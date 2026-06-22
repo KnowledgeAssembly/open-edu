@@ -1,0 +1,8 @@
+{
+  "type": "quiz",
+  "question": "Test?",
+  "options": [
+    { "id": "a", "text": "Yes", "correct": true },
+    { "id": "b", "text": "No", "correct": false }
+  ]
+}

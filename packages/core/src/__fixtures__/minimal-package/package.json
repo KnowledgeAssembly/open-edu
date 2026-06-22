@@ -1,0 +1,7 @@
+{
+  "id": "minimal",
+  "title": "Minimal Package",
+  "version": "0.1.0",
+  "author": "Test",
+  "entry": "nodes/lesson.md"
+}
