@@ -1,0 +1,4 @@
+# OpenEdu project-local Hermes config
+# Overrides global config when Hermes is run from this directory
+memory:
+  bank_id: openedu
