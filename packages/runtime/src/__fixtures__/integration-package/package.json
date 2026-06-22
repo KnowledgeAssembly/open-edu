@@ -1,0 +1,7 @@
+{
+  "id": "integration",
+  "title": "Integration Test Package",
+  "version": "1.0.0",
+  "author": "Test",
+  "entry": "nodes/lesson-01.md"
+}
