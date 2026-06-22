@@ -1,0 +1,13 @@
+{
+  "routing": {
+    "nodes/lesson-01.md": {
+      "onComplete": "nodes/quiz-01.json"
+    },
+    "nodes/quiz-01.json": {
+      "conditions": [
+        { "if": "score >= 80", "then": "COMPLETED" },
+        { "if": "score < 80", "then": "nodes/lesson-01.md" }
+      ]
+    }
+  }
+}

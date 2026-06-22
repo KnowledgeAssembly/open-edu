@@ -1,0 +1,9 @@
+{
+  "type": "quiz",
+  "question": "What is 2 + 2?",
+  "options": [
+    { "id": "a", "text": "3", "correct": false },
+    { "id": "b", "text": "4", "correct": true },
+    { "id": "c", "text": "5", "correct": false }
+  ]
+}
