@@ -1,0 +1,9 @@
+{
+  "type": "quiz",
+  "question": "Which keyword creates a constant?",
+  "options": [
+    { "id": "a", "text": "var", "correct": false },
+    { "id": "b", "text": "const", "correct": true },
+    { "id": "c", "text": "let", "correct": false }
+  ]
+}

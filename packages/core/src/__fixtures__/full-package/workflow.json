@@ -1,0 +1,7 @@
+{
+  "routing": {
+    "nodes/lesson-01.md": {
+      "onComplete": "nodes/quiz-01.json"
+    }
+  }
+}
