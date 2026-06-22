@@ -20,13 +20,13 @@ the current node.
 
 Five stories from `PLAN.md`:
 
-| Story | Component |
-|-------|-----------|
-| 5.1 | Runtime context provider + workflow state integration |
-| 5.2 | Markdown rendering pipeline (remark → rehype → accessible React) |
-| 5.3 | Quiz node renderer with scoring + answer validation |
-| 5.4 | Reflection node renderer with text input |
-| 5.5 | Navigation UI + design tokens + layout shell |
+| Story | Component                                                        |
+| ----- | ---------------------------------------------------------------- |
+| 5.1   | Runtime context provider + workflow state integration            |
+| 5.2   | Markdown rendering pipeline (remark → rehype → accessible React) |
+| 5.3   | Quiz node renderer with scoring + answer validation              |
+| 5.4   | Reflection node renderer with text input                         |
+| 5.5   | Navigation UI + design tokens + layout shell                     |
 
 ## Architecture
 
@@ -69,14 +69,14 @@ export { RUNTIME_THEME, RuntimeThemeProvider } from './theme';
 ```typescript
 interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
-  currentNode: LoadedNode | null;      // full node incl. .content + .node
+  currentNode: LoadedNode | null; // full node incl. .content + .node
   currentNodeId: string;
   isCompleted: boolean;
-  scores: Record<string, number>;       // nodeId → score
+  scores: Record<string, number>; // nodeId → score
   lastScore: number | null;
   completeNode: (score?: number) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
-  visitedNodes: string[];               // ordered list of visited node IDs
+  visitedNodes: string[]; // ordered list of visited node IDs
 }
 ```
 
@@ -85,6 +85,7 @@ interface RuntimeContextValue {
 Props: `{ loadedPackage: LoadedPackage; engine: WorkflowEngine; children: ReactNode }`
 
 Behavior:
+
 - On mount: subscribe to engine, call `engine.start()`.
 - On `node.entered` event: update `currentNodeId`, push to `visitedNodes`.
 - On `node.completed` event: record score in `scores` map and `lastScore`.
@@ -111,12 +112,14 @@ markdown string
 ```
 
 Dependencies to add (devDependencies + dependencies where needed at runtime):
+
 - `unified`, `remark-parse`, `remark-gfm`, `remark-rehype`, `rehype-react`
 - `@types/unist` (dev)
 
 ### Accessible component map
 
 Custom React components for hast node types:
+
 - `h1`–`h6`: render with semantic heading + auto-generated `id` (slugified text).
 - `img`: require `alt` (fallback to empty string + `aria-hidden` if missing); never
   render broken images without alt.
@@ -138,6 +141,7 @@ Returns: `ReactElement` via `useMemo` (re-process only when content changes).
 Props: `{ node: QuizNode; onSubmit: (score: number, optionId: string) => void }`
 
 Behavior:
+
 - Renders `node.question` in a `<fieldset>` with `<legend>`.
 - Renders each option as a radio input (`<input type="radio">`) inside a `<label>`.
 - Single selection only (radio group semantics).
@@ -157,6 +161,7 @@ Score calculation: `score = selectedOption.correct ? 100 : 0`.
 Props: `{ node: ReflectionNode; onSubmit: (text: string) => void }`
 
 Behavior:
+
 - Renders `node.prompt` in a `<label>` associated with a `<textarea>`.
 - `textarea` has `required`, `minLength` enforced via the submit button being
   disabled while empty.
@@ -177,6 +182,7 @@ variable block on a wrapper `<div>` with class `open-edu-runtime`. Consuming app
 override any token.
 
 Tokens:
+
 ```css
 .open-edu-runtime {
   --oe-color-bg: #ffffff;
@@ -204,6 +210,7 @@ Renders an accessible progress meter (`role="progressbar"` with `aria-valuenow`,
 Props: `{ children: ReactNode }` (reads from `useRuntime()`)
 
 Structure:
+
 ```
 <section class="open-edu-runtime">
   <header>
@@ -220,6 +227,7 @@ Structure:
 ```
 
 Navigation:
+
 - For lesson nodes: "Next" button → `completeNode()`.
 - For quiz/reflection nodes: the renderer itself provides "Submit", which calls
   `completeNode(score)` / `completeNode()`. The footer "Next" only shows for lesson
@@ -232,6 +240,7 @@ Navigation:
 Props: `{ node: LoadedNode | null }`
 
 Switch on `node.node.type`:
+
 - `lesson` → `MarkdownRenderer` with `node.content`
 - `quiz` → `QuizRenderer` (wired to `completeNode`)
 - `reflection` → `ReflectionRenderer` (wired to `completeNode`)
