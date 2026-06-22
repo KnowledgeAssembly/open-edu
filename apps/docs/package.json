@@ -1,0 +1,13 @@
+{
+  "name": "@open-edu/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Docusaurus documentation site for Open-Edu",
+  "scripts": {
+    "build": "echo 'docs site build placeholder'",
+    "test": "echo 'no tests yet'",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf build"
+  }
+}

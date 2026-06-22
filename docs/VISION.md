@@ -26,12 +26,12 @@ Authors should create learning experiences using simple, structured, human-reada
 
 The framework runtime is responsible for:
 
-* Rendering content
-* Accessibility compliance
-* Navigation and progression
-* Telemetry collection
-* Skill tracking
-* Reward integration
+- Rendering content
+- Accessibility compliance
+- Navigation and progression
+- Telemetry collection
+- Skill tracking
+- Reward integration
 
 This separation allows educators, developers, and AI agents to focus on pedagogy rather than platform engineering.
 
@@ -47,10 +47,10 @@ Learning experiences are defined using open formats such as Markdown and JSON ra
 
 Every learning package remains:
 
-* Human readable
-* Version controllable
-* AI generatable
-* Platform independent
+- Human readable
+- Version controllable
+- AI generatable
+- Platform independent
 
 Content should outlive the tools used to create it.
 
@@ -78,11 +78,11 @@ Educational experiences should be usable by everyone regardless of ability.
 
 The framework enforces:
 
-* Semantic rendering
-* Keyboard navigation
-* Screen reader compatibility
-* Focus management
-* Predictable interaction patterns
+- Semantic rendering
+- Keyboard navigation
+- Screen reader compatibility
+- Focus management
+- Predictable interaction patterns
 
 Authors describe learning intent.
 
@@ -100,12 +100,12 @@ The framework captures learning interactions as structured telemetry streams, al
 
 Rather than measuring only completion rates, the framework enables insight into:
 
-* Time spent
-* Interaction patterns
-* Assessment performance
-* Learning bottlenecks
-* Knowledge progression
-* Skill mastery
+- Time spent
+- Interaction patterns
+- Assessment performance
+- Learning bottlenecks
+- Knowledge progression
+- Skill mastery
 
 This transforms educational analytics from reporting into observability.
 
@@ -119,10 +119,10 @@ Educational packages can define progression rules based on mastery, performance,
 
 The framework enables:
 
-* Personalized learning paths
-* Remediation loops
-* Skill-based progression
-* Dynamic content routing
+- Personalized learning paths
+- Remediation loops
+- Skill-based progression
+- Dynamic content routing
 
 The objective is not to deliver content.
 
@@ -138,12 +138,12 @@ The runtime therefore supports an extensible widget architecture that allows spe
 
 Examples include:
 
-* Coding environments
-* Mathematics visualizations
-* Scientific simulations
-* Music notation tools
-* Language learning interfaces
-* Assistive learning technologies
+- Coding environments
+- Mathematics visualizations
+- Scientific simulations
+- Music notation tools
+- Language learning interfaces
+- Assistive learning technologies
 
 The framework remains small and focused while allowing unlimited expansion.
 
@@ -159,12 +159,12 @@ The framework emits standardized learning events that external systems can consu
 
 These systems may provide:
 
-* Certificates
-* Badges
-* Experience points
-* Organizational recognition
-* Financial incentives
-* Physical-world integrations
+- Certificates
+- Badges
+- Experience points
+- Organizational recognition
+- Financial incentives
+- Physical-world integrations
 
 The learning package remains unchanged.
 
@@ -221,4 +221,3 @@ To create an open, accessible, AI-native framework that enables anyone to build,
 # Vision Statement
 
 A world where educational experiences are as portable, extensible, observable, and accessible as modern software.
-

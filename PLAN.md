@@ -15,23 +15,23 @@ The plan follows the architectural principle: **Schemas before implementation, C
 
 ## Technology Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Language | TypeScript 5.x |
-| Package Manager | pnpm 9.x |
-| Monorepo | pnpm workspaces |
-| Build Tool | Vite 5.x |
-| Schemas | Zod 3.x |
-| State Machine | XState 5.x |
-| UI Framework | React 18.x |
-| Styling | Tailwind CSS 3.x |
-| Markdown | remark + rehype + unified |
-| Accessibility | React Aria + axe-core |
-| Telemetry | RxJS 7.x |
-| CLI | Commander 12.x |
-| Unit Testing | Vitest 1.x |
-| E2E Testing | Playwright 1.x |
-| Docs | Docusaurus 3.x |
+| Layer           | Technology                |
+| --------------- | ------------------------- |
+| Language        | TypeScript 5.x            |
+| Package Manager | pnpm 9.x                  |
+| Monorepo        | pnpm workspaces           |
+| Build Tool      | Vite 5.x                  |
+| Schemas         | Zod 3.x                   |
+| State Machine   | XState 5.x                |
+| UI Framework    | React 18.x                |
+| Styling         | Tailwind CSS 3.x          |
+| Markdown        | remark + rehype + unified |
+| Accessibility   | React Aria + axe-core     |
+| Telemetry       | RxJS 7.x                  |
+| CLI             | Commander 12.x            |
+| Unit Testing    | Vitest 1.x                |
+| E2E Testing     | Playwright 1.x            |
+| Docs            | Docusaurus 3.x            |
 
 ---
 
@@ -77,20 +77,20 @@ open-edu/
 
 ## Epic Summary
 
-| # | Epic | Stories | Priority | Key Dependencies |
-|---|------|---------|----------|-----------------|
-| 1 | Foundation & Monorepo Setup | 3 | P0 | None |
-| 2 | Schema Layer | 4 | P0 | Epic 1 |
-| 3 | Package Loader | 2 | P0 | Epic 2 |
-| 4 | Workflow Engine | 2 | P0 | Epic 2 |
-| 5 | Runtime Renderer | 5 | P0 | Epics 3, 4 |
-| 6 | Accessibility Engine | 3 | P0 | Epic 5 |
-| 7 | Telemetry Engine | 3 | P0 | Epic 2 |
-| 8 | Reward Broker | 2 | P1 | Epic 7 |
-| 9 | CLI | 2 | P0 | Epics 3, 10 |
-| 10 | Dev Server | 2 | P0 | Epic 5 |
-| 11 | Example Packages | 2 | P1 | Epic 2 |
-| 12 | Integration Testing | 2 | P1 | Epics 5, 6, 10, 11 |
+| #   | Epic                        | Stories | Priority | Key Dependencies   |
+| --- | --------------------------- | ------- | -------- | ------------------ |
+| 1   | Foundation & Monorepo Setup | 3       | P0       | None               |
+| 2   | Schema Layer                | 4       | P0       | Epic 1             |
+| 3   | Package Loader              | 2       | P0       | Epic 2             |
+| 4   | Workflow Engine             | 2       | P0       | Epic 2             |
+| 5   | Runtime Renderer            | 5       | P0       | Epics 3, 4         |
+| 6   | Accessibility Engine        | 3       | P0       | Epic 5             |
+| 7   | Telemetry Engine            | 3       | P0       | Epic 2             |
+| 8   | Reward Broker               | 2       | P1       | Epic 7             |
+| 9   | CLI                         | 2       | P0       | Epics 3, 10        |
+| 10  | Dev Server                  | 2       | P0       | Epic 5             |
+| 11  | Example Packages            | 2       | P1       | Epic 2             |
+| 12  | Integration Testing         | 2       | P1       | Epics 5, 6, 10, 11 |
 
 ---
 
@@ -117,25 +117,30 @@ Epic 1 (Foundation)
 ## Story Breakdown
 
 ### Epic 1: Foundation & Monorepo Setup
+
 - Story 1.1: Initialize pnpm monorepo with all package directories
 - Story 1.2: Set up shared TypeScript, ESLint, Prettier, Vitest configs
 - Story 1.3: Create AGENTS.md, CI workflow, and PR template
 
 ### Epic 2: Schema Layer
+
 - Story 2.1: Package manifest + node type schemas (Zod → TS types + JSON Schema export)
 - Story 2.2: Workflow schema (routing rules + conditional expressions)
 - Story 2.3: Rewards schema (triggers + badge/webhook/script actions)
 - Story 2.4: Telemetry event schema (event types + JSONL format)
 
 ### Epic 3: Package Loader
+
 - Story 3.1: Package directory loader + manifest parsing + schema validation
 - Story 3.2: Node file loading + type detection + asset resolution
 
 ### Epic 4: Workflow Engine
+
 - Story 4.1: XState machine builder from workflow.json + conditional routing
 - Story 4.2: Workflow state events + telemetry integration hooks
 
 ### Epic 5: Runtime Renderer
+
 - Story 5.1: Runtime context provider + workflow state integration
 - Story 5.2: Markdown rendering pipeline (remark → rehype → accessible React)
 - Story 5.3: Quiz node renderer with scoring + answer validation
@@ -143,32 +148,39 @@ Epic 1 (Foundation)
 - Story 5.5: Navigation UI + Tailwind design system + layout shell
 
 ### Epic 6: Accessibility Engine
+
 - Story 6.1: Focus management + keyboard navigation system
 - Story 6.2: ARIA generation (landmarks, labels, roles, descriptions)
 - Story 6.3: axe-core dev-mode accessibility validator
 
 ### Epic 7: Telemetry Engine
+
 - Story 7.1: Telemetry event emitter (RxJS Subject/Observable pipeline)
 - Story 7.2: JSONL append-only persistence layer
 - Story 7.3: Telemetry session management (start/stop/restore)
 
 ### Epic 8: Reward Broker
+
 - Story 8.1: Reward broker core + badge + webhook action handlers
 - Story 8.2: Script reward action (opt-in via --allow-shell-hooks flag)
 
 ### Epic 9: CLI
+
 - Story 9.1: CLI framework (Commander) + `edu validate` command
 - Story 9.2: `edu dev` + `edu build` + `edu package` commands
 
 ### Epic 10: Dev Server
+
 - Story 10.1: Vite dev server + runtime mounting + hot reload
 - Story 10.2: Telemetry inspector + accessibility inspector panels
 
 ### Epic 11: Example Packages
+
 - Story 11.1: hello-world + intro-javascript example packages
 - Story 11.2: fractions + autism-reading example packages
 
 ### Epic 12: Integration Testing
+
 - Story 12.1: Playwright setup + package execution end-to-end tests
 - Story 12.2: Keyboard navigation + accessibility + telemetry e2e tests
 

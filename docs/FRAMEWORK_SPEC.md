@@ -12,12 +12,12 @@ The Open-Edu Framework is an open, AI-native runtime for building, delivering, a
 
 The framework separates:
 
-* Content
-* Learning workflows
-* User interfaces
-* Accessibility
-* Analytics
-* Rewards
+- Content
+- Learning workflows
+- User interfaces
+- Accessibility
+- Analytics
+- Rewards
 
 into independent layers.
 
@@ -33,9 +33,9 @@ Educational content must remain independent of presentation technologies.
 
 Packages are defined using:
 
-* Markdown
-* JSON
-* JSON Schema
+- Markdown
+- JSON
+- JSON Schema
 
 rather than custom editors or proprietary formats.
 
@@ -59,11 +59,11 @@ Package authors describe learning intent.
 
 The runtime guarantees:
 
-* Semantic rendering
-* Keyboard navigation
-* Screen reader compatibility
-* Focus management
-* Predictable interaction patterns
+- Semantic rendering
+- Keyboard navigation
+- Screen reader compatibility
+- Focus management
+- Predictable interaction patterns
 
 ---
 
@@ -73,11 +73,11 @@ Learning interactions are captured as structured telemetry.
 
 Telemetry enables:
 
-* Progress tracking
-* Curriculum analysis
-* Skill mastery estimation
-* Adaptive routing
-* Learning analytics
+- Progress tracking
+- Curriculum analysis
+- Skill mastery estimation
+- Adaptive routing
+- Learning analytics
 
 ---
 
@@ -207,9 +207,9 @@ const age = 20
 
 Runtime responsibilities:
 
-* Semantic rendering
-* Accessibility support
-* Reading telemetry
+- Semantic rendering
+- Accessibility support
+- Reading telemetry
 
 ---
 
@@ -248,10 +248,10 @@ Example:
 
 Runtime responsibilities:
 
-* Keyboard navigation
-* Scoring
-* Validation
-* Telemetry
+- Keyboard navigation
+- Scoring
+- Validation
+- Telemetry
 
 ---
 
@@ -280,9 +280,9 @@ Allow learner practice.
 
 Examples:
 
-* Coding exercise
-* Math problem
-* Simulation
+- Coding exercise
+- Math problem
+- Simulation
 
 May use custom widgets.
 
@@ -331,10 +331,7 @@ Example:
 
 ```json
 {
-  "skills": [
-    "javascript.variables",
-    "javascript.constants"
-  ]
+  "skills": ["javascript.variables", "javascript.constants"]
 }
 ```
 
@@ -352,11 +349,11 @@ The runtime must enforce:
 
 Every interaction must be accessible using:
 
-* Tab
-* Shift + Tab
-* Enter
-* Space
-* Arrow Keys
+- Tab
+- Shift + Tab
+- Enter
+- Space
+- Arrow Keys
 
 ---
 
@@ -364,10 +361,10 @@ Every interaction must be accessible using:
 
 Generated interfaces must expose:
 
-* Semantic headings
-* Labels
-* Landmarks
-* Form descriptions
+- Semantic headings
+- Labels
+- Landmarks
+- Form descriptions
 
 ---
 
@@ -385,10 +382,10 @@ Widgets provide specialized educational interactions.
 
 Examples:
 
-* Coding editors
-* Fraction visualizers
-* Scientific simulations
-* Music notation tools
+- Coding editors
+- Fraction visualizers
+- Scientific simulations
+- Music notation tools
 
 ---
 
@@ -412,11 +409,7 @@ Examples:
 
 ```typescript
 interface OpenEduWidget {
-  mount(
-    element: HTMLElement,
-    config: unknown,
-    context: WidgetContext
-  ): void;
+  mount(element: HTMLElement, config: unknown, context: WidgetContext): void;
 
   unmount(): void;
 
@@ -430,15 +423,9 @@ interface OpenEduWidget {
 
 ```typescript
 interface WidgetContext {
-  emitTelemetry(
-    event: string,
-    data: Record<string, unknown>
-  ): void;
+  emitTelemetry(event: string, data: Record<string, unknown>): void;
 
-  onVerify(
-    score: number,
-    metadata?: Record<string, unknown>
-  ): void;
+  onVerify(score: number, metadata?: Record<string, unknown>): void;
 }
 ```
 
@@ -573,12 +560,12 @@ edu dev ./my-package
 
 Responsibilities:
 
-* Package loading
-* Schema validation
-* Local web server
-* Hot reload
-* Telemetry generation
-* Accessibility inspection
+- Package loading
+- Schema validation
+- Local web server
+- Hot reload
+- Telemetry generation
+- Accessibility inspection
 
 ---
 
@@ -588,32 +575,32 @@ The MVP must include:
 
 ## Runtime
 
-* Package loader
-* Workflow engine
-* Markdown rendering
-* Quiz rendering
+- Package loader
+- Workflow engine
+- Markdown rendering
+- Quiz rendering
 
 ## Accessibility
 
-* Keyboard navigation
-* Screen reader compatibility
-* Focus management
+- Keyboard navigation
+- Screen reader compatibility
+- Focus management
 
 ## Telemetry
 
-* JSONL event stream
-* Event logging
+- JSONL event stream
+- Event logging
 
 ## Rewards
 
-* Badge actions
-* Webhook actions
+- Badge actions
+- Webhook actions
 
 ## Development Tools
 
-* Local CLI
-* Hot reload
-* Validation
+- Local CLI
+- Hot reload
+- Validation
 
 ---
 
@@ -659,37 +646,37 @@ Completion events trigger configured rewards.
 
 Phase 1
 
-* Core runtime
-* Lessons
-* Quizzes
-* Telemetry
+- Core runtime
+- Lessons
+- Quizzes
+- Telemetry
 
 Phase 2
 
-* Accessibility inspector
-* Reflection nodes
-* Exercise nodes
+- Accessibility inspector
+- Reflection nodes
+- Exercise nodes
 
 Phase 3
 
-* Skill graph
-* Adaptive learning
+- Skill graph
+- Adaptive learning
 
 Phase 4
 
-* Widget SDK
-* Community widgets
+- Widget SDK
+- Community widgets
 
 Phase 5
 
-* Analytics dashboards
-* Curriculum observability
+- Analytics dashboards
+- Curriculum observability
 
 Phase 6
 
-* Package registry
-* Cloud deployment
-* Collaborative authoring
+- Package registry
+- Cloud deployment
+- Collaborative authoring
 
 ---
 
@@ -700,4 +687,3 @@ Build an open, accessible, AI-native framework for creating portable educational
 # Vision
 
 Educational experiences should be as portable, observable, extensible, and accessible as modern software.
-
