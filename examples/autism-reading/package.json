@@ -1,0 +1,13 @@
+{
+  "name": "@open-edu/example-autism-reading",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autism-friendly reading example for Open-Edu",
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "echo 'no tests yet'",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

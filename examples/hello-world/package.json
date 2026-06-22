@@ -1,0 +1,13 @@
+{
+  "name": "@open-edu/example-hello-world",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hello World example for Open-Edu",
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "echo 'no tests yet'",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@open-edu/dev-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vite dev server for Open-Edu",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@open-edu/runtime": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.1.0"
+  }
+}

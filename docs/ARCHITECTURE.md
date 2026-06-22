@@ -14,12 +14,12 @@ While the Framework Specification defines **what the system must do**, this docu
 
 The architecture prioritizes:
 
-* Accessibility by default
-* AI-agent friendliness
-* Local-first development
-* Extensibility
-* Observability
-* Long-term maintainability
+- Accessibility by default
+- AI-agent friendliness
+- Local-first development
+- Extensibility
+- Observability
+- Long-term maintainability
 
 ---
 
@@ -82,17 +82,17 @@ Vite
 
 Responsibilities:
 
-* Runtime rendering
-* Widget execution
-* State management integration
-* Accessibility enforcement
+- Runtime rendering
+- Widget execution
+- State management integration
+- Accessibility enforcement
 
 Why:
 
-* Largest contributor ecosystem
-* Best AI-agent support
-* Mature accessibility tooling
-* Strong plugin architecture
+- Largest contributor ecosystem
+- Best AI-agent support
+- Mature accessibility tooling
+- Strong plugin architecture
 
 ---
 
@@ -102,16 +102,16 @@ Why:
 
 Used for:
 
-* Runtime UI
-* Development tools
-* Accessibility inspector
-* Widget scaffolding
+- Runtime UI
+- Development tools
+- Accessibility inspector
+- Widget scaffolding
 
 Guidelines:
 
-* Utility-first styling
-* No component-specific CSS frameworks
-* Design tokens exposed through CSS variables
+- Utility-first styling
+- No component-specific CSS frameworks
+- Design tokens exposed through CSS variables
 
 ---
 
@@ -171,10 +171,10 @@ The runtime must never require package compilation.
 
 Packages remain:
 
-* Human readable
-* AI generatable
-* Git friendly
-* Platform independent
+- Human readable
+- AI generatable
+- Git friendly
+- Platform independent
 
 ---
 
@@ -194,10 +194,10 @@ Zod serves as the single source of truth.
 
 Generate:
 
-* Runtime validation
-* TypeScript types
-* JSON Schema
-* AI agent contracts
+- Runtime validation
+- TypeScript types
+- JSON Schema
+- AI agent contracts
 
 ---
 
@@ -209,7 +209,7 @@ const PackageSchema = z.object({
   title: z.string(),
   version: z.string(),
   author: z.string(),
-  entry: z.string()
+  entry: z.string(),
 });
 ```
 
@@ -239,10 +239,10 @@ The workflow engine is implemented as a deterministic state machine.
 
 Controls:
 
-* Navigation
-* Progression
-* Remediation loops
-* Adaptive routing
+- Navigation
+- Progression
+- Remediation loops
+- Adaptive routing
 
 ---
 
@@ -317,10 +317,10 @@ Accessible React Components
 
 Supports future:
 
-* Reading analytics
-* AI-assisted review
-* Semantic enrichment
-* Accessibility validation
+- Reading analytics
+- AI-assisted review
+- Semantic enrichment
+- Accessibility validation
 
 ---
 
@@ -335,18 +335,18 @@ TypeScript
 
 Responsibilities:
 
-* Node rendering
-* Widget loading
-* Progress tracking
-* Accessibility integration
+- Node rendering
+- Widget loading
+- Progress tracking
+- Accessibility integration
 
 The renderer must remain stateless whenever possible.
 
 Business logic belongs to:
 
-* Workflow Engine
-* Telemetry Engine
-* Accessibility Engine
+- Workflow Engine
+- Telemetry Engine
+- Accessibility Engine
 
 ---
 
@@ -373,9 +373,9 @@ Not optional.
 
 Controls:
 
-* Tab order
-* Focus restoration
-* Widget boundaries
+- Tab order
+- Focus restoration
+- Widget boundaries
 
 ---
 
@@ -398,10 +398,10 @@ Escape
 
 Automatically generates:
 
-* Labels
-* Landmarks
-* Roles
-* Descriptions
+- Labels
+- Landmarks
+- Roles
+- Descriptions
 
 ---
 
@@ -425,11 +425,11 @@ Allows specialized learning interactions without modifying the runtime.
 
 Examples:
 
-* Coding sandboxes
-* Fraction sliders
-* Simulations
-* Interactive diagrams
-* Music notation
+- Coding sandboxes
+- Fraction sliders
+- Simulations
+- Interactive diagrams
+- Music notation
 
 ---
 
@@ -544,10 +544,10 @@ Location:
 
 Benefits:
 
-* Append only
-* Human readable
-* Stream friendly
-* Easy debugging
+- Append only
+- Human readable
+- Stream friendly
+- Easy debugging
 
 ---
 
@@ -561,9 +561,9 @@ DuckDB
 
 Used for:
 
-* Telemetry analysis
-* Learning analytics
-* Curriculum observability
+- Telemetry analysis
+- Learning analytics
+- Curriculum observability
 
 Example:
 
@@ -682,10 +682,10 @@ Vite
 
 Responsibilities:
 
-* Package loading
-* Hot reload
-* Telemetry inspection
-* Accessibility inspection
+- Package loading
+- Hot reload
+- Telemetry inspection
+- Accessibility inspection
 
 ---
 
@@ -693,9 +693,9 @@ Responsibilities:
 
 Must preserve:
 
-* Current node
-* Learner progress
-* Telemetry session
+- Current node
+- Learner progress
+- Telemetry session
 
 while updating content changes instantly.
 
@@ -713,9 +713,9 @@ Vitest
 
 Coverage:
 
-* Schema validation
-* Workflow execution
-* Telemetry generation
+- Schema validation
+- Workflow execution
+- Telemetry generation
 
 ---
 
@@ -729,9 +729,9 @@ Playwright
 
 Coverage:
 
-* Package execution
-* Accessibility workflows
-* Keyboard navigation
+- Package execution
+- Accessibility workflows
+- Keyboard navigation
 
 ---
 
@@ -757,10 +757,10 @@ Docusaurus
 
 Used for:
 
-* Contributor guides
-* Schema references
-* Widget SDK documentation
-* AI agent instructions
+- Contributor guides
+- Schema references
+- Widget SDK documentation
+- AI agent instructions
 
 ---
 
@@ -770,10 +770,10 @@ Used for:
 
 Core Runtime
 
-* Lessons
-* Quizzes
-* Telemetry
-* Accessibility
+- Lessons
+- Quizzes
+- Telemetry
+- Accessibility
 
 ---
 
@@ -781,8 +781,8 @@ Core Runtime
 
 Skill Graph
 
-* Mastery tracking
-* Adaptive routing
+- Mastery tracking
+- Adaptive routing
 
 ---
 
@@ -790,9 +790,9 @@ Skill Graph
 
 Widget Ecosystem
 
-* SDK
-* Registry
-* Community contributions
+- SDK
+- Registry
+- Community contributions
 
 ---
 
@@ -800,9 +800,9 @@ Widget Ecosystem
 
 Observability Platform
 
-* Dashboards
-* Curriculum debugging
-* Learning analytics
+- Dashboards
+- Curriculum debugging
+- Learning analytics
 
 ---
 
@@ -810,10 +810,10 @@ Observability Platform
 
 Cloud Platform
 
-* Package registry
-* Collaboration
-* Deployment
-* Hosted analytics
+- Package registry
+- Collaboration
+- Deployment
+- Hosted analytics
 
 ---
 
@@ -832,4 +832,3 @@ Cloud Platform
 # Architecture Goal
 
 To provide a lightweight, accessible, AI-native educational runtime capable of executing portable learning experiences while remaining simple enough for a single developer, educator, or AI agent to understand, extend, and deploy.
-
