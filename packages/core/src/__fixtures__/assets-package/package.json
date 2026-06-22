@@ -1,0 +1,7 @@
+{
+  "id": "assets-package",
+  "title": "Assets Package",
+  "version": "1.0.0",
+  "author": "Test",
+  "entry": "nodes/lesson.md"
+}

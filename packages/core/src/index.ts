@@ -10,6 +10,8 @@ export {
   AssetNotFoundError,
   WorkflowValidationError,
   RewardsValidationError,
+  WorkflowRouteError,
+  EntryNodeNotFoundError,
 } from './errors';
 export { loadManifest } from './manifest';
 export { loadWorkflow } from './workflow';

@@ -21,7 +21,7 @@ export async function loadRewards(packageDir: string): Promise<Rewards | null> {
     if (err instanceof SyntaxError) {
       throw new RewardsValidationError(`rewards.json is not valid JSON: ${(err as Error).message}`);
     }
-    throw err;
+    throw new RewardsValidationError(`Failed to read rewards.json: ${(err as Error).message}`);
   }
 
   const result = RewardsSchema.safeParse(raw);

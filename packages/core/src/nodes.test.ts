@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { loadNodes } from './nodes';
 import { NodeLoadError } from './errors';
 import { resolve, join } from 'node:path';
-import { writeFile, unlink } from 'node:fs/promises';
+import { writeFile, unlink, mkdir, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 const fixturesDir = resolve(__dirname, '__fixtures__');
 
@@ -10,6 +11,17 @@ describe('loadNodes', () => {
   it('should load all node files from valid-package', async () => {
     const nodes = await loadNodes(join(fixturesDir, 'valid-package'));
     expect(nodes).toHaveLength(3);
+  });
+
+  it('uses forward slashes in relativePath regardless of platform', async () => {
+    const nodes = await loadNodes(join(fixturesDir, 'valid-package'));
+    const paths = nodes.map((n) => n.relativePath);
+    expect(paths).toContain('nodes/lesson-01.md');
+    expect(paths).toContain('nodes/quiz-01.json');
+    expect(paths).toContain('nodes/reflection-01.json');
+    for (const p of paths) {
+      expect(p.includes('\\')).toBe(false);
+    }
   });
 
   it('should detect lesson node from .md file', async () => {
@@ -60,5 +72,13 @@ describe('loadNodes', () => {
     await writeFile(tmpPath, JSON.stringify({ question: 'test' }));
     await expect(loadNodes(tmpDir)).rejects.toThrow(NodeLoadError);
     await unlink(tmpPath);
+  });
+
+  it('should reject subdirectories inside nodes/ with a NodeLoadError', async () => {
+    const tmpDir = join(fixturesDir, 'tmp-subdirs');
+    if (!existsSync(tmpDir)) await mkdir(join(tmpDir, 'nodes', 'subdir'), { recursive: true });
+    await writeFile(join(tmpDir, 'nodes', 'subdir', 'a.md'), '# A');
+    await expect(loadNodes(tmpDir)).rejects.toThrow(NodeLoadError);
+    await rm(tmpDir, { recursive: true, force: true });
   });
 });

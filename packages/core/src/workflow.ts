@@ -23,7 +23,7 @@ export async function loadWorkflow(packageDir: string): Promise<Workflow | null>
         `workflow.json is not valid JSON: ${(err as Error).message}`,
       );
     }
-    throw err;
+    throw new WorkflowValidationError(`Failed to read workflow.json: ${(err as Error).message}`);
   }
 
   const result = WorkflowSchema.safeParse(raw);

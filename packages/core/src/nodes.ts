@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, sep } from 'node:path';
+import type { Dirent } from 'node:fs';
 import { ContentNodeSchema } from '@open-edu/schemas';
 import type { ContentNode } from '@open-edu/schemas';
 import { NodeLoadError } from './errors';
@@ -41,26 +42,42 @@ function detectNodeType(filePath: string, content: string): ContentNode {
   throw new NodeLoadError(`Unsupported node file extension: ${filePath} (supported: .md, .json)`);
 }
 
+function toForwardSlashes(p: string): string {
+  return sep === '/' ? p : p.split(sep).join('/');
+}
+
 export async function loadNodes(packageDir: string): Promise<LoadedNode[]> {
   const nodesDir = join(packageDir, 'nodes');
 
-  let files: string[];
+  let entries: Dirent[];
   try {
-    files = await readdir(nodesDir);
+    entries = await readdir(nodesDir, { withFileTypes: true });
   } catch {
     return [];
   }
 
   const nodes: LoadedNode[] = [];
 
-  for (const file of files) {
-    const filePath = join(nodesDir, file);
-    const content = await readFile(filePath, 'utf-8');
-    const node = detectNodeType(file, content);
+  for (const entry of entries) {
+    const absolutePath = join(nodesDir, entry.name);
+
+    if (entry.isDirectory()) {
+      throw new NodeLoadError(
+        `Subdirectories inside nodes/ are not supported. Move "${entry.name}" to a flat file or use the widgets package: ${absolutePath}`,
+      );
+    }
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const content = await readFile(absolutePath, 'utf-8').catch((err: NodeJS.ErrnoException) => {
+      throw new NodeLoadError(`Failed to read node "${entry.name}": ${err.message}`);
+    });
+    const node = detectNodeType(entry.name, content);
 
     nodes.push({
-      path: filePath,
-      relativePath: join('nodes', file),
+      path: absolutePath,
+      relativePath: toForwardSlashes(join('nodes', entry.name)),
       content,
       node,
     });
