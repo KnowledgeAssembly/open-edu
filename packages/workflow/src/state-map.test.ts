@@ -2,36 +2,45 @@ import { describe, it, expect } from 'vitest';
 import { encodeStateName, decodeStateName } from './state-map';
 
 describe('encodeStateName', () => {
-  it('should replace slashes with underscores', () => {
-    expect(encodeStateName('nodes/lesson-01.md')).toBe('nodes_lesson_01_md');
+  it('escapes dots so the result is a valid XState state key', () => {
+    expect(encodeStateName('nodes/lesson-01.md')).toBe('nodes/lesson-01\u0000md');
   });
 
-  it('should replace dots with underscores', () => {
-    expect(encodeStateName('file.json')).toBe('file_json');
+  it('preserves slashes and hyphens (they are valid in XState state keys)', () => {
+    expect(encodeStateName('nodes/sub/lesson-01')).toBe('nodes/sub/lesson-01');
   });
 
-  it('should replace hyphens with underscores', () => {
-    expect(encodeStateName('lesson-01')).toBe('lesson_01');
-  });
-
-  it('should handle complex paths', () => {
-    expect(encodeStateName('nodes/sub/quiz-01.final.json')).toBe('nodes_sub_quiz_01_final_json');
+  it('escapes every dot in a multi-extension path', () => {
+    expect(encodeStateName('nodes/sub/quiz-01.final.json')).toBe(
+      'nodes/sub/quiz-01\u0000final\u0000json',
+    );
   });
 });
 
 describe('decodeStateName', () => {
-  it('should decode an encoded state back to original path', () => {
-    const paths = ['nodes/lesson-01.md', 'nodes/quiz-01.json'];
-    const encoded = encodeStateName('nodes/lesson-01.md');
-    expect(decodeStateName(encoded, paths)).toBe('nodes/lesson-01.md');
+  it('reverses encodeStateName', () => {
+    const path = 'nodes/sub/quiz-01.final.json';
+    expect(decodeStateName(encodeStateName(path))).toBe(path);
   });
 
-  it('should return the encoded value if no match found', () => {
-    expect(decodeStateName('unknown_state', [])).toBe('unknown_state');
+  it('passes through values that contain no escape characters', () => {
+    expect(decodeStateName('COMPLETED')).toBe('COMPLETED');
+    expect(decodeStateName('nodes/lesson-01')).toBe('nodes/lesson-01');
   });
+});
 
-  it('should decode from a map of original paths', () => {
-    const paths = ['nodes/a.md', 'nodes/b.json', 'COMPLETED'];
-    expect(decodeStateName('COMPLETED', paths)).toBe('COMPLETED');
+describe('injectivity (no collisions)', () => {
+  it('distinct paths never encode to the same value', () => {
+    const paths = [
+      'nodes/a-b.md',
+      'nodes/a.b.md',
+      'nodes/a_b.md',
+      'nodes/a/b.md',
+      'nodes/a-b',
+      'nodes/a.b',
+      'nodes/a_b',
+    ];
+    const encoded = paths.map(encodeStateName);
+    expect(new Set(encoded).size).toBe(encoded.length);
   });
 });

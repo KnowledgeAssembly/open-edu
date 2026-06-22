@@ -6,26 +6,40 @@ import { createWorkflowEvent } from './events';
 import type { WorkflowEvent, WorkflowEventListener } from './events';
 import type { Workflow, RouteDefinition } from '@open-edu/schemas';
 
+const COMPLETED_STATE = 'COMPLETED';
+
+export interface WorkflowEngineOptions {
+  entry?: string;
+}
+
 export class WorkflowEngine {
   private actor: ReturnType<typeof interpret> | null = null;
   private workflow: Workflow;
   private listeners: WorkflowEventListener[] = [];
-  private nodePaths: string[];
+  private entry: string;
 
-  constructor(workflow: Workflow) {
+  constructor(workflow: Workflow, options?: WorkflowEngineOptions) {
     this.workflow = workflow;
-    this.nodePaths = Object.keys(workflow.routing);
+    const firstKey = Object.keys(workflow.routing)[0];
+    const entry = options?.entry ?? firstKey;
+    if (!entry) {
+      throw new Error('Workflow has no routes defined');
+    }
+    if (!(entry in workflow.routing)) {
+      throw new Error(`Entry node "${entry}" is not present in workflow routing.`);
+    }
+    this.entry = entry;
   }
 
   start(): void {
-    const config = buildMachineConfig(this.workflow);
+    const config = buildMachineConfig(this.workflow, { entry: this.entry });
     const machine = createMachine(config);
     const actor = interpret(machine).start();
     this.actor = actor;
 
     this.emit(
       createWorkflowEvent('node.entered', {
-        nodeId: String(actor.getSnapshot().value),
+        nodeId: this.getCurrentNodeId(),
       }),
     );
   }
@@ -33,11 +47,12 @@ export class WorkflowEngine {
   stop(): void {
     this.actor?.stop();
     this.actor = null;
+    this.listeners = [];
   }
 
   getCurrentNodeId(): string {
     if (!this.actor) return '';
-    return decodeStateName(String(this.actor.getSnapshot().value), this.nodePaths);
+    return decodeStateName(String(this.actor.getSnapshot().value));
   }
 
   isCompleted(): boolean {
@@ -66,11 +81,7 @@ export class WorkflowEngine {
       const prevNode = this.getCurrentNodeId();
       this.emit(createWorkflowEvent('node.completed', { nodeId: prevNode, score }));
       this.actor.send({ type: 'NODE_COMPLETE' });
-      const newNode = this.getCurrentNodeId();
-      this.emit(createWorkflowEvent('node.entered', { nodeId: newNode }));
-      if (newNode === 'COMPLETED') {
-        this.emit(createWorkflowEvent('workflow.completed', {}));
-      }
+      this.emitEnteredOrCompleted();
     }
   }
 
@@ -79,11 +90,11 @@ export class WorkflowEngine {
 
     const s = score ?? 0;
     const actor = this.actor!;
+    const prevNode = this.getCurrentNodeId();
 
     for (const cond of routeDef.conditions) {
       const result = evaluateCondition(cond.if, s);
       if (result.match) {
-        const prevNode = this.getCurrentNodeId();
         this.emit(
           createWorkflowEvent('node.completed', {
             nodeId: prevNode,
@@ -99,14 +110,33 @@ export class WorkflowEngine {
           }),
         );
         actor.send({ type: 'EVALUATE', score: s });
-        const newNode = this.getCurrentNodeId();
-        this.emit(createWorkflowEvent('node.entered', { nodeId: newNode }));
-        if (newNode === 'COMPLETED') {
-          this.emit(createWorkflowEvent('workflow.completed', {}));
-        }
+        this.emitEnteredOrCompleted();
         return;
       }
     }
+
+    this.emit(
+      createWorkflowEvent('route.evaluated', {
+        nodeId: prevNode,
+        score: s,
+        reason: `No condition matched for score ${s}`,
+      }),
+    );
+    this.emit(
+      createWorkflowEvent('node.completed', {
+        nodeId: prevNode,
+        score: s,
+      }),
+    );
+  }
+
+  private emitEnteredOrCompleted(): void {
+    const newNode = this.getCurrentNodeId();
+    if (newNode === COMPLETED_STATE) {
+      this.emit(createWorkflowEvent('workflow.completed', {}));
+      return;
+    }
+    this.emit(createWorkflowEvent('node.entered', { nodeId: newNode }));
   }
 
   subscribe(listener: WorkflowEventListener): () => void {
