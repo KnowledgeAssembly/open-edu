@@ -44,6 +44,20 @@ export class WorkflowValidationError extends PackageLoadError {
   }
 }
 
+export class WorkflowRouteError extends PackageLoadError {
+  constructor(message: string) {
+    super('WORKFLOW_ROUTE_ERROR', message);
+    this.name = 'WorkflowRouteError';
+  }
+}
+
+export class EntryNodeNotFoundError extends PackageLoadError {
+  constructor(message: string) {
+    super('ENTRY_NODE_NOT_FOUND', message);
+    this.name = 'EntryNodeNotFoundError';
+  }
+}
+
 export class RewardsValidationError extends PackageLoadError {
   public readonly zodError: ZodError | null;
 

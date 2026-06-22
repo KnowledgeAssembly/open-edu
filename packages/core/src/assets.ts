@@ -1,18 +1,22 @@
 import { readdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve, relative, sep } from 'node:path';
+import { AssetNotFoundError } from './errors';
 
-async function collectAssetFiles(dir: string, baseDir: string): Promise<string[]> {
+function toForwardSlashes(p: string): string {
+  return sep === '/' ? p : p.split(sep).join('/');
+}
+
+async function collectAssetFiles(dir: string): Promise<string[]> {
   const assetPaths: string[] = [];
 
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
-      const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
-        const nested = await collectAssetFiles(fullPath, baseDir);
+        const nested = await collectAssetFiles(join(dir, entry.name));
         assetPaths.push(...nested);
-      } else {
-        assetPaths.push(fullPath);
+      } else if (entry.isFile()) {
+        assetPaths.push(join(dir, entry.name));
       }
     }
   } catch {
@@ -24,9 +28,26 @@ async function collectAssetFiles(dir: string, baseDir: string): Promise<string[]
 
 export async function resolveAssets(packageDir: string): Promise<string[]> {
   const assetsDir = join(packageDir, 'assets');
-  return collectAssetFiles(assetsDir, assetsDir);
+  const absolutePaths = await collectAssetFiles(assetsDir);
+  return absolutePaths.map((abs) => toForwardSlashes(relative(packageDir, abs)));
 }
 
 export function resolveAssetPath(packageDir: string, relativePath: string): string {
-  return join(packageDir, 'assets', relativePath);
+  const normalizedRelative = toForwardSlashes(relativePath);
+  if (
+    normalizedRelative.includes('..') ||
+    normalizedRelative.startsWith('/') ||
+    /^[A-Za-z]:[\\/]/.test(normalizedRelative)
+  ) {
+    throw new AssetNotFoundError(`Asset path escapes the assets directory: ${relativePath}`);
+  }
+
+  const assetsRoot = resolve(packageDir, 'assets');
+  const resolved = resolve(assetsRoot, normalizedRelative);
+  const rel = relative(assetsRoot, resolved);
+  if (rel.startsWith('..') || /^[A-Za-z]:[\\/]/.test(rel) || rel === '') {
+    throw new AssetNotFoundError(`Asset path escapes the assets directory: ${relativePath}`);
+  }
+
+  return toForwardSlashes(resolved);
 }

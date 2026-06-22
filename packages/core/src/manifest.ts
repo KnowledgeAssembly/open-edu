@@ -23,7 +23,7 @@ export async function loadManifest(packageDir: string): Promise<PackageManifest>
         `package.json is not valid JSON: ${(err as Error).message}`,
       );
     }
-    throw err;
+    throw new ManifestValidationError(`Failed to read package.json: ${(err as Error).message}`);
   }
 
   const result = PackageManifestSchema.safeParse(raw);
