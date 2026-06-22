@@ -41,7 +41,7 @@ describe('buildMachineConfig', () => {
     expect(config.states[encodeStateName('nodes/quiz-01.json')]).toBeDefined();
   });
 
-  it('should use the first route key as initial state', () => {
+  it('should use the first route key as initial state by default', () => {
     const workflow: Workflow = {
       routing: {
         'nodes/start.md': {
@@ -55,6 +55,30 @@ describe('buildMachineConfig', () => {
 
     const config = buildMachineConfig(workflow);
     expect(config.initial).toBe(encodeStateName('nodes/start.md'));
+  });
+
+  it('should use the supplied entry option instead of the first route key', () => {
+    const workflow: Workflow = {
+      routing: {
+        'nodes/start.md': { onComplete: 'nodes/end.md' },
+        'nodes/end.md': { onComplete: 'COMPLETED' },
+      },
+    };
+
+    const config = buildMachineConfig(workflow, { entry: 'nodes/end.md' });
+    expect(config.initial).toBe(encodeStateName('nodes/end.md'));
+  });
+
+  it('should throw if the supplied entry is not a routing key', () => {
+    const workflow: Workflow = {
+      routing: {
+        'nodes/start.md': { onComplete: 'COMPLETED' },
+      },
+    };
+
+    expect(() => buildMachineConfig(workflow, { entry: 'nodes/GHOST.md' })).toThrow(
+      'not present in workflow routing',
+    );
   });
 
   it('should handle COMPLETED sentinel', () => {
@@ -76,6 +100,19 @@ describe('buildMachineConfig', () => {
   });
 
   it('should throw for empty workflow', () => {
-    expect(() => buildMachineConfig({ routing: {} })).toThrow('Workflow has no routes defined');
+    expect(() => buildMachineConfig({ routing: {} })).toThrow('no routes');
+  });
+
+  it('does not collide distinct paths that differ only by slash/dot/hyphen', () => {
+    const workflow: Workflow = {
+      routing: {
+        'nodes/a-b.md': { onComplete: 'COMPLETED' },
+        'nodes/a.b.md': { onComplete: 'COMPLETED' },
+        'nodes/a_b.md': { onComplete: 'COMPLETED' },
+      },
+    };
+
+    const config = buildMachineConfig(workflow);
+    expect(Object.keys(config.states).filter((k) => k !== 'COMPLETED')).toHaveLength(3);
   });
 });
