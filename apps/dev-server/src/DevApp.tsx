@@ -54,15 +54,15 @@ export function DevApp(): JSX.Element {
     if (engine) {
       engineUnsub = engine.subscribe((event: WorkflowEvent) => {
         if (event.type === 'node.entered' && event.nodeId) {
-          session.emit({ type: 'node.opened', nodeId: event.nodeId } as never);
+          session.emit({ event: 'node_open', nodeId: event.nodeId } as never);
         } else if (event.type === 'node.completed' && event.nodeId) {
           session.emit({
-            type: 'node.completed',
+            event: 'node_complete',
             nodeId: event.nodeId,
             score: event.score,
           } as never);
         } else if (event.type === 'workflow.completed') {
-          session.emit({ type: 'workflow.completed' } as never);
+          session.emit({ event: 'node_complete', nodeId: '__workflow__' } as never);
         }
       });
     }

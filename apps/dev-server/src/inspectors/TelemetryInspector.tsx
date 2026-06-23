@@ -62,7 +62,7 @@ export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Ele
       style={{ ...containerStyle.list, maxHeight: 'calc(100vh - 120px)', overflow: 'auto' }}
     >
       {events.map((event, idx) => {
-        const eventType = (event as Record<string, unknown>).type as string;
+        const eventType = (event as Record<string, unknown>).event as string;
         const timestamp = (event as Record<string, unknown>).timestamp as number;
         const nodeId = (event as Record<string, unknown>).nodeId as string | undefined;
         const score = (event as Record<string, unknown>).score as number | undefined;
