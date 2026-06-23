@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "description": "Vite dev server for Open-Edu",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc",
@@ -12,12 +24,23 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@open-edu/accessibility": "workspace:*",
+    "@open-edu/core": "workspace:*",
     "@open-edu/runtime": "workspace:*",
+    "@open-edu/telemetry": "workspace:*",
+    "@open-edu/workflow": "workspace:*",
+    "@open-edu/schemas": "workspace:*",
+    "axe-core": "^4.7.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "vite": "^5.1.0",
+    "@vitejs/plugin-react": "^4.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.0",
-    "vite": "^5.1.0"
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "jsdom": "^24.0.0"
   }
 }

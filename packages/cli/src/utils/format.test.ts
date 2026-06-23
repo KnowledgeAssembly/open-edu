@@ -95,10 +95,10 @@ describe('formatValidationError', () => {
 });
 
 describe('formatDevMessage', () => {
-  it('should include Epic 10 message', () => {
+  it('should indicate dev server starting', () => {
     const messages = formatDevMessage(validPkg);
     expect(messages[0]?.type).toBe('success');
-    expect(messages.some((m) => m.text.includes('Epic 10'))).toBe(true);
+    expect(messages.some((m) => m.text.includes('localhost:4000'))).toBe(true);
   });
 });
 

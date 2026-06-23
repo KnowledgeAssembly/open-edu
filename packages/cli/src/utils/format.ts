@@ -93,9 +93,12 @@ export function formatDevMessage(pkg: LoadedPackage): ValidationMessage[] {
       text: `${green(CHECK)} Package "${pkg.manifest.title}" validated successfully`,
     },
     { type: 'info', text: `  Nodes: ${pkg.nodes.length}` },
+    {
+      type: 'info',
+      text: `  Workflow: ${pkg.workflow ? `yes (${Object.keys(pkg.workflow.routing).length} routes)` : 'no'}`,
+    },
     { type: 'info', text: '' },
-    { type: 'info', text: dim('  Dev server coming in Epic 10.') },
-    { type: 'info', text: dim('  Use `edu validate` to check your package for now.') },
+    { type: 'info', text: dim('  Starting dev server on http://localhost:4000') },
   ];
   return messages;
 }
