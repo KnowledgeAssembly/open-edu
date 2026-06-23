@@ -1,10 +1,9 @@
 import type { TelemetryEvent } from '@open-edu/schemas';
-import type { ZodError } from 'zod';
 
 export interface TelemetryEmitResult {
   success: boolean;
   event?: TelemetryEvent;
-  error?: ZodError;
+  error?: Error;
 }
 
 export interface Persister {

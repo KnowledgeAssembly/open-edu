@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { ZodSchema } from 'zod';

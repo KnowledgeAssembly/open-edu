@@ -6,11 +6,11 @@ Epic 7 implements the Telemetry Engine for Open-Edu. It provides an event emissi
 
 ## Stories
 
-| Story | Description |
-|-------|-------------|
-| 7.1 | Telemetry event emitter (RxJS Subject/Observable pipeline) |
-| 7.2 | JSONL append-only persistence layer |
-| 7.3 | Telemetry session management (start/stop/restore) |
+| Story | Description                                                |
+| ----- | ---------------------------------------------------------- |
+| 7.1   | Telemetry event emitter (RxJS Subject/Observable pipeline) |
+| 7.2   | JSONL append-only persistence layer                        |
+| 7.3   | Telemetry session management (start/stop/restore)          |
 
 ## Architecture
 
@@ -18,7 +18,7 @@ Epic 7 implements the Telemetry Engine for Open-Edu. It provides an event emissi
 TelemetrySession (7.3)
   ├── owns TelemetryEmitter (7.1) — emits validated events
   └── owns JsonlPersister (7.2) — subscribes to emitter, writes to file
-  
+
   start() → generates sessionId, initializes emitter + persister
   stop()  → completes emitter, flushes and closes persister
   emit(event) → delegates to emitter, which stamps timestamp + sessionId
@@ -71,11 +71,11 @@ interface Persister {
 
 ```typescript
 class TelemetryEmitter {
-  constructor(schema?: typeof TelemetryEventSchema)
+  constructor(schema?: typeof TelemetryEventSchema);
 
-  emit(data: Omit<TelemetryEvent, 'timestamp'>): TelemetryEmitResult
-  get events$(): Observable<TelemetryEvent>
-  complete(): void
+  emit(data: Omit<TelemetryEvent, 'timestamp'>): TelemetryEmitResult;
+  get events$(): Observable<TelemetryEvent>;
+  complete(): void;
 }
 ```
 
@@ -90,11 +90,11 @@ class TelemetryEmitter {
 
 ```typescript
 class JsonlPersister implements Persister {
-  constructor(source: Observable<TelemetryEvent>, filePath: string)
+  constructor(source: Observable<TelemetryEvent>, filePath: string);
 
-  write(event: TelemetryEvent): Promise<void>
-  flush(): Promise<void>
-  close(): Promise<void>
+  write(event: TelemetryEvent): Promise<void>;
+  flush(): Promise<void>;
+  close(): Promise<void>;
 }
 ```
 
@@ -109,17 +109,14 @@ class JsonlPersister implements Persister {
 
 ```typescript
 class TelemetrySession {
-  constructor(options?: {
-    persister?: Persister;
-    schema?: typeof TelemetryEventSchema;
-  })
+  constructor(options?: { persister?: Persister; schema?: typeof TelemetryEventSchema });
 
-  start(): string   // returns sessionId
-  stop(): Promise<void>
-  emit(event: Omit<TelemetryEvent, 'timestamp'>): TelemetryEmitResult
-  get sessionId(): string | null
-  get isActive(): boolean
-  get events$(): Observable<TelemetryEvent>
+  start(): string; // returns sessionId
+  stop(): Promise<void>;
+  emit(event: Omit<TelemetryEvent, 'timestamp'>): TelemetryEmitResult;
+  get sessionId(): string | null;
+  get isActive(): boolean;
+  get events$(): Observable<TelemetryEvent>;
 }
 ```
 

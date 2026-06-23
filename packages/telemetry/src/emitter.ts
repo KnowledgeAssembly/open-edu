@@ -1,7 +1,8 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
-import type { ZodSchema, ZodError } from 'zod';
+import type { ZodSchema } from 'zod';
 import type { TelemetryEmitResult } from './types';
 
 export class TelemetryEmitter {
@@ -22,7 +23,7 @@ export class TelemetryEmitter {
     if (!parseResult.success) {
       return {
         success: false,
-        error: parseResult.error as ZodError,
+        error: parseResult.error,
       };
     }
 

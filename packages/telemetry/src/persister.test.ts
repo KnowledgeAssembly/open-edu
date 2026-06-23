@@ -24,7 +24,12 @@ describe('JsonlPersister', () => {
   it('should write events to a JSONL file', async () => {
     const persister = new JsonlPersister(subject.asObservable(), filePath);
     const event1: TelemetryEvent = { event: 'node_open', nodeId: 'n1', timestamp: 1000 };
-    const event2: TelemetryEvent = { event: 'node_complete', nodeId: 'n1', score: 85, timestamp: 2000 };
+    const event2: TelemetryEvent = {
+      event: 'node_complete',
+      nodeId: 'n1',
+      score: 85,
+      timestamp: 2000,
+    };
     subject.next(event1);
     subject.next(event2);
     subject.complete();
