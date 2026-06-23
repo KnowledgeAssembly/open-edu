@@ -1,0 +1,16 @@
+{
+  "routing": {
+    "nodes/what-is-javascript.md": {
+      "onComplete": "nodes/variables.md"
+    },
+    "nodes/variables.md": {
+      "onComplete": "nodes/variables-quiz.json"
+    },
+    "nodes/variables-quiz.json": {
+      "onComplete": "nodes/finished.md"
+    },
+    "nodes/finished.md": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}

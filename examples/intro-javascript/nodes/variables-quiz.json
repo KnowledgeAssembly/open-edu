@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "question": "Which of these correctly declares a JavaScript variable?",
+  "options": [
+    { "id": "a", "text": "let score = 0;", "correct": true },
+    { "id": "b", "text": "variable score = 0;", "correct": false },
+    { "id": "c", "text": "const pi = 3.14;", "correct": true },
+    { "id": "d", "text": "string name = \"Alice\";", "correct": false }
+  ],
+  "skills": ["javascript", "basics"]
+}
