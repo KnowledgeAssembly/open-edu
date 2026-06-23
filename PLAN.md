@@ -84,7 +84,7 @@ open-edu/
 | 3   | Package Loader              | 2       | P0       | Epic 2             |
 | 4   | Workflow Engine             | 2       | P0       | Epic 2             |
 | 5   | Runtime Renderer            | 5       | P0       | Epics 3, 4         |
-| 6   | Accessibility Engine        | 3       | P0       | Epic 5             |
+| 6   | Accessibility Engine [DONE] | 3       | P0       | Epic 5             |
 | 7   | Telemetry Engine            | 3       | P0       | Epic 2             |
 | 8   | Reward Broker               | 2       | P1       | Epic 7             |
 | 9   | CLI                         | 2       | P0       | Epics 3, 10        |
