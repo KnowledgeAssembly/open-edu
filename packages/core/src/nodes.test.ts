@@ -2,10 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { loadNodes } from './nodes';
 import { NodeLoadError } from './errors';
 import { resolve, join } from 'node:path';
-import { writeFile, unlink, mkdir, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { writeFile, mkdir, rm } from 'node:fs/promises';
 
 const fixturesDir = resolve(__dirname, '__fixtures__');
+
+async function withTempDir(fn: (dir: string) => Promise<void>): Promise<void> {
+  const dir = join(fixturesDir, `tmp-${Math.random().toString(36).slice(2)}`);
+  await mkdir(join(dir, 'nodes'), { recursive: true });
+  try {
+    await fn(dir);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
 
 describe('loadNodes', () => {
   it('should load all node files from valid-package', async () => {
@@ -59,26 +68,24 @@ describe('loadNodes', () => {
   });
 
   it('should reject invalid JSON node files', async () => {
-    const tmpDir = join(fixturesDir, 'minimal-package');
-    const tmpPath = join(tmpDir, 'nodes', 'bad.json');
-    await writeFile(tmpPath, 'not json');
-    await expect(loadNodes(tmpDir)).rejects.toThrow(NodeLoadError);
-    await unlink(tmpPath);
+    await withTempDir(async (dir) => {
+      await writeFile(join(dir, 'nodes', 'bad.json'), 'not json');
+      await expect(loadNodes(dir)).rejects.toThrow(NodeLoadError);
+    });
   });
 
   it('should reject JSON node without type field', async () => {
-    const tmpDir = join(fixturesDir, 'minimal-package');
-    const tmpPath = join(tmpDir, 'nodes', 'notype.json');
-    await writeFile(tmpPath, JSON.stringify({ question: 'test' }));
-    await expect(loadNodes(tmpDir)).rejects.toThrow(NodeLoadError);
-    await unlink(tmpPath);
+    await withTempDir(async (dir) => {
+      await writeFile(join(dir, 'nodes', 'notype.json'), JSON.stringify({ question: 'test' }));
+      await expect(loadNodes(dir)).rejects.toThrow(NodeLoadError);
+    });
   });
 
   it('should reject subdirectories inside nodes/ with a NodeLoadError', async () => {
-    const tmpDir = join(fixturesDir, 'tmp-subdirs');
-    if (!existsSync(tmpDir)) await mkdir(join(tmpDir, 'nodes', 'subdir'), { recursive: true });
-    await writeFile(join(tmpDir, 'nodes', 'subdir', 'a.md'), '# A');
-    await expect(loadNodes(tmpDir)).rejects.toThrow(NodeLoadError);
-    await rm(tmpDir, { recursive: true, force: true });
+    await withTempDir(async (dir) => {
+      await mkdir(join(dir, 'nodes', 'subdir'), { recursive: true });
+      await writeFile(join(dir, 'nodes', 'subdir', 'a.md'), '# A');
+      await expect(loadNodes(dir)).rejects.toThrow(NodeLoadError);
+    });
   });
 });
