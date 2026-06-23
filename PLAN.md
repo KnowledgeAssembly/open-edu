@@ -86,7 +86,7 @@ open-edu/
 | 5   | Runtime Renderer            | 5       | P0       | Epics 3, 4         |
 | 6   | Accessibility Engine [DONE] | 3       | P0       | Epic 5             |
 | 7   | Telemetry Engine [DONE]     | 3       | P0       | Epic 2             |
-| 8   | Reward Broker               | 2       | P1       | Epic 7             |
+| 8   | Reward Broker [DONE]        | 2       | P1       | Epic 7             |
 | 9   | CLI                         | 2       | P0       | Epics 3, 10        |
 | 10  | Dev Server                  | 2       | P0       | Epic 5             |
 | 11  | Example Packages            | 2       | P1       | Epic 2             |
