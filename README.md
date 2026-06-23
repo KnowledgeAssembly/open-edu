@@ -139,7 +139,8 @@ pnpm install
 
 ```bash
 pnpm build            # Build all packages
-pnpm test             # Run all tests
+pnpm test             # Run all unit tests
+pnpm test:e2e         # Run all E2E tests (requires pnpm build first)
 pnpm lint             # Lint all packages
 pnpm typecheck        # Type-check all packages
 pnpm format:check     # Check formatting
@@ -153,6 +154,7 @@ schemas
   ├──► core
   │     └──► runtime ──► accessibility
   │                    ──► dev-server ──► cli
+  │                    ──► e2e (Playwright)
   ├──► workflow ──► runtime
   ├──► telemetry ──► rewards
   └──► examples
@@ -185,7 +187,9 @@ Reward Broker — badges, webhooks, scripts
 
 ## Testing
 
-The framework uses **Vitest** for unit tests and **Playwright** for E2E tests.
+The framework uses **Vitest** for unit tests (~490+ tests across 73 files) and **Playwright** for E2E integration tests (20+ tests).
+
+### Unit Tests
 
 ```bash
 pnpm test                    # All unit tests
@@ -194,6 +198,22 @@ pnpm exec vitest run --coverage  # With coverage
 ```
 
 Each package has its own `vitest.config.ts` and `src/**/*.test.ts` files. Example packages also have validation tests asserting correct loading.
+
+### E2E Tests
+
+```bash
+pnpm build                   # Build packages first
+pnpm test:e2e                # Run all Playwright tests
+pnpm test:e2e:install        # Install Playwright browsers
+```
+
+E2E tests start a real Vite dev server on a dynamic port and run against all 4 example packages:
+
+| Test file | Coverage |
+|-----------|----------|
+| `package-execution.spec.ts` | Content rendering, navigation, quiz submission, reflection input, conditional branching (14 tests) |
+| `accessibility.spec.ts` | Keyboard Tab/Enter navigation, landmark regions, A11y inspector audit (6 tests) |
+| `telemetry.spec.ts` | Telemetry event capture via developer inspector panel (2 tests) |
 
 ## Project Structure
 
