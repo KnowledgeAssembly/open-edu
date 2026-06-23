@@ -23,6 +23,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@open-edu/telemetry": "workspace:*"
+    "@open-edu/schemas": "workspace:*",
+    "@open-edu/telemetry": "workspace:*",
+    "rxjs": "^7.8.0"
   }
 }
