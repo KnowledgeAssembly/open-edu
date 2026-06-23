@@ -13,6 +13,7 @@
 ### Task 1: hello-world validation test
 
 **Files:**
+
 - Create: `examples/hello-world/validate.test.ts`
 
 - [ ] **Step 1: Create `examples/hello-world/validate.test.ts`**
@@ -53,6 +54,7 @@ git commit -m "test(hello-world): add validation test for example package"
 ### Task 2: Create intro-javascript example package
 
 **Files:**
+
 - Create: `examples/intro-javascript/package.json`
 - Create: `examples/intro-javascript/workflow.json`
 - Create: `examples/intro-javascript/nodes/what-is-javascript.md`
@@ -126,7 +128,7 @@ JavaScript is one of the most widely-used programming languages. It powers the i
 
 - [ ] **Step 4: Write `examples/intro-javascript/nodes/variables.md`**
 
-```markdown
+````markdown
 # Variables
 
 Variables store data in JavaScript. Think of them as labeled containers.
@@ -139,6 +141,7 @@ Use `let` for values that can change, and `const` for values that stay the same.
 let score = 0;
 const pi = 3.14159;
 ```
+````
 
 ## Data Types
 
@@ -151,7 +154,8 @@ JavaScript has several basic data types:
 - **Object** — key-value pairs: `{ name: "Alice" }`
 
 > Ready to test your knowledge? Press **Next** for a quiz.
-```
+
+````
 
 - [ ] **Step 5: Write `examples/intro-javascript/nodes/variables-quiz.json`**
 
@@ -167,7 +171,7 @@ JavaScript has several basic data types:
   ],
   "skills": ["javascript", "basics"]
 }
-```
+````
 
 - [ ] **Step 6: Write `examples/intro-javascript/nodes/finished.md`**
 
@@ -229,6 +233,7 @@ git commit -m "feat(examples): create intro-javascript example package"
 ### Task 3: Create fractions example package
 
 **Files:**
+
 - Create: `examples/fractions/package.json`
 - Create: `examples/fractions/workflow.json`
 - Create: `examples/fractions/nodes/intro.md`
@@ -293,11 +298,12 @@ A fraction represents a part of a whole.
 ## Anatomy of a Fraction
 
 A fraction has two parts:
-
 ```
-3  ← numerator (how many parts)
+
+3 ← numerator (how many parts)
 ─
-4  ← denominator (how many total parts)
+4 ← denominator (how many total parts)
+
 ```
 
 - The **numerator** (top) counts how many parts you have
@@ -412,6 +418,7 @@ git commit -m "feat(examples): create fractions example package with conditional
 ### Task 4: Create autism-reading example package
 
 **Files:**
+
 - Create: `examples/autism-reading/package.json`
 - Create: `examples/autism-reading/workflow.json`
 - Create: `examples/autism-reading/nodes/a-day-at-the-park.md`

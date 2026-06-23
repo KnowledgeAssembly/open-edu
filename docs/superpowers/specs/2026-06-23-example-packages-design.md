@@ -6,14 +6,15 @@ Epic 11 creates four example educational packages that demonstrate the Open-Edu 
 
 ## Stories
 
-| Story | Description                                                |
-| ----- | ---------------------------------------------------------- |
-| 11.1  | hello-world + intro-javascript example packages            |
-| 11.2  | fractions + autism-reading example packages                |
+| Story | Description                                     |
+| ----- | ----------------------------------------------- |
+| 11.1  | hello-world + intro-javascript example packages |
+| 11.2  | fractions + autism-reading example packages     |
 
 ## Architecture
 
 Each package is a self-contained directory under `examples/` loadable by `@open-edu/core`'s `loadPackage()`. No cross-package dependencies. Each must have:
+
 - `package.json` — valid Open-Edu manifest (`id`, `title`, `version`, `author`, `entry`)
 - `nodes/` — content files (`.md` lessons, `.json` quizzes/reflections)
 - `workflow.json` — routing between nodes
@@ -72,6 +73,7 @@ No assets or rewards needed for MVP.
 ## Testing
 
 A single test file `examples/validate-all.test.ts` that calls `loadPackage()` on each of the four examples and asserts:
+
 - No errors thrown
 - Correct node count
 - Correct entry node path
@@ -80,6 +82,7 @@ A single test file `examples/validate-all.test.ts` that calls `loadPackage()` on
 ## Quiz Content Strategy
 
 Questions are simple and pedagogically sound. Each quiz:
+
 - Has exactly one correct answer per question
 - Provides meaningful distractors (wrong but plausible)
 - Tests concepts introduced in preceding lesson nodes
