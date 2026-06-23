@@ -12,13 +12,13 @@ describe('TelemetryInspector', () => {
 
   it('should render telemetry events', () => {
     const events = [
-      { type: 'node.opened', nodeId: 'nodes/lesson.md', timestamp: Date.now() },
-      { type: 'node.completed', nodeId: 'nodes/lesson.md', score: 100, timestamp: Date.now() },
+      { event: 'node_open', nodeId: 'nodes/lesson.md', timestamp: Date.now() },
+      { event: 'node_complete', nodeId: 'nodes/lesson.md', score: 100, timestamp: Date.now() },
     ] as never[];
 
     render(<TelemetryInspector events={events} />);
-    expect(screen.getByText('node.opened')).toBeInTheDocument();
-    expect(screen.getByText('node.completed')).toBeInTheDocument();
+    expect(screen.getByText('node_open')).toBeInTheDocument();
+    expect(screen.getByText('node_complete')).toBeInTheDocument();
     expect(screen.getAllByText(/nodes\/lesson\.md/)).toHaveLength(2);
     expect(screen.getByText(/score: 100/)).toBeInTheDocument();
   });
