@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import type { Observable, Subscription } from 'rxjs';
 import type { TelemetryEvent } from '@open-edu/schemas';
-import type { Persister } from './types';
-import { TelemetryPersistenceError } from './errors';
+import type { Persister } from './types.js';
+import { TelemetryPersistenceError } from './errors.js';
 
 export class JsonlPersister implements Persister {
   private stream: fs.WriteStream;

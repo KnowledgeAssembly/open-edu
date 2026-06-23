@@ -1,6 +1,6 @@
-export { ACCESSIBILITY_VERSION } from './version';
-export { AccessibilityProvider } from './accessibility-provider';
-export type { AccessibilityProviderProps } from './accessibility-provider';
+export { ACCESSIBILITY_VERSION } from './version.js';
+export { AccessibilityProvider } from './accessibility-provider.js';
+export type { AccessibilityProviderProps } from './accessibility-provider.js';
 export {
   FocusProvider,
   useFocusContext,

@@ -1,10 +1,10 @@
-import type { LoadedPackage } from './types';
-import { loadManifest } from './manifest';
-import { loadWorkflow } from './workflow';
-import { loadRewards } from './rewards';
-import { loadNodes } from './nodes';
-import { resolveAssets } from './assets';
-import { EntryNodeNotFoundError, WorkflowRouteError } from './errors';
+import type { LoadedPackage } from './types.js';
+import { loadManifest } from './manifest.js';
+import { loadWorkflow } from './workflow.js';
+import { loadRewards } from './rewards.js';
+import { loadNodes } from './nodes.js';
+import { resolveAssets } from './assets.js';
+import { EntryNodeNotFoundError, WorkflowRouteError } from './errors.js';
 
 const COMPLETED_SENTINEL = 'COMPLETED';
 

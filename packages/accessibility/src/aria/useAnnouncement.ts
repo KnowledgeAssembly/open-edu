@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAriaContext, type AnnouncementPriority } from './AriaContext';
+import { useAriaContext, type AnnouncementPriority } from './AriaContext.js';
 
 export function useAnnouncement(): (message: string, priority?: AnnouncementPriority) => void {
   const { announce } = useAriaContext();

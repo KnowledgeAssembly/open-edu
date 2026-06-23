@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { loadPackage } from '@open-edu/core';
-import { formatValidationError, formatPackageSuccess, printMessages } from '../utils/format';
+import { formatValidationError, formatPackageSuccess, printMessages } from '../utils/format.js';
 
 function isTarAvailable(): boolean {
   try {

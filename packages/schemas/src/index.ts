@@ -1,5 +1,5 @@
-export { PackageManifestSchema, SkillsSchema } from './manifest';
-export type { PackageManifest } from './manifest';
+export { PackageManifestSchema, SkillsSchema } from './manifest.js';
+export type { PackageManifest } from './manifest.js';
 
 export {
   ContentNodeSchema,
@@ -9,7 +9,7 @@ export {
   ExerciseNodeSchema,
   WidgetNodeSchema,
   NodeTypeSchema,
-} from './nodes';
+} from './nodes.js';
 export type {
   ContentNode,
   LessonNode,
@@ -18,10 +18,10 @@ export type {
   ExerciseNode,
   WidgetNode,
   NodeType,
-} from './nodes';
+} from './nodes.js';
 
-export { WorkflowSchema, RouteDefinitionSchema } from './workflow';
-export type { Workflow, RouteDefinition, Condition } from './workflow';
+export { WorkflowSchema, RouteDefinitionSchema } from './workflow.js';
+export type { Workflow, RouteDefinition, Condition } from './workflow.js';
 
 export {
   RewardsSchema,
@@ -30,7 +30,7 @@ export {
   BadgeActionSchema,
   WebhookActionSchema,
   ScriptActionSchema,
-} from './rewards';
+} from './rewards.js';
 export type {
   Rewards,
   Trigger,
@@ -38,7 +38,7 @@ export type {
   BadgeAction,
   WebhookAction,
   ScriptAction,
-} from './rewards';
+} from './rewards.js';
 
 export {
   TelemetryEventSchema,
@@ -49,7 +49,7 @@ export {
   WidgetInteractionEventSchema,
   RouteTriggeredEventSchema,
   TelemetryEventEnum,
-} from './telemetry';
+} from './telemetry.js';
 export type {
   TelemetryEvent,
   NodeOpenEvent,
@@ -58,8 +58,8 @@ export type {
   HintTriggeredEvent,
   WidgetInteractionEvent,
   RouteTriggeredEvent,
-} from './telemetry';
+} from './telemetry.js';
 
 export const SCHEMAS_VERSION = '0.1.0';
 
-export { toJsonSchema } from './json-schema';
+export { toJsonSchema } from './json-schema.js';

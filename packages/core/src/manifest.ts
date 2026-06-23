@@ -2,7 +2,7 @@ import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PackageManifestSchema } from '@open-edu/schemas';
 import type { PackageManifest } from '@open-edu/schemas';
-import { ManifestValidationError } from './errors';
+import { ManifestValidationError } from './errors.js';
 
 export async function loadManifest(packageDir: string): Promise<PackageManifest> {
   const manifestPath = join(packageDir, 'package.json');

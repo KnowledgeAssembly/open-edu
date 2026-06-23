@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { validatePackage } from './commands/validate';
-import { devPackage } from './commands/dev';
-import { buildPackage } from './commands/build';
-import { packagePackage } from './commands/package';
-import { CLI_VERSION } from './index';
+import { validatePackage } from './commands/validate.js';
+import { devPackage } from './commands/dev.js';
+import { buildPackage } from './commands/build.js';
+import { packagePackage } from './commands/package.js';
+import { CLI_VERSION } from './index.js';
 
 const program = new Command();
 

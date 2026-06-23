@@ -1,9 +1,9 @@
 import { createMachine, interpret } from 'xstate';
-import { buildMachineConfig } from './builder';
-import { evaluateCondition } from './condition';
-import { decodeStateName } from './state-map';
-import { createWorkflowEvent } from './events';
-import type { WorkflowEvent, WorkflowEventListener } from './events';
+import { buildMachineConfig } from './builder.js';
+import { evaluateCondition } from './condition.js';
+import { decodeStateName } from './state-map.js';
+import { createWorkflowEvent } from './events.js';
+import type { WorkflowEvent, WorkflowEventListener } from './events.js';
 import type { Workflow, RouteDefinition } from '@open-edu/schemas';
 
 const COMPLETED_STATE = 'COMPLETED';

@@ -25,5 +25,6 @@
   "dependencies": {
     "@open-edu/schemas": "workspace:*",
     "zod": "^3.25.76"
-  }
+  },
+  "type": "module"
 }

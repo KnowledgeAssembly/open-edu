@@ -43,5 +43,6 @@
     "@types/react-dom": "^18.0.0",
     "@types/unist": "^3.0.0",
     "hast-util-to-jsx-runtime": "^2.0.0"
-  }
+  },
+  "type": "module"
 }

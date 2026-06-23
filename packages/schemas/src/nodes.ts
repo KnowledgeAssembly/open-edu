@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SkillsSchema } from './manifest';
+import { SkillsSchema } from './manifest.js';
 
 const OptionSchema = z.object({
   id: z.string().min(1).max(64),
