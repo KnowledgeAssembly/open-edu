@@ -122,9 +122,15 @@ importers:
 
   packages/rewards:
     dependencies:
+      '@open-edu/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../telemetry
+      rxjs:
+        specifier: ^7.8.0
+        version: 7.8.2
 
   packages/runtime:
     dependencies:

@@ -1,6 +1,12 @@
 import type { Observable } from 'rxjs';
 import type { TelemetryEvent } from '@open-edu/schemas';
-import type { Rewards, RewardAction, BadgeAction, WebhookAction, ScriptAction } from '@open-edu/schemas';
+import type {
+  Rewards,
+  RewardAction,
+  BadgeAction,
+  WebhookAction,
+  ScriptAction,
+} from '@open-edu/schemas';
 
 export interface RewardResult {
   success: boolean;
