@@ -1,8 +1,12 @@
 {
   "name": "@open-edu/example-hello-world",
+  "id": "hello-world",
+  "title": "Hello World",
   "version": "0.1.0",
   "private": true,
   "description": "Hello World example for Open-Edu",
+  "author": "Open-Edu Team",
+  "entry": "nodes/hello.md",
   "scripts": {
     "build": "echo 'example build placeholder'",
     "test": "echo 'no tests yet'",
