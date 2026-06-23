@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
@@ -6,6 +5,13 @@ import type { ZodSchema } from 'zod';
 import type { Persister, TelemetryEmitResult } from './types.js';
 import { TelemetryEmitter } from './emitter.js';
 import { TelemetryValidationError } from './errors.js';
+
+function generateId(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
 
 export interface TelemetrySessionOptions {
   persister?: Persister;
@@ -24,7 +30,7 @@ export class TelemetrySession {
   }
 
   start(): string {
-    this._sessionId = randomUUID();
+    this._sessionId = generateId();
     this.emitter = new TelemetryEmitter(this.schema);
 
     if (this.persister) {
