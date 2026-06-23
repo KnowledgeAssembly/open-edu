@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
@@ -23,7 +24,7 @@ export class TelemetrySession {
   }
 
   start(): string {
-    this._sessionId = crypto.randomUUID();
+    this._sessionId = randomUUID();
     this.emitter = new TelemetryEmitter(this.schema);
 
     if (this.persister) {
