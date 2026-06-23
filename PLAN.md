@@ -87,7 +87,7 @@ open-edu/
 | 6   | Accessibility Engine [DONE] | 3       | P0       | Epic 5             |
 | 7   | Telemetry Engine [DONE]     | 3       | P0       | Epic 2             |
 | 8   | Reward Broker [DONE]        | 2       | P1       | Epic 7             |
-| 9   | CLI                         | 2       | P0       | Epics 3, 10        |
+| 9   | CLI [DONE]                  | 2       | P0       | Epic 3             |
 | 10  | Dev Server                  | 2       | P0       | Epic 5             |
 | 11  | Example Packages            | 2       | P1       | Epic 2             |
 | 12  | Integration Testing         | 2       | P1       | Epics 5, 6, 10, 11 |
