@@ -90,7 +90,7 @@ open-edu/
 | 9   | CLI [DONE]                  | 2       | P0       | Epic 3             |
 | 10  | Dev Server                  | 2       | P0       | Epic 5             |
 | 11  | Example Packages            | 2       | P1       | Epic 2             |
-| 12  | Integration Testing         | 2       | P1       | Epics 5, 6, 10, 11 |
+| 12  | Integration Testing [DONE]  | 2       | P1       | Epics 5, 6, 10, 11 |
 
 ---
 
@@ -104,7 +104,7 @@ Epic 1 (Foundation)
         │           ├─► Epic 6 (Accessibility)
         │           ├─► Epic 10 (Dev Server)
         │           │     └─► Epic 9 (CLI)
-        │           └─► Epic 12 (Testing)
+        │           └─► Epic 12 (Testing) [DONE]
         ├─► Epic 4 (Workflow Engine)
         │     └─► Epic 5 (Runtime Renderer)
         ├─► Epic 7 (Telemetry)
@@ -179,7 +179,7 @@ Epic 1 (Foundation)
 - Story 11.1: hello-world + intro-javascript example packages
 - Story 11.2: fractions + autism-reading example packages
 
-### Epic 12: Integration Testing
+### Epic 12: Integration Testing [DONE]
 
 - Story 12.1: Playwright setup + package execution end-to-end tests
 - Story 12.2: Keyboard navigation + accessibility + telemetry e2e tests
