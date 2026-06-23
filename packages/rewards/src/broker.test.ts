@@ -31,6 +31,15 @@ describe('RewardBroker', () => {
     expect(broker.isActive).toBe(true);
   });
 
+  it('should ignore duplicate start calls', () => {
+    broker = new RewardBroker({ rewards, source: subject.asObservable() });
+    broker.start();
+    broker.start();
+    subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
+    expect(broker.awardedBadges).toContain('completer');
+    expect(broker.results).toHaveLength(1);
+  });
+
   it('should stop and become inactive', () => {
     broker = new RewardBroker({ rewards, source: subject.asObservable() });
     broker.start();

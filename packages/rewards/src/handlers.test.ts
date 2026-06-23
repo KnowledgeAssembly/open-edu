@@ -27,20 +27,20 @@ describe('BadgeTracker', () => {
 });
 
 describe('handleBadgeAction', () => {
-  it('should award a badge successfully', async () => {
+  it('should award a badge successfully', () => {
     const tracker = new BadgeTracker();
     const action: BadgeAction = { action: 'badge.award', badge: 'star-learner' };
-    const result = await handleBadgeAction(action, tracker);
+    const result = handleBadgeAction(action, tracker);
     expect(result.success).toBe(true);
     expect(result.detail).toContain('star-learner');
     expect(tracker.awardedBadges).toContain('star-learner');
   });
 
-  it('should handle duplicate badge award', async () => {
+  it('should handle duplicate badge award', () => {
     const tracker = new BadgeTracker();
     const action: BadgeAction = { action: 'badge.award', badge: 'star-learner' };
     tracker.award('star-learner');
-    const result = await handleBadgeAction(action, tracker);
+    const result = handleBadgeAction(action, tracker);
     expect(result.success).toBe(true);
     expect(result.detail).toContain('already awarded');
   });

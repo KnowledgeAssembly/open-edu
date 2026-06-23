@@ -18,6 +18,7 @@ export class RewardBroker {
   }
 
   start(): void {
+    if (this.isActive) return;
     this.subscription = this.options.source.subscribe({
       next: (event) => this.evaluateEvent(event),
     });
