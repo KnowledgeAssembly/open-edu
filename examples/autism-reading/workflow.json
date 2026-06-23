@@ -1,0 +1,13 @@
+{
+  "routing": {
+    "nodes/a-day-at-the-park.md": {
+      "onComplete": "nodes/quiz.json"
+    },
+    "nodes/quiz.json": {
+      "onComplete": "nodes/reflection.json"
+    },
+    "nodes/reflection.json": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}
