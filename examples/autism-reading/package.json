@@ -1,11 +1,18 @@
 {
   "name": "@open-edu/example-autism-reading",
+  "id": "autism-reading",
+  "title": "A Day at the Park",
   "version": "0.1.0",
   "private": true,
-  "description": "Autism-friendly reading example for Open-Edu",
+  "description": "Accessibility-first reading lesson with reflection for Open-Edu",
+  "author": "Open-Edu Team",
+  "entry": "nodes/a-day-at-the-park.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
   "scripts": {
     "build": "echo 'example build placeholder'",
-    "test": "echo 'no tests yet'",
+    "test": "vitest run",
     "lint": "echo 'no lint yet'",
     "typecheck": "echo 'no typecheck yet'",
     "clean": "rm -rf dist"

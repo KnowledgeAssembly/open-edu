@@ -1,11 +1,18 @@
 {
   "name": "@open-edu/example-intro-javascript",
+  "id": "intro-javascript",
+  "title": "Introduction to JavaScript",
   "version": "0.1.0",
   "private": true,
-  "description": "Intro to JavaScript example for Open-Edu",
+  "description": "Multi-node lesson on JavaScript basics for Open-Edu",
+  "author": "Open-Edu Team",
+  "entry": "nodes/what-is-javascript.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
   "scripts": {
     "build": "echo 'example build placeholder'",
-    "test": "echo 'no tests yet'",
+    "test": "vitest run",
     "lint": "echo 'no lint yet'",
     "typecheck": "echo 'no typecheck yet'",
     "clean": "rm -rf dist"

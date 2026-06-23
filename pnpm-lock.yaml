@@ -99,13 +99,29 @@ importers:
 
   apps/docs: {}
 
-  examples/autism-reading: {}
+  examples/autism-reading:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
 
-  examples/fractions: {}
+  examples/fractions:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
 
-  examples/hello-world: {}
+  examples/hello-world:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
 
-  examples/intro-javascript: {}
+  examples/intro-javascript:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
 
   packages/accessibility:
     dependencies:

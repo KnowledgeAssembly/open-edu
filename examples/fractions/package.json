@@ -1,11 +1,18 @@
 {
   "name": "@open-edu/example-fractions",
+  "id": "fractions",
+  "title": "Understanding Fractions",
   "version": "0.1.0",
   "private": true,
-  "description": "Fractions quiz example for Open-Edu",
+  "description": "Quiz with conditional branching and remediation for Open-Edu",
+  "author": "Open-Edu Team",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
   "scripts": {
     "build": "echo 'example build placeholder'",
-    "test": "echo 'no tests yet'",
+    "test": "vitest run",
     "lint": "echo 'no lint yet'",
     "typecheck": "echo 'no typecheck yet'",
     "clean": "rm -rf dist"

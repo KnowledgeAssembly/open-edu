@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "question": "Which statements about fractions are correct?",
+  "options": [
+    { "id": "a", "text": "The top number is called the numerator", "correct": true },
+    { "id": "b", "text": "The bottom number is called the numerator", "correct": false },
+    { "id": "c", "text": "1/2 is equivalent to 0.5", "correct": true },
+    { "id": "d", "text": "The denominator can be zero", "correct": false }
+  ],
+  "skills": ["math", "fractions"]
+}

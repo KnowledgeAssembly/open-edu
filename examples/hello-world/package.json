@@ -7,9 +7,12 @@
   "description": "Hello World example for Open-Edu",
   "author": "Open-Edu Team",
   "entry": "nodes/hello.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
   "scripts": {
     "build": "echo 'example build placeholder'",
-    "test": "echo 'no tests yet'",
+    "test": "vitest run",
     "lint": "echo 'no lint yet'",
     "typecheck": "echo 'no typecheck yet'",
     "clean": "rm -rf dist"

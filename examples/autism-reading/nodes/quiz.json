@@ -1,0 +1,10 @@
+{
+  "type": "quiz",
+  "question": "What did Sam and Max do at the park?",
+  "options": [
+    { "id": "a", "text": "They fed the ducks", "correct": true },
+    { "id": "b", "text": "They went swimming", "correct": false },
+    { "id": "c", "text": "They played video games", "correct": false }
+  ],
+  "skills": ["reading", "comprehension"]
+}
