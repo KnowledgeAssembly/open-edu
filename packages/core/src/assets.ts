@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import { join, resolve, relative, sep } from 'node:path';
-import { AssetNotFoundError } from './errors';
+import { AssetNotFoundError } from './errors.js';
 
 function toForwardSlashes(p: string): string {
   return sep === '/' ? p : p.split(sep).join('/');

@@ -1,6 +1,6 @@
 import { loadPackage } from '@open-edu/core';
 import { startDevServer } from '@open-edu/dev-server';
-import { formatValidationError, printMessages } from '../utils/format';
+import { formatValidationError, printMessages } from '../utils/format.js';
 
 export async function devPackage(packageDir: string): Promise<number> {
   try {

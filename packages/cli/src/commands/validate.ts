@@ -1,5 +1,5 @@
 import { loadPackage } from '@open-edu/core';
-import { formatValidationSuccess, formatValidationError, printMessages } from '../utils/format';
+import { formatValidationSuccess, formatValidationError, printMessages } from '../utils/format.js';
 
 export async function validatePackage(packageDir: string): Promise<number> {
   try {

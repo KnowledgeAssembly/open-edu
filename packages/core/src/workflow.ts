@@ -2,7 +2,7 @@ import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { WorkflowSchema } from '@open-edu/schemas';
 import type { Workflow } from '@open-edu/schemas';
-import { WorkflowValidationError } from './errors';
+import { WorkflowValidationError } from './errors.js';
 
 export async function loadWorkflow(packageDir: string): Promise<Workflow | null> {
   const workflowPath = join(packageDir, 'workflow.json');

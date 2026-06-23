@@ -3,9 +3,9 @@ import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { ZodSchema } from 'zod';
-import type { Persister, TelemetryEmitResult } from './types';
-import { TelemetryEmitter } from './emitter';
-import { TelemetryValidationError } from './errors';
+import type { Persister, TelemetryEmitResult } from './types.js';
+import { TelemetryEmitter } from './emitter.js';
+import { TelemetryValidationError } from './errors.js';
 
 export interface TelemetrySessionOptions {
   persister?: Persister;

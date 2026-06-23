@@ -26,5 +26,6 @@
     "@open-edu/schemas": "workspace:*",
     "rxjs": "^7.8.0",
     "zod": "^3.0.0"
-  }
+  },
+  "type": "module"
 }

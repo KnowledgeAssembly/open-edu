@@ -3,8 +3,8 @@ import { join, extname, sep } from 'node:path';
 import type { Dirent } from 'node:fs';
 import { ContentNodeSchema } from '@open-edu/schemas';
 import type { ContentNode } from '@open-edu/schemas';
-import { NodeLoadError } from './errors';
-import type { LoadedNode } from './types';
+import { NodeLoadError } from './errors.js';
+import type { LoadedNode } from './types.js';
 
 function detectNodeType(filePath: string, content: string): ContentNode {
   const ext = extname(filePath);

@@ -3,7 +3,7 @@ import type { Observable } from 'rxjs';
 import { TelemetryEventSchema } from '@open-edu/schemas';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { ZodSchema } from 'zod';
-import type { TelemetryEmitResult } from './types';
+import type { TelemetryEmitResult } from './types.js';
 
 export class TelemetryEmitter {
   private subject: Subject<TelemetryEvent>;

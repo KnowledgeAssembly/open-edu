@@ -2,7 +2,7 @@ import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { RewardsSchema } from '@open-edu/schemas';
 import type { Rewards } from '@open-edu/schemas';
-import { RewardsValidationError } from './errors';
+import { RewardsValidationError } from './errors.js';
 
 export async function loadRewards(packageDir: string): Promise<Rewards | null> {
   const rewardsPath = join(packageDir, 'rewards.json');

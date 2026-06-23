@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, statSync, cpSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadPackage } from '@open-edu/core';
-import { formatValidationError, formatBuildSuccess, printMessages } from '../utils/format';
+import { formatValidationError, formatBuildSuccess, printMessages } from '../utils/format.js';
 
 const EXCLUDED_DIRS = new Set(['dist', 'node_modules', '.git']);
 

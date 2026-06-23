@@ -1,2 +1,2 @@
-export { AxeValidator } from './AxeValidator';
-export type { AxeValidatorProps, AxeViolation, AxeResults } from './AxeValidator';
+export { AxeValidator } from './AxeValidator.js';
+export type { AxeValidatorProps, AxeViolation, AxeResults } from './AxeValidator.js';

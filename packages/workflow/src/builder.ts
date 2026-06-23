@@ -1,7 +1,7 @@
 import type { Workflow, RouteDefinition } from '@open-edu/schemas';
-import { evaluateCondition } from './condition';
-import { encodeStateName } from './state-map';
-import type { MachineConfig } from './types';
+import { evaluateCondition } from './condition.js';
+import { encodeStateName } from './state-map.js';
+import type { MachineConfig } from './types.js';
 
 const COMPLETED_STATE = 'COMPLETED';
 

@@ -1,3 +1,3 @@
-export { AriaProvider, useAriaContext } from './AriaContext';
-export type { AriaContextValue, AnnouncementPriority, AriaProviderProps } from './AriaContext';
-export { useAnnouncement } from './useAnnouncement';
+export { AriaProvider, useAriaContext } from './AriaContext.js';
+export type { AriaContextValue, AnnouncementPriority, AriaProviderProps } from './AriaContext.js';
+export { useAnnouncement } from './useAnnouncement.js';
