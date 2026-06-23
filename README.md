@@ -209,11 +209,11 @@ pnpm test:e2e:install        # Install Playwright browsers
 
 E2E tests start a real Vite dev server on a dynamic port and run against all 4 example packages:
 
-| Test file | Coverage |
-|-----------|----------|
+| Test file                   | Coverage                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------- |
 | `package-execution.spec.ts` | Content rendering, navigation, quiz submission, reflection input, conditional branching (14 tests) |
-| `accessibility.spec.ts` | Keyboard Tab/Enter navigation, landmark regions, A11y inspector audit (6 tests) |
-| `telemetry.spec.ts` | Telemetry event capture via developer inspector panel (2 tests) |
+| `accessibility.spec.ts`     | Keyboard Tab/Enter navigation, landmark regions, A11y inspector audit (6 tests)                    |
+| `telemetry.spec.ts`         | Telemetry event capture via developer inspector panel (2 tests)                                    |
 
 ## Project Structure
 
