@@ -122,9 +122,7 @@ Content goes here. Use standard Markdown.
 {
   "type": "exercise",
   "widget": "open-edu.multiple-choice-practice",
-  "assessments": [
-    { "skillId": "algebra.basics", "weight": 1.0 }
-  ],
+  "assessments": [{ "skillId": "algebra.basics", "weight": 1.0 }],
   "config": {
     "prompt": "What is 2 + 2?",
     "options": [
@@ -254,9 +252,7 @@ Reference skills in the manifest to enable skill tracking:
   "triggers": [
     {
       "onEvent": "node.complete",
-      "conditions": [
-        { "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }
-      ],
+      "conditions": [{ "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }],
       "rewards": [{ "action": "badge.award", "badge": "high-scorer" }]
     }
   ]
@@ -311,7 +307,65 @@ edu report ./telemetry.jsonl --json
 - **Skill dependency typos** — Skill IDs in `dependencies` and `assessments` must match defined skill IDs.
 - **Circular skill dependencies** — Skills must not depend on each other in a cycle.
 
-## Instructions for AI Agents
+## Agentic AI Workflow
+
+Open-Edu is designed for AI-native creation. The CLI exposes machine-readable output, deterministic patch contracts, and a generation prompt so agents can inspect, create, and modify packages without parsing human-targeted text.
+
+### Getting the Schema Prompt
+
+Before asking an AI to build a package, dump the full agent prompt with all schemas:
+
+```bash
+edu generate --prompt
+```
+
+This prints a complete template with package structure, all Zod schema fields, workflow patterns, common mistakes, and a fill-in-the-blanks template. Pipe it into your AI conversation:
+
+```bash
+edu generate --prompt | pbcopy   # macOS
+edu generate --prompt | xclip    # Linux
+```
+
+### Quick Scaffolding
+
+Describe your package in plain language:
+
+```bash
+edu generate --from-description "A JavaScript variables lesson with a quiz and remediation loop" ./my-lesson
+```
+
+The CLI extracts an ID/title, scaffolds the directory, and validates the result.
+
+### Iterative Workflow
+
+For complex packages, iterate through these steps:
+
+**1. Get the prompt** — `edu generate --prompt > prompt.txt` and feed it to your AI agent.
+
+**2. Generate** — Tell the AI what you want:
+
+```
+Create an Open-Edu package called "intro-to-variables" that teaches JavaScript variables.
+It should have:
+- A markdown lesson node (nodes/lesson.md) explaining let, const, var
+- A quiz node (nodes/quiz.json) with 3 questions about variable scoping
+- A reflection node (nodes/reflection.json) asking what they learned
+- Linear workflow: lesson → quiz → reflection → COMPLETED
+```
+
+**3. Validate** — `edu validate ./my-package` (add `--json` for machine-readable errors).
+
+**4. Patch surgically** — Make targeted edits without regenerating everything:
+
+```bash
+edu patch ./my-package --json - <<'EOF'
+[
+  { "op": "add", "path": "/options/-", "value": { "id": "d", "text": "block-scoped", "correct": true } }
+]
+EOF
+```
+
+Each patch is validated atomically — if the result doesn't pass `loadPackage()`, changes are rolled back. Use `--dry-run` to preview.
 
 ### Deterministic Generation Rules
 
@@ -325,7 +379,6 @@ edu report ./telemetry.jsonl --json
 8. The terminal route is always `COMPLETED`.
 9. Rewards should use `badge.award` action only unless webhooks or scripts are explicitly requested.
 10. Keep content short and deterministic.
-11. Use `edu generate --from-description` for AI-assisted package creation.
 
 ### Validation Checklist
 
