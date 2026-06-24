@@ -19,9 +19,21 @@ describe('TelemetryInspector', () => {
   it('should show summary metrics for emitted events', () => {
     const events = [
       { event: 'node_open', nodeId: 'nodes/lesson.md', timestamp: 1000, sessionId: 'sess-1' },
-      { event: 'node_complete', nodeId: 'nodes/lesson.md', score: 85, timestamp: 2000, sessionId: 'sess-1' },
+      {
+        event: 'node_complete',
+        nodeId: 'nodes/lesson.md',
+        score: 85,
+        timestamp: 2000,
+        sessionId: 'sess-1',
+      },
       { event: 'node_open', nodeId: 'nodes/quiz.md', timestamp: 3000, sessionId: 'sess-1' },
-      { event: 'node_complete', nodeId: 'nodes/quiz.md', score: 92, timestamp: 4000, sessionId: 'sess-1' },
+      {
+        event: 'node_complete',
+        nodeId: 'nodes/quiz.md',
+        score: 92,
+        timestamp: 4000,
+        sessionId: 'sess-1',
+      },
     ] as never[];
 
     render(<TelemetryInspector events={events} />);

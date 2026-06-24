@@ -85,17 +85,11 @@ export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Ele
         <div style={containerStyle.summaryRow}>Node completions: {summary.nodeCompletions}</div>
         <div style={containerStyle.summaryRow}>
           Avg quiz score:{' '}
-          {summary.averageQuizScore !== null
-            ? summary.averageQuizScore.toFixed(1)
-            : 'N/A'}
+          {summary.averageQuizScore !== null ? summary.averageQuizScore.toFixed(1) : 'N/A'}
         </div>
-        <div style={containerStyle.summaryRow}>
-          Session: {currentSessionId ?? 'N/A'}
-        </div>
+        <div style={containerStyle.summaryRow}>Session: {currentSessionId ?? 'N/A'}</div>
         {summary.sessionCount > 1 && (
-          <div style={containerStyle.summaryRow}>
-            Sessions: {summary.sessionCount}
-          </div>
+          <div style={containerStyle.summaryRow}>Sessions: {summary.sessionCount}</div>
         )}
       </div>
 
@@ -115,7 +109,10 @@ export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Ele
               <div>
                 <span style={containerStyle.type}>{eventType}</span>
                 {timestamp && (
-                  <span style={containerStyle.meta}> {new Date(timestamp).toLocaleTimeString()}</span>
+                  <span style={containerStyle.meta}>
+                    {' '}
+                    {new Date(timestamp).toLocaleTimeString()}
+                  </span>
                 )}
               </div>
               {nodeId && <div style={containerStyle.data}>node: {nodeId}</div>}

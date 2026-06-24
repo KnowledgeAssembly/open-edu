@@ -115,9 +115,7 @@ describe('reportTelemetry', () => {
     if (!result.success) {
       expect(result.code).toBe(1);
     }
-    expect(consoleError).toHaveBeenCalledWith(
-      expect.stringContaining('Line 2'),
-    );
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('Line 2'));
     consoleError.mockRestore();
   });
 });
