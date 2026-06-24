@@ -6,3 +6,4 @@ export { dragDrop } from './DragDrop/DragDrop';
 export { sequencing } from './Sequencing/Sequencing';
 export { fillBlank } from './FillBlank/FillBlank';
 export { storyQuestion } from './StoryQuestion/StoryQuestion';
+export { realWorld } from './RealWorld/RealWorld';
