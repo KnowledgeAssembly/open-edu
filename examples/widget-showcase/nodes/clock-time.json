@@ -1,0 +1,14 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.clock-time",
+  "config": {
+    "description": "Set the clock to show 7:30.",
+    "hour": 3,
+    "minute": 0,
+    "mode": "set",
+    "showDigital": true,
+    "targetTime": { "hour": 7, "minute": 30 },
+    "interactive": true,
+    "size": 250
+  }
+}

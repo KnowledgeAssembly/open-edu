@@ -1,0 +1,20 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.story-question",
+  "config": {
+    "scenario": "Maya planted a sunflower seed in a small pot. She placed it by the window and watered it every morning. After one week, a tiny green sprout appeared. Maya was excited! She continued watering it and gave it plant food. After two months, the sunflower grew taller than Maya. It had a big yellow flower on top that followed the sun across the sky.",
+    "questions": [
+      {
+        "question": "Where did Maya place the pot?",
+        "options": ["In the garden", "By the window", "On the roof", "In the closet"],
+        "correctIndex": 1
+      },
+      {
+        "question": "How often did Maya water the seed?",
+        "options": ["Every morning", "Once a week", "Every day after school", "Only on weekends"],
+        "correctIndex": 0
+      }
+    ],
+    "interactive": true
+  }
+}

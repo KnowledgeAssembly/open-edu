@@ -1,0 +1,11 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.visual-counting",
+  "config": {
+    "description": "Count the stars!",
+    "items": ["⭐"],
+    "count": 5,
+    "text": "stars",
+    "interactive": true
+  }
+}

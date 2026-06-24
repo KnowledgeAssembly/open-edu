@@ -1,0 +1,10 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.real-world",
+  "config": {
+    "description": "Apply measurement to the real world.",
+    "scenario": "You are helping to bake cookies for a school event. The recipe calls for 2 cups of flour, 1 cup of sugar, and 1 teaspoon of vanilla. You need to triple the recipe to make enough for everyone.",
+    "taskDescription": "How many cups of flour will you need in total? Write your answer and explain your thinking.",
+    "interactive": true
+  }
+}

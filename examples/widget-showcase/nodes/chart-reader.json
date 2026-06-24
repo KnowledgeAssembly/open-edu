@@ -1,0 +1,17 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.chart-reader",
+  "config": {
+    "description": "Which sport is the most popular based on the chart?",
+    "type": "bar",
+    "data": [
+      { "label": "Cricket", "value": 12 },
+      { "label": "Football", "value": 8 },
+      { "label": "Hockey", "value": 5 }
+    ],
+    "title": "Favorite Sports",
+    "showValues": true,
+    "correctLabel": "Cricket",
+    "interactive": true
+  }
+}

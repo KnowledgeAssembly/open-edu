@@ -1,0 +1,20 @@
+{
+  "name": "@open-edu/example-widget-showcase",
+  "id": "widget-showcase",
+  "title": "Widget Showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demonstrates all 14 built-in widgets in the Open-Edu runtime",
+  "author": "Open-Edu",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

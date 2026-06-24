@@ -1,0 +1,12 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.place-value-chart",
+  "config": {
+    "description": "Build the number 543 by placing digits in the correct columns.",
+    "maxPlaces": "lakh",
+    "targetNumber": 543,
+    "draggableDigits": [5, 4, 3],
+    "showLabels": true,
+    "interactive": true
+  }
+}

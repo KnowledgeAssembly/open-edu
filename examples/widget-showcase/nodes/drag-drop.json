@@ -1,0 +1,24 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.drag-drop",
+  "config": {
+    "description": "Sort each animal into the correct habitat.",
+    "items": [
+      { "id": "fish", "label": "🐟 Fish", "emoji": "🐟" },
+      { "id": "bird", "label": "🐦 Bird", "emoji": "🐦" },
+      { "id": "whale", "label": "🐋 Whale", "emoji": "🐋" },
+      { "id": "eagle", "label": "🦅 Eagle", "emoji": "🦅" }
+    ],
+    "targets": [
+      { "id": "sky", "label": "Sky" },
+      { "id": "ocean", "label": "Ocean" }
+    ],
+    "expectedPositions": {
+      "fish": "ocean",
+      "bird": "sky",
+      "whale": "ocean",
+      "eagle": "sky"
+    },
+    "interactive": true
+  }
+}
