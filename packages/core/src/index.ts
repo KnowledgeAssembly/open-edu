@@ -13,6 +13,9 @@ export {
   WorkflowRouteError,
   EntryNodeNotFoundError,
 } from './errors.js';
+export type { ErrorDiagnostics } from './errors.js';
+export { lintPackage } from './content-lint.js';
+export type { LintWarning, LintResult } from './content-lint.js';
 export { loadManifest } from './manifest.js';
 export { loadWorkflow } from './workflow.js';
 export { loadRewards } from './rewards.js';

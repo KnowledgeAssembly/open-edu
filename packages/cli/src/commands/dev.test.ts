@@ -42,16 +42,45 @@ describe('devPackage', () => {
 
   it('should load package and start dev server on success', async () => {
     mockLoadPackage.mockResolvedValue(validPkg);
-    const code = await devPackage('/tmp/pkg');
-    expect(code).toBe(0);
+    const result = await devPackage('/tmp/pkg');
+    expect(result.success).toBe(true);
     expect(mockLoadPackage).toHaveBeenCalledWith('/tmp/pkg');
     expect(mockStartDevServer).toHaveBeenCalledWith('/tmp/pkg');
   });
 
-  it('should return 1 on load error and not start dev server', async () => {
+  it('should return failure on load error and not start dev server', async () => {
     mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'fail'));
-    const code = await devPackage('/tmp/pkg');
-    expect(code).toBe(1);
+    const result = await devPackage('/tmp/pkg');
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.code).toBe(1);
+    }
     expect(mockStartDevServer).not.toHaveBeenCalled();
+  });
+
+  describe('--json output', () => {
+    it('should return structured data on success in json mode', async () => {
+      mockLoadPackage.mockResolvedValue(validPkg);
+      const result = await devPackage('/tmp/pkg', { json: true });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          title: 'Pkg',
+          version: '1.0.0',
+          serverUrl: 'http://localhost:4000',
+        });
+      }
+      expect(mockStartDevServer).toHaveBeenCalledWith('/tmp/pkg');
+    });
+
+    it('should return error info on failure in json mode', async () => {
+      mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'fail'));
+      const result = await devPackage('/tmp/pkg', { json: true });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('fail');
+        expect(result.code).toBe(1);
+      }
+    });
   });
 });

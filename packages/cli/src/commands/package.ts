@@ -1,19 +1,15 @@
-import { existsSync, mkdirSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { execSync } from 'node:child_process';
 import { loadPackage } from '@open-edu/core';
 import { formatValidationError, formatPackageSuccess, printMessages } from '../utils/format.js';
+import type { CliResult } from '../utils/json-output.js';
+import * as tar from 'tar';
 
-function isTarAvailable(): boolean {
-  try {
-    execSync('tar --version', { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function packagePackage(packageDir: string, outputDir?: string): Promise<number> {
+export async function packagePackage(
+  packageDir: string,
+  outputDir?: string,
+  options?: { json?: boolean },
+): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
     const outDir = outputDir ?? process.cwd();
@@ -24,26 +20,50 @@ export async function packagePackage(packageDir: string, outputDir?: string): Pr
     const archiveName = `${pkg.manifest.id}-${pkg.manifest.version}.tar.gz`;
     const archivePath = resolve(join(outDir, archiveName));
 
-    if (!isTarAvailable()) {
-      printMessages([
-        { type: 'error', text: 'tar command not found. Install tar or use edu build instead.' },
-      ]);
-      return 1;
+    await new Promise<void>((resolvePromise, reject) => {
+      tar
+        .c(
+          {
+            gzip: true,
+            cwd: packageDir,
+            filter: (path: string) => {
+              const topLevel = path.split('/')[0];
+              return topLevel !== 'dist' && topLevel !== 'node_modules' && topLevel !== '.git';
+            },
+          },
+          ['.'],
+        )
+        .pipe(createWriteStream(archivePath))
+        .on('finish', resolvePromise)
+        .on('error', reject);
+    });
+
+    if (options?.json) {
+      return {
+        success: true,
+        data: {
+          packageDir,
+          generatedFiles: [archivePath],
+        },
+      };
     }
-
-    const excludeOpts = ["--exclude='dist'", "--exclude='node_modules'", "--exclude='.git'"].join(
-      ' ',
-    );
-
-    const cmd = `tar -czf ${archivePath} ${excludeOpts} -C ${packageDir} .`;
-    execSync(cmd, { stdio: 'ignore', timeout: 30000 });
-
     const messages = formatPackageSuccess(archivePath);
     printMessages(messages);
-    return 0;
+    return { success: true, data: {} };
   } catch (error) {
+    if (options?.json) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        code: 1,
+      };
+    }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return 1;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      code: 1,
+    };
   }
 }

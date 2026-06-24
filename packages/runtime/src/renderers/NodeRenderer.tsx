@@ -1,8 +1,11 @@
+import { useEffect, useRef } from 'react';
 import type { LoadedNode } from '@open-edu/core';
 import { useRuntime } from '../context/RuntimeContext';
+import { FocusTrap, useLiveRegion } from '@open-edu/accessibility';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { QuizRenderer } from './QuizRenderer';
 import { ReflectionRenderer } from './ReflectionRenderer';
+import { WidgetRenderer } from './WidgetRenderer';
 import { PlaceholderRenderer } from './PlaceholderRenderer';
 
 export interface NodeRendererProps {
@@ -13,6 +16,16 @@ export interface NodeRendererProps {
 export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
   const { completeNode } = useRuntime();
   const handleComplete = onComplete ?? completeNode;
+  const { announce } = useLiveRegion();
+  const announcedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (node && !announcedRef.current.has(node.relativePath)) {
+      announcedRef.current.add(node.relativePath);
+      const title = (node.node as { title?: string }).title ?? node.relativePath;
+      announce(`Loaded ${node.node.type}: ${title}`);
+    }
+  }, [node, announce]);
 
   if (!node) {
     return (
@@ -34,18 +47,16 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
 
     case 'exercise':
       return (
-        <PlaceholderRenderer
-          nodeType="exercise"
-          reason="Exercise widget rendering will be provided by the widgets package."
-        />
+        <FocusTrap>
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+        </FocusTrap>
       );
 
     case 'custom':
       return (
-        <PlaceholderRenderer
-          nodeType="custom"
-          reason="Custom widget rendering will be provided by the widgets package."
-        />
+        <FocusTrap>
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+        </FocusTrap>
       );
 
     default:

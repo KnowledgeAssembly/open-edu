@@ -151,6 +151,51 @@ test.describe('fractions (conditional branching)', () => {
   });
 });
 
+test.describe('widget-practice (widget exercise)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/widget-practice'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('renders intro and navigates to widget', async ({ page }) => {
+    await page.goto(server.url);
+    await expect(page.getByRole('heading', { name: 'Widget Practice' }).first()).toBeVisible();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await expect(page.getByText('What is the capital of France?')).toBeVisible();
+  });
+
+  test('selects correct answer and completes', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await page.getByLabel('Paris').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(1000);
+    await expect(page.getByText('Paris is the capital')).toBeVisible();
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible({
+      timeout: 5000,
+    });
+  });
+
+  test('selects wrong answer and completes', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await page.getByLabel('London').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+    await expect(page.getByText('Incorrect')).toBeVisible();
+  });
+});
+
 test.describe('autism-reading (lesson → quiz → reflection)', () => {
   let server: TestServer;
 

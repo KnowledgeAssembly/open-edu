@@ -1,0 +1,14 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.multiple-choice-practice",
+  "config": {
+    "prompt": "What is the capital of France?",
+    "options": [
+      { "id": "a", "text": "London", "correct": false },
+      { "id": "b", "text": "Paris", "correct": true },
+      { "id": "c", "text": "Berlin", "correct": false },
+      { "id": "d", "text": "Madrid", "correct": false }
+    ],
+    "explanation": "Paris is the capital and largest city of France."
+  }
+}

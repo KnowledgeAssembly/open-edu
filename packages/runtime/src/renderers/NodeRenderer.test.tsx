@@ -120,7 +120,7 @@ describe('NodeRenderer', () => {
     expect(getByTestId('reflection-renderer')).toBeInTheDocument();
   });
 
-  it('renders PlaceholderRenderer for exercise nodes', () => {
+  it('renders WidgetRenderer for exercise nodes', () => {
     const exerciseNode = { type: 'exercise' as const, skills: undefined };
     const pkg = makePackage([{ relativePath: 'nodes/ex-01.md', node: exerciseNode }]);
     const { getByTestId } = renderWithProvider(
@@ -128,11 +128,10 @@ describe('NodeRenderer', () => {
       'nodes/ex-01.md',
       makeLoadedNode('nodes/ex-01.md', exerciseNode),
     );
-    expect(getByTestId('placeholder-renderer')).toBeInTheDocument();
-    expect(getByTestId('placeholder-renderer').textContent).toContain('exercise');
+    expect(getByTestId('widget-renderer-placeholder')).toBeInTheDocument();
   });
 
-  it('renders PlaceholderRenderer for custom (widget) nodes', () => {
+  it('renders WidgetRenderer for custom (widget) nodes', () => {
     const customNode = {
       type: 'custom' as const,
       widget: 'code-editor',
@@ -145,7 +144,7 @@ describe('NodeRenderer', () => {
       'nodes/widget-01.md',
       makeLoadedNode('nodes/widget-01.md', customNode),
     );
-    expect(getByTestId('placeholder-renderer').textContent).toContain('custom');
+    expect(getByTestId('widget-renderer-placeholder')).toBeInTheDocument();
   });
 
   it('renders an empty loading state for null nodes', () => {

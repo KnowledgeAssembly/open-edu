@@ -111,3 +111,52 @@ describe('hierarchy', () => {
     }
   });
 });
+
+describe('diagnostics fields', () => {
+  it('PackageLoadError stores file, path, and suggestion', () => {
+    const err = new PackageLoadError('TEST', 'msg', {
+      file: 'package.json',
+      path: 'title',
+      suggestion: 'Add a title field',
+    });
+    expect(err.file).toBe('package.json');
+    expect(err.path).toBe('title');
+    expect(err.suggestion).toBe('Add a title field');
+  });
+
+  it('ManifestValidationError accepts diagnostics', () => {
+    const err = new ManifestValidationError('Invalid', undefined, {
+      file: 'package.json',
+      path: 'version',
+      suggestion: 'Use semver like "0.1.0"',
+    });
+    expect(err.file).toBe('package.json');
+    expect(err.path).toBe('version');
+    expect(err.suggestion).toBe('Use semver like "0.1.0"');
+  });
+
+  it('WorkflowRouteError accepts diagnostics', () => {
+    const err = new WorkflowRouteError('bad route', {
+      path: 'nodes/missing.md',
+      suggestion: 'Add the missing node file',
+    });
+    expect(err.path).toBe('nodes/missing.md');
+    expect(err.suggestion).toBe('Add the missing node file');
+  });
+
+  it('EntryNodeNotFoundError accepts diagnostics', () => {
+    const err = new EntryNodeNotFoundError('entry missing', {
+      path: 'nodes/start.md',
+      suggestion: 'Create the entry node file',
+    });
+    expect(err.path).toBe('nodes/start.md');
+    expect(err.suggestion).toBe('Create the entry node file');
+  });
+
+  it('fields are undefined when not provided', () => {
+    const err = new ManifestValidationError('simple');
+    expect(err.file).toBeUndefined();
+    expect(err.path).toBeUndefined();
+    expect(err.suggestion).toBeUndefined();
+  });
+});

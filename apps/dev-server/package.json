@@ -28,6 +28,7 @@
     "@open-edu/core": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/telemetry": "workspace:*",
+    "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "axe-core": "^4.7.0",

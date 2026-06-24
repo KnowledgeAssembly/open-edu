@@ -20,6 +20,10 @@ function red(text: string): string {
   return color(text, '\x1b[31m');
 }
 
+function yellow(text: string): string {
+  return color(text, '\x1b[33m');
+}
+
 function bold(text: string): string {
   return color(text, '\x1b[1m');
 }
@@ -32,8 +36,15 @@ const CHECK = '\u2713';
 const CROSS = '\u2717';
 
 export interface ValidationMessage {
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
   text: string;
+}
+
+export interface DiagnosticBlock {
+  file: string;
+  path?: string;
+  problem: string;
+  suggestion?: string;
 }
 
 export function formatValidationSuccess(pkg: LoadedPackage): ValidationMessage[] {
@@ -61,6 +72,53 @@ export function formatValidationSuccess(pkg: LoadedPackage): ValidationMessage[]
   return messages;
 }
 
+function formatDiagnosticBlock(diag: DiagnosticBlock): string[] {
+  const lines: string[] = [];
+  lines.push(`  ${bold('File:')} ${diag.file}`);
+  if (diag.path) {
+    lines.push(`  ${bold('Path:')} ${diag.path}`);
+  }
+  lines.push(`  ${bold('Problem:')} ${diag.problem}`);
+  if (diag.suggestion) {
+    lines.push(`  ${bold('Suggested fix:')} ${diag.suggestion}`);
+  }
+  return lines;
+}
+
+function getZodDiagnostics(
+  error: ManifestValidationError | WorkflowValidationError | RewardsValidationError,
+): DiagnosticBlock[] {
+  const blocks: DiagnosticBlock[] = [];
+  if (error.zodError?.issues) {
+    const file = error.file ?? 'unknown';
+    for (const issue of error.zodError.issues) {
+      blocks.push({
+        file,
+        path: issue.path.length > 0 ? issue.path.join('.') : undefined,
+        problem: issue.message,
+        suggestion: error.suggestion,
+      });
+    }
+  }
+  return blocks;
+}
+
+function getLoadErrorDiagnostics(error: PackageLoadError): DiagnosticBlock[] {
+  if ('zodError' in error && error.zodError) {
+    return getZodDiagnostics(
+      error as ManifestValidationError | WorkflowValidationError | RewardsValidationError,
+    );
+  }
+  return [
+    {
+      file: error.file ?? 'package file',
+      path: error.path,
+      problem: error.message,
+      suggestion: error.suggestion,
+    },
+  ];
+}
+
 export function formatValidationError(error: unknown): ValidationMessage[] {
   const messages: ValidationMessage[] = [
     { type: 'error', text: `${red(CROSS)} Package validation failed` },
@@ -71,7 +129,15 @@ export function formatValidationError(error: unknown): ValidationMessage[] {
       WorkflowValidationError &
       RewardsValidationError;
     messages.push({ type: 'error', text: `  ${bold(error.code)}: ${error.message}` });
-    if (zodErr.zodError?.issues) {
+
+    const diagnostics = getLoadErrorDiagnostics(error);
+    for (const diag of diagnostics) {
+      for (const line of formatDiagnosticBlock(diag)) {
+        messages.push({ type: 'error', text: line });
+      }
+    }
+
+    if (zodErr.zodError?.issues && !error.file) {
       for (const issue of zodErr.zodError.issues) {
         const path = issue.path.length > 0 ? issue.path.join('.') + ': ' : '';
         messages.push({ type: 'error', text: `    - ${path}${issue.message}` });
@@ -117,10 +183,30 @@ export function formatPackageSuccess(archivePath: string): ValidationMessage[] {
   ];
 }
 
+export function formatLintResults(warnings: number, errors: number): ValidationMessage[] {
+  const messages: ValidationMessage[] = [];
+  if (warnings === 0 && errors === 0) {
+    messages.push({ type: 'success', text: `${green(CHECK)} No content issues found` });
+  }
+  if (warnings > 0) {
+    messages.push({
+      type: 'warning',
+      text: `${yellow('!')} ${warnings} warning${warnings === 1 ? '' : 's'} found`,
+    });
+  }
+  if (errors > 0) {
+    messages.push({
+      type: 'error',
+      text: `${red(CROSS)} ${errors} error${errors === 1 ? '' : 's'} found`,
+    });
+  }
+  return messages;
+}
+
 export function printMessages(messages: ValidationMessage[]): void {
   for (const m of messages) {
-    if (m.type === 'success') console.log(m.text);
-    else if (m.type === 'error') console.error(m.text);
-    else console.log(m.text);
+    if (m.type === 'success' || m.type === 'info') console.log(m.text);
+    else if (m.type === 'warning') console.warn(m.text);
+    else console.error(m.text);
   }
 }

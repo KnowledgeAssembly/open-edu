@@ -4,11 +4,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
+import type { WidgetRegistry } from '@open-edu/widgets';
+import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
+import type { ProgressSnapshot } from '@open-edu/schemas';
+import { buildProgressSnapshot } from './progress';
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
@@ -20,12 +25,17 @@ export interface RuntimeContextValue {
   visitedNodes: string[];
   completeNode: (score?: number) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
+  widgetRegistry: WidgetRegistry | undefined;
+  progressSnapshot: ProgressSnapshot | null;
 }
 
 export interface RuntimeProviderProps {
   loadedPackage: LoadedPackage;
   engine: WorkflowEngine;
   children: ReactNode;
+  widgetRegistry?: WidgetRegistry;
+  initialProgress?: ProgressSnapshot;
+  onProgressChange?: (snapshot: ProgressSnapshot) => void;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -34,13 +44,10 @@ export function RuntimeProvider({
   loadedPackage,
   engine,
   children,
+  widgetRegistry,
+  initialProgress,
+  onProgressChange,
 }: RuntimeProviderProps): JSX.Element {
-  const [currentNodeId, setCurrentNodeId] = useState<string>('');
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  const [scores, setScores] = useState<Record<string, number>>({});
-  const [lastScore, setLastScore] = useState<number | null>(null);
-  const [visitedNodes, setVisitedNodes] = useState<string[]>([]);
-
   const nodeMap = useMemo(() => {
     const map: Record<string, LoadedNode> = {};
     for (const node of loadedPackage.nodes) {
@@ -48,6 +55,36 @@ export function RuntimeProvider({
     }
     return map;
   }, [loadedPackage.nodes]);
+
+  const initialSnapshotValid = useMemo(() => {
+    if (!initialProgress) return false;
+    if (initialProgress.isCompleted) return true;
+    return nodeMap[initialProgress.currentNodeId] !== undefined;
+  }, [initialProgress, nodeMap]);
+
+  const hasInitialProgress = initialProgress !== undefined;
+
+  useEffect(() => {
+    if (hasInitialProgress && !initialSnapshotValid) {
+      console.warn(
+        `Invalid progress snapshot for "${loadedPackage.manifest.id}" — currentNodeId "${initialProgress!.currentNodeId}" not found in package nodes. Starting from entry.`,
+      );
+    }
+  }, [hasInitialProgress, initialSnapshotValid]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [currentNodeId, setCurrentNodeId] = useState<string>(
+    initialSnapshotValid ? initialProgress!.currentNodeId : '',
+  );
+  const [isCompleted, setIsCompleted] = useState<boolean>(
+    initialSnapshotValid ? initialProgress!.isCompleted : false,
+  );
+  const [scores, setScores] = useState<Record<string, number>>(
+    initialSnapshotValid ? initialProgress!.scores : {},
+  );
+  const [lastScore, setLastScore] = useState<number | null>(null);
+  const [visitedNodes, setVisitedNodes] = useState<string[]>(
+    initialSnapshotValid ? initialProgress!.visitedNodes : [],
+  );
 
   const getNode = useCallback(
     (nodeId: string): LoadedNode | undefined => nodeMap[nodeId],
@@ -86,6 +123,30 @@ export function RuntimeProvider({
     };
   }, [engine]);
 
+  const prevSnapshotRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!onProgressChange) return;
+    const snapshot = buildProgressSnapshot(
+      loadedPackage.manifest.id,
+      loadedPackage.manifest.version,
+      { currentNodeId, visitedNodes, scores, isCompleted },
+    );
+    const json = JSON.stringify(snapshot);
+    if (json !== prevSnapshotRef.current) {
+      prevSnapshotRef.current = json;
+      onProgressChange(snapshot);
+    }
+  }, [
+    currentNodeId,
+    visitedNodes,
+    scores,
+    isCompleted,
+    onProgressChange,
+    loadedPackage.manifest.id,
+    loadedPackage.manifest.version,
+  ]);
+
   const value = useMemo<RuntimeContextValue>(
     () => ({
       loadedPackage,
@@ -97,6 +158,12 @@ export function RuntimeProvider({
       visitedNodes,
       completeNode,
       getNode,
+      widgetRegistry,
+      progressSnapshot: buildProgressSnapshot(
+        loadedPackage.manifest.id,
+        loadedPackage.manifest.version,
+        { currentNodeId, visitedNodes, scores, isCompleted },
+      ),
     }),
     [
       loadedPackage,
@@ -108,10 +175,40 @@ export function RuntimeProvider({
       visitedNodes,
       completeNode,
       getNode,
+      widgetRegistry,
     ],
   );
 
-  return <RuntimeContext.Provider value={value}>{children}</RuntimeContext.Provider>;
+  return (
+    <RuntimeContext.Provider value={value}>
+      <LiveRegionProvider>
+        <WorkflowAnnouncer />
+        {children}
+      </LiveRegionProvider>
+    </RuntimeContext.Provider>
+  );
+}
+
+function WorkflowAnnouncer(): null {
+  const { announce } = useLiveRegion();
+  const { currentNodeId, currentNode, isCompleted } = useRuntime();
+  const announcedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (currentNode && currentNodeId && !announcedRef.current.has(currentNodeId)) {
+      announcedRef.current.add(currentNodeId);
+      const title = (currentNode.node as { title?: string }).title ?? currentNode.relativePath;
+      announce(`Now viewing: ${title}`);
+    }
+  }, [currentNodeId, currentNode, announce]);
+
+  useEffect(() => {
+    if (isCompleted) {
+      announce('Lesson completed', 'assertive');
+    }
+  }, [isCompleted, announce]);
+
+  return null;
 }
 
 export function useRuntime(): RuntimeContextValue {

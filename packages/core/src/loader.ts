@@ -51,6 +51,10 @@ export async function loadPackage(
   if (!nodeMap.has(manifestNodePath)) {
     throw new EntryNodeNotFoundError(
       `Entry node "${manifestNodePath}" not found in package. ${list()}`,
+      {
+        path: manifestNodePath,
+        suggestion: `Create a file at "nodes/${manifestNodePath.replace('nodes/', '')}" or change the "entry" field in package.json to one of: ${available.join(', ')}`,
+      },
     );
   }
 
@@ -58,7 +62,10 @@ export async function loadPackage(
     const routingKeys: string[] = [];
     for (const routePath of Object.keys(workflow.routing)) {
       if (!nodeMap.has(routePath)) {
-        throw new WorkflowRouteError(`Workflow references unknown node "${routePath}". ${list()}`);
+        throw new WorkflowRouteError(`Workflow references unknown node "${routePath}". ${list()}`, {
+          path: routePath,
+          suggestion: `Add a node at "nodes/${routePath.replace('nodes/', '')}" or remove the "${routePath}" key from workflow.json routing`,
+        });
       }
       routingKeys.push(routePath);
     }
@@ -67,7 +74,10 @@ export async function loadPackage(
     for (const target of targets) {
       if (target === COMPLETED_SENTINEL) continue;
       if (!nodeMap.has(target)) {
-        throw new WorkflowRouteError(`Workflow route targets unknown node "${target}". ${list()}`);
+        throw new WorkflowRouteError(`Workflow route targets unknown node "${target}". ${list()}`, {
+          path: target,
+          suggestion: `Add a node at "nodes/${target.replace('nodes/', '')}" or change the route target in workflow.json to one of: ${available.join(', ')}`,
+        });
       }
     }
 

@@ -62,9 +62,9 @@ describe('buildPackage', () => {
     mockLoadPackage.mockResolvedValue({ ...validPkg, rootDir: tmpDir });
 
     const outDir = join(tmpDir, 'output');
-    const code = await buildPackage(tmpDir, outDir);
+    const result = await buildPackage(tmpDir, outDir);
 
-    expect(code).toBe(0);
+    expect(result.success).toBe(true);
     expect(existsSync(join(outDir, 'nodes', 'lesson.md'))).toBe(true);
     expect(readFileSync(join(outDir, 'nodes', 'lesson.md'), 'utf-8')).toBe('# Lesson');
   });
@@ -80,9 +80,9 @@ describe('buildPackage', () => {
     mockLoadPackage.mockResolvedValue({ ...validPkg, rootDir: tmpDir });
 
     const outDir = join(tmpDir, 'output');
-    const code = await buildPackage(tmpDir, outDir);
+    const result = await buildPackage(tmpDir, outDir);
 
-    expect(code).toBe(0);
+    expect(result.success).toBe(true);
     expect(existsSync(join(outDir, 'nodes', 'lesson.md'))).toBe(true);
     expect(existsSync(join(outDir, 'dist'))).toBe(false);
     expect(existsSync(join(outDir, 'node_modules'))).toBe(false);
@@ -94,15 +94,48 @@ describe('buildPackage', () => {
 
     mockLoadPackage.mockResolvedValue({ ...validPkg, rootDir: tmpDir });
 
-    const code = await buildPackage(tmpDir);
+    const result = await buildPackage(tmpDir);
 
-    expect(code).toBe(0);
+    expect(result.success).toBe(true);
     expect(existsSync(join(tmpDir, 'dist', 'nodes', 'lesson.md'))).toBe(true);
   });
 
-  it('should return 1 on load error', async () => {
+  it('should return failure on load error', async () => {
     mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'load failed'));
-    const code = await buildPackage(tmpDir);
-    expect(code).toBe(1);
+    const result = await buildPackage(tmpDir);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.code).toBe(1);
+    }
+  });
+
+  describe('--json output', () => {
+    it('should return structured data on success in json mode', async () => {
+      mkdirSync(join(tmpDir, 'nodes'), { recursive: true });
+      writeFileSync(join(tmpDir, 'nodes', 'lesson.md'), '# Lesson');
+
+      mockLoadPackage.mockResolvedValue({ ...validPkg, rootDir: tmpDir });
+
+      const outDir = join(tmpDir, 'output');
+      const result = await buildPackage(tmpDir, outDir, { json: true });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          outputPath: outDir,
+          manifest: { id: 'pkg', title: 'Pkg', version: '1.0.0' },
+        });
+      }
+    });
+
+    it('should return error info on failure in json mode', async () => {
+      mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'load failed'));
+      const result = await buildPackage(tmpDir, undefined, { json: true });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('load failed');
+        expect(result.code).toBe(1);
+      }
+    });
   });
 });

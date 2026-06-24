@@ -60,4 +60,9 @@ describe('DevApp', () => {
     render(<DevApp />);
     expect(screen.getByText('A11y')).toBeInTheDocument();
   });
+
+  it('should render the reset progress button', async () => {
+    render(<DevApp />);
+    expect(screen.getByText('Reset Progress')).toBeInTheDocument();
+  });
 });

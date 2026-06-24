@@ -1,0 +1,20 @@
+{
+  "name": "@open-edu/example-widget-practice",
+  "id": "widget-practice",
+  "title": "Widget Practice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demonstrates widget-based exercise rendering",
+  "author": "Open-Edu",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

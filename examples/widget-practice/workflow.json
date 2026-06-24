@@ -1,0 +1,6 @@
+{
+  "routing": {
+    "nodes/intro.md": { "onComplete": "nodes/practice.json" },
+    "nodes/practice.json": { "onComplete": "COMPLETED" }
+  }
+}

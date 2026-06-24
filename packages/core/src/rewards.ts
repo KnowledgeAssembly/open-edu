@@ -19,7 +19,14 @@ export async function loadRewards(packageDir: string): Promise<Rewards | null> {
     raw = JSON.parse(content);
   } catch (err) {
     if (err instanceof SyntaxError) {
-      throw new RewardsValidationError(`rewards.json is not valid JSON: ${(err as Error).message}`);
+      throw new RewardsValidationError(
+        `rewards.json is not valid JSON: ${(err as Error).message}`,
+        undefined,
+        {
+          file: 'rewards.json',
+          suggestion: 'Fix the JSON syntax error in rewards.json',
+        },
+      );
     }
     throw new RewardsValidationError(`Failed to read rewards.json: ${(err as Error).message}`);
   }
@@ -32,7 +39,15 @@ export async function loadRewards(packageDir: string): Promise<Rewards | null> {
         (i: { path: (string | number)[]; message: string }) => `${i.path.join('.')}: ${i.message}`,
       )
       .join('; ');
-    throw new RewardsValidationError(`Invalid rewards.json: ${issues}`, result.error);
+    const firstIssue = result.error.issues[0];
+    const rPath = firstIssue ? firstIssue.path.join('.') : undefined;
+    throw new RewardsValidationError(`Invalid rewards.json: ${issues}`, result.error, {
+      file: 'rewards.json',
+      path: rPath,
+      suggestion: firstIssue
+        ? `Fix the "${rPath}" field in rewards.json`
+        : 'Check the rewards.json structure matches the schema',
+    });
   }
 
   return result.data;

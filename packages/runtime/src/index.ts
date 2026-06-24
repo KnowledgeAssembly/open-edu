@@ -1,6 +1,8 @@
 export { RUNTIME_VERSION } from './version.js';
 export { RuntimeProvider, useRuntime } from './context/RuntimeContext.js';
 export type { RuntimeContextValue, RuntimeProviderProps } from './context/RuntimeContext.js';
+export { buildProgressSnapshot, isValidSnapshot } from './context/progress.js';
+export type { ProgressSnapshot } from '@open-edu/schemas';
 export { MarkdownRenderer } from './renderers/MarkdownRenderer.js';
 export type { MarkdownRendererProps } from './renderers/MarkdownRenderer.js';
 export { QuizRenderer } from './renderers/QuizRenderer.js';
@@ -9,6 +11,8 @@ export { ReflectionRenderer } from './renderers/ReflectionRenderer.js';
 export type { ReflectionRendererProps } from './renderers/ReflectionRenderer.js';
 export { NodeRenderer } from './renderers/NodeRenderer.js';
 export type { NodeRendererProps } from './renderers/NodeRenderer.js';
+export { WidgetRenderer } from './renderers/WidgetRenderer.js';
+export type { WidgetRendererProps } from './renderers/WidgetRenderer.js';
 export { PlaceholderRenderer } from './renderers/PlaceholderRenderer.js';
 export type { PlaceholderRendererProps } from './renderers/PlaceholderRenderer.js';
 export { LayoutShell } from './layout/LayoutShell.js';
