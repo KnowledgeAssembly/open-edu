@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "question": "Which statements about advanced algebra are correct?",
+  "options": [
+    { "id": "a", "text": "A quadratic equation has the form ax² + bx + c = 0", "correct": true },
+    { "id": "b", "text": "The quadratic formula solves for x in a quadratic equation", "correct": true },
+    { "id": "c", "text": "All quadratic equations have exactly one solution", "correct": false },
+    { "id": "d", "text": "Factoring is a method for solving quadratic equations", "correct": true }
+  ],
+  "skills": ["algebra.advanced"]
+}

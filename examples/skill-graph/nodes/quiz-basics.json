@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "question": "Which statements about basic algebra are correct?",
+  "options": [
+    { "id": "a", "text": "An equation is a statement that two expressions are equal", "correct": true },
+    { "id": "b", "text": "The variable x always equals 5", "correct": false },
+    { "id": "c", "text": "To solve x + 3 = 7, subtract 3 from both sides", "correct": true },
+    { "id": "d", "text": "Multiplication and division are inverse operations", "correct": true }
+  ],
+  "skills": ["algebra.basics"]
+}

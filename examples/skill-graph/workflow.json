@@ -1,0 +1,25 @@
+{
+  "routing": {
+    "nodes/intro.md": {
+      "onComplete": "nodes/quiz-basics.json"
+    },
+    "nodes/quiz-basics.json": {
+      "conditions": [
+        { "if": "score >= 80", "then": "nodes/quiz-advanced.json" },
+        { "if": "score < 80", "then": "nodes/remediation.md" }
+      ]
+    },
+    "nodes/remediation.md": {
+      "onComplete": "nodes/quiz-basics.json"
+    },
+    "nodes/quiz-advanced.json": {
+      "conditions": [
+        { "if": "score >= 80", "then": "nodes/mastery-complete.md" },
+        { "if": "score < 80", "then": "nodes/remediation.md" }
+      ]
+    },
+    "nodes/mastery-complete.md": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}
