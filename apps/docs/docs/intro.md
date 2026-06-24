@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Open-Edu Framework
 
-**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, and rewards.
+**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skill tracking, and rewards.
 
 ## Core Idea
 
@@ -41,7 +41,7 @@ An extensible widget architecture allows specialized learning experiences withou
 ## Quick Start
 
 ```bash
-git clone https://github.com/anomalyco/open-edu
+git clone https://github.com/spatnaik1982/open-edu
 cd open-edu
 pnpm install
 pnpm build
@@ -49,8 +49,17 @@ pnpm --filter @open-edu/cli build
 node packages/cli/dist/index.js dev ./examples/hello-world
 ```
 
+Or install the CLI globally:
+
+```bash
+pnpm --filter @open-edu/cli build
+node packages/cli/dist/index.js --help
+```
+
 ## What's Next?
 
-- [Architecture](/docs/architecture) — How the framework is built
-- [Package Format](/docs/package-format) — Structure of educational packages
-- [Package Authoring Guide](/docs/package-authoring) — How to create packages
+- [Architecture](./architecture) — How the framework is built
+- [Package Format](./package-format) — Structure of educational packages
+- [Package Authoring Guide](./package-authoring) — How to create packages
+- [CLI Reference](./cli/overview) — All CLI commands
+- [Widget SDK](./widgets/overview) — Building custom interactive widgets
