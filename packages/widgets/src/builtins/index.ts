@@ -1,1 +1,15 @@
 export { multipleChoicePractice } from './multipleChoicePractice';
+export { multipleChoice } from './MultipleChoice/MultipleChoice';
+export { visualCounting } from './VisualCounting/VisualCounting';
+export { matching } from './Matching/Matching';
+export { dragDrop } from './DragDrop/DragDrop';
+export { sequencing } from './Sequencing/Sequencing';
+export { fillBlank } from './FillBlank/FillBlank';
+export { storyQuestion } from './StoryQuestion/StoryQuestion';
+export { realWorld } from './RealWorld/RealWorld';
+export { fractionVisual } from './FractionVisual/FractionVisual';
+export { chartReader } from './ChartReader/ChartReader';
+export { gridArea } from './GridArea/GridArea';
+export { placeValueChart } from './PlaceValueChart/PlaceValueChart';
+export { measurementScale } from './MeasurementScale/MeasurementScale';
+export { clockTime } from './ClockTime/ClockTime';

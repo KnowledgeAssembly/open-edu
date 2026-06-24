@@ -73,6 +73,7 @@ const state = await loader.load(
 ```
 
 The loader supports:
+
 - **Integrity verification** — SHA-256 hash check before execution
 - **Fallback widgets** — use a local widget if remote loading fails
 - **Per-session caching** — avoids re-fetching the same `id@version`

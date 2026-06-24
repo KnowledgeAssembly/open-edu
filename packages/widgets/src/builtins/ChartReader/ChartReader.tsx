@@ -1,0 +1,336 @@
+import { useState, useEffect, useCallback } from 'react';
+import { z } from 'zod';
+import type { WidgetDefinition } from '../../types';
+
+const dataItemSchema = z.object({
+  label: z.string().min(1),
+  value: z.number().int().nonnegative(),
+  emoji: z.string().optional(),
+});
+
+const configSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('bar'),
+    data: z.array(dataItemSchema).min(1),
+    title: z.string().optional(),
+    showValues: z.boolean().optional().default(true),
+    interactive: z.boolean().optional().default(false),
+    correctLabel: z.string().optional(),
+    description: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('pictograph'),
+    data: z.array(dataItemSchema).min(1),
+    title: z.string().optional(),
+    showValues: z.boolean().optional().default(true),
+    interactive: z.boolean().optional().default(false),
+    correctLabel: z.string().optional(),
+    description: z.string().optional(),
+  }),
+]).refine(
+  (val) => {
+    if (val.interactive && !val.correctLabel) return false;
+    return true;
+  },
+  { message: 'correctLabel is required when interactive is true' },
+);
+
+function ChartReaderComponent(props: {
+  nodeId: string;
+  config: Record<string, unknown>;
+  emitInteraction: (data: Record<string, unknown>) => void;
+  complete: (score?: number) => void;
+}) {
+  const { config: rawConfig, emitInteraction, complete } = props;
+  const parsed = configSchema.safeParse(rawConfig);
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const isObserve = parsed.success && !parsed.data.interactive && !parsed.data.correctLabel;
+  const isInteractive = parsed.success && parsed.data.interactive && !!parsed.data.correctLabel;
+
+  useEffect(() => {
+    if (!isObserve || submitted) return;
+    const timer = setTimeout(() => {
+      emitInteraction({
+        type: 'widget.interaction',
+        widgetId: 'open-edu.chart-reader',
+        action: 'observe',
+        observed: true,
+        correct: true,
+      });
+      complete(100);
+      setSubmitted(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isObserve, submitted, emitInteraction, complete]);
+
+  const handleSelect = useCallback(
+    (label: string) => {
+      if (submitted || !parsed.success || !parsed.data.correctLabel) return;
+      const isCorrect = label === parsed.data.correctLabel;
+      const score = isCorrect ? 100 : 0;
+      emitInteraction({
+        type: 'widget.interaction',
+        widgetId: 'open-edu.chart-reader',
+        action: 'select',
+        selectedLabel: label,
+        correct: isCorrect,
+      });
+      complete(score);
+      setSubmitted(true);
+    },
+    [submitted, parsed, emitInteraction, complete],
+  );
+
+  if (!parsed.success) {
+    return (
+      <div role="alert" data-testid="widget-config-error">
+        <p>Invalid widget configuration.</p>
+      </div>
+    );
+  }
+
+  const config = parsed.data;
+
+  return (
+    <div
+      role="group"
+      aria-label={config.title ?? 'Chart'}
+      data-testid="chart-reader"
+    >
+      {config.title && <h3>{config.title}</h3>}
+      {config.description && <p>{config.description}</p>}
+
+      {config.type === 'bar' ? (
+        <BarChart
+          data={config.data}
+          showValues={config.showValues}
+          interactive={isInteractive}
+          submitted={submitted}
+          onSelect={handleSelect}
+        />
+      ) : (
+        <PictographChart
+          data={config.data}
+          showValues={config.showValues}
+          interactive={isInteractive}
+          submitted={submitted}
+          onSelect={handleSelect}
+        />
+      )}
+
+      {submitted && (
+        <div role="status" aria-live="assertive" data-testid="chart-submitted">
+          <p>Completed.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BarChart({
+  data,
+  showValues,
+  interactive,
+  submitted,
+  onSelect,
+}: {
+  data: z.infer<typeof dataItemSchema>[];
+  showValues: boolean;
+  interactive: boolean;
+  submitted: boolean;
+  onSelect: (label: string) => void;
+}) {
+  const maxValue = Math.max(...data.map((d) => d.value));
+  const barWidth = 60;
+  const gap = 40;
+  const chartHeight = 200;
+  const labelHeight = 30;
+  const padding = { top: 20, right: 20, bottom: labelHeight + 20, left: 40 };
+  const svgWidth = data.length * (barWidth + gap) + padding.left + padding.right;
+  const svgHeight = chartHeight + padding.top + padding.bottom;
+  const chartBottom = chartHeight + padding.top;
+
+  return (
+    <svg
+      role="img"
+      aria-label="Bar chart"
+      width={svgWidth}
+      height={svgHeight}
+      data-testid="bar-chart"
+      style={{ maxWidth: '100%', height: 'auto' }}
+    >
+      {maxValue > 0 && (
+        <g>
+          {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
+            const y = chartBottom - frac * chartHeight;
+            return (
+              <g key={frac}>
+                <line
+                  x1={padding.left}
+                  y1={y}
+                  x2={svgWidth - padding.right}
+                  y2={y}
+                  stroke="#e5e7eb"
+                  strokeWidth={1}
+                />
+                <text
+                  x={padding.left - 6}
+                  y={y + 4}
+                  textAnchor="end"
+                  fontSize={12}
+                  fill="#6b7280"
+                >
+                  {Math.round(maxValue * frac)}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      )}
+
+      {data.map((item, idx) => {
+        const barHeight = maxValue > 0 ? (item.value / maxValue) * chartHeight : 0;
+        const x = padding.left + idx * (barWidth + gap);
+        const y = chartBottom - barHeight;
+
+        const barContent = (
+          <g>
+            <rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={barHeight}
+              fill="#3b82f6"
+              rx={4}
+              aria-label={`${item.label}: ${item.value}`}
+              role={interactive && !submitted ? 'button' : 'graphics-symbol'}
+              tabIndex={interactive && !submitted ? 0 : undefined}
+              style={{ cursor: interactive && !submitted ? 'pointer' : undefined }}
+              onKeyDown={
+                interactive && !submitted
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelect(item.label);
+                      }
+                    }
+                  : undefined
+              }
+            />
+            {barHeight > 20 && showValues && (
+              <text
+                x={x + barWidth / 2}
+                y={y - 6}
+                textAnchor="middle"
+                fontSize={12}
+                fill="#374151"
+                data-testid={`bar-value-${item.label}`}
+              >
+                {item.value}
+              </text>
+            )}
+            <text
+              x={x + barWidth / 2}
+              y={chartBottom + 16}
+              textAnchor="middle"
+              fontSize={12}
+              fill="#374151"
+            >
+              {item.label}
+            </text>
+          </g>
+        );
+
+        return (
+          <g
+            key={item.label}
+            {...(interactive && !submitted
+              ? { onClick: () => onSelect(item.label) }
+              : {})}
+          >
+            {barContent}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function PictographChart({
+  data,
+  showValues,
+  interactive,
+  submitted,
+  onSelect,
+}: {
+  data: z.infer<typeof dataItemSchema>[];
+  showValues: boolean;
+  interactive: boolean;
+  submitted: boolean;
+  onSelect: (label: string) => void;
+}) {
+  return (
+    <div role="img" aria-label="Pictograph chart" data-testid="pictograph-chart">
+      {data.map((item) => {
+        const emoji = item.emoji ?? '★';
+        const RowTag = interactive && !submitted ? 'button' : 'div';
+
+        return (
+          <RowTag
+            key={item.label}
+            data-testid={`pictograph-row-${item.label}`}
+            role={interactive && !submitted ? 'button' : undefined}
+            aria-label={`${item.label}: ${item.value}`}
+            onClick={interactive && !submitted ? () => onSelect(item.label) : undefined}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              margin: '0.5rem 0',
+              cursor: interactive && !submitted ? 'pointer' : undefined,
+              border: interactive && !submitted ? '1px solid transparent' : undefined,
+              borderRadius: '0.5rem',
+              padding: '0.25rem 0.5rem',
+              background: 'none',
+              fontSize: 'inherit',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              width: '100%',
+            }}
+            onKeyDown={
+              interactive && !submitted
+                ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelect(item.label);
+                    }
+                  }
+                : undefined
+            }
+          >
+            <span style={{ minWidth: '5rem', fontWeight: 500 }}>{item.label}</span>
+            <span data-testid={`pictograph-emojis-${item.label}`}>
+              {Array.from({ length: item.value }, (_, i) => (
+                <span key={i} role="img" aria-hidden="true">
+                  {emoji}
+                </span>
+              ))}
+            </span>
+            {showValues && <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>{item.value}</span>}
+          </RowTag>
+        );
+      })}
+    </div>
+  );
+}
+
+const ChartReaderWidget: WidgetDefinition = {
+  id: 'open-edu.chart-reader',
+  version: '0.1.0',
+  render: ChartReaderComponent,
+};
+
+export { ChartReaderWidget as chartReader };
+export default ChartReaderWidget;

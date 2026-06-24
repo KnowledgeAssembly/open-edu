@@ -82,6 +82,7 @@ Workflows can define a skill graph with dependencies and mastery thresholds. Whe
 ## Accessibility Engine
 
 Accessibility is a core subsystem, not a plugin. It manages:
+
 - **Focus traps** — modal-like nodes keep keyboard focus within the active region
 - **Live regions** — screen readers announce node transitions and feedback
 - **ARIA generation** — semantic roles, labels, and descriptions
@@ -90,6 +91,7 @@ Accessibility is a core subsystem, not a plugin. It manages:
 ## Runtime Renderer
 
 The React-based renderer handles node rendering, widget loading, progress tracking, and accessibility integration. It supports:
+
 - **Progress snapshots** — serialize and restore learner state via `initialProgress` / `onProgressChange`
 - **Embed adapter** — mount the runtime in any DOM element via `createRuntime()` without importing React directly
 - **Widget rendering** — delegates to the Widget SDK for exercise and custom nodes
@@ -97,6 +99,7 @@ The React-based renderer handles node rendering, widget loading, progress tracki
 ## Widget SDK
 
 The Widget SDK provides a typed contract (`WidgetDefinition`, `WidgetRenderProps`) for interactive nodes. Widgets are registered via a `WidgetRegistry` and rendered by the runtime through `WidgetRenderer`. The SDK includes:
+
 - **Built-in widgets** — `open-edu.multiple-choice-practice` for interactive practice
 - **Remote loading** — fetch and cache widget bundles from URLs with integrity verification
 - **Scaffold templates** — `edu widget create` generates publishable widget packages
@@ -104,6 +107,7 @@ The Widget SDK provides a typed contract (`WidgetDefinition`, `WidgetRenderProps
 ## Telemetry Architecture
 
 All learner interactions are modeled as RxJS event streams and persisted as JSONL (append-only, human readable, stream friendly). The telemetry package includes:
+
 - **JSONL reader** — parse telemetry files with typed error reporting
 - **Summary functions** — calculate events by type, node completions, quiz score averages, session counts
 - **CLI reporting** — `edu report` generates text or JSON summaries
@@ -111,6 +115,7 @@ All learner interactions are modeled as RxJS event streams and persisted as JSON
 ## Reward Broker
 
 The reward broker consumes learning events and executes configured reward actions — badges, webhooks, or scripts — keeping incentives separate from content. It supports:
+
 - **Conditional rules** — score thresholds, skill mastery, completion chains, and `and`/`or` combinators
 - **Verification** — confirm receipts match telemetry events
 - **Replay** — re-dispatch reward actions from telemetry files, skipping duplicates
@@ -119,17 +124,17 @@ The reward broker consumes learning events and executes configured reward action
 
 The `edu` CLI provides 10+ commands organized around the package lifecycle:
 
-| Command          | Purpose                                |
-| ---------------- | -------------------------------------- |
-| `dev`            | Start development server               |
-| `validate`       | Schema validation + integrity checks   |
-| `build`          | Package build with manifest metadata   |
-| `package`        | Deterministic archive creation         |
-| `create`         | Scaffold a new package directory       |
-| `report`         | Summarize telemetry JSONL files        |
-| `lint-content`   | Content quality checks beyond schemas  |
-| `patch`          | Apply surgical, validated JSON patches |
-| `generate`       | Agent-ready prompt and package generation |
-| `widget create`  | Scaffold a new widget package          |
+| Command         | Purpose                                   |
+| --------------- | ----------------------------------------- |
+| `dev`           | Start development server                  |
+| `validate`      | Schema validation + integrity checks      |
+| `build`         | Package build with manifest metadata      |
+| `package`       | Deterministic archive creation            |
+| `create`        | Scaffold a new package directory          |
+| `report`        | Summarize telemetry JSONL files           |
+| `lint-content`  | Content quality checks beyond schemas     |
+| `patch`         | Apply surgical, validated JSON patches    |
+| `generate`      | Agent-ready prompt and package generation |
+| `widget create` | Scaffold a new widget package             |
 
 All commands support `--json` for machine-readable output.

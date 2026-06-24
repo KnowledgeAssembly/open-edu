@@ -138,9 +138,7 @@ Exercise and custom nodes can assess skills:
 {
   "type": "exercise",
   "widget": "open-edu.multiple-choice-practice",
-  "assessments": [
-    { "skillId": "algebra.basics", "weight": 1.0 }
-  ],
+  "assessments": [{ "skillId": "algebra.basics", "weight": 1.0 }],
   "config": {
     "prompt": "What is 2 + 2?",
     "options": [
@@ -241,9 +239,7 @@ Rewards can include conditions that must be met before dispatching:
   "triggers": [
     {
       "onEvent": "node.complete",
-      "conditions": [
-        { "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }
-      ],
+      "conditions": [{ "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }],
       "rewards": [{ "action": "badge.award", "badge": "high-scorer" }]
     }
   ]
