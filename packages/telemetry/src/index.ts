@@ -6,3 +6,7 @@ export type { Persister } from './types.js';
 export { TelemetrySession } from './session.js';
 export type { TelemetrySessionOptions } from './session.js';
 export { TelemetryError, TelemetryValidationError, TelemetryPersistenceError } from './errors.js';
+export { readJsonl } from './reader.js';
+export type { ParseError, ReadResult } from './reader.js';
+export { createSummary } from './summary.js';
+export type { TelemetrySummary } from './summary.js';
