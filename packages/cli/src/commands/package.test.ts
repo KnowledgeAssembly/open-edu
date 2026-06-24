@@ -18,6 +18,21 @@ vi.mock('@open-edu/core', async () => {
 
 vi.mock('tar', () => ({ c: mockTarC }));
 
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual('node:fs');
+  return {
+    ...actual,
+    createWriteStream: vi.fn(() => ({
+      on: vi.fn(function (this: Record<string, unknown>, event: string, handler: () => void) {
+        if (event === 'finish') setImmediate(handler);
+        return this;
+      }),
+      end: vi.fn(),
+      destroy: vi.fn(),
+    })),
+  };
+});
+
 import { packagePackage } from './package';
 
 function createMockStream(): any {
