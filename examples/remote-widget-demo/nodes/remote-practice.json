@@ -1,0 +1,32 @@
+{
+  "type": "custom",
+  "widget": "open-edu.remote-practice",
+  "config": {
+    "questions": [
+      {
+        "question": "What is 2 + 2?",
+        "options": [
+          { "id": "a", "text": "3", "correct": false },
+          { "id": "b", "text": "4", "correct": true },
+          { "id": "c", "text": "5", "correct": false }
+        ]
+      },
+      {
+        "question": "What is the capital of France?",
+        "options": [
+          { "id": "a", "text": "London", "correct": false },
+          { "id": "b", "text": "Berlin", "correct": false },
+          { "id": "c", "text": "Paris", "correct": true }
+        ]
+      }
+    ]
+  },
+  "remoteWidget": {
+    "id": "open-edu.remote-practice",
+    "version": "1.0.0",
+    "url": "https://cdn.example.com/widgets/remote-practice.js",
+    "apiVersion": "1.0.0",
+    "fallback": "open-edu.multiple-choice-practice",
+    "permissions": []
+  }
+}
