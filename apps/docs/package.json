@@ -4,10 +4,24 @@
   "private": true,
   "description": "Docusaurus documentation site for Open-Edu",
   "scripts": {
-    "build": "echo 'docs site build placeholder'",
+    "dev": "docusaurus start",
+    "build": "docusaurus build",
+    "typecheck": "tsc --noEmit",
     "test": "echo 'no tests yet'",
     "lint": "echo 'no lint yet'",
-    "typecheck": "echo 'no typecheck yet'",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build .docusaurus"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.0.0",
+    "@docusaurus/preset-classic": "^3.0.0",
+    "@docusaurus/tsconfig": "^3.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "^3.0.0",
+    "typescript": "^5.3.0"
   }
 }
