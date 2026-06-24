@@ -14,7 +14,7 @@ export function createSummary(events: TelemetryEvent[]): TelemetrySummary {
   const byType: Record<string, number> = {};
   let nodeOpens = 0;
   let nodeCompletions = 0;
-  let quizScores: number[] = [];
+  const quizScores: number[] = [];
   const sessionIds = new Set<string>();
 
   for (const event of events) {
@@ -34,9 +34,7 @@ export function createSummary(events: TelemetryEvent[]): TelemetrySummary {
   }
 
   const averageQuizScore =
-    quizScores.length > 0
-      ? quizScores.reduce((sum, s) => sum + s, 0) / quizScores.length
-      : null;
+    quizScores.length > 0 ? quizScores.reduce((sum, s) => sum + s, 0) / quizScores.length : null;
 
   return {
     totalEvents: events.length,
