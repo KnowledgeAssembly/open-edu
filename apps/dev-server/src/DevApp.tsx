@@ -6,6 +6,7 @@ import { TelemetrySession } from '@open-edu/telemetry';
 import type { TelemetryEvent, ProgressSnapshot } from '@open-edu/schemas';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import type { LoadedPackage } from '@open-edu/core';
+import { createWidgetRegistry, multipleChoicePractice } from '@open-edu/widgets';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 
@@ -92,6 +93,12 @@ export function DevApp(): JSX.Element {
     [],
   );
 
+  const widgetRegistry = useMemo(() => {
+    const registry = createWidgetRegistry();
+    registry.register(multipleChoicePractice);
+    return registry;
+  }, []);
+
   const handleReset = useCallback(() => {
     if (loadedPkg) {
       clearProgress(loadedPkg.manifest.id, loadedPkg.manifest.version);
@@ -125,6 +132,7 @@ export function DevApp(): JSX.Element {
           engine={engine}
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
+          widgetRegistry={widgetRegistry}
         >
           <div style={{ display: 'flex', height: '100vh' }}>
             <div style={{ flex: 1, overflow: 'auto' }}>
