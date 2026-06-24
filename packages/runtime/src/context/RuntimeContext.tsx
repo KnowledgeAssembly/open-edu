@@ -9,6 +9,7 @@ import {
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
+import type { WidgetRegistry } from '@open-edu/widgets';
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
@@ -20,12 +21,14 @@ export interface RuntimeContextValue {
   visitedNodes: string[];
   completeNode: (score?: number) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
+  widgetRegistry: WidgetRegistry | undefined;
 }
 
 export interface RuntimeProviderProps {
   loadedPackage: LoadedPackage;
   engine: WorkflowEngine;
   children: ReactNode;
+  widgetRegistry?: WidgetRegistry;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -34,6 +37,7 @@ export function RuntimeProvider({
   loadedPackage,
   engine,
   children,
+  widgetRegistry,
 }: RuntimeProviderProps): JSX.Element {
   const [currentNodeId, setCurrentNodeId] = useState<string>('');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
@@ -97,6 +101,7 @@ export function RuntimeProvider({
       visitedNodes,
       completeNode,
       getNode,
+      widgetRegistry,
     }),
     [
       loadedPackage,
@@ -108,6 +113,7 @@ export function RuntimeProvider({
       visitedNodes,
       completeNode,
       getNode,
+      widgetRegistry,
     ],
   );
 

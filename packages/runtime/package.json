@@ -29,6 +29,7 @@
   "dependencies": {
     "@open-edu/core": "workspace:*",
     "@open-edu/schemas": "workspace:*",
+    "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",
     "unified": "^11.0.0",
     "remark-parse": "^11.0.0",

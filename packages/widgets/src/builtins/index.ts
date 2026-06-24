@@ -1,0 +1,1 @@
+export { multipleChoicePractice } from './multipleChoicePractice';

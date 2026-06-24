@@ -3,6 +3,7 @@ import { useRuntime } from '../context/RuntimeContext';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { QuizRenderer } from './QuizRenderer';
 import { ReflectionRenderer } from './ReflectionRenderer';
+import { WidgetRenderer } from './WidgetRenderer';
 import { PlaceholderRenderer } from './PlaceholderRenderer';
 
 export interface NodeRendererProps {
@@ -33,20 +34,10 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
       return <ReflectionRenderer node={node.node} onSubmit={() => handleComplete()} />;
 
     case 'exercise':
-      return (
-        <PlaceholderRenderer
-          nodeType="exercise"
-          reason="Exercise widget rendering will be provided by the widgets package."
-        />
-      );
+      return <WidgetRenderer node={node.node} nodeId={node.relativePath} />;
 
     case 'custom':
-      return (
-        <PlaceholderRenderer
-          nodeType="custom"
-          reason="Custom widget rendering will be provided by the widgets package."
-        />
-      );
+      return <WidgetRenderer node={node.node} nodeId={node.relativePath} />;
 
     default:
       return <PlaceholderRenderer nodeType={String((node.node as { type: unknown }).type)} />;

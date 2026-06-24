@@ -9,6 +9,8 @@ export { ReflectionRenderer } from './renderers/ReflectionRenderer.js';
 export type { ReflectionRendererProps } from './renderers/ReflectionRenderer.js';
 export { NodeRenderer } from './renderers/NodeRenderer.js';
 export type { NodeRendererProps } from './renderers/NodeRenderer.js';
+export { WidgetRenderer } from './renderers/WidgetRenderer.js';
+export type { WidgetRendererProps } from './renderers/WidgetRenderer.js';
 export { PlaceholderRenderer } from './renderers/PlaceholderRenderer.js';
 export type { PlaceholderRendererProps } from './renderers/PlaceholderRenderer.js';
 export { LayoutShell } from './layout/LayoutShell.js';

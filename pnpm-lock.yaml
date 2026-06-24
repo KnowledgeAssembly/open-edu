@@ -202,6 +202,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@open-edu/widgets':
+        specifier: workspace:*
+        version: link:../widgets
       '@open-edu/workflow':
         specifier: workspace:*
         version: link:../workflow
@@ -276,6 +279,19 @@ importers:
       react-dom:
         specifier: ^18.0.0
         version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.0.0
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^14.0.0
+        version: 14.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react':
+        specifier: ^18.0.0
+        version: 18.3.31
+      '@types/react-dom':
+        specifier: ^18.0.0
+        version: 18.3.7(@types/react@18.3.31)
 
   packages/workflow:
     dependencies:
