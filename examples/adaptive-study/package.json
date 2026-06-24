@@ -1,0 +1,20 @@
+{
+  "name": "@open-edu/example-adaptive-study",
+  "id": "adaptive-study",
+  "title": "Adaptive Study",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Advanced adaptive learning with score-based branching, remediation, reflection, and badge reward",
+  "author": "Open-Edu Team",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

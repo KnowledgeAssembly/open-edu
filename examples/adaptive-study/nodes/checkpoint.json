@@ -1,0 +1,27 @@
+{
+  "type": "quiz",
+  "question": "Which statements about adaptive learning are correct?",
+  "options": [
+    {
+      "id": "a",
+      "text": "Adaptive learning personalizes the path based on performance",
+      "correct": true
+    },
+    {
+      "id": "b",
+      "text": "Adaptive learning uses the same path for all learners",
+      "correct": false
+    },
+    {
+      "id": "c",
+      "text": "Remediation helps learners review challenging concepts",
+      "correct": true
+    },
+    {
+      "id": "d",
+      "text": "Score-based branching directs learners to different nodes",
+      "correct": true
+    }
+  ],
+  "skills": ["adaptive-learning", "meta-cognition"]
+}

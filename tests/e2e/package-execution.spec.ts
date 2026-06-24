@@ -196,6 +196,60 @@ test.describe('widget-practice (widget exercise)', () => {
   });
 });
 
+test.describe('adaptive-study (adaptive learning with remediation loop)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/adaptive-study'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('loads with correct title and intro content', async ({ page }) => {
+    await page.goto(server.url);
+    const title = page.getByRole('heading', { level: 1 }).first();
+    await expect(title).toHaveText('Adaptive Study');
+    await expect(
+      page.getByText('This learning experience adapts to your knowledge.'),
+    ).toBeVisible();
+  });
+
+  test('passes checkpoint and reaches reflection', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(
+      page.getByText('Which statements about adaptive learning are correct?'),
+    ).toBeVisible();
+    await page.getByLabel('Adaptive learning personalizes the path based on performance').click();
+    await page.getByLabel('Remediation helps learners review challenging concepts').click();
+    await page.getByLabel('Score-based branching directs learners to different nodes').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('How does adaptive learning differ')).toBeVisible();
+  });
+
+  test('fails checkpoint and reaches remediation', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await page.getByLabel('Adaptive learning uses the same path for all learners').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Let's review the basics again")).toBeVisible();
+  });
+});
+
 test.describe('autism-reading (lesson → quiz → reflection)', () => {
   let server: TestServer;
 
