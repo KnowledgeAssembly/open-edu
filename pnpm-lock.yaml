@@ -167,6 +167,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
 
+  examples/remote-widget-demo:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
+  examples/skill-graph:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
   examples/widget-practice:
     devDependencies:
       '@open-edu/core':
