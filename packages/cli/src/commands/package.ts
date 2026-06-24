@@ -1,17 +1,8 @@
-import { existsSync, mkdirSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { execSync } from 'node:child_process';
 import { loadPackage } from '@open-edu/core';
 import { formatValidationError, formatPackageSuccess, printMessages } from '../utils/format.js';
-
-function isTarAvailable(): boolean {
-  try {
-    execSync('tar --version', { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
-}
+import * as tar from 'tar';
 
 export async function packagePackage(packageDir: string, outputDir?: string): Promise<number> {
   try {
@@ -24,19 +15,27 @@ export async function packagePackage(packageDir: string, outputDir?: string): Pr
     const archiveName = `${pkg.manifest.id}-${pkg.manifest.version}.tar.gz`;
     const archivePath = resolve(join(outDir, archiveName));
 
-    if (!isTarAvailable()) {
-      printMessages([
-        { type: 'error', text: 'tar command not found. Install tar or use edu build instead.' },
-      ]);
-      return 1;
-    }
-
-    const excludeOpts = ["--exclude='dist'", "--exclude='node_modules'", "--exclude='.git'"].join(
-      ' ',
-    );
-
-    const cmd = `tar -czf ${archivePath} ${excludeOpts} -C ${packageDir} .`;
-    execSync(cmd, { stdio: 'ignore', timeout: 30000 });
+    await new Promise<void>((resolvePromise, reject) => {
+      tar
+        .c(
+          {
+            gzip: true,
+            cwd: packageDir,
+            filter: (path: string) => {
+              const topLevel = path.split('/')[0];
+              return (
+                topLevel !== 'dist' &&
+                topLevel !== 'node_modules' &&
+                topLevel !== '.git'
+              );
+            },
+          },
+          ['.'],
+        )
+        .pipe(createWriteStream(archivePath))
+        .on('finish', resolvePromise)
+        .on('error', reject);
+    });
 
     const messages = formatPackageSuccess(archivePath);
     printMessages(messages);
