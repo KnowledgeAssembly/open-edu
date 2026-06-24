@@ -8,3 +8,5 @@ export type {
 export { WidgetRegistrationError } from './types';
 export { createWidgetRegistry } from './registry';
 export { multipleChoicePractice } from './builtins';
+export { validateWidgetPackage } from './cli-utils';
+export type { WidgetPackageValidation } from './cli-utils';

@@ -4,6 +4,7 @@ import { validatePackage } from './commands/validate.js';
 import { devPackage } from './commands/dev.js';
 import { buildPackage } from './commands/build.js';
 import { packagePackage } from './commands/package.js';
+import { widgetCreate } from './commands/widget-create.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -54,6 +55,29 @@ program
     const json = program.optsWithGlobals().json;
     const result = await packagePackage(packageDir, cmdOptions.output, { json });
     handleResult(result, json);
+  });
+
+const widget = program.command('widget').description('Widget management commands');
+
+widget
+  .command('create')
+  .description('Create a new widget package')
+  .argument('<dir>', 'Directory to create the widget in')
+  .option('--id <id>', 'Widget ID')
+  .option('--title <title>', 'Widget title')
+  .option('--force', 'Overwrite existing files')
+  .action(async (dir: string, cmdOptions: { id?: string; title?: string; force?: boolean }) => {
+    const json = program.optsWithGlobals().json;
+    const id = cmdOptions.id || dir.split('/').pop() || dir.split('\\').pop() || 'widget';
+    const result = await widgetCreate(dir, {
+      id,
+      title: cmdOptions.title,
+      force: cmdOptions.force,
+    });
+    const cliResult: CliResult = result.success
+      ? { success: true, data: { files: result.files } }
+      : { success: false, error: result.error!, code: 1 };
+    handleResult(cliResult, json);
   });
 
 function handleResult(result: CliResult, json: boolean | undefined): void {
