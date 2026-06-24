@@ -23,4 +23,5 @@ export {
   storyQuestion,
   realWorld,
   fractionVisual,
+  chartReader,
 } from './builtins';

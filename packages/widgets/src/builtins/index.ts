@@ -8,3 +8,6 @@ export { fillBlank } from './FillBlank/FillBlank';
 export { storyQuestion } from './StoryQuestion/StoryQuestion';
 export { realWorld } from './RealWorld/RealWorld';
 export { fractionVisual } from './FractionVisual/FractionVisual';
+export { chartReader } from './ChartReader/ChartReader';
+export { gridArea } from './GridArea/GridArea';
+export { placeValueChart } from './PlaceValueChart/PlaceValueChart';
