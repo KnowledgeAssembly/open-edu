@@ -11,3 +11,5 @@ export { fractionVisual } from './FractionVisual/FractionVisual';
 export { chartReader } from './ChartReader/ChartReader';
 export { gridArea } from './GridArea/GridArea';
 export { placeValueChart } from './PlaceValueChart/PlaceValueChart';
+export { measurementScale } from './MeasurementScale/MeasurementScale';
+export { clockTime } from './ClockTime/ClockTime';

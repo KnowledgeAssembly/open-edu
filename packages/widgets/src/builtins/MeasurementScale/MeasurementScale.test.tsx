@@ -1,0 +1,388 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import { measurementScale } from './MeasurementScale';
+
+const WidgetComponent = measurementScale.render;
+
+function renderWidget(config: Record<string, unknown> = {}) {
+  const emitInteraction = vi.fn();
+  const complete = vi.fn();
+  const result = render(
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
+  );
+  return { emitInteraction, complete, ...result };
+}
+
+describe('MeasurementScale widget definition', () => {
+  it('has correct widget id', () => {
+    expect(measurementScale.id).toBe('open-edu.measurement-scale');
+  });
+
+  it('has a render function', () => {
+    expect(typeof measurementScale.render).toBe('function');
+  });
+});
+
+describe('MeasurementScale config validation', () => {
+  it('renders error for invalid config', () => {
+    renderWidget({});
+    expect(screen.getByTestId('widget-config-error')).toBeInTheDocument();
+  });
+
+  it('renders error for missing type', () => {
+    renderWidget({ min: 0, max: 10, step: 1, unit: 'cm' });
+    expect(screen.getByTestId('widget-config-error')).toBeInTheDocument();
+  });
+
+  it('renders error for missing unit', () => {
+    renderWidget({ type: 'ruler', min: 0, max: 10, step: 1 });
+    expect(screen.getByTestId('widget-config-error')).toBeInTheDocument();
+  });
+});
+
+describe('MeasurementScale observe mode', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const observeConfig = {
+    type: 'ruler' as const,
+    min: 0,
+    max: 10,
+    step: 1,
+    unit: 'cm',
+    value: 5,
+    showReading: true,
+  };
+
+  it('renders ruler SVG in observe mode', () => {
+    renderWidget(observeConfig);
+    expect(screen.getByTestId('ruler-svg')).toBeInTheDocument();
+  });
+
+  it('shows current reading in live region', () => {
+    renderWidget(observeConfig);
+    expect(screen.getByTestId('reading-live-region')).toHaveTextContent('5cm');
+  });
+
+  it('auto-completes after 1500ms in observe mode', () => {
+    const { complete, emitInteraction } = renderWidget(observeConfig);
+    expect(complete).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith(100);
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'observe', observed: true, correct: true }),
+    );
+  });
+
+  it('shows observe complete state after auto-complete', () => {
+    renderWidget(observeConfig);
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(screen.getByTestId('observe-complete')).toHaveTextContent('Observed.');
+  });
+});
+
+describe('MeasurementScale thermometer observe mode', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('renders thermometer SVG', () => {
+    renderWidget({
+      type: 'thermometer',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: '°C',
+      value: 37,
+    });
+    expect(screen.getByTestId('thermometer-svg')).toBeInTheDocument();
+  });
+});
+
+describe('MeasurementScale cylinder observe mode', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('renders cylinder SVG', () => {
+    renderWidget({
+      type: 'cylinder',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: 'mL',
+      value: 50,
+    });
+    expect(screen.getByTestId('cylinder-svg')).toBeInTheDocument();
+  });
+});
+
+describe('MeasurementScale interactive mode', () => {
+  const interactiveConfig = {
+    type: 'ruler' as const,
+    min: 0,
+    max: 10,
+    step: 1,
+    unit: 'cm',
+    interactive: true,
+    targetValue: 5,
+    showReading: true,
+    showLabels: true,
+  };
+
+  it('renders submit button in interactive mode', () => {
+    renderWidget(interactiveConfig);
+    expect(screen.getByTestId('submit-btn')).toBeInTheDocument();
+  });
+
+  it('starts with min value when no value given', () => {
+    renderWidget(interactiveConfig);
+    expect(screen.getByTestId('reading-live-region')).toHaveTextContent('0cm');
+  });
+
+  it('allows arrow key navigation', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    expect(screen.getByTestId('reading-live-region')).toHaveTextContent('1cm');
+    fireEvent.keyDown(svg, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('reading-live-region')).toHaveTextContent('0cm');
+  });
+
+  it('submits correct score when value matches target', () => {
+    const { complete, emitInteraction } = renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(100);
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'submit', value: 5, targetValue: 5, correct: true }),
+    );
+  });
+
+  it('submits score 0 when value does not match target', () => {
+    const { complete, emitInteraction } = renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(0);
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'submit', value: 1, targetValue: 5, correct: false }),
+    );
+  });
+
+  it('shows correct feedback on correct answer', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
+  });
+
+  it('shows expected value on incorrect answer', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Expected 5cm');
+  });
+
+  it('allows Enter key to submit', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    }
+    fireEvent.keyDown(svg, { key: 'Enter' });
+    expect(complete).toHaveBeenCalledWith(100);
+  });
+
+  it('allows Space key to submit', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    }
+    fireEvent.keyDown(svg, { key: ' ' });
+    expect(complete).toHaveBeenCalledWith(100);
+  });
+
+  it('disables interaction after submit', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(screen.queryByTestId('submit-btn')).toBeNull();
+  });
+
+  it('updates value on click', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    const rect = svg.getBoundingClientRect();
+    const midX = rect.left + rect.width * 0.5;
+    fireEvent.click(svg, { clientX: midX, clientY: rect.top + rect.height / 2 });
+    expect(screen.getByTestId('reading-live-region')).not.toHaveTextContent('0cm');
+  });
+});
+
+describe('MeasurementScale scoring tolerance', () => {
+  it('scores correct when within step tolerance', () => {
+    const { complete } = renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      interactive: true,
+      targetValue: 5,
+      value: 6,
+    });
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(100);
+  });
+
+  it('scores incorrect when outside step tolerance', () => {
+    const { complete } = renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      interactive: true,
+      targetValue: 5,
+      value: 3,
+    });
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(0);
+  });
+});
+
+describe('MeasurementScale accessibility', () => {
+  const interactiveConfig = {
+    type: 'ruler' as const,
+    min: 0,
+    max: 10,
+    step: 1,
+    unit: 'cm',
+    interactive: true,
+    targetValue: 5,
+  };
+
+  it('has live region for current reading', () => {
+    renderWidget(interactiveConfig);
+    const liveRegion = screen.getByTestId('reading-live-region');
+    expect(liveRegion.getAttribute('aria-live')).toBe('polite');
+    expect(liveRegion.getAttribute('aria-atomic')).toBe('true');
+  });
+
+  it('has role="alert" for config errors', () => {
+    renderWidget({});
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('uses aria-live for feedback after submit', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(svg, { key: 'ArrowRight' });
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    const feedback = screen.getByTestId('feedback');
+    expect(feedback.getAttribute('aria-live')).toBe('assertive');
+  });
+
+  it('has aria-label on SVG', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    expect(svg.getAttribute('aria-label')).toContain('Ruler scale');
+  });
+
+  it('thermometer has aria-label', () => {
+    renderWidget({
+      type: 'thermometer',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: '°C',
+      interactive: true,
+      targetValue: 37,
+    });
+    const svg = screen.getByTestId('thermometer-svg');
+    expect(svg.getAttribute('aria-label')).toContain('Thermometer scale');
+  });
+
+  it('cylinder has aria-label', () => {
+    renderWidget({
+      type: 'cylinder',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: 'mL',
+      interactive: true,
+      targetValue: 50,
+    });
+    const svg = screen.getByTestId('cylinder-svg');
+    expect(svg.getAttribute('aria-label')).toContain('Graduated cylinder');
+  });
+});
+
+describe('MeasurementScale description', () => {
+  it('renders description when provided', () => {
+    renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      description: 'Measure the line',
+    });
+    expect(screen.getByText('Measure the line')).toBeInTheDocument();
+  });
+
+  it('hides reading when showReading is false', () => {
+    renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      value: 5,
+      showReading: false,
+    });
+    expect(screen.getByTestId('reading-live-region')).toHaveTextContent('');
+  });
+});
