@@ -6,6 +6,16 @@ sidebar_position: 4
 
 Learn how to create educational packages for the Open-Edu Framework.
 
+## Quick Start with CLI
+
+The fastest way to create a new package:
+
+```bash
+edu create ./my-lesson --id my-lesson --title "My Lesson" --author "Me"
+```
+
+This generates a valid package with `package.json`, `workflow.json`, `nodes/intro.md`, and a validation test.
+
 ## Minimal Package Structure
 
 A valid package is a directory with at least a `package.json` manifest and one content node:
@@ -88,6 +98,79 @@ Content goes here. Use standard Markdown.
 }
 ```
 
+### Custom Node with Remote Widget
+
+```json
+{
+  "type": "custom",
+  "remoteWidget": {
+    "id": "my-remote-widget",
+    "version": "1.0.0",
+    "url": "https://example.com/widgets/quiz.js",
+    "integrity": "sha256-abc123...",
+    "fallback": "open-edu.multiple-choice-practice"
+  },
+  "config": {
+    "prompt": "Interactive exercise from remote source"
+  }
+}
+```
+
+### Skill Assessments
+
+```json
+{
+  "type": "exercise",
+  "widget": "open-edu.multiple-choice-practice",
+  "assessments": [
+    { "skillId": "algebra.basics", "weight": 1.0 }
+  ],
+  "config": {
+    "prompt": "What is 2 + 2?",
+    "options": [
+      { "id": "a", "text": "3", "correct": false },
+      { "id": "b", "text": "4", "correct": true }
+    ]
+  }
+}
+```
+
+## Skills Graph
+
+Define skills and their dependencies in `skills.json`:
+
+```json
+{
+  "skills": [
+    {
+      "id": "algebra.basics",
+      "name": "Algebra Basics",
+      "maxScore": 100,
+      "dependencies": []
+    },
+    {
+      "id": "algebra.advanced",
+      "name": "Algebra Advanced",
+      "maxScore": 100,
+      "dependencies": ["algebra.basics"]
+    }
+  ]
+}
+```
+
+Reference skills in the manifest to enable skill tracking:
+
+```json
+{
+  "id": "my-lesson",
+  "title": "My Lesson",
+  "version": "0.1.0",
+  "author": "Your Name",
+  "entry": "nodes/intro.md",
+  "skills": ["skills.json"]
+}
+```
+
 ## Workflow Examples
 
 ### Linear Progression
@@ -116,6 +199,21 @@ Content goes here. Use standard Markdown.
 }
 ```
 
+### Skill-Based Branching
+
+```json
+{
+  "routing": {
+    "nodes/quiz-basics.json": {
+      "conditions": [
+        { "if": "skill:algebra.basics >= achieved", "then": "nodes/quiz-advanced.json" },
+        { "if": "true", "then": "nodes/remediation.md" }
+      ]
+    }
+  }
+}
+```
+
 ### Remediation Loop
 
 ```json
@@ -136,6 +234,8 @@ Content goes here. Use standard Markdown.
 
 ## Rewards
 
+### Simple Reward
+
 ```json
 {
   "triggers": [
@@ -147,10 +247,57 @@ Content goes here. Use standard Markdown.
 }
 ```
 
-## Validation
+### Conditional Reward
+
+```json
+{
+  "triggers": [
+    {
+      "onEvent": "node.complete",
+      "conditions": [
+        { "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }
+      ],
+      "rewards": [{ "action": "badge.award", "badge": "high-scorer" }]
+    }
+  ]
+}
+```
+
+## Validation and Linting
 
 ```bash
+# Schema validation
 edu validate ./my-package
+
+# Content quality checks
+edu lint-content ./my-package
+
+# Integrity verification
+edu validate --verify-integrity ./my-package
+```
+
+## Patching Existing Packages
+
+Apply surgical edits without regenerating the entire package:
+
+```bash
+# Dry run to see what would change
+edu patch ./my-package ./patch.json --dry-run
+
+# Apply the patch (validates before writing)
+edu patch ./my-package ./patch.json
+```
+
+Patch operations: `add`, `remove`, `replace` (JSON Pointer paths), `upsert-node`, `remove-node`.
+
+## Telemetry Reporting
+
+```bash
+# Human-readable summary
+edu report ./telemetry.jsonl
+
+# Machine-readable JSON
+edu report ./telemetry.jsonl --json
 ```
 
 ## Common Mistakes
@@ -161,6 +308,8 @@ edu validate ./my-package
 - **Unreferenced nodes** — All nodes in `workflow.json` routing must exist on disk.
 - **Wrong terminal state** — The terminal route must be `COMPLETED` (uppercase).
 - **JSON formatting** — Ensure all `.json` files are valid JSON.
+- **Skill dependency typos** — Skill IDs in `dependencies` and `assessments` must match defined skill IDs.
+- **Circular skill dependencies** — Skills must not depend on each other in a cycle.
 
 ## Instructions for AI Agents
 
@@ -176,6 +325,7 @@ edu validate ./my-package
 8. The terminal route is always `COMPLETED`.
 9. Rewards should use `badge.award` action only unless webhooks or scripts are explicitly requested.
 10. Keep content short and deterministic.
+11. Use `edu generate --from-description` for AI-assisted package creation.
 
 ### Validation Checklist
 
@@ -187,3 +337,5 @@ edu validate ./my-package
 - [ ] `COMPLETED` is the terminal state
 - [ ] JSON files are valid JSON
 - [ ] All paths use forward slashes
+- [ ] Skill IDs in `dependencies` and `assessments` are defined
+- [ ] Remote widget URLs use HTTPS

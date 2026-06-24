@@ -10,9 +10,10 @@ Every educational experience is distributed as a self-contained directory:
 
 ```
 my-package/
-├── package.json         # Manifest — id, title, version, author, entry
-├── workflow.json        # Routing — how learners navigate between nodes
-├── rewards.json         # Rewards — badges, webhooks, scripts (optional)
+├── package.json         # Manifest — id, title, version, author, entry, skills
+├── workflow.json        # Routing — linear, conditional, skill-based branching
+├── rewards.json         # Rewards — badges, conditions, actions (optional)
+├── skills.json          # Skill definitions and assessments (optional)
 ├── nodes/               # Content — markdown lessons, JSON quizzes/reflections
 │   ├── intro.md
 │   ├── quiz.json
@@ -109,6 +110,47 @@ Widget-based interactive exercise:
 }
 ```
 
+### Custom Node with Remote Widget
+
+Nodes can load widgets from remote URLs at runtime:
+
+```json
+{
+  "type": "custom",
+  "remoteWidget": {
+    "id": "my-remote-widget",
+    "version": "1.0.0",
+    "url": "https://example.com/widgets/quiz.js",
+    "integrity": "sha256-abc123...",
+    "fallback": "open-edu.multiple-choice-practice"
+  },
+  "config": {
+    "prompt": "Interactive exercise from remote source"
+  }
+}
+```
+
+### Skill Assessments
+
+Exercise and custom nodes can assess skills:
+
+```json
+{
+  "type": "exercise",
+  "widget": "open-edu.multiple-choice-practice",
+  "assessments": [
+    { "skillId": "algebra.basics", "weight": 1.0 }
+  ],
+  "config": {
+    "prompt": "What is 2 + 2?",
+    "options": [
+      { "id": "a", "text": "3", "correct": false },
+      { "id": "b", "text": "4", "correct": true }
+    ]
+  }
+}
+```
+
 ## Workflow Routing
 
 ### Linear Progression
@@ -137,6 +179,44 @@ Widget-based interactive exercise:
 }
 ```
 
+## Skills Graph
+
+Optional `skills.json` defines skills, dependencies, and which nodes assess them:
+
+```json
+{
+  "skills": [
+    {
+      "id": "algebra.basics",
+      "name": "Algebra Basics",
+      "maxScore": 100,
+      "dependencies": []
+    },
+    {
+      "id": "algebra.advanced",
+      "name": "Algebra Advanced",
+      "maxScore": 100,
+      "dependencies": ["algebra.basics"]
+    }
+  ]
+}
+```
+
+Workflow routes can branch based on skill mastery by referencing the `skills.json` in manifest:
+
+```json
+{
+  "routing": {
+    "nodes/quiz-basics.json": {
+      "conditions": [
+        { "if": "skill:algebra.basics >= achieved", "then": "nodes/quiz-advanced.json" },
+        { "if": "true", "then": "nodes/remediation.md" }
+      ]
+    }
+  }
+}
+```
+
 ## Rewards
 
 ### rewards.json
@@ -152,8 +232,46 @@ Widget-based interactive exercise:
 }
 ```
 
+### Conditional Rewards
+
+Rewards can include conditions that must be met before dispatching:
+
+```json
+{
+  "triggers": [
+    {
+      "onEvent": "node.complete",
+      "conditions": [
+        { "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }
+      ],
+      "rewards": [{ "action": "badge.award", "badge": "high-scorer" }]
+    }
+  ]
+}
+```
+
+Supported condition types: `score`, `skill`, `chain` (completed node IDs), `and`, `or`.
+
 ### Supported Actions
 
 - **badge.award** — Award a named badge
 - **webhook** — Send a POST request to a URL
 - **script** — Execute a shell script (requires `--allow-shell-hooks`)
+
+## Progress Snapshots
+
+The runtime emits and accepts progress snapshots for persistence and resume:
+
+```json
+{
+  "packageId": "my-lesson",
+  "packageVersion": "1.0.0",
+  "currentNodeId": "nodes/quiz.json",
+  "visitedNodes": ["nodes/intro.md"],
+  "scores": { "nodes/quiz.json": 100 },
+  "isCompleted": false,
+  "updatedAt": "2026-06-24T12:00:00.000Z"
+}
+```
+
+The dev server persists snapshots to localStorage under key `open-edu:progress:<packageId>:<packageVersion>`.
