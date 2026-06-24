@@ -23,9 +23,7 @@ export async function validatePackage(
         if (options?.json) {
           return { success: false, error: errorMsg, code: 1 };
         }
-        printMessages([
-          { type: 'error', text: `Integrity check failed:\n${errorMsg}` },
-        ]);
+        printMessages([{ type: 'error', text: `Integrity check failed:\n${errorMsg}` }]);
         return { success: false, error: errorMsg, code: 1 };
       }
     }

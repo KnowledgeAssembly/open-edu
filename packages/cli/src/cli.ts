@@ -25,7 +25,10 @@ program
   .option('--verify-integrity', 'Verify file integrity against build manifest')
   .action(async (packageDir: string, cmdOptions: { verifyIntegrity?: boolean }) => {
     const json = program.optsWithGlobals().json;
-    const result = await validatePackage(packageDir, { json, verifyIntegrity: cmdOptions.verifyIntegrity });
+    const result = await validatePackage(packageDir, {
+      json,
+      verifyIntegrity: cmdOptions.verifyIntegrity,
+    });
     handleResult(result, json);
   });
 
