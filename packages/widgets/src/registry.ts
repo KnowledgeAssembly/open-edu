@@ -6,6 +6,7 @@ import type {
 } from './types';
 import { WidgetRegistrationError } from './types';
 import {
+  multipleChoicePractice,
   visualCounting,
   multipleChoice,
   matching,
@@ -65,6 +66,7 @@ export function createWidgetRegistry(): WidgetRegistry {
 }
 
 const BUILTIN_WIDGETS: WidgetDefinition[] = [
+  multipleChoicePractice,
   visualCounting,
   multipleChoice,
   matching,
