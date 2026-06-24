@@ -1,6 +1,6 @@
 # Open-Edu Framework
 
-An open runtime for educational experiences that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, and rewards.
+An open runtime for educational experiences that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skills tracking, and rewards.
 
 > **Vision:** A world where educational experiences are as portable, extensible, observable, and accessible as modern software. — [Full Vision](./docs/VISION.md) — [Package Authoring Guide](./docs/PACKAGE_AUTHORING.md)
 
@@ -24,6 +24,11 @@ Or use the CLI directly after building:
 edu dev ./examples/intro-javascript
 edu validate ./examples/fractions
 edu build ./examples/hello-world -o ./dist
+edu create ./my-lesson --id my-lesson --title "My Lesson" --author "Me"
+edu report ./telemetry.jsonl
+edu lint-content ./my-lesson
+edu patch ./my-lesson ./patch.json
+edu generate --prompt
 ```
 
 ## What Makes a Learning Package?
@@ -92,31 +97,31 @@ Conditional branching (e.g. quiz score-based remediation):
 
 ## Packages
 
-| Package                   | Description                                                                                          | Status |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
-| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry                    | Done   |
-| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation                            | Done   |
-| `@open-edu/workflow`      | XState workflow engine — builds state machines from `workflow.json` routing                          | Done   |
-| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection renderers, navigation | Done   |
-| `@open-edu/accessibility` | Focus management, keyboard navigation, ARIA generation, axe-core validator                           | Done   |
-| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management                                | Done   |
-| `@open-edu/rewards`       | Reward broker — badge award, webhook, and script action handlers                                     | Done   |
-| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package` commands                                 | Done   |
-| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + accessibility inspector panels        | Done   |
-| `@open-edu/widgets`       | Widget SDK for custom interactive nodes (placeholder)                                                | Future |
+| Package                   | Description                                                                                                          | Status |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------ |
+| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress                  | Done   |
+| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation                 | Done   |
+| `@open-edu/workflow`      | XState workflow engine — state machines, skill-tracking, mastery-based routing                                       | Done   |
+| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers                      | Done   |
+| `@open-edu/accessibility` | Focus traps, live regions, ARIA generation, axe-core validator                                                       | Done   |
+| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary                        | Done   |
+| `@open-edu/rewards`       | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay                        | Done   |
+| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate` | Done   |
+| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector                     | Done   |
+| `@open-edu/widgets`       | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                         | Done   |
 
 ## Examples
 
-| Example                                             | Description                                                                                    | Workflow Pattern                                              |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| [hello-world](./examples/hello-world)               | Minimal single-lesson package                                                                  | Linear → COMPLETED                                            |
-| [intro-javascript](./examples/intro-javascript)     | Multi-node JavaScript lesson with quiz                                                         | Linear chain of 4 nodes                                       |
-| [fractions](./examples/fractions)                   | Fractions quiz with score-based remediation                                                    | Conditional branching                                         |
-| [autism-reading](./examples/autism-reading)         | Accessibility-first reading lesson with reflection                                             | Linear + reflection node                                      |
-| [adaptive-study](./examples/adaptive-study)         | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward     | Conditional branching + remediation loop + reflection + badge |
-| [skill-graph](./examples/skill-graph)               | Mastery-based routing with skill dependencies — pass algebra.basics to unlock algebra.advanced | Skill-graph conditional branching + remediation loop          |
-| [widget-practice](./examples/widget-practice)       | Demonstrates widget-based exercise rendering                                                   | Linear → COMPLETED                                            |
-| [remote-widget-demo](./examples/remote-widget-demo) | Demonstrates loading a widget from a remote URL at runtime                                     | Linear → COMPLETED                                            |
+| Example                                             | Description                                                                                | Workflow Pattern                                              |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| [hello-world](./examples/hello-world)               | Minimal single-lesson package                                                              | Linear → COMPLETED                                            |
+| [intro-javascript](./examples/intro-javascript)     | Multi-node JavaScript lesson with quiz                                                     | Linear chain of 4 nodes                                       |
+| [fractions](./examples/fractions)                   | Fractions quiz with score-based remediation and feedback                                   | Conditional branching                                         |
+| [autism-reading](./examples/autism-reading)         | Accessibility-first reading lesson with reflection                                         | Linear + reflection node                                      |
+| [adaptive-study](./examples/adaptive-study)         | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward | Conditional branching + remediation loop + reflection + badge |
+| [skill-graph](./examples/skill-graph)               | Mastery-based routing — pass `algebra.basics` to unlock `algebra.advanced`                 | Skill-graph conditional branching + remediation loop          |
+| [widget-practice](./examples/widget-practice)       | Widget-based exercise rendering using the built-in multiple-choice widget                  | Linear → COMPLETED                                            |
+| [remote-widget-demo](./examples/remote-widget-demo) | Remote widget loading from a URL at runtime via module federation                          | Linear → COMPLETED                                            |
 
 Each example includes a validation test that asserts correct loading via `@open-edu/core`:
 
@@ -155,12 +160,13 @@ pnpm format           # Auto-format all files
 
 ```
 schemas
-  ├──► core
-  │     └──► runtime ──► accessibility
-  │                    ──► dev-server ──► cli
-  │                    ──► e2e (Playwright)
+  ├──► core ──► cli
   ├──► workflow ──► runtime
-  ├──► telemetry ──► rewards
+  ├──► telemetry ──► rewards ──► dev-server
+  ├──► runtime ──► accessibility
+  │             ──► dev-server ──► cli
+  │             ──► e2e (Playwright)
+  ├──► widgets ──► runtime
   └──► examples
 ```
 
@@ -170,28 +176,32 @@ schemas
 Educational Package (Markdown + JSON)
         │
         ▼
-Package Loader — Zod validation
+  ┌────────────┐
+  │   Core     │  Package loader, patcher, lint, generator
+  └─────┬──────┘
         │
         ▼
-Workflow Engine — XState state machine
+  ┌────────────┐
+  │  Workflow  │  XState state machine + skill tracking
+  └─────┬──────┘
         │
         ▼
-Runtime Renderer — React + TypeScript
-     ┌──┴──┐
-     ▼     ▼
-A11y    Widget SDK
-Engine  (future)
-     └──┬──┘
-        ▼
-Telemetry Engine — RxJS event streams
-        │
-        ▼
-Reward Broker — badges, webhooks, scripts
+  ┌────────────┐
+  │  Runtime   │  React renderer — lessons, quizzes, widgets
+  └──┬───┬───┬┘
+     ▼   ▼   ▼
+  ┌────┐┌────┐┌────────┐
+  │A11y││Widgets││Telemetry│
+  └────┘└────┘└───┬────┘
+                  ▼
+           ┌─────────┐
+           │ Rewards │  Badges, conditions, verification
+           └─────────┘
 ```
 
 ## Testing
 
-The framework uses **Vitest** for unit tests (~490+ tests across 73 files) and **Playwright** for E2E integration tests (20+ tests).
+The framework uses **Vitest** for unit tests (~750+ tests across 106 files) and **Playwright** for E2E integration tests (20+ tests).
 
 ### Unit Tests
 
@@ -211,39 +221,45 @@ pnpm test:e2e                # Run all Playwright tests
 pnpm test:e2e:install        # Install Playwright browsers
 ```
 
-E2E tests start a real Vite dev server on a dynamic port and run against all 5 example packages:
+E2E tests start a real Vite dev server on a dynamic port and run against all example packages:
 
-| Test file                   | Coverage                                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `package-execution.spec.ts` | Content rendering, navigation, quiz submission, reflection input, conditional branching (14 tests) |
-| `accessibility.spec.ts`     | Keyboard Tab/Enter navigation, landmark regions, A11y inspector audit (6 tests)                    |
-| `telemetry.spec.ts`         | Telemetry event capture via developer inspector panel (2 tests)                                    |
+| Test file                     | Coverage                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `package-execution.spec.ts`   | Content rendering, navigation, quiz submission, reflection input, conditional branching (14 tests) |
+| `accessibility.spec.ts`       | Keyboard Tab/Enter navigation, landmark regions, A11y inspector audit (6 tests)                    |
+| `telemetry.spec.ts`           | Telemetry event capture via developer inspector panel (2 tests)                                    |
+| `keyboard-navigation.spec.ts` | Full keyboard-only navigation through all example packages                                         |
+| `hot-reload.spec.ts`          | HMR preserves node, progress, and telemetry session on Markdown/JSON edits                         |
+| `skill-graph.spec.ts`         | Skill-tracking events, mastery-based branching, remediation path                                   |
 
 ## Project Structure
 
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # Vite dev server (Epic 10)
-│   └── docs/                # Docusaurus docs (future)
+│   ├── dev-server/          # Vite dev server with inspector panels
+│   └── docs/                # Docusaurus documentation site
 ├── packages/
 │   ├── schemas/             # Zod schemas + type generation
-│   ├── core/                # Package loader + validation
-│   ├── workflow/            # XState workflow engine
-│   ├── runtime/             # React runtime renderer
-│   ├── accessibility/       # A11y engine
-│   ├── telemetry/           # RxJS telemetry + JSONL
-│   ├── rewards/             # Reward broker
-│   ├── cli/                 # edu CLI
-│   └── widgets/             # Widget SDK (future)
+│   ├── core/                # Package loader, patcher, validator, lint, generator
+│   ├── workflow/            # XState workflow engine + skill tracking
+│   ├── runtime/             # React runtime renderer + embed adapter
+│   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
+│   ├── telemetry/           # RxJS telemetry, JSONL reader + summary
+│   ├── rewards/             # Reward broker, conditions, verification
+│   ├── cli/                 # edu CLI (10+ commands)
+│   └── widgets/             # Widget SDK, registry, builtins, remote loader
 ├── examples/                # Example educational packages
 │   ├── hello-world/
 │   ├── intro-javascript/
 │   ├── fractions/
 │   ├── autism-reading/
-│   └── adaptive-study/
-├── tests/e2e/               # Playwright tests
-└── docs/                    # Architecture docs
+│   ├── adaptive-study/
+│   ├── skill-graph/
+│   ├── widget-practice/
+│   └── remote-widget-demo/
+├── tests/e2e/               # Playwright tests (6 spec files)
+└── docs/                    # Architecture and release docs
 ```
 
 ## Release Process
