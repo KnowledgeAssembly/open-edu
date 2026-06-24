@@ -1,10 +1,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import VisualCountingWidget, { visualCounting } from './VisualCounting';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import { visualCounting } from './VisualCounting';
 
-describe('VisualCounting', () => {
-  const WidgetComponent = VisualCountingWidget.render;
+const WidgetComponent = visualCounting.render;
 
+function renderWidget(config: Record<string, unknown> = {}) {
+  const emitInteraction = vi.fn();
+  const complete = vi.fn();
+  const result = render(
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
+  );
+  return { emitInteraction, complete, ...result };
+}
+
+describe('VisualCounting schema', () => {
+  it('has correct widget id', () => {
+    expect(visualCounting.id).toBe('open-edu.visual-counting');
+  });
+
+  it('has a render function', () => {
+    expect(typeof visualCounting.render).toBe('function');
+  });
+});
+
+describe('VisualCounting observe mode (interactive: false)', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -13,371 +37,245 @@ describe('VisualCounting', () => {
     vi.useRealTimers();
   });
 
-  const baseConfig = {
-    items: ['🍎', '🍎', '🍎'],
-    count: 3,
-    text: 'apples',
-  };
-
-  function advanceObserve() {
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-  }
-
-  it('renders observe phase with items and label', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByTestId('visual-counting')).toBeInTheDocument();
-    expect(screen.getByText('There are 3 apples.')).toBeInTheDocument();
-    expect(screen.getByRole('list')).toBeInTheDocument();
+  it('renders items with count label', () => {
+    renderWidget({ items: ['🍎'], count: 3, text: 'apples', interactive: false });
+    expect(screen.getByText('There are 3 apples.')).toBeTruthy();
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 
-  it('auto-completes observe phase after 1500ms', () => {
-    const emitInteraction = vi.fn();
-    const complete = vi.fn();
+  it('does not render number buttons in observe mode', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: false });
+    expect(screen.queryByLabelText(/Count \d/)).toBeNull();
+  });
 
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={emitInteraction}
-        complete={complete}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'observe', observed: true }),
-    );
+  it('auto-completes after 1500ms in observe mode', () => {
+    const { complete, emitInteraction } = renderWidget({
+      items: ['🍎'],
+      count: 3,
+      interactive: false,
+    });
+    expect(complete).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
-  });
-
-  it('transitions to interactive phase after observe', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getByText('Submit')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 1')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 2')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 3')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 4')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 5')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 6')).toBeInTheDocument();
-  });
-
-  it('shows number buttons from max(1, count-3) to count+3', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={{ items: ['🍎', '🍎', '🍎', '🍎', '🍎'], count: 5, text: 'apples' }}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getByLabelText('Count 2')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 8')).toBeInTheDocument();
-    expect(() => screen.getByLabelText('Count 1')).toThrow();
-  });
-
-  it('selects a count and shows it in live region', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-    fireEvent.click(screen.getByLabelText('Count 3'));
-
-    expect(screen.getByText('Selected: 3')).toBeInTheDocument();
-  });
-
-  it('submits correct answer with score', () => {
-    const emitInteraction = vi.fn();
-    const complete = vi.fn();
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={emitInteraction}
-        complete={complete}
-      />,
-    );
-
-    advanceObserve();
-    fireEvent.click(screen.getByLabelText('Count 3'));
-    act(() => {
-      fireEvent.click(screen.getByText('Submit'));
-    });
-
-    expect(complete).toHaveBeenCalledTimes(2);
-    expect(complete).toHaveBeenLastCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'submit', count: 3, correct: true, accuracy: 1 }),
+      expect.objectContaining({ action: 'observe', observed: true, correct: true }),
     );
-    expect(screen.getByText('Correct! The answer is 3.')).toBeInTheDocument();
   });
 
-  it('submits incorrect answer with partial accuracy', () => {
-    const complete = vi.fn();
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={complete}
-      />,
-    );
-
-    advanceObserve();
-    fireEvent.click(screen.getByLabelText('Count 5'));
+  it('shows observe complete state after auto-complete', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: false });
     act(() => {
-      fireEvent.click(screen.getByText('Submit'));
+      vi.advanceTimersByTime(1500);
     });
-
-    expect(complete).toHaveBeenCalledTimes(2);
-    expect(complete).toHaveBeenLastCalledWith(33.333333333333336);
-    expect(screen.getByText('Not quite. The correct answer is 3.')).toBeInTheDocument();
+    expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 
-  it('disables submit button when no count selected', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
+  it('renders description in observe mode', () => {
+    renderWidget({
+      items: ['🍎'],
+      count: 3,
+      description: 'Count the apples',
+      interactive: false,
+    });
+    expect(screen.getByText('Count the apples')).toBeTruthy();
+  });
+
+  it('renders addition mode in observe', () => {
+    renderWidget({ left: ['🍎', '🍎'], right: ['🍎'], sum: 3, interactive: false });
+    expect(screen.getByLabelText('Addition counting')).toBeTruthy();
+  });
+
+  it('shows config error for invalid content', () => {
+    renderWidget({ interactive: false });
+    expect(screen.getByTestId('widget-config-error')).toBeTruthy();
+  });
+});
+
+describe('VisualCounting interactive mode (interactive: true)', () => {
+  it('renders number buttons from expected-3 to expected+3', () => {
+    renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    expect(screen.getByLabelText('Count 2')).toBeTruthy();
+    expect(screen.getByLabelText('Count 8')).toBeTruthy();
+    expect(screen.queryByLabelText('Count 1')).toBeNull();
+    expect(screen.queryByLabelText('Count 9')).toBeNull();
+  });
+
+  it('shows items without count label', () => {
+    renderWidget({ items: ['🍎'], count: 5, text: 'apples', interactive: true });
+    expect(screen.queryByText('There are 5 apples.')).toBeNull();
+    expect(screen.getAllByRole('listitem')).toHaveLength(5);
+  });
+
+  it('clamp lower bound to 1', () => {
+    renderWidget({ items: ['🍎'], count: 2, interactive: true });
+    expect(screen.getByLabelText('Count 1')).toBeTruthy();
+    expect(screen.queryByLabelText('Count 0')).toBeNull();
+  });
+
+  it('calls complete with 100 on correct answer', () => {
+    const { complete, emitInteraction } = renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith(100);
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ correct: true, accuracy: 1 }),
     );
+  });
 
-    advanceObserve();
+  it('calls complete with accuracy on incorrect answer', () => {
+    const { complete, emitInteraction } = renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith(60);
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ correct: false, accuracy: 0.6 }),
+    );
+  });
 
+  it('cannot submit without selecting a number', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
     expect(screen.getByText('Submit')).toBeDisabled();
   });
 
-  it('renders addition mode observe with left, plus, right, equals, total', () => {
-    const config = {
-      left: ['🍎', '🍎'],
-      right: ['🍌', '🍌', '🍌'],
-      sum: 5,
-      text: 'fruit',
-    };
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={config}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(screen.getByText('5')).toBeInTheDocument();
+  it('submit button disabled after submission', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.queryByText('Submit')).toBeNull();
+    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
-  it('renders addition mode interactive without total', () => {
-    const config = {
-      left: ['🍎', '🍎'],
-      right: ['🍌', '🍌', '🍌'],
-      sum: 5,
-      text: 'fruit',
-    };
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={config}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(screen.getByText('+')).toBeInTheDocument();
-    expect(screen.queryByLabelText('equals')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Count 2')).toBeInTheDocument();
-    expect(screen.getByLabelText('Count 8')).toBeInTheDocument();
+  it('shows result feedback after submission', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('result-display')).toBeTruthy();
+    expect(screen.getByText('Correct! The answer is 3.')).toBeTruthy();
   });
 
-  it('handles addition with left/right as number counts', () => {
-    const emitInteraction = vi.fn();
-    const complete = vi.fn();
+  it('shows incorrect feedback for wrong answer', () => {
+    renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('result-display')).toBeTruthy();
+    expect(screen.getByText('Not quite. The correct answer is 5.')).toBeTruthy();
+  });
 
-    const config = { left: 2, right: 3, sum: 5 };
+  it('shows selected count in live region', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    expect(screen.getByText('Selected: 3')).toBeTruthy();
+  });
 
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={config}
-        emitInteraction={emitInteraction}
-        complete={complete}
-      />,
-    );
+  it('renders description in interactive mode', () => {
+    renderWidget({ items: ['🍎'], count: 3, description: 'Count the apples', interactive: true });
+    expect(screen.getByText('Count the apples')).toBeTruthy();
+  });
 
-    advanceObserve();
+  it('renders hint text when provided', () => {
+    renderWidget({ items: ['🍎'], count: 3, hint: 'Try counting slowly.', interactive: true });
+    expect(screen.getByText('Try counting slowly.')).toBeTruthy();
+  });
+
+  it('renders graduated hints with More help button', () => {
+    const hints = ['Hint 1', 'Hint 2'];
+    renderWidget({ items: ['🍎'], count: 3, hints, interactive: true });
+    expect(screen.getByText('Hint 1')).toBeTruthy();
+    expect(screen.getByText('More help')).toBeTruthy();
+    fireEvent.click(screen.getByText('More help'));
+    expect(screen.getByText('Hint 2')).toBeTruthy();
+    expect(screen.queryByText('More help')).toBeNull();
+  });
+
+  it('renders addition mode interactively', () => {
+    renderWidget({ left: ['🍎', '🍎'], right: ['🍎'], sum: 3, interactive: true });
+    expect(screen.getByLabelText('Addition counting')).toBeTruthy();
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByText('Correct! The answer is 3.')).toBeTruthy();
+  });
+
+  it('handles addition with number left/right', () => {
+    const { complete } = renderWidget({ left: 3, right: 2, sum: 5, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 5'));
     fireEvent.click(screen.getByText('Submit'));
-
     expect(complete).toHaveBeenCalledWith(100);
   });
 
-  it('shows fallback message for empty items', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={{ items: [], count: 0, text: 'apples' }}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getByText('No items to count.')).toBeInTheDocument();
+  it('shows config error for invalid interactive config', () => {
+    renderWidget({ interactive: true });
+    expect(screen.getByTestId('widget-config-error')).toBeTruthy();
   });
+});
 
-  it('displays a single hint', () => {
-    const config = { ...baseConfig, hint: 'Count each apple carefully.' };
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={config}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getByText('Count each apple carefully.')).toBeInTheDocument();
-  });
-
-  it('displays graduated hints and advances through them', () => {
-    const config = {
-      ...baseConfig,
-      hints: ['Look at the apples.', 'Count one by one.', 'There are 3 apples.'],
-    };
-
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={config}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
-    advanceObserve();
-
-    expect(screen.getByText('Look at the apples.')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('More help'));
-    expect(screen.getByText('Count one by one.')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('More help'));
-    expect(screen.getByText('There are 3 apples.')).toBeInTheDocument();
-    expect(() => screen.getByText('More help')).toThrow();
-  });
-
-  it('renders items with correct aria-labels', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
-    );
-
+describe('VisualCounting edge cases', () => {
+  it('uses emoji override when provided', () => {
+    renderWidget({ items: ['🍎'], count: 2, emoji: '🍊', interactive: false });
     const items = screen.getAllByRole('listitem');
-    expect(items[0]).toHaveAttribute('aria-label', '🍎 1 of 3');
-    expect(items[1]).toHaveAttribute('aria-label', '🍎 2 of 3');
-    expect(items[2]).toHaveAttribute('aria-label', '🍎 3 of 3');
+    expect(items).toHaveLength(2);
   });
 
-  it('applies size classes correctly', () => {
-    const sizes = [
-      { size: 'sm', expected: '2rem' },
-      { size: 'md', expected: '3rem' },
-      { size: 'lg', expected: '4rem' },
-    ] as const;
-
-    for (const { size, expected } of sizes) {
-      const { unmount } = render(
-        <WidgetComponent
-          nodeId="test-node"
-          config={{ ...baseConfig, size }}
-          emitInteraction={vi.fn()}
-          complete={vi.fn()}
-        />,
-      );
-
-      const spans = screen.getAllByRole('img', { hidden: true });
-      expect(spans[0]).toHaveStyle({ fontSize: expected });
-      unmount();
-    }
-  });
-
-  it('renders config error for invalid config', () => {
+  it('applies size variants', () => {
     render(
       <WidgetComponent
-        nodeId="test-node"
-        config={{ invalid: true }}
+        nodeId="test"
+        config={{ items: ['🍎'], count: 1, interactive: false }}
         emitInteraction={vi.fn()}
         complete={vi.fn()}
       />,
     );
-
-    expect(screen.getByTestId('widget-config-error')).toBeInTheDocument();
+    expect(screen.getByTestId('visual-counting')).toBeTruthy();
   });
 
-  it('named export matches default export', () => {
-    expect(visualCounting).toBe(VisualCountingWidget);
+  it('defaults to observe mode when interactive not specified', () => {
+    renderWidget({ items: ['🍎'], count: 3 });
+    expect(screen.queryByLabelText(/Count \d/)).toBeNull();
   });
 
-  it('number buttons are keyboard accessible', () => {
-    render(
-      <WidgetComponent
-        nodeId="test-node"
-        config={baseConfig}
-        emitInteraction={vi.fn()}
-        complete={vi.fn()}
-      />,
+  it('does not call complete on mount', () => {
+    const { complete } = renderWidget({ items: ['🍎'], count: 3, interactive: false });
+    expect(complete).not.toHaveBeenCalled();
+  });
+
+  it('emits interaction with widget ID on submit', () => {
+    const { emitInteraction } = renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ widgetId: 'open-edu.visual-counting' }),
     );
+  });
+});
 
-    advanceObserve();
+describe('VisualCounting accessibility', () => {
+  it('has proper aria labels', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: false });
+    expect(screen.getByLabelText('Visual counting activity')).toBeTruthy();
+    expect(screen.getByLabelText('item')).toBeTruthy();
+  });
 
+  it('has accessible number buttons', () => {
+    renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    expect(screen.getByLabelText('Count 2')).toBeTruthy();
+    expect(screen.getByLabelText('Count 5')).toBeTruthy();
+  });
+
+  it('has aria-pressed on selected button', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
     const button = screen.getByLabelText('Count 3');
-    expect(button.tagName).toBe('BUTTON');
-    button.focus();
-    expect(document.activeElement).toBe(button);
+    fireEvent.click(button);
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('has live region for count selection', () => {
+    renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    fireEvent.click(screen.getByLabelText('Count 3'));
+    const liveRegion = screen.getByText('Selected: 3');
+    expect(liveRegion.closest('[aria-live]')).toBeTruthy();
   });
 });

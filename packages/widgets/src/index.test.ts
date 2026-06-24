@@ -4,6 +4,7 @@ import {
   createWidgetRegistry,
   WidgetRegistrationError,
   multipleChoicePractice,
+  visualCounting,
 } from './index';
 
 describe('@open-edu/widgets', () => {
@@ -29,5 +30,10 @@ describe('@open-edu/widgets', () => {
   it('should export multipleChoicePractice widget', () => {
     expect(multipleChoicePractice.id).toBe('open-edu.multiple-choice-practice');
     expect(multipleChoicePractice.render).toBeInstanceOf(Function);
+  });
+
+  it('should export visualCounting widget', () => {
+    expect(visualCounting.id).toBe('open-edu.visual-counting');
+    expect(visualCounting.render).toBeInstanceOf(Function);
   });
 });

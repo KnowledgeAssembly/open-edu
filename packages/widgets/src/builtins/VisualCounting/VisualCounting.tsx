@@ -14,6 +14,7 @@ export const visualCountingSchema = z.object({
   sum: z.number().optional(),
   emoji: z.string().optional(),
   size: z.enum(['sm', 'md', 'lg']).optional(),
+  interactive: z.boolean().optional().default(false),
 });
 
 export type VisualCountingConfig = z.infer<typeof visualCountingSchema>;
@@ -36,8 +37,7 @@ function VisualCountingComponent(props: {
 }) {
   const { config: rawConfig, emitInteraction, complete } = props;
   const parsed = visualCountingSchema.safeParse(rawConfig);
-  const fallbackContent: VisualCountingConfig = {};
-  const content = parsed.success ? parsed.data : fallbackContent;
+  const content = parsed.success ? parsed.data : {} as VisualCountingConfig;
   const isAddition = parsed.success && isAdditionMode(content);
   const hasValidContent =
     parsed.success &&
@@ -45,7 +45,7 @@ function VisualCountingComponent(props: {
       ? content.left !== undefined || content.right !== undefined
       : content.items !== undefined || content.count !== undefined);
 
-  const [phase, setPhase] = useState<'observe' | 'interactive' | 'done'>('observe');
+  const [submitted, setSubmitted] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [selectedCount, setSelectedCount] = useState<number | null>(null);
 
@@ -57,27 +57,28 @@ function VisualCountingComponent(props: {
   const expected = isAddition ? (content.sum ?? leftCount + rightCount) : (content.count ?? 0);
   const emojiSize = SIZE_MAP[content.size ?? 'md'];
   const labelName = content.text ?? 'item';
+  const isObserve = !content.interactive;
 
   useEffect(() => {
-    if (phase !== 'observe') return;
+    if (!isObserve || submitted) return;
     const timer = setTimeout(() => {
       emitInteraction({ type: 'widget.interaction', action: 'observe', observed: true, correct: true });
       complete(100);
-      setPhase('interactive');
+      setSubmitted(true);
     }, 1500);
     return () => clearTimeout(timer);
-  }, [phase, emitInteraction, complete]);
+  }, [isObserve, submitted, emitInteraction, complete]);
 
   const handleNumberClick = useCallback(
     (num: number) => {
-      if (phase !== 'interactive') return;
+      if (submitted) return;
       setSelectedCount(num);
     },
-    [phase],
+    [submitted],
   );
 
   const handleSubmit = useCallback(() => {
-    if (selectedCount === null || phase !== 'interactive') return;
+    if (selectedCount === null || submitted) return;
     const correct = selectedCount === expected;
     const accuracy =
       expected > 0 ? Math.max(0, 1 - Math.abs(selectedCount - expected) / expected) : 0;
@@ -90,8 +91,8 @@ function VisualCountingComponent(props: {
       widgetId: 'open-edu.visual-counting',
     });
     complete(accuracy * 100);
-    setPhase('done');
-  }, [selectedCount, phase, expected, emitInteraction, complete]);
+    setSubmitted(true);
+  }, [selectedCount, submitted, expected, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content.hints && hintIndex < content.hints.length - 1) {
@@ -114,18 +115,19 @@ function VisualCountingComponent(props: {
     numberButtons.push(i);
   }
 
-  const renderItems = (items: string[]) => {
-    const displayEmoji = content.emoji ?? undefined;
+  const renderItems = (items: string[], displayCount?: number) => {
+    const emoji = content.emoji ?? items[0] ?? '';
+    const count = displayCount ?? items.length;
     return (
       <ul
         style={{ listStyle: 'none', display: 'flex', gap: '0.5rem', padding: 0, margin: 0 }}
         role="list"
         aria-label={labelName}
       >
-        {items.map((item, idx) => (
-          <li key={idx} role="listitem" aria-label={getEmojiLabel(displayEmoji || item, idx + 1, items.length)}>
+        {Array.from({ length: count }, (_, idx) => (
+          <li key={idx} role="listitem" aria-label={getEmojiLabel(emoji, idx + 1, count)}>
             <span role="img" aria-hidden="true" style={{ fontSize: emojiSize }}>
-              {displayEmoji || item}
+              {emoji}
             </span>
           </li>
         ))}
@@ -161,16 +163,16 @@ function VisualCountingComponent(props: {
     </div>
   );
 
-  return (
-    <div data-testid="visual-counting" aria-label="Visual counting activity">
-      {phase === 'observe' && (
+  if (isObserve) {
+    return (
+      <div data-testid="visual-counting" aria-label="Visual counting activity">
         <div role="status" aria-live="polite">
           {content.description && <p>{content.description}</p>}
           {isAddition ? (
             renderAddition(true)
           ) : (
             <>
-              {displayItems.length > 0 && renderItems(displayItems)}
+              {displayItems.length > 0 && renderItems(displayItems, content.count)}
               {content.text && (
                 <p>
                   There are {content.count} {content.text}.
@@ -179,92 +181,93 @@ function VisualCountingComponent(props: {
             </>
           )}
         </div>
+        {submitted && (
+          <div role="status" aria-live="assertive" data-testid="observe-complete">
+            <p>Observed.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div data-testid="visual-counting" aria-label="Visual counting activity">
+      {content.description && <p>{content.description}</p>}
+      {isAddition ? renderAddition(false) : displayItems.length > 0 && renderItems(displayItems, content.count)}
+      {displayItems.length === 0 && !isAddition && <p role="status">No items to count.</p>}
+
+      {!submitted && (
+        <div role="group" aria-label="Count selection" style={{ marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {numberButtons.map((num) => (
+              <button
+                key={num}
+                onClick={() => handleNumberClick(num)}
+                aria-pressed={selectedCount === num}
+                aria-label={`Count ${num}`}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '1rem',
+                  fontWeight: selectedCount === num ? 'bold' : 'normal',
+                  backgroundColor: selectedCount === num ? '#3b82f6' : '#e5e7eb',
+                  color: selectedCount === num ? 'white' : 'black',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.25rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
-      {(phase === 'interactive' || phase === 'done') && (
-        <div>
-          {content.description && <p>{content.description}</p>}
-          {isAddition
-            ? renderAddition(false)
-            : displayItems.length > 0 && renderItems(displayItems)}
-
-          {displayItems.length === 0 && !isAddition && <p role="status">No items to count.</p>}
-
-          {phase === 'interactive' && (
-            <div role="group" aria-label="Count selection" style={{ marginTop: '1rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {numberButtons.map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => handleNumberClick(num)}
-                    aria-pressed={selectedCount === num}
-                    aria-label={`Count ${num}`}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      fontSize: '1rem',
-                      fontWeight: selectedCount === num ? 'bold' : 'normal',
-                      backgroundColor: selectedCount === num ? '#3b82f6' : '#e5e7eb',
-                      color: selectedCount === num ? 'white' : 'black',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '0.25rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
-              </div>
-            </div>
+      {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: '#6b7280' }}
+        >
+          <p>{content.hints[hintIndex]}</p>
+          {hintIndex < content.hints.length - 1 && (
+            <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
+              More help
+            </button>
           )}
+        </div>
+      )}
 
-          {phase === 'interactive' &&
-            content.hints &&
-            content.hints.length > 0 &&
-            content.hints[hintIndex] && (
-              <div
-                role="status"
-                aria-live="polite"
-                style={{ marginTop: '0.5rem', color: '#6b7280' }}
-              >
-                <p>{content.hints[hintIndex]}</p>
-                {hintIndex < content.hints.length - 1 && (
-                  <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
-                    More help
-                  </button>
-                )}
-              </div>
-            )}
+      {!submitted && content.hint && !content.hints && (
+        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+          <p>{content.hint}</p>
+        </div>
+      )}
 
-          {phase === 'interactive' && content.hint && !content.hints && (
-            <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
-              <p>{content.hint}</p>
-            </div>
-          )}
+      <div style={{ marginTop: '1rem' }}>
+        {!submitted ? (
+          <button onClick={handleSubmit} disabled={selectedCount === null}>
+            Submit
+          </button>
+        ) : (
+          <button disabled data-testid="result-display">
+            {selectedCount === expected ? 'Correct!' : 'Incorrect'}
+          </button>
+        )}
+      </div>
 
-          <div style={{ marginTop: '1rem' }}>
-            {phase === 'interactive' ? (
-              <button onClick={handleSubmit} disabled={selectedCount === null}>
-                Submit
-              </button>
-            ) : (
-              <button disabled>{selectedCount === expected ? 'Correct!' : 'Incorrect'}</button>
-            )}
-          </div>
+      {selectedCount !== null && !submitted && (
+        <div role="status" aria-live="polite" aria-atomic="true">
+          <p>Selected: {selectedCount}</p>
+        </div>
+      )}
 
-          {selectedCount !== null && phase === 'interactive' && (
-            <div role="status" aria-live="polite" aria-atomic="true">
-              <p>Selected: {selectedCount}</p>
-            </div>
-          )}
-
-          {phase === 'done' && (
-            <div role="status" aria-live="assertive">
-              {selectedCount === expected ? (
-                <p>Correct! The answer is {expected}.</p>
-              ) : (
-                <p>Not quite. The correct answer is {expected}.</p>
-              )}
-            </div>
+      {submitted && (
+        <div role="status" aria-live="assertive" data-testid="feedback">
+          {selectedCount === expected ? (
+            <p>Correct! The answer is {expected}.</p>
+          ) : (
+            <p>Not quite. The correct answer is {expected}.</p>
           )}
         </div>
       )}
