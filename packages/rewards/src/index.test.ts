@@ -9,6 +9,10 @@ import {
   RewardError,
   RewardExecutionError,
   RewardConfigurationError,
+  evaluateCondition,
+  shouldFireAction,
+  getDefaultContext,
+  verifyReceipt,
 } from './index';
 
 describe('@open-edu/rewards exports', () => {
@@ -34,5 +38,15 @@ describe('@open-edu/rewards exports', () => {
     expect(RewardError).toBeDefined();
     expect(RewardExecutionError).toBeDefined();
     expect(RewardConfigurationError).toBeDefined();
+  });
+
+  it('should export condition functions', () => {
+    expect(evaluateCondition).toBeDefined();
+    expect(shouldFireAction).toBeDefined();
+    expect(getDefaultContext).toBeDefined();
+  });
+
+  it('should export verification functions', () => {
+    expect(verifyReceipt).toBeDefined();
   });
 });

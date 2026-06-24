@@ -4,6 +4,7 @@ import {
   BadgeActionSchema,
   WebhookActionSchema,
   ScriptActionSchema,
+  RewardConditionSchema,
 } from './rewards';
 
 describe('BadgeActionSchema', () => {
@@ -117,5 +118,81 @@ describe('RewardsSchema', () => {
         ],
       }),
     ).toThrow();
+  });
+});
+
+describe('RewardConditionSchema', () => {
+  it('should accept a score condition', () => {
+    expect(RewardConditionSchema.parse({ type: 'score', nodeId: 'quiz-1', minScore: 80 })).toEqual({
+      type: 'score',
+      nodeId: 'quiz-1',
+      minScore: 80,
+    });
+  });
+
+  it('should accept a skill condition', () => {
+    expect(
+      RewardConditionSchema.parse({ type: 'skill', skillId: 'math', minLevel: 'mastered' }),
+    ).toEqual({ type: 'skill', skillId: 'math', minLevel: 'mastered' });
+  });
+
+  it('should accept a chain condition', () => {
+    expect(RewardConditionSchema.parse({ type: 'chain', completedNodeIds: ['n1', 'n2'] })).toEqual({
+      type: 'chain',
+      completedNodeIds: ['n1', 'n2'],
+    });
+  });
+
+  it('should accept an and condition', () => {
+    const result = RewardConditionSchema.parse({
+      type: 'and',
+      conditions: [
+        { type: 'score', nodeId: 'quiz-1', minScore: 80 },
+        { type: 'skill', skillId: 'math', minLevel: 'achieved' },
+      ],
+    });
+    expect(result.type).toBe('and');
+    expect(result).toHaveProperty('conditions');
+  });
+
+  it('should accept an or condition', () => {
+    const result = RewardConditionSchema.parse({
+      type: 'or',
+      conditions: [
+        { type: 'score', nodeId: 'quiz-1', minScore: 90 },
+        { type: 'score', nodeId: 'quiz-2', minScore: 80 },
+      ],
+    });
+    expect(result.type).toBe('or');
+    expect(result).toHaveProperty('conditions');
+  });
+
+  it('should accept a reward action with condition', () => {
+    const action = {
+      action: 'badge.award',
+      badge: 'conditional-badge',
+      condition: { type: 'score', nodeId: 'quiz-1', minScore: 80 },
+    };
+    expect(BadgeActionSchema.parse(action)).toEqual(action);
+  });
+
+  it('should reject a condition with negative minScore', () => {
+    expect(() =>
+      RewardConditionSchema.parse({ type: 'score', nodeId: 'quiz-1', minScore: -1 }),
+    ).toThrow();
+  });
+
+  it('should reject a condition with unknown type', () => {
+    expect(() => RewardConditionSchema.parse({ type: 'unknown' })).toThrow();
+  });
+
+  it('should reject invalid minLevel for skill condition', () => {
+    expect(() =>
+      RewardConditionSchema.parse({ type: 'skill', skillId: 'math', minLevel: 'novice' }),
+    ).toThrow();
+  });
+
+  it('should reject empty chain completedNodeIds', () => {
+    expect(() => RewardConditionSchema.parse({ type: 'chain', completedNodeIds: [] })).toThrow();
   });
 });

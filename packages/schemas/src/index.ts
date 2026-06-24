@@ -33,6 +33,7 @@ export {
   BadgeActionSchema,
   WebhookActionSchema,
   ScriptActionSchema,
+  RewardConditionSchema,
 } from './rewards.js';
 export type {
   Rewards,
@@ -41,6 +42,7 @@ export type {
   BadgeAction,
   WebhookAction,
   ScriptAction,
+  RewardCondition,
 } from './rewards.js';
 
 export {
