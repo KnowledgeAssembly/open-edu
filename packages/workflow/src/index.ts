@@ -9,3 +9,5 @@ export { createWorkflowEvent } from './events.js';
 export { encodeStateName, decodeStateName } from './state-map.js';
 export type { WorkflowEvent, WorkflowEventListener, WorkflowEventType } from './events.js';
 export type { MachineConfig } from './types.js';
+export { createSkillState, applyAssessment } from './skills.js';
+export type { SkillState, MasteryLevel, SkillUpdatedEvent, SkillAchievedEvent, SkillEvent } from './skills.js';

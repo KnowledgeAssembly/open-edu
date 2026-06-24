@@ -2,7 +2,9 @@ export type WorkflowEventType =
   | 'node.entered'
   | 'node.completed'
   | 'workflow.completed'
-  | 'route.evaluated';
+  | 'route.evaluated'
+  | 'SKILL_UPDATED'
+  | 'SKILL_ACHIEVED';
 
 export interface WorkflowEvent {
   type: WorkflowEventType;
@@ -11,6 +13,10 @@ export interface WorkflowEvent {
   score?: number;
   reason?: string;
   timestamp: number;
+  skillId?: string;
+  accumulatedScore?: number;
+  maxScore?: number;
+  masteryLevel?: string;
 }
 
 export type WorkflowEventListener = (event: WorkflowEvent) => void;

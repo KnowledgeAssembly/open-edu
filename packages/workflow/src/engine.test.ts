@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { WorkflowEngine } from './engine';
-import type { Workflow } from '@open-edu/schemas';
+import type { Workflow, SkillGraph } from '@open-edu/schemas';
 import type { WorkflowEvent, WorkflowEventListener } from './events';
 
 const simpleWorkflow: Workflow = {
@@ -257,6 +257,94 @@ describe('WorkflowEngine', () => {
       engine.start();
       expect(events[0]?.type).toBe('node.entered');
       expect(events[0]?.nodeId).toBe('nodes/lesson-01.md');
+      engine.stop();
+    });
+  });
+
+  describe('skill tracking', () => {
+    const skillGraph: SkillGraph = {
+      skills: [
+        { id: 'addition', name: 'Addition', maxScore: 100 },
+        { id: 'subtraction', name: 'Subtraction', maxScore: 50 },
+      ],
+      assessments: [
+        { nodeId: 'nodes/lesson-01.md', skillId: 'addition', weight: 1.0 },
+        { nodeId: 'nodes/quiz-01.json', skillId: 'subtraction', weight: 0.5 },
+      ],
+    };
+
+    it('workflow without skill graph runs identically', () => {
+      const engine = new WorkflowEngine(simpleWorkflow);
+      const events = captureEvents(engine);
+      engine.start();
+      events.length = 0;
+      engine.completeNode(80);
+      expect(events.filter((e) => e.type === 'SKILL_UPDATED')).toHaveLength(0);
+      expect(events.filter((e) => e.type === 'SKILL_ACHIEVED')).toHaveLength(0);
+      engine.stop();
+    });
+
+    it('emits SKILL_UPDATED on node completion with assessments', () => {
+      const engine = new WorkflowEngine(simpleWorkflow, { skillGraph });
+      const events = captureEvents(engine);
+      engine.start();
+      events.length = 0;
+      engine.completeNode(80);
+      const updated = events.filter((e) => e.type === 'SKILL_UPDATED');
+      expect(updated).toHaveLength(1);
+      expect(updated[0]?.skillId).toBe('addition');
+      engine.stop();
+    });
+
+    it('accumulates score across multiple assessments on same skill', () => {
+      const multiGraph: SkillGraph = {
+        skills: [{ id: 'addition', name: 'Addition', maxScore: 200 }],
+        assessments: [
+          { nodeId: 'nodes/lesson-01.md', skillId: 'addition', weight: 1.0 },
+          { nodeId: 'nodes/quiz-01.json', skillId: 'addition', weight: 1.0 },
+        ],
+      };
+      const engine = new WorkflowEngine(simpleWorkflow, { skillGraph: multiGraph });
+      const events = captureEvents(engine);
+      engine.start();
+      events.length = 0;
+      engine.completeNode(50);
+      engine.completeNode(100);
+      const updated = events.filter((e) => e.type === 'SKILL_UPDATED');
+      expect(updated).toHaveLength(2);
+      expect(updated[0]?.accumulatedScore).toBe(50);
+      expect(updated[1]?.accumulatedScore).toBe(150);
+      engine.stop();
+    });
+
+    it('emits SKILL_ACHIEVED when crossing threshold', () => {
+      const engine = new WorkflowEngine(simpleWorkflow, { skillGraph });
+      const events = captureEvents(engine);
+      engine.start();
+      events.length = 0;
+      engine.completeNode(80);
+      const achieved = events.filter((e) => e.type === 'SKILL_ACHIEVED');
+      expect(achieved).toHaveLength(1);
+      expect(achieved[0]?.skillId).toBe('addition');
+      engine.stop();
+    });
+
+    it('SKILL_ACHIEVED fires only once per skill', () => {
+      const singleSkillGraph: SkillGraph = {
+        skills: [{ id: 'addition', name: 'Addition', maxScore: 200 }],
+        assessments: [
+          { nodeId: 'nodes/lesson-01.md', skillId: 'addition', weight: 1.0 },
+          { nodeId: 'nodes/quiz-01.json', skillId: 'addition', weight: 1.0 },
+        ],
+      };
+      const engine = new WorkflowEngine(simpleWorkflow, { skillGraph: singleSkillGraph });
+      const events = captureEvents(engine);
+      engine.start();
+      events.length = 0;
+      engine.completeNode(140);
+      engine.completeNode(60);
+      const achieved = events.filter((e) => e.type === 'SKILL_ACHIEVED');
+      expect(achieved).toHaveLength(1);
       engine.stop();
     });
   });
