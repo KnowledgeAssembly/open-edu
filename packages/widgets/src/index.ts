@@ -14,5 +14,3 @@ export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader';
 export { useRemoteWidget } from './use-remote-widget';
 export type { UseRemoteWidgetResult } from './use-remote-widget';
 export { multipleChoicePractice } from './builtins';
-export { validateWidgetPackage } from './cli-utils';
-export type { WidgetPackageValidation } from './cli-utils';

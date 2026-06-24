@@ -246,7 +246,7 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Let's review the basics again")).toBeVisible();
+    await expect(page.getByText("Let's Review Adaptive Learning")).toBeVisible();
   });
 });
 
