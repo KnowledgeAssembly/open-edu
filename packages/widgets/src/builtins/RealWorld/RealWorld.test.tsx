@@ -53,7 +53,9 @@ describe('RealWorld observe mode', () => {
 
   it('shows task description', () => {
     renderWidget(sampleConfig);
-    expect(screen.getByText('Describe one way climate change affects the environment.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Describe one way climate change affects the environment.'),
+    ).toBeInTheDocument();
   });
 
   it('shows prompt', () => {
@@ -150,7 +152,9 @@ describe('RealWorld interactive mode', () => {
   it('allows typing in the textarea', () => {
     renderWidget(interactiveConfig);
     const textarea = screen.getByTestId('response-textarea') as HTMLTextAreaElement;
-    fireEvent.change(textarea, { target: { value: 'Rising sea levels are affecting coastal communities.' } });
+    fireEvent.change(textarea, {
+      target: { value: 'Rising sea levels are affecting coastal communities.' },
+    });
     expect(textarea.value).toBe('Rising sea levels are affecting coastal communities.');
   });
 

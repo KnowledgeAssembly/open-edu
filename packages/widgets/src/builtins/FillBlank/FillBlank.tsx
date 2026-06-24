@@ -24,7 +24,8 @@ const fillBlankSchema = z.object({
 
 export type FillBlankConfig = z.infer<typeof fillBlankSchema>;
 type BlankItem = z.infer<typeof blankItemSchema>;
-type ResolvedFillBlankConfig = FillBlankConfig & Required<Pick<FillBlankConfig, 'template' | 'blanks'>>;
+type ResolvedFillBlankConfig = FillBlankConfig &
+  Required<Pick<FillBlankConfig, 'template' | 'blanks'>>;
 
 function convertPipeline(
   statement: string,
@@ -65,11 +66,8 @@ function FillBlankComponent(props: {
 
   const hasValidContent = config !== null;
   const isObserve = config?.interactive !== true;
-  const sortedBlanks = config
-    ? [...config.blanks].sort((a, b) => a.position - b.position)
-    : [];
+  const sortedBlanks = config ? [...config.blanks].sort((a, b) => a.position - b.position) : [];
   const segments = config ? config.template.split('___') : [];
-
 
   useEffect(() => {
     if (!isObserve || submitted || !hasValidContent) return;
@@ -153,11 +151,7 @@ function FillBlankComponent(props: {
   function renderBlankControl(blank: BlankItem, idx: number) {
     const userAnswer = userAnswers[blank.id];
     const isAnswerCorrect = submitted && String(userAnswer) === String(blank.correctAnswer);
-    const borderColor = submitted
-      ? isAnswerCorrect
-        ? '#16a34a'
-        : '#dc2626'
-      : '#d1d5db';
+    const borderColor = submitted ? (isAnswerCorrect ? '#16a34a' : '#dc2626') : '#d1d5db';
 
     if (c.mode === 'type') {
       return (
@@ -183,10 +177,7 @@ function FillBlankComponent(props: {
     }
 
     return (
-      <span
-        key={blank.id}
-        style={{ position: 'relative', display: 'inline-block' }}
-      >
+      <span key={blank.id} style={{ position: 'relative', display: 'inline-block' }}>
         <button
           data-testid={`blank-select-${blank.id}`}
           onClick={() => {
@@ -242,10 +233,7 @@ function FillBlankComponent(props: {
                   cursor: 'pointer',
                   textAlign: 'left',
                   fontSize: 'inherit',
-                  fontWeight:
-                    String(userAnswers[blank.id]) === String(opt)
-                      ? 'bold'
-                      : 'normal',
+                  fontWeight: String(userAnswers[blank.id]) === String(opt) ? 'bold' : 'normal',
                 }}
               >
                 {String(opt)}
@@ -355,7 +343,11 @@ function FillBlankComponent(props: {
             if (correct) {
               return <p>Correct! All blanks filled correctly.</p>;
             }
-            return <p>{correctCount} of {sortedBlanks.length} blanks correct.</p>;
+            return (
+              <p>
+                {correctCount} of {sortedBlanks.length} blanks correct.
+              </p>
+            );
           })()}
         </div>
       )}

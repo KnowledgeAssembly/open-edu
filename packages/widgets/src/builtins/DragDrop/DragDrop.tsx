@@ -46,9 +46,7 @@ function DragDropComponent(props: {
   const items = content?.items ?? [];
   const targets = content?.targets ?? [];
 
-  const unplacedItemIds = items
-    .map((item) => item.id)
-    .filter((id) => !(id in placedItems));
+  const unplacedItemIds = items.map((item) => item.id).filter((id) => !(id in placedItems));
 
   useEffect(() => {
     if (!isObserve || submitted || !hasValidContent) return;
@@ -160,12 +158,15 @@ function DragDropComponent(props: {
           <div
             role="group"
             aria-label="Drop zones with items"
-            style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+              marginTop: '0.5rem',
+            }}
           >
             {targets.map((target) => {
-              const itemsInTarget = items.filter(
-                (item) => observePositions[item.id] === target.id,
-              );
+              const itemsInTarget = items.filter((item) => observePositions[item.id] === target.id);
               return (
                 <div
                   key={target.id}
@@ -270,9 +271,7 @@ function DragDropComponent(props: {
         style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
       >
         {targets.map((target) => {
-          const itemsInTarget = items.filter(
-            (item) => placedItems[item.id] === target.id,
-          );
+          const itemsInTarget = items.filter((item) => placedItems[item.id] === target.id);
           return (
             <div
               key={target.id}
@@ -289,9 +288,7 @@ function DragDropComponent(props: {
               }}
               style={{
                 padding: '0.75rem',
-                border: selectedItemId !== null
-                  ? '2px solid #3b82f6'
-                  : '1px solid #d1d5db',
+                border: selectedItemId !== null ? '2px solid #3b82f6' : '1px solid #d1d5db',
                 borderRadius: '0.375rem',
                 minHeight: '2.5rem',
                 backgroundColor: selectedItemId !== null ? '#eff6ff' : '#f9fafb',
@@ -403,7 +400,9 @@ function DragDropComponent(props: {
             return correctCount === totalItems ? (
               <p>Correct! All items placed correctly.</p>
             ) : (
-              <p>{correctCount} of {totalItems} items placed correctly.</p>
+              <p>
+                {correctCount} of {totalItems} items placed correctly.
+              </p>
             );
           })()}
         </div>

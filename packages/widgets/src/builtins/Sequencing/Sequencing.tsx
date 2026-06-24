@@ -268,9 +268,7 @@ function SequencingComponent(props: {
               </span>
               {item.emoji && <span>{item.emoji}</span>}
               <span>{item.label}</span>
-              <span style={{ marginLeft: 'auto', color: '#ef4444', fontSize: '0.75rem' }}>
-                ✕
-              </span>
+              <span style={{ marginLeft: 'auto', color: '#ef4444', fontSize: '0.75rem' }}>✕</span>
             </div>
           ))}
         </div>
@@ -328,7 +326,11 @@ function SequencingComponent(props: {
             if (correct) {
               return <p>Correct! The sequence is in the right order.</p>;
             }
-            return <p>{correctCount} of {correctOrder.length} items in the right position.</p>;
+            return (
+              <p>
+                {correctCount} of {correctOrder.length} items in the right position.
+              </p>
+            );
           })()}
         </div>
       )}

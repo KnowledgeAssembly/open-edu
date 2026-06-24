@@ -13,4 +13,14 @@ export { RemoteWidgetLoader } from './remote-loader';
 export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader';
 export { useRemoteWidget } from './use-remote-widget';
 export type { UseRemoteWidgetResult } from './use-remote-widget';
-export { multipleChoicePractice, multipleChoice, visualCounting, matching, dragDrop, sequencing, storyQuestion } from './builtins';
+export {
+  multipleChoicePractice,
+  multipleChoice,
+  visualCounting,
+  matching,
+  dragDrop,
+  sequencing,
+  storyQuestion,
+  realWorld,
+  fractionVisual,
+} from './builtins';

@@ -58,7 +58,8 @@ function RealWorldComponent(props: {
 
     if (content.expectedAnswer && response) {
       interactionData.expectedAnswer = content.expectedAnswer;
-      interactionData.responseExactMatch = response.trim().toLowerCase() === content.expectedAnswer.trim().toLowerCase();
+      interactionData.responseExactMatch =
+        response.trim().toLowerCase() === content.expectedAnswer.trim().toLowerCase();
     }
 
     emitInteraction(interactionData);
@@ -83,11 +84,11 @@ function RealWorldComponent(props: {
           {visualExample && <span aria-hidden="true">{visualExample} </span>}
           <p>{scenario}</p>
         </article>
-        {taskDescription && (
-          <p data-testid="task-description">{taskDescription}</p>
-        )}
+        {taskDescription && <p data-testid="task-description">{taskDescription}</p>}
         {prompt && (
-          <p data-testid="prompt" aria-label="Prompt">{prompt}</p>
+          <p data-testid="prompt" aria-label="Prompt">
+            {prompt}
+          </p>
         )}
         {submitted && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
@@ -120,14 +121,16 @@ function RealWorldComponent(props: {
         {visualExample && <span aria-hidden="true">{visualExample} </span>}
         <p>{scenario}</p>
       </article>
-      {taskDescription && (
-        <p data-testid="task-description">{taskDescription}</p>
-      )}
+      {taskDescription && <p data-testid="task-description">{taskDescription}</p>}
       {prompt && (
-        <p data-testid="prompt" aria-label="Prompt">{prompt}</p>
+        <p data-testid="prompt" aria-label="Prompt">
+          {prompt}
+        </p>
       )}
       {hint && (
-        <p data-testid="hint" aria-label="Hint">{hint}</p>
+        <p data-testid="hint" aria-label="Hint">
+          {hint}
+        </p>
       )}
       <div>
         <label htmlFor="real-world-response" data-testid="response-label">
@@ -142,10 +145,7 @@ function RealWorldComponent(props: {
           aria-describedby={hint ? 'real-world-hint' : undefined}
         />
       </div>
-      <button
-        onClick={handleComplete}
-        data-testid="complete-task-button"
-      >
+      <button onClick={handleComplete} data-testid="complete-task-button">
         I Completed This Task
       </button>
     </div>

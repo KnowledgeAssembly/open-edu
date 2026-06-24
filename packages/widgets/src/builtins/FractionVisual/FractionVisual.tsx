@@ -1,0 +1,345 @@
+import { useState, useEffect, useCallback } from 'react';
+import { z } from 'zod';
+import type { WidgetDefinition } from '../../types';
+
+const compareSchema = z.object({
+  numerator: z.number().int().min(0),
+  denominator: z.number().int().min(1),
+});
+
+export const fractionVisualSchema = z.object({
+  numerator: z.number().int().min(0),
+  denominator: z.number().int().min(1),
+  mode: z.enum(['bar', 'circle']).optional().default('bar'),
+  label: z.string().optional(),
+  showLabel: z.boolean().optional().default(true),
+  interactive: z.boolean().optional().default(false),
+  compare: compareSchema.optional(),
+  size: z.number().optional().default(200),
+});
+
+export type FractionVisualConfig = z.infer<typeof fractionVisualSchema>;
+
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = (angleDeg - 90) * (Math.PI / 180);
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad),
+  };
+}
+
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+  return [
+    `M ${cx} ${cy}`,
+    `L ${start.x} ${start.y}`,
+    `A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`,
+    'Z',
+  ].join('');
+}
+
+function computeComparison(n1: number, d1: number, n2: number, d2: number): '=' | '<' | '>' {
+  const v1 = n1 / d1;
+  const v2 = n2 / d2;
+  if (v1 === v2) return '=';
+  return v1 > v2 ? '>' : '<';
+}
+
+function segmentLabel(index: number, total: number): string {
+  return `${index + 1} of ${total}`;
+}
+
+function countBits(mask: number): number {
+  let count = 0;
+  while (mask > 0) {
+    count += mask & 1;
+    mask >>= 1;
+  }
+  return count;
+}
+
+function FractionVisualComponent(props: {
+  nodeId: string;
+  config: Record<string, unknown>;
+  emitInteraction: (data: Record<string, unknown>) => void;
+  complete: (score?: number) => void;
+}) {
+  const { config: rawConfig, emitInteraction, complete } = props;
+  const parsed = fractionVisualSchema.safeParse(rawConfig);
+  const content = parsed.success ? parsed.data : null;
+  const [submitted, setSubmitted] = useState(false);
+  const [shadedMask, setShadedMask] = useState<number | null>(null);
+
+  const isObserve = content && !content.interactive;
+  const size = content?.size ?? 200;
+  const mode = content?.mode ?? 'bar';
+
+  const initialMask = content ? (1 << content.numerator) - 1 : 0;
+  const effectiveMask = shadedMask ?? initialMask;
+  const shadedCount = countBits(effectiveMask);
+
+  useEffect(() => {
+    if (!isObserve || submitted || !content) return;
+    const timer = setTimeout(() => {
+      emitInteraction({
+        type: 'widget.interaction',
+        action: 'observe',
+        observed: true,
+        correct: true,
+      });
+      complete(100);
+      setSubmitted(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isObserve, submitted, content, emitInteraction, complete]);
+
+  const handleSegmentClick = useCallback(
+    (index: number) => {
+      if (!content?.interactive || submitted || !content) return;
+      setShadedMask((prev) => {
+        const mask = prev ?? (1 << content.numerator) - 1;
+        return mask ^ (1 << index);
+      });
+    },
+    [content, submitted],
+  );
+
+  const handleSubmit = useCallback(() => {
+    if (!content || submitted) return;
+    const correct = shadedCount === content.numerator;
+    const score = correct ? 100 : 0;
+    emitInteraction({
+      type: 'widget.interaction',
+      action: 'submit',
+      shaded: shadedCount,
+      expected: content.numerator,
+      correct,
+      widgetId: 'open-edu.fraction-visual',
+    });
+    complete(score);
+    setSubmitted(true);
+  }, [content, submitted, shadedCount, emitInteraction, complete]);
+
+  if (!parsed.success || !content) {
+    return (
+      <div role="alert" data-testid="widget-config-error">
+        <p>Invalid widget configuration.</p>
+      </div>
+    );
+  }
+
+  if (content.denominator > 12) {
+    return (
+      <div data-testid="fraction-too-many">
+        <p>Too many parts to display.</p>
+      </div>
+    );
+  }
+
+  function renderBarSvg(baseNum: number, den: number, interactive: boolean, svgTestId: string) {
+    const segWidth = size / den;
+    const mask = interactive ? effectiveMask : (1 << baseNum) - 1;
+    const segs: React.ReactNode[] = [];
+
+    for (let i = 0; i < den; i++) {
+      const isShaded = (mask & (1 << i)) !== 0;
+      segs.push(
+        <rect
+          key={i}
+          x={i * segWidth}
+          y={0}
+          width={segWidth + 0.5}
+          height={size}
+          fill={isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6'}
+          stroke="#1e3a5f"
+          strokeWidth={1}
+          data-testid="bar-segment"
+          data-shaded={isShaded ? 'true' : 'false'}
+          aria-label={`Segment ${segmentLabel(i, den)} ${isShaded ? 'shaded' : 'unshaded'}`}
+          role={interactive ? 'button' : undefined}
+          tabIndex={interactive ? 0 : undefined}
+          onClick={interactive ? () => handleSegmentClick(i) : undefined}
+          onKeyDown={
+            interactive
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSegmentClick(i);
+                }
+              : undefined
+          }
+          style={{ cursor: interactive ? 'pointer' : undefined }}
+        />,
+      );
+    }
+
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        data-testid={svgTestId}
+        aria-label={`Fraction bar: ${baseNum}/${den}`}
+        role="img"
+      >
+        {segs}
+      </svg>
+    );
+  }
+
+  function renderCircleSvg(baseNum: number, den: number, interactive: boolean, svgTestId: string) {
+    const cx = size / 2;
+    const cy = size / 2;
+    const r = size / 2 - 2;
+    const anglePerSeg = 360 / den;
+    const mask = interactive ? effectiveMask : (1 << baseNum) - 1;
+    const segs: React.ReactNode[] = [];
+
+    for (let i = 0; i < den; i++) {
+      const startAngle = i * anglePerSeg;
+      const endAngle = (i + 1) * anglePerSeg;
+      const isShaded = (mask & (1 << i)) !== 0;
+      const d = describeArc(cx, cy, r, startAngle, endAngle);
+      segs.push(
+        <path
+          key={i}
+          d={d}
+          fill={isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6'}
+          stroke="#1e3a5f"
+          strokeWidth={1}
+          data-testid="circle-segment"
+          data-shaded={isShaded ? 'true' : 'false'}
+          aria-label={`Segment ${segmentLabel(i, den)} ${isShaded ? 'shaded' : 'unshaded'}`}
+          role={interactive ? 'button' : undefined}
+          tabIndex={interactive ? 0 : undefined}
+          onClick={interactive ? () => handleSegmentClick(i) : undefined}
+          onKeyDown={
+            interactive
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSegmentClick(i);
+                }
+              : undefined
+          }
+          style={{ cursor: interactive ? 'pointer' : undefined }}
+        />,
+      );
+    }
+
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        data-testid={svgTestId}
+        aria-label={`Fraction circle: ${baseNum}/${den}`}
+        role="img"
+      >
+        {segs}
+      </svg>
+    );
+  }
+
+  function renderFraction(num: number, den: number, interactive: boolean, svgTestId: string) {
+    if (mode === 'circle') {
+      return renderCircleSvg(num, den, interactive, svgTestId);
+    }
+    return renderBarSvg(num, den, interactive, svgTestId);
+  }
+
+  const isInteractive = content.interactive ?? false;
+  const displayIndex = `${content.numerator}/${content.denominator}`;
+
+  if (content.compare) {
+    const comparison = computeComparison(
+      content.numerator,
+      content.denominator,
+      content.compare.numerator,
+      content.compare.denominator,
+    );
+    return (
+      <div
+        data-testid="fraction-compare"
+        style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          {renderFraction(content.numerator, content.denominator, isInteractive, 'fraction-bar')}
+          <div aria-label={`Fraction value: ${content.numerator}/${content.denominator}`}>
+            {content.numerator}/{content.denominator}
+          </div>
+        </div>
+        <div
+          style={{ fontSize: '2rem', fontWeight: 'bold' }}
+          aria-label={`comparison: ${comparison}`}
+        >
+          {comparison}
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          {renderFraction(
+            content.compare.numerator,
+            content.compare.denominator,
+            isInteractive,
+            'fraction-bar',
+          )}
+          <div
+            aria-label={`Fraction value: ${content.compare.numerator}/${content.compare.denominator}`}
+          >
+            {content.compare.numerator}/{content.compare.denominator}
+          </div>
+        </div>
+        {isInteractive && !submitted && (
+          <div style={{ width: '100%', textAlign: 'center' }}>
+            <button onClick={handleSubmit} disabled={shadedCount === 0 && shadedMask === null}>
+              Submit
+            </button>
+          </div>
+        )}
+        {submitted && (
+          <div data-testid="feedback" role="status" aria-live="assertive">
+            {shadedCount === content.numerator ? <p>Correct!</p> : <p>Not quite.</p>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div data-testid="fraction-visual" aria-label={`Fraction visual: ${displayIndex}`}>
+      {content.showLabel !== false && content.label && <p>{content.label}</p>}
+
+      <div role="status" aria-live="polite" data-testid="fraction-live-region" aria-atomic="true">
+        {displayIndex}
+      </div>
+
+      {renderFraction(content.numerator, content.denominator, isInteractive, `fraction-${mode}`)}
+
+      {isInteractive && !submitted && (
+        <div style={{ marginTop: '1rem' }}>
+          <button onClick={handleSubmit} disabled={shadedCount === 0 && shadedMask === null}>
+            Submit
+          </button>
+        </div>
+      )}
+
+      {isInteractive && submitted && (
+        <div data-testid="feedback" role="status" aria-live="assertive">
+          {shadedCount === content.numerator ? <p>Correct!</p> : <p>Not quite.</p>}
+        </div>
+      )}
+
+      {!isInteractive && submitted && (
+        <div role="status" aria-live="assertive" data-testid="observe-complete">
+          <p>Observed.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const FractionVisualWidget: WidgetDefinition = {
+  id: 'open-edu.fraction-visual',
+  version: '0.1.0',
+  render: FractionVisualComponent,
+};
+
+export { FractionVisualWidget as fractionVisual };
+export default FractionVisualWidget;

@@ -22,7 +22,12 @@ const selectConfig = {
   template: 'The capital of France is ___. It is known for the ___.',
   blanks: [
     { id: 'city', position: 0, correctAnswer: 'Paris', options: ['Paris', 'London', 'Berlin'] },
-    { id: 'landmark', position: 1, correctAnswer: 'Eiffel Tower', options: ['Louvre', 'Eiffel Tower', 'Notre Dame'] },
+    {
+      id: 'landmark',
+      position: 1,
+      correctAnswer: 'Eiffel Tower',
+      options: ['Louvre', 'Eiffel Tower', 'Notre Dame'],
+    },
   ],
   mode: 'select' as const,
   interactive: true,
@@ -30,9 +35,7 @@ const selectConfig = {
 
 const typeConfig = {
   template: 'The capital of France is ___.',
-  blanks: [
-    { id: 'b1', position: 0, correctAnswer: 'Paris' },
-  ],
+  blanks: [{ id: 'b1', position: 0, correctAnswer: 'Paris' }],
   mode: 'type' as const,
   interactive: true,
 };
@@ -60,7 +63,12 @@ describe('FillBlank observe mode', () => {
     template: 'The capital of France is ___. It is known for the ___.',
     blanks: [
       { id: 'city', position: 0, correctAnswer: 'Paris', options: ['Paris', 'London', 'Berlin'] },
-      { id: 'landmark', position: 1, correctAnswer: 'Eiffel Tower', options: ['Louvre', 'Eiffel Tower', 'Notre Dame'] },
+      {
+        id: 'landmark',
+        position: 1,
+        correctAnswer: 'Eiffel Tower',
+        options: ['Louvre', 'Eiffel Tower', 'Notre Dame'],
+      },
     ],
     mode: 'select',
   };

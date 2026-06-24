@@ -21,7 +21,11 @@ function renderWidget(config: Record<string, unknown> = {}) {
 const sampleConfig = {
   scenario: 'Once upon a time, there was a brave knight.',
   questions: [
-    { question: 'Who is the story about?', options: ['A dragon', 'A knight', 'A king'], correctIndex: 1 },
+    {
+      question: 'Who is the story about?',
+      options: ['A dragon', 'A knight', 'A king'],
+      correctIndex: 1,
+    },
     { question: 'What was the knight?', options: ['Brave', 'Cowardly', 'Sleepy'], correctIndex: 0 },
   ],
   visual: '🛡️',
@@ -218,9 +222,7 @@ describe('StoryQuestion legacy story field support', () => {
     const bothConfig = {
       scenario: 'Primary story.',
       story: 'Legacy story.',
-      questions: [
-        { question: 'Which story?', options: ['Primary', 'Legacy'], correctIndex: 0 },
-      ],
+      questions: [{ question: 'Which story?', options: ['Primary', 'Legacy'], correctIndex: 0 }],
     };
     renderWidget(bothConfig);
     expect(screen.getByText('Primary story.')).toBeInTheDocument();

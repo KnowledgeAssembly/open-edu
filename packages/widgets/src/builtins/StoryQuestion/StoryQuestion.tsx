@@ -8,16 +8,17 @@ const questionSchema = z.object({
   correctIndex: z.number().int().min(0),
 });
 
-const storyQuestionSchema = z.object({
-  scenario: z.string().min(1).optional(),
-  story: z.string().min(1).optional(),
-  questions: z.array(questionSchema).min(1),
-  visual: z.string().optional(),
-  interactive: z.boolean().optional().default(false),
-}).refine(
-  (data) => data.scenario || data.story,
-  { message: 'Either scenario or story field is required' },
-);
+const storyQuestionSchema = z
+  .object({
+    scenario: z.string().min(1).optional(),
+    story: z.string().min(1).optional(),
+    questions: z.array(questionSchema).min(1),
+    visual: z.string().optional(),
+    interactive: z.boolean().optional().default(false),
+  })
+  .refine((data) => data.scenario || data.story, {
+    message: 'Either scenario or story field is required',
+  });
 
 function StoryQuestionComponent(props: {
   nodeId: string;
