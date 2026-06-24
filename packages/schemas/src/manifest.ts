@@ -7,7 +7,11 @@ export const PackageManifestSchema = z.object({
     .max(128)
     .regex(/^[a-z0-9][a-z0-9_-]*$/, 'id must be kebab-case (lowercase, hyphens, underscores)'),
   title: z.string().min(1).max(256),
-  version: z.string().regex(/^\d+\.\d+\.\d+$/, 'version must be semver format (e.g. 1.0.0)'),
+  version: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^\d+\.\d+\.\d+$/, 'version must be semver format (e.g. 1.0.0)'),
   author: z.string().min(1).max(128),
   entry: z.string().min(1).max(512),
 });

@@ -1,0 +1,8 @@
+{
+  "triggers": [
+    {
+      "onEvent": "workflow.complete",
+      "rewards": [{ "action": "badge.award", "badge": "adaptive-study-complete" }]
+    }
+  ]
+}

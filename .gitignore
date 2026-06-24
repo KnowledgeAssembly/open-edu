@@ -13,3 +13,5 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+apps/docs/build/
+apps/docs/.docusaurus/

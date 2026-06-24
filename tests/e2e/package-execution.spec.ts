@@ -196,6 +196,117 @@ test.describe('widget-practice (widget exercise)', () => {
   });
 });
 
+test.describe('adaptive-study (adaptive learning with remediation loop)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/adaptive-study'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('loads with correct title and intro content', async ({ page }) => {
+    await page.goto(server.url);
+    const title = page.getByRole('heading', { level: 1 }).first();
+    await expect(title).toHaveText('Adaptive Study');
+    await expect(
+      page.getByText('This learning experience adapts to your knowledge.'),
+    ).toBeVisible();
+  });
+
+  test('passes checkpoint and reaches reflection', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(
+      page.getByText('Which statements about adaptive learning are correct?'),
+    ).toBeVisible();
+    await page.getByLabel('Adaptive learning personalizes the path based on performance').click();
+    await page.getByLabel('Remediation helps learners review challenging concepts').click();
+    await page.getByLabel('Score-based branching directs learners to different nodes').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('How does adaptive learning differ')).toBeVisible();
+  });
+
+  test('fails checkpoint and reaches remediation', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await page.getByLabel('Adaptive learning uses the same path for all learners').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Let's Review Adaptive Learning")).toBeVisible();
+  });
+});
+
+test.describe('skill-graph (mastery-based routing)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/skill-graph'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('passes basics quiz to unlock advanced quiz', async ({ page }) => {
+    await page.goto(server.url);
+    const title = page.getByRole('heading', { level: 1 }).first();
+    await expect(title).toHaveText('Algebra Skill Graph');
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('Which statements about basic algebra are correct?')).toBeVisible();
+    await page.getByLabel('An equation is a statement that two expressions are equal').click();
+    await page.getByLabel('To solve x + 3 = 7, subtract 3 from both sides').click();
+    await page.getByLabel('Multiplication and division are inverse operations').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(
+      page.getByText('Which statements about advanced algebra are correct?'),
+    ).toBeVisible();
+    await page.getByLabel('A quadratic equation has the form ax² + bx + c = 0').click();
+    await page.getByLabel('The quadratic formula solves for x in a quadratic equation').click();
+    await page.getByLabel('Factoring is a method for solving quadratic equations').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('Algebra Mastery Complete')).toBeVisible();
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
+  });
+
+  test('fails basics quiz and reaches remediation', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await page.getByLabel('The variable x always equals 5').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Let's Review Algebra")).toBeVisible();
+  });
+});
+
 test.describe('autism-reading (lesson → quiz → reflection)', () => {
   let server: TestServer;
 

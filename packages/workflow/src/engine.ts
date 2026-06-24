@@ -3,13 +3,15 @@ import { buildMachineConfig } from './builder.js';
 import { evaluateCondition } from './condition.js';
 import { decodeStateName } from './state-map.js';
 import { createWorkflowEvent } from './events.js';
+import { createSkillState, applyAssessment } from './skills.js';
 import type { WorkflowEvent, WorkflowEventListener } from './events.js';
-import type { Workflow, RouteDefinition } from '@open-edu/schemas';
+import type { Workflow, RouteDefinition, SkillGraph } from '@open-edu/schemas';
 
 const COMPLETED_STATE = 'COMPLETED';
 
 export interface WorkflowEngineOptions {
   entry?: string;
+  skillGraph?: SkillGraph;
 }
 
 export class WorkflowEngine {
@@ -17,6 +19,8 @@ export class WorkflowEngine {
   private workflow: Workflow;
   private listeners: WorkflowEventListener[] = [];
   private entry: string;
+  private skillGraph: SkillGraph | undefined;
+  private skillState: ReturnType<typeof createSkillState>;
 
   constructor(workflow: Workflow, options?: WorkflowEngineOptions) {
     this.workflow = workflow;
@@ -29,6 +33,8 @@ export class WorkflowEngine {
       throw new Error(`Entry node "${entry}" is not present in workflow routing.`);
     }
     this.entry = entry;
+    this.skillGraph = options?.skillGraph;
+    this.skillState = createSkillState(options?.skillGraph);
   }
 
   start(): void {
@@ -80,6 +86,7 @@ export class WorkflowEngine {
     if ('onComplete' in routeDef && routeDef.onComplete) {
       const prevNode = this.getCurrentNodeId();
       this.emit(createWorkflowEvent('node.completed', { nodeId: prevNode, score }));
+      this.applySkillAssessments(prevNode, score);
       this.actor.send({ type: 'NODE_COMPLETE' });
       this.emitEnteredOrCompleted();
     }
@@ -109,6 +116,7 @@ export class WorkflowEngine {
             reason: result.reason,
           }),
         );
+        this.applySkillAssessments(prevNode, s);
         actor.send({ type: 'EVALUATE', score: s });
         this.emitEnteredOrCompleted();
         return;
@@ -128,6 +136,7 @@ export class WorkflowEngine {
         score: s,
       }),
     );
+    this.applySkillAssessments(prevNode, s);
   }
 
   private emitEnteredOrCompleted(): void {
@@ -144,6 +153,35 @@ export class WorkflowEngine {
     return () => {
       this.listeners = this.listeners.filter((l) => l !== listener);
     };
+  }
+
+  private applySkillAssessments(nodeId: string, score?: number): void {
+    if (!this.skillGraph) return;
+
+    const assessments = this.skillGraph.assessments.filter((a) => a.nodeId === nodeId);
+    for (const assessment of assessments) {
+      const skillId = assessment.skillId;
+      if (!(skillId in this.skillState.scores)) continue;
+
+      const { newState, events } = applyAssessment(
+        this.skillState,
+        skillId,
+        score,
+        assessment.weight,
+      );
+      this.skillState = newState;
+
+      for (const event of events) {
+        this.emit(
+          createWorkflowEvent(event.type, {
+            skillId: event.skillId,
+            accumulatedScore: event.accumulatedScore,
+            maxScore: event.maxScore,
+            masteryLevel: event.masteryLevel,
+          }),
+        );
+      }
+    }
   }
 
   private emit(event: WorkflowEvent): void {

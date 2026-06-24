@@ -40,21 +40,33 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
       return <MarkdownRenderer content={node.content} />;
 
     case 'quiz':
-      return <QuizRenderer node={node.node} onSubmit={(score) => handleComplete(score)} />;
+      return (
+        <QuizRenderer
+          key={node.relativePath}
+          node={node.node}
+          onSubmit={(score) => handleComplete(score)}
+        />
+      );
 
     case 'reflection':
-      return <ReflectionRenderer node={node.node} onSubmit={() => handleComplete()} />;
+      return (
+        <ReflectionRenderer
+          key={node.relativePath}
+          node={node.node}
+          onSubmit={() => handleComplete()}
+        />
+      );
 
     case 'exercise':
       return (
-        <FocusTrap>
+        <FocusTrap key={node.relativePath}>
           <WidgetRenderer node={node.node} nodeId={node.relativePath} />
         </FocusTrap>
       );
 
     case 'custom':
       return (
-        <FocusTrap>
+        <FocusTrap key={node.relativePath}>
           <WidgetRenderer node={node.node} nodeId={node.relativePath} />
         </FocusTrap>
       );

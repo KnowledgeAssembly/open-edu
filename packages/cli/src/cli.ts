@@ -7,6 +7,9 @@ import { devPackage } from './commands/dev.js';
 import { buildPackage } from './commands/build.js';
 import { packagePackage } from './commands/package.js';
 import { widgetCreate } from './commands/widget-create.js';
+import { reportTelemetry } from './commands/report.js';
+import { generatePrompt, generateFromDescription } from './commands/generate.js';
+import { patchPackage } from './commands/patch.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -21,9 +24,13 @@ program
   .command('validate')
   .description('Validate an educational package')
   .argument('<package-dir>', 'Path to the educational package directory')
-  .action(async (packageDir: string) => {
+  .option('--verify-integrity', 'Verify file integrity against build manifest')
+  .action(async (packageDir: string, cmdOptions: { verifyIntegrity?: boolean }) => {
     const json = program.optsWithGlobals().json;
-    const result = await validatePackage(packageDir, { json });
+    const result = await validatePackage(packageDir, {
+      json,
+      verifyIntegrity: cmdOptions.verifyIntegrity,
+    });
     handleResult(result, json);
   });
 
@@ -91,6 +98,16 @@ program
   );
 
 program
+  .command('report')
+  .description('Generate a report from a telemetry JSONL file')
+  .argument('<telemetry-jsonl>', 'Path to the telemetry JSONL file')
+  .action((filePath: string) => {
+    const json = program.optsWithGlobals().json;
+    const result = reportTelemetry(filePath, { json });
+    handleResult(result, json);
+  });
+
+program
   .command('lint-content')
   .description('Run content quality checks on an educational package')
   .argument('<package-dir>', 'Path to the educational package directory')
@@ -122,6 +139,68 @@ widget
       ? { success: true, data: { files: result.files } }
       : { success: false, error: result.error!, code: 1 };
     handleResult(cliResult, json);
+  });
+
+program
+  .command('generate')
+  .description('Generate agent prompt or scaffold a package from a description')
+  .option('--prompt', 'Output the agent prompt template for LLM-based package generation')
+  .option('--from-description <text>', 'Generate a package from a natural language description')
+  .option('--force', 'Overwrite existing files (used with --from-description)')
+  .argument('[package-dir]', 'Package directory (required with --from-description)')
+  .action(
+    async (
+      packageDir: string | undefined,
+      cmdOptions: { prompt?: boolean; fromDescription?: string; force?: boolean },
+    ) => {
+      const json = program.optsWithGlobals().json;
+
+      if (cmdOptions.prompt) {
+        const result = await generatePrompt({ json });
+        handleResult(result, json);
+        return;
+      }
+
+      if (cmdOptions.fromDescription) {
+        if (!packageDir) {
+          const result: CliResult = {
+            success: false,
+            error: 'package-dir argument is required with --from-description',
+            code: 1,
+          };
+          handleResult(result, json);
+          return;
+        }
+        const result = await generateFromDescription(packageDir, cmdOptions.fromDescription, {
+          json,
+          force: cmdOptions.force,
+        });
+        handleResult(result, json);
+        return;
+      }
+
+      const result: CliResult = {
+        success: false,
+        error: 'Specify --prompt or --from-description <text>',
+        code: 1,
+      };
+      handleResult(result, json);
+    },
+  );
+
+program
+  .command('patch')
+  .description('Apply a deterministic patch to an educational package')
+  .argument('<package-dir>', 'Path to the educational package directory')
+  .argument('<patch-file>', 'Path to the patch JSON file')
+  .option('--dry-run', 'Show planned changes without modifying files')
+  .action(async (packageDir: string, patchFile: string, cmdOptions: { dryRun?: boolean }) => {
+    const json = program.optsWithGlobals().json;
+    const result = await patchPackage(packageDir, patchFile, {
+      json,
+      dryRun: cmdOptions.dryRun,
+    });
+    handleResult(result, json);
   });
 
 function handleResult(result: CliResult, json: boolean | undefined): void {

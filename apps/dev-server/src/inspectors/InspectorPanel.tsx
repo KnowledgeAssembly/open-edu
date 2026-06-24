@@ -1,12 +1,21 @@
 import { useState, type ReactNode } from 'react';
 import type { TelemetryEvent } from '@open-edu/schemas';
+import type { RewardReceipt } from '@open-edu/rewards';
 import { TelemetryInspector } from './TelemetryInspector';
 import { AccessibilityInspector } from './AccessibilityInspector';
+import { RewardsInspector } from './RewardsInspector';
 
-type Tab = 'telemetry' | 'accessibility';
+type Tab = 'telemetry' | 'accessibility' | 'rewards';
 
 interface InspectorPanelProps {
   telemetryEvents: TelemetryEvent[];
+  rewardReceipts?: RewardReceipt[];
+  definedRewards?: Array<{
+    action: string;
+    badge?: string;
+    condition?: unknown;
+  }>;
+  onResendReward?: (receipt: RewardReceipt) => void;
 }
 
 const panelStyle: Record<string, React.CSSProperties> = {
@@ -72,7 +81,12 @@ const panelStyle: Record<string, React.CSSProperties> = {
   },
 };
 
-export function InspectorPanel({ telemetryEvents }: InspectorPanelProps): JSX.Element | null {
+export function InspectorPanel({
+  telemetryEvents,
+  rewardReceipts,
+  definedRewards,
+  onResendReward,
+}: InspectorPanelProps): JSX.Element | null {
   const [activeTab, setActiveTab] = useState<Tab>('telemetry');
   const [isOpen, setIsOpen] = useState(true);
 
@@ -92,6 +106,14 @@ export function InspectorPanel({ telemetryEvents }: InspectorPanelProps): JSX.El
   let content: ReactNode;
   if (activeTab === 'telemetry') {
     content = <TelemetryInspector events={telemetryEvents} />;
+  } else if (activeTab === 'rewards') {
+    content = (
+      <RewardsInspector
+        receipts={rewardReceipts ?? []}
+        definedRewards={definedRewards ?? []}
+        onResend={onResendReward}
+      />
+    );
   } else {
     content = <AccessibilityInspector />;
   }
@@ -105,6 +127,16 @@ export function InspectorPanel({ telemetryEvents }: InspectorPanelProps): JSX.El
           onClick={() => setActiveTab('telemetry')}
         >
           Telemetry
+        </button>
+        <button
+          type="button"
+          style={{
+            ...panelStyle.tab,
+            ...(activeTab === 'rewards' ? panelStyle.activeTab : {}),
+          }}
+          onClick={() => setActiveTab('rewards')}
+        >
+          Rewards
         </button>
         <button
           type="button"

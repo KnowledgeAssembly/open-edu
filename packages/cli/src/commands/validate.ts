@@ -1,13 +1,33 @@
-import { loadPackage } from '@open-edu/core';
+import { loadPackage, verifyIntegrity } from '@open-edu/core';
 import { formatValidationSuccess, formatValidationError, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
 
 export async function validatePackage(
   packageDir: string,
-  options?: { json?: boolean },
+  options?: { json?: boolean; verifyIntegrity?: boolean },
 ): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
+
+    if (options?.verifyIntegrity) {
+      const integrityResult = verifyIntegrity(packageDir);
+      if (!integrityResult.valid) {
+        const errorParts: string[] = [];
+        for (const m of integrityResult.mismatches) {
+          errorParts.push(`Hash mismatch: ${m.path}`);
+        }
+        for (const m of integrityResult.missing) {
+          errorParts.push(`Missing file: ${m}`);
+        }
+        const errorMsg = errorParts.join('\n');
+        if (options?.json) {
+          return { success: false, error: errorMsg, code: 1 };
+        }
+        printMessages([{ type: 'error', text: `Integrity check failed:\n${errorMsg}` }]);
+        return { success: false, error: errorMsg, code: 1 };
+      }
+    }
+
     if (options?.json) {
       return {
         success: true,

@@ -2,7 +2,7 @@
 
 An open runtime for educational experiences that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, and rewards.
 
-> **Vision:** A world where educational experiences are as portable, extensible, observable, and accessible as modern software. — [Full Vision](./docs/VISION.md)
+> **Vision:** A world where educational experiences are as portable, extensible, observable, and accessible as modern software. — [Full Vision](./docs/VISION.md) — [Package Authoring Guide](./docs/PACKAGE_AUTHORING.md)
 
 ## Quick Start
 
@@ -107,12 +107,16 @@ Conditional branching (e.g. quiz score-based remediation):
 
 ## Examples
 
-| Example                                         | Description                                        | Workflow Pattern         |
-| ----------------------------------------------- | -------------------------------------------------- | ------------------------ |
-| [hello-world](./examples/hello-world)           | Minimal single-lesson package                      | Linear → COMPLETED       |
-| [intro-javascript](./examples/intro-javascript) | Multi-node JavaScript lesson with quiz             | Linear chain of 4 nodes  |
-| [fractions](./examples/fractions)               | Fractions quiz with score-based remediation        | Conditional branching    |
-| [autism-reading](./examples/autism-reading)     | Accessibility-first reading lesson with reflection | Linear + reflection node |
+| Example                                             | Description                                                                                    | Workflow Pattern                                              |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [hello-world](./examples/hello-world)               | Minimal single-lesson package                                                                  | Linear → COMPLETED                                            |
+| [intro-javascript](./examples/intro-javascript)     | Multi-node JavaScript lesson with quiz                                                         | Linear chain of 4 nodes                                       |
+| [fractions](./examples/fractions)                   | Fractions quiz with score-based remediation                                                    | Conditional branching                                         |
+| [autism-reading](./examples/autism-reading)         | Accessibility-first reading lesson with reflection                                             | Linear + reflection node                                      |
+| [adaptive-study](./examples/adaptive-study)         | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward     | Conditional branching + remediation loop + reflection + badge |
+| [skill-graph](./examples/skill-graph)               | Mastery-based routing with skill dependencies — pass algebra.basics to unlock algebra.advanced | Skill-graph conditional branching + remediation loop          |
+| [widget-practice](./examples/widget-practice)       | Demonstrates widget-based exercise rendering                                                   | Linear → COMPLETED                                            |
+| [remote-widget-demo](./examples/remote-widget-demo) | Demonstrates loading a widget from a remote URL at runtime                                     | Linear → COMPLETED                                            |
 
 Each example includes a validation test that asserts correct loading via `@open-edu/core`:
 
@@ -207,7 +211,7 @@ pnpm test:e2e                # Run all Playwright tests
 pnpm test:e2e:install        # Install Playwright browsers
 ```
 
-E2E tests start a real Vite dev server on a dynamic port and run against all 4 example packages:
+E2E tests start a real Vite dev server on a dynamic port and run against all 5 example packages:
 
 | Test file                   | Coverage                                                                                           |
 | --------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -236,10 +240,15 @@ open-edu/
 │   ├── hello-world/
 │   ├── intro-javascript/
 │   ├── fractions/
-│   └── autism-reading/
+│   ├── autism-reading/
+│   └── adaptive-study/
 ├── tests/e2e/               # Playwright tests
 └── docs/                    # Architecture docs
 ```
+
+## Release Process
+
+See [RELEASE.md](./docs/RELEASE.md) for the full release checklist, including changeset management, build and test verification, dry-run publish, and rollback guidance.
 
 ## License
 

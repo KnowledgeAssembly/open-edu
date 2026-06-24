@@ -1,9 +1,16 @@
-import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { formatValidationError, formatPackageSuccess, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
+import {
+  collectFiles,
+  generateBuildManifest,
+  writeBuildManifest,
+} from '../utils/build-manifest.js';
 import * as tar from 'tar';
+
+const MANIFEST_FILE = 'open-edu-build.json';
 
 export async function packagePackage(
   packageDir: string,
@@ -19,6 +26,10 @@ export async function packagePackage(
 
     const archiveName = `${pkg.manifest.id}-${pkg.manifest.version}.tar.gz`;
     const archivePath = resolve(join(outDir, archiveName));
+
+    const files = collectFiles(packageDir, packageDir);
+    const manifest = generateBuildManifest(pkg, files);
+    writeBuildManifest(packageDir, manifest);
 
     await new Promise<void>((resolvePromise, reject) => {
       tar
@@ -37,6 +48,11 @@ export async function packagePackage(
         .on('finish', resolvePromise)
         .on('error', reject);
     });
+
+    const manifestPath = join(packageDir, MANIFEST_FILE);
+    if (existsSync(manifestPath)) {
+      unlinkSync(manifestPath);
+    }
 
     if (options?.json) {
       return {

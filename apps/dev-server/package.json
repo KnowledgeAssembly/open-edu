@@ -26,6 +26,7 @@
   "dependencies": {
     "@open-edu/accessibility": "workspace:*",
     "@open-edu/core": "workspace:*",
+    "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/telemetry": "workspace:*",
     "@open-edu/widgets": "workspace:*",

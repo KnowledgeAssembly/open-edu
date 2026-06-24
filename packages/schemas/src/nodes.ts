@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SkillsSchema } from './manifest.js';
+import { RemoteWidgetManifestSchema } from './widget-manifest.js';
 
 const OptionSchema = z.object({
   id: z.string().min(1).max(64),
@@ -18,7 +19,7 @@ const ReflectionConfigSchema = z.object({
 
 const WidgetConfigSchema = z.object({
   widget: z.string().min(1).max(256),
-  version: z.string().max(64).optional(),
+  version: z.string().min(1).max(64).optional(),
   config: z.record(z.unknown()).optional(),
 });
 
@@ -54,6 +55,7 @@ export const WidgetNodeSchema = z.object({
   type: z.literal('custom'),
   skills: SkillsSchema.optional(),
   ...WidgetConfigSchema.shape,
+  remoteWidget: RemoteWidgetManifestSchema.optional(),
 });
 
 export const ContentNodeSchema = z.discriminatedUnion('type', [

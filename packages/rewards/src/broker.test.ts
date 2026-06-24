@@ -100,7 +100,7 @@ describe('RewardBroker', () => {
     subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
 
     expect(broker.results).toHaveLength(1);
-    expect(broker.results[0]?.success).toBe(false);
+    expect(broker.results[0]?.status).toBe('failed');
     expect(broker.results[0]?.detail).toContain('allowShellHooks');
   });
 
@@ -130,5 +130,114 @@ describe('RewardBroker', () => {
     broker.stop();
     subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
     expect(broker.results).toHaveLength(0);
+  });
+
+  it('should return typed receipts with actionId and status', () => {
+    broker = new RewardBroker({ rewards, source: subject.asObservable() });
+    broker.start();
+    subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
+    const receipt = broker.results[0];
+    expect(receipt).toBeDefined();
+    expect(receipt?.actionId).toBeDefined();
+    expect(receipt?.actionType).toBe('badge.award');
+    expect(receipt?.status).toBe('delivered');
+    expect(receipt?.dispatchedAt).toBeGreaterThan(0);
+  });
+
+  it('should skip actions when condition is not met', () => {
+    const conditionalRewards: Rewards = {
+      triggers: [
+        {
+          onEvent: 'node_complete',
+          rewards: [
+            {
+              action: 'badge.award',
+              badge: 'conditional',
+              condition: { type: 'score', nodeId: 'quiz1', minScore: 80 },
+            },
+          ],
+        },
+      ],
+    };
+    broker = new RewardBroker({
+      rewards: conditionalRewards,
+      source: subject.asObservable(),
+      context: { scores: { quiz1: 50 }, skills: {}, completedNodes: [] },
+    });
+    broker.start();
+    subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
+    expect(broker.results).toHaveLength(1);
+    expect(broker.results[0]?.status).toBe('skipped');
+    expect(broker.results[0]?.detail).toContain('Condition not met');
+  });
+
+  it('should fire actions when condition is met', () => {
+    const conditionalRewards: Rewards = {
+      triggers: [
+        {
+          onEvent: 'node_complete',
+          rewards: [
+            {
+              action: 'badge.award',
+              badge: 'conditional',
+              condition: { type: 'score', nodeId: 'quiz1', minScore: 80 },
+            },
+          ],
+        },
+      ],
+    };
+    broker = new RewardBroker({
+      rewards: conditionalRewards,
+      source: subject.asObservable(),
+      context: { scores: { quiz1: 90 }, skills: {}, completedNodes: [] },
+    });
+    broker.start();
+    subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
+    expect(broker.results).toHaveLength(1);
+    expect(broker.results[0]?.status).toBe('delivered');
+  });
+
+  it('should update context and re-evaluate conditions', () => {
+    const conditionalRewards: Rewards = {
+      triggers: [
+        {
+          onEvent: 'quiz_answered',
+          rewards: [
+            {
+              action: 'badge.award',
+              badge: 'high-scorer',
+              condition: { type: 'score', nodeId: 'quiz1', minScore: 80 },
+            },
+          ],
+        },
+      ],
+    };
+    broker = new RewardBroker({
+      rewards: conditionalRewards,
+      source: subject.asObservable(),
+      context: { scores: {}, skills: {}, completedNodes: [] },
+    });
+    broker.start();
+    broker.updateContext({ scores: { quiz1: 85 } });
+    subject.next({
+      event: 'quiz_answered',
+      nodeId: 'quiz1',
+      optionId: 'a',
+      correct: true,
+      timestamp: 1000,
+    } as TelemetryEvent);
+    expect(broker.results).toHaveLength(1);
+    expect(broker.results[0]?.status).toBe('delivered');
+  });
+
+  it('should fire unconditionally when no condition is specified', () => {
+    broker = new RewardBroker({
+      rewards,
+      source: subject.asObservable(),
+    });
+    broker.start();
+    subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
+    expect(broker.results).toHaveLength(1);
+    expect(broker.results[0]?.status).toBe('delivered');
   });
 });

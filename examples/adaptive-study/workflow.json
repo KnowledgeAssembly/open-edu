@@ -1,0 +1,19 @@
+{
+  "routing": {
+    "nodes/intro.md": {
+      "onComplete": "nodes/checkpoint.json"
+    },
+    "nodes/checkpoint.json": {
+      "conditions": [
+        { "if": "score >= 80", "then": "nodes/reflection.json" },
+        { "if": "score < 80", "then": "nodes/remediation.md" }
+      ]
+    },
+    "nodes/remediation.md": {
+      "onComplete": "nodes/checkpoint.json"
+    },
+    "nodes/reflection.json": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}

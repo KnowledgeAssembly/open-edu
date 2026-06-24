@@ -1,0 +1,20 @@
+{
+  "name": "@open-edu/example-skill-graph",
+  "id": "skill-graph",
+  "title": "Algebra Skill Graph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mastery-based routing with skill dependencies — pass algebra.basics to unlock algebra.advanced",
+  "author": "Open-Edu Team",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

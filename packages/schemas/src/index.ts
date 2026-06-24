@@ -33,6 +33,7 @@ export {
   BadgeActionSchema,
   WebhookActionSchema,
   ScriptActionSchema,
+  RewardConditionSchema,
 } from './rewards.js';
 export type {
   Rewards,
@@ -41,7 +42,26 @@ export type {
   BadgeAction,
   WebhookAction,
   ScriptAction,
+  RewardCondition,
 } from './rewards.js';
+
+export { RemoteWidgetManifestSchema } from './widget-manifest.js';
+export type { RemoteWidgetManifest } from './widget-manifest.js';
+
+export {
+  SkillGraphSchema,
+  SkillDefinitionSchema,
+  SkillAssessmentSchema,
+  MasteryLevelSchema,
+  validateSkillGraph,
+} from './skills.js';
+export type {
+  SkillGraph,
+  SkillDefinition,
+  SkillAssessment,
+  MasteryLevel,
+  ValidationResult,
+} from './skills.js';
 
 export {
   TelemetryEventSchema,

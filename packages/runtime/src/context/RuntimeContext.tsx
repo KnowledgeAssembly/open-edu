@@ -12,8 +12,9 @@ import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
-import type { ProgressSnapshot } from '@open-edu/schemas';
+import type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
+import { computeSkillScores, getSkillMastery } from './skills';
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
@@ -27,6 +28,9 @@ export interface RuntimeContextValue {
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
   progressSnapshot: ProgressSnapshot | null;
+  skillScores: Record<string, number>;
+  getSkillMastery: (skillId: string) => MasteryLevel;
+  skillGraph: SkillGraph | undefined;
 }
 
 export interface RuntimeProviderProps {
@@ -36,6 +40,9 @@ export interface RuntimeProviderProps {
   widgetRegistry?: WidgetRegistry;
   initialProgress?: ProgressSnapshot;
   onProgressChange?: (snapshot: ProgressSnapshot) => void;
+  packageId?: string;
+  packageVersion?: string;
+  skillGraph?: SkillGraph;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -47,7 +54,12 @@ export function RuntimeProvider({
   widgetRegistry,
   initialProgress,
   onProgressChange,
+  packageId,
+  packageVersion,
+  skillGraph,
 }: RuntimeProviderProps): JSX.Element {
+  const skillsRef = useRef(skillGraph);
+  skillsRef.current = skillGraph;
   const nodeMap = useMemo(() => {
     const map: Record<string, LoadedNode> = {};
     for (const node of loadedPackage.nodes) {
@@ -127,11 +139,14 @@ export function RuntimeProvider({
 
   useEffect(() => {
     if (!onProgressChange) return;
-    const snapshot = buildProgressSnapshot(
-      loadedPackage.manifest.id,
-      loadedPackage.manifest.version,
-      { currentNodeId, visitedNodes, scores, isCompleted },
-    );
+    const pkgId = packageId ?? loadedPackage.manifest.id;
+    const pkgVer = packageVersion ?? loadedPackage.manifest.version;
+    const snapshot = buildProgressSnapshot(pkgId, pkgVer, {
+      currentNodeId,
+      visitedNodes,
+      scores,
+      isCompleted,
+    });
     const json = JSON.stringify(snapshot);
     if (json !== prevSnapshotRef.current) {
       prevSnapshotRef.current = json;
@@ -145,7 +160,20 @@ export function RuntimeProvider({
     onProgressChange,
     loadedPackage.manifest.id,
     loadedPackage.manifest.version,
+    packageId,
+    packageVersion,
   ]);
+
+  const skillScores = useMemo(() => computeSkillScores(scores, skillsRef.current), [scores]);
+
+  const getContextSkillMastery = useCallback(
+    (skillId: string): MasteryLevel => {
+      const score = skillScores[skillId] ?? 0;
+      const def = skillsRef.current?.skills.find((s) => s.id === skillId);
+      return getSkillMastery(score, def);
+    },
+    [skillScores],
+  );
 
   const value = useMemo<RuntimeContextValue>(
     () => ({
@@ -159,9 +187,12 @@ export function RuntimeProvider({
       completeNode,
       getNode,
       widgetRegistry,
+      skillScores,
+      getSkillMastery: getContextSkillMastery,
+      skillGraph,
       progressSnapshot: buildProgressSnapshot(
-        loadedPackage.manifest.id,
-        loadedPackage.manifest.version,
+        packageId ?? loadedPackage.manifest.id,
+        packageVersion ?? loadedPackage.manifest.version,
         { currentNodeId, visitedNodes, scores, isCompleted },
       ),
     }),
@@ -176,6 +207,11 @@ export function RuntimeProvider({
       completeNode,
       getNode,
       widgetRegistry,
+      skillScores,
+      getContextSkillMastery,
+      skillGraph,
+      packageId,
+      packageVersion,
     ],
   );
 
