@@ -4,12 +4,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
+import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
@@ -117,7 +119,36 @@ export function RuntimeProvider({
     ],
   );
 
-  return <RuntimeContext.Provider value={value}>{children}</RuntimeContext.Provider>;
+  return (
+    <RuntimeContext.Provider value={value}>
+      <LiveRegionProvider>
+        <WorkflowAnnouncer />
+        {children}
+      </LiveRegionProvider>
+    </RuntimeContext.Provider>
+  );
+}
+
+function WorkflowAnnouncer(): null {
+  const { announce } = useLiveRegion();
+  const { currentNodeId, currentNode, isCompleted } = useRuntime();
+  const announcedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (currentNode && currentNodeId && !announcedRef.current.has(currentNodeId)) {
+      announcedRef.current.add(currentNodeId);
+      const title = (currentNode.node as { title?: string }).title ?? currentNode.relativePath;
+      announce(`Now viewing: ${title}`);
+    }
+  }, [currentNodeId, currentNode, announce]);
+
+  useEffect(() => {
+    if (isCompleted) {
+      announce('Lesson completed', 'assertive');
+    }
+  }, [isCompleted, announce]);
+
+  return null;
 }
 
 export function useRuntime(): RuntimeContextValue {

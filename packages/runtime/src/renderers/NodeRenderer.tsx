@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 import type { LoadedNode } from '@open-edu/core';
 import { useRuntime } from '../context/RuntimeContext';
+import { FocusTrap, useLiveRegion } from '@open-edu/accessibility';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { QuizRenderer } from './QuizRenderer';
 import { ReflectionRenderer } from './ReflectionRenderer';
@@ -14,6 +16,16 @@ export interface NodeRendererProps {
 export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
   const { completeNode } = useRuntime();
   const handleComplete = onComplete ?? completeNode;
+  const { announce } = useLiveRegion();
+  const announcedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (node && !announcedRef.current.has(node.relativePath)) {
+      announcedRef.current.add(node.relativePath);
+      const title = (node.node as { title?: string }).title ?? node.relativePath;
+      announce(`Loaded ${node.node.type}: ${title}`);
+    }
+  }, [node, announce]);
 
   if (!node) {
     return (
@@ -34,10 +46,18 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
       return <ReflectionRenderer node={node.node} onSubmit={() => handleComplete()} />;
 
     case 'exercise':
-      return <WidgetRenderer node={node.node} nodeId={node.relativePath} />;
+      return (
+        <FocusTrap>
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+        </FocusTrap>
+      );
 
     case 'custom':
-      return <WidgetRenderer node={node.node} nodeId={node.relativePath} />;
+      return (
+        <FocusTrap>
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+        </FocusTrap>
+      );
 
     default:
       return <PlaceholderRenderer nodeType={String((node.node as { type: unknown }).type)} />;

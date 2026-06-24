@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import type { QuizNode } from '@open-edu/schemas';
+import { FocusTrap } from '@open-edu/accessibility';
 
 export interface QuizRendererProps {
   node: QuizNode;
@@ -85,6 +86,7 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
   };
 
   return (
+    <FocusTrap active={!submitted}>
     <fieldset
       className={className}
       data-testid="quiz-renderer"
@@ -127,5 +129,6 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
         </div>
       )}
     </fieldset>
+    </FocusTrap>
   );
 }

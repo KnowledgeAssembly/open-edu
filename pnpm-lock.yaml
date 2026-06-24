@@ -196,6 +196,9 @@ importers:
 
   packages/runtime:
     dependencies:
+      '@open-edu/accessibility':
+        specifier: workspace:*
+        version: link:../accessibility
       '@open-edu/core':
         specifier: workspace:*
         version: link:../core

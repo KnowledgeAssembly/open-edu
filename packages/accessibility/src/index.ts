@@ -16,5 +16,9 @@ export type {
 } from './focus';
 export { AriaProvider, useAriaContext, useAnnouncement } from './aria';
 export type { AriaContextValue, AnnouncementPriority, AriaProviderProps } from './aria';
+export { FocusTrap } from './focus-trap';
+export type { FocusTrapProps } from './focus-trap';
+export { LiveRegionProvider, useLiveRegion } from './live-region';
+export type { LiveRegionContextValue } from './live-region';
 export { AxeValidator } from './validator';
 export type { AxeValidatorProps, AxeViolation, AxeResults } from './validator';
