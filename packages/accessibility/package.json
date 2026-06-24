@@ -23,7 +23,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@open-edu/runtime": "workspace:*",
     "axe-core": "^4.8.0"
   },
   "peerDependencies": {

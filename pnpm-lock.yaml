@@ -137,9 +137,6 @@ importers:
 
   packages/accessibility:
     dependencies:
-      '@open-edu/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       axe-core:
         specifier: ^4.8.0
         version: 4.12.1
