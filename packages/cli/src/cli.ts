@@ -7,6 +7,7 @@ import { devPackage } from './commands/dev.js';
 import { buildPackage } from './commands/build.js';
 import { packagePackage } from './commands/package.js';
 import { widgetCreate } from './commands/widget-create.js';
+import { reportTelemetry } from './commands/report.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -21,9 +22,10 @@ program
   .command('validate')
   .description('Validate an educational package')
   .argument('<package-dir>', 'Path to the educational package directory')
-  .action(async (packageDir: string) => {
+  .option('--verify-integrity', 'Verify file integrity against build manifest')
+  .action(async (packageDir: string, cmdOptions: { verifyIntegrity?: boolean }) => {
     const json = program.optsWithGlobals().json;
-    const result = await validatePackage(packageDir, { json });
+    const result = await validatePackage(packageDir, { json, verifyIntegrity: cmdOptions.verifyIntegrity });
     handleResult(result, json);
   });
 
@@ -89,6 +91,16 @@ program
       handleResult(cliResult, json);
     },
   );
+
+program
+  .command('report')
+  .description('Generate a report from a telemetry JSONL file')
+  .argument('<telemetry-jsonl>', 'Path to the telemetry JSONL file')
+  .action((filePath: string) => {
+    const json = program.optsWithGlobals().json;
+    const result = reportTelemetry(filePath, { json });
+    handleResult(result, json);
+  });
 
 program
   .command('lint-content')
