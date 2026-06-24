@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  computeSkillScores,
-  getSkillMastery,
-  getMasteryLabel,
-  getMasteryColor,
-} from './skills';
+import { computeSkillScores, getSkillMastery, getMasteryLabel, getMasteryColor } from './skills';
 import type { SkillGraph } from '@open-edu/schemas';
 
 describe('computeSkillScores', () => {
@@ -32,10 +27,7 @@ describe('computeSkillScores', () => {
   });
 
   it('computes skill scores from node scores', () => {
-    const scores = computeSkillScores(
-      { 'nodes/quiz-basics.json': 90 },
-      graph,
-    );
+    const scores = computeSkillScores({ 'nodes/quiz-basics.json': 90 }, graph);
     expect(scores).toEqual({ 'algebra.basics': 90 });
   });
 

@@ -20,4 +20,3 @@ Let's go over the key concepts again before retrying.
 Review these concepts and retake the quiz when you're ready.
 
 > Press **Next** to retry the quiz.
-

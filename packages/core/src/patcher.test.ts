@@ -41,7 +41,10 @@ function createMinimalPackage(dir: string): void {
 }
 
 beforeEach(() => {
-  tempDir = resolve(tmpdir(), `edu-patch-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  tempDir = resolve(
+    tmpdir(),
+    `edu-patch-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   createMinimalPackage(tempDir);
 });
 
@@ -80,9 +83,7 @@ describe('applyPatch', () => {
     await applyPatch(tempDir, addOp);
 
     // Now remove it
-    const operations: PatchOperation[] = [
-      { op: 'remove', path: '/package.json/customField' },
-    ];
+    const operations: PatchOperation[] = [{ op: 'remove', path: '/package.json/customField' }];
     const report = await applyPatch(tempDir, operations);
     expect(report.validationResult.valid).toBe(true);
     const manifest = JSON.parse(readFileSync(join(tempDir, 'package.json'), 'utf-8'));
@@ -90,9 +91,7 @@ describe('applyPatch', () => {
   });
 
   it('should remove a schema-required field and fail validation', async () => {
-    const operations: PatchOperation[] = [
-      { op: 'remove', path: '/package.json/author' },
-    ];
+    const operations: PatchOperation[] = [{ op: 'remove', path: '/package.json/author' }];
     const report = await applyPatch(tempDir, operations);
     expect(report.validationResult.valid).toBe(false);
     // File should be reverted
@@ -157,7 +156,11 @@ describe('applyPatch', () => {
     // Now remove the quiz node — needs to also fix intro.md's onComplete
     const removeOps: PatchOperation[] = [
       { op: 'remove-node', nodeId: 'nodes/quiz.json' },
-      { op: 'replace', path: '/workflow.json/routing', value: { 'nodes/intro.md': { onComplete: 'COMPLETED' } } },
+      {
+        op: 'replace',
+        path: '/workflow.json/routing',
+        value: { 'nodes/intro.md': { onComplete: 'COMPLETED' } },
+      },
     ];
     const report = await applyPatch(tempDir, removeOps);
     expect(report.validationResult.valid).toBe(true);
@@ -170,9 +173,7 @@ describe('applyPatch', () => {
 
   it('should reject invalid patches (validation failure) and revert files', async () => {
     // Remove the entry node but keep workflow reference -> should fail
-    const operations: PatchOperation[] = [
-      { op: 'remove-node', nodeId: 'nodes/intro.md' },
-    ];
+    const operations: PatchOperation[] = [{ op: 'remove-node', nodeId: 'nodes/intro.md' }];
     const report = await applyPatch(tempDir, operations);
     expect(report.validationResult.valid).toBe(false);
     // Files should be reverted
@@ -213,9 +214,7 @@ describe('applyPatch', () => {
   });
 
   it('should skip remove if field does not exist', async () => {
-    const operations: PatchOperation[] = [
-      { op: 'remove', path: '/package.json/nonexistent' },
-    ];
+    const operations: PatchOperation[] = [{ op: 'remove', path: '/package.json/nonexistent' }];
     const report = await applyPatch(tempDir, operations);
     expect(report.operations[0]!.status).toBe('skipped');
     expect(report.validationResult.valid).toBe(true);

@@ -5,7 +5,12 @@ export { buildProgressSnapshot, isValidSnapshot } from './context/progress.js';
 export type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
 export { SkillSummary } from './components/SkillSummary.js';
 export type { SkillSummaryProps } from './components/SkillSummary.js';
-export { computeSkillScores, getSkillMastery, getMasteryLabel, getMasteryColor } from './context/skills.js';
+export {
+  computeSkillScores,
+  getSkillMastery,
+  getMasteryLabel,
+  getMasteryColor,
+} from './context/skills.js';
 export { MarkdownRenderer } from './renderers/MarkdownRenderer.js';
 export type { MarkdownRendererProps } from './renderers/MarkdownRenderer.js';
 export { QuizRenderer } from './renderers/QuizRenderer.js';

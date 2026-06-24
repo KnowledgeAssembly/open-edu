@@ -10,4 +10,3 @@ Excellent work! You've demonstrated mastery of both algebra basics and advanced 
 You've completed the Algebra Skill Graph learning experience.
 
 > Press **Next** to finish.
-

@@ -52,7 +52,12 @@ const skillGraph: SkillGraph = {
 describe('SkillSummary', () => {
   it('renders nothing when skillGraph is not provided', () => {
     const pkg = makePackage([
-      { path: '/tmp/nodes/lesson-01.md', relativePath: 'nodes/lesson-01.md', content: '# Hello', node: { type: 'lesson' as const } },
+      {
+        path: '/tmp/nodes/lesson-01.md',
+        relativePath: 'nodes/lesson-01.md',
+        content: '# Hello',
+        node: { type: 'lesson' as const },
+      },
     ]);
     const { container } = render(
       <RuntimeProvider loadedPackage={pkg} engine={new StubEngine() as unknown as WorkflowEngine}>
@@ -64,10 +69,19 @@ describe('SkillSummary', () => {
 
   it('renders skill names when skillGraph is provided', () => {
     const pkg = makePackage([
-      { path: '/tmp/nodes/lesson-01.md', relativePath: 'nodes/lesson-01.md', content: '# Hello', node: { type: 'lesson' as const } },
+      {
+        path: '/tmp/nodes/lesson-01.md',
+        relativePath: 'nodes/lesson-01.md',
+        content: '# Hello',
+        node: { type: 'lesson' as const },
+      },
     ]);
     render(
-      <RuntimeProvider loadedPackage={pkg} engine={new StubEngine() as unknown as WorkflowEngine} skillGraph={skillGraph}>
+      <RuntimeProvider
+        loadedPackage={pkg}
+        engine={new StubEngine() as unknown as WorkflowEngine}
+        skillGraph={skillGraph}
+      >
         <SkillSummary />
       </RuntimeProvider>,
     );

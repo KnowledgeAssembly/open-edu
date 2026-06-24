@@ -250,6 +250,63 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
   });
 });
 
+test.describe('skill-graph (mastery-based routing)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/skill-graph'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('passes basics quiz to unlock advanced quiz', async ({ page }) => {
+    await page.goto(server.url);
+    const title = page.getByRole('heading', { level: 1 }).first();
+    await expect(title).toHaveText('Algebra Skill Graph');
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('Which statements about basic algebra are correct?')).toBeVisible();
+    await page.getByLabel('An equation is a statement that two expressions are equal').click();
+    await page.getByLabel('To solve x + 3 = 7, subtract 3 from both sides').click();
+    await page.getByLabel('Multiplication and division are inverse operations').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(
+      page.getByText('Which statements about advanced algebra are correct?'),
+    ).toBeVisible();
+    await page.getByLabel('A quadratic equation has the form ax² + bx + c = 0').click();
+    await page.getByLabel('The quadratic formula solves for x in a quadratic equation').click();
+    await page.getByLabel('Factoring is a method for solving quadratic equations').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText('Algebra Mastery Complete')).toBeVisible();
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
+  });
+
+  test('fails basics quiz and reaches remediation', async ({ page }) => {
+    await page.goto(server.url);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await page.getByLabel('The variable x always equals 5').click();
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Let's Review Algebra")).toBeVisible();
+  });
+});
+
 test.describe('autism-reading (lesson → quiz → reflection)', () => {
   let server: TestServer;
 

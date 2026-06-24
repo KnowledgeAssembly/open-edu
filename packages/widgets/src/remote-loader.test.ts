@@ -46,7 +46,11 @@ describe('RemoteWidgetLoader', () => {
     );
 
     const manifest = makeManifest();
-    const def = await loader.load(manifest, registry, makeEvaluate({ id: 'test-remote', version: '1.0.0', render: () => null }));
+    const def = await loader.load(
+      manifest,
+      registry,
+      makeEvaluate({ id: 'test-remote', version: '1.0.0', render: () => null }),
+    );
 
     expect(def.id).toBe('test-remote');
     expect(registry.has('test-remote')).toBe(true);
@@ -106,9 +110,9 @@ describe('RemoteWidgetLoader', () => {
       integrity: 'sha256-0000000000000000000000000000000000000000000000000000000000000000',
     });
 
-    await expect(loader.load(manifest, registry, makeEvaluate({ id: 'test', render: () => null }))).rejects.toThrow(
-      'Integrity check failed',
-    );
+    await expect(
+      loader.load(manifest, registry, makeEvaluate({ id: 'test', render: () => null })),
+    ).rejects.toThrow('Integrity check failed');
   });
 
   it('should throw when default export is missing', async () => {
@@ -134,9 +138,9 @@ describe('RemoteWidgetLoader', () => {
     );
 
     const manifest = makeManifest();
-    await expect(loader.load(manifest, registry, async () => ({ default: { notAWidget: true } }))).rejects.toThrow(
-      'not a valid WidgetDefinition',
-    );
+    await expect(
+      loader.load(manifest, registry, async () => ({ default: { notAWidget: true } })),
+    ).rejects.toThrow('not a valid WidgetDefinition');
   });
 
   it('should update registry remote status through loading states', async () => {
@@ -153,7 +157,11 @@ describe('RemoteWidgetLoader', () => {
     const reg1 = registry.getRemoteRegistration(manifest);
     expect(reg1?.status).toBe('pending');
 
-    await loader.load(manifest, registry, makeEvaluate({ id: 'status-test', version: '1.0.0', render: () => null }));
+    await loader.load(
+      manifest,
+      registry,
+      makeEvaluate({ id: 'status-test', version: '1.0.0', render: () => null }),
+    );
 
     const reg2 = registry.getRemoteRegistration(manifest);
     expect(reg2?.status).toBe('success');
@@ -168,7 +176,11 @@ describe('RemoteWidgetLoader', () => {
     );
 
     const manifest = makeManifest({ id: 'cached-test' });
-    await loader.load(manifest, registry, makeEvaluate({ id: 'cached-test', version: '1.0.0', render: () => null }));
+    await loader.load(
+      manifest,
+      registry,
+      makeEvaluate({ id: 'cached-test', version: '1.0.0', render: () => null }),
+    );
 
     const callback = vi.fn();
     const unsubscribe = loader.subscribe(manifest, callback);

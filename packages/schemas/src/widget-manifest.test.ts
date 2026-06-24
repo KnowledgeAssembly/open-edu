@@ -57,7 +57,10 @@ describe('RemoteWidgetManifestSchema', () => {
   });
 
   it('should accept https:// url', () => {
-    const m = RemoteWidgetManifestSchema.parse({ ...validManifest, url: 'https://cdn.example.com/widget.js' });
+    const m = RemoteWidgetManifestSchema.parse({
+      ...validManifest,
+      url: 'https://cdn.example.com/widget.js',
+    });
     expect(m.url).toBe('https://cdn.example.com/widget.js');
   });
 
@@ -87,9 +90,7 @@ describe('RemoteWidgetManifestSchema', () => {
   });
 
   it('should reject non-string integrity', () => {
-    expect(() =>
-      RemoteWidgetManifestSchema.parse({ ...validManifest, integrity: 123 }),
-    ).toThrow();
+    expect(() => RemoteWidgetManifestSchema.parse({ ...validManifest, integrity: 123 })).toThrow();
   });
 
   it('should reject non-array permissions', () => {

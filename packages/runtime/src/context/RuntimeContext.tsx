@@ -164,10 +164,7 @@ export function RuntimeProvider({
     packageVersion,
   ]);
 
-  const skillScores = useMemo(
-    () => computeSkillScores(scores, skillsRef.current),
-    [scores],
-  );
+  const skillScores = useMemo(() => computeSkillScores(scores, skillsRef.current), [scores]);
 
   const getContextSkillMastery = useCallback(
     (skillId: string): MasteryLevel => {

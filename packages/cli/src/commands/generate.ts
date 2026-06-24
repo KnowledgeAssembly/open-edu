@@ -2,9 +2,7 @@ import { generateAgentPrompt, loadPackage } from '@open-edu/core';
 import { createPackage } from './create.js';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function generatePrompt(options?: {
-  json?: boolean;
-}): Promise<CliResult> {
+export async function generatePrompt(options?: { json?: boolean }): Promise<CliResult> {
   const prompt = generateAgentPrompt();
 
   if (options?.json) {

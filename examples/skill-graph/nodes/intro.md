@@ -15,4 +15,3 @@ This learning experience uses mastery-based routing to help you build algebra sk
 4. Pass the advanced quiz to complete the lesson
 
 > Press **Next** to begin the basics quiz.
-

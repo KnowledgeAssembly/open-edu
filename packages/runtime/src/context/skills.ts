@@ -19,14 +19,16 @@ export function computeSkillScores(
       entry.total += nodeScore * assessment.weight;
       entry.totalWeight += assessment.weight;
     } else {
-      weightedScores[assessment.skillId] = { total: nodeScore * assessment.weight, totalWeight: assessment.weight };
+      weightedScores[assessment.skillId] = {
+        total: nodeScore * assessment.weight,
+        totalWeight: assessment.weight,
+      };
     }
   }
 
   const result: Record<string, number> = {};
   for (const [skillId, data] of Object.entries(weightedScores)) {
-    result[skillId] =
-      data.totalWeight > 0 ? Math.round(data.total / data.totalWeight) : 0;
+    result[skillId] = data.totalWeight > 0 ? Math.round(data.total / data.totalWeight) : 0;
   }
 
   return result;

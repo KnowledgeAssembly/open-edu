@@ -80,13 +80,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   );
 }
 
-function RemoteWidgetRenderer({
-  node,
-  nodeId,
-}: {
-  node: RemoteNode;
-  nodeId: string;
-}): JSX.Element {
+function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
   const { widgetRegistry, completeNode } = useRuntime();
   const manifest = node.remoteWidget!;
   const { widget, status, error } = useRemoteWidget(manifest, widgetRegistry);

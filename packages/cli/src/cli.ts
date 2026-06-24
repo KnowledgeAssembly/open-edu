@@ -194,16 +194,14 @@ program
   .argument('<package-dir>', 'Path to the educational package directory')
   .argument('<patch-file>', 'Path to the patch JSON file')
   .option('--dry-run', 'Show planned changes without modifying files')
-  .action(
-    async (packageDir: string, patchFile: string, cmdOptions: { dryRun?: boolean }) => {
-      const json = program.optsWithGlobals().json;
-      const result = await patchPackage(packageDir, patchFile, {
-        json,
-        dryRun: cmdOptions.dryRun,
-      });
-      handleResult(result, json);
-    },
-  );
+  .action(async (packageDir: string, patchFile: string, cmdOptions: { dryRun?: boolean }) => {
+    const json = program.optsWithGlobals().json;
+    const result = await patchPackage(packageDir, patchFile, {
+      json,
+      dryRun: cmdOptions.dryRun,
+    });
+    handleResult(result, json);
+  });
 
 function handleResult(result: CliResult, json: boolean | undefined): void {
   if (json) {

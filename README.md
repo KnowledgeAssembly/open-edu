@@ -107,16 +107,16 @@ Conditional branching (e.g. quiz score-based remediation):
 
 ## Examples
 
-| Example                                         | Description                                                                                | Workflow Pattern                                              |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| [hello-world](./examples/hello-world)           | Minimal single-lesson package                                                              | Linear → COMPLETED                                            |
-| [intro-javascript](./examples/intro-javascript) | Multi-node JavaScript lesson with quiz                                                     | Linear chain of 4 nodes                                       |
-| [fractions](./examples/fractions)               | Fractions quiz with score-based remediation                                                | Conditional branching                                         |
-| [autism-reading](./examples/autism-reading)     | Accessibility-first reading lesson with reflection                                         | Linear + reflection node                                      |
-| [adaptive-study](./examples/adaptive-study)     | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward | Conditional branching + remediation loop + reflection + badge |
-| [skill-graph](./examples/skill-graph)           | Mastery-based routing with skill dependencies — pass algebra.basics to unlock algebra.advanced | Skill-graph conditional branching + remediation loop |
-| [widget-practice](./examples/widget-practice)   | Demonstrates widget-based exercise rendering                                                   | Linear → COMPLETED |
-| [remote-widget-demo](./examples/remote-widget-demo) | Demonstrates loading a widget from a remote URL at runtime                                 | Linear → COMPLETED |
+| Example                                             | Description                                                                                    | Workflow Pattern                                              |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [hello-world](./examples/hello-world)               | Minimal single-lesson package                                                                  | Linear → COMPLETED                                            |
+| [intro-javascript](./examples/intro-javascript)     | Multi-node JavaScript lesson with quiz                                                         | Linear chain of 4 nodes                                       |
+| [fractions](./examples/fractions)                   | Fractions quiz with score-based remediation                                                    | Conditional branching                                         |
+| [autism-reading](./examples/autism-reading)         | Accessibility-first reading lesson with reflection                                             | Linear + reflection node                                      |
+| [adaptive-study](./examples/adaptive-study)         | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward     | Conditional branching + remediation loop + reflection + badge |
+| [skill-graph](./examples/skill-graph)               | Mastery-based routing with skill dependencies — pass algebra.basics to unlock algebra.advanced | Skill-graph conditional branching + remediation loop          |
+| [widget-practice](./examples/widget-practice)       | Demonstrates widget-based exercise rendering                                                   | Linear → COMPLETED                                            |
+| [remote-widget-demo](./examples/remote-widget-demo) | Demonstrates loading a widget from a remote URL at runtime                                     | Linear → COMPLETED                                            |
 
 Each example includes a validation test that asserts correct loading via `@open-edu/core`:
 

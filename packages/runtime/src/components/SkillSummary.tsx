@@ -25,7 +25,14 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
     >
       {skillGraph.skills.map((skill) => {
         const score = skillScores[skill.id] ?? 0;
-        const mastery = score >= 90 ? 'mastered' : score >= 75 ? 'achieved' : score >= 50 ? 'in_progress' : 'not_attempted';
+        const mastery =
+          score >= 90
+            ? 'mastered'
+            : score >= 75
+              ? 'achieved'
+              : score >= 50
+                ? 'in_progress'
+                : 'not_attempted';
         return (
           <div
             key={skill.id}
@@ -45,9 +52,7 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
               }}
               data-testid={`skill-dot-${skill.id}`}
             />
-            <span style={{ fontWeight: 500 }}>
-              {skill.name}
-            </span>
+            <span style={{ fontWeight: 500 }}>{skill.name}</span>
             {!compact && (
               <span style={{ color: '#6b7280', fontSize: '12px' }}>
                 {score}% &middot; {getMasteryLabel(mastery)}
