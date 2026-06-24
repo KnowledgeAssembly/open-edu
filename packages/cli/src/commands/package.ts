@@ -5,7 +5,11 @@ import { formatValidationError, formatPackageSuccess, printMessages } from '../u
 import type { CliResult } from '../utils/json-output.js';
 import * as tar from 'tar';
 
-export async function packagePackage(packageDir: string, outputDir?: string, options?: { json?: boolean }): Promise<CliResult> {
+export async function packagePackage(
+  packageDir: string,
+  outputDir?: string,
+  options?: { json?: boolean },
+): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
     const outDir = outputDir ?? process.cwd();
@@ -24,11 +28,7 @@ export async function packagePackage(packageDir: string, outputDir?: string, opt
             cwd: packageDir,
             filter: (path: string) => {
               const topLevel = path.split('/')[0];
-              return (
-                topLevel !== 'dist' &&
-                topLevel !== 'node_modules' &&
-                topLevel !== '.git'
-              );
+              return topLevel !== 'dist' && topLevel !== 'node_modules' && topLevel !== '.git';
             },
           },
           ['.'],
@@ -60,6 +60,10 @@ export async function packagePackage(packageDir: string, outputDir?: string, opt
     }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return { success: false, error: error instanceof Error ? error.message : String(error), code: 1 };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      code: 1,
+    };
   }
 }

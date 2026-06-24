@@ -87,48 +87,50 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
 
   return (
     <FocusTrap active={!submitted}>
-    <fieldset
-      className={className}
-      data-testid="quiz-renderer"
-      style={fieldsetStyle}
-      disabled={submitted}
-    >
-      <legend style={{ fontWeight: 700, fontSize: '1.125rem', padding: '0 0.5rem' }}>
-        {node.question}
-      </legend>
+      <fieldset
+        className={className}
+        data-testid="quiz-renderer"
+        style={fieldsetStyle}
+        disabled={submitted}
+      >
+        <legend style={{ fontWeight: 700, fontSize: '1.125rem', padding: '0 0.5rem' }}>
+          {node.question}
+        </legend>
 
-      <div role="radiogroup" aria-label="Answer options" style={{ marginTop: '0.75rem' }}>
-        {options.map((option) => (
-          <label key={option.id} style={labelStyle(option)}>
-            <input
-              type="radio"
-              name="quiz-option"
-              value={option.id}
-              checked={selectedOptionId === option.id}
-              onChange={() => setSelectedOptionId(option.id)}
-              disabled={submitted}
-              aria-label={option.text}
-            />
-            <span>{labelText(option)}</span>
-          </label>
-        ))}
-      </div>
-
-      {!submitted ? (
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={selectedOptionId === null}
-          style={buttonStyle}
-        >
-          Submit
-        </button>
-      ) : (
-        <div aria-live="polite" role="status" style={feedbackStyle}>
-          {score === 100 ? 'Correct! Well done.' : 'Incorrect. The correct answer is highlighted.'}
+        <div role="radiogroup" aria-label="Answer options" style={{ marginTop: '0.75rem' }}>
+          {options.map((option) => (
+            <label key={option.id} style={labelStyle(option)}>
+              <input
+                type="radio"
+                name="quiz-option"
+                value={option.id}
+                checked={selectedOptionId === option.id}
+                onChange={() => setSelectedOptionId(option.id)}
+                disabled={submitted}
+                aria-label={option.text}
+              />
+              <span>{labelText(option)}</span>
+            </label>
+          ))}
         </div>
-      )}
-    </fieldset>
+
+        {!submitted ? (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={selectedOptionId === null}
+            style={buttonStyle}
+          >
+            Submit
+          </button>
+        ) : (
+          <div aria-live="polite" role="status" style={feedbackStyle}>
+            {score === 100
+              ? 'Correct! Well done.'
+              : 'Incorrect. The correct answer is highlighted.'}
+          </div>
+        )}
+      </fieldset>
     </FocusTrap>
   );
 }

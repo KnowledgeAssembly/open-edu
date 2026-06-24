@@ -3,7 +3,13 @@ import { render, screen } from '@testing-library/react';
 import { LiveRegionProvider, useLiveRegion } from './live-region';
 import { useEffect } from 'react';
 
-function Announcer({ message, priority }: { message: string; priority?: 'polite' | 'assertive' }): null {
+function Announcer({
+  message,
+  priority,
+}: {
+  message: string;
+  priority?: 'polite' | 'assertive';
+}): null {
   const { announce } = useLiveRegion();
   useEffect(() => {
     announce(message, priority);

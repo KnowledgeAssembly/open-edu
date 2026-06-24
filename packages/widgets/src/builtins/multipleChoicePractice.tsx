@@ -59,16 +59,14 @@ function PracticeWidgetComponent(props: {
             onChange={() => !submitted && setSelectedId(opt.id)}
             disabled={submitted}
             aria-label={opt.text}
-          />
-          {' '}{opt.text}
+          />{' '}
+          {opt.text}
         </label>
       ))}
       <button onClick={handleSubmit} disabled={!selectedId || submitted}>
         {submitted ? (isCorrect ? 'Correct!' : 'Incorrect') : 'Submit'}
       </button>
-      {submitted && explanation && (
-        <p role="status">{explanation}</p>
-      )}
+      {submitted && explanation && <p role="status">{explanation}</p>}
     </div>
   );
 }

@@ -17,7 +17,11 @@ export function loadProgress(packageId: string, packageVersion: string): Progres
   }
 }
 
-export function saveProgress(packageId: string, packageVersion: string, snapshot: ProgressSnapshot): void {
+export function saveProgress(
+  packageId: string,
+  packageVersion: string,
+  snapshot: ProgressSnapshot,
+): void {
   try {
     const key = getStorageKey(packageId, packageVersion);
     localStorage.setItem(key, JSON.stringify(snapshot));

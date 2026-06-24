@@ -84,14 +84,11 @@ export function DevApp(): JSX.Element {
     };
   }, [engine]);
 
-  const handleProgressChange = useCallback(
-    (snapshot: ProgressSnapshot) => {
-      if (loadedPkg) {
-        saveProgress(loadedPkg.manifest.id, loadedPkg.manifest.version, snapshot);
-      }
-    },
-    [],
-  );
+  const handleProgressChange = useCallback((snapshot: ProgressSnapshot) => {
+    if (loadedPkg) {
+      saveProgress(loadedPkg.manifest.id, loadedPkg.manifest.version, snapshot);
+    }
+  }, []);
 
   const widgetRegistry = useMemo(() => {
     const registry = createWidgetRegistry();

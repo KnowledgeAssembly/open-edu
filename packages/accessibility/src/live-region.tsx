@@ -54,14 +54,25 @@ export function LiveRegionProvider({ children }: LiveRegionProviderProps): JSX.E
     <LiveRegionContext.Provider value={{ announce }}>
       {children}
       <div data-testid="live-region-polite" aria-live="polite" className="sr-only" style={srOnly}>
-        {announcements.filter(a => a.priority === 'polite').slice(-1).map(a => (
-          <div key={a.id}>{a.message}</div>
-        ))}
+        {announcements
+          .filter((a) => a.priority === 'polite')
+          .slice(-1)
+          .map((a) => (
+            <div key={a.id}>{a.message}</div>
+          ))}
       </div>
-      <div data-testid="live-region-assertive" aria-live="assertive" className="sr-only" style={srOnly}>
-        {announcements.filter(a => a.priority === 'assertive').slice(-1).map(a => (
-          <div key={a.id}>{a.message}</div>
-        ))}
+      <div
+        data-testid="live-region-assertive"
+        aria-live="assertive"
+        className="sr-only"
+        style={srOnly}
+      >
+        {announcements
+          .filter((a) => a.priority === 'assertive')
+          .slice(-1)
+          .map((a) => (
+            <div key={a.id}>{a.message}</div>
+          ))}
       </div>
     </LiveRegionContext.Provider>
   );

@@ -12,9 +12,9 @@ describe('createWidgetRegistry', () => {
   it('throws WidgetRegistrationError on duplicate registration', () => {
     const registry = createWidgetRegistry();
     registry.register({ id: 'test', render: () => null });
-    expect(() =>
-      registry.register({ id: 'test', render: () => null }),
-    ).toThrow(WidgetRegistrationError);
+    expect(() => registry.register({ id: 'test', render: () => null })).toThrow(
+      WidgetRegistrationError,
+    );
   });
 
   it('get returns undefined for unregistered widget', () => {

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { WIDGETS_VERSION, createWidgetRegistry, WidgetRegistrationError, multipleChoicePractice } from './index';
+import {
+  WIDGETS_VERSION,
+  createWidgetRegistry,
+  WidgetRegistrationError,
+  multipleChoicePractice,
+} from './index';
 
 describe('@open-edu/widgets', () => {
   it('should export a version', () => {

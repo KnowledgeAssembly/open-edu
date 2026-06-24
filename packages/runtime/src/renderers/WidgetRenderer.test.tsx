@@ -68,11 +68,7 @@ function renderWithProvider(
 ) {
   const engine = makeEngine(initialNodeId);
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <RuntimeProvider
-      loadedPackage={pkg}
-      engine={engine}
-      widgetRegistry={widgetRegistry}
-    >
+    <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={widgetRegistry}>
       {children}
     </RuntimeProvider>
   );
@@ -84,9 +80,7 @@ describe('WidgetRenderer', () => {
   let pkg: LoadedPackage;
 
   beforeEach(() => {
-    pkg = makePackage([
-      { relativePath: 'nodes/ex-01.md', type: 'exercise', content: '' },
-    ]);
+    pkg = makePackage([{ relativePath: 'nodes/ex-01.md', type: 'exercise', content: '' }]);
   });
 
   it('renders a registered widget', () => {
@@ -124,13 +118,7 @@ describe('WidgetRenderer', () => {
   });
 
   it('renders placeholder when widget registry is undefined', () => {
-    renderWithProvider(
-      pkg,
-      'nodes/ex-01.md',
-      { type: 'exercise' },
-      'nodes/ex-01.md',
-      undefined,
-    );
+    renderWithProvider(pkg, 'nodes/ex-01.md', { type: 'exercise' }, 'nodes/ex-01.md', undefined);
 
     expect(screen.getByTestId('widget-renderer-placeholder')).toBeInTheDocument();
   });
@@ -139,9 +127,7 @@ describe('WidgetRenderer', () => {
     const registry = createWidgetRegistry();
     registry.register({
       id: 'complete-widget',
-      render: (props) => (
-        <button onClick={() => props.complete(85)}>Complete</button>
-      ),
+      render: (props) => <button onClick={() => props.complete(85)}>Complete</button>,
     });
 
     const { engine } = renderWithProvider(
@@ -180,11 +166,7 @@ describe('WidgetRenderer', () => {
     const registry = createWidgetRegistry();
     registry.register({
       id: 'config-check',
-      render: (props) => (
-        <div data-testid="config-output">
-          {JSON.stringify(props.config)}
-        </div>
-      ),
+      render: (props) => <div data-testid="config-output">{JSON.stringify(props.config)}</div>,
     });
 
     renderWithProvider(

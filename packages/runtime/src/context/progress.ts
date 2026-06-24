@@ -21,10 +21,7 @@ export function buildProgressSnapshot(
   };
 }
 
-export function isValidSnapshot(
-  snapshot: ProgressSnapshot,
-  validNodeIds: Set<string>,
-): boolean {
+export function isValidSnapshot(snapshot: ProgressSnapshot, validNodeIds: Set<string>): boolean {
   if (snapshot.isCompleted) return true;
   return validNodeIds.has(snapshot.currentNodeId);
 }

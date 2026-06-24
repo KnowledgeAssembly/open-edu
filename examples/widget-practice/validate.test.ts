@@ -12,8 +12,8 @@ describe('widget-practice example package', () => {
 
   it('should have correct node types', async () => {
     const pkg = await loadPackage(resolve(__dirname));
-    const intro = pkg.nodes.find(n => n.relativePath === 'nodes/intro.md');
-    const practice = pkg.nodes.find(n => n.relativePath === 'nodes/practice.json');
+    const intro = pkg.nodes.find((n) => n.relativePath === 'nodes/intro.md');
+    const practice = pkg.nodes.find((n) => n.relativePath === 'nodes/practice.json');
     expect(intro?.node.type).toBe('lesson');
     expect(practice?.node.type).toBe('exercise');
   });

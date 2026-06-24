@@ -2,7 +2,10 @@ import { loadPackage } from '@open-edu/core';
 import { formatValidationSuccess, formatValidationError, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function validatePackage(packageDir: string, options?: { json?: boolean }): Promise<CliResult> {
+export async function validatePackage(
+  packageDir: string,
+  options?: { json?: boolean },
+): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
     if (options?.json) {
@@ -34,6 +37,10 @@ export async function validatePackage(packageDir: string, options?: { json?: boo
     }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return { success: false, error: error instanceof Error ? error.message : String(error), code: 1 };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      code: 1,
+    };
   }
 }

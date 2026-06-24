@@ -23,7 +23,11 @@ function collectFiles(dir: string, rootDir: string): string[] {
   return files;
 }
 
-export async function buildPackage(packageDir: string, outDir?: string, options?: { json?: boolean }): Promise<CliResult> {
+export async function buildPackage(
+  packageDir: string,
+  outDir?: string,
+  options?: { json?: boolean },
+): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
     const outputDir = outDir ?? join(packageDir, 'dist');
@@ -69,6 +73,10 @@ export async function buildPackage(packageDir: string, outDir?: string, options?
     }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return { success: false, error: error instanceof Error ? error.message : String(error), code: 1 };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      code: 1,
+    };
   }
 }

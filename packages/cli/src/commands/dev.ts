@@ -3,7 +3,10 @@ import { startDevServer } from '@open-edu/dev-server';
 import { formatValidationError, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function devPackage(packageDir: string, options?: { json?: boolean }): Promise<CliResult> {
+export async function devPackage(
+  packageDir: string,
+  options?: { json?: boolean },
+): Promise<CliResult> {
   try {
     const pkg = await loadPackage(packageDir);
 
@@ -35,6 +38,10 @@ export async function devPackage(packageDir: string, options?: { json?: boolean 
     }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return { success: false, error: error instanceof Error ? error.message : String(error), code: 1 };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      code: 1,
+    };
   }
 }

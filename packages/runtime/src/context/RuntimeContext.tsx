@@ -137,7 +137,15 @@ export function RuntimeProvider({
       prevSnapshotRef.current = json;
       onProgressChange(snapshot);
     }
-  }, [currentNodeId, visitedNodes, scores, isCompleted, onProgressChange, loadedPackage.manifest.id, loadedPackage.manifest.version]);
+  }, [
+    currentNodeId,
+    visitedNodes,
+    scores,
+    isCompleted,
+    onProgressChange,
+    loadedPackage.manifest.id,
+    loadedPackage.manifest.version,
+  ]);
 
   const value = useMemo<RuntimeContextValue>(
     () => ({

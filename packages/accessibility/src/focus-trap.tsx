@@ -5,7 +5,8 @@ export interface FocusTrapProps {
   active?: boolean;
 }
 
-const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export function FocusTrap({ children, active = true }: FocusTrapProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,26 +29,29 @@ export function FocusTrap({ children, active = true }: FocusTrapProps): JSX.Elem
     };
   }, [active]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key !== 'Tab' || !active) return;
-    const container = containerRef.current;
-    if (!container) return;
-    const focusable = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-    if (focusable.length === 0) return;
-    const first = focusable[0]!;
-    const last = focusable[focusable.length - 1]!;
-    if (e.shiftKey) {
-      if (document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== 'Tab' || !active) return;
+      const container = containerRef.current;
+      if (!container) return;
+      const focusable = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
-    } else {
-      if (document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-  }, [active]);
+    },
+    [active],
+  );
 
   return (
     <div ref={containerRef} onKeyDown={handleKeyDown} tabIndex={-1} data-testid="focus-trap">
