@@ -24,14 +24,22 @@ export interface PatchReport {
 }
 
 function parseJsonPointerPath(path: string): { filePath: string; pointerSegments: string[] } {
+  if (path.includes('//')) {
+    throw new Error(`Invalid path: "${path}" — empty segments are not allowed`);
+  }
   const segments = path.split('/').filter(Boolean);
   const filePath = segments[0];
   if (!filePath) {
     throw new Error(`Invalid path: "${path}" — first segment must be a filename`);
   }
-  const pointerSegments = segments.slice(1).map((s) =>
-    s.replace(/~1/g, '/').replace(/~0/g, '~'),
-  );
+  const pointerSegments = segments.slice(1).map((s) => s.replace(/~1/g, '/').replace(/~0/g, '~'));
+  for (const seg of pointerSegments) {
+    if (seg === '-') {
+      throw new Error(
+        `Array append token "-" is not supported in path "${path}" — use explicit array index instead`,
+      );
+    }
+  }
   return { filePath, pointerSegments };
 }
 
@@ -59,40 +67,46 @@ function ensureNestedParent(
   obj: Record<string, unknown>,
   segments: string[],
 ): { parent: Record<string, unknown>; key: string } {
-  let current: unknown = obj;
+  let parent: Record<string, unknown> = obj;
   for (let i = 0; i < segments.length - 1; i++) {
-    if (typeof current !== 'object' || current === null) {
-      const newObj: Record<string, unknown> = {};
-      current = newObj;
+    const seg = segments[i]!;
+    if (seg === '-') {
+      throw new Error('Array append token "-" is not supported — use explicit array index instead');
     }
-    const next = (current as Record<string, unknown>)[segments[i]!];
-    if (next === undefined || typeof next !== 'object' || next === null) {
+    const child = parent[seg];
+    if (child === undefined || typeof child !== 'object' || child === null) {
       const newObj: Record<string, unknown> = {};
-      (current as Record<string, unknown>)[segments[i]!] = newObj;
-      current = newObj;
+      parent[seg] = newObj;
+      parent = newObj;
     } else {
-      current = next;
+      parent = child as Record<string, unknown>;
     }
   }
-  return { parent: current as Record<string, unknown>, key: segments[segments.length - 1]! };
+  return { parent, key: segments[segments.length - 1]! };
 }
 
-function deleteNestedValue(
-  obj: Record<string, unknown>,
-  segments: string[],
-): boolean {
+function deleteNestedValue(obj: Record<string, unknown>, segments: string[]): boolean {
   const result = getNestedValue(obj, segments);
   if (!result || !result.exists) return false;
   delete result.parent[result.key];
+
+  let current = result.parent;
+  for (let i = segments.length - 2; i >= 0; i--) {
+    if (current !== null && typeof current === 'object' && Object.keys(current).length === 0) {
+      const parentResult = getNestedValue(obj, segments.slice(0, i + 1));
+      if (parentResult && parentResult.exists) {
+        delete parentResult.parent[parentResult.key];
+        current = parentResult.parent;
+      }
+    } else {
+      break;
+    }
+  }
+
   return true;
 }
 
-function toDiffLine(
-  op: string,
-  filePath?: string,
-  nodeId?: string,
-  detail?: string,
-): string {
+function toDiffLine(op: string, filePath?: string, nodeId?: string, detail?: string): string {
   if (nodeId) {
     if (op === 'upsert-node') return `  + upsert node: ${nodeId}${detail ? ` (${detail})` : ''}`;
     if (op === 'remove-node') return `  - remove node: ${nodeId}`;
@@ -221,9 +235,7 @@ export async function applyPatch(
               status: 'skipped',
               detail: 'Field does not exist',
             });
-            diffSummary.push(
-              toDiffLine(op.op, filePath, undefined, 'SKIPPED (field not found)'),
-            );
+            diffSummary.push(toDiffLine(op.op, filePath, undefined, 'SKIPPED (field not found)'));
             continue;
           }
           existing.parent[existing.key] = op.value;
@@ -237,9 +249,7 @@ export async function applyPatch(
               status: 'skipped',
               detail: 'Field does not exist',
             });
-            diffSummary.push(
-              toDiffLine(op.op, filePath, undefined, 'SKIPPED (field not found)'),
-            );
+            diffSummary.push(toDiffLine(op.op, filePath, undefined, 'SKIPPED (field not found)'));
             continue;
           }
           results.push({ op: 'remove', path: op.path, status: 'applied' });
@@ -347,7 +357,9 @@ export async function applyPatch(
   for (const [nodeId, content] of nodesToWrite) {
     const fullPath = join(packageDir, nodeId);
     const hadOriginal = backups.some((b) => b.kind === 'json-content' && b.path === nodeId);
-    const originalContent = backups.find((b) => b.kind === 'json-content' && b.path === nodeId)?.content;
+    const originalContent = backups.find(
+      (b) => b.kind === 'json-content' && b.path === nodeId,
+    )?.content;
     await mkdir(dirname(fullPath), { recursive: true });
     await writeFile(fullPath, content, 'utf-8');
     appliedChanges.push({ kind: 'node-written', path: nodeId, hadOriginal, originalContent });
@@ -413,7 +425,9 @@ export async function applyPatch(
           }
         }
       } catch (e) {
-        errors.push(`Failed to revert ${change.path}: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(
+          `Failed to revert ${change.path}: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     }
 

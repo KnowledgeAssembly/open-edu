@@ -67,14 +67,16 @@ export async function replayRewards(
       if (trigger.onEvent !== eventType) continue;
 
       for (const actionDef of trigger.rewards) {
+        const actionKey = JSON.stringify(actionDef);
         const existing = receipts.find(
-          (r) => r.actionType === String(actionDef.action) && r.status === 'delivered',
+          (r) => r.actionKey === actionKey && r.status === 'delivered',
         );
 
         if (existing) {
           receipts.push({
             actionId: `replay-skip-${nextId++}`,
             actionType: String(actionDef.action),
+            actionKey,
             dispatchedAt: Date.now(),
             status: 'skipped',
             detail: 'Already delivered in previous replay',
@@ -85,6 +87,7 @@ export async function replayRewards(
         receipts.push({
           actionId: `replay-${nextId++}`,
           actionType: String(actionDef.action),
+          actionKey: JSON.stringify(actionDef),
           dispatchedAt: Date.now(),
           status: 'delivered',
           detail: `Replayed: ${String(actionDef.action)} for ${eventType}`,

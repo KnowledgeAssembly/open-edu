@@ -13,6 +13,7 @@ export type ReceiptStatus = 'delivered' | 'failed' | 'skipped';
 export interface RewardReceipt {
   actionId: string;
   actionType: string;
+  actionKey?: string;
   dispatchedAt: number;
   status: ReceiptStatus;
   detail?: string;

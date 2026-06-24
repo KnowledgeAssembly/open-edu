@@ -5,15 +5,18 @@ export const RewardConditionSchema = z.lazy(
     z.discriminatedUnion('type', [
       z.object({
         type: z.literal('score'),
-        nodeId: z.string().min(1),
+        nodeId: z.string().min(1).max(512),
         minScore: z.number().min(0),
       }),
       z.object({
         type: z.literal('skill'),
-        skillId: z.string().min(1),
+        skillId: z.string().min(1).max(128),
         minLevel: z.enum(['achieved', 'mastered']),
       }),
-      z.object({ type: z.literal('chain'), completedNodeIds: z.array(z.string().min(1)).min(1) }),
+      z.object({
+        type: z.literal('chain'),
+        completedNodeIds: z.array(z.string().min(1).max(512)).min(1),
+      }),
       z.object({ type: z.literal('and'), conditions: z.array(RewardConditionSchema).min(1) }),
       z.object({ type: z.literal('or'), conditions: z.array(RewardConditionSchema).min(1) }),
     ]),
@@ -27,7 +30,7 @@ export const BadgeActionSchema = z.object({
 
 export const WebhookActionSchema = z.object({
   action: z.literal('webhook'),
-  url: z.string().url().max(2048),
+  url: z.string().min(1).url().max(2048),
   condition: RewardConditionSchema.optional(),
 });
 

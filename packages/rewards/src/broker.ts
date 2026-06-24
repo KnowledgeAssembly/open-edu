@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Subscription } from 'rxjs';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardAction, BadgeAction, WebhookAction, ScriptAction } from '@open-edu/schemas';
@@ -12,7 +13,6 @@ export class RewardBroker {
   private badgeTracker: BadgeTracker;
   private subscription: Subscription | null = null;
   private _receipts: RewardReceipt[] = [];
-  private nextId = 0;
   private _context: ContextSnapshot;
 
   constructor(options: RewardBrokerOptions) {
@@ -70,14 +70,15 @@ export class RewardBroker {
   }
 
   private generateActionId(): string {
-    return `reward-${Date.now()}-${++this.nextId}`;
+    return `reward-${randomUUID()}`;
   }
 
   private toReceipt(result: RewardResult, actionType: string): RewardReceipt {
+    const now = Date.now();
     return {
       actionId: this.generateActionId(),
       actionType,
-      dispatchedAt: Date.now(),
+      dispatchedAt: now,
       status: result.success ? 'delivered' : 'failed',
       detail: result.detail,
       error: result.error?.message,

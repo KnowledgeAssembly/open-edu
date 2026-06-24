@@ -19,7 +19,7 @@ const ReflectionConfigSchema = z.object({
 
 const WidgetConfigSchema = z.object({
   widget: z.string().min(1).max(256),
-  version: z.string().max(64).optional(),
+  version: z.string().min(1).max(64).optional(),
   config: z.record(z.unknown()).optional(),
 });
 

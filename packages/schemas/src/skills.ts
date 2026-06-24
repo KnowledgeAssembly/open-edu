@@ -1,23 +1,18 @@
 import { z } from 'zod';
 
 export const SkillDefinitionSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  dependencies: z.array(z.string()).optional(),
+  id: z.string().min(1).max(128),
+  name: z.string().min(1).max(256),
+  description: z.string().min(1).max(4096).optional(),
+  dependencies: z.array(z.string().min(1).max(128)).optional(),
   maxScore: z.number().default(100),
 });
 
-export const MasteryLevelSchema = z.enum([
-  'not_attempted',
-  'in_progress',
-  'achieved',
-  'mastered',
-]);
+export const MasteryLevelSchema = z.enum(['not_attempted', 'in_progress', 'achieved', 'mastered']);
 
 export const SkillAssessmentSchema = z.object({
-  nodeId: z.string(),
-  skillId: z.string(),
+  nodeId: z.string().min(1).max(512),
+  skillId: z.string().min(1).max(128),
   weight: z.number().min(0).max(1),
 });
 

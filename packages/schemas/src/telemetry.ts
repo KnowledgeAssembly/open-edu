@@ -42,7 +42,7 @@ export const RouteTriggeredEventSchema = BaseTelemetrySchema.extend({
   event: z.literal('route_triggered'),
   from: z.string().min(1).max(256),
   to: z.string().min(1).max(256),
-  reason: z.string().max(512).optional(),
+  reason: z.string().min(1).max(512).optional(),
 });
 
 export const TelemetryEventSchema = z.discriminatedUnion('event', [

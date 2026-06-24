@@ -35,6 +35,7 @@ interface EmbedState {
   engineUnsub: (() => void) | null;
   latestSnapshot: ProgressSnapshot | null;
   resetKey: number;
+  didReset: boolean;
 }
 
 const mountedContainers = new WeakSet<HTMLElement>();
@@ -65,11 +66,12 @@ function workflowEventToTelemetry(event: WorkflowEvent): TelemetryEvent | null {
       } as TelemetryEvent;
     }
     case 'route.evaluated': {
+      if (!event.target) return null;
       return {
         event: 'route_triggered',
         timestamp: ts,
         from: event.nodeId!,
-        to: event.target ?? '',
+        to: event.target,
         reason: event.reason,
       } as TelemetryEvent;
     }
@@ -185,6 +187,7 @@ export async function createRuntime(options: RuntimeEmbedOptions): Promise<Runti
     engineUnsub: null,
     latestSnapshot: options.initialProgress ?? null,
     resetKey: 0,
+    didReset: false,
   };
 
   const onProgressChange = (snapshot: ProgressSnapshot) => {
@@ -218,13 +221,16 @@ export async function createRuntime(options: RuntimeEmbedOptions): Promise<Runti
     const entry = state.latestSnapshot?.currentNodeId ?? loadedPkg.manifest.entry;
     const engine = buildEngine(entry);
 
+    const initialProgress = state.didReset ? undefined : options.initialProgress;
+    state.didReset = false;
+
     root.render(
       <EmbedRoot
         key={state.resetKey}
         loadedPackage={loadedPkg}
         engine={engine}
         widgetRegistry={options.widgetRegistry}
-        initialProgress={options.initialProgress}
+        initialProgress={initialProgress}
         onProgressChange={onProgressChange}
         onAnnouncement={options.onAnnouncement}
       />,
@@ -277,6 +283,7 @@ export async function createRuntime(options: RuntimeEmbedOptions): Promise<Runti
 
       state.resetKey++;
       state.latestSnapshot = null;
+      state.didReset = true;
 
       renderEmbed();
     },
