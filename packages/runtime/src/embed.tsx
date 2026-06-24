@@ -39,7 +39,7 @@ interface EmbedState {
 
 const mountedContainers = new WeakSet<HTMLElement>();
 
-function workflowEventToTelemetry(event: WorkflowEvent): TelemetryEvent {
+function workflowEventToTelemetry(event: WorkflowEvent): TelemetryEvent | null {
   const ts = Date.now();
   switch (event.type) {
     case 'node.entered': {
@@ -73,6 +73,8 @@ function workflowEventToTelemetry(event: WorkflowEvent): TelemetryEvent {
         reason: event.reason,
       } as TelemetryEvent;
     }
+    default:
+      return null;
   }
 }
 
@@ -196,7 +198,10 @@ export async function createRuntime(options: RuntimeEmbedOptions): Promise<Runti
     const unsub = eng.subscribe((event: WorkflowEvent) => {
       if (options.onTelemetryEvent) {
         try {
-          options.onTelemetryEvent(workflowEventToTelemetry(event));
+          const telemetryEvent = workflowEventToTelemetry(event);
+          if (telemetryEvent) {
+            options.onTelemetryEvent(telemetryEvent);
+          }
         } catch (err) {
           console.error(`${ERROR_PREFIX} onTelemetryEvent callback threw:`, err);
         }
