@@ -8,7 +8,7 @@ export const visualCountingSchema = z.object({
   count: z.number().optional(),
   text: z.string().optional(),
   hint: z.string().optional(),
-  hints: z.array(z.string()).max(5).optional(),
+  hints: z.array(z.string()).optional(),
   left: z.union([z.array(z.string()), z.number()]).optional(),
   right: z.union([z.array(z.string()), z.number()]).optional(),
   sum: z.number().optional(),
@@ -61,7 +61,7 @@ function VisualCountingComponent(props: {
   useEffect(() => {
     if (phase !== 'observe') return;
     const timer = setTimeout(() => {
-      emitInteraction({ type: 'widget.interaction', action: 'observe', observed: true });
+      emitInteraction({ type: 'widget.interaction', action: 'observe', observed: true, correct: true });
       complete(100);
       setPhase('interactive');
     }, 1500);
@@ -114,21 +114,24 @@ function VisualCountingComponent(props: {
     numberButtons.push(i);
   }
 
-  const renderItems = (items: string[]) => (
-    <ul
-      style={{ listStyle: 'none', display: 'flex', gap: '0.5rem', padding: 0, margin: 0 }}
-      role="list"
-      aria-label={labelName}
-    >
-      {items.map((item, idx) => (
-        <li key={idx} role="listitem" aria-label={getEmojiLabel(item, idx + 1, items.length)}>
-          <span role="img" aria-hidden="true" style={{ fontSize: emojiSize }}>
-            {item}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
+  const renderItems = (items: string[]) => {
+    const displayEmoji = content.emoji ?? undefined;
+    return (
+      <ul
+        style={{ listStyle: 'none', display: 'flex', gap: '0.5rem', padding: 0, margin: 0 }}
+        role="list"
+        aria-label={labelName}
+      >
+        {items.map((item, idx) => (
+          <li key={idx} role="listitem" aria-label={getEmojiLabel(displayEmoji || item, idx + 1, items.length)}>
+            <span role="img" aria-hidden="true" style={{ fontSize: emojiSize }}>
+              {displayEmoji || item}
+            </span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   const renderAddition = (showTotal: boolean) => (
     <div

@@ -65,7 +65,7 @@ const config: Config = {
         },
         {
           title: 'Community',
-          items: [          { label: 'GitHub', href: 'https://github.com/spatnaik1982/open-edu' }],
+          items: [{ label: 'GitHub', href: 'https://github.com/spatnaik1982/open-edu' }],
         },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Open-Edu Contributors. Built with Docusaurus.`,
