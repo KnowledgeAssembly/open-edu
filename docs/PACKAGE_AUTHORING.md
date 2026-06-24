@@ -249,11 +249,214 @@ Node files must use `.md` for lessons and `.json` for quizzes/reflections/exerci
 
 ---
 
-## 8. Instructions for AI Agents
+## 8. Agentic AI Workflow
 
-### Deterministic Generation Rules
+Open-Edu is designed to work hand-in-hand with AI agents. The CLI exposes machine-readable output, deterministic patch contracts, and a generation prompt so agents can inspect, create, and modify packages without parsing human-targeted text.
 
-When generating an Open-Edu package:
+### 8.1 Getting the Schema Prompt
+
+Before asking an AI to build a package, dump the full agent prompt with all schemas:
+
+```bash
+edu generate --prompt
+```
+
+This prints a complete, deterministic template containing:
+
+- Package directory structure
+- All Zod schema fields for `package.json`, `workflow.json`, `rewards.json`, and every node type
+- Workflow routing patterns (linear, conditional, skill-based)
+- Common mistakes and validation rules
+- A fill-in-the-blanks template for quick generation
+
+Pipe it directly into your conversation with an AI:
+
+```bash
+edu generate --prompt | pbcopy   # copy to clipboard (macOS)
+edu generate --prompt | xclip    # copy to clipboard (Linux)
+```
+
+### 8.2 Quick Scaffolding from a Description
+
+The fastest way to start is to describe your package in plain language:
+
+```bash
+edu generate --from-description "A JavaScript variables lesson with a quiz and remediation loop" ./my-lesson
+```
+
+The CLI will:
+
+1. Extract a package ID and title from the description
+2. Scaffold a complete directory with `package.json`, `workflow.json`, and starter nodes
+3. Validate the result with `loadPackage()` and report any errors
+
+Add `--force` to overwrite an existing directory.
+
+### 8.3 Full Workflow: Idea → Validated Package
+
+For complex packages, follow this iterative workflow:
+
+#### Step 1: Get the prompt
+
+```bash
+edu generate --prompt > prompt.txt
+```
+
+Feed `prompt.txt` to your AI agent so it has the complete schema context.
+
+#### Step 2: Generate the package from a description
+
+Tell the AI what you want. Example prompt for the agent:
+
+```
+Create an Open-Edu package called "intro-to-variables" that teaches JavaScript variables.
+It should have:
+- A markdown lesson node (nodes/lesson.md) explaining let, const, var
+- A quiz node (nodes/quiz.json) with 3 questions about variable scoping
+- A reflection node (nodes/reflection.json) asking what they learned
+- Linear workflow: lesson → quiz → reflection → COMPLETED
+```
+
+#### Step 3: Validate
+
+```bash
+edu validate ./my-package
+```
+
+If validation fails, feed the error output back to the AI:
+
+```bash
+edu validate ./my-package --json   # machine-readable errors
+```
+
+#### Step 4: Patch surgically
+
+The `patch` command lets an AI make targeted edits without regenerating the entire package:
+
+```bash
+# Add a new quiz question
+edu patch ./my-package --json - <<'EOF'
+[
+  { "op": "add", "path": "/options/-", "value": { "id": "d", "text": "block-scoped", "correct": true } }
+]
+EOF
+
+# Replace the remediation content
+edu patch ./my-package --json - <<'EOF'
+[
+  { "op": "replace", "path": "/0/content", "value": "# Let's review\n\nGo over scoping rules again." }
+]
+EOF
+```
+
+Each patch operation is validated atomically — if the result doesn't pass `loadPackage()`, all changes are rolled back. Use `--dry-run` to preview.
+
+Supported patch operations: `add`, `remove`, `replace`, `upsert-node`, `remove-node`.
+
+#### Step 5: Add rewards
+
+```bash
+edu patch ./my-package --json - <<'EOF'
+[
+  { "op": "add", "path": "/triggers/-", "value": {
+    "onEvent": "workflow.complete",
+    "rewards": [{ "action": "badge.award", "badge": "variables-complete" }]
+  }}
+]
+EOF
+```
+
+### 8.4 Worked Example: Building a Remediation Package
+
+Goal: Create a fractions lesson where low scorers loop through remediation.
+
+**1. Scaffold**
+
+```
+edu generate --from-description "Fractions lesson with quiz and remediation" ./fractions
+```
+
+**2. Ask AI to fill in the content**
+
+Prompt the agent with the generated `prompt.txt`. It produces:
+
+```json
+// nodes/quiz.json
+{
+  "type": "quiz",
+  "question": "What is 1/4 + 1/4?",
+  "options": [
+    { "id": "a", "text": "1/4", "correct": false },
+    { "id": "b", "text": "1/2", "correct": true },
+    { "id": "c", "text": "1/8", "correct": false }
+  ],
+  "skills": ["fractions.addition"]
+}
+```
+
+**3. Validate**
+
+```bash
+edu validate ./fractions --json
+```
+
+**4. Patch any issues**
+
+```bash
+edu patch ./fractions/package.json --json - <<'EOF'
+[
+  { "op": "replace", "path": "/author", "value": "AI Assistant" }
+]
+EOF
+```
+
+The complete package is now valid and runnable with the dev server.
+
+### 8.5 AI Prompt Patterns
+
+#### Simple Linear Lesson
+
+```
+Create an Open-Edu lesson package that teaches [TOPIC].
+- One markdown node explaining the concept
+- One quiz with [N] multiple-choice questions
+- Linear workflow: lesson → quiz → COMPLETED
+```
+
+#### Conditional Branching
+
+```
+Create an Open-Edu package with conditional routing.
+- Start with a quiz that branches:
+  - Score >= 80% → advanced lesson node
+  - Score < 80% → remediation lesson node
+- The remediation node loops back to the quiz
+- On passing, route to COMPLETED
+```
+
+#### Skill-Graph Dependencies
+
+```
+Create an Open-Edu package with skill-based progression.
+- Skill "basics" is assessed by quiz-basics
+- Skill "advanced" depends on "basics"
+- Workflow checks skill mastery before unlocking advanced content
+- Use the "skill:" prefix in routing conditions
+```
+
+#### Multi-Lesson Chain
+
+```
+Create a 3-lesson Open-Edu package on [COURSE_TOPIC].
+- Part 1: markdown lesson + quiz
+- Part 2: markdown lesson + reflection
+- Part 3: exercise widget + final quiz
+- Workflow chains them linearly with a badge reward on completion
+```
+
+### 8.6 Deterministic Generation Rules (for AI agents)
+
+When generating an Open-Edu package, follow these rules:
 
 1. **Always produce a complete, valid package** with `package.json`, at least one node, and a `workflow.json`.
 2. **Use kebab-case** for the package `id` field.
@@ -266,7 +469,7 @@ When generating an Open-Edu package:
 9. **Rewards should use `badge.award` action only** unless webhooks or scripts are explicitly requested.
 10. **Keep content short and deterministic** — avoid open-ended or variable content when possible.
 
-### Validation Checklist
+### 8.7 Validation Checklist (for AI agents)
 
 Before delivering a package, verify:
 
@@ -278,6 +481,14 @@ Before delivering a package, verify:
 - [ ] `COMPLETED` is used for terminal states
 - [ ] JSON files are valid JSON
 - [ ] All paths use forward slashes
+
+### 8.8 Tips for Effective AI Collaboration
+
+- **Start with `--prompt`** — always give the AI the full schema prompt first. Without it, the AI may guess wrong field names or structures.
+- **Use `--json` output** — all CLI commands accept `--json` for structured output that agents can parse reliably.
+- **Iterate in small steps** — prefer `patch` with small operations over regenerating entire files.
+- **Validate after every change** — run `edu validate` before committing to catch issues early.
+- **Reference examples** — the `examples/` directory has 9 working packages covering linear, branching, remediation, skill-graph, and widget patterns. Point your AI to them as reference implementations.
 
 ---
 
