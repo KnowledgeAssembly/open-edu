@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, statSync, cpSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { formatValidationError, formatBuildSuccess, printMessages } from '../utils/format.js';
+import type { CliResult } from '../utils/json-output.js';
 
 const EXCLUDED_DIRS = new Set(['dist', 'node_modules', '.git']);
 
@@ -22,9 +23,9 @@ function collectFiles(dir: string, rootDir: string): string[] {
   return files;
 }
 
-export async function buildPackage(packageDir: string, outDir?: string): Promise<number> {
+export async function buildPackage(packageDir: string, outDir?: string, options?: { json?: boolean }): Promise<CliResult> {
   try {
-    await loadPackage(packageDir);
+    const pkg = await loadPackage(packageDir);
     const outputDir = outDir ?? join(packageDir, 'dist');
 
     if (!existsSync(outputDir)) {
@@ -42,12 +43,32 @@ export async function buildPackage(packageDir: string, outDir?: string): Promise
       cpSync(srcPath, destPath);
     }
 
+    if (options?.json) {
+      return {
+        success: true,
+        data: {
+          outputPath: outputDir,
+          manifest: {
+            id: pkg.manifest.id,
+            title: pkg.manifest.title,
+            version: pkg.manifest.version,
+          },
+        },
+      };
+    }
     const messages = formatBuildSuccess(outputDir);
     printMessages(messages);
-    return 0;
+    return { success: true, data: {} };
   } catch (error) {
+    if (options?.json) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        code: 1,
+      };
+    }
     const messages = formatValidationError(error);
     printMessages(messages);
-    return 1;
+    return { success: false, error: error instanceof Error ? error.message : String(error), code: 1 };
   }
 }

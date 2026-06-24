@@ -70,9 +70,9 @@ describe('packagePackage', () => {
   it('should create tar archive with gzip and exclude options', async () => {
     mockLoadPackage.mockResolvedValue(validPkg);
 
-    const code = await packagePackage(tmpDir, tmpDir);
+    const result = await packagePackage(tmpDir, tmpDir);
 
-    expect(code).toBe(0);
+    expect(result.success).toBe(true);
     expect(mockTarC).toHaveBeenCalledTimes(1);
     const [opts, files] = mockTarC.mock.calls[0] as [Record<string, unknown>, string[]];
     expect(files).toEqual(['.']);
@@ -89,17 +89,47 @@ describe('packagePackage', () => {
   it('should default output to current working directory', async () => {
     mockLoadPackage.mockResolvedValue(validPkg);
 
-    const code = await packagePackage(tmpDir);
+    const result = await packagePackage(tmpDir);
 
-    expect(code).toBe(0);
+    expect(result.success).toBe(true);
     expect(mockTarC).toHaveBeenCalledTimes(1);
   });
 
-  it('should return 1 on load error', async () => {
+  it('should return failure on load error', async () => {
     mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'load failed'));
 
-    const code = await packagePackage(tmpDir, tmpDir);
-    expect(code).toBe(1);
+    const result = await packagePackage(tmpDir, tmpDir);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.code).toBe(1);
+    }
     expect(mockTarC).not.toHaveBeenCalled();
+  });
+
+  describe('--json output', () => {
+    it('should return structured data on success in json mode', async () => {
+      mockLoadPackage.mockResolvedValue(validPkg);
+
+      const result = await packagePackage(tmpDir, tmpDir, { json: true });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          packageDir: tmpDir,
+          generatedFiles: expect.arrayContaining([expect.stringMatching(/\.tar\.gz$/)]),
+        });
+      }
+    });
+
+    it('should return error info on failure in json mode', async () => {
+      mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'load failed'));
+
+      const result = await packagePackage(tmpDir, tmpDir, { json: true });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('load failed');
+        expect(result.code).toBe(1);
+      }
+    });
   });
 });
