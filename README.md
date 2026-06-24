@@ -15,7 +15,7 @@ pnpm build
 
 # Run the dev server with an example package
 pnpm --filter @open-edu/cli build
-node packages/cli/dist/index.js dev ./examples/hello-world
+node packages/cli/dist/cli.js dev ./examples/hello-world
 ```
 
 Or use the CLI directly after building:
