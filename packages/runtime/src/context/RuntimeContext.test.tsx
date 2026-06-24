@@ -4,6 +4,7 @@ import { RuntimeProvider, useRuntime } from './RuntimeContext';
 import type { LoadedPackage } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { ReactNode } from 'react';
+import type { ProgressSnapshot } from '@open-edu/schemas';
 
 function makePackage(
   nodes: Array<{ relativePath: string; type: string; content: string }>,
@@ -185,5 +186,107 @@ describe('RuntimeProvider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => renderHook(() => useRuntime())).toThrow(/RuntimeProvider/);
     spy.mockRestore();
+  });
+
+  it('initializes state from valid initialProgress', () => {
+    const initialProgress: ProgressSnapshot = {
+      packageId: 'test',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-02.md',
+      visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
+      scores: { 'nodes/lesson-01.md': 80 },
+      isCompleted: false,
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} initialProgress={initialProgress}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    expect(result.current.currentNodeId).toBe('nodes/lesson-02.md');
+    expect(result.current.visitedNodes).toEqual(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
+    expect(result.current.scores).toEqual({ 'nodes/lesson-01.md': 80 });
+    expect(result.current.isCompleted).toBe(false);
+  });
+
+  it('initializes completed state from valid initialProgress', () => {
+    const initialProgress: ProgressSnapshot = {
+      packageId: 'test',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-02.md',
+      visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
+      scores: { 'nodes/lesson-01.md': 80 },
+      isCompleted: true,
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} initialProgress={initialProgress}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    expect(result.current.isCompleted).toBe(true);
+  });
+
+  it('ignores invalid initialProgress and starts fresh', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const initialProgress: ProgressSnapshot = {
+      packageId: 'test',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nonexistent-node',
+      visitedNodes: ['nonexistent-node'],
+      scores: {},
+      isCompleted: false,
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} initialProgress={initialProgress}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    expect(result.current.currentNodeId).toBe('');
+    expect(result.current.visitedNodes).toEqual([]);
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('calls onProgressChange when node is entered', () => {
+    const onProgressChange = vi.fn();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} onProgressChange={onProgressChange}>
+        {children}
+      </RuntimeProvider>
+    );
+    renderHook(() => useRuntime(), { wrapper });
+    act(() => {
+      emit(engine, { type: 'node.entered', nodeId: 'nodes/lesson-01.md', timestamp: 1 });
+    });
+    expect(onProgressChange).toHaveBeenCalledWith(
+      expect.objectContaining({ currentNodeId: 'nodes/lesson-01.md' }),
+    );
+  });
+
+  it('does not call onProgressChange if not provided', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine}>
+        {children}
+      </RuntimeProvider>
+    );
+    expect(() => {
+      renderHook(() => useRuntime(), { wrapper });
+    }).not.toThrow();
+  });
+
+  it('exposes progressSnapshot in context value', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    expect(result.current.progressSnapshot).toBeDefined();
+    expect(result.current.progressSnapshot?.packageId).toBe('test');
   });
 });

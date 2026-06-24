@@ -1,12 +1,13 @@
-import { useMemo, useEffect, useRef, useState } from 'react';
+import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import { RuntimeProvider, LayoutShell, RuntimeThemeProvider } from '@open-edu/runtime';
 import { WorkflowEngine } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
-import type { TelemetryEvent } from '@open-edu/schemas';
+import type { TelemetryEvent, ProgressSnapshot } from '@open-edu/schemas';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import type { LoadedPackage } from '@open-edu/core';
 import { InspectorPanel } from './inspectors/InspectorPanel';
+import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 
 import { packageData as rawPackageData } from 'virtual:open-edu-package';
 
@@ -31,13 +32,20 @@ function DevAppFallback({ title, message }: { title: string; message: string }):
 export function DevApp(): JSX.Element {
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
   const telemetrySessionRef = useRef<TelemetrySession | null>(null);
+  const [progressKey, setProgressKey] = useState(0);
+
+  const initialProgress = useMemo(() => {
+    if (!loadedPkg) return undefined;
+    return loadProgress(loadedPkg.manifest.id, loadedPkg.manifest.version) ?? undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressKey]);
+
+  const entry = initialProgress?.currentNodeId ?? loadedPkg?.manifest.entry;
 
   const engine = useMemo(() => {
     if (!loadedPkg?.workflow) return null;
-    return new WorkflowEngine(loadedPkg.workflow, {
-      entry: loadedPkg.manifest.entry,
-    });
-  }, []);
+    return new WorkflowEngine(loadedPkg.workflow, { entry });
+  }, [loadedPkg, entry, progressKey]);
 
   useEffect(() => {
     const session = new TelemetrySession();
@@ -75,6 +83,22 @@ export function DevApp(): JSX.Element {
     };
   }, [engine]);
 
+  const handleProgressChange = useCallback(
+    (snapshot: ProgressSnapshot) => {
+      if (loadedPkg) {
+        saveProgress(loadedPkg.manifest.id, loadedPkg.manifest.version, snapshot);
+      }
+    },
+    [],
+  );
+
+  const handleReset = useCallback(() => {
+    if (loadedPkg) {
+      clearProgress(loadedPkg.manifest.id, loadedPkg.manifest.version);
+      setProgressKey((k) => k + 1);
+    }
+  }, []);
+
   if (!loadedPkg) {
     return (
       <DevAppFallback
@@ -96,9 +120,37 @@ export function DevApp(): JSX.Element {
   return (
     <RuntimeThemeProvider>
       <AccessibilityProvider>
-        <RuntimeProvider loadedPackage={loadedPkg} engine={engine}>
+        <RuntimeProvider
+          loadedPackage={loadedPkg}
+          engine={engine}
+          initialProgress={initialProgress}
+          onProgressChange={handleProgressChange}
+        >
           <div style={{ display: 'flex', height: '100vh' }}>
             <div style={{ flex: 1, overflow: 'auto' }}>
+              <div
+                style={{
+                  position: 'fixed',
+                  bottom: '1rem',
+                  right: '24rem',
+                  zIndex: 50,
+                }}
+              >
+                <button
+                  onClick={handleReset}
+                  style={{
+                    padding: '0.375rem 0.75rem',
+                    fontSize: '0.75rem',
+                    backgroundColor: '#fee2e2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '0.25rem',
+                    color: '#dc2626',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Reset Progress
+                </button>
+              </div>
               <LayoutShell />
             </div>
             <InspectorPanel telemetryEvents={telemetryEvents} />

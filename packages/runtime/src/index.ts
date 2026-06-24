@@ -1,6 +1,8 @@
 export { RUNTIME_VERSION } from './version.js';
 export { RuntimeProvider, useRuntime } from './context/RuntimeContext.js';
 export type { RuntimeContextValue, RuntimeProviderProps } from './context/RuntimeContext.js';
+export { buildProgressSnapshot, isValidSnapshot } from './context/progress.js';
+export type { ProgressSnapshot } from '@open-edu/schemas';
 export { MarkdownRenderer } from './renderers/MarkdownRenderer.js';
 export type { MarkdownRendererProps } from './renderers/MarkdownRenderer.js';
 export { QuizRenderer } from './renderers/QuizRenderer.js';

@@ -23,6 +23,9 @@ export type {
 export { WorkflowSchema, RouteDefinitionSchema } from './workflow.js';
 export type { Workflow, RouteDefinition, Condition } from './workflow.js';
 
+export { ProgressSnapshotSchema } from './progress.js';
+export type { ProgressSnapshot } from './progress.js';
+
 export {
   RewardsSchema,
   TriggerSchema,
