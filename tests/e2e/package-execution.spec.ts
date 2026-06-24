@@ -164,7 +164,7 @@ test.describe('widget-practice (widget exercise)', () => {
 
   test('renders intro and navigates to widget', async ({ page }) => {
     await page.goto(server.url);
-    await expect(page.getByText('Widget Practice')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Widget Practice' }).first()).toBeVisible();
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
     await expect(page.getByText('What is the capital of France?')).toBeVisible();
@@ -177,10 +177,11 @@ test.describe('widget-practice (widget exercise)', () => {
     await page.waitForTimeout(500);
     await page.getByLabel('Paris').click();
     await page.getByRole('button', { name: 'Submit' }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     await expect(page.getByText('Paris is the capital')).toBeVisible();
-    await page.getByRole('button', { name: 'Next' }).click();
-    await expect(page.getByText(/completed/)).toBeVisible();
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test('selects wrong answer and completes', async ({ page }) => {

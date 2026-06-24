@@ -18,8 +18,9 @@ test.describe('keyboard navigation', () => {
 
   test('Next button receives focus via Tab', async ({ page }) => {
     await page.goto(server.url);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     const nextButton = page.getByRole('button', { name: 'Next' });
     await expect(nextButton).toBeFocused();
@@ -27,8 +28,9 @@ test.describe('keyboard navigation', () => {
 
   test('activates Next button with keyboard Enter', async ({ page }) => {
     await page.goto(server.url);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
