@@ -21,6 +21,8 @@ export async function loadWorkflow(packageDir: string): Promise<Workflow | null>
     if (err instanceof SyntaxError) {
       throw new WorkflowValidationError(
         `workflow.json is not valid JSON: ${(err as Error).message}`,
+        undefined,
+        { file: 'workflow.json', suggestion: 'Fix the JSON syntax error in workflow.json' },
       );
     }
     throw new WorkflowValidationError(`Failed to read workflow.json: ${(err as Error).message}`);
@@ -34,7 +36,15 @@ export async function loadWorkflow(packageDir: string): Promise<Workflow | null>
         (i: { path: (string | number)[]; message: string }) => `${i.path.join('.')}: ${i.message}`,
       )
       .join('; ');
-    throw new WorkflowValidationError(`Invalid workflow.json: ${issues}`, result.error);
+    const firstIssue = result.error.issues[0];
+    const wfPath = firstIssue ? firstIssue.path.join('.') : undefined;
+    throw new WorkflowValidationError(`Invalid workflow.json: ${issues}`, result.error, {
+      file: 'workflow.json',
+      path: wfPath,
+      suggestion: firstIssue
+        ? `Fix the "${wfPath}" field in workflow.json`
+        : 'Check the workflow.json structure matches the schema',
+    });
   }
 
   return result.data;

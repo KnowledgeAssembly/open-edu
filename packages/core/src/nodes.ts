@@ -18,28 +18,47 @@ function detectNodeType(filePath: string, content: string): ContentNode {
     try {
       parsed = JSON.parse(content);
     } catch {
-      throw new NodeLoadError(`Node file is not valid JSON: ${filePath}`);
+      throw new NodeLoadError(`Node file is not valid JSON: ${filePath}`, {
+        file: filePath,
+        suggestion: 'Fix the JSON syntax error',
+      });
     }
 
     if (typeof parsed.type !== 'string') {
-      throw new NodeLoadError(`JSON node file is missing required "type" field: ${filePath}`);
+      throw new NodeLoadError(`JSON node file is missing required "type" field: ${filePath}`, {
+        file: filePath,
+        path: 'type',
+        suggestion:
+          'Add "type": "lesson" | "quiz" | "reflection" | "exercise" | "custom" to the node file',
+      });
     }
 
     const result = ContentNodeSchema.safeParse(parsed);
     if (!result.success) {
+      const firstIssue = result.error.issues[0];
+      const nodePath = firstIssue ? firstIssue.path.join('.') : undefined;
       const issues = result.error.issues
         .map(
           (i: { path: (string | number)[]; message: string }) =>
             `${i.path.join('.')}: ${i.message}`,
         )
         .join('; ');
-      throw new NodeLoadError(`Invalid node content in ${filePath}: ${issues}`);
+      throw new NodeLoadError(`Invalid node content in ${filePath}: ${issues}`, {
+        file: filePath,
+        path: nodePath,
+        suggestion: firstIssue
+          ? `Fix the "${nodePath}" field in ${filePath}`
+          : 'Check the node file structure matches the schema',
+      });
     }
 
     return result.data;
   }
 
-  throw new NodeLoadError(`Unsupported node file extension: ${filePath} (supported: .md, .json)`);
+  throw new NodeLoadError(`Unsupported node file extension: ${filePath} (supported: .md, .json)`, {
+    file: filePath,
+    suggestion: `Rename the file to have a .md or .json extension`,
+  });
 }
 
 function toForwardSlashes(p: string): string {

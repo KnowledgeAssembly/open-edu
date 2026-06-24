@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { validatePackage } from './commands/validate.js';
+import { createPackage } from './commands/create.js';
+import { lintContent } from './commands/lint-content.js';
 import { devPackage } from './commands/dev.js';
 import { buildPackage } from './commands/build.js';
 import { packagePackage } from './commands/package.js';
@@ -54,6 +56,48 @@ program
   .action(async (packageDir: string, cmdOptions: { output?: string }) => {
     const json = program.optsWithGlobals().json;
     const result = await packagePackage(packageDir, cmdOptions.output, { json });
+    handleResult(result, json);
+  });
+
+program
+  .command('create')
+  .description('Create a new educational package scaffold')
+  .argument('<package-dir>', 'Directory to create the package in')
+  .option('--id <id>', 'Package ID (kebab-case)')
+  .option('--title <title>', 'Package title')
+  .option('--author <author>', 'Package author')
+  .option('--force', 'Overwrite existing files in non-empty directory')
+  .action(
+    async (
+      packageDir: string,
+      cmdOptions: { id?: string; title?: string; author?: string; force?: boolean },
+    ) => {
+      const json = program.optsWithGlobals().json;
+      const id =
+        cmdOptions.id || packageDir.split('/').pop() || packageDir.split('\\').pop() || 'package';
+      const title = cmdOptions.title || id;
+      const author = cmdOptions.author || 'Open-Edu Author';
+      const result = await createPackage(packageDir, {
+        id,
+        title,
+        author,
+        force: cmdOptions.force,
+      });
+      const cliResult: CliResult = result.success
+        ? { success: true, data: { files: result.files } }
+        : { success: false, error: result.error!, code: 1 };
+      handleResult(cliResult, json);
+    },
+  );
+
+program
+  .command('lint-content')
+  .description('Run content quality checks on an educational package')
+  .argument('<package-dir>', 'Path to the educational package directory')
+  .option('--max-warnings <number>', 'Maximum number of warnings allowed', parseInt)
+  .action(async (packageDir: string, cmdOptions: { maxWarnings?: number }) => {
+    const json = program.optsWithGlobals().json;
+    const result = await lintContent(packageDir, { json, maxWarnings: cmdOptions.maxWarnings });
     handleResult(result, json);
   });
 
