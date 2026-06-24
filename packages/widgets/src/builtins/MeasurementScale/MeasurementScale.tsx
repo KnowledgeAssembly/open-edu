@@ -30,14 +30,14 @@ function MeasurementScaleComponent(props: {
 }) {
   const { config: rawConfig, emitInteraction, complete } = props;
   const parsed = configSchema.safeParse(rawConfig);
-  const config = parsed.success ? parsed.data : null;
+  const config = parsed.success ? parsed.data : (null as unknown as MeasurementScaleConfig);
 
   const [submitted, setSubmitted] = useState(false);
   const [value, setValue] = useState(config?.value ?? config?.min ?? 0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isInteractive = config?.interactive ?? false;
-  const isObserve = config != null && !isInteractive;
+  const isObserve = parsed.success && !isInteractive;
 
   useEffect(() => {
     if (isObserve && !submitted && config) {
@@ -132,8 +132,10 @@ function MeasurementScaleComponent(props: {
     );
   }
 
+  const cfg: MeasurementScaleConfig = config;
+
   function getTickInterval(): number {
-    const range = config.max - config.min;
+    const range = cfg.max - cfg.min;
     if (range <= 0) return 1;
     const ideal = range / 10;
     const magnitude = Math.pow(10, Math.floor(Math.log10(ideal)));
@@ -152,12 +154,12 @@ function MeasurementScaleComponent(props: {
     const rulerY = 60;
     const rulerH = 40;
     const tickInterval = getTickInterval();
-    const range = config.max - config.min;
+    const range = cfg.max - cfg.min;
     const usable = svgW - PADDING * 2;
 
     const ticks: React.ReactNode[] = [];
-    for (let v = config.min; v <= config.max + 0.0001; v += tickInterval) {
-      const frac = (v - config.min) / range;
+    for (let v = cfg.min; v <= cfg.max + 0.0001; v += tickInterval) {
+      const frac = (v - cfg.min) / range;
       const x = PADDING + frac * usable;
       const isMajor = Math.abs(v - Math.round(v / tickInterval) * tickInterval) < 0.0001;
       const tickH = isMajor ? 16 : 8;
@@ -173,7 +175,7 @@ function MeasurementScaleComponent(props: {
           aria-hidden="true"
         />,
       );
-      if (isMajor && config.showLabels) {
+      if (isMajor && cfg.showLabels) {
         ticks.push(
           <text
             key={`label-${v}`}
@@ -190,7 +192,7 @@ function MeasurementScaleComponent(props: {
       }
     }
 
-    const markerFrac = (value - config.min) / range;
+    const markerFrac = (value - cfg.min) / range;
     const markerX = PADDING + markerFrac * usable;
 
     return (
@@ -200,7 +202,7 @@ function MeasurementScaleComponent(props: {
         viewBox={`0 0 ${svgW} ${svgH}`}
         data-testid="ruler-svg"
         role="img"
-        aria-label={`Ruler scale from ${config.min} to ${config.max} ${config.unit}`}
+        aria-label={`Ruler scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -246,11 +248,11 @@ function MeasurementScaleComponent(props: {
     const tubeBotY = bulbCY - bulbR;
     const tubeLen = tubeBotY - tubeTopY;
     const tickInterval = getTickInterval();
-    const range = config.max - config.min;
+    const range = cfg.max - cfg.min;
 
     const ticks: React.ReactNode[] = [];
-    for (let v = config.min; v <= config.max + 0.0001; v += tickInterval) {
-      const frac = (v - config.min) / range;
+    for (let v = cfg.min; v <= cfg.max + 0.0001; v += tickInterval) {
+      const frac = (v - cfg.min) / range;
       const y = tubeBotY - frac * tubeLen;
       const isMajor = Math.abs(v - Math.round(v / tickInterval) * tickInterval) < 0.0001;
       const tickW = isMajor ? 12 : 6;
@@ -266,7 +268,7 @@ function MeasurementScaleComponent(props: {
           aria-hidden="true"
         />,
       );
-      if (isMajor && config.showLabels) {
+      if (isMajor && cfg.showLabels) {
         ticks.push(
           <text
             key={`label-${v}`}
@@ -283,7 +285,7 @@ function MeasurementScaleComponent(props: {
       }
     }
 
-    const markerFrac = (value - config.min) / range;
+    const markerFrac = (value - cfg.min) / range;
     const fillHeight = markerFrac * tubeLen;
 
     return (
@@ -293,7 +295,7 @@ function MeasurementScaleComponent(props: {
         viewBox={`0 0 ${svgW} ${svgH}`}
         data-testid="thermometer-svg"
         role="img"
-        aria-label={`Thermometer scale from ${config.min} to ${config.max} ${config.unit}`}
+        aria-label={`Thermometer scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -341,11 +343,11 @@ function MeasurementScaleComponent(props: {
     const cylH = cylBot - cylTop;
     const cylW = 80;
     const tickInterval = getTickInterval();
-    const range = config.max - config.min;
+    const range = cfg.max - cfg.min;
 
     const ticks: React.ReactNode[] = [];
-    for (let v = config.min; v <= config.max + 0.0001; v += tickInterval) {
-      const frac = (v - config.min) / range;
+    for (let v = cfg.min; v <= cfg.max + 0.0001; v += tickInterval) {
+      const frac = (v - cfg.min) / range;
       const y = cylBot - frac * cylH;
       const isMajor = Math.abs(v - Math.round(v / tickInterval) * tickInterval) < 0.0001;
       const tickW = isMajor ? 12 : 6;
@@ -361,7 +363,7 @@ function MeasurementScaleComponent(props: {
           aria-hidden="true"
         />,
       );
-      if (isMajor && config.showLabels) {
+      if (isMajor && cfg.showLabels) {
         ticks.push(
           <text
             key={`label-${v}`}
@@ -378,7 +380,7 @@ function MeasurementScaleComponent(props: {
       }
     }
 
-    const markerFrac = (value - config.min) / range;
+    const markerFrac = (value - cfg.min) / range;
     const fillHeight = markerFrac * cylH;
 
     return (
@@ -388,7 +390,7 @@ function MeasurementScaleComponent(props: {
         viewBox={`0 0 ${svgW} ${svgH}`}
         data-testid="cylinder-svg"
         role="img"
-        aria-label={`Graduated cylinder scale from ${config.min} to ${config.max} ${config.unit}`}
+        aria-label={`Graduated cylinder scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -432,18 +434,18 @@ function MeasurementScaleComponent(props: {
     <div
       ref={containerRef}
       data-testid="measurement-scale"
-      aria-label={`Measurement scale: ${config.type}`}
+      aria-label={`Measurement scale: ${cfg.type}`}
       style={{ textAlign: 'center' }}
     >
-      {config.description && <p>{config.description}</p>}
+      {cfg.description && <p>{cfg.description}</p>}
 
       <div role="status" aria-live="polite" data-testid="reading-live-region" aria-atomic="true">
-        {config.showReading ? currentReading : ''}
+        {cfg.showReading ? currentReading : ''}
       </div>
 
-      {config.type === 'ruler' && renderRuler()}
-      {config.type === 'thermometer' && renderThermometer()}
-      {config.type === 'cylinder' && renderCylinder()}
+      {cfg.type === 'ruler' && renderRuler()}
+      {cfg.type === 'thermometer' && renderThermometer()}
+      {cfg.type === 'cylinder' && renderCylinder()}
 
       {isInteractive && !submitted && (
         <div style={{ marginTop: '0.75rem' }}>
@@ -455,10 +457,10 @@ function MeasurementScaleComponent(props: {
 
       {isInteractive && submitted && (
         <div data-testid="feedback" role="status" aria-live="assertive">
-          {value != null && config.targetValue != null
-            ? Math.abs(value - config.targetValue) <= config.step
+          {value != null && cfg.targetValue != null
+            ? Math.abs(value - cfg.targetValue) <= cfg.step
               ? 'Correct!'
-              : `Not quite. Expected ${config.targetValue}${config.unit}.`
+              : `Not quite. Expected ${cfg.targetValue}${cfg.unit}.`
             : 'Complete.'}
         </div>
       )}

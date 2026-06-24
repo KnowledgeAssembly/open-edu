@@ -5,6 +5,22 @@ import type {
   RemoteWidgetRegistration,
 } from './types';
 import { WidgetRegistrationError } from './types';
+import {
+  visualCounting,
+  multipleChoice,
+  matching,
+  dragDrop,
+  sequencing,
+  fillBlank,
+  storyQuestion,
+  realWorld,
+  fractionVisual,
+  placeValueChart,
+  gridArea,
+  chartReader,
+  clockTime,
+  measurementScale,
+} from './builtins';
 
 export function createWidgetRegistry(): WidgetRegistry {
   const widgets = new Map<string, WidgetDefinition>();
@@ -46,4 +62,33 @@ export function createWidgetRegistry(): WidgetRegistry {
       }
     },
   };
+}
+
+const BUILTIN_WIDGETS: WidgetDefinition[] = [
+  visualCounting,
+  multipleChoice,
+  matching,
+  dragDrop,
+  sequencing,
+  fillBlank,
+  storyQuestion,
+  realWorld,
+  fractionVisual,
+  placeValueChart,
+  gridArea,
+  chartReader,
+  clockTime,
+  measurementScale,
+];
+
+export function registerAllBuiltins(registry: WidgetRegistry): void {
+  for (const widget of BUILTIN_WIDGETS) {
+    registry.register(widget);
+  }
+}
+
+export function createDefaultRegistry(): WidgetRegistry {
+  const registry = createWidgetRegistry();
+  registerAllBuiltins(registry);
+  return registry;
 }
