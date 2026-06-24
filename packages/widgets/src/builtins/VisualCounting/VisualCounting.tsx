@@ -37,7 +37,7 @@ function VisualCountingComponent(props: {
 }) {
   const { config: rawConfig, emitInteraction, complete } = props;
   const parsed = visualCountingSchema.safeParse(rawConfig);
-  const content = parsed.success ? parsed.data : {} as VisualCountingConfig;
+  const content = parsed.success ? parsed.data : ({} as VisualCountingConfig);
   const isAddition = parsed.success && isAdditionMode(content);
   const hasValidContent =
     parsed.success &&
@@ -62,7 +62,12 @@ function VisualCountingComponent(props: {
   useEffect(() => {
     if (!isObserve || submitted) return;
     const timer = setTimeout(() => {
-      emitInteraction({ type: 'widget.interaction', action: 'observe', observed: true, correct: true });
+      emitInteraction({
+        type: 'widget.interaction',
+        action: 'observe',
+        observed: true,
+        correct: true,
+      });
       complete(100);
       setSubmitted(true);
     }, 1500);
@@ -193,7 +198,9 @@ function VisualCountingComponent(props: {
   return (
     <div data-testid="visual-counting" aria-label="Visual counting activity">
       {content.description && <p>{content.description}</p>}
-      {isAddition ? renderAddition(false) : displayItems.length > 0 && renderItems(displayItems, content.count)}
+      {isAddition
+        ? renderAddition(false)
+        : displayItems.length > 0 && renderItems(displayItems, content.count)}
       {displayItems.length === 0 && !isAddition && <p role="status">No items to count.</p>}
 
       {!submitted && (
@@ -224,11 +231,7 @@ function VisualCountingComponent(props: {
       )}
 
       {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{ marginTop: '0.5rem', color: '#6b7280' }}
-        >
+        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
             <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>

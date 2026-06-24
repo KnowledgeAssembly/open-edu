@@ -116,7 +116,11 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
   });
 
   it('calls complete with 100 on correct answer', () => {
-    const { complete, emitInteraction } = renderWidget({ items: ['🍎'], count: 3, interactive: true });
+    const { complete, emitInteraction } = renderWidget({
+      items: ['🍎'],
+      count: 3,
+      interactive: true,
+    });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
@@ -127,7 +131,11 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
   });
 
   it('calls complete with accuracy on incorrect answer', () => {
-    const { complete, emitInteraction } = renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    const { complete, emitInteraction } = renderWidget({
+      items: ['🍎'],
+      count: 5,
+      interactive: true,
+    });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
