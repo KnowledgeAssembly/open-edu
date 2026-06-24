@@ -12,8 +12,9 @@ import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
-import type { ProgressSnapshot } from '@open-edu/schemas';
+import type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
+import { computeSkillScores, getSkillMastery } from './skills';
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
@@ -27,6 +28,9 @@ export interface RuntimeContextValue {
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
   progressSnapshot: ProgressSnapshot | null;
+  skillScores: Record<string, number>;
+  getSkillMastery: (skillId: string) => MasteryLevel;
+  skillGraph: SkillGraph | undefined;
 }
 
 export interface RuntimeProviderProps {
@@ -38,6 +42,7 @@ export interface RuntimeProviderProps {
   onProgressChange?: (snapshot: ProgressSnapshot) => void;
   packageId?: string;
   packageVersion?: string;
+  skillGraph?: SkillGraph;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -51,7 +56,10 @@ export function RuntimeProvider({
   onProgressChange,
   packageId,
   packageVersion,
+  skillGraph,
 }: RuntimeProviderProps): JSX.Element {
+  const skillsRef = useRef(skillGraph);
+  skillsRef.current = skillGraph;
   const nodeMap = useMemo(() => {
     const map: Record<string, LoadedNode> = {};
     for (const node of loadedPackage.nodes) {
@@ -156,6 +164,20 @@ export function RuntimeProvider({
     packageVersion,
   ]);
 
+  const skillScores = useMemo(
+    () => computeSkillScores(scores, skillsRef.current),
+    [scores],
+  );
+
+  const getContextSkillMastery = useCallback(
+    (skillId: string): MasteryLevel => {
+      const score = skillScores[skillId] ?? 0;
+      const def = skillsRef.current?.skills.find((s) => s.id === skillId);
+      return getSkillMastery(score, def);
+    },
+    [skillScores],
+  );
+
   const value = useMemo<RuntimeContextValue>(
     () => ({
       loadedPackage,
@@ -168,6 +190,9 @@ export function RuntimeProvider({
       completeNode,
       getNode,
       widgetRegistry,
+      skillScores,
+      getSkillMastery: getContextSkillMastery,
+      skillGraph,
       progressSnapshot: buildProgressSnapshot(
         packageId ?? loadedPackage.manifest.id,
         packageVersion ?? loadedPackage.manifest.version,
@@ -185,6 +210,9 @@ export function RuntimeProvider({
       completeNode,
       getNode,
       widgetRegistry,
+      skillScores,
+      getContextSkillMastery,
+      skillGraph,
       packageId,
       packageVersion,
     ],
