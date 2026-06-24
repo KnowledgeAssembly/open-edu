@@ -46,14 +46,14 @@ cd open-edu
 pnpm install
 pnpm build
 pnpm --filter @open-edu/cli build
-node packages/cli/dist/index.js dev ./examples/hello-world
+node packages/cli/dist/cli.js dev ./examples/hello-world
 ```
 
 Or install the CLI globally:
 
 ```bash
 pnpm --filter @open-edu/cli build
-node packages/cli/dist/index.js --help
+node packages/cli/dist/cli.js --help
 ```
 
 ## What's Next?
