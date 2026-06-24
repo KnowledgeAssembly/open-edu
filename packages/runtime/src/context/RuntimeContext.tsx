@@ -36,6 +36,8 @@ export interface RuntimeProviderProps {
   widgetRegistry?: WidgetRegistry;
   initialProgress?: ProgressSnapshot;
   onProgressChange?: (snapshot: ProgressSnapshot) => void;
+  packageId?: string;
+  packageVersion?: string;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -47,6 +49,8 @@ export function RuntimeProvider({
   widgetRegistry,
   initialProgress,
   onProgressChange,
+  packageId,
+  packageVersion,
 }: RuntimeProviderProps): JSX.Element {
   const nodeMap = useMemo(() => {
     const map: Record<string, LoadedNode> = {};
@@ -127,11 +131,14 @@ export function RuntimeProvider({
 
   useEffect(() => {
     if (!onProgressChange) return;
-    const snapshot = buildProgressSnapshot(
-      loadedPackage.manifest.id,
-      loadedPackage.manifest.version,
-      { currentNodeId, visitedNodes, scores, isCompleted },
-    );
+    const pkgId = packageId ?? loadedPackage.manifest.id;
+    const pkgVer = packageVersion ?? loadedPackage.manifest.version;
+    const snapshot = buildProgressSnapshot(pkgId, pkgVer, {
+      currentNodeId,
+      visitedNodes,
+      scores,
+      isCompleted,
+    });
     const json = JSON.stringify(snapshot);
     if (json !== prevSnapshotRef.current) {
       prevSnapshotRef.current = json;
@@ -145,6 +152,8 @@ export function RuntimeProvider({
     onProgressChange,
     loadedPackage.manifest.id,
     loadedPackage.manifest.version,
+    packageId,
+    packageVersion,
   ]);
 
   const value = useMemo<RuntimeContextValue>(
@@ -160,8 +169,8 @@ export function RuntimeProvider({
       getNode,
       widgetRegistry,
       progressSnapshot: buildProgressSnapshot(
-        loadedPackage.manifest.id,
-        loadedPackage.manifest.version,
+        packageId ?? loadedPackage.manifest.id,
+        packageVersion ?? loadedPackage.manifest.version,
         { currentNodeId, visitedNodes, scores, isCompleted },
       ),
     }),
@@ -176,6 +185,8 @@ export function RuntimeProvider({
       completeNode,
       getNode,
       widgetRegistry,
+      packageId,
+      packageVersion,
     ],
   );
 
