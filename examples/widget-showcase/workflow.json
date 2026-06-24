@@ -1,0 +1,20 @@
+{
+  "routing": {
+    "nodes/intro.md":                        { "onComplete": "nodes/visual-counting.json" },
+    "nodes/visual-counting.json":            { "onComplete": "nodes/multiple-choice.json" },
+    "nodes/multiple-choice.json":            { "onComplete": "nodes/matching.json" },
+    "nodes/matching.json":                   { "onComplete": "nodes/drag-drop.json" },
+    "nodes/drag-drop.json":                  { "onComplete": "nodes/sequencing.json" },
+    "nodes/sequencing.json":                 { "onComplete": "nodes/fill-blank.json" },
+    "nodes/fill-blank.json":                 { "onComplete": "nodes/story-question.json" },
+    "nodes/story-question.json":             { "onComplete": "nodes/real-world.json" },
+    "nodes/real-world.json":                 { "onComplete": "nodes/fraction-visual.json" },
+    "nodes/fraction-visual.json":            { "onComplete": "nodes/place-value-chart.json" },
+    "nodes/place-value-chart.json":         { "onComplete": "nodes/grid-area.json" },
+    "nodes/grid-area.json":                  { "onComplete": "nodes/chart-reader.json" },
+    "nodes/chart-reader.json":               { "onComplete": "nodes/clock-time.json" },
+    "nodes/clock-time.json":                { "onComplete": "nodes/measurement-scale.json" },
+    "nodes/measurement-scale.json":         { "onComplete": "nodes/outro.md" },
+    "nodes/outro.md":                        { "onComplete": "COMPLETED" }
+  }
+}

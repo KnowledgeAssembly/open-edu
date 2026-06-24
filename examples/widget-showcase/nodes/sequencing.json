@@ -1,0 +1,15 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.sequencing",
+  "config": {
+    "description": "Put the life cycle steps in correct order.",
+    "items": [
+      { "id": "seed", "label": "🌱 Seed" },
+      { "id": "sprout", "label": "🌿 Sprout" },
+      { "id": "plant", "label": "🌻 Plant" },
+      { "id": "flower", "label": "🌸 Flower" }
+    ],
+    "correctOrder": ["seed", "sprout", "plant", "flower"],
+    "interactive": true
+  }
+}

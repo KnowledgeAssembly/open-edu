@@ -42,6 +42,7 @@ describe('@open-edu/widgets', () => {
   it('should export registerAllBuiltins and register all widgets', () => {
     const registry = createWidgetRegistry();
     registerAllBuiltins(registry);
+    expect(registry.has('open-edu.multiple-choice-practice')).toBe(true);
     expect(registry.has('open-edu.visual-counting')).toBe(true);
     expect(registry.has('open-edu.multiple-choice')).toBe(true);
     expect(registry.has('open-edu.matching')).toBe(true);

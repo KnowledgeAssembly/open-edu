@@ -1,0 +1,15 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.fill-blank",
+  "config": {
+    "description": "Complete the sentences about the water cycle.",
+    "template": "Water ___ from the ground into the air. It forms ___ in the sky. Then it falls back down as ___.",
+    "blanks": [
+      { "id": "b1", "position": 0, "correctAnswer": "evaporates", "options": ["evaporates", "freezes", "sinks"] },
+      { "id": "b2", "position": 1, "correctAnswer": "clouds", "options": ["rocks", "clouds", "waves"] },
+      { "id": "b3", "position": 2, "correctAnswer": "rain", "options": ["rain", "sand", "wind"] }
+    ],
+    "mode": "select",
+    "interactive": true
+  }
+}

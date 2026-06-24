@@ -1,0 +1,14 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.matching",
+  "config": {
+    "description": "Match each fruit to its color.",
+    "pairs": [
+      { "itemA": "🍎", "itemB": "Red" },
+      { "itemA": "🍌", "itemB": "Yellow" },
+      { "itemA": "🍊", "itemB": "Orange" },
+      { "itemA": "🍇", "itemB": "Purple" }
+    ],
+    "interactive": true
+  }
+}

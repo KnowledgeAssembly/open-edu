@@ -6,7 +6,7 @@ import { TelemetrySession } from '@open-edu/telemetry';
 import type { TelemetryEvent, ProgressSnapshot } from '@open-edu/schemas';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import type { LoadedPackage } from '@open-edu/core';
-import { createWidgetRegistry, multipleChoicePractice } from '@open-edu/widgets';
+import { createDefaultRegistry } from '@open-edu/widgets';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 
@@ -91,9 +91,7 @@ export function DevApp(): JSX.Element {
   }, []);
 
   const widgetRegistry = useMemo(() => {
-    const registry = createWidgetRegistry();
-    registry.register(multipleChoicePractice);
-    return registry;
+    return createDefaultRegistry();
   }, []);
 
   const handleReset = useCallback(() => {

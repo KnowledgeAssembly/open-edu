@@ -1,0 +1,12 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.fraction-visual",
+  "config": {
+    "description": "Shade 3/4 of the circle.",
+    "numerator": 3,
+    "denominator": 4,
+    "mode": "circle",
+    "showLabel": true,
+    "interactive": true
+  }
+}

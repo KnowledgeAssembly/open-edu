@@ -1,0 +1,13 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.grid-area",
+  "config": {
+    "description": "Highlight 6 cells to match the area shown.",
+    "rows": 5,
+    "cols": 5,
+    "mode": "area",
+    "maxHighlights": 25,
+    "showCount": true,
+    "interactive": true
+  }
+}
