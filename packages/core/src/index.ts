@@ -21,3 +21,10 @@ export { loadWorkflow } from './workflow.js';
 export { loadRewards } from './rewards.js';
 export { loadNodes } from './nodes.js';
 export { resolveAssets, resolveAssetPath } from './assets.js';
+export { computeFileHash, verifyIntegrity } from './integrity.js';
+export type {
+  IntegrityResult,
+  IntegrityMismatch,
+  BuildManifest,
+  BuildManifestEntry,
+} from './integrity.js';

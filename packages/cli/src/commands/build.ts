@@ -1,27 +1,13 @@
-import { existsSync, mkdirSync, readdirSync, statSync, cpSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, mkdirSync, cpSync } from 'node:fs';
+import { join } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { formatValidationError, formatBuildSuccess, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
-
-const EXCLUDED_DIRS = new Set(['dist', 'node_modules', '.git']);
-
-function collectFiles(dir: string, rootDir: string): string[] {
-  const files: string[] = [];
-  if (!existsSync(dir)) return files;
-
-  for (const entry of readdirSync(dir)) {
-    if (EXCLUDED_DIRS.has(entry)) continue;
-    const fullPath = join(dir, entry);
-    const relPath = relative(rootDir, fullPath);
-    if (statSync(fullPath).isDirectory()) {
-      files.push(...collectFiles(fullPath, rootDir));
-    } else {
-      files.push(relPath);
-    }
-  }
-  return files;
-}
+import {
+  collectFiles,
+  generateBuildManifest,
+  writeBuildManifest,
+} from '../utils/build-manifest.js';
 
 export async function buildPackage(
   packageDir: string,
@@ -46,6 +32,9 @@ export async function buildPackage(
       }
       cpSync(srcPath, destPath);
     }
+
+    const manifest = generateBuildManifest(pkg, files);
+    writeBuildManifest(outputDir, manifest);
 
     if (options?.json) {
       return {
