@@ -1,4 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('axe-core', () => ({
+  default: {
+    run: vi.fn().mockResolvedValue({ violations: [] }),
+  },
+}));
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { InspectorPanel } from './InspectorPanel';
 import type { RewardReceipt } from '@open-edu/rewards';
