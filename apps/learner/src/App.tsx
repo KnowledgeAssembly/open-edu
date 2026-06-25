@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
+import { CatalogPage } from './CatalogPage';
 
 type Screen =
   | { type: 'catalog' }
@@ -7,12 +8,16 @@ type Screen =
   | { type: 'complete'; packageDir: string; badges: string[] };
 
 export function App(): JSX.Element {
-  const [screen] = useState<Screen>({ type: 'catalog' });
+  const [screen, setScreen] = useState<Screen>({ type: 'catalog' });
+
+  const handleStartCourse = (packageDir: string) => {
+    setScreen({ type: 'course', packageDir });
+  };
 
   return (
     <RuntimeThemeProvider>
       {screen.type === 'catalog' && (
-        <div data-testid="catalog-page">Catalog (placeholder)</div>
+        <CatalogPage packageDir="../../examples" onStartCourse={handleStartCourse} />
       )}
       {screen.type === 'course' && (
         <div data-testid="course-page">Course: {screen.packageDir} (placeholder)</div>
