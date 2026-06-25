@@ -3,7 +3,6 @@ import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardAction, BadgeAction, WebhookAction, ScriptAction } from '@open-edu/schemas';
 import type { RewardBrokerOptions, RewardReceipt, RewardResult, ContextSnapshot } from './types';
 import { BadgeTracker, handleBadgeAction, handleWebhookAction } from './handlers';
-import { handleScriptAction } from './script-handler';
 import { RewardConfigurationError } from './errors';
 import { shouldFireAction, getDefaultContext } from './conditions';
 
@@ -111,7 +110,7 @@ export class RewardBroker {
     }
   }
 
-  private executeAction(action: RewardAction, event: TelemetryEvent): void {
+  private async executeAction(action: RewardAction, event: TelemetryEvent): Promise<void> {
     switch (action.action) {
       case 'badge.award':
         this.addReceipt(
@@ -139,6 +138,7 @@ export class RewardBroker {
           });
           break;
         }
+        const { handleScriptAction } = await import('./script-handler');
         handleScriptAction(action as ScriptAction).then((r) =>
           this.addReceipt(this.toReceipt(r, action.action)),
         );
