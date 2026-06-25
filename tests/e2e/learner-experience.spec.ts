@@ -7,9 +7,55 @@
  * The learner app serves the catalog at http://localhost:4001.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const LEARNER_URL = 'http://localhost:4001';
+
+async function navigateThroughCourse(page: Page, maxSteps = 30): Promise<void> {
+  for (let step = 0; step < maxSteps; step++) {
+    const nextBtn = page.getByRole('button', { name: 'Next' });
+    if (await nextBtn.isVisible().catch(() => false)) {
+      await nextBtn.click();
+      await page.waitForTimeout(500);
+      continue;
+    }
+
+    const submitBtn = page.getByRole('button', { name: 'Submit' });
+    if (await submitBtn.isVisible().catch(() => false)) {
+      if (await submitBtn.isEnabled().catch(() => false)) {
+        await submitBtn.click();
+        await page.waitForTimeout(500);
+        continue;
+      }
+      const radio = page.locator('input[type="radio"]').first();
+      if (await radio.isVisible().catch(() => false)) {
+        await radio.check();
+        await page.waitForTimeout(200);
+        if (await submitBtn.isEnabled().catch(() => false)) {
+          await submitBtn.click();
+          await page.waitForTimeout(500);
+          continue;
+        }
+      }
+    }
+
+    const textarea = page.locator('textarea').first();
+    if (await textarea.isVisible().catch(() => false)) {
+      await textarea.fill('Test reflection text');
+      await page.waitForTimeout(200);
+      if (
+        (await submitBtn.isVisible().catch(() => false)) &&
+        (await submitBtn.isEnabled().catch(() => false))
+      ) {
+        await submitBtn.click();
+        await page.waitForTimeout(500);
+        continue;
+      }
+    }
+
+    break;
+  }
+}
 
 test.describe('Learner Experience', () => {
   test('full flow: catalog displays courses', async ({ page }) => {
@@ -95,17 +141,7 @@ test.describe('Learner Experience', () => {
 
     await expect(page.locator('nav[aria-label="Course outline"]')).toBeVisible({ timeout: 15000 });
 
-    const nextBtn = page.getByRole('button', { name: 'Next' });
-    let clickCount = 0;
-    const maxClicks = 20;
-
-    while (clickCount < maxClicks) {
-      const visible = await nextBtn.isVisible().catch(() => false);
-      if (!visible) break;
-      await nextBtn.click();
-      clickCount++;
-      await page.waitForTimeout(500);
-    }
+    await navigateThroughCourse(page);
 
     const completionScreen = page.locator('[data-testid="completion-screen"]');
     const completionText = page.getByText(/You finished|You have completed|Course Completed/);
