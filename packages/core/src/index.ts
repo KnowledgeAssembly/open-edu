@@ -31,3 +31,5 @@ export type {
 export { generateAgentPrompt } from './agent-prompt.js';
 export { applyPatch } from './patcher.js';
 export type { PatchOperation, PatchReport, PatchOperationResult } from './patcher.js';
+export { scanPackages } from './scanner.js';
+export type { PackageSummary } from './scanner.js';
