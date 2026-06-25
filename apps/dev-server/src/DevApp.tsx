@@ -7,6 +7,8 @@ import type { TelemetryEvent, ProgressSnapshot } from '@open-edu/schemas';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import type { LoadedPackage } from '@open-edu/core';
 import { createDefaultRegistry } from '@open-edu/widgets';
+import { RewardBroker } from '@open-edu/rewards';
+import type { RewardReceipt } from '@open-edu/rewards';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 
@@ -33,6 +35,8 @@ function DevAppFallback({ title, message }: { title: string; message: string }):
 export function DevApp(): JSX.Element {
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
   const telemetrySessionRef = useRef<TelemetrySession | null>(null);
+  const brokerRef = useRef<RewardBroker | null>(null);
+  const [rewardReceipts, setRewardReceipts] = useState<RewardReceipt[]>([]);
   const [progressKey, setProgressKey] = useState(0);
 
   const initialProgress = useMemo(() => {
@@ -59,6 +63,18 @@ export function DevApp(): JSX.Element {
       },
     });
 
+    const broker = loadedPkg?.rewards
+      ? new RewardBroker({
+          rewards: loadedPkg.rewards,
+          source: session.events$,
+          onReceipt: (receipt) => {
+            setRewardReceipts((prev) => [...prev, receipt]);
+          },
+        })
+      : null;
+    broker?.start();
+    brokerRef.current = broker;
+
     let engineUnsub: (() => void) | undefined;
     if (engine) {
       engineUnsub = engine.subscribe((event: WorkflowEvent) => {
@@ -70,17 +86,26 @@ export function DevApp(): JSX.Element {
             nodeId: event.nodeId,
             score: event.score,
           } as never);
+          broker?.updateContext({
+            scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
+            completedNodes: [event.nodeId],
+          });
         } else if (event.type === 'workflow.completed') {
-          session.emit({ event: 'node_complete', nodeId: '__workflow__' } as never);
+          session.emit({ event: 'workflow_complete' } as never);
+          broker?.updateContext({
+            completedNodes: ['__workflow__'],
+          });
         }
       });
     }
 
     return () => {
       engineUnsub?.();
+      broker?.stop();
       eventSub.unsubscribe();
       session.stop();
       telemetrySessionRef.current = null;
+      brokerRef.current = null;
     };
   }, [engine]);
 
@@ -156,7 +181,21 @@ export function DevApp(): JSX.Element {
               </div>
               <LayoutShell />
             </div>
-            <InspectorPanel telemetryEvents={telemetryEvents} />
+            <InspectorPanel
+              telemetryEvents={telemetryEvents}
+              rewardReceipts={rewardReceipts}
+              definedRewards={
+                loadedPkg?.rewards
+                  ? loadedPkg.rewards.triggers.flatMap((t) =>
+                      t.rewards.map((r) => ({
+                        action: r.action,
+                        badge: (r as any).badge,
+                        condition: (r as any).condition,
+                      })),
+                    )
+                  : undefined
+              }
+            />
           </div>
         </RuntimeProvider>
       </AccessibilityProvider>

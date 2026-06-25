@@ -8,32 +8,34 @@ const dataItemSchema = z.object({
   emoji: z.string().optional(),
 });
 
-const configSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('bar'),
-    data: z.array(dataItemSchema).min(1),
-    title: z.string().optional(),
-    showValues: z.boolean().optional().default(true),
-    interactive: z.boolean().optional().default(false),
-    correctLabel: z.string().optional(),
-    description: z.string().optional(),
-  }),
-  z.object({
-    type: z.literal('pictograph'),
-    data: z.array(dataItemSchema).min(1),
-    title: z.string().optional(),
-    showValues: z.boolean().optional().default(true),
-    interactive: z.boolean().optional().default(false),
-    correctLabel: z.string().optional(),
-    description: z.string().optional(),
-  }),
-]).refine(
-  (val) => {
-    if (val.interactive && !val.correctLabel) return false;
-    return true;
-  },
-  { message: 'correctLabel is required when interactive is true' },
-);
+const configSchema = z
+  .discriminatedUnion('type', [
+    z.object({
+      type: z.literal('bar'),
+      data: z.array(dataItemSchema).min(1),
+      title: z.string().optional(),
+      showValues: z.boolean().optional().default(true),
+      interactive: z.boolean().optional().default(false),
+      correctLabel: z.string().optional(),
+      description: z.string().optional(),
+    }),
+    z.object({
+      type: z.literal('pictograph'),
+      data: z.array(dataItemSchema).min(1),
+      title: z.string().optional(),
+      showValues: z.boolean().optional().default(true),
+      interactive: z.boolean().optional().default(false),
+      correctLabel: z.string().optional(),
+      description: z.string().optional(),
+    }),
+  ])
+  .refine(
+    (val) => {
+      if (val.interactive && !val.correctLabel) return false;
+      return true;
+    },
+    { message: 'correctLabel is required when interactive is true' },
+  );
 
 function ChartReaderComponent(props: {
   nodeId: string;
@@ -94,11 +96,7 @@ function ChartReaderComponent(props: {
   const config = parsed.data;
 
   return (
-    <div
-      role="group"
-      aria-label={config.title ?? 'Chart'}
-      data-testid="chart-reader"
-    >
+    <div role="group" aria-label={config.title ?? 'Chart'} data-testid="chart-reader">
       {config.title && <h3>{config.title}</h3>}
       {config.description && <p>{config.description}</p>}
 
@@ -175,13 +173,7 @@ function BarChart({
                   stroke="#e5e7eb"
                   strokeWidth={1}
                 />
-                <text
-                  x={padding.left - 6}
-                  y={y + 4}
-                  textAnchor="end"
-                  fontSize={12}
-                  fill="#6b7280"
-                >
+                <text x={padding.left - 6} y={y + 4} textAnchor="end" fontSize={12} fill="#6b7280">
                   {Math.round(maxValue * frac)}
                 </text>
               </g>
@@ -246,9 +238,7 @@ function BarChart({
         return (
           <g
             key={item.label}
-            {...(interactive && !submitted
-              ? { onClick: () => onSelect(item.label) }
-              : {})}
+            {...(interactive && !submitted ? { onClick: () => onSelect(item.label) } : {})}
           >
             {barContent}
           </g>
@@ -318,7 +308,9 @@ function PictographChart({
                 </span>
               ))}
             </span>
-            {showValues && <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>{item.value}</span>}
+            {showValues && (
+              <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>{item.value}</span>
+            )}
           </RowTag>
         );
       })}

@@ -58,7 +58,10 @@ describe('GridArea observe mode (interactive: false)', () => {
     renderWidget({
       rows: 3,
       cols: 3,
-      highlighted: [{ row: 0, col: 0 }, { row: 1, col: 1 }],
+      highlighted: [
+        { row: 0, col: 0 },
+        { row: 1, col: 1 },
+      ],
       interactive: false,
     });
     expect(cell(0).getAttribute('data-highlighted')).toBe('true');
@@ -70,7 +73,11 @@ describe('GridArea observe mode (interactive: false)', () => {
     renderWidget({
       rows: 3,
       cols: 3,
-      highlighted: [{ row: 0, col: 0 }, { row: 0, col: 1 }, { row: 2, col: 2 }],
+      highlighted: [
+        { row: 0, col: 0 },
+        { row: 0, col: 1 },
+        { row: 2, col: 2 },
+      ],
       interactive: false,
     });
     expect(screen.getByTestId('count-display')).toBeTruthy();
@@ -172,7 +179,10 @@ describe('GridArea interactive mode - area', () => {
     const { complete, emitInteraction } = renderWidget({
       rows: 2,
       cols: 2,
-      highlighted: [{ row: 0, col: 0 }, { row: 0, col: 1 }],
+      highlighted: [
+        { row: 0, col: 0 },
+        { row: 0, col: 1 },
+      ],
       interactive: true,
     });
     fireEvent.click(cell(0));
@@ -215,12 +225,17 @@ describe('GridArea interactive mode - area', () => {
     renderWidget({
       rows: 2,
       cols: 2,
-      highlighted: [{ row: 0, col: 0 }, { row: 0, col: 1 }],
+      highlighted: [
+        { row: 0, col: 0 },
+        { row: 0, col: 1 },
+      ],
       interactive: true,
     });
     fireEvent.click(cell(0));
     fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('feedback').textContent).toBe('Not quite. The correct area count is 2.');
+    expect(screen.getByTestId('feedback').textContent).toBe(
+      'Not quite. The correct area count is 2.',
+    );
   });
 
   it('does not toggle after submission', () => {
@@ -246,7 +261,12 @@ describe('GridArea interactive mode - area', () => {
   });
 
   it('renders description in interactive mode', () => {
-    renderWidget({ rows: 2, cols: 2, description: 'Highlight the correct cells', interactive: true });
+    renderWidget({
+      rows: 2,
+      cols: 2,
+      description: 'Highlight the correct cells',
+      interactive: true,
+    });
     expect(screen.getByText('Highlight the correct cells')).toBeTruthy();
   });
 });
@@ -258,13 +278,21 @@ describe('GridArea perimeter mode', () => {
       cols: 3,
       mode: 'perimeter',
       highlighted: [
-        { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 },
-        { row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 },
-        { row: 2, col: 0 }, { row: 2, col: 1 }, { row: 2, col: 2 },
+        { row: 0, col: 0 },
+        { row: 0, col: 1 },
+        { row: 0, col: 2 },
+        { row: 1, col: 0 },
+        { row: 1, col: 1 },
+        { row: 1, col: 2 },
+        { row: 2, col: 0 },
+        { row: 2, col: 1 },
+        { row: 2, col: 2 },
       ],
       interactive: false,
     });
-    const highlightedCells = getCells().filter((c) => c.getAttribute('data-highlighted') === 'true');
+    const highlightedCells = getCells().filter(
+      (c) => c.getAttribute('data-highlighted') === 'true',
+    );
     expect(highlightedCells).toHaveLength(8);
     expect(cell(4).getAttribute('data-highlighted')).toBe('false');
   });

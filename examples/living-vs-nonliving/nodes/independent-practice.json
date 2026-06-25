@@ -1,0 +1,29 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.multiple-choice",
+  "config": {
+    "questions": [
+      {
+        "question": "Which is a living thing?",
+        "options": ["🪨", "🌱", "🚗"],
+        "correctIndex": 1
+      },
+      {
+        "question": "Which is NOT a living thing?",
+        "options": ["🐕", "🪨", "🐦"],
+        "correctIndex": 1
+      },
+      {
+        "question": "What do living things do?",
+        "options": ["Grow", "Sleep only", "Stay still"],
+        "correctIndex": 0
+      },
+      {
+        "question": "Which of these can move by itself?",
+        "options": ["A table", "A cat", "A pencil"],
+        "correctIndex": 1
+      }
+    ],
+    "interactive": true
+  }
+}

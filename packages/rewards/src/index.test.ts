@@ -5,7 +5,6 @@ import {
   BadgeTracker,
   handleBadgeAction,
   handleWebhookAction,
-  handleScriptAction,
   RewardError,
   RewardExecutionError,
   RewardConfigurationError,
@@ -31,7 +30,6 @@ describe('@open-edu/rewards exports', () => {
   it('should export handler functions', () => {
     expect(handleBadgeAction).toBeDefined();
     expect(handleWebhookAction).toBeDefined();
-    expect(handleScriptAction).toBeDefined();
   });
 
   it('should export error classes', () => {

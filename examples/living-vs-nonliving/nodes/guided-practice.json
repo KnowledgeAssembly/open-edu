@@ -1,0 +1,14 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.matching",
+  "config": {
+    "description": "Match each item with whether it is living or non-living.",
+    "pairs": [
+      { "itemA": "🌱 Plant", "itemB": "Living" },
+      { "itemA": "🪨 Rock", "itemB": "Non-living" },
+      { "itemA": "🐕 Dog", "itemB": "Living" },
+      { "itemA": "🚗 Car", "itemB": "Non-living" }
+    ],
+    "interactive": true
+  }
+}

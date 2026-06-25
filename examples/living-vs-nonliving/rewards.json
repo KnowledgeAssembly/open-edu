@@ -1,0 +1,50 @@
+{
+  "triggers": [
+    {
+      "onEvent": "workflow_complete",
+      "rewards": [
+        { "action": "badge.award", "badge": "living-nonliving-complete" },
+        {
+          "action": "badge.award",
+          "badge": "living-nonliving-mastery",
+          "condition": {
+            "type": "and",
+            "conditions": [
+              { "type": "score", "nodeId": "nodes/mastery-check.json", "minScore": 80 },
+              {
+                "type": "chain",
+                "completedNodeIds": [
+                  "nodes/guided-practice.json",
+                  "nodes/independent-practice.json"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "action": "webhook",
+          "url": "https://hooks.example.com/lesson-complete",
+          "condition": {
+            "type": "score",
+            "nodeId": "nodes/mastery-check.json",
+            "minScore": 100
+          }
+        }
+      ]
+    },
+    {
+      "onEvent": "node_complete",
+      "rewards": [
+        {
+          "action": "badge.award",
+          "badge": "perfect-independent-practice",
+          "condition": {
+            "type": "score",
+            "nodeId": "nodes/independent-practice.json",
+            "minScore": 100
+          }
+        }
+      ]
+    }
+  ]
+}

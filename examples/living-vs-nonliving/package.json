@@ -1,10 +1,10 @@
 {
-  "name": "@open-edu/example-widget-showcase",
-  "id": "widget-showcase",
-  "title": "Widget Showcase",
+  "name": "@open-edu/example-living-vs-nonliving",
+  "id": "living-vs-nonliving",
+  "title": "Living vs Non-Living Things",
   "version": "0.1.0",
   "private": true,
-  "description": "Demonstrates all 14 built-in widgets in the Open-Edu runtime",
+  "description": "Learn to identify living and non-living things through interactive exercises",
   "author": "Open-Edu",
   "entry": "nodes/intro.md",
   "devDependencies": {

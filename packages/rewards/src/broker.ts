@@ -1,10 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import type { Subscription } from 'rxjs';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardAction, BadgeAction, WebhookAction, ScriptAction } from '@open-edu/schemas';
 import type { RewardBrokerOptions, RewardReceipt, RewardResult, ContextSnapshot } from './types';
 import { BadgeTracker, handleBadgeAction, handleWebhookAction } from './handlers';
-import { handleScriptAction } from './script-handler';
 import { RewardConfigurationError } from './errors';
 import { shouldFireAction, getDefaultContext } from './conditions';
 
@@ -70,7 +68,10 @@ export class RewardBroker {
   }
 
   private generateActionId(): string {
-    return `reward-${randomUUID()}`;
+    return `reward-${'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    })}`;
   }
 
   private toReceipt(result: RewardResult, actionType: string): RewardReceipt {
@@ -85,12 +86,17 @@ export class RewardBroker {
     };
   }
 
+  private addReceipt(receipt: RewardReceipt): void {
+    this._receipts.push(receipt);
+    this.options.onReceipt?.(receipt);
+  }
+
   private evaluateEvent(event: TelemetryEvent): void {
     for (const trigger of this.options.rewards.triggers) {
       if (trigger.onEvent !== event.event) continue;
       for (const action of trigger.rewards) {
         if (!shouldFireAction(action, this._context)) {
-          this._receipts.push({
+          this.addReceipt({
             actionId: this.generateActionId(),
             actionType: action.action,
             dispatchedAt: Date.now(),
@@ -104,10 +110,10 @@ export class RewardBroker {
     }
   }
 
-  private executeAction(action: RewardAction, event: TelemetryEvent): void {
+  private async executeAction(action: RewardAction, event: TelemetryEvent): Promise<void> {
     switch (action.action) {
       case 'badge.award':
-        this._receipts.push(
+        this.addReceipt(
           this.toReceipt(
             handleBadgeAction(action as BadgeAction, this.badgeTracker),
             action.action,
@@ -116,12 +122,12 @@ export class RewardBroker {
         break;
       case 'webhook':
         handleWebhookAction(action as WebhookAction, event).then((r) =>
-          this._receipts.push(this.toReceipt(r, action.action)),
+          this.addReceipt(this.toReceipt(r, action.action)),
         );
         break;
       case 'script': {
         if (!this.options.allowShellHooks) {
-          this._receipts.push({
+          this.addReceipt({
             actionId: this.generateActionId(),
             actionType: action.action,
             dispatchedAt: Date.now(),
@@ -132,8 +138,9 @@ export class RewardBroker {
           });
           break;
         }
+        const { handleScriptAction } = await import('./script-handler');
         handleScriptAction(action as ScriptAction).then((r) =>
-          this._receipts.push(this.toReceipt(r, action.action)),
+          this.addReceipt(this.toReceipt(r, action.action)),
         );
         break;
       }

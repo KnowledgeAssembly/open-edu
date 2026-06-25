@@ -3,6 +3,7 @@
 You've completed the Widget Showcase. You've now seen all 14 built-in widgets in action.
 
 **What you experienced:**
+
 - Visual Counting, Multiple Choice, Matching
 - Drag & Drop, Sequencing, Fill in the Blank
 - Story Question, Real World

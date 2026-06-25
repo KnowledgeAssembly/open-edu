@@ -60,9 +60,8 @@ function workflowEventToTelemetry(event: WorkflowEvent): TelemetryEvent | null {
     }
     case 'workflow.completed': {
       return {
-        event: 'node_complete',
+        event: 'workflow_complete',
         timestamp: ts,
-        nodeId: '__workflow__',
       } as TelemetryEvent;
     }
     case 'route.evaluated': {

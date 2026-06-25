@@ -9,7 +9,6 @@ export type {
   RewardCondition,
 } from './types';
 export { BadgeTracker, handleBadgeAction, handleWebhookAction } from './handlers';
-export { handleScriptAction } from './script-handler';
 export { RewardError, RewardExecutionError, RewardConfigurationError } from './errors';
 export { evaluateCondition, shouldFireAction, getDefaultContext } from './conditions';
 export { verifyReceipt, replayRewards } from './verification';
