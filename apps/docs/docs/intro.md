@@ -45,6 +45,11 @@ git clone https://github.com/spatnaik1982/open-edu
 cd open-edu
 pnpm install
 pnpm build
+
+# Start the learner app (course catalog with full runtime)
+pnpm --filter @open-edu/learner dev
+
+# Or run the dev server for a specific package
 pnpm --filter @open-edu/cli build
 node packages/cli/dist/cli.js dev ./examples/hello-world
 ```
@@ -59,6 +64,7 @@ node packages/cli/dist/cli.js --help
 ## What's Next?
 
 - [Architecture](./architecture) — How the framework is built
+- [Learner App](./learner) — Standalone course player with catalog and progress
 - [Package Format](./package-format) — Structure of educational packages
 - [Package Authoring Guide](./package-authoring) — How to create packages
 - [CLI Reference](./cli/overview) — All CLI commands

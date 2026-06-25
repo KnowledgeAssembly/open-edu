@@ -50,7 +50,24 @@ const widget = registry.get('my-widget');
 
 ## Built-in Widgets
 
-- **`open-edu.multiple-choice-practice`** — Configurable multiple choice exercise with accessible radio inputs, keyboard support, and score-based completion.
+| Widget ID                    | Description                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `open-edu.multiple-choice`   | Standard multiple-choice with radio inputs, single correct answer, and score feedback |
+| `open-edu.visual-counting`   | Count objects in a visual grid and select the correct number                          |
+| `open-edu.matching`          | Drag items from a source list to their matching targets                               |
+| `open-edu.drag-drop`         | Drag and drop items into categorized zones                                            |
+| `open-edu.sequencing`        | Arrange items in the correct order                                                    |
+| `open-edu.fill-blank`        | Type the missing word or phrase in a sentence                                         |
+| `open-edu.story-question`    | Read a passage and answer a comprehension question                                    |
+| `open-edu.real-world`        | Identify real-world examples of a concept from images or descriptions                 |
+| `open-edu.fraction-visual`   | Visual fraction representation — identify fractions from shaded shapes                |
+| `open-edu.place-value-chart` | Identify digit place values (ones, tens, hundreds)                                    |
+| `open-edu.grid-area`         | Calculate area by counting grid squares                                               |
+| `open-edu.chart-reader`      | Read and interpret data from bar charts and graphs                                    |
+| `open-edu.clock-time`        | Read analog clock faces and identify the time                                         |
+| `open-edu.measurement-scale` | Read measurements from a labeled scale                                                |
+
+All built-in widgets follow the same `WidgetDefinition` contract and accept widget-specific configuration via the `config` field on exercise nodes. For a live demo of every widget, run the [Widget Showcase](../examples/widget-showcase) example package.
 
 ## Remote Widget Loading
 
