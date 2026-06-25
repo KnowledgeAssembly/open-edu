@@ -11,18 +11,28 @@ Educational Package (Markdown + JSON)
         │
         ▼
   ┌──────────────┐
-  │     Core     │  Package loader, patcher, lint, agent generator
+  │     Core     │  Package loader, scanner, patcher, lint, generator
+  ├──────────────┤
+  │ scanPackages │  Discover all packages in a directory → catalog
   └──────┬───────┘
          │
          ▼
   ┌──────────────┐
   │   Workflow   │  XState + skill tracking + mastery routing
+  ├──────────────┤
+  │ getOrderedNodes │  Topological sort for course outline
   └──────┬───────┘
          │
          ▼
-  ┌──────────────┐
-  │   Runtime    │  React renderer — lessons, quizzes, widgets
-  └──┬───┬───┬──┘
+  ┌──────────────────┐
+  │     Runtime      │  React renderer — lessons, quizzes, widgets
+  ├──────────────────┤
+  │ Sidebar          │  Course outline with progress
+  │ CourseCard       │  Catalog card with badge counts
+  │ CourseOutline    │  Collapsible sidebar layout
+  │ CompletionScreen │  End-of-course summary
+  │ ProgressBadge    │  Inline progress indicator
+  └──┬───┬───┬───────┘
      ▼   ▼   ▼
   ┌────┐┌────┐┌──────────┐
   │A11y││Widgets││Telemetry │
@@ -31,6 +41,12 @@ Educational Package (Markdown + JSON)
            ┌──────────┐
            │ Rewards  │  Badges, conditions, verification
            └──────────┘
+                  │
+                  ▼
+           ┌──────────────┐
+           │   Learner    │  Standalone app — catalog + course view
+           │   App        │  Progress persistence + toast notifications
+           └──────────────┘
 ```
 
 ## Technology Stack

@@ -27,13 +27,15 @@ Open-Edu is an open runtime for educational experiences — a monorepo framework
 ## Essential Commands
 
 ```bash
-pnpm install          # Install all dependencies
-pnpm build            # Build all packages
-pnpm test             # Run all tests
-pnpm lint             # Lint all packages
-pnpm typecheck        # Type-check all packages
-pnpm format:check     # Check formatting
-pnpm format           # Auto-format all files
+pnpm install                          # Install all dependencies
+pnpm build                            # Build all packages
+pnpm test                             # Run all tests
+pnpm lint                             # Lint all packages
+pnpm typecheck                        # Type-check all packages
+pnpm format:check                     # Check formatting
+pnpm format                           # Auto-format all files
+pnpm --filter @open-edu/learner dev   # Start the learner app (port 4001)
+pnpm test:e2e                         # Run Playwright E2E tests
 ```
 
 ## Monorepo Structure
@@ -42,18 +44,29 @@ pnpm format           # Auto-format all files
 open-edu/
 ├── apps/
 │   ├── dev-server/          # Vite dev server (Epic 10)
-│   └── docs/                # Docusaurus docs (future)
+│   ├── docs/                # Docusaurus docs (future)
+│   └── learner/             # Standalone learner app (Epic 13)
 ├── packages/
 │   ├── schemas/             # Zod schemas + type generation (Epic 2)
-│   ├── core/                # Package loader + validation (Epic 3)
-│   ├── workflow/            # XState workflow engine (Epic 4)
-│   ├── runtime/             # React runtime renderer (Epic 5)
+│   ├── core/                # Package loader + validation + scanner (Epic 3)
+│   ├── workflow/            # XState workflow engine + topology (Epic 4)
+│   ├── runtime/             # React runtime renderer + layout components (Epic 5)
 │   ├── accessibility/       # A11y engine (Epic 6)
 │   ├── telemetry/           # RxJS telemetry + JSONL (Epic 7)
 │   ├── rewards/             # Reward broker (Epic 8)
 │   ├── cli/                 # edu CLI (Epic 9)
-│   └── widgets/             # Widget SDK + built-in widgets (future)
+│   └── widgets/             # Widget SDK + built-in widgets (Epic 11)
 ├── examples/                # Example educational packages
+│   ├── adaptive-study/
+│   ├── autism-reading/
+│   ├── fractions/
+│   ├── hello-world/
+│   ├── intro-javascript/
+│   ├── living-vs-nonliving/
+│   ├── remote-widget-demo/
+│   ├── skill-graph/
+│   ├── widget-practice/
+│   └── widget-showcase/
 ├── tests/e2e/               # Playwright integration tests
 ├── docs/                    # Architecture docs (VISION, ARCHITECTURE, FRAMEWORK_SPEC)
 └── PLAN.md                  # Implementation plan with epic/story breakdown
@@ -94,6 +107,9 @@ Epic 1 (Foundation)  ← CURRENT
         ├─► Epic 7 (Telemetry)
         │     └─► Epic 8 (Rewards)
         └─► Epic 11 (Examples)
+
+Epic 13 (Learner App)
+  └─► Epics 3, 4, 5, 6, 7, 8, 11 (consumes all packages)
 ```
 
 ## Configuration Files
