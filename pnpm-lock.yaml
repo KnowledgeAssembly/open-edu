@@ -139,6 +139,9 @@ importers:
 
   apps/learner:
     dependencies:
+      '@open-edu/accessibility':
+        specifier: workspace:*
+        version: link:../../packages/accessibility
       '@open-edu/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -151,6 +154,15 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@open-edu/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      '@open-edu/widgets':
+        specifier: workspace:*
+        version: link:../../packages/widgets
+      '@open-edu/workflow':
+        specifier: workspace:*
+        version: link:../../packages/workflow
       react:
         specifier: ^18.3.0
         version: 18.3.1

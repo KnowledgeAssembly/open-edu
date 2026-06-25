@@ -14,6 +14,10 @@
   "dependencies": {
     "@open-edu/runtime": "workspace:*",
     "@open-edu/core": "workspace:*",
+    "@open-edu/workflow": "workspace:*",
+    "@open-edu/telemetry": "workspace:*",
+    "@open-edu/accessibility": "workspace:*",
+    "@open-edu/widgets": "workspace:*",
     "@open-edu/rewards": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "react": "^18.3.0",
