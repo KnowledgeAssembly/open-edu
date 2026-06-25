@@ -148,4 +148,13 @@ describe('LayoutShell', () => {
     });
     expect(getByRole('heading', { level: 1, name: 'Custom Title' })).toBeInTheDocument();
   });
+
+  it('renders sidebar content when sidebar prop is provided', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByText, getByTestId } = renderShell(pkg, 'nodes/lesson-01.md', {
+      sidebar: <div data-testid="sidebar-content">Sidebar Content</div>,
+    });
+    expect(getByTestId('sidebar-content')).toBeInTheDocument();
+    expect(getByText('Sidebar Content')).toBeInTheDocument();
+  });
 });

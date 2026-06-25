@@ -8,6 +8,7 @@ export interface LayoutShellProps {
   headerTitle?: string;
   nextLabel?: string;
   completedLabel?: string;
+  sidebar?: ReactNode;
 }
 
 export function LayoutShell({
@@ -15,6 +16,7 @@ export function LayoutShell({
   headerTitle,
   nextLabel = 'Next',
   completedLabel = 'You have completed this learning experience.',
+  sidebar,
 }: LayoutShellProps): JSX.Element {
   const { loadedPackage, currentNode, isCompleted, visitedNodes, completeNode } = useRuntime();
 
@@ -76,7 +78,7 @@ export function LayoutShell({
     padding: '0.625rem 0',
   };
 
-  return (
+  const shellContent = (
     <section className="open-edu-runtime" style={sectionStyle} data-testid="layout-shell">
       <header style={headerStyle}>
         <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>{title}</h1>
@@ -107,4 +109,29 @@ export function LayoutShell({
       </footer>
     </section>
   );
+
+  if (sidebar) {
+    const wrapperStyle: CSSProperties = {
+      display: 'flex',
+      height: '100%',
+    };
+    const sidebarStyle: CSSProperties = {
+      flex: '0 0 280px',
+      overflowY: 'auto',
+      borderRight: `1px solid var(--oe-color-border, #e5e7eb)`,
+    };
+    const rightStyle: CSSProperties = {
+      flex: 1,
+      minWidth: 0,
+    };
+
+    return (
+      <div style={wrapperStyle}>
+        <div style={sidebarStyle}>{sidebar}</div>
+        <div style={rightStyle}>{shellContent}</div>
+      </div>
+    );
+  }
+
+  return shellContent;
 }
