@@ -1,0 +1,29 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.multiple-choice",
+  "config": {
+    "questions": [
+      {
+        "question": "Is a sunflower a living thing?",
+        "options": ["Yes, it grows", "No, it stays still", "Only when it is young"],
+        "correctIndex": 0
+      },
+      {
+        "question": "Why is a rock NOT a living thing?",
+        "options": ["It does not grow", "It is too hard", "It is too small"],
+        "correctIndex": 0
+      },
+      {
+        "question": "Which is a living thing?",
+        "options": ["☀️ Sun", "🐦 Bird", "💧 Water"],
+        "correctIndex": 1
+      },
+      {
+        "question": "Living things need ___ to survive.",
+        "options": ["Music", "Food and water", "A bed"],
+        "correctIndex": 1
+      }
+    ],
+    "interactive": true
+  }
+}

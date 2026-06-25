@@ -1,0 +1,11 @@
+{
+  "type": "exercise",
+  "widget": "open-edu.visual-counting",
+  "config": {
+    "description": "Look at these living things!",
+    "items": ["🌱", "🐕", "🐦"],
+    "count": 3,
+    "text": "living things you see",
+    "interactive": true
+  }
+}

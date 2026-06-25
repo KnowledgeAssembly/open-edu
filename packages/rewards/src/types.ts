@@ -38,6 +38,7 @@ export interface RewardBrokerOptions {
   source: Observable<TelemetryEvent>;
   allowShellHooks?: boolean;
   context?: ContextSnapshot;
+  onReceipt?: (receipt: RewardReceipt) => void;
 }
 
 export interface RewardHandler<T> {

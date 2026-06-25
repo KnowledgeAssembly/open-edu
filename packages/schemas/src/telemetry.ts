@@ -45,6 +45,10 @@ export const RouteTriggeredEventSchema = BaseTelemetrySchema.extend({
   reason: z.string().min(1).max(512).optional(),
 });
 
+export const WorkflowCompleteEventSchema = BaseTelemetrySchema.extend({
+  event: z.literal('workflow_complete'),
+});
+
 export const TelemetryEventSchema = z.discriminatedUnion('event', [
   NodeOpenEventSchema,
   NodeCompleteEventSchema,
@@ -52,6 +56,7 @@ export const TelemetryEventSchema = z.discriminatedUnion('event', [
   HintTriggeredEventSchema,
   WidgetInteractionEventSchema,
   RouteTriggeredEventSchema,
+  WorkflowCompleteEventSchema,
 ]);
 
 export type TelemetryEvent = z.infer<typeof TelemetryEventSchema>;
@@ -61,6 +66,7 @@ export type QuizAnsweredEvent = z.infer<typeof QuizAnsweredEventSchema>;
 export type HintTriggeredEvent = z.infer<typeof HintTriggeredEventSchema>;
 export type WidgetInteractionEvent = z.infer<typeof WidgetInteractionEventSchema>;
 export type RouteTriggeredEvent = z.infer<typeof RouteTriggeredEventSchema>;
+export type WorkflowCompleteEvent = z.infer<typeof WorkflowCompleteEventSchema>;
 
 export const TelemetryEventEnum = z.enum([
   'node_open',
@@ -69,4 +75,5 @@ export const TelemetryEventEnum = z.enum([
   'hint_triggered',
   'widget_interaction',
   'route_triggered',
+  'workflow_complete',
 ]);

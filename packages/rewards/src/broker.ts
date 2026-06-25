@@ -85,12 +85,17 @@ export class RewardBroker {
     };
   }
 
+  private addReceipt(receipt: RewardReceipt): void {
+    this._receipts.push(receipt);
+    this.options.onReceipt?.(receipt);
+  }
+
   private evaluateEvent(event: TelemetryEvent): void {
     for (const trigger of this.options.rewards.triggers) {
       if (trigger.onEvent !== event.event) continue;
       for (const action of trigger.rewards) {
         if (!shouldFireAction(action, this._context)) {
-          this._receipts.push({
+          this.addReceipt({
             actionId: this.generateActionId(),
             actionType: action.action,
             dispatchedAt: Date.now(),
@@ -107,7 +112,7 @@ export class RewardBroker {
   private executeAction(action: RewardAction, event: TelemetryEvent): void {
     switch (action.action) {
       case 'badge.award':
-        this._receipts.push(
+        this.addReceipt(
           this.toReceipt(
             handleBadgeAction(action as BadgeAction, this.badgeTracker),
             action.action,
@@ -116,12 +121,12 @@ export class RewardBroker {
         break;
       case 'webhook':
         handleWebhookAction(action as WebhookAction, event).then((r) =>
-          this._receipts.push(this.toReceipt(r, action.action)),
+          this.addReceipt(this.toReceipt(r, action.action)),
         );
         break;
       case 'script': {
         if (!this.options.allowShellHooks) {
-          this._receipts.push({
+          this.addReceipt({
             actionId: this.generateActionId(),
             actionType: action.action,
             dispatchedAt: Date.now(),
@@ -133,7 +138,7 @@ export class RewardBroker {
           break;
         }
         handleScriptAction(action as ScriptAction).then((r) =>
-          this._receipts.push(this.toReceipt(r, action.action)),
+          this.addReceipt(this.toReceipt(r, action.action)),
         );
         break;
       }

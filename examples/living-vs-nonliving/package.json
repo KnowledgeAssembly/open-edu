@@ -1,0 +1,20 @@
+{
+  "name": "@open-edu/example-living-vs-nonliving",
+  "id": "living-vs-nonliving",
+  "title": "Living vs Non-Living Things",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Learn to identify living and non-living things through interactive exercises",
+  "author": "Open-Edu",
+  "entry": "nodes/intro.md",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}
