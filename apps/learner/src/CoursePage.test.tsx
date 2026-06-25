@@ -32,13 +32,8 @@ function createMockBroker() {
   };
 }
 
-const { mockLoadPackage, mockGetOrderedNodes } = vi.hoisted(() => ({
-  mockLoadPackage: vi.fn(),
+const { mockGetOrderedNodes } = vi.hoisted(() => ({
   mockGetOrderedNodes: vi.fn(),
-}));
-
-vi.mock('@open-edu/core', () => ({
-  loadPackage: mockLoadPackage,
 }));
 
 vi.mock('@open-edu/workflow', () => ({
@@ -109,38 +104,24 @@ describe('CoursePage', () => {
     mockGetOrderedNodes.mockReturnValue(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
   });
 
-  it('renders loading state initially', () => {
-    mockLoadPackage.mockReturnValue(new Promise(() => {}));
-    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
-    expect(screen.getByText('Loading course...')).toBeInTheDocument();
-  });
+  it('renders course view with sidebar', () => {
+    render(<CoursePage pkg={samplePackage} onBackToCatalog={vi.fn()} />);
 
-  it('renders error state on load failure', async () => {
-    mockLoadPackage.mockRejectedValue(new Error('Package not found'));
-    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
-    await waitFor(() => {
-      expect(screen.getByText('Unable to load this course')).toBeInTheDocument();
-    });
-    expect(screen.getByText('Package not found')).toBeInTheDocument();
-  });
-
-  it('renders course view with sidebar on successful load', async () => {
-    mockLoadPackage.mockResolvedValue(samplePackage);
-
-    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-    });
-
+    expect(screen.getByTestId('sidebar')).toBeInTheDocument();
     expect(screen.getAllByText('Test Course').length).toBeGreaterThan(0);
   });
 
+  it('renders no-workflow fallback when package has no workflow', () => {
+    const noWorkflowPkg = { ...samplePackage, workflow: null };
+    render(<CoursePage pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
+
+    expect(screen.getByText('Course not available')).toBeInTheDocument();
+  });
+
   it('badge toast appears when a badge is earned', async () => {
-    mockLoadPackage.mockResolvedValue({
+    const pkgWithRewards: LoadedPackage = {
       ...samplePackage,
       rewards: {
-        version: '0.1.0',
         triggers: [
           {
             onEvent: 'node_complete',
@@ -148,7 +129,7 @@ describe('CoursePage', () => {
           },
         ],
       },
-    });
+    };
 
     const RewardBroker = vi.mocked((await import('@open-edu/rewards')).RewardBroker);
     let onReceipt: ((r: unknown) => void) | undefined;
@@ -157,7 +138,7 @@ describe('CoursePage', () => {
       return createMockBroker() as any;
     });
 
-    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
+    render(<CoursePage pkg={pkgWithRewards} onBackToCatalog={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('sidebar')).toBeInTheDocument();

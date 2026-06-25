@@ -54,15 +54,11 @@ test.describe('Learner Experience', () => {
 
     await expect(page.locator('nav[aria-label="Course outline"]')).toBeVisible({ timeout: 15000 });
 
-    const progressBefore = await page.evaluate(() =>
-      localStorage.getItem('open-edu-progress'),
-    );
+    const progressBefore = await page.evaluate(() => localStorage.getItem('open-edu-progress'));
 
     await page.reload();
 
-    const progressAfter = await page.evaluate(() =>
-      localStorage.getItem('open-edu-progress'),
-    );
+    const progressAfter = await page.evaluate(() => localStorage.getItem('open-edu-progress'));
 
     expect(progressAfter).toEqual(progressBefore);
   });
@@ -114,9 +110,7 @@ test.describe('Learner Experience', () => {
     const completionScreen = page.locator('[data-testid="completion-screen"]');
     const completionText = page.getByText(/You finished|You have completed|Course Completed/);
 
-    await expect(
-      completionScreen.or(completionText).first(),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(completionScreen.or(completionText).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('back to catalog returns to course listing', async ({ page }) => {

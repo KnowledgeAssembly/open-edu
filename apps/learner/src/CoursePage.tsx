@@ -15,44 +15,21 @@ import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
 import type { ProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
-import { loadPackage } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 
 export interface CoursePageProps {
-  packageDir: string;
+  pkg: LoadedPackage;
   onBackToCatalog: () => void;
 }
 
-export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JSX.Element {
-  const [pkg, setPkg] = useState<LoadedPackage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Element {
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    loadPackage(packageDir)
-      .then((result) => {
-        if (!cancelled) setPkg(result);
-      })
-      .catch((err: Error) => {
-        if (!cancelled) setError(err.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [packageDir]);
-
   const engine = useMemo(() => {
-    if (!pkg?.workflow) return null;
+    if (!pkg.workflow) return null;
     const saved = getProgress(pkg.manifest.id);
     const entry = saved?.currentNodeId ?? pkg.manifest.entry;
     if (!entry) return null;
@@ -60,7 +37,7 @@ export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JS
   }, [pkg]);
 
   const orderedNodes = useMemo<LoadedNode[]>(() => {
-    if (!pkg?.workflow || !pkg?.manifest.entry) return [];
+    if (!pkg.workflow || !pkg.manifest.entry) return [];
     const nodeIds = getOrderedNodes(pkg.workflow, pkg.manifest.entry);
     return nodeIds
       .map((id) => pkg.nodes.find((n) => n.relativePath === id))
@@ -70,12 +47,11 @@ export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JS
   const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
 
   const initialProgress = useMemo(() => {
-    if (!pkg) return undefined;
     return getProgress(pkg.manifest.id) ?? undefined;
   }, [pkg]);
 
   useEffect(() => {
-    if (!engine || !pkg) return;
+    if (!engine) return;
 
     const session = new TelemetrySession();
     session.start();
@@ -128,7 +104,7 @@ export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JS
   }, [engine, pkg]);
 
   useEffect(() => {
-    if (!engine || !pkg) return;
+    if (!engine) return;
 
     const unsub = engine.subscribe((event: WorkflowEvent) => {
       if (event.type === 'workflow.completed') {
@@ -137,32 +113,16 @@ export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JS
     });
 
     return unsub;
-  }, [engine, pkg]);
+  }, [engine]);
 
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
-      if (pkg) {
-        saveProgress(pkg.manifest.id, snapshot);
-      }
+      saveProgress(pkg.manifest.id, snapshot);
     },
     [pkg],
   );
 
-  if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading course...</div>;
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: '2rem', maxWidth: '40rem' }}>
-        <h1 style={{ color: 'var(--oe-color-error, #dc2626)' }}>Unable to load this course</h1>
-        <p>{error}</p>
-        <button onClick={onBackToCatalog}>Back to catalog</button>
-      </div>
-    );
-  }
-
-  if (!pkg || !engine) {
+  if (!engine) {
     return (
       <div style={{ padding: '2rem', maxWidth: '40rem' }}>
         <h1 style={{ color: 'var(--oe-color-error, #dc2626)' }}>Course not available</h1>

@@ -146,10 +146,10 @@ Progress key: single localStorage key `"open-edu-progress"`, value is `Record<pa
 
 #### `Sidebar`
 
-| Prop | Type | Description |
-|------|------|-------------|
-| nodes | `LoadedNode[]` | All nodes in the package, ordered by workflow discovery |
-| className | `string?` | Optional CSS class |
+| Prop      | Type           | Description                                             |
+| --------- | -------------- | ------------------------------------------------------- |
+| nodes     | `LoadedNode[]` | All nodes in the package, ordered by workflow discovery |
+| className | `string?`      | Optional CSS class                                      |
 
 States: empty (0 nodes), in-progress, completed.
 Accessibility: `<nav>` landmark, `aria-current="true"` on active node.
@@ -165,34 +165,34 @@ Renders: `Sidebar` + "X of Y complete" + collapsible toggle. Default open on des
 
 #### `CourseCard`
 
-| Prop | Type | Description |
-|------|------|-------------|
-| manifest | `PackageManifest` | From scanPackages |
-| nodeCount | `number` | Total nodes in the package |
-| badgeCount | `number` | Total badge.award actions in rewards.json |
-| earnedBadgeCount | `number` | Badges already earned by this learner |
-| progress | `ProgressSnapshot \| null` | Current progress, null if not started |
-| onStart | `(packageId: string) => void` | Click handler for the action button |
+| Prop             | Type                          | Description                               |
+| ---------------- | ----------------------------- | ----------------------------------------- |
+| manifest         | `PackageManifest`             | From scanPackages                         |
+| nodeCount        | `number`                      | Total nodes in the package                |
+| badgeCount       | `number`                      | Total badge.award actions in rewards.json |
+| earnedBadgeCount | `number`                      | Badges already earned by this learner     |
+| progress         | `ProgressSnapshot \| null`    | Current progress, null if not started     |
+| onStart          | `(packageId: string) => void` | Click handler for the action button       |
 
 States: not-started (blue badge), in-progress (amber badge), completed (green check).
 Accessibility: `<article>` landmark, action button has `aria-label` with course title.
 
 #### `CompletionScreen`
 
-| Prop | Type | Description |
-|------|------|-------------|
-| className | `string?` | Optional CSS class |
-| onBack | `() => void` | Click handler for back-to-catalog button |
+| Prop      | Type         | Description                              |
+| --------- | ------------ | ---------------------------------------- |
+| className | `string?`    | Optional CSS class                       |
+| onBack    | `() => void` | Click handler for back-to-catalog button |
 
 Reads `useRuntime()` for: `loadedPackage.title`, `scores`, `skillScores`.
 Earned badges passed as `badges` prop from `CoursePage`.
 
 #### `ProgressBadge`
 
-| Prop | Type | Description |
-|------|------|-------------|
-| percentComplete | `number` | 0-100 |
-| isCompleted | `boolean` | Whether the package is fully completed |
+| Prop            | Type      | Description                            |
+| --------------- | --------- | -------------------------------------- |
+| percentComplete | `number`  | 0-100                                  |
+| isCompleted     | `boolean` | Whether the package is fully completed |
 
 Renders: colored badge (not-started/in-progress/complete). Used inside `CourseCard`.
 
@@ -202,8 +202,8 @@ Renders: colored badge (not-started/in-progress/complete). Used inside `CourseCa
 
 Add one new prop:
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop    | Type         | Description                                      |
+| ------- | ------------ | ------------------------------------------------ |
 | sidebar | `ReactNode?` | Optional sidebar rendered to the left of content |
 
 When `sidebar` is omitted, renders full-width — fully backward compatible.
@@ -229,12 +229,12 @@ Traverses the workflow routing table starting from `entry`, following `onComplet
 
 ### New app `apps/learner`
 
-| File | Purpose |
-|------|---------|
-| `main.tsx` | Mounts `<App />` to DOM |
-| `App.tsx` | State machine: catalog → course → completion → catalog |
-| `CatalogPage.tsx` | Calls `scanPackages()`, merges with progress, renders `CourseCard` grid |
-| `CoursePage.tsx` | Loads package, creates runtime + reward broker, manages toast and completion |
+| File                 | Purpose                                                                           |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `main.tsx`           | Mounts `<App />` to DOM                                                           |
+| `App.tsx`            | State machine: catalog → course → completion → catalog                            |
+| `CatalogPage.tsx`    | Calls `scanPackages()`, merges with progress, renders `CourseCard` grid           |
+| `CoursePage.tsx`     | Loads package, creates runtime + reward broker, manages toast and completion      |
 | `progressStorage.ts` | `getAllProgress()`, `getProgress(packageId)`, `saveProgress(packageId, snapshot)` |
 
 Package dependencies: `@open-edu/runtime`, `@open-edu/core`, `@open-edu/rewards`, `@open-edu/schemas`, `react`, `react-dom`, `vite`.
@@ -257,74 +257,74 @@ The toast uses existing theme tokens from `RUNTIME_THEME`. No animation beyond C
 
 ## 7. Error Handling
 
-| Component | Error | User Sees |
-|-----------|-------|-----------|
-| `CatalogPage` — `scanPackages` fails | Directory not found, inaccessible | Empty state: "No courses found" with retry button |
-| `CatalogPage` — 0 packages found | Valid dir but no valid packages | Same empty state |
-| `CatalogPage` — corrupted localStorage | Unparseable progress data | Falls back to `null` progress (all courses show "Not started") |
-| `CoursePage` — `loadPackage` fails | Invalid package, missing manifest | Error screen: "Unable to load this course" + back button |
-| `Sidebar` — no nodes in package | Empty workflow | Sidebar shows "No lessons" placeholder |
-| `CompletionScreen` — no scores | Workflow completed with 0 scored nodes | Shows "No skills assessed" instead of empty SkillSummary |
-| `CompletionScreen` — no badges | No rewards.json or no badges earned | Omits badges section entirely |
+| Component                              | Error                                  | User Sees                                                      |
+| -------------------------------------- | -------------------------------------- | -------------------------------------------------------------- |
+| `CatalogPage` — `scanPackages` fails   | Directory not found, inaccessible      | Empty state: "No courses found" with retry button              |
+| `CatalogPage` — 0 packages found       | Valid dir but no valid packages        | Same empty state                                               |
+| `CatalogPage` — corrupted localStorage | Unparseable progress data              | Falls back to `null` progress (all courses show "Not started") |
+| `CoursePage` — `loadPackage` fails     | Invalid package, missing manifest      | Error screen: "Unable to load this course" + back button       |
+| `Sidebar` — no nodes in package        | Empty workflow                         | Sidebar shows "No lessons" placeholder                         |
+| `CompletionScreen` — no scores         | Workflow completed with 0 scored nodes | Shows "No skills assessed" instead of empty SkillSummary       |
+| `CompletionScreen` — no badges         | No rewards.json or no badges earned    | Omits badges section entirely                                  |
 
 ## 8. Testing
 
-| What | How | Package |
-|------|-----|---------|
-| `scanPackages()` | Unit: empty dir, valid packages, mixed valid/invalid, deep nesting | `@open-edu/core` |
-| `CourseCard` | Unit: not-started, in-progress, completed states; click handler; badge counts | `@open-edu/runtime` |
-| `ProgressBadge` | Unit: 0%, 50%, 100%; isCompleted flag | `@open-edu/runtime` |
-| `Sidebar` | Unit: renders all nodes, highlights current, marks visited, empty state | `@open-edu/runtime` |
-| `CourseOutline` | Unit: renders Sidebar + summary, collapsible toggle | `@open-edu/runtime` |
-| `CompletionScreen` | Unit: renders message + skills + badges + back button click | `@open-edu/runtime` |
-| `LayoutShell` | Regression: existing tests must pass; new test for sidebar slot | `@open-edu/runtime` |
-| `CatalogPage` | Unit: renders grid, empty state, click-to-launch | `apps/learner` |
-| `CoursePage` | Unit: progress persistence roundtrip, badge toast | `apps/learner` |
-| `progressStorage` | Unit: save, load, multiple packages, corrupted data recovery | `apps/learner` |
-| E2E full flow | Playwright: catalog → course → complete nodes → completion → back to catalog | `tests/e2e` |
-| E2E progress | Playwright: complete a node, reload, verify progress survives | `tests/e2e` |
-| E2E sidebar | Playwright: Tab through sidebar, verify aria-current updates | `tests/e2e` |
-| E2E badges | Playwright: earn badge during course, verify toast + completion screen | `tests/e2e` |
-| Accessibility | axe-core audit on every rendered screen | `@open-edu/accessibility` |
+| What               | How                                                                           | Package                   |
+| ------------------ | ----------------------------------------------------------------------------- | ------------------------- |
+| `scanPackages()`   | Unit: empty dir, valid packages, mixed valid/invalid, deep nesting            | `@open-edu/core`          |
+| `CourseCard`       | Unit: not-started, in-progress, completed states; click handler; badge counts | `@open-edu/runtime`       |
+| `ProgressBadge`    | Unit: 0%, 50%, 100%; isCompleted flag                                         | `@open-edu/runtime`       |
+| `Sidebar`          | Unit: renders all nodes, highlights current, marks visited, empty state       | `@open-edu/runtime`       |
+| `CourseOutline`    | Unit: renders Sidebar + summary, collapsible toggle                           | `@open-edu/runtime`       |
+| `CompletionScreen` | Unit: renders message + skills + badges + back button click                   | `@open-edu/runtime`       |
+| `LayoutShell`      | Regression: existing tests must pass; new test for sidebar slot               | `@open-edu/runtime`       |
+| `CatalogPage`      | Unit: renders grid, empty state, click-to-launch                              | `apps/learner`            |
+| `CoursePage`       | Unit: progress persistence roundtrip, badge toast                             | `apps/learner`            |
+| `progressStorage`  | Unit: save, load, multiple packages, corrupted data recovery                  | `apps/learner`            |
+| E2E full flow      | Playwright: catalog → course → complete nodes → completion → back to catalog  | `tests/e2e`               |
+| E2E progress       | Playwright: complete a node, reload, verify progress survives                 | `tests/e2e`               |
+| E2E sidebar        | Playwright: Tab through sidebar, verify aria-current updates                  | `tests/e2e`               |
+| E2E badges         | Playwright: earn badge during course, verify toast + completion screen        | `tests/e2e`               |
+| Accessibility      | axe-core audit on every rendered screen                                       | `@open-edu/accessibility` |
 
 No new test dependencies. All existing frameworks (Vitest, React Testing Library, Playwright, axe-core) are sufficient.
 
 ## 9. File Manifest
 
-| File | Change Type |
-|------|-------------|
-| `packages/core/src/scanner.ts` | **New** |
-| `packages/core/src/scanner.test.ts` | **New** |
-| `packages/core/src/index.ts` | **Modify** — export `scanPackages` |
-| `packages/workflow/src/topology.ts` | **New** |
-| `packages/workflow/src/topology.test.ts` | **New** |
-| `packages/workflow/src/index.ts` | **Modify** — export `getOrderedNodes` |
-| `packages/runtime/src/layout/Sidebar.tsx` | **New** |
-| `packages/runtime/src/layout/Sidebar.test.tsx` | **New** |
-| `packages/runtime/src/layout/LayoutShell.tsx` | **Modify** — add `sidebar` prop |
-| `packages/runtime/src/layout/LayoutShell.test.tsx` | **Modify** — test sidebar slot |
-| `packages/runtime/src/components/CourseOutline.tsx` | **New** |
-| `packages/runtime/src/components/CourseOutline.test.tsx` | **New** |
-| `packages/runtime/src/components/CourseCard.tsx` | **New** |
-| `packages/runtime/src/components/CourseCard.test.tsx` | **New** |
-| `packages/runtime/src/components/CompletionScreen.tsx` | **New** |
-| `packages/runtime/src/components/CompletionScreen.test.tsx` | **New** |
-| `packages/runtime/src/components/ProgressBadge.tsx` | **New** |
-| `packages/runtime/src/components/ProgressBadge.test.tsx` | **New** |
-| `packages/runtime/src/index.ts` | **Modify** — export new components |
-| `apps/learner/src/main.tsx` | **New** |
-| `apps/learner/src/App.tsx` | **New** |
-| `apps/learner/src/CatalogPage.tsx` | **New** |
-| `apps/learner/src/CatalogPage.test.tsx` | **New** |
-| `apps/learner/src/CoursePage.tsx` | **New** |
-| `apps/learner/src/CoursePage.test.tsx` | **New** |
-| `apps/learner/src/progressStorage.ts` | **New** |
-| `apps/learner/src/progressStorage.test.ts` | **New** |
-| `apps/learner/package.json` | **New** |
-| `apps/learner/tsconfig.json` | **New** |
-| `apps/learner/vite.config.ts` | **New** |
-| `apps/learner/index.html` | **New** |
-| `tests/e2e/learner-experience.spec.ts` | **New** |
+| File                                                        | Change Type                           |
+| ----------------------------------------------------------- | ------------------------------------- |
+| `packages/core/src/scanner.ts`                              | **New**                               |
+| `packages/core/src/scanner.test.ts`                         | **New**                               |
+| `packages/core/src/index.ts`                                | **Modify** — export `scanPackages`    |
+| `packages/workflow/src/topology.ts`                         | **New**                               |
+| `packages/workflow/src/topology.test.ts`                    | **New**                               |
+| `packages/workflow/src/index.ts`                            | **Modify** — export `getOrderedNodes` |
+| `packages/runtime/src/layout/Sidebar.tsx`                   | **New**                               |
+| `packages/runtime/src/layout/Sidebar.test.tsx`              | **New**                               |
+| `packages/runtime/src/layout/LayoutShell.tsx`               | **Modify** — add `sidebar` prop       |
+| `packages/runtime/src/layout/LayoutShell.test.tsx`          | **Modify** — test sidebar slot        |
+| `packages/runtime/src/components/CourseOutline.tsx`         | **New**                               |
+| `packages/runtime/src/components/CourseOutline.test.tsx`    | **New**                               |
+| `packages/runtime/src/components/CourseCard.tsx`            | **New**                               |
+| `packages/runtime/src/components/CourseCard.test.tsx`       | **New**                               |
+| `packages/runtime/src/components/CompletionScreen.tsx`      | **New**                               |
+| `packages/runtime/src/components/CompletionScreen.test.tsx` | **New**                               |
+| `packages/runtime/src/components/ProgressBadge.tsx`         | **New**                               |
+| `packages/runtime/src/components/ProgressBadge.test.tsx`    | **New**                               |
+| `packages/runtime/src/index.ts`                             | **Modify** — export new components    |
+| `apps/learner/src/main.tsx`                                 | **New**                               |
+| `apps/learner/src/App.tsx`                                  | **New**                               |
+| `apps/learner/src/CatalogPage.tsx`                          | **New**                               |
+| `apps/learner/src/CatalogPage.test.tsx`                     | **New**                               |
+| `apps/learner/src/CoursePage.tsx`                           | **New**                               |
+| `apps/learner/src/CoursePage.test.tsx`                      | **New**                               |
+| `apps/learner/src/progressStorage.ts`                       | **New**                               |
+| `apps/learner/src/progressStorage.test.ts`                  | **New**                               |
+| `apps/learner/package.json`                                 | **New**                               |
+| `apps/learner/tsconfig.json`                                | **New**                               |
+| `apps/learner/vite.config.ts`                               | **New**                               |
+| `apps/learner/index.html`                                   | **New**                               |
+| `tests/e2e/learner-experience.spec.ts`                      | **New**                               |
 
 ## 10. Package Summary Type
 

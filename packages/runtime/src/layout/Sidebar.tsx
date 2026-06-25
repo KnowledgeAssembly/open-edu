@@ -69,9 +69,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
             const liStyle: CSSProperties = {
               padding: '0.5rem',
               borderRadius: 'var(--oe-radius, 8px)',
-              backgroundColor: isCurrent
-                ? 'var(--oe-color-primary, #2563eb)'
-                : 'transparent',
+              backgroundColor: isCurrent ? 'var(--oe-color-primary, #2563eb)' : 'transparent',
               color: isCurrent
                 ? 'var(--oe-color-primary-fg, #ffffff)'
                 : 'var(--oe-color-fg, #1a1a1a)',

@@ -1,13 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
 import type { PackageSummary } from '@open-edu/core';
-
-const mockScanPackages = vi.fn();
-
-vi.mock('@open-edu/core', () => ({
-  scanPackages: (...args: unknown[]) => mockScanPackages(...args),
-}));
 
 vi.mock('../progressStorage', () => ({
   getAllProgress: vi.fn(() => ({})),
@@ -41,34 +35,26 @@ const samplePackages: PackageSummary[] = [
 ];
 
 describe('CatalogPage', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('renders course cards', () => {
-    mockScanPackages.mockReturnValue(samplePackages);
-    render(<CatalogPage packageDir="/test" onStartCourse={vi.fn()} />);
+    render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     const cards = screen.getAllByTestId('course-card');
     expect(cards).toHaveLength(2);
   });
 
   it('renders empty state when no packages', () => {
-    mockScanPackages.mockReturnValue([]);
-    render(<CatalogPage packageDir="/test" onStartCourse={vi.fn()} />);
+    render(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
     expect(screen.getByText('No courses found.')).toBeInTheDocument();
   });
 
   it('renders package titles', () => {
-    mockScanPackages.mockReturnValue(samplePackages);
-    render(<CatalogPage packageDir="/test" onStartCourse={vi.fn()} />);
+    render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     expect(screen.getByText('Course One')).toBeInTheDocument();
     expect(screen.getByText('Course Two')).toBeInTheDocument();
   });
 
   it('fires onStartCourse with correct rootDir per package', () => {
-    mockScanPackages.mockReturnValue(samplePackages);
     const onStart = vi.fn();
-    render(<CatalogPage packageDir="/test/courses" onStartCourse={onStart} />);
+    render(<CatalogPage packages={samplePackages} onStartCourse={onStart} />);
     fireEvent.click(screen.getByRole('button', { name: /Start Course One/ }));
     expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
   });

@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
+import type { LoadedPackage } from '@open-edu/core';
 import { CatalogPage } from './CatalogPage';
 import { CoursePage } from './CoursePage';
 
-type Screen = { type: 'catalog' } | { type: 'course'; packageDir: string };
+import { catalogPackages, packageEntries } from 'virtual:edu-data';
+
+type Screen = { type: 'catalog' } | { type: 'course'; pkg: LoadedPackage; packageDir: string };
 
 export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>({ type: 'catalog' });
 
   const handleStartCourse = (packageDir: string) => {
-    setScreen({ type: 'course', packageDir });
+    const pkg = Object.values(packageEntries).find((p) => p.rootDir === packageDir);
+    if (pkg) {
+      setScreen({ type: 'course', pkg, packageDir });
+    }
   };
 
   const handleBackToCatalog = () => {
@@ -19,10 +25,10 @@ export function App(): JSX.Element {
   return (
     <RuntimeThemeProvider>
       {screen.type === 'catalog' && (
-        <CatalogPage packageDir="../../examples" onStartCourse={handleStartCourse} />
+        <CatalogPage packages={catalogPackages} onStartCourse={handleStartCourse} />
       )}
       {screen.type === 'course' && (
-        <CoursePage packageDir={screen.packageDir} onBackToCatalog={handleBackToCatalog} />
+        <CoursePage pkg={screen.pkg} onBackToCatalog={handleBackToCatalog} />
       )}
     </RuntimeThemeProvider>
   );

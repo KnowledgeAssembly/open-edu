@@ -96,12 +96,7 @@ export function CompletionScreen({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={onBack}
-        style={backButtonStyle}
-        data-testid="back-to-catalog"
-      >
+      <button type="button" onClick={onBack} style={backButtonStyle} data-testid="back-to-catalog">
         Back to catalog
       </button>
     </div>
