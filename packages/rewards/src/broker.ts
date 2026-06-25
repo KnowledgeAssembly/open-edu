@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { Subscription } from 'rxjs';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardAction, BadgeAction, WebhookAction, ScriptAction } from '@open-edu/schemas';
@@ -70,7 +69,10 @@ export class RewardBroker {
   }
 
   private generateActionId(): string {
-    return `reward-${randomUUID()}`;
+    return `reward-${'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    })}`;
   }
 
   private toReceipt(result: RewardResult, actionType: string): RewardReceipt {
