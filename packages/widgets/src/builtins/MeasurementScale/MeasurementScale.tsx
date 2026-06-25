@@ -396,7 +396,15 @@ function MeasurementScaleComponent(props: {
         onKeyDown={handleKeyDown}
         tabIndex={isInteractive && !submitted ? 0 : undefined}
       >
-        <ellipse cx={cx} cy={cylTop} rx={cylW / 2} ry={10} fill="#e5e7eb" stroke="#9ca3af" strokeWidth={1} />
+        <ellipse
+          cx={cx}
+          cy={cylTop}
+          rx={cylW / 2}
+          ry={10}
+          fill="#e5e7eb"
+          stroke="#9ca3af"
+          strokeWidth={1}
+        />
         <rect
           x={cx - cylW / 2}
           y={cylTop}
@@ -424,7 +432,15 @@ function MeasurementScaleComponent(props: {
           opacity={0.6}
           aria-hidden="true"
         />
-        <ellipse cx={cx} cy={cylTop} rx={cylW / 2} ry={10} fill="none" stroke="#9ca3af" strokeWidth={1} />
+        <ellipse
+          cx={cx}
+          cy={cylTop}
+          rx={cylW / 2}
+          ry={10}
+          fill="none"
+          stroke="#9ca3af"
+          strokeWidth={1}
+        />
         {ticks}
       </svg>
     );

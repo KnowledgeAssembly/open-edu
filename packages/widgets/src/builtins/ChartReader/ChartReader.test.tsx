@@ -130,9 +130,7 @@ describe('ChartReader pictograph mode', () => {
   it('uses default emoji when not provided', () => {
     const config = {
       type: 'pictograph' as const,
-      data: [
-        { label: 'Stars', value: 2 },
-      ],
+      data: [{ label: 'Stars', value: 2 }],
     };
     renderWidget(config);
     const starRow = screen.getByTestId('pictograph-row-Stars');

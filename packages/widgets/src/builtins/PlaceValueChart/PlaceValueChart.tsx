@@ -163,9 +163,9 @@ function PlaceValueChartComponent(props: {
   const hasTarget = content.targetNumber !== undefined;
 
   const displayDigits = isObserve
-    ? (content.digits
-        ? rightAlignDigits(content.digits, colCount)
-        : new Array(colCount).fill(null))
+    ? content.digits
+      ? rightAlignDigits(content.digits, colCount)
+      : new Array(colCount).fill(null)
     : placedDigits;
 
   return (
@@ -217,9 +217,7 @@ function PlaceValueChartComponent(props: {
               tabIndex={!isObserve ? 0 : undefined}
               aria-label={
                 displayDigits[i] !== null
-                  ? `${LABEL_MAP[col]}: ${displayDigits[i]}${
-                      !isObserve ? '. Click to remove' : ''
-                    }`
+                  ? `${LABEL_MAP[col]}: ${displayDigits[i]}${!isObserve ? '. Click to remove' : ''}`
                   : `${LABEL_MAP[col]} slot empty${!isObserve ? '. Click to place a digit' : ''}`
               }
               aria-live={!isObserve ? 'polite' : undefined}
@@ -233,11 +231,12 @@ function PlaceValueChartComponent(props: {
               style={{
                 width: '48px',
                 height: '56px',
-                border: displayDigits[i] !== null
-                  ? '2px solid #3b82f6'
-                  : selectedDigit !== null
-                    ? '2px dashed #93c5fd'
-                    : '2px solid #d1d5db',
+                border:
+                  displayDigits[i] !== null
+                    ? '2px solid #3b82f6'
+                    : selectedDigit !== null
+                      ? '2px dashed #93c5fd'
+                      : '2px solid #d1d5db',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',

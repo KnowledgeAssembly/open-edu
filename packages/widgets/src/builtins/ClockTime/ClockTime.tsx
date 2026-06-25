@@ -25,7 +25,7 @@ function to12(hour: number): number {
 }
 
 function handAngle(hour: number, minute: number): { hourAngle: number; minuteAngle: number } {
-  const hourAngle = ((hour % 12) * 30) + minute * 0.5;
+  const hourAngle = (hour % 12) * 30 + minute * 0.5;
   const minuteAngle = minute * 6;
   return { hourAngle, minuteAngle };
 }
@@ -148,21 +148,24 @@ function ClockTimeComponent(props: {
       score,
     });
     complete(score);
-  }, [config, isInteractive, isSetMode, submitted, currentHour, currentMinute, emitInteraction, complete]);
+  }, [
+    config,
+    isInteractive,
+    isSetMode,
+    submitted,
+    currentHour,
+    currentMinute,
+    emitInteraction,
+    complete,
+  ]);
 
-  const cycleHour = useCallback(
-    (dir: 1 | -1) => {
-      setCurrentHour((h) => (h + dir + 24) % 24);
-    },
-    [],
-  );
+  const cycleHour = useCallback((dir: 1 | -1) => {
+    setCurrentHour((h) => (h + dir + 24) % 24);
+  }, []);
 
-  const cycleMinute = useCallback(
-    (dir: 1 | -1) => {
-      setCurrentMinute((m) => (m + dir + 60) % 60);
-    },
-    [],
-  );
+  const cycleMinute = useCallback((dir: 1 | -1) => {
+    setCurrentMinute((m) => (m + dir + 60) % 60);
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -204,24 +207,12 @@ function ClockTimeComponent(props: {
       const dx = polarX(cx, digitR, angle);
       const dy = polarY(cx, digitR, angle);
 
-      const isMarked =
-        isReadMode &&
-        isInteractive &&
-        !submitted &&
-        (selectedHour === hv);
+      const isMarked = isReadMode && isInteractive && !submitted && selectedHour === hv;
 
-      const isTargetRead =
-        isReadMode &&
-        isInteractive &&
-        submitted &&
-        hv === displayHour;
+      const isTargetRead = isReadMode && isInteractive && submitted && hv === displayHour;
 
       const isWrongRead =
-        isReadMode &&
-        isInteractive &&
-        submitted &&
-        selectedHour === hv &&
-        hv !== displayHour;
+        isReadMode && isInteractive && submitted && selectedHour === hv && hv !== displayHour;
 
       return (
         <g key={hv}>
@@ -230,10 +221,7 @@ function ClockTimeComponent(props: {
             cy={my}
             r={4}
             fill={
-              isMarked ? '#3b82f6' :
-              isTargetRead ? '#10b981' :
-              isWrongRead ? '#ef4444' :
-              '#374151'
+              isMarked ? '#3b82f6' : isTargetRead ? '#10b981' : isWrongRead ? '#ef4444' : '#374151'
             }
             aria-hidden="true"
           />
@@ -244,14 +232,8 @@ function ClockTimeComponent(props: {
               textAnchor="middle"
               dominantBaseline="central"
               fontSize={size * 0.055}
-              fontWeight={
-                (submitted && hv === displayHour) ? 'bold' : 'normal'
-              }
-              fill={
-                isTargetRead ? '#10b981' :
-                isWrongRead ? '#ef4444' :
-                '#1f2937'
-              }
+              fontWeight={submitted && hv === displayHour ? 'bold' : 'normal'}
+              fill={isTargetRead ? '#10b981' : isWrongRead ? '#ef4444' : '#1f2937'}
               cursor={isReadMode && isInteractive && !submitted ? 'pointer' : 'default'}
               onClick={() => handleReadClick(hv)}
               aria-label={`${hv} o'clock`}
@@ -332,26 +314,27 @@ function ClockTimeComponent(props: {
       aria-label={`Clock time widget showing ${timeAnnouncement}`}
       style={{ textAlign: 'center' }}
     >
-      <div
-        role="status"
-        aria-live="polite"
-        data-testid="time-live-region"
-        aria-atomic="true"
-      >
+      <div role="status" aria-live="polite" data-testid="time-live-region" aria-atomic="true">
         {config.showDigital ? timeAnnouncement : ''}
       </div>
 
       {renderClockFace()}
 
       {isSetMode && isInteractive && !submitted && (
-        <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+        <div
+          style={{
+            marginTop: '0.75rem',
+            display: 'flex',
+            gap: '0.5rem',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: mode === 'hour' ? 'bold' : 'normal' }}>Hour</div>
-            <button
-              onClick={() => cycleHour(1)}
-              data-testid="hour-up"
-              aria-label="Increase hour"
-            >
+            <div style={{ fontSize: '0.8rem', fontWeight: mode === 'hour' ? 'bold' : 'normal' }}>
+              Hour
+            </div>
+            <button onClick={() => cycleHour(1)} data-testid="hour-up" aria-label="Increase hour">
               ▲
             </button>
             <div data-testid="set-hour-display" style={{ fontSize: '1.2rem' }}>
@@ -366,7 +349,9 @@ function ClockTimeComponent(props: {
             </button>
           </div>
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: mode === 'minute' ? 'bold' : 'normal' }}>Minute</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: mode === 'minute' ? 'bold' : 'normal' }}>
+              Minute
+            </div>
             <button
               onClick={() => cycleMinute(1)}
               data-testid="minute-up"
@@ -402,8 +387,8 @@ function ClockTimeComponent(props: {
       {isSetMode && isInteractive && submitted && (
         <div data-testid="feedback" role="status" aria-live="assertive">
           {config.targetTime
-            ? (currentHour % 12 === config.targetTime.hour % 12 &&
-                Math.abs(currentMinute - config.targetTime.minute) <= 5)
+            ? currentHour % 12 === config.targetTime.hour % 12 &&
+              Math.abs(currentMinute - config.targetTime.minute) <= 5
               ? 'Correct!'
               : `Not quite. Expected ${to12(config.targetTime.hour)}:${String(config.targetTime.minute).padStart(2, '0')}.`
             : 'Complete.'}
@@ -412,7 +397,9 @@ function ClockTimeComponent(props: {
 
       {isReadMode && isInteractive && submitted && (
         <div data-testid="feedback" role="status" aria-live="assertive">
-          {selectedHour === displayHour ? 'Correct!' : `Not quite. The hour shown was ${displayHour}.`}
+          {selectedHour === displayHour
+            ? 'Correct!'
+            : `Not quite. The hour shown was ${displayHour}.`}
         </div>
       )}
 

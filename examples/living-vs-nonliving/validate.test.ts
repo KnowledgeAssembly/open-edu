@@ -30,7 +30,9 @@ describe('living-vs-nonliving example package', () => {
     expect(matching).toBeDefined();
     expect((matching!.node as any).widget).toBe('open-edu.matching');
 
-    const mcNodes = exerciseNodes.filter((n) => (n.node as any).widget === 'open-edu.multiple-choice');
+    const mcNodes = exerciseNodes.filter(
+      (n) => (n.node as any).widget === 'open-edu.multiple-choice',
+    );
     expect(mcNodes).toHaveLength(2);
   });
 

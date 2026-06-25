@@ -56,9 +56,7 @@ function GridAreaComponent(props: {
 
   const expectedCells = useMemo(() => {
     if (!config) return new Set<CellKey>();
-    return new Set<CellKey>(
-      (config.highlighted ?? []).map((c) => toKey(c.row, c.col)),
-    );
+    return new Set<CellKey>((config.highlighted ?? []).map((c) => toKey(c.row, c.col)));
   }, [config]);
 
   const [highlighted, setHighlighted] = useState<Set<CellKey>>(new Set());
@@ -225,9 +223,13 @@ function GridAreaComponent(props: {
       {submitted && config.interactive && (
         <div role="status" aria-live="assertive" data-testid="feedback">
           {count === expectedCount ? (
-            <p>Correct! The {modeLabel.toLowerCase()} count is {count}.</p>
+            <p>
+              Correct! The {modeLabel.toLowerCase()} count is {count}.
+            </p>
           ) : (
-            <p>Not quite. The correct {modeLabel.toLowerCase()} count is {expectedCount}.</p>
+            <p>
+              Not quite. The correct {modeLabel.toLowerCase()} count is {expectedCount}.
+            </p>
           )}
         </div>
       )}

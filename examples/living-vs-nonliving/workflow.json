@@ -1,10 +1,10 @@
 {
   "routing": {
-    "nodes/intro.md":                    { "onComplete": "nodes/observe.json" },
-    "nodes/observe.json":                { "onComplete": "nodes/guided-practice.json" },
-    "nodes/guided-practice.json":        { "onComplete": "nodes/independent-practice.json" },
-    "nodes/independent-practice.json":   { "onComplete": "nodes/mastery-check.json" },
-    "nodes/mastery-check.json":          { "onComplete": "nodes/outro.md" },
-    "nodes/outro.md":                    { "onComplete": "COMPLETED" }
+    "nodes/intro.md": { "onComplete": "nodes/observe.json" },
+    "nodes/observe.json": { "onComplete": "nodes/guided-practice.json" },
+    "nodes/guided-practice.json": { "onComplete": "nodes/independent-practice.json" },
+    "nodes/independent-practice.json": { "onComplete": "nodes/mastery-check.json" },
+    "nodes/mastery-check.json": { "onComplete": "nodes/outro.md" },
+    "nodes/outro.md": { "onComplete": "COMPLETED" }
   }
 }
