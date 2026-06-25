@@ -67,7 +67,7 @@ export function CatalogPage({ packageDir, onStartCourse }: CatalogPageProps): JS
             badgeCount={pkg.availableBadges}
             earnedBadgeCount={0}
             progress={progress[pkg.manifest.id] ?? null}
-            onStart={() => onStartCourse(packageDir)}
+            onStart={() => onStartCourse(pkg.rootDir)}
           />
         ))}
       </div>

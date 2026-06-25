@@ -51,6 +51,7 @@ describe('scanPackages', () => {
       manifest: { id: 'test-pkg', title: 'Test Package' },
       nodeCount: 1,
       availableBadges: 2,
+      rootDir: join(tmpDir, 'valid-pkg'),
     });
   });
 

@@ -111,13 +111,13 @@ describe('CoursePage', () => {
 
   it('renders loading state initially', () => {
     mockLoadPackage.mockReturnValue(new Promise(() => {}));
-    render(<CoursePage packageDir="/test/course" onComplete={vi.fn()} onBackToCatalog={vi.fn()} />);
+    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
     expect(screen.getByText('Loading course...')).toBeInTheDocument();
   });
 
   it('renders error state on load failure', async () => {
     mockLoadPackage.mockRejectedValue(new Error('Package not found'));
-    render(<CoursePage packageDir="/test/course" onComplete={vi.fn()} onBackToCatalog={vi.fn()} />);
+    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
     await waitFor(() => {
       expect(screen.getByText('Unable to load this course')).toBeInTheDocument();
     });
@@ -127,7 +127,7 @@ describe('CoursePage', () => {
   it('renders course view with sidebar on successful load', async () => {
     mockLoadPackage.mockResolvedValue(samplePackage);
 
-    render(<CoursePage packageDir="/test/course" onComplete={vi.fn()} onBackToCatalog={vi.fn()} />);
+    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('sidebar')).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('CoursePage', () => {
       return createMockBroker() as any;
     });
 
-    render(<CoursePage packageDir="/test/course" onComplete={vi.fn()} onBackToCatalog={vi.fn()} />);
+    render(<CoursePage packageDir="/test/course" onBackToCatalog={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('sidebar')).toBeInTheDocument();

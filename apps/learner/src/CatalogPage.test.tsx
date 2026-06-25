@@ -24,6 +24,7 @@ const samplePackages: PackageSummary[] = [
     },
     nodeCount: 3,
     availableBadges: 1,
+    rootDir: '/test/courses/course-1',
   },
   {
     manifest: {
@@ -35,6 +36,7 @@ const samplePackages: PackageSummary[] = [
     },
     nodeCount: 5,
     availableBadges: 2,
+    rootDir: '/test/courses/course-2',
   },
 ];
 
@@ -63,11 +65,11 @@ describe('CatalogPage', () => {
     expect(screen.getByText('Course Two')).toBeInTheDocument();
   });
 
-  it('fires onStartCourse with correct packageDir', () => {
+  it('fires onStartCourse with correct rootDir per package', () => {
     mockScanPackages.mockReturnValue(samplePackages);
     const onStart = vi.fn();
     render(<CatalogPage packageDir="/test/courses" onStartCourse={onStart} />);
     fireEvent.click(screen.getByRole('button', { name: /Start Course One/ }));
-    expect(onStart).toHaveBeenCalledWith('/test/courses');
+    expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
   });
 });

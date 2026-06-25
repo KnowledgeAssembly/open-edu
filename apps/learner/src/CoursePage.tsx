@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { RuntimeProvider, LayoutShell, RuntimeThemeProvider, Sidebar, CompletionScreen } from '@open-edu/runtime';
+import {
+  RuntimeProvider,
+  LayoutShell,
+  RuntimeThemeProvider,
+  Sidebar,
+  CompletionScreen,
+} from '@open-edu/runtime';
 import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
@@ -14,11 +20,10 @@ import { getProgress, saveProgress } from './progressStorage';
 
 export interface CoursePageProps {
   packageDir: string;
-  onComplete: (packageDir: string, badges: string[]) => void;
   onBackToCatalog: () => void;
 }
 
-export function CoursePage({ packageDir, onComplete, onBackToCatalog }: CoursePageProps): JSX.Element {
+export function CoursePage({ packageDir, onBackToCatalog }: CoursePageProps): JSX.Element {
   const [pkg, setPkg] = useState<LoadedPackage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +46,9 @@ export function CoursePage({ packageDir, onComplete, onBackToCatalog }: CoursePa
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [packageDir]);
 
   const engine = useMemo(() => {
@@ -132,12 +139,6 @@ export function CoursePage({ packageDir, onComplete, onBackToCatalog }: CoursePa
     return unsub;
   }, [engine, pkg]);
 
-  useEffect(() => {
-    if (isCompleted && pkg) {
-      onComplete(packageDir, badges);
-    }
-  }, [isCompleted, pkg, packageDir, badges, onComplete]);
-
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
       if (pkg) {
@@ -207,7 +208,9 @@ export function CoursePage({ packageDir, onComplete, onBackToCatalog }: CoursePa
                 transition: 'opacity 0.3s ease',
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--oe-color-success)' }}>
+              <div
+                style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--oe-color-success)' }}
+              >
                 Badge earned!
               </div>
               <div style={{ fontSize: '1rem' }}>{toastBadgeName}</div>

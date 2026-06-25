@@ -7,6 +7,7 @@ export interface PackageSummary {
   manifest: PackageManifest;
   nodeCount: number;
   availableBadges: number;
+  rootDir: string;
 }
 
 export function scanPackages(dir: string): PackageSummary[] {
@@ -55,7 +56,7 @@ export function scanPackages(dir: string): PackageSummary[] {
         }
       }
 
-      results.push({ manifest, nodeCount, availableBadges });
+      results.push({ manifest, nodeCount, availableBadges, rootDir: pkgDir });
     } catch {
       // skip invalid packages
     }
