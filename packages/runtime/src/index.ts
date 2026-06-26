@@ -29,8 +29,24 @@ export { ProgressBar } from './layout/ProgressBar.js';
 export type { ProgressBarProps } from './layout/ProgressBar.js';
 export { RUNTIME_THEME, RuntimeThemeProvider, useTheme } from './theme.js';
 export type { RuntimeTheme } from './theme.js';
-export { themeRegistry, getTheme, themeIds, defaultThemeId, DEFAULT_THEME } from './themes/index.js';
-export type { ThemeDefinition, ThemeId, ColorTokens, TypographyToken, TypographyTokens, SpacingTokens, RadiiTokens } from './themes/types.js';
+export {
+  themeRegistry,
+  getTheme,
+  themeIds,
+  defaultThemeId,
+  DEFAULT_THEME,
+} from './themes/index.js';
+export type {
+  ThemeDefinition,
+  ThemeId,
+  ColorTokens,
+  TypographyToken,
+  TypographyTokens,
+  SpacingTokens,
+  RadiiTokens,
+} from './themes/types.js';
+export { FontLoader } from './components/FontLoader.js';
+export { useThemePreference } from './components/useThemePreference.js';
 export { Sidebar } from './layout/Sidebar.js';
 export type { SidebarProps } from './layout/Sidebar.js';
 export { CourseOutline } from './components/CourseOutline.js';
