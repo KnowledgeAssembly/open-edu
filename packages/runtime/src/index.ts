@@ -1,5 +1,5 @@
 export { RUNTIME_VERSION } from './version.js';
-export { RuntimeProvider, useRuntime } from './context/RuntimeContext.js';
+export { RuntimeProvider, useRuntime, useRuntimeOptional } from './context/RuntimeContext.js';
 export type { RuntimeContextValue, RuntimeProviderProps } from './context/RuntimeContext.js';
 export { buildProgressSnapshot, isValidSnapshot } from './context/progress.js';
 export type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
