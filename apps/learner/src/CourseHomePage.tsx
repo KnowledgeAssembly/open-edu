@@ -1,51 +1,12 @@
 import { useMemo } from 'react';
 import type { LoadedPackage } from '@open-edu/core';
 import { SideNav, TopAppBar, CourseTree, AICallout } from '@open-edu/runtime';
-import type { CourseTreeModule } from '@open-edu/runtime';
 import { getProgress } from './progressStorage';
+import { buildModules } from './buildModules';
 
 export interface CourseHomePageProps {
   pkg: LoadedPackage;
   onNavigate: (page: string, nodeId?: string) => void;
-}
-
-function buildModules(pkg: LoadedPackage): CourseTreeModule[] {
-  const nodes = pkg.nodes;
-  if (nodes.length === 0) return [];
-
-  const grouped: Record<string, CourseTreeModule> = {};
-  let moduleIndex = 0;
-
-  for (const node of nodes) {
-    const parts = node.relativePath.split('/');
-    const firstPart = parts[0];
-    if (!firstPart) continue;
-    const moduleKey = parts.length > 1 ? firstPart : `module-${moduleIndex}`;
-    if (!grouped[moduleKey]) {
-      moduleIndex++;
-      grouped[moduleKey] = {
-        title: `Module ${moduleIndex}`,
-        lessons: [],
-        isLocked: moduleIndex > 1,
-      };
-    }
-    grouped[moduleKey]!.lessons.push({
-      id: node.relativePath,
-      title: (node.node as { title?: string }).title ?? node.relativePath,
-    });
-  }
-
-  const entries = Object.entries(grouped);
-  const firstEntry = entries[0];
-  if (firstEntry) {
-    firstEntry[1].isLocked = false;
-    const firstLesson = firstEntry[1].lessons[0];
-    if (firstLesson) {
-      firstLesson.isActive = true;
-    }
-  }
-
-  return entries.map(([, mod]) => mod);
 }
 
 export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.Element {

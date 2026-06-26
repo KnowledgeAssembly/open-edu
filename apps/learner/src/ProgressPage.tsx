@@ -14,12 +14,14 @@ export function ProgressPage({ pkg, onNavigate }: ProgressPageProps): JSX.Elemen
   const completedCount = progress?.visitedNodes?.length ?? 0;
   const percent = totalNodes > 0 ? Math.round((completedCount / totalNodes) * 100) : 0;
 
+  const visitedNodes = progress?.visitedNodes;
+  const scores = progress?.scores;
   const recentActivity = useMemo(() => {
-    if (!progress?.visitedNodes) return [];
-    return progress.visitedNodes
+    if (!visitedNodes) return [];
+    return visitedNodes
       .map((nodeId) => {
         const node = pkg.nodes.find((n) => n.relativePath === nodeId);
-        const score = progress.scores?.[nodeId];
+        const score = scores?.[nodeId];
         return {
           id: nodeId,
           title: node ? ((node.node as { title?: string }).title ?? nodeId) : nodeId,
@@ -44,7 +46,7 @@ export function ProgressPage({ pkg, onNavigate }: ProgressPageProps): JSX.Elemen
       })
       .reverse()
       .slice(0, 10);
-  }, [progress, pkg.nodes]);
+  }, [visitedNodes, scores, pkg.nodes]);
 
   return (
     <div className="flex h-screen overflow-hidden">

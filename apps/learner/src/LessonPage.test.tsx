@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LessonPage } from './LessonPage';
 import type { LoadedPackage } from '@open-edu/core';
+import type { ContentNode } from '@open-edu/schemas';
 
 vi.mock('@open-edu/runtime', () => ({
   SideNav: ({ children }: { children: React.ReactNode }) => (
@@ -9,7 +10,7 @@ vi.mock('@open-edu/runtime', () => ({
   ),
   TopAppBar: () => <div data-testid="top-app-bar" />,
   CourseTree: () => <div data-testid="course-tree" />,
-  NodeRenderer: ({ node }: any) => (
+  NodeRenderer: ({ node }: { node: { node?: { title?: string } } }) => (
     <div data-testid="node-renderer">{node?.node?.title ?? 'no node'}</div>
   ),
   AITutorPanel: ({ visible }: { visible: boolean }) =>
@@ -34,14 +35,14 @@ const samplePackage: LoadedPackage = {
       path: '/test/course/nodes/lesson-01.md',
       relativePath: 'nodes/lesson-01.md',
       content: '# Lesson 1',
-      node: { type: 'lesson', title: 'Lesson 1' },
-    } as any,
+      node: { type: 'lesson', title: 'Lesson 1' } as unknown as ContentNode,
+    },
     {
       path: '/test/course/nodes/lesson-02.md',
       relativePath: 'nodes/lesson-02.md',
       content: '# Lesson 2',
-      node: { type: 'lesson', title: 'Lesson 2' },
-    } as any,
+      node: { type: 'lesson', title: 'Lesson 2' } as unknown as ContentNode,
+    },
   ],
   assetPaths: [],
 };

@@ -8,7 +8,7 @@ import {
   AITutorPanel,
   ReadingRuler,
 } from '@open-edu/runtime';
-import type { CourseTreeModule } from '@open-edu/runtime';
+import { buildModules } from './buildModules';
 
 export interface LessonPageProps {
   pkg: LoadedPackage;
@@ -16,46 +16,9 @@ export interface LessonPageProps {
   onNavigate: (page: string, nodeId?: string) => void;
 }
 
-function buildModules(pkg: LoadedPackage, activeNodeId: string): CourseTreeModule[] {
-  const nodes = pkg.nodes;
-  if (nodes.length === 0) return [];
-
-  const grouped: Record<string, CourseTreeModule> = {};
-  let moduleIndex = 0;
-
-  for (const node of nodes) {
-    const parts = node.relativePath.split('/');
-    const firstPart = parts[0];
-    if (!firstPart) continue;
-    const moduleKey = parts.length > 1 ? firstPart : `module-${moduleIndex}`;
-    if (!grouped[moduleKey]) {
-      moduleIndex++;
-      grouped[moduleKey] = {
-        title: `Module ${moduleIndex}`,
-        lessons: [],
-        isLocked: moduleIndex > 1,
-      };
-    }
-    const isActive = node.relativePath === activeNodeId;
-    grouped[moduleKey]!.lessons.push({
-      id: node.relativePath,
-      title: (node.node as { title?: string }).title ?? node.relativePath,
-      isActive,
-    });
-  }
-
-  const entries = Object.entries(grouped);
-  const firstEntry = entries[0];
-  if (firstEntry) {
-    firstEntry[1].isLocked = false;
-  }
-
-  return entries.map(([, mod]) => mod);
-}
-
 export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.Element {
   const [aiPanelVisible, setAiPanelVisible] = useState(true);
-  const [readingRulerVisible] = useState(false);
+  const [readingRulerVisible, setReadingRulerVisible] = useState(false);
 
   const currentNode = useMemo(
     () => pkg.nodes.find((n) => n.relativePath === nodeId) ?? null,
@@ -65,7 +28,7 @@ export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.El
   const modules = useMemo(() => buildModules(pkg, nodeId), [pkg, nodeId]);
 
   const breadcrumbs = [
-    { label: pkg.manifest.title, href: '#' },
+    { label: pkg.manifest.title },
     { label: currentNode ? ((currentNode.node as { title?: string }).title ?? nodeId) : nodeId },
   ];
 
@@ -80,6 +43,7 @@ export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.El
           breadcrumbs={breadcrumbs}
           showA11yControls
           onAskAiClick={() => setAiPanelVisible((v) => !v)}
+          onReadingRulerChange={(enabled) => setReadingRulerVisible(enabled)}
         />
 
         <div className="flex-1 overflow-y-auto relative w-full flex justify-center">

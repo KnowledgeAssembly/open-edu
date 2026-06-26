@@ -2,9 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AssessmentPage } from './AssessmentPage';
 import type { LoadedPackage } from '@open-edu/core';
+import type { ContentNode } from '@open-edu/schemas';
 
 vi.mock('@open-edu/runtime', () => ({
-  QuizRenderer: ({ onSubmit }: any) => (
+  QuizRenderer: ({ onSubmit }: { onSubmit: (score: number, optionId: string) => void }) => (
     <div data-testid="quiz-renderer">
       <button onClick={() => onSubmit(100, 'opt-1')} data-testid="mock-submit">
         Submit
@@ -19,9 +20,11 @@ vi.mock('@open-edu/runtime', () => ({
   ),
 }));
 
+const mockGetProgress = vi.hoisted(() => vi.fn(() => null));
+const mockSaveProgress = vi.hoisted(() => vi.fn());
 vi.mock('./progressStorage', () => ({
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getProgress: mockGetProgress,
+  saveProgress: mockSaveProgress,
 }));
 
 const samplePackage: LoadedPackage = {
@@ -49,8 +52,8 @@ const samplePackage: LoadedPackage = {
           { id: 'b', text: '4', correct: true },
           { id: 'c', text: '5', correct: false },
         ],
-      },
-    } as any,
+      } as unknown as ContentNode,
+    },
   ],
   assetPaths: [],
 };
@@ -77,18 +80,31 @@ describe('AssessmentPage', () => {
   });
 
   it('shows not-a-quiz message for non-quiz node', () => {
-    const pkg = {
+    const pkg: LoadedPackage = {
       ...samplePackage,
       nodes: [
         {
-          ...samplePackage.nodes[0],
+          path: '/test/course/nodes/lesson-01.md',
           relativePath: 'nodes/lesson-01.md',
-          node: { type: 'lesson', title: 'Lesson' },
+          content: '# Lesson',
+          node: { type: 'lesson', title: 'Lesson' } as unknown as ContentNode,
         },
       ],
-    } as any;
+    };
     render(<AssessmentPage pkg={pkg} nodeId="nodes/lesson-01.md" onNavigate={vi.fn()} />);
     expect(screen.getByText(/not a quiz/)).toBeInTheDocument();
+  });
+
+  it('saves score via saveProgress on submit', () => {
+    mockGetProgress.mockReturnValue(null);
+    render(<AssessmentPage pkg={samplePackage} nodeId="nodes/quiz-01.md" onNavigate={vi.fn()} />);
+    screen.getByTestId('mock-submit').click();
+    expect(mockSaveProgress).toHaveBeenCalledWith(
+      'test-course',
+      expect.objectContaining({
+        scores: { 'nodes/quiz-01.md': 100 },
+      }),
+    );
   });
 
   it('shows not found for invalid nodeId', () => {

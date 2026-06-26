@@ -2,10 +2,15 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CourseHomePage } from './CourseHomePage';
 import type { LoadedPackage } from '@open-edu/core';
+import type { ContentNode } from '@open-edu/schemas';
+import type { ProgressSnapshot } from '@open-edu/schemas';
 
 vi.mock('@open-edu/runtime', () => ({
-  SideNav: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="side-nav">{children}</div>
+  SideNav: ({ courseTitle, children }: { courseTitle: string; children: React.ReactNode }) => (
+    <div data-testid="side-nav">
+      <h3>{courseTitle}</h3>
+      {children}
+    </div>
   ),
   TopAppBar: () => <div data-testid="top-app-bar" />,
   CourseTree: () => <div data-testid="course-tree" />,
@@ -17,8 +22,11 @@ vi.mock('@open-edu/runtime', () => ({
   ),
 }));
 
+const mockGetProgress = vi.hoisted(() =>
+  vi.fn<[packageId: string], ProgressSnapshot | null>(() => null),
+);
 vi.mock('./progressStorage', () => ({
-  getProgress: vi.fn(() => null),
+  getProgress: mockGetProgress,
 }));
 
 const samplePackage: LoadedPackage = {
@@ -37,14 +45,14 @@ const samplePackage: LoadedPackage = {
       path: '/test/course/nodes/lesson-01.md',
       relativePath: 'nodes/lesson-01.md',
       content: '# Lesson 1',
-      node: { type: 'lesson', title: 'Lesson 1' },
-    } as any,
+      node: { type: 'lesson', title: 'Lesson 1' } as unknown as ContentNode,
+    },
     {
       path: '/test/course/nodes/lesson-02.md',
       relativePath: 'nodes/lesson-02.md',
       content: '# Lesson 2',
-      node: { type: 'lesson', title: 'Lesson 2' },
-    } as any,
+      node: { type: 'lesson', title: 'Lesson 2' } as unknown as ContentNode,
+    },
   ],
   assetPaths: [],
 };
@@ -52,7 +60,7 @@ const samplePackage: LoadedPackage = {
 describe('CourseHomePage', () => {
   it('renders course title', () => {
     render(<CourseHomePage pkg={samplePackage} onNavigate={vi.fn()} />);
-    expect(screen.getAllByText('Test Course').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Test Course')).toHaveLength(2);
   });
 
   it('renders SideNav', () => {
@@ -65,7 +73,7 @@ describe('CourseHomePage', () => {
     expect(screen.getByTestId('top-app-bar')).toBeInTheDocument();
   });
 
-  it('renders progress section', () => {
+  it('renders progress section with 0% when no progress', () => {
     render(<CourseHomePage pkg={samplePackage} onNavigate={vi.fn()} />);
     expect(screen.getByText('Overall Progress')).toBeInTheDocument();
     expect(screen.getByText('0%')).toBeInTheDocument();
@@ -85,5 +93,22 @@ describe('CourseHomePage', () => {
   it('renders Current Modules section', () => {
     render(<CourseHomePage pkg={samplePackage} onNavigate={vi.fn()} />);
     expect(screen.getByText('Current Modules')).toBeInTheDocument();
+  });
+
+  it('shows Continue Learning button when progress has currentNodeId', () => {
+    const progress: ProgressSnapshot = {
+      packageId: 'test-course',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-02.md',
+      visitedNodes: ['nodes/lesson-01.md'],
+      scores: {},
+      isCompleted: false,
+      updatedAt: new Date().toISOString(),
+    };
+    mockGetProgress.mockReturnValue(progress);
+    render(<CourseHomePage pkg={samplePackage} onNavigate={vi.fn()} />);
+    expect(screen.getByText('Continue Learning')).toBeInTheDocument();
+    expect(screen.getByText('50%')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 lessons')).toBeInTheDocument();
   });
 });

@@ -31,7 +31,7 @@ export function App(): JSX.Element {
 
   const handleNavigate = (target: string, nodeId?: string) => {
     if (page.type === 'catalog') return;
-    const pkg = page.type === 'course-home' || page.type === 'progress' ? page.pkg : page.pkg;
+    const pkg = page.pkg;
 
     switch (target) {
       case 'course-home':

@@ -17,18 +17,24 @@ export function AssessmentPage({ pkg, nodeId, onNavigate }: AssessmentPageProps)
   );
 
   const isQuiz = currentNode?.node.type === 'quiz';
-  const quizNode = isQuiz ? (currentNode!.node as QuizNode) : null;
+  const quizNode: QuizNode | null = isQuiz && currentNode ? (currentNode.node as QuizNode) : null;
 
   const handleSubmit = useCallback(
     (score: number, _optionId: string) => {
       if (currentNode) {
-        const snap = getProgress(pkg.manifest.id);
-        if (snap) {
-          saveProgress(pkg.manifest.id, {
-            ...snap,
-            scores: { ...snap.scores, [currentNode.relativePath]: score },
-          });
-        }
+        const snap = getProgress(pkg.manifest.id) ?? {
+          packageId: pkg.manifest.id,
+          packageVersion: pkg.manifest.version,
+          currentNodeId: currentNode.relativePath,
+          visitedNodes: [],
+          scores: {},
+          isCompleted: false,
+          updatedAt: new Date().toISOString(),
+        };
+        saveProgress(pkg.manifest.id, {
+          ...snap,
+          scores: { ...snap.scores, [currentNode.relativePath]: score },
+        });
       }
     },
     [currentNode, pkg.manifest.id],

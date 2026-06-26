@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ProgressPage } from './ProgressPage';
 import type { LoadedPackage } from '@open-edu/core';
+import type { ContentNode, ProgressSnapshot } from '@open-edu/schemas';
 
 vi.mock('@open-edu/runtime', () => ({
   SideNav: ({ children }: { children: React.ReactNode }) => (
@@ -10,8 +11,11 @@ vi.mock('@open-edu/runtime', () => ({
   TopAppBar: () => <div data-testid="top-app-bar" />,
 }));
 
+const mockGetProgress = vi.hoisted(() =>
+  vi.fn<[packageId: string], ProgressSnapshot | null>(() => null),
+);
 vi.mock('./progressStorage', () => ({
-  getProgress: vi.fn(() => null),
+  getProgress: mockGetProgress,
 }));
 
 const samplePackage: LoadedPackage = {
@@ -30,8 +34,8 @@ const samplePackage: LoadedPackage = {
       path: '/test/course/nodes/lesson-01.md',
       relativePath: 'nodes/lesson-01.md',
       content: '# Lesson 1',
-      node: { type: 'lesson', title: 'Lesson 1' },
-    } as any,
+      node: { type: 'lesson', title: 'Lesson 1' } as unknown as ContentNode,
+    },
   ],
   assetPaths: [],
 };
@@ -70,5 +74,38 @@ describe('ProgressPage', () => {
   it('renders Recent Activity section', () => {
     render(<ProgressPage pkg={samplePackage} onNavigate={vi.fn()} />);
     expect(screen.getByText('Recent Activity & Scores')).toBeInTheDocument();
+  });
+
+  it('shows recent activity and scores when progress exists', () => {
+    const progress: ProgressSnapshot = {
+      packageId: 'test-course',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-01.md',
+      visitedNodes: ['nodes/lesson-01.md'],
+      scores: { 'nodes/lesson-01.md': 85 },
+      isCompleted: false,
+      updatedAt: new Date().toISOString(),
+    };
+    mockGetProgress.mockReturnValue(progress);
+    render(<ProgressPage pkg={samplePackage} onNavigate={vi.fn()} />);
+    expect(screen.getByText('Lesson 1')).toBeInTheDocument();
+    expect(screen.getByText('85/100')).toBeInTheDocument();
+    expect(screen.getByText('Excellent')).toBeInTheDocument();
+    expect(screen.getByText(/100\s*%/)).toBeInTheDocument();
+  });
+
+  it('shows Continue Learning button when progress has currentNodeId', () => {
+    const progress: ProgressSnapshot = {
+      packageId: 'test-course',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-01.md',
+      visitedNodes: ['nodes/lesson-01.md'],
+      scores: {},
+      isCompleted: false,
+      updatedAt: new Date().toISOString(),
+    };
+    mockGetProgress.mockReturnValue(progress);
+    render(<ProgressPage pkg={samplePackage} onNavigate={vi.fn()} />);
+    expect(screen.getByText('Continue Learning')).toBeInTheDocument();
   });
 });
