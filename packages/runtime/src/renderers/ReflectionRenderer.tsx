@@ -1,4 +1,4 @@
-import { useState, useId, type CSSProperties } from 'react';
+import { useState, useId } from 'react';
 import type { ReflectionNode } from '@open-edu/schemas';
 
 export interface ReflectionRendererProps {
@@ -31,50 +31,14 @@ export function ReflectionRenderer({
     onSubmit(text);
   };
 
-  const wrapperStyle: CSSProperties = {
-    border: `1px solid var(--oe-color-border, #e5e7eb)`,
-    borderRadius: 'var(--oe-radius, 8px)',
-    padding: 'calc(var(--oe-spacing, 1rem) * 1.5)',
-  };
-
-  const textareaStyle: CSSProperties = {
-    width: '100%',
-    minHeight: '8rem',
-    padding: '0.625rem',
-    borderRadius: 'calc(var(--oe-radius, 8px) - 2px)',
-    border: `1px solid var(--oe-color-border, #e5e7eb)`,
-    fontFamily: 'var(--oe-font-sans, system-ui, sans-serif)',
-    fontSize: '1rem',
-    resize: 'vertical',
-    backgroundColor: 'var(--oe-color-bg, #ffffff)',
-    color: 'var(--oe-color-fg, #1a1a1a)',
-  };
-
-  const buttonStyle: CSSProperties = {
-    backgroundColor: 'var(--oe-color-primary, #2563eb)',
-    color: 'var(--oe-color-primary-fg, #ffffff)',
-    border: 'none',
-    borderRadius: 'var(--oe-radius, 8px)',
-    padding: '0.625rem 1.25rem',
-    fontSize: '1rem',
-    fontWeight: 600,
-    cursor: submitted || !isValid ? 'default' : 'pointer',
-  };
-
-  const savedStyle: CSSProperties = {
-    marginTop: '0.75rem',
-    padding: '0.625rem 1rem',
-    borderRadius: 'var(--oe-radius, 8px)',
-    fontWeight: 600,
-    color: 'var(--oe-color-success, #16a34a)',
-    backgroundColor: 'color-mix(in srgb, var(--oe-color-success, #16a34a) 14%, transparent)',
-  };
-
   return (
-    <div className={className} data-testid="reflection-renderer" style={wrapperStyle}>
+    <div
+      className={`border border-outline-variant rounded-lg p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
+      data-testid="reflection-renderer"
+    >
       <label
         htmlFor={hintId}
-        style={{ display: 'block', fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.5rem' }}
+        className="block font-semibold text-lg mb-2"
       >
         {node.prompt}
       </label>
@@ -87,36 +51,31 @@ export function ReflectionRenderer({
         placeholder="Type your reflection here…"
         aria-label={node.prompt}
         aria-describedby={showCharCount ? `${hintId}-count` : undefined}
-        style={textareaStyle}
+        className="w-full min-h-[8rem] p-2.5 rounded-[calc(var(--oe-radius-md)-2px)] border border-outline-variant font-body-md text-base resize-y bg-surface text-on-surface"
       />
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginTop: '0.75rem',
-          gap: '0.75rem',
-        }}
-      >
+      <div className="flex items-center justify-between mt-3 gap-sm">
         {!submitted ? (
-          <button type="button" onClick={handleSubmit} disabled={!isValid} style={buttonStyle}>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isValid}
+            className="bg-primary text-on-primary border-none rounded-lg px-5 py-2.5 text-base font-semibold disabled:cursor-default enabled:cursor-pointer"
+          >
             Submit
           </button>
         ) : (
-          <div aria-live="polite" role="status" style={savedStyle}>
+          <div
+            aria-live="polite"
+            role="status"
+            className="mt-3 px-4 py-2.5 rounded-lg font-semibold text-secondary bg-secondary/15"
+          >
             Saved — thank you for your reflection.
           </div>
         )}
 
         {showCharCount && (
-          <span
-            id={`${hintId}-count`}
-            style={{
-              color: 'var(--oe-color-muted, #6b7280)',
-              fontSize: '0.875rem',
-            }}
-          >
+          <span id={`${hintId}-count`} className="text-on-surface-variant text-body-ui">
             {text.length} / {maxLength}
           </span>
         )}

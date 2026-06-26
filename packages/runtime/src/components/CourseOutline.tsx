@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useRuntime } from '../context/RuntimeContext.js';
 import { Sidebar } from '../layout/Sidebar.js';
 
@@ -9,37 +9,12 @@ export function CourseOutline(): JSX.Element {
   const current = visitedNodes.length;
   const total = nodes.length;
 
-  const containerStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    fontFamily: 'var(--oe-font-sans, system-ui, sans-serif)',
-  };
-
-  const toggleStyle: CSSProperties = {
-    background: 'none',
-    border: `1px solid var(--oe-color-border, #e5e7eb)`,
-    borderRadius: 'var(--oe-radius, 8px)',
-    padding: '0.25rem 0.5rem',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    alignSelf: 'flex-end',
-    marginBottom: '0.25rem',
-  };
-
-  const summaryStyle: CSSProperties = {
-    color: 'var(--oe-color-muted, #6b7280)',
-    fontSize: '0.75rem',
-    padding: '0.5rem 1rem',
-    borderTop: `1px solid var(--oe-color-border, #e5e7eb)`,
-  };
-
   return (
-    <div style={containerStyle} data-testid="course-outline">
+    <div className="flex flex-col h-full font-body-md" data-testid="course-outline">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        style={toggleStyle}
+        className="bg-none border border-outline-variant rounded-lg px-2 py-1 cursor-pointer text-base self-end mb-1"
         aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         data-testid="outline-toggle"
       >
@@ -48,7 +23,7 @@ export function CourseOutline(): JSX.Element {
       {isOpen && (
         <>
           <Sidebar nodes={nodes} />
-          <p style={summaryStyle}>
+          <p className="text-on-surface-variant text-xs px-md py-2 border-t border-outline-variant">
             {current} of {total} complete
           </p>
         </>
