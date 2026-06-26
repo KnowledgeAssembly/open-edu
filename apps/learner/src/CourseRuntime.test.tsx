@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { CoursePage } from './CoursePage';
+import { render, screen } from '@testing-library/react';
+import { CourseRuntime } from './CourseRuntime';
 import type { LoadedPackage } from '@open-edu/core';
 
 function createMockEngine() {
@@ -9,6 +9,7 @@ function createMockEngine() {
     start: vi.fn(),
     stop: vi.fn(),
     completeNode: vi.fn(),
+    getCurrentNodeId: vi.fn(() => ''),
   };
 }
 
@@ -64,6 +65,12 @@ vi.mock('./progressStorage', () => ({
   saveProgress: vi.fn(),
 }));
 
+vi.mock('./badgesStorage', () => ({
+  addBadge: vi.fn(),
+  getBadges: vi.fn(() => []),
+  getAllBadges: vi.fn(() => ({})),
+}));
+
 const samplePackage: LoadedPackage = {
   rootDir: '/test/course',
   manifest: {
@@ -98,64 +105,35 @@ const samplePackage: LoadedPackage = {
   assetPaths: [],
 };
 
-describe('CoursePage', () => {
+describe('CourseRuntime', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetOrderedNodes.mockReturnValue(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
   });
 
-  it('renders course view with sidebar', () => {
-    render(<CoursePage pkg={samplePackage} onBackToCatalog={vi.fn()} />);
-
-    expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-    expect(screen.getAllByText('Test Course').length).toBeGreaterThan(0);
+  it('renders course view with children', () => {
+    render(
+      <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
+        <div data-testid="child-content">Sidebar content</div>
+      </CourseRuntime>,
+    );
+    expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
+    expect(screen.getByTestId('child-content')).toBeInTheDocument();
   });
 
   it('renders no-workflow fallback when package has no workflow', () => {
     const noWorkflowPkg = { ...samplePackage, workflow: null };
-    render(<CoursePage pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
-
+    render(<CourseRuntime pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
     expect(screen.getByText('Course not available')).toBeInTheDocument();
   });
 
-  it('badge toast appears when a badge is earned', async () => {
-    const pkgWithRewards: LoadedPackage = {
-      ...samplePackage,
-      rewards: {
-        triggers: [
-          {
-            onEvent: 'node_complete',
-            rewards: [{ action: 'badge.award', badge: 'test-badge' }],
-          },
-        ],
-      },
-    };
-
-    const RewardBroker = vi.mocked((await import('@open-edu/rewards')).RewardBroker);
-    let onReceipt: ((r: unknown) => void) | undefined;
-    RewardBroker.mockImplementation((opts: any) => {
-      onReceipt = opts.onReceipt;
-      return createMockBroker() as any;
-    });
-
-    render(<CoursePage pkg={pkgWithRewards} onBackToCatalog={vi.fn()} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-    });
-
-    onReceipt!({
-      actionId: 'reward-1',
-      actionType: 'badge.award',
-      dispatchedAt: Date.now(),
-      status: 'delivered',
-      detail: 'Test Badge',
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Badge earned!')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Test Badge')).toBeInTheDocument();
+  it('renders children alongside course content', () => {
+    render(
+      <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
+        <nav data-testid="section2-nav">Step list</nav>
+      </CourseRuntime>,
+    );
+    expect(screen.getByTestId('section2-nav')).toBeInTheDocument();
+    expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
   });
 });

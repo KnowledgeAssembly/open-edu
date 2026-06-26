@@ -11,26 +11,56 @@ import { test, expect, type Page } from '@playwright/test';
 
 const LEARNER_URL = 'http://localhost:4001';
 
+async function navigateToCatalog(page: Page): Promise<void> {
+  const browseBtn = page.getByText('Browse Courses');
+  if (await browseBtn.isVisible().catch(() => false)) {
+    await browseBtn.click();
+  } else {
+    const catalogNav = page.locator('[data-testid="leftnav-catalog"]');
+    if (await catalogNav.isVisible().catch(() => false)) {
+      await catalogNav.click();
+    }
+  }
+}
+
+async function startFirstCourse(page: Page): Promise<void> {
+  await navigateToCatalog(page);
+  await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+  const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
+  await expect(startBtn).toBeVisible({ timeout: 10000 });
+  await startBtn.click();
+}
+
 async function navigateThroughCourse(page: Page, maxSteps = 30): Promise<void> {
   for (let step = 0; step < maxSteps; step++) {
-    const lessonBtns = page.locator('[data-testid^="course-tree-lesson-"]');
-    const count = await lessonBtns.count();
-    if (step >= count) break;
-
-    await lessonBtns.nth(step).click();
-    await page.waitForTimeout(800);
-
-    const submitBtn = page.getByRole('button', { name: 'Submit' });
-    if (await submitBtn.isVisible().catch(() => false)) {
-      const radio = page.locator('input[type="radio"]').first();
-      if (await radio.isVisible().catch(() => false)) {
-        await radio.check();
-        await page.waitForTimeout(200);
+    const nextBtn = page.locator('[data-testid="layout-shell-next"]');
+    if (!(await nextBtn.isVisible().catch(() => false))) {
+      const backBtn = page.locator('[data-testid="layout-shell-back"]');
+      if (await backBtn.isVisible().catch(() => false)) {
+        break;
       }
-      if (await submitBtn.isEnabled().catch(() => false)) {
-        await submitBtn.click();
-        await page.waitForTimeout(500);
+      // Wait for Next button or break if we're at the end
+      await page.waitForTimeout(1000);
+      if (!(await nextBtn.isVisible().catch(() => false))) break;
+    }
+    if (!(await nextBtn.isEnabled().catch(() => false))) {
+      const submitBtn = page.getByRole('button', { name: 'Submit' });
+      if (await submitBtn.isVisible().catch(() => false)) {
+        const radio = page.locator('input[type="radio"]').first();
+        if (await radio.isVisible().catch(() => false)) {
+          await radio.check();
+          await page.waitForTimeout(200);
+        }
+        if (await submitBtn.isEnabled().catch(() => false)) {
+          await submitBtn.click();
+          await page.waitForTimeout(500);
+        }
       }
+      await page.waitForTimeout(1000);
+    }
+    if (await nextBtn.isVisible().catch(() => false)) {
+      await nextBtn.click();
+      await page.waitForTimeout(800);
     }
   }
 }
@@ -38,6 +68,10 @@ async function navigateThroughCourse(page: Page, maxSteps = 30): Promise<void> {
 test.describe('Learner Experience', () => {
   test('full flow: catalog displays courses', async ({ page }) => {
     await page.goto(LEARNER_URL);
+
+    await expect(page.locator('[data-testid="home-page"]')).toBeVisible({ timeout: 10000 });
+
+    await navigateToCatalog(page);
 
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
 
@@ -48,35 +82,32 @@ test.describe('Learner Experience', () => {
   test('clicking Start navigates to course page', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+    await startFirstCourse(page);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await expect(startBtn).toBeVisible({ timeout: 10000 });
-    await startBtn.click();
-
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="layout-shell"]')).toBeVisible({ timeout: 10000 });
   });
 
-  test('course tree shows modules on course home', async ({ page }) => {
+  test('course step list shows steps on course start', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
+    await startFirstCourse(page);
 
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
 
-    // Verify the course tree has at least one lesson
-    const lessonButtons = page.locator('[data-testid^="course-tree-lesson-"]');
-    await expect(lessonButtons.first()).toBeVisible({ timeout: 5000 });
+    const stepList = page.locator('[data-testid="course-step-list"]');
+    await expect(stepList).toBeVisible({ timeout: 10000 });
+
+    const stepButtons = page.locator('[data-testid^="step-"]');
+    await expect(stepButtons.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('progress persists after reload', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
+    await startFirstCourse(page);
 
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="layout-shell"]')).toBeVisible({ timeout: 15000 });
 
     const progressBefore = await page.evaluate(() => localStorage.getItem('open-edu-progress'));
 
@@ -89,6 +120,8 @@ test.describe('Learner Experience', () => {
 
   test('accessibility: catalog page passes basic checks', async ({ page }) => {
     await page.goto(LEARNER_URL);
+    await navigateToCatalog(page);
+
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
 
     const headings = page.locator('h1');
@@ -102,10 +135,10 @@ test.describe('Learner Experience', () => {
   test('accessibility: course page has visible heading and nav', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
+    await startFirstCourse(page);
 
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="left-nav"]')).toBeVisible({ timeout: 10000 });
 
     const heading = page.locator('h1').first();
     await expect(heading).toBeVisible();
@@ -114,31 +147,30 @@ test.describe('Learner Experience', () => {
   test('user can navigate through all course lessons', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
+    await startFirstCourse(page);
 
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
 
     await navigateThroughCourse(page);
 
-    // Verify the side navigation remains visible after navigating all lessons
-    await expect(page.locator('[data-testid="side-nav"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="left-nav"]')).toBeVisible({ timeout: 10000 });
   });
 
-  test('course navigation between lessons works', async ({ page }) => {
+  test('navigation between steps works', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
+    await startFirstCourse(page);
 
-    await expect(page.locator('nav[aria-label="Course modules"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="layout-shell"]')).toBeVisible({ timeout: 15000 });
 
-    // Click the first lesson in the CourseTree
-    const firstLesson = page.locator('[data-testid^="course-tree-lesson-"]').first();
-    await firstLesson.click();
-    await page.waitForTimeout(500);
+    const nextBtn = page.locator('[data-testid="layout-shell-next"]');
+    await expect(nextBtn).toBeVisible({ timeout: 10000 });
+    await expect(nextBtn).toBeEnabled({ timeout: 10000 });
 
-    // Verify the lesson page rendered with side navigation
-    await expect(page.locator('[data-testid="side-nav"]')).toBeVisible({ timeout: 10000 });
+    await nextBtn.click();
+    await page.waitForTimeout(800);
+
+    const stepButtons = page.locator('[data-testid^="step-"]');
+    await expect(stepButtons.first()).toBeVisible({ timeout: 10000 });
   });
 });

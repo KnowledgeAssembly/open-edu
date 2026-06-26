@@ -25,6 +25,7 @@ export interface RuntimeContextValue {
   lastScore: number | null;
   visitedNodes: string[];
   completeNode: (score?: number) => void;
+  navigateToNode: (nodeId: string) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
   progressSnapshot: ProgressSnapshot | null;
@@ -85,7 +86,7 @@ export function RuntimeProvider({
   }, [hasInitialProgress, initialSnapshotValid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [currentNodeId, setCurrentNodeId] = useState<string>(
-    initialSnapshotValid ? initialProgress!.currentNodeId : '',
+    initialSnapshotValid ? initialProgress!.currentNodeId : (loadedPackage.manifest.entry ?? ''),
   );
   const [isCompleted, setIsCompleted] = useState<boolean>(
     initialSnapshotValid ? initialProgress!.isCompleted : false,
@@ -108,6 +109,15 @@ export function RuntimeProvider({
       engine.completeNode(score);
     },
     [engine],
+  );
+
+  const navigateToNode = useCallback(
+    (nodeId: string) => {
+      if (nodeMap[nodeId]) {
+        setCurrentNodeId(nodeId);
+      }
+    },
+    [nodeMap],
   );
 
   useEffect(() => {
@@ -185,6 +195,7 @@ export function RuntimeProvider({
       lastScore,
       visitedNodes,
       completeNode,
+      navigateToNode,
       getNode,
       widgetRegistry,
       skillScores,
@@ -205,6 +216,7 @@ export function RuntimeProvider({
       lastScore,
       visitedNodes,
       completeNode,
+      navigateToNode,
       getNode,
       widgetRegistry,
       skillScores,

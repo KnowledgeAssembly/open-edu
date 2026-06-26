@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import type { PackageSummary } from '@open-edu/core';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
+import { getAllBadges } from './badgesStorage';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -9,6 +11,15 @@ export interface CatalogPageProps {
 
 export function CatalogPage({ packages, onStartCourse }: CatalogPageProps): JSX.Element {
   const progress = getAllProgress();
+  const badgeData = getAllBadges();
+
+  const badgeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const pkgId of Object.keys(progress)) {
+      counts[pkgId] = (badgeData[pkgId] ?? []).length;
+    }
+    return counts;
+  }, [progress, badgeData]);
 
   if (packages.length === 0) {
     return (
@@ -21,7 +32,7 @@ export function CatalogPage({ packages, onStartCourse }: CatalogPageProps): JSX.
 
   return (
     <div className="p-xl max-w-7xl mx-auto" data-testid="catalog-page">
-      <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Courses</h1>
+      <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Course Catalog</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
         {packages.map((pkg) => (
           <CourseCard
@@ -29,7 +40,7 @@ export function CatalogPage({ packages, onStartCourse }: CatalogPageProps): JSX.
             manifest={pkg.manifest}
             nodeCount={pkg.nodeCount}
             badgeCount={pkg.availableBadges}
-            earnedBadgeCount={0}
+            earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
             progress={progress[pkg.manifest.id] ?? null}
             onStart={() => onStartCourse(pkg.rootDir)}
           />

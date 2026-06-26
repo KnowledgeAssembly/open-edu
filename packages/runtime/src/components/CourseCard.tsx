@@ -7,7 +7,7 @@ export interface CourseCardProps {
   badgeCount: number;
   earnedBadgeCount: number;
   progress: ProgressSnapshot | null;
-  onStart: (packageDir: string) => void;
+  onStart: () => void;
 }
 
 export function CourseCard({
@@ -62,7 +62,7 @@ export function CourseCard({
         className={`border-none rounded-lg px-md py-sm text-body-ui font-semibold mt-3 ${buttonClass} ${isCompleted ? 'cursor-default' : 'cursor-pointer'}`}
         disabled={disabled}
         aria-label={`${buttonLabel} ${manifest.title}`}
-        onClick={() => onStart(manifest.entry)}
+        onClick={() => onStart()}
       >
         {buttonLabel}
       </button>

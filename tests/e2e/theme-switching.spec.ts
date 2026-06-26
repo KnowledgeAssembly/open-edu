@@ -5,16 +5,21 @@ const LEARNER_URL = 'http://localhost:4001';
 test.describe('Theme Switching', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(LEARNER_URL);
-    // Start a course so the TopAppBar with ThemeSelector is shown
+    await expect(page.locator('[data-testid="home-page"]')).toBeVisible({ timeout: 10000 });
+    // Navigate to a course so runtime components render
+    const catalogNav = page.locator('[data-testid="leftnav-catalog"]');
+    await catalogNav.click();
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
     const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
     await startBtn.click();
-    await expect(page.locator('[data-testid="side-nav"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('default theme is Lumina Scholastica', async ({ page }) => {
-    const themeAttr = await page.locator('.open-edu-runtime').getAttribute('data-theme');
-    expect(themeAttr).toBe('lumina-scholastica');
+    await expect(page.locator('.open-edu-runtime')).toHaveAttribute(
+      'data-theme',
+      'lumina-scholastica',
+    );
   });
 
   test('theme selector trigger is visible on course pages', async ({ page }) => {
@@ -24,29 +29,23 @@ test.describe('Theme Switching', () => {
   });
 
   test('switching to Nocturnal changes data-theme attribute', async ({ page }) => {
-    // Open theme selector
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
     await trigger.click();
     await expect(page.locator('[data-testid="theme-selector-popover"]')).toBeVisible();
 
-    // Select Nocturnal
     await page.locator('[data-testid="theme-card-nocturnal"]').click();
 
-    // Verify data-theme changed
     await expect(page.locator('.open-edu-runtime')).toHaveAttribute('data-theme', 'nocturnal');
 
-    // Verify popover closed
     await expect(page.locator('[data-testid="theme-selector-popover"]')).not.toBeVisible();
   });
 
   test('theme persists after page reload', async ({ page }) => {
-    // Switch to Nocturnal
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
     await trigger.click();
     await page.locator('[data-testid="theme-card-nocturnal"]').click();
     await expect(page.locator('.open-edu-runtime')).toHaveAttribute('data-theme', 'nocturnal');
 
-    // Reload and verify persistence
     await page.reload();
     await expect(page.locator('.open-edu-runtime')).toHaveAttribute('data-theme', 'nocturnal', {
       timeout: 10000,
@@ -73,11 +72,9 @@ test.describe('Theme Switching', () => {
   test('ThemeSelector popover can be opened and closed', async ({ page }) => {
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
 
-    // Open
     await trigger.click();
     await expect(page.locator('[data-testid="theme-selector-popover"]')).toBeVisible();
 
-    // Close by clicking trigger again
     await trigger.click();
     await expect(page.locator('[data-testid="theme-selector-popover"]')).not.toBeVisible();
   });
