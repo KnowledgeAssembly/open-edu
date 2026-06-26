@@ -1,7 +1,15 @@
 import type { Config } from 'tailwindcss';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: Config = {
-  content: ['./index.html', './src/**/*.{ts,tsx}', '../packages/runtime/src/**/*.{ts,tsx}'],
+  content: [
+    path.resolve(__dirname, 'index.html'),
+    path.resolve(__dirname, 'src/**/*.{ts,tsx}'),
+    path.resolve(__dirname, '../../packages/runtime/src/**/*.{ts,tsx}'),
+  ],
   theme: {
     extend: {
       colors: {
