@@ -88,4 +88,34 @@ describe('ThemeSelector', () => {
     fireEvent.click(trigger);
     expect(screen.queryByTestId('theme-selector-popover')).toBeNull();
   });
+
+  it('closes on click outside', () => {
+    render(<ThemeSelector currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('theme-selector-trigger'));
+    expect(screen.getByTestId('theme-selector-popover')).toBeInTheDocument();
+
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId('theme-selector-popover')).toBeNull();
+  });
+
+  it('popover has role="dialog" and aria-label', () => {
+    render(<ThemeSelector currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('theme-selector-trigger'));
+
+    const popover = screen.getByTestId('theme-selector-popover');
+    expect(popover.getAttribute('role')).toBe('dialog');
+    expect(popover.getAttribute('aria-label')).toBe('Theme selector');
+  });
+
+  it('cards have role="option" and aria-selected reflects currentThemeId', () => {
+    render(<ThemeSelector currentThemeId="high-focus" onThemeChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('theme-selector-trigger'));
+
+    const selected = screen.getByTestId('theme-card-high-focus');
+    expect(selected.getAttribute('role')).toBe('option');
+    expect(selected.getAttribute('aria-selected')).toBe('true');
+
+    const unselected = screen.getByTestId('theme-card-nocturnal');
+    expect(unselected.getAttribute('aria-selected')).toBe('false');
+  });
 });

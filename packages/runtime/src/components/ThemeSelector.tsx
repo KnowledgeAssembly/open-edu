@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type CSSProperties } from 'react';
+import { useState, useRef, useEffect, type CSSProperties } from 'react';
 import type { ThemeId } from '../themes/types.js';
 
 const themeInfo: Array<{ id: ThemeId; name: string; description: string; swatches: string[] }> = [
@@ -82,11 +82,6 @@ const cardBaseStyle: CSSProperties = {
   color: 'var(--oe-color-fg, #1a1a1a)',
 };
 
-const cardSelectedStyle: CSSProperties = {
-  ...cardBaseStyle,
-  borderColor: 'var(--oe-color-primary, #2563eb)',
-};
-
 const swatchRowStyle: CSSProperties = {
   display: 'flex',
   gap: '4px',
@@ -124,21 +119,22 @@ const checkmarkStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '10px',
-  fontWeight: 700,
-  lineHeight: 1,
 };
 
 export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredId, setHoveredId] = useState<ThemeId | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const wasOpen = useRef(isOpen);
 
-  const close = useCallback(() => {
-    setIsOpen(false);
-    setTimeout(() => triggerRef.current?.focus(), 0);
-  }, []);
+  useEffect(() => {
+    if (wasOpen.current && !isOpen) {
+      triggerRef.current?.focus();
+    }
+    wasOpen.current = isOpen;
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -149,43 +145,49 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
         triggerRef.current &&
         !triggerRef.current.contains(e.target as Node)
       ) {
-        close();
+        setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, close]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
       const selectedIdx = themeInfo.findIndex((t) => t.id === currentThemeId);
       const focusIdx = selectedIdx >= 0 ? selectedIdx : 0;
-      setTimeout(() => cardRefs.current[focusIdx]?.focus(), 0);
+      cardRefs.current[focusIdx]?.focus();
     }
   }, [isOpen, currentThemeId]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        close();
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+      return;
+    }
+    if (e.key === 'Tab') {
+      const cards = cardRefs.current.filter(Boolean);
+      if (cards.length === 0) return;
+      const currentIdx = cardRefs.current.findIndex((ref) => ref === document.activeElement);
+      e.preventDefault();
+      if (currentIdx === -1) {
+        if (e.shiftKey) {
+          cards[cards.length - 1]?.focus();
+        } else {
+          cards[0]?.focus();
+        }
         return;
       }
-      if (e.key === 'Tab') {
-        const currentIdx = cardRefs.current.findIndex((ref) => ref === document.activeElement);
-        if (currentIdx === -1) return;
-        e.preventDefault();
-        const direction = e.shiftKey ? -1 : 1;
-        const nextIdx = (currentIdx + direction + themeInfo.length) % themeInfo.length;
-        cardRefs.current[nextIdx]?.focus();
-      }
-    },
-    [close],
-  );
+      const direction = e.shiftKey ? -1 : 1;
+      const nextIdx = (currentIdx + direction + themeInfo.length) % themeInfo.length;
+      cardRefs.current[nextIdx]?.focus();
+    }
+  };
 
   const handleSelect = (id: ThemeId) => {
     onThemeChange(id);
-    close();
+    setIsOpen(false);
   };
 
   return (
@@ -230,6 +232,12 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
           <div style={gridStyle} role="listbox" aria-label="Select a theme">
             {themeInfo.map((theme, idx) => {
               const isSelected = currentThemeId === theme.id;
+              const isHovered = hoveredId === theme.id;
+              const cardStyle: CSSProperties = {
+                ...cardBaseStyle,
+                borderColor:
+                  isSelected || isHovered ? 'var(--oe-color-primary, #2563eb)' : 'transparent',
+              };
               return (
                 <button
                   key={theme.id}
@@ -240,17 +248,9 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(theme.id)}
-                  style={isSelected ? cardSelectedStyle : cardBaseStyle}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'var(--oe-color-primary, #2563eb)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }
-                  }}
+                  style={cardStyle}
+                  onMouseEnter={() => setHoveredId(theme.id)}
+                  onMouseLeave={() => setHoveredId(null)}
                   data-testid={`theme-card-${theme.id}`}
                 >
                   <div style={{ position: 'relative' }}>
@@ -287,3 +287,5 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
     </div>
   );
 }
+
+ThemeSelector.displayName = 'ThemeSelector';
