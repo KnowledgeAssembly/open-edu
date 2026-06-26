@@ -29,6 +29,14 @@ function flattenTheme(theme: ThemeDefinition): Record<string, string> {
     vars[`--oe-radius-${key}`] = value;
   }
 
+  vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';
+  vars['--oe-color-fg'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
+  vars['--oe-color-border'] = theme.colors['outline'] ?? '';
+  vars['--oe-color-success'] = theme.colors['secondary'] ?? '#16a34a';
+  vars['--oe-font-sans'] = theme.typography.bodyMd.fontFamily;
+  vars['--oe-radius'] = theme.radii.DEFAULT;
+  vars['--oe-spacing'] = theme.spacing.md;
+
   return vars;
 }
 

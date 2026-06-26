@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { defaultThemeId } from '../themes/index.js';
+import { themeIds, defaultThemeId } from '../themes/index.js';
 import type { ThemeId } from '../themes/types.js';
 
 const STORAGE_KEY = 'oe-theme-preference';
@@ -8,12 +8,7 @@ function getStoredTheme(): ThemeId {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const valid: ThemeId[] = [
-        'high-focus',
-        'lumina-scholastica',
-        'nocturnal',
-        'sylvan-workspace',
-      ];
+      const valid = themeIds;
       if (valid.includes(stored as ThemeId)) {
         return stored as ThemeId;
       }
