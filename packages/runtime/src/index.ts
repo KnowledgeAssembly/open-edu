@@ -47,6 +47,8 @@ export type {
 } from './themes/types.js';
 export { FontLoader } from './components/FontLoader.js';
 export { useThemePreference } from './components/useThemePreference.js';
+export { ThemeSelector } from './components/ThemeSelector.js';
+export type { ThemeSelectorProps } from './components/ThemeSelector.js';
 export { Sidebar } from './layout/Sidebar.js';
 export type { SidebarProps } from './layout/Sidebar.js';
 export { CourseOutline } from './components/CourseOutline.js';
