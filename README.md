@@ -35,6 +35,44 @@ edu patch ./my-lesson ./patch.json
 edu generate --prompt
 ```
 
+## Theming System
+
+The framework ships with **4 built-in themes** that control colors, typography, spacing, and border radii via CSS custom properties (`--oe-*`). All runtime components use Tailwind utility classes mapped to these tokens.
+
+| Theme              | ID                   | Description                        | Font Stack                                  |
+| ------------------ | -------------------- | ---------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist — the default    | Inter + Source Serif 4 + JetBrains Mono     |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                          | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest aesthetic           | Source Serif 4 + Literata + Hanken Grotesk  |
+
+```tsx
+import {
+  RuntimeThemeProvider,
+  FontLoader,
+  useThemePreference,
+  ThemeSelector,
+} from '@open-edu/runtime';
+
+function App() {
+  const [themeId, setThemeId] = useThemePreference(); // persisted to localStorage
+  return (
+    <RuntimeThemeProvider themeId={themeId}>
+      <FontLoader /> {/* injects Google Font <link> tags */}
+      <ThemeSelector currentThemeId={themeId} onThemeChange={setThemeId} />
+      {/* ... course content */}
+    </RuntimeThemeProvider>
+  );
+}
+```
+
+- `useThemePreference()` — reads/writes `oe-theme-preference` in localStorage, defaults to `lumina-scholastica`
+- `RuntimeThemeProvider` — flattens `ThemeDefinition` into 60+ `--oe-*` CSS variables and wraps content in a themed `div`
+- `FontLoader` — injects Google Font `<link>` tags matching the active theme's typography
+- `ThemeSelector` — popover with 4 theme preview cards (color swatches + description), keyboard-navigable
+
+The learner app (`@open-edu/learner`) includes the `ThemeSelector` in the `TopAppBar` on every course page. The dev-server uses a pre-generated Tailwind CSS file; the learner app processes Tailwind through PostCSS.
+
 ## What Makes a Learning Package?
 
 A package is a directory with a manifest, optional workflow routing, and content nodes:
@@ -101,19 +139,19 @@ Conditional branching (e.g. quiz score-based remediation):
 
 ## Packages
 
-| Package                   | Description                                                                                                                        | Status |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress                                | Done   |
-| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner                      | Done   |
-| `@open-edu/workflow`      | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering                                  | Done   |
-| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, Tailwind-styled layout components | Done   |
-| `@open-edu/accessibility` | Focus traps, live regions, ARIA generation, axe-core validator                                                                     | Done   |
-| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary                                      | Done   |
-| `@open-edu/rewards`       | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay                                      | Done   |
-| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`               | Done   |
-| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector                                   | Done   |
-| `@open-edu/widgets`       | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                       | Done   |
-| `@open-edu/learner`       | Standalone learner app — course catalog, progress persistence, reward integration, E2E-tested workflow                             | Done   |
+| Package                   | Description                                                                                                                                                                                                  | Status |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress                                                                                                          | Done   |
+| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner                                                                                                | Done   |
+| `@open-edu/workflow`      | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering                                                                                                            | Done   |
+| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **4 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree) | Done   |
+| `@open-edu/accessibility` | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                               | Done   |
+| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary                                                                                                                | Done   |
+| `@open-edu/rewards`       | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay                                                                                                                | Done   |
+| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`                                                                                         | Done   |
+| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector                                                                                                             | Done   |
+| `@open-edu/widgets`       | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                                                                                                 | Done   |
+| `@open-edu/learner`       | Standalone learner app — course catalog, **6-page router** (catalog, course home, lesson, assessment, code, progress), **theme switching**, progress persistence, reward integration, E2E-tested workflow    | Done   |
 
 ## Examples
 
@@ -194,46 +232,55 @@ Educational Package (Markdown + JSON)
   ┌──────────────┐
   │    Core      │  Package loader, scanner, patcher, lint, generator
   ├──────────────┤
-  │ scanPackages │  Discover all packages in a directory → catalog
+  │ scanPackages │  Discover packages → catalog
   └──────┬───────┘
          │
          ▼
   ┌──────────────┐
-  │   Workflow   │  XState state machine + skill tracking
+  │   Workflow   │  XState + skill tracking + mastery routing
   ├──────────────┤
   │ getOrderedNodes │  Topological sort for course outline
   └──────┬───────┘
          │
          ▼
-   ┌──────────────────┐
-   │     Runtime      │  React renderer — lessons, quizzes, widgets
-   │                  │  Tailwind-styled (semantic --oe-* tokens)
-   ├──────────────────┤
-  │ Sidebar          │  Course outline with progress
-  │ CourseCard       │  Catalog card with badge counts
-  │ CourseOutline    │  Collapsible sidebar layout
-  │ CompletionScreen │  End-of-course summary
-  │ ProgressBadge    │  Inline progress indicator
-  └──┬───┬───┬───────┘
-     ▼   ▼   ▼
-  ┌────┐┌────┐┌────────┐
-  │A11y││Widgets││Telemetry│
-  └────┘└────┘└───┬────┘
+  ┌──────────────────────────┐
+  │        Runtime           │  React renderer — lessons, quizzes, widgets
+  │                          │  4 themes, Tailwind-styled (--oe-* tokens)
+  ├──────────────────────────┤
+  │ Layout Components:       │
+  │  SideNav     TopAppBar   │
+  │  CourseTree  AITutorPanel│
+  │  AICallout   ReadingRuler│
+  ├──────────────────────────┤
+  │ Renderers: Markdown, Quiz│
+  │  Reflection, Widget,     │
+  │  Placeholder, Node       │
+  ├──────────────────────────┤
+  │ Theming: RuntimeTheme-   │
+  │  Provider, FontLoader,   │
+  │  useThemePreference,     │
+  │  ThemeSelector           │
+  └──┬───┬───┬───────┬──────┘
+     ▼   ▼   ▼       ▼
+  ┌────┐┌────┐┌────────┐┌──────────┐
+  │A11y││Widgets││Telemetry││ Theming  │
+  │    ││      ││        ││(runtime) │
+  └────┘└────┘└───┬────┘└──────────┘
                   ▼
            ┌─────────┐
-           │ Rewards │  Badges, webhooks, script actions
+           │ Rewards  │  Badges, webhooks, scripts
            └─────────┘
                   │
                   ▼
-           ┌────────────┐
-           │  Learner   │  Standalone app — catalog + course view
-           │  App       │  Progress persistence + toast notifications
-           └────────────┘
+           ┌────────────────────┐
+           │   Learner App      │  Standalone app
+           │   Catalog · Course  │  · Progress · Themes
+           └────────────────────┘
 ```
 
 ## Testing
 
-The framework uses **Vitest** for unit tests (~1,100+ tests across 140+ files) and **Playwright** for E2E integration tests (30+ tests).
+The framework uses **Vitest** for unit tests (~1,100+ tests across 140+ files) and **Playwright** for E2E integration tests (35+ tests).
 
 ### Unit Tests
 
@@ -264,6 +311,8 @@ E2E tests start the learner dev server on port 4001 and run against all example 
 | `keyboard-navigation.spec.ts` | Full keyboard-only navigation through all example packages                                                                                      |
 | `hot-reload.spec.ts`          | HMR preserves node, progress, and telemetry session on Markdown/JSON edits                                                                      |
 | `skill-graph.spec.ts`         | Skill-tracking events, mastery-based branching, remediation path                                                                                |
+| `rewards.spec.ts`             | Reward receipt tracking in dev-server inspector panel (2 tests)                                                                                 |
+| `theme-switching.spec.ts`     | Theme switching between all 4 themes, popover behavior, persistence after reload (8 tests)                                                      |
 
 ## Project Structure
 
@@ -277,7 +326,7 @@ open-edu/
 │   ├── schemas/             # Zod schemas + type generation
 │   ├── core/                # Package loader, scanner, patcher, validator, lint, generator
 │   ├── workflow/            # XState workflow engine + skill tracking + topology
-│   ├── runtime/             # React runtime + layout components (sidebar, cards, etc.)
+│   ├── runtime/             # React runtime + layout components + 4 themes + theme selector
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry, JSONL reader + summary
 │   ├── rewards/             # Reward broker, conditions, verification

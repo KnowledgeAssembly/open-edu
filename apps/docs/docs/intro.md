@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Open-Edu Framework
 
-**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skill tracking, and rewards.
+**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skill tracking, rewards, and a **4-theme system** with Tailwind CSS styling.
 
 ## Core Idea
 
@@ -38,6 +38,10 @@ Learning pathways adapt to learner behavior. Packages define progression rules b
 
 An extensible widget architecture allows specialized learning experiences without modifying the core system — coding environments, mathematics visualizations, simulations, and more.
 
+### Thematic Flexibility
+
+The framework ships with 4 themes (Lumina Scholastica, High Focus, Nocturnal, Sylvan Workspace) that control colors, typography, spacing, and border radii via CSS custom properties. Themes are switchable at runtime, persisted to localStorage, and all components are styled with Tailwind utility classes mapped to `--oe-*` tokens.
+
 ## Quick Start
 
 ```bash
@@ -64,8 +68,9 @@ node packages/cli/dist/cli.js --help
 ## What's Next?
 
 - [Architecture](./architecture) — How the framework is built
-- [Learner App](./learner) — Standalone course player with catalog and progress
+- [Learner App](./learner) — Standalone course player with catalog, progress, and theme switching
 - [Package Format](./package-format) — Structure of educational packages
 - [Package Authoring Guide](./package-authoring) — How to create packages
+- [Runtime Packages](./runtime) — Node renderers, layout components, and theming
 - [CLI Reference](./cli/overview) — All CLI commands
 - [Widget SDK](./widgets/overview) — Building custom interactive widgets

@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, and rewards.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **4-theme system** with Tailwind CSS styling.
 
 ## Technology Stack
 
@@ -45,19 +45,19 @@ pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # Vite dev server (Epic 10)
-│   ├── docs/                # Docusaurus docs (future)
-│   └── learner/             # Standalone learner app (Epic 13)
+│   ├── dev-server/          # Vite dev server with inspector panels
+│   ├── docs/                # Docusaurus documentation site
+│   └── learner/             # Standalone learner app with 6-page router + theme switching
 ├── packages/
-│   ├── schemas/             # Zod schemas + type generation (Epic 2)
-│   ├── core/                # Package loader + validation + scanner (Epic 3)
-│   ├── workflow/            # XState workflow engine + topology (Epic 4)
-│   ├── runtime/             # React runtime renderer + layout components (Epic 5)
-│   ├── accessibility/       # A11y engine (Epic 6)
-│   ├── telemetry/           # RxJS telemetry + JSONL (Epic 7)
-│   ├── rewards/             # Reward broker (Epic 8)
-│   ├── cli/                 # edu CLI (Epic 9)
-│   └── widgets/             # Widget SDK + built-in widgets (Epic 11)
+│   ├── schemas/             # Zod schemas + type generation
+│   ├── core/                # Package loader + validator + scanner + patcher + lint + generator
+│   ├── workflow/            # XState workflow engine + skill tracking + topology
+│   ├── runtime/             # React runtime + 6 layout components + 4 themes + 7 renderers
+│   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
+│   ├── telemetry/           # RxJS telemetry + JSONL reader + summary
+│   ├── rewards/             # Reward broker + conditions + verification + replay
+│   ├── cli/                 # edu CLI (10+ commands)
+│   └── widgets/             # Widget SDK + registry + 14 built-in widgets + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/
@@ -69,7 +69,7 @@ open-edu/
 │   ├── skill-graph/
 │   ├── widget-practice/
 │   └── widget-showcase/
-├── tests/e2e/               # Playwright integration tests
+├── tests/e2e/               # Playwright integration tests (8 spec files)
 ├── docs/                    # Architecture docs (VISION, ARCHITECTURE, FRAMEWORK_SPEC)
 └── PLAN.md                  # Implementation plan with epic/story breakdown
 ```
@@ -114,6 +114,21 @@ Epic 13 (Learner App)
   └─► Epics 3, 4, 5, 6, 7, 8, 11 (consumes all packages)
 ```
 
+### Theme System (Epics 138–145)
+
+A 4-theme system built as a sub-track within the runtime:
+
+```
+Epic 1: Token Foundation (#138, PR #174)
+  └─► Epic 2: Tailwind Integration (#140, PR #175)
+        ├─► Epic 3: Theme Provider & Runtime (#141, PR #176)
+        │     └─► Epic 5: Layout Shell Components (#142, PR #178)
+        │           └─► Epic 6: Pages (#143, PR #179)
+        │                 └─► Epic 7: Tailwind Refactor (#144, PR #180)
+        │                       └─► Epic 8: Polish & Verification (#145, PR #181)
+        └─► Epic 4: Theme Selector UI (#139, PR #177)
+```
+
 ## Configuration Files
 
 - `tsconfig.base.json` — Shared TypeScript config, extended by all packages
@@ -144,3 +159,4 @@ Before marking a story complete, verify:
 - [ ] Formatting is correct: `pnpm format:check`
 - [ ] Conventional commit messages
 - [ ] No dead code, debug logs, or temporary edits
+- [ ] Acessibility: axe-core audits pass for all affected components
