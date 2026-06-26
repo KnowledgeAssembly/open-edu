@@ -7,6 +7,10 @@ vi.mock('../progressStorage', () => ({
   getAllProgress: vi.fn(() => ({})),
 }));
 
+vi.mock('../badgesStorage', () => ({
+  getAllBadges: vi.fn(() => ({})),
+}));
+
 const samplePackages: PackageSummary[] = [
   {
     manifest: {

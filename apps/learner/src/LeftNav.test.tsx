@@ -34,8 +34,8 @@ describe('LeftNav', () => {
     expect(screen.queryByTestId('leftnav-back-to-catalog')).not.toBeInTheDocument();
   });
 
-  it('does not render Section 2 when in course view without onBackToCatalog', () => {
-    render(<LeftNav currentView={{ view: 'course' }} onNavigate={vi.fn()} />);
+  it('does not render Section 2 when in course view outside RuntimeProvider', () => {
+    render(<LeftNav currentView={{ view: 'course', packageId: 'test' }} onNavigate={vi.fn()} />);
     expect(screen.queryByTestId('course-step-list')).not.toBeInTheDocument();
   });
 });

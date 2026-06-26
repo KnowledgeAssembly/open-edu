@@ -246,7 +246,7 @@ describe('RuntimeProvider', () => {
       </RuntimeProvider>
     );
     const { result } = renderHook(() => useRuntime(), { wrapper });
-    expect(result.current.currentNodeId).toBe('');
+    expect(result.current.currentNodeId).toBe('nodes/lesson-01.md');
     expect(result.current.visitedNodes).toEqual([]);
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();

@@ -2,6 +2,7 @@ import type { PackageSummary, LoadedPackage } from '@open-edu/core';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
+import { getAllBadges } from './badgesStorage';
 
 export interface ProgressDashboardProps {
   onNavigate: (view: AppView) => void;
@@ -15,6 +16,7 @@ export function ProgressDashboard({
   packageEntries = {},
 }: ProgressDashboardProps): JSX.Element {
   const allProgress = getAllProgress();
+  const allBadges = getAllBadges();
   const entries = Object.entries(allProgress);
 
   if (entries.length === 0) {
@@ -58,6 +60,9 @@ export function ProgressDashboard({
             ? ((lastNode.node as { title?: string }).title ?? snap.currentNodeId)
             : (snap.currentNodeId ?? 'Not started');
 
+          const packageBadges = allBadges[packageId] ?? [];
+          const badgeCount = packageBadges.length;
+
           return (
             <div
               key={packageId}
@@ -71,6 +76,11 @@ export function ProgressDashboard({
                     {snap.visitedNodes.length} of {totalNodes} steps
                   </span>
                   <span>Last: {lastTitle}</span>
+                  {badgeCount > 0 && (
+                    <span className="text-amber-600 font-medium">
+                      {badgeCount} badge{badgeCount > 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-sm w-full bg-surface-variant rounded-full h-2 overflow-hidden">
                   <div

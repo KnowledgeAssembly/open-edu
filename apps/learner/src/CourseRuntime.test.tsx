@@ -65,6 +65,12 @@ vi.mock('./progressStorage', () => ({
   saveProgress: vi.fn(),
 }));
 
+vi.mock('./badgesStorage', () => ({
+  addBadge: vi.fn(),
+  getBadges: vi.fn(() => []),
+  getAllBadges: vi.fn(() => ({})),
+}));
+
 const samplePackage: LoadedPackage = {
   rootDir: '/test/course',
   manifest: {

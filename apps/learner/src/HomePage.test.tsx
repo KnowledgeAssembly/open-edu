@@ -6,11 +6,6 @@ vi.mock('../progressStorage', () => ({
   getAllProgress: vi.fn(() => ({})),
 }));
 
-vi.mock('virtual:edu-data', () => ({
-  catalogPackages: [],
-  packageEntries: {},
-}));
-
 describe('HomePage', () => {
   it('renders welcome heading', () => {
     render(<HomePage onNavigate={vi.fn()} />);

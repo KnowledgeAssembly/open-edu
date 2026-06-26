@@ -1,6 +1,7 @@
 import type { PackageSummary } from '@open-edu/core';
 import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
+import { getAllBadges } from './badgesStorage';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
@@ -9,14 +10,12 @@ export interface HomePageProps {
 
 export function HomePage({ onNavigate, catalogPackages = [] }: HomePageProps): JSX.Element {
   const progress = getAllProgress();
+  const badgeData = getAllBadges();
   const courseCount = catalogPackages.length;
   const inProgressCount = Object.values(progress).filter(
     (p) => !p.isCompleted && p.visitedNodes.length > 0,
   ).length;
-  const badgeCount = Object.values(progress).reduce(
-    (sum, p) => sum + Object.keys(p.scores).length,
-    0,
-  );
+  const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
     <div className="p-xl max-w-4xl mx-auto" data-testid="home-page">

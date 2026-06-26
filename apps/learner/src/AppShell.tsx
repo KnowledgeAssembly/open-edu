@@ -14,7 +14,7 @@ export interface AppShellProps {
 }
 
 export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JSX.Element {
-  const [view, setView] = useState<AppView | { view: 'course'; packageId: string }>({
+  const [view, setView] = useState<AppView>({
     view: 'home',
   });
   const [themeId, setThemeId] = useThemePreference();
@@ -47,8 +47,8 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
   }, []);
 
   const coursePkg = useMemo<LoadedPackage | undefined>(() => {
-    if (view.view !== 'course') return undefined;
-    return packageEntries[(view as { view: 'course'; packageId: string }).packageId];
+    if (view.view !== 'course' || !view.packageId) return undefined;
+    return packageEntries[view.packageId];
   }, [view, packageEntries]);
 
   const getBreadcrumbs = () => {
@@ -75,13 +75,21 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
       <FontLoader />
       <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
         {isCourseView && coursePkg ? (
-          <CourseRuntime pkg={coursePkg} onBackToCatalog={handleBackToCatalog}>
-            <LeftNav
-              currentView={view}
-              onNavigate={handleNavigate}
-              onBackToCatalog={handleBackToCatalog}
+          <div className="flex-1 flex flex-col min-w-0">
+            <TopAppBar
+              breadcrumbs={getBreadcrumbs()}
+              currentThemeId={themeId}
+              onThemeChange={setThemeId}
+              showA11yControls
             />
-          </CourseRuntime>
+            <CourseRuntime pkg={coursePkg} onBackToCatalog={handleBackToCatalog}>
+              <LeftNav
+                currentView={view}
+                onNavigate={handleNavigate}
+                onBackToCatalog={handleBackToCatalog}
+              />
+            </CourseRuntime>
+          </div>
         ) : (
           <>
             <LeftNav currentView={view} onNavigate={handleNavigate} />

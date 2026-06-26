@@ -86,7 +86,7 @@ export function RuntimeProvider({
   }, [hasInitialProgress, initialSnapshotValid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [currentNodeId, setCurrentNodeId] = useState<string>(
-    initialSnapshotValid ? initialProgress!.currentNodeId : '',
+    initialSnapshotValid ? initialProgress!.currentNodeId : (loadedPackage.manifest.entry ?? ''),
   );
   const [isCompleted, setIsCompleted] = useState<boolean>(
     initialSnapshotValid ? initialProgress!.isCompleted : false,

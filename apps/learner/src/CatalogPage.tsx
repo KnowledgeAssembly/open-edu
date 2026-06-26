@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { PackageSummary } from '@open-edu/core';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
+import { getAllBadges } from './badgesStorage';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -10,14 +11,15 @@ export interface CatalogPageProps {
 
 export function CatalogPage({ packages, onStartCourse }: CatalogPageProps): JSX.Element {
   const progress = getAllProgress();
+  const badgeData = getAllBadges();
 
   const badgeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const [pkgId, snap] of Object.entries(progress)) {
-      counts[pkgId] = Object.keys(snap.scores ?? {}).length;
+    for (const pkgId of Object.keys(progress)) {
+      counts[pkgId] = (badgeData[pkgId] ?? []).length;
     }
     return counts;
-  }, [progress]);
+  }, [progress, badgeData]);
 
   if (packages.length === 0) {
     return (

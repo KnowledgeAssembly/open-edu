@@ -7,7 +7,7 @@ export type AppView =
   | { view: 'catalog' }
   | { view: 'progress' }
   | { view: 'settings' }
-  | { view: 'course'; packageId?: string };
+  | { view: 'course'; packageId: string };
 
 export interface LeftNavProps {
   currentView: AppView;
@@ -28,8 +28,7 @@ function isSameView(a: AppView, b: AppView): boolean {
 
 export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavProps): JSX.Element {
   const runtime = useRuntimeOptional();
-  const isInCourse =
-    runtime !== null && currentView.view === 'course' && onBackToCatalog !== undefined;
+  const isInCourse = runtime !== null && currentView.view === 'course';
 
   return (
     <aside

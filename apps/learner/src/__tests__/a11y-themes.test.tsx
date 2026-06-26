@@ -16,9 +16,10 @@ vi.mock('../progressStorage', () => ({
   saveProgress: vi.fn(),
 }));
 
-vi.mock('virtual:edu-data', () => ({
-  catalogPackages: [],
-  packageEntries: {},
+vi.mock('../badgesStorage', () => ({
+  addBadge: vi.fn(),
+  getBadges: vi.fn(() => []),
+  getAllBadges: vi.fn(() => ({})),
 }));
 
 const samplePackages: PackageSummary[] = [

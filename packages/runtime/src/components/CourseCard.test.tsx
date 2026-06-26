@@ -88,7 +88,7 @@ describe('CourseCard', () => {
     expect(button).toBeDisabled();
   });
 
-  it('fires onStart with entry on click', () => {
+  it('fires onStart on click', () => {
     const onStart = vi.fn();
     render(
       <CourseCard
@@ -101,6 +101,6 @@ describe('CourseCard', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /Start/ }));
-    expect(onStart).toHaveBeenCalledWith('nodes/lesson-01.md');
+    expect(onStart).toHaveBeenCalledWith();
   });
 });

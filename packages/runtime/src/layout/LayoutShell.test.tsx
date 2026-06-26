@@ -157,4 +157,60 @@ describe('LayoutShell', () => {
     expect(getByTestId('sidebar-content')).toBeInTheDocument();
     expect(getByText('Sidebar Content')).toBeInTheDocument();
   });
+
+  it('does not render Back button when onBack is not provided', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { queryByTestId } = renderShell(pkg, 'nodes/lesson-01.md');
+    expect(queryByTestId('layout-shell-back')).not.toBeInTheDocument();
+  });
+
+  it('renders Back button when onBack is provided', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByTestId } = renderShell(pkg, 'nodes/lesson-01.md', {
+      onBack: vi.fn(),
+      canGoBack: true,
+    });
+    expect(getByTestId('layout-shell-back')).toBeInTheDocument();
+    expect(getByTestId('layout-shell-back')).not.toBeDisabled();
+  });
+
+  it('disables Back button when canGoBack is false', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByTestId } = renderShell(pkg, 'nodes/lesson-01.md', {
+      onBack: vi.fn(),
+      canGoBack: false,
+    });
+    expect(getByTestId('layout-shell-back')).toBeDisabled();
+  });
+
+  it('calls onBack when Back button is clicked', () => {
+    const onBack = vi.fn();
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByTestId } = renderShell(pkg, 'nodes/lesson-01.md', {
+      onBack,
+      canGoBack: true,
+    });
+    fireEvent.click(getByTestId('layout-shell-back'));
+    expect(onBack).toHaveBeenCalledOnce();
+  });
+
+  it('displays custom backLabel text', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByText } = renderShell(pkg, 'nodes/lesson-01.md', {
+      onBack: vi.fn(),
+      canGoBack: true,
+      backLabel: 'Previous',
+    });
+    expect(getByText('Previous')).toBeInTheDocument();
+  });
+
+  it('displays currentStep / totalSteps when provided', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getAllByText } = renderShell(pkg, 'nodes/lesson-01.md', {
+      currentStep: 3,
+      totalSteps: 10,
+    });
+    const matches = getAllByText('3 / 10');
+    expect(matches.length).toBe(2);
+  });
 });

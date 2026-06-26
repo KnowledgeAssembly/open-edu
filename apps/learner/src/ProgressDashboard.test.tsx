@@ -6,11 +6,6 @@ vi.mock('../progressStorage', () => ({
   getAllProgress: vi.fn(() => ({})),
 }));
 
-vi.mock('virtual:edu-data', () => ({
-  catalogPackages: [],
-  packageEntries: {},
-}));
-
 describe('ProgressDashboard', () => {
   it('shows empty state when no progress exists', () => {
     render(<ProgressDashboard onNavigate={vi.fn()} />);
