@@ -1,15 +1,22 @@
 import { useMemo } from 'react';
 import type { LoadedPackage } from '@open-edu/core';
-import { SideNav, TopAppBar, CourseTree, AICallout } from '@open-edu/runtime';
+import { SideNav, TopAppBar, CourseTree, AICallout, type ThemeId } from '@open-edu/runtime';
 import { getProgress } from './progressStorage';
 import { buildModules } from './buildModules';
 
 export interface CourseHomePageProps {
   pkg: LoadedPackage;
   onNavigate: (page: string, nodeId?: string) => void;
+  currentThemeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }
 
-export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.Element {
+export function CourseHomePage({
+  pkg,
+  onNavigate,
+  currentThemeId,
+  onThemeChange,
+}: CourseHomePageProps): JSX.Element {
   const progress = getProgress(pkg.manifest.id);
   const totalNodes = pkg.nodes.length;
   const completedNodes = progress?.visitedNodes?.length ?? 0;
@@ -33,6 +40,8 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
           breadcrumbs={[{ label: pkg.manifest.title }]}
           showA11yControls
           onAskAiClick={() => {}}
+          currentThemeId={currentThemeId}
+          onThemeChange={onThemeChange}
         />
 
         <main className="flex-1 overflow-y-auto bg-surface flex justify-center pb-xl">
@@ -54,7 +63,7 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
                 <div className="flex-1 w-full">
                   <div className="flex justify-between items-end mb-sm">
                     <div>
-                      <h3 className="text-h2 font-title text-on-surface">Overall Progress</h3>
+                      <h2 className="text-h2 font-title text-on-surface">Overall Progress</h2>
                       <p className="text-on-surface-variant text-sm mt-xs">
                         {completedNodes} of {totalNodes} lessons
                       </p>
@@ -82,8 +91,8 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-md">
               <div className="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col">
-                <h3 className="text-h2 font-title text-on-surface mb-md">Your Path</h3>
-                <div className="flex-1 flex flex-col gap-0">
+                <h2 className="text-h2 font-title text-on-surface mb-md">Your Path</h2>
+                <div className="flex-1 flex flex-col gap-0 relative">
                   {modules.map((mod, idx) => (
                     <div key={mod.title} className="flex gap-md relative">
                       {idx < modules.length - 1 && (
@@ -109,11 +118,11 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
                         </div>
                       </div>
                       <div className={`pb-lg ${mod.isLocked ? 'opacity-50' : ''}`}>
-                        <h4
+                        <h3
                           className={`font-bold ${idx === 0 ? 'text-primary' : 'text-on-surface'}`}
                         >
                           {mod.title}
-                        </h4>
+                        </h3>
                         <p className="text-on-surface-variant text-xs mt-1">
                           {mod.isLocked ? 'Locked' : idx === 0 ? 'Current Focus' : 'Completed'}
                         </p>
@@ -124,7 +133,7 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
               </div>
 
               <div className="md:col-span-2 flex flex-col gap-sm">
-                <h3 className="text-h2 font-title text-on-surface mb-xs">Current Modules</h3>
+                <h2 className="text-h2 font-title text-on-surface mb-xs">Current Modules</h2>
                 {modules.slice(0, 3).map((mod, idx) => (
                   <div
                     key={mod.title}
@@ -148,7 +157,7 @@ export function CourseHomePage({ pkg, onNavigate }: CourseHomePageProps): JSX.El
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-on-surface">{mod.title}</h4>
+                        <h3 className="font-bold text-on-surface">{mod.title}</h3>
                         <span className="bg-surface-container px-2 py-1 rounded text-xs font-mono text-on-surface-variant">
                           {mod.lessons.length} {mod.lessons.length === 1 ? 'lesson' : 'lessons'}
                         </span>

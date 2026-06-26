@@ -3,7 +3,8 @@ import type { ThemeDefinition } from './types';
 export const nocturnal: ThemeDefinition = {
   id: 'nocturnal',
   name: 'OpenEdu Nocturnal',
-  description: 'Dark mode with deep focus. Minimalist design with glassmorphism and neon accent glows.',
+  description:
+    'Dark mode with deep focus. Minimalist design with glassmorphism and neon accent glows.',
   colors: {
     surface: '#151219',
     ['surface-dim']: '#151219',

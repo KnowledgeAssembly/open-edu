@@ -16,14 +16,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Packages',
-      items: [
-        'schemas',
-        'accessibility',
-        'telemetry',
-        'rewards',
-        'runtime',
-        'dev-server',
-      ],
+      items: ['schemas', 'accessibility', 'telemetry', 'rewards', 'runtime', 'dev-server'],
     },
     {
       type: 'category',

@@ -1,15 +1,30 @@
 import { useMemo, useState } from 'react';
 import type { LoadedPackage } from '@open-edu/core';
-import { SideNav, TopAppBar, CourseTree, NodeRenderer, AITutorPanel } from '@open-edu/runtime';
+import {
+  SideNav,
+  TopAppBar,
+  CourseTree,
+  NodeRenderer,
+  AITutorPanel,
+  type ThemeId,
+} from '@open-edu/runtime';
 import { buildModules } from './buildModules';
 
 export interface CodePageProps {
   pkg: LoadedPackage;
   nodeId: string;
   onNavigate: (page: string, nodeId?: string) => void;
+  currentThemeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }
 
-export function CodePage({ pkg, nodeId, onNavigate }: CodePageProps): JSX.Element {
+export function CodePage({
+  pkg,
+  nodeId,
+  onNavigate,
+  currentThemeId,
+  onThemeChange,
+}: CodePageProps): JSX.Element {
   const [aiPanelVisible, setAiPanelVisible] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [fontSizeLevel, setFontSizeLevel] = useState(100);
@@ -32,11 +47,13 @@ export function CodePage({ pkg, nodeId, onNavigate }: CodePageProps): JSX.Elemen
         <CourseTree modules={modules} onLessonClick={(id) => onNavigate('lesson', id)} />
       </SideNav>
 
-      <main className="flex-1 flex flex-col min-w-0 bg-surface-dim relative">
+      <div className="flex-1 flex flex-col min-w-0 bg-surface-dim relative">
         <TopAppBar
           breadcrumbs={breadcrumbs}
           showA11yControls
           onAskAiClick={() => setAiPanelVisible((v) => !v)}
+          currentThemeId={currentThemeId}
+          onThemeChange={onThemeChange}
         />
 
         <div className="flex items-center gap-md px-lg py-sm border-b border-outline-variant bg-surface-container-lowest/50">
@@ -65,7 +82,7 @@ export function CodePage({ pkg, nodeId, onNavigate }: CodePageProps): JSX.Elemen
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto relative w-full flex justify-center">
+        <main className="flex-1 overflow-y-auto relative w-full flex justify-center">
           <article
             className="w-full max-w-container-max px-lg py-xl pb-[120px]"
             style={{ fontSize: `${fontSizeLevel}%`, zoom: `${zoomLevel}%` }}
@@ -78,8 +95,8 @@ export function CodePage({ pkg, nodeId, onNavigate }: CodePageProps): JSX.Elemen
               </div>
             )}
           </article>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <AITutorPanel visible={aiPanelVisible} />
     </div>

@@ -24,24 +24,24 @@ function App() {
 
 ## Focus Management
 
-| Export | Purpose |
-|---|---|
-| `FocusProvider` | Context provider for focus state tracking |
-| `useFocusContext` | Access current focus state and navigation history |
-| `useAutoFocus` | Automatically focus an element when it mounts |
-| `useFocusTrap` | Trap keyboard focus within a region (modals, quizzes) |
-| `useKeyboardNavigation` | Arrow-key navigation within a list |
-| `FocusTrap` | Component wrapper that traps focus |
+| Export                  | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `FocusProvider`         | Context provider for focus state tracking             |
+| `useFocusContext`       | Access current focus state and navigation history     |
+| `useAutoFocus`          | Automatically focus an element when it mounts         |
+| `useFocusTrap`          | Trap keyboard focus within a region (modals, quizzes) |
+| `useKeyboardNavigation` | Arrow-key navigation within a list                    |
+| `FocusTrap`             | Component wrapper that traps focus                    |
 
 ## Live Regions & Announcements
 
-| Export | Purpose |
-|---|---|
-| `LiveRegionProvider` | Context provider for screen reader announcements |
-| `useLiveRegion` | Post assertive or polite messages to screen readers |
-| `AriaProvider` | Context provider for ARIA state management |
-| `useAriaContext` | Access and set ARIA attributes dynamically |
-| `useAnnouncement` | Announce node transitions and feedback |
+| Export               | Purpose                                             |
+| -------------------- | --------------------------------------------------- |
+| `LiveRegionProvider` | Context provider for screen reader announcements    |
+| `useLiveRegion`      | Post assertive or polite messages to screen readers |
+| `AriaProvider`       | Context provider for ARIA state management          |
+| `useAriaContext`     | Access and set ARIA attributes dynamically          |
+| `useAnnouncement`    | Announce node transitions and feedback              |
 
 ## Automated Auditing
 

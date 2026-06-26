@@ -100,11 +100,11 @@ edu report ./telemetry.jsonl --json  # Machine-readable
 
 ## Event Types
 
-| Event | Description |
-|---|---|
-| `node_open` | Learner entered a node |
-| `node_complete` | Learner completed a node (includes score) |
-| `quiz_answered` | Learner answered a quiz question |
-| `hint_triggered` | Learner requested a hint |
-| `widget_interaction` | Learner interacted with a widget |
-| `route_triggered` | Workflow routed to a specific node |
+| Event                | Description                               |
+| -------------------- | ----------------------------------------- |
+| `node_open`          | Learner entered a node                    |
+| `node_complete`      | Learner completed a node (includes score) |
+| `quiz_answered`      | Learner answered a quiz question          |
+| `hint_triggered`     | Learner requested a hint                  |
+| `widget_interaction` | Learner interacted with a widget          |
+| `route_triggered`    | Workflow routed to a specific node        |

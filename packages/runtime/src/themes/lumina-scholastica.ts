@@ -3,7 +3,8 @@ import type { ThemeDefinition } from './types';
 export const luminaScholastica: ThemeDefinition = {
   id: 'lumina-scholastica',
   name: 'Lumina Scholastica',
-  description: 'Modern minimalist learning environment with a content-first three-panel architecture.',
+  description:
+    'Modern minimalist learning environment with a content-first three-panel architecture.',
   colors: {
     surface: '#fdf7ff',
     ['surface-dim']: '#ded8e0',

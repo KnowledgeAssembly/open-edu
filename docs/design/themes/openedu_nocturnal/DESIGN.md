@@ -106,12 +106,14 @@ spacing:
 ---
 
 ## Brand & Style
+
 The design system for OpenEdu is built on a foundation of "Focus and Depth," drawing inspiration from high-productivity environments like Arc and Obsidian. The brand personality is professional, intellectual, and immersive, designed to reduce cognitive load during long study sessions.
 
 The style leverages **Minimalism** with a touch of **Glassmorphism** for navigational elements. It prioritizes content through deep contrast, using a "layering" approach rather than heavy borders. The emotional response should be one of calm, premium utility—a digital sanctuary for learning where the interface recedes to let the educational material shine.
 
 ## Colors
-The palette is centered on a "Deep Black" base to maximize contrast and reduce eye strain. 
+
+The palette is centered on a "Deep Black" base to maximize contrast and reduce eye strain.
 
 - **Primary (#bb86fc):** A soft, desaturated purple used for high-importance actions, progress indicators, and active states.
 - **Secondary (#03dac6):** A vibrant teal used for success states, secondary interactive elements, and accents within data visualizations.
@@ -119,13 +121,15 @@ The palette is centered on a "Deep Black" base to maximize contrast and reduce e
 - **Subtle Glows:** Active interactive elements (like a selected course or active tab) should utilize a 15% opacity drop-shadow of the Primary color to create a soft "neon" depth effect.
 
 ## Typography
-This design system utilizes **Inter** exclusively to maintain a systematic, utilitarian aesthetic. 
+
+This design system utilizes **Inter** exclusively to maintain a systematic, utilitarian aesthetic.
 
 - **Hierarchy:** Use bold weights (700) sparingly for display titles. Semi-bold (600) is the standard for headlines to maintain a professional tone.
 - **Readability:** Body text uses a generous line-height (1.5x) to ensure long-form educational content is easily digestible in dark mode.
 - **Labels:** Use uppercase for `label-sm` with increased letter spacing to provide a structural feel for metadata and categories.
 
 ## Layout & Spacing
+
 The layout follows a **fluid grid** model with standardized 12-column structures for desktop and 4-column for mobile.
 
 - **Desktop:** Sidebar-centric layout (inspired by Arc). The sidebar is fixed at 260px, while the main content area expands. Main margins are 40px.
@@ -133,6 +137,7 @@ The layout follows a **fluid grid** model with standardized 12-column structures
 - **Rhythm:** Use an 8px spacing system. Components should primarily use `sm` (16px) for internal padding and `md` (24px) for vertical rhythm between sections.
 
 ## Elevation & Depth
+
 This design system avoids traditional heavy shadows, opting instead for **Tonal Layering** and **Subtle Outlines**.
 
 - **Depth Levels:**
@@ -142,16 +147,18 @@ This design system avoids traditional heavy shadows, opting instead for **Tonal 
 - **Active State Glow:** Instead of elevation height, active elements use a `0px 0px 12px 0px` shadow using the Primary color at 20% opacity.
 
 ## Shapes
-The shape language is "Modern Geometric." 
+
+The shape language is "Modern Geometric."
 
 - **Standard Elements:** Buttons, input fields, and cards use the `rounded` (0.5rem) setting.
 - **Large Containers:** Modals and main content wrappers use `rounded-xl` (1.5rem) to soften the high-contrast transitions.
 - **Interactive Indicators:** Small decorative elements like status dots or notification badges should be fully circular (pill-shaped).
 
 ## Components
-- **Buttons:** 
-  - *Primary:* Solid `#bb86fc` with black text. No border. On hover, apply a soft purple outer glow.
-  - *Secondary:* Ghost style with a 1px `#ffffff20` border and teal text.
+
+- **Buttons:**
+  - _Primary:_ Solid `#bb86fc` with black text. No border. On hover, apply a soft purple outer glow.
+  - _Secondary:_ Ghost style with a 1px `#ffffff20` border and teal text.
 - **Input Fields:** Filled with `#1a1a1a`. 1px border that turns Primary purple on focus. No shadows except for the active glow.
 - **Cards:** Use `surface-bright` (#262626). Ensure internal padding is consistent with the `md` (24px) spacing token.
 - **Progress Bars:** Thin 4px tracks. The track is `#ffffff10` and the fill is a gradient from Primary to Secondary.

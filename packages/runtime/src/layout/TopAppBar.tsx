@@ -175,7 +175,7 @@ export function TopAppBar({
   };
 
   return (
-    <header style={containerStyle} data-testid="top-app-bar" role="banner">
+    <header style={containerStyle} data-testid="top-app-bar">
       <div style={leftSectionStyle}>
         {breadcrumbsEnabled && breadcrumbs && breadcrumbs.length > 0 && (
           <nav aria-label="Breadcrumbs">

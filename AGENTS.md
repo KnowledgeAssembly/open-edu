@@ -36,6 +36,8 @@ pnpm format:check                     # Check formatting
 pnpm format                           # Auto-format all files
 pnpm --filter @open-edu/learner dev   # Start the learner app (port 4001)
 pnpm test:e2e                         # Run Playwright E2E tests
+# Regenerate dev-server Tailwind CSS after runtime style changes
+pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
 
 ## Monorepo Structure
@@ -119,6 +121,18 @@ Epic 13 (Learner App)
 - `.prettierrc` — Shared Prettier config
 - `vitest.workspace.ts` — Vitest workspace definition
 - `pnpm-workspace.yaml` — pnpm workspace packages
+
+## Tailwind CSS & Dev-Server
+
+Runtime components (`packages/runtime/src`) use Tailwind utility classes. The learner app processes Tailwind through PostCSS at dev/build time. The dev-server **does not** run PostCSS — it imports a pre-generated CSS file (`apps/dev-server/src/tailwind.css`).
+
+**When you add or change Tailwind classes in runtime components, regenerate the dev-server CSS:**
+
+```bash
+pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
+```
+
+Both the learner (`apps/learner/tailwind.config.ts`) and dev-server (`apps/dev-server/tailwind.config.js`) share the same theme token mappings (colors, spacing, border radius, fonts) that reference `--oe-*` CSS variables injected by `RuntimeThemeProvider`.
 
 ## PR Checklist
 
