@@ -256,3 +256,7 @@ export function useRuntime(): RuntimeContextValue {
   }
   return ctx;
 }
+
+export function useRuntimeOptional(): RuntimeContextValue | null {
+  return useContext(RuntimeContext);
+}

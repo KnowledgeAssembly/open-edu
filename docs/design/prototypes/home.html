@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Home - OpenEdu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;family=Source+Serif+4:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "tertiary": "#765b00",
+                "on-error-container": "#93000a",
+                "outline-variant": "#cbc4d2",
+                "error": "#ba1a1a",
+                "background": "#fdf7ff",
+                "surface-container": "#f2ecf4",
+                "on-surface": "#1d1b20",
+                "primary-container": "#6750a4",
+                "surface-container-high": "#ece6ee",
+                "primary-fixed": "#e9ddff",
+                "secondary": "#63597c",
+                "on-error": "#ffffff",
+                "surface-dim": "#ded8e0",
+                "tertiary-fixed-dim": "#e7c365",
+                "tertiary-fixed": "#ffdf93",
+                "on-primary-container": "#e0d2ff",
+                "on-tertiary-container": "#503d00",
+                "inverse-on-surface": "#f5eff7",
+                "on-secondary-fixed": "#1f1635",
+                "on-secondary": "#ffffff",
+                "on-tertiary-fixed": "#241a00",
+                "inverse-primary": "#cfbcff",
+                "on-primary": "#ffffff",
+                "secondary-fixed-dim": "#cdc0e9",
+                "on-primary-fixed-variant": "#4f378a",
+                "inverse-surface": "#322f35",
+                "surface-container-low": "#f8f2fa",
+                "surface-bright": "#fdf7ff",
+                "on-secondary-container": "#645a7d",
+                "on-primary-fixed": "#22005d",
+                "secondary-fixed": "#e9ddff",
+                "secondary-container": "#e1d4fd",
+                "primary": "#4f378a",
+                "surface-tint": "#6750a4",
+                "error-container": "#ffdad6",
+                "primary-fixed-dim": "#cfbcff",
+                "surface-variant": "#e6e0e9",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-fixed-variant": "#594400",
+                "surface": "#fdf7ff",
+                "surface-container-highest": "#e6e0e9",
+                "surface-container-lowest": "#ffffff",
+                "outline": "#7a7582",
+                "on-surface-variant": "#494551",
+                "tertiary-container": "#c9a74d",
+                "on-background": "#1d1b20",
+                "on-secondary-fixed-variant": "#4b4263"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "md": "24px",
+                "base": "8px",
+                "container-max": "800px",
+                "sm": "12px",
+                "xl": "64px",
+                "lg": "40px",
+                "panel-explorer": "320px",
+                "panel-nav": "260px",
+                "xs": "4px"
+        },
+        "fontFamily": {
+                "display-lg-mobile": [
+                        "Inter"
+                ],
+                "body-reading": [
+                        "\"Source Serif 4\""
+                ],
+                "body-ui": [
+                        "Inter"
+                ],
+                "display-lg": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "Inter"
+                ],
+                "h2": [
+                        "Inter"
+                ],
+                "mono": [
+                        "jetbrainsMono"
+                ],
+                "h1": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "display-lg-mobile": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-reading": [
+                        "18px",
+                        {
+                                "lineHeight": "1.7",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-ui": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "h2": [
+                        "24px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "600"
+                        }
+                ],
+                "mono": [
+                        "13px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "h1": [
+                        "30px",
+                        {
+                                "lineHeight": "1.3",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.background');
+    color: theme('colors.on-background');
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+</head>
+<body class="flex h-screen overflow-hidden font-body-ui text-body-ui">
+<!-- SideNavBar -->
+<nav class="h-screen w-panel-nav sticky top-0 left-0 border-r border-outline-variant bg-surface-container flex flex-col py-md px-sm z-40 hidden md:flex">
+<div class="mb-xl px-sm flex items-center gap-sm">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A modern minimalist logo icon for an educational platform, featuring abstract geometric shapes in deep violet and crisp white, conveying a sense of structure and forward momentum, set against a light background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKsh9bv9-8Gq3tB94lRVfnfseiovYYAug2eyk3Cn48plnUgZPbMyoI8zQmjEJ71V_tmCj_5tUBcngTjQI4zy7D9u11QrUbg9Rvu9qEhbpoaG2zbLQ64jRcwkcSxLuLWR_oRSKVZ8IsN8CbsOooMO3xhfFruVtsEaSn0pOnBUv8HMyY2Gg6pKIwcTpETia4J_oaKkAPnGn-CJKul73jo7y0CumhA_-AHTg5ors05VHTRCH-rSyg5ErZtCxQveZx2F4v8NoZ58utvYkn"/>
+<div>
+<h1 class="font-h1 text-h1 text-primary m-0 p-0 leading-none">OpenEdu</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-xs uppercase tracking-wider">Modern Minimalist Learning</p>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-xs">
+<a class="flex items-center gap-base border-l-2 border-primary bg-primary-container text-on-primary-container p-base rounded-r-lg transition-all duration-200 ease-out active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        Course Overview
+      </a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-r-lg transition-all duration-200 ease-out border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+        Modules
+      </a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-r-lg transition-all duration-200 ease-out border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+        My Progress
+      </a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-r-lg transition-all duration-200 ease-out border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+        Bookmarks
+      </a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-r-lg transition-all duration-200 ease-out border-l-2 border-transparent mt-auto mb-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+        Settings
+      </a>
+</div>
+<button class="w-full bg-primary text-on-primary py-sm px-base rounded font-body-ui font-bold hover:opacity-90 transition-opacity">
+      Resume Last Lesson
+    </button>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="docked w-full top-0 sticky z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center h-xl px-md">
+<div class="flex items-center gap-md">
+<h2 class="font-h2 text-h2 text-primary hidden lg:block">OpenEdu Course Viewer</h2>
+<nav class="hidden md:flex gap-sm">
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Breadcrumbs</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-sm py-xs rounded" href="#">Reading Ruler</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-sm py-xs rounded" href="#">Font Size</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:bg-surface-container-high p-xs rounded-full transition-colors">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high p-xs rounded-full transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high p-xs rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-xs"></div>
+<button class="text-secondary font-semibold hover:bg-surface-container-high px-sm py-xs rounded transition-colors hidden sm:block">Theme</button>
+<button class="bg-primary-container text-on-primary-container font-semibold px-sm py-xs rounded hover:opacity-90 transition-opacity flex items-center gap-xs">
+          Ask AI
+          <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</button>
+<img class="w-8 h-8 rounded-full ml-sm border border-outline-variant object-cover" data-alt="A small circular profile picture of a young professional with short hair, smiling warmly against a soft grey background, lit with soft natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5_pVOwuP7zc26ZMa-bc2TzpRgLg8cYoQpD9WNpW3s8MqfBZbfEfbJh-xBg38bx5lexKBr9LSaL9HnQOScI-GJl2ZjrTkD4FlPTBrKsfQV5HzxKRXF05Ket0huyBFyMG30SVk3uUuhj-Kd50acBO61GvGiknooIlNqOjVw_XlKC-4mrT9n82GgOYm3cPNCLnPs0Pa1DlTVza2FxjshNXi3uf0ukYiAKHtXHPoCrt7MrgdivT0FUmE4LUd-gbBvrM4YUCrhpYVSrALY"/>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto no-scrollbar bg-surface flex justify-center pb-xl relative">
+<div class="w-full max-w-[container-max] px-md py-lg flex flex-col gap-lg">
+<!-- Course Header & Progress -->
+<section class="flex flex-col gap-md">
+<div>
+<span class="font-label-caps text-label-caps text-primary tracking-widest uppercase mb-xs block">Data Structures &amp; Algorithms</span>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-sm">Advanced Graph Theory</h1>
+<p class="font-body-reading text-body-reading text-on-surface-variant max-w-2xl">Master the complexities of network flow, shortest paths, and spanning trees. This module builds upon foundational concepts to tackle real-world routing problems.</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-md">
+<div class="flex-1 w-full">
+<div class="flex justify-between items-end mb-sm">
+<div>
+<h3 class="font-h2 text-h2 text-on-surface">Overall Progress</h3>
+<p class="text-on-surface-variant text-sm mt-xs">Module 3 of 8 • Est. 4h remaining</p>
+</div>
+<span class="font-h1 text-h1 text-primary">38%</span>
+</div>
+<div class="h-[4px] w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[38%]"></div>
+</div>
+</div>
+<button class="bg-primary text-on-primary font-bold py-sm px-lg rounded flex items-center gap-sm hover:opacity-90 transition-opacity whitespace-nowrap w-full sm:w-auto justify-center">
+              Continue Learning
+              <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Bento Grid: Modules & Path -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Learning Path Visual -->
+<div class="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col h-full relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-low to-surface-container z-0 opacity-50"></div>
+<h3 class="font-h2 text-h2 text-on-surface mb-md relative z-10">Your Path</h3>
+<div class="flex-1 relative z-10 flex flex-col gap-0 py-sm">
+<!-- Path Item 1 (Completed) -->
+<div class="flex gap-md relative">
+<div class="w-px h-full bg-primary absolute left-3 top-6 z-0"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary mt-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="pb-lg">
+<h4 class="font-bold text-on-surface">Fundamentals</h4>
+<p class="text-on-surface-variant text-xs mt-1">Completed Mar 12</p>
+</div>
+</div>
+<!-- Path Item 2 (Active) -->
+<div class="flex gap-md relative">
+<div class="w-px h-full bg-outline-variant absolute left-3 top-6 z-0 border-l border-dashed border-outline-variant"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full border-2 border-primary bg-surface flex items-center justify-center mt-1 ring-4 ring-primary-container/30">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+</div>
+<div class="pb-lg">
+<h4 class="font-bold text-primary">Graph Theory</h4>
+<p class="text-on-surface-variant text-xs mt-1">Current Focus</p>
+</div>
+</div>
+<!-- Path Item 3 (Locked) -->
+<div class="flex gap-md relative">
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant bg-surface flex items-center justify-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-outline-variant">lock</span>
+</div>
+</div>
+<div class="pb-0">
+<h4 class="font-bold text-outline-variant">Dynamic Programming</h4>
+<p class="text-outline-variant text-xs mt-1">Locked</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Modules List -->
+<div class="md:col-span-2 flex flex-col gap-sm">
+<h3 class="font-h2 text-h2 text-on-surface mb-xs">Current Modules</h3>
+<!-- Module Card 1 -->
+<div class="bg-surface border border-outline-variant hover:border-primary transition-colors duration-200 rounded-xl p-md flex flex-col sm:flex-row gap-md cursor-pointer group">
+<div class="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">account_tree</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-on-surface text-lg">1. Directed Acyclic Graphs</h4>
+<span class="bg-surface-container px-2 py-1 rounded text-xs font-mono text-on-surface-variant">45m</span>
+</div>
+<p class="text-on-surface-variant mt-1 text-sm">Understanding DAGs, topological sorting, and their applications in scheduling.</p>
+<div class="mt-sm flex items-center gap-2">
+<div class="h-[2px] w-24 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[100%]"></div>
+</div>
+<span class="text-xs font-bold text-primary">Done</span>
+</div>
+</div>
+</div>
+<!-- Module Card 2 (Active) -->
+<div class="bg-primary-fixed/20 border-2 border-primary rounded-xl p-md flex flex-col sm:flex-row gap-md cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="w-12 h-12 rounded bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined">route</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-on-surface text-lg">2. Dijkstra's Algorithm</h4>
+<span class="bg-surface-container px-2 py-1 rounded text-xs font-mono text-on-surface-variant">1h 15m</span>
+</div>
+<p class="text-on-surface-variant mt-1 text-sm">Finding the shortest paths between nodes in a graph, which may represent routing networks.</p>
+<div class="mt-sm flex items-center gap-2">
+<div class="h-[2px] w-24 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[40%]"></div>
+</div>
+<span class="text-xs text-on-surface-variant">40%</span>
+</div>
+</div>
+</div>
+<!-- Module Card 3 -->
+<div class="bg-surface border border-outline-variant hover:border-outline transition-colors duration-200 rounded-xl p-md flex flex-col sm:flex-row gap-md cursor-pointer opacity-70">
+<div class="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-on-surface text-lg">3. Minimum Spanning Trees</h4>
+<span class="bg-surface-container px-2 py-1 rounded text-xs font-mono text-outline">50m</span>
+</div>
+<p class="text-outline mt-1 text-sm">Prim's and Kruskal's algorithms for finding MSTs in connected, undirected graphs.</p>
+<div class="mt-sm flex items-center gap-2">
+<span class="text-xs text-outline font-semibold">Not Started</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Insights Callout -->
+<section class="mt-md">
+<div class="bg-tertiary-container/20 border border-tertiary-container rounded-lg p-md flex gap-md items-start">
+<span class="material-symbols-outlined text-tertiary mt-1" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div>
+<h4 class="font-bold text-on-surface mb-1">AI Learning Insight</h4>
+<p class="text-on-surface-variant font-body-reading text-sm leading-relaxed">You spent 20% more time on Directed Acyclic Graphs than the average student, but your quiz score was perfect. The system has adjusted your upcoming Dijkstra module to include more advanced edge-case scenarios to match your deep comprehension style.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

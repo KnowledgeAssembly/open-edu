@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenEdu - Progress Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Source+Serif+4:wght@400&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#765b00",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#cbc4d2",
+                        "error": "#ba1a1a",
+                        "background": "#fdf7ff",
+                        "surface-container": "#f2ecf4",
+                        "on-surface": "#1d1b20",
+                        "primary-container": "#6750a4",
+                        "surface-container-high": "#ece6ee",
+                        "primary-fixed": "#e9ddff",
+                        "secondary": "#63597c",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#ded8e0",
+                        "tertiary-fixed-dim": "#e7c365",
+                        "tertiary-fixed": "#ffdf93",
+                        "on-primary-container": "#e0d2ff",
+                        "on-tertiary-container": "#503d00",
+                        "inverse-on-surface": "#f5eff7",
+                        "on-secondary-fixed": "#1f1635",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#241a00",
+                        "inverse-primary": "#cfbcff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#cdc0e9",
+                        "on-primary-fixed-variant": "#4f378a",
+                        "inverse-surface": "#322f35",
+                        "surface-container-low": "#f8f2fa",
+                        "surface-bright": "#fdf7ff",
+                        "on-secondary-container": "#645a7d",
+                        "on-primary-fixed": "#22005d",
+                        "secondary-fixed": "#e9ddff",
+                        "secondary-container": "#e1d4fd",
+                        "primary": "#4f378a",
+                        "surface-tint": "#6750a4",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#cfbcff",
+                        "surface-variant": "#e6e0e9",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "surface": "#fdf7ff",
+                        "surface-container-highest": "#e6e0e9",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#7a7582",
+                        "on-surface-variant": "#494551",
+                        "tertiary-container": "#c9a74d",
+                        "on-background": "#1d1b20",
+                        "on-secondary-fixed-variant": "#4b4263"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "24px",
+                        "base": "8px",
+                        "container-max": "800px",
+                        "sm": "12px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "panel-explorer": "320px",
+                        "panel-nav": "260px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-reading": ["\"Source Serif 4\""],
+                        "body-ui": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h2": ["Inter"],
+                        "mono": ["jetbrainsMono"],
+                        "h1": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-reading": ["18px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "body-ui": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "h2": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "mono": ["13px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1": ["30px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Chart.js for radar chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-background text-on-background font-body-ui text-body-ui antialiased flex h-screen overflow-hidden">
+<!-- Global Nav (Left) - Using SideNavBar JSON -->
+<aside class="hidden md:flex flex-col h-screen w-panel-nav sticky top-0 left-0 bg-surface-container border-r border-outline-variant py-md px-sm">
+<div class="mb-xl px-sm">
+<h1 class="font-h1 text-h1 text-primary">OpenEdu</h1>
+<p class="font-body-ui text-body-ui text-on-surface-variant mt-xs">Modern Minimalist Learning</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<!-- Inactive -->
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-DEFAULT transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Course Overview</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-DEFAULT transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Modules</span>
+</a>
+<!-- Active -->
+<a class="flex items-center gap-base border-l-2 border-primary bg-primary-container text-on-primary-container p-base rounded-DEFAULT transition-all duration-200 ease-out scale-95" href="#">
+<span class="material-symbols-outlined icon-fill">query_stats</span>
+<span class="font-bold">My Progress</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-DEFAULT transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span>Bookmarks</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant hover:bg-surface-variant p-base rounded-DEFAULT transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg">
+<button class="w-full bg-primary text-on-primary font-body-ui font-bold py-sm px-base rounded-DEFAULT hover:bg-primary/90 transition-colors duration-200">
+                Resume Last Lesson
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-full overflow-y-auto">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-xl px-md w-full bg-surface/80 backdrop-blur-md border-b border-outline-variant docked full-width top-0 sticky z-50">
+<div class="flex items-center gap-md">
+<span class="font-h2 text-h2 text-primary md:hidden">OpenEdu</span>
+<nav class="hidden sm:flex items-center gap-sm">
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-base py-xs rounded-DEFAULT" href="#">Breadcrumbs</a>
+<span class="text-outline-variant">/</span>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-base py-xs rounded-DEFAULT" href="#">Reading Ruler</a>
+<span class="text-outline-variant">/</span>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 px-base py-xs opacity-80 duration-200" href="#">Font Size</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex gap-xs mr-sm">
+<button aria-label="dark_mode" class="p-xs text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button aria-label="search" class="p-xs text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button aria-label="more_vert" class="p-xs text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<button class="hidden lg:block text-primary hover:bg-primary-container/20 px-sm py-xs rounded-DEFAULT transition-colors duration-200 font-bold">Theme</button>
+<button class="bg-primary text-on-primary font-bold px-sm py-xs rounded-DEFAULT hover:bg-primary/90 transition-colors duration-200">Ask AI</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-xs" data-alt="A minimalist, professional headshot of a student in a bright, modern light-mode setting. Soft, diffused lighting highlights a calm expression. Deep blacks and pristine whites with subtle vibrant accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY3NqDQtb-KbFLconXGwCL2eYOAnQu0JERaHZo2djtqUcKTyJS5GTGAmGp8RP9l9_OIyryU7wjQYXFflCmAgbIn55RwI71jtmKfcVGR1P9oAgPqetcjR3W5qZDpFvnV5WvIS0L_E0Hq26mLqIFg2ol7jNwV03ZmgaNjbEi77_uB7vdrtJfnHaiNLAuS8wsSh6ajZXb6_wHM7UGgtac6yt1P56fRAnN5RwuOynVzl-0_whLE9pqwBWkG9Mt-h4fSYXeXs7IBVu8aJqT"/>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="max-w-[1200px] mx-auto w-full p-md md:p-lg lg:p-xl space-y-lg">
+<div class="mb-xl">
+<h2 class="font-display-lg text-display-lg text-on-surface">My Progress</h2>
+<p class="font-body-reading text-body-reading text-on-surface-variant mt-sm max-w-2xl">A comprehensive view of your learning journey, mastery levels, and AI-driven recommendations tailored to your performance.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Overview Card -->
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+<div>
+<h3 class="font-h2 text-h2 text-on-surface mb-sm">Course Completion</h3>
+<p class="text-on-surface-variant mb-xl">Advanced Data Structures &amp; Algorithms</p>
+</div>
+<div class="flex items-end gap-md">
+<div class="text-[72px] font-bold leading-none text-primary tracking-tighter">68%</div>
+<div class="mb-sm text-on-surface-variant">
+<p>24/35 Modules Completed</p>
+<p class="text-xs mt-xs text-tertiary">↑ 12% this week</p>
+</div>
+</div>
+<div class="mt-lg">
+<div class="w-full bg-surface-container-high rounded-full h-xs overflow-hidden">
+<div class="bg-primary h-full" style="width: 68%"></div>
+</div>
+<div class="flex justify-between mt-sm font-mono text-mono text-outline">
+<span>Start</span>
+<span>Target: Dec 15</span>
+</div>
+</div>
+</div>
+<!-- AI Recommendations Callout -->
+<div class="bg-tertiary-container/10 border border-tertiary-container rounded-xl p-lg flex flex-col">
+<div class="flex items-center gap-sm mb-md text-tertiary">
+<span class="material-symbols-outlined icon-fill">auto_awesome</span>
+<h3 class="font-bold">AI Insights</h3>
+</div>
+<p class="font-body-reading text-body-reading text-on-surface-variant mb-auto">Your pacing is excellent. However, recent quizzes show a struggle with Graph Traversal algorithms. I recommend reviewing Module 14 before proceeding.</p>
+<button class="mt-md w-full border border-tertiary text-tertiary font-bold py-sm rounded-DEFAULT hover:bg-tertiary-container/20 transition-colors duration-200">
+                        Review Module 14
+                    </button>
+</div>
+<!-- Strengths Radar Chart -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col items-center">
+<h3 class="font-h2 text-h2 text-on-surface mb-lg w-full text-left">Mastery Profile</h3>
+<div class="w-full max-w-[250px] aspect-square">
+<canvas id="masteryChart"></canvas>
+</div>
+</div>
+<!-- Recent Activity List -->
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h3 class="font-h2 text-h2 text-on-surface mb-lg">Recent Activity &amp; Scores</h3>
+<div class="space-y-sm">
+<!-- Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors duration-200 border-b border-outline-variant/30 last:border-0">
+<div class="flex items-center gap-md">
+<div class="bg-primary-container text-on-primary-container p-sm rounded-DEFAULT flex items-center justify-center">
+<span class="material-symbols-outlined">quiz</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Dynamic Programming Quiz</p>
+<p class="text-xs text-on-surface-variant">Completed Today, 10:30 AM</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-mono font-bold text-on-surface">92/100</span>
+<p class="text-xs text-primary">Excellent</p>
+</div>
+</div>
+<!-- Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors duration-200 border-b border-outline-variant/30 last:border-0">
+<div class="flex items-center gap-md">
+<div class="bg-surface-container-high text-on-surface-variant p-sm rounded-DEFAULT flex items-center justify-center">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Read: Graph Theory Basics</p>
+<p class="text-xs text-on-surface-variant">Yesterday, 4:15 PM</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-mono text-outline">100%</span>
+<p class="text-xs text-outline-variant">Completed</p>
+</div>
+</div>
+<!-- Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors duration-200 border-b border-outline-variant/30 last:border-0">
+<div class="flex items-center gap-md">
+<div class="bg-error-container/30 text-error p-sm rounded-DEFAULT flex items-center justify-center">
+<span class="material-symbols-outlined">assignment_late</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Sorting Algorithms Assignment</p>
+<p class="text-xs text-on-surface-variant">2 days ago</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-mono font-bold text-on-surface">65/100</span>
+<p class="text-xs text-error">Needs Review</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Initialize Radar Chart for Mastery Profile
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('masteryChart').getContext('2d');
+            
+            // Getting colors from Tailwind config via CSS variables or computed styles
+            // For simplicity in this vanilla script, approximating the theme colors based on config
+            const primaryColor = '#4f378a';
+            const primaryContainer = '#6750a4';
+            const surfaceVariant = '#e6e0e9';
+            const outlineColor = '#7a7582';
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Logic', 'Syntax', 'Algorithms', 'Data Struct', 'Testing', 'Design'],
+                    datasets: [{
+                        label: 'Current Mastery',
+                        data: [85, 90, 60, 75, 50, 80],
+                        backgroundColor: 'rgba(103, 80, 164, 0.2)', // primary-container with opacity
+                        borderColor: primaryColor,
+                        pointBackgroundColor: primaryColor,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: primaryColor,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: surfaceVariant
+                            },
+                            grid: {
+                                color: surfaceVariant
+                            },
+                            pointLabels: {
+                                color: outlineColor,
+                                font: {
+                                    family: 'Inter',
+                                    size: 11
+                                }
+                            },
+                            ticks: {
+                                display: false,
+                                min: 0,
+                                max: 100
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(29, 27, 32, 0.9)',
+                            titleFont: { family: 'Inter', size: 13 },
+                            bodyFont: { family: 'Inter', size: 13 },
+                            padding: 10,
+                            cornerRadius: 4,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body></html>

@@ -15,6 +15,7 @@ export interface TopAppBarProps {
   userAvatar?: string;
   onSearchClick?: () => void;
   onAskAiClick?: () => void;
+  onReadingRulerChange?: (enabled: boolean) => void;
 }
 
 const containerStyle: CSSProperties = {
@@ -126,6 +127,7 @@ export function TopAppBar({
   userAvatar,
   onSearchClick,
   onAskAiClick,
+  onReadingRulerChange,
 }: TopAppBarProps): JSX.Element {
   const [a11yOpen, setA11yOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
@@ -262,7 +264,10 @@ export function TopAppBar({
                   <input
                     type="checkbox"
                     checked={readingRulerEnabled}
-                    onChange={(e) => setReadingRulerEnabled(e.target.checked)}
+                    onChange={(e) => {
+                      setReadingRulerEnabled(e.target.checked);
+                      onReadingRulerChange?.(e.target.checked);
+                    }}
                   />
                   Reading Ruler
                 </label>

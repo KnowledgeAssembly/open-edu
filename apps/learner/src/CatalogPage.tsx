@@ -12,23 +12,17 @@ export function CatalogPage({ packages, onStartCourse }: CatalogPageProps): JSX.
 
   if (packages.length === 0) {
     return (
-      <div style={{ padding: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Courses</h1>
-        <p>No courses found.</p>
+      <div className="p-xl">
+        <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Courses</h1>
+        <p className="text-on-surface-variant">No courses found.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '2rem' }} data-testid="catalog-page">
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 1.5rem' }}>Courses</h1>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.5rem',
-        }}
-      >
+    <div className="p-xl max-w-7xl mx-auto" data-testid="catalog-page">
+      <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Courses</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
         {packages.map((pkg) => (
           <CourseCard
             key={pkg.manifest.id}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { LoadedNode } from '@open-edu/core';
-import { useRuntime } from '../context/RuntimeContext';
+import { useRuntimeOptional } from '../context/RuntimeContext';
 import { FocusTrap, useLiveRegion } from '@open-edu/accessibility';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { QuizRenderer } from './QuizRenderer';
@@ -14,8 +14,8 @@ export interface NodeRendererProps {
 }
 
 export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
-  const { completeNode } = useRuntime();
-  const handleComplete = onComplete ?? completeNode;
+  const runtime = useRuntimeOptional();
+  const handleComplete: (score?: number) => void = onComplete ?? runtime?.completeNode ?? (() => {});
   const { announce } = useLiveRegion();
   const announcedRef = useRef<Set<string>>(new Set());
 
