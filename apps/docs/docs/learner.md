@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Learner App
 
-The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, progress tracking, and reward integration.
+The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, progress tracking, reward integration, and **theme switching**.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ The **learner app** (`@open-edu/learner`) is a standalone application that provi
 pnpm --filter @open-edu/learner dev
 ```
 
-Opens at `http://localhost:4001`. The app scans all example packages in the repository and presents them as a browsable catalog.
+Opens at `http://localhost:4001`. The app scans all example packages in the repository and presents them as a browsable catalog. You can switch between all 4 built-in themes using the palette icon in the TopAppBar.
 
 ## Architecture
 
@@ -22,12 +22,26 @@ The learner app is built on top of the Open-Edu runtime packages:
 @open-edu/learner
   ├── @open-edu/core       — scanPackages, loadPackage
   ├── @open-edu/workflow   — WorkflowEngine, getOrderedNodes
-  ├── @open-edu/runtime    — RuntimeProvider, LayoutShell, components
+  ├── @open-edu/runtime    — RuntimeThemeProvider, FontLoader, useThemePreference,
+  │                           TopAppBar, SideNav, AITutorPanel, NodeRenderer, etc.
   ├── @open-edu/rewards    — RewardBroker for badge delivery
   ├── @open-edu/telemetry  — TelemetrySession for event capture
   ├── @open-edu/accessibility — AccessibilityProvider
   └── @open-edu/widgets    — createDefaultRegistry
 ```
+
+## Page Router
+
+The app uses a 6-page `Page` union type with state-based routing (no React Router):
+
+| Page            | Route Type    | Description                                                               |
+| --------------- | ------------- | ------------------------------------------------------------------------- |
+| **Catalog**     | `catalog`     | Scans and displays all packages as CourseCards                            |
+| **Course Home** | `course-home` | Course overview with progress banner, timeline, and AI insight callout    |
+| **Lesson**      | `lesson`      | 3-panel viewer — SideNav + content canvas + AITutorPanel                  |
+| **Assessment**  | `assessment`  | Quiz renderer with AI hint callout and Exit Quiz button                   |
+| **Code**        | `code`        | Dark-themed code viewer with toolbar (zoom + font size) + AITutorPanel    |
+| **Progress**    | `progress`    | Bento-grid dashboard — completion, AI insights, mastery profile, activity |
 
 ## Course Catalog
 
@@ -37,8 +51,9 @@ On startup, the app uses `scanPackages()` to discover all valid packages in the 
 
 Clicking a course loads it via `loadPackage()` and renders:
 
-- **Sidebar** — course outline with node-by-node progress and `aria-current` indication
-- **LayoutShell** — course title, progress bar, and active node renderer
+- **SideNav** — course outline with node-by-node progress, active tab highlighting, and `aria-current` indication
+- **TopAppBar** — sticky header with breadcrumbs, theme selector, accessibility controls, and search
+- **AITutorPanel** (lesson/code pages) — right sidebar for AI chat, notes, and highlights
 - **Node renderers** — markdown for lessons, quiz with scoring, reflection with text input, widget renderer for exercises
 
 ### Node Navigation
@@ -47,6 +62,10 @@ Clicking a course loads it via `loadPackage()` and renders:
 - **Quiz nodes** — Select an answer and click "Submit" to score
 - **Reflection nodes** — Type a response and click "Submit"
 - **Exercise nodes** — Interact with the widget and submit
+
+## Theme Switching
+
+All course pages (Course Home, Lesson, Assessment, Code, Progress) include a `ThemeSelector` in the `TopAppBar`. The selected theme is persisted to `localStorage` via `useThemePreference()` and reapplied on return visits. 24 axe-core audits (6 pages × 4 themes) confirm every theme is accessible.
 
 ## Progress Persistence
 

@@ -13,7 +13,7 @@ Educational Package (Markdown + JSON)
   ┌──────────────┐
   │     Core     │  Package loader, scanner, patcher, lint, generator
   ├──────────────┤
-  │ scanPackages │  Discover all packages in a directory → catalog
+  │ scanPackages │  Discover packages → catalog
   └──────┬───────┘
          │
          ▼
@@ -24,29 +24,39 @@ Educational Package (Markdown + JSON)
   └──────┬───────┘
          │
          ▼
-  ┌──────────────────┐
-  │     Runtime      │  React renderer — lessons, quizzes, widgets
-  ├──────────────────┤
-  │ Sidebar          │  Course outline with progress
-  │ CourseCard       │  Catalog card with badge counts
-  │ CourseOutline    │  Collapsible sidebar layout
-  │ CompletionScreen │  End-of-course summary
-  │ ProgressBadge    │  Inline progress indicator
-  └──┬───┬───┬───────┘
-     ▼   ▼   ▼
-  ┌────┐┌────┐┌──────────┐
-  │A11y││Widgets││Telemetry │
-  └────┘└────┘└───┬─────┘
+  ┌──────────────────────────┐
+  │        Runtime           │  React renderer — lessons, quizzes, widgets
+  │                          │  4 themes, Tailwind-styled (--oe-* tokens)
+  ├──────────────────────────┤
+  │ Layout Components:       │
+  │  SideNav     TopAppBar   │
+  │  CourseTree  AITutorPanel│
+  │  AICallout   ReadingRuler│
+  ├──────────────────────────┤
+  │ Renderers: Markdown, Quiz│
+  │  Reflection, Widget,     │
+  │  Placeholder, Node       │
+  ├──────────────────────────┤
+  │ Theming: RuntimeTheme-   │
+  │  Provider, FontLoader,   │
+  │  useThemePreference,     │
+  │  ThemeSelector           │
+  └──┬───┬───┬───────┬──────┘
+     ▼   ▼   ▼       ▼
+  ┌────┐┌────┐┌────────┐┌──────────┐
+  │A11y││Widgets││Telemetry││ Theming  │
+  │    ││      ││        ││(runtime) │
+  └────┘└────┘└───┬────┘└──────────┘
                   ▼
            ┌──────────┐
            │ Rewards  │  Badges, conditions, verification
            └──────────┘
                   │
                   ▼
-           ┌──────────────┐
-           │   Learner    │  Standalone app — catalog + course view
-           │   App        │  Progress persistence + toast notifications
-           └──────────────┘
+           ┌────────────────────┐
+           │   Learner App      │  Standalone app
+           │   Catalog · Course  │  · Progress · Themes
+           └────────────────────┘
 ```
 
 ## Technology Stack
@@ -104,9 +114,24 @@ Accessibility is a core subsystem, not a plugin. It manages:
 - **ARIA generation** — semantic roles, labels, and descriptions
 - **Automated auditing** — axe-core validation in the dev-server inspector
 
+## Theming System
+
+The framework ships with 4 built-in themes that control colors, typography, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS custom properties on a wrapper `<div>`.
+
+| Theme              | ID                   | Description                        | Font Stack                                  |
+| ------------------ | -------------------- | ---------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)        | Inter + Source Serif 4 + JetBrains Mono     |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                          | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest aesthetic           | Source Serif 4 + Literata + Hanken Grotesk  |
+
+The `RuntimeThemeProvider` accepts a `themeId` prop and flattens the corresponding definition. `FontLoader` injects Google Font `<link>` tags based on active font families. `useThemePreference()` persists the selected theme to `localStorage`. `ThemeSelector` provides a popover UI for switching themes at runtime.
+
+Both the learner app and dev-server map `--oe-*` tokens to Tailwind utility classes via `tailwind.config.ts` / `tailwind.config.js`.
+
 ## Runtime Renderer
 
-The React-based renderer handles node rendering, widget loading, progress tracking, and accessibility integration. It supports:
+The React-based renderer handles node rendering, widget loading, progress tracking, and accessibility integration. Key layout components include `SideNav` (fixed left navigation), `TopAppBar` (sticky header with breadcrumbs and theme selector), `AITutorPanel` (right sidebar for AI chat, notes, highlights), `CourseTree` (expandable module tree), `AICallout` (insight callout boxes), and `ReadingRuler` (focus band overlay). It supports:
 
 - **Progress snapshots** — serialize and restore learner state via `initialProgress` / `onProgressChange`
 - **Embed adapter** — mount the runtime in any DOM element via `createRuntime()` without importing React directly

@@ -162,6 +162,7 @@ E2E tests live in `tests/e2e/` and use Playwright with Chromium (single worker, 
 | `rewards.spec.ts`             | DevTools rewards inspector panel                                     |
 | `telemetry.spec.ts`           | Telemetry event capture after lesson completion                      |
 | `hot-reload.spec.ts`          | HMR state preservation after markdown/JSON edits                     |
+| `theme-switching.spec.ts`     | Theme switching across all 4 themes, popover behavior, persistence   |
 
 ### Web Server Config
 
@@ -187,6 +188,30 @@ pnpm typecheck
 pnpm test              # unit tests
 pnpm test:e2e          # E2E tests
 ```
+
+### Accessibility Theme Audits
+
+Each learner app page is tested with axe-core in all 4 themes to catch theme-specific accessibility regressions:
+
+```typescript
+import { render } from '@testing-library/react';
+import { RuntimeThemeProvider } from '@open-edu/runtime';
+import axe from 'axe-core';
+
+const THEMES = ['lumina-scholastica', 'high-focus', 'nocturnal', 'sylvan-workspace'];
+
+it.each(THEMES)('passes axe audit in %s theme', async (themeId) => {
+  const { container } = render(
+    <RuntimeThemeProvider themeId={themeId}>
+      <LessonPage pkg={mockPackage} nodeId="..." onNavigate={vi.fn()} />
+    </RuntimeThemeProvider>,
+  );
+  const result = await axe.run(container);
+  expect(result.violations).toHaveLength(0);
+});
+```
+
+This ensures that color contrast, heading hierarchy, landmark structure, and ARIA attributes remain valid regardless of the active theme.
 
 ## Writing Tests
 

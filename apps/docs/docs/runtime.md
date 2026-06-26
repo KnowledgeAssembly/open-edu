@@ -4,7 +4,177 @@ sidebar_position: 11
 
 # Runtime Renderer (`@open-edu/runtime`)
 
-The React-based runtime handles node rendering, widget loading, progress tracking, and accessibility integration.
+The React-based runtime handles node rendering, widget loading, progress tracking, accessibility integration, theming, and layout.
+
+## Theming System
+
+The framework ships with **4 built-in themes** that provide full color palettes, typography stacks, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS variables on a wrapper `<div>`.
+
+### Available Themes
+
+| Theme              | ID                   | Description                        | Font Stack                                  |
+| ------------------ | -------------------- | ---------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist — the default    | Inter + Source Serif 4 + JetBrains Mono     |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                          | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest aesthetic           | Source Serif 4 + Literata + Hanken Grotesk  |
+
+### RuntimeThemeProvider
+
+Wraps your application with the active theme. Accepts a `themeId` prop (defaults to `lumina-scholastica`). Flattens the `ThemeDefinition` into CSS variables, sets `data-theme` attribute on the wrapper, and provides the full `ThemeDefinition` via React context.
+
+```tsx
+import { RuntimeThemeProvider } from '@open-edu/runtime';
+
+function App() {
+  return (
+    <RuntimeThemeProvider themeId="high-focus">
+      <YourContent />
+    </RuntimeThemeProvider>
+  );
+}
+```
+
+### useTheme Hook
+
+Access the active `ThemeDefinition` from any descendant:
+
+```tsx
+import { useTheme } from '@open-edu/runtime';
+
+function MyComponent() {
+  const theme = useTheme();
+  // theme.colors.primary, theme.typography.headingLg, etc.
+  return <div style={{ color: theme.colors.primary }}>Styled</div>;
+}
+```
+
+### FontLoader
+
+Injects Google Font `<link>` tags matching the active theme's typography families. Cleans up unused font links on theme switch.
+
+```tsx
+import { RuntimeThemeProvider, FontLoader } from '@open-edu/runtime';
+
+function App() {
+  return (
+    <RuntimeThemeProvider themeId={themeId}>
+      <FontLoader />
+      <YourContent />
+    </RuntimeThemeProvider>
+  );
+}
+```
+
+### useThemePreference
+
+A hook that reads/writes the selected theme to `localStorage` under the key `oe-theme-preference`. Falls back to `lumina-scholastica` gracefully on corrupted storage.
+
+```tsx
+const [themeId, setThemeId] = useThemePreference();
+```
+
+### ThemeSelector
+
+A popover component displaying all 4 themes as preview cards with color swatches, names, and descriptions. The active theme is highlighted with a primary border and checkmark badge. Supports keyboard navigation (Tab, Shift+Tab, Escape) and click-outside-to-close.
+
+```tsx
+import { ThemeSelector } from '@open-edu/runtime';
+
+<ThemeSelector currentThemeId={themeId} onThemeChange={setThemeId} />;
+```
+
+### Theme Registry
+
+Low-level theme access:
+
+```tsx
+import { themeRegistry, getTheme, themeIds, defaultThemeId } from '@open-edu/runtime';
+
+const theme = getTheme('nocturnal');
+// theme.colors, theme.typography, theme.spacing, theme.radii
+console.log(themeIds); // ['high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace']
+```
+
+## Layout Components
+
+### SideNav
+
+Fixed left navigation panel (260px) with:
+
+- OpenEdu heading
+- 5 navigation tabs (Course Overview, Modules, My Progress, Bookmarks, Settings)
+- Course structure children slot
+- Resume Last Lesson button
+- Active tab highlighted with left border + primary-container background
+
+```tsx
+import { SideNav } from '@open-edu/runtime';
+
+<SideNav
+  activeTab="course-home"
+  onTabChange={handleNavigate}
+  modules={modules}
+  currentLessonId={currentNodeId}
+/>;
+```
+
+### TopAppBar
+
+Sticky header with:
+
+- Breadcrumb navigation
+- Accessibility controls popover (Reader mode, Reading Ruler toggle, font size A+/A-)
+- ThemeSelector integration (theme switcher)
+- Search button, Ask AI button, user avatar
+- Backdrop-blur effect
+
+```tsx
+import { TopAppBar } from '@open-edu/runtime';
+
+<TopAppBar breadcrumbs={breadcrumbs} currentThemeId={themeId} onThemeChange={setThemeId} />;
+```
+
+### CourseTree
+
+Expandable module/lesson tree for the SideNav:
+
+- First unlocked module expanded by default
+- Locked modules show lock icon
+- Active lesson highlighted with left border + primary color
+- Full keyboard accessibility (`aria-expanded`, `aria-current`)
+
+### AITutorPanel
+
+Right sidebar (320px) with tabbed interface (Ask AI / My Notes / Highlights):
+
+- Chat area with welcome message, user messages (primary bg), AI responses
+- Text input with Enter to send, Shift+Enter for newline
+- Role="complementary"
+
+### AICallout
+
+Tertiary-container bordered insight box with optional icon, title, and content. Role="complementary".
+
+```tsx
+import { AICallout } from '@open-edu/runtime';
+
+<AICallout title="Learning Tip" icon="lightbulb">
+  Try breaking the problem into smaller steps.
+</AICallout>;
+```
+
+### ReadingRuler
+
+Togglable fixed-position horizontal focus band overlay. `aria-hidden` when decorative.
+
+```tsx
+import { ReadingRuler } from '@open-edu/runtime';
+
+{
+  showRuler && <ReadingRuler />;
+}
+```
 
 ## RuntimeProvider
 
@@ -62,14 +232,14 @@ function MyComponent() {
 | `WidgetRenderer`      | Delegates to the Widget SDK for exercise and custom nodes                |
 | `PlaceholderRenderer` | Fallback for unknown node types                                          |
 
-## Layout Components
+## Legacy Components
 
 | Component          | Purpose                                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------------------- |
 | `LayoutShell`      | Course header (title + progress bar), node renderer area, and footer (Next button or submit prompt) |
 | `ProgressBar`      | Accessible progress indicator with `aria-valuenow` and `aria-label`                                 |
-| `Sidebar`          | Course outline with node-by-node progress, `aria-current="step"` on active node                     |
-| `CourseOutline`    | Collapsible sidebar wrapper — combines Sidebar with "X of Y complete" summary                       |
+| `Sidebar`          | Legacy sidebar — replaced by `SideNav` + `CourseTree` in the learner app                            |
+| `CourseOutline`    | Collapsible sidebar wrapper                                                                         |
 | `CourseCard`       | Catalog card showing title, progress badge, Start/Continue button, and badge counts                 |
 | `CompletionScreen` | End-of-course summary with skill scores and earned badges                                           |
 | `ProgressBadge`    | Inline progress indicator (not-started / in-progress / completed)                                   |
@@ -109,16 +279,4 @@ const handle = await createRuntime({
 });
 
 handle.unmount();
-```
-
-## Theming
-
-```typescript
-import { RUNTIME_THEME, RuntimeThemeProvider, useTheme } from '@open-edu/runtime';
-import type { RuntimeTheme } from '@open-edu/runtime';
-
-function CustomTheme() {
-  const theme = useTheme();
-  return <div style={{ color: theme.colors.primary }}>Styled content</div>;
-}
 ```

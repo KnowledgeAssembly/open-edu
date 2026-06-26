@@ -44,3 +44,13 @@ Displays reward configuration for the loaded package and tracks reward receipt s
 The dev server wraps the `@open-edu/runtime` embed adapter in a Vite application with the inspector panels overlaid. When a package directory is provided, it loads the package via `loadPackage()`, sets up a `WorkflowEngine` and `RewardBroker`, and renders the runtime inside a `LayoutShell` with the sidebar.
 
 The inspector panels read from the same contexts — `AxesValidator` for a11y, `TelemetrySession.events$` for telemetry, and `RewardBroker` status for rewards.
+
+### Tailwind CSS
+
+The dev-server **does not** run PostCSS. It imports a pre-generated CSS file (`src/tailwind.css`) that contains all Tailwind utility classes mapped to `--oe-*` CSS variables. When you add or change Tailwind classes in runtime components, regenerate this file:
+
+```bash
+pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
+```
+
+The dev-server's `tailwind.config.js` maps the same `--oe-*` theme tokens as the learner app's `tailwind.config.ts` — colors, spacing, border radii, and font families.
