@@ -51,7 +51,7 @@ export function ReflectionRenderer({
         placeholder="Type your reflection here…"
         aria-label={node.prompt}
         aria-describedby={showCharCount ? `${hintId}-count` : undefined}
-        className="w-full min-h-[8rem] p-2.5 rounded-[calc(var(--oe-radius-md)-2px)] border border-outline-variant font-body-md text-base resize-y bg-surface text-on-surface"
+        className="w-full min-h-[8rem] p-2.5 rounded-[calc(var(--oe-radius-lg)-2px)] border border-outline-variant font-body-md text-base resize-y bg-surface text-on-surface"
       />
 
       <div className="flex items-center justify-between mt-3 gap-sm">

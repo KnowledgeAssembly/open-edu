@@ -59,7 +59,7 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
           {options.map((option) => (
             <label
               key={option.id}
-              className={`flex items-start gap-sm px-3 py-2 rounded-[calc(var(--oe-radius-md)-2px)] ${
+              className={`flex items-start gap-sm px-3 py-2 rounded-[calc(var(--oe-radius-lg)-2px)] ${
                 submitted ? 'cursor-default' : 'cursor-pointer'
               } ${optionBgClass(option)}`}
             >

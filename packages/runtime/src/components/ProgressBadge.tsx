@@ -20,7 +20,7 @@ export function ProgressBadge({ percentComplete, isCompleted }: ProgressBadgePro
 
   return (
     <span
-      className={`${bgClass} text-xs px-1 py-0.5 rounded-md inline-block text-white font-semibold`}
+      className={`${bgClass} text-xs px-1 py-0.5 rounded-lg inline-block text-white font-semibold`}
     >
       {label}
     </span>

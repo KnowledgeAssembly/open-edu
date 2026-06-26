@@ -34,7 +34,7 @@ export function LayoutShell({
       data-testid="layout-shell"
     >
       <header className="flex flex-col gap-sm border-b border-outline-variant pb-4">
-        <h1 className="m-0 text-h2 font-bold">{title}</h1>
+        <h1 className="m-0 text-[1.5rem] font-bold">{title}</h1>
         <ProgressBar current={current} total={total} />
       </header>
 

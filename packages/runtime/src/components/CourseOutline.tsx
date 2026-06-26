@@ -14,7 +14,7 @@ export function CourseOutline(): JSX.Element {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="bg-none border border-outline-variant rounded-lg px-2 py-1 cursor-pointer text-base self-end mb-1"
+        className="bg-transparent border border-outline-variant rounded-lg px-2 py-1 cursor-pointer text-base self-end mb-1"
         aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         data-testid="outline-toggle"
       >
