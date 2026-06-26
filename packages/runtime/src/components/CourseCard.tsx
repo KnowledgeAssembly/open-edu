@@ -1,4 +1,3 @@
-import { type CSSProperties } from 'react';
 import { ProgressBadge } from './ProgressBadge.js';
 import type { PackageManifest, ProgressSnapshot } from '@open-edu/schemas';
 
@@ -24,86 +23,43 @@ export function CourseCard({
     : 0;
   const isCompleted = progress?.isCompleted ?? false;
 
-  const cardStyle: CSSProperties = {
-    border: `1px solid var(--oe-color-border, #e5e7eb)`,
-    borderRadius: '8px',
-    padding: '1rem',
-    backgroundColor: '#ffffff',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    fontFamily: 'var(--oe-font-sans, system-ui, sans-serif)',
-  };
-
-  const titleStyle: CSSProperties = {
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    margin: '0 0 0.25rem',
-  };
-
-  const authorStyle: CSSProperties = {
-    fontSize: '0.875rem',
-    color: 'var(--oe-color-muted, #6b7280)',
-    margin: '0 0 0.75rem',
-  };
-
-  const metaStyle: CSSProperties = {
-    fontSize: '0.875rem',
-    color: 'var(--oe-color-muted, #6b7280)',
-    margin: 0,
-  };
-
-  const buttonBase: CSSProperties = {
-    border: 'none',
-    borderRadius: 'var(--oe-radius, 8px)',
-    padding: '0.5rem 1rem',
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    cursor: isCompleted ? 'default' : 'pointer',
-    marginTop: '0.75rem',
-  };
-
-  let buttonStyle: CSSProperties;
+  let buttonClass: string;
   let buttonLabel: string;
   let disabled = false;
 
   if (progress === null) {
-    buttonStyle = {
-      ...buttonBase,
-      backgroundColor: 'var(--oe-color-primary, #2563eb)',
-      color: '#ffffff',
-    };
+    buttonClass = 'bg-primary text-on-primary';
     buttonLabel = 'Start';
   } else if (isCompleted) {
-    buttonStyle = {
-      ...buttonBase,
-      backgroundColor: 'var(--oe-color-success, #16a34a)',
-      color: '#ffffff',
-      opacity: 0.7,
-    };
+    buttonClass = 'bg-secondary text-on-secondary opacity-70';
     buttonLabel = 'Completed';
     disabled = true;
   } else {
-    buttonStyle = { ...buttonBase, backgroundColor: '#d97706', color: '#ffffff' };
+    buttonClass = 'bg-amber-600 text-white';
     buttonLabel = 'Continue';
   }
 
   return (
-    <article style={cardStyle} data-testid="course-card">
-      <h2 style={titleStyle}>{manifest.title}</h2>
-      <p style={authorStyle}>{manifest.author}</p>
-      <p style={metaStyle}>{nodeCount} lessons</p>
+    <article
+      className="border border-outline-variant rounded-lg p-md bg-white shadow-sm font-body-md"
+      data-testid="course-card"
+    >
+      <h2 className="text-xl font-bold m-0 mb-1">{manifest.title}</h2>
+      <p className="text-body-ui text-on-surface-variant m-0 mb-3">{manifest.author}</p>
+      <p className="text-body-ui text-on-surface-variant m-0">{nodeCount} lessons</p>
       {badgeCount > 0 && (
-        <p style={metaStyle}>
+        <p className="text-body-ui text-on-surface-variant m-0">
           {earnedBadgeCount > 0
             ? `${earnedBadgeCount} earned / ${badgeCount}`
             : `${badgeCount} badges available`}
         </p>
       )}
-      <div style={{ marginTop: '0.5rem' }}>
+      <div className="mt-2">
         <ProgressBadge percentComplete={percentComplete} isCompleted={isCompleted} />
       </div>
       <button
         type="button"
-        style={buttonStyle}
+        className={`border-none rounded-lg px-md py-sm text-body-ui font-semibold mt-3 ${buttonClass} ${isCompleted ? 'cursor-default' : 'cursor-pointer'}`}
         disabled={disabled}
         aria-label={`${buttonLabel} ${manifest.title}`}
         onClick={() => onStart(manifest.entry)}

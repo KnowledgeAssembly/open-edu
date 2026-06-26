@@ -1,4 +1,3 @@
-import { type CSSProperties } from 'react';
 import { useRuntime } from '../context/RuntimeContext.js';
 import type { LoadedNode } from '@open-edu/core';
 
@@ -11,42 +10,17 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
   const title = loadedPackage.manifest.title;
   const total = nodes.length;
 
-  const navStyle: CSSProperties = {
-    width: '280px',
-    borderRight: `1px solid var(--oe-color-border, #e5e7eb)`,
-    padding: '1rem',
-    overflowY: 'auto',
-    fontFamily: 'var(--oe-font-sans, system-ui, sans-serif)',
-    height: '100%',
-    boxSizing: 'border-box',
-  };
-
-  const headingStyle: CSSProperties = {
-    fontSize: '1.125rem',
-    fontWeight: 700,
-    margin: '0 0 1rem',
-    color: 'var(--oe-color-fg, #1a1a1a)',
-  };
-
-  const listStyle: CSSProperties = {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-  };
-
-  const mutedStyle: CSSProperties = {
-    color: 'var(--oe-color-muted, #6b7280)',
-    fontSize: '0.75rem',
-    marginTop: '1rem',
-  };
-
   return (
-    <nav aria-label="Course outline" style={navStyle} data-testid="sidebar">
-      <h2 style={headingStyle}>{title}</h2>
+    <nav
+      aria-label="Course outline"
+      className="w-[280px] border-r border-outline-variant p-md overflow-y-auto font-body-md h-full box-border"
+      data-testid="sidebar"
+    >
+      <h2 className="text-lg font-bold m-0 mb-4 text-on-surface">{title}</h2>
       {nodes.length === 0 ? (
-        <p style={mutedStyle}>No lessons</p>
+        <p className="text-on-surface-variant text-xs mt-4">No lessons</p>
       ) : (
-        <ol style={listStyle}>
+        <ol className="list-none p-0 m-0">
           {nodes.map((node) => {
             const nodeTitle =
               (node.node as { title?: string }).title ?? node.relativePath.replace('.md', '');
@@ -54,46 +28,33 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
             const isVisited = visitedNodes.includes(node.relativePath);
 
             let icon: string;
-            let iconColor: string;
+            let iconClass: string;
             if (isCurrent) {
               icon = '\u25CF';
-              iconColor = 'var(--oe-color-primary-fg, #ffffff)';
+              iconClass = 'text-on-primary';
             } else if (isVisited) {
               icon = '\u25CF';
-              iconColor = 'var(--oe-color-muted, #6b7280)';
+              iconClass = 'text-on-surface-variant';
             } else {
               icon = '\u25CB';
-              iconColor = 'var(--oe-color-muted, #6b7280)';
+              iconClass = 'text-on-surface-variant';
             }
-
-            const liStyle: CSSProperties = {
-              padding: '0.5rem',
-              borderRadius: 'var(--oe-radius, 8px)',
-              backgroundColor: isCurrent ? 'var(--oe-color-primary, #2563eb)' : 'transparent',
-              color: isCurrent
-                ? 'var(--oe-color-primary-fg, #ffffff)'
-                : 'var(--oe-color-fg, #1a1a1a)',
-              cursor: 'default',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            };
 
             return (
               <li
                 key={node.relativePath}
-                style={liStyle}
+                className={`p-2 rounded-lg flex items-center gap-sm cursor-default ${isCurrent ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface'}`}
                 aria-current={isCurrent ? 'step' : undefined}
                 data-testid={`sidebar-node-${node.relativePath}`}
               >
-                <span style={{ color: iconColor, flexShrink: 0 }}>{icon}</span>
+                <span className={`${iconClass} shrink-0`}>{icon}</span>
                 <span>{nodeTitle}</span>
               </li>
             );
           })}
         </ol>
       )}
-      <p style={mutedStyle}>
+      <p className="text-on-surface-variant text-xs mt-4">
         {visitedNodes.length} of {total} complete
       </p>
     </nav>
