@@ -1,0 +1,35 @@
+import { useState, useCallback } from 'react';
+import { themeIds, defaultThemeId } from '../themes/index.js';
+import type { ThemeId } from '../themes/types.js';
+
+const STORAGE_KEY = 'oe-theme-preference';
+
+function getStoredTheme(): ThemeId {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const valid = themeIds;
+      if (valid.includes(stored as ThemeId)) {
+        return stored as ThemeId;
+      }
+    }
+  } catch {
+    /* invalid or inaccessible storage */
+  }
+  return defaultThemeId;
+}
+
+export function useThemePreference(): [ThemeId, (id: ThemeId) => void] {
+  const [themeId, setThemeId] = useState<ThemeId>(getStoredTheme);
+
+  const setTheme = useCallback((id: ThemeId) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, id);
+    } catch {
+      /* storage unavailable */
+    }
+    setThemeId(id);
+  }, []);
+
+  return [themeId, setTheme];
+}

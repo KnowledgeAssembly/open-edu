@@ -1,44 +1,76 @@
 import { createContext, useContext, type ReactNode } from 'react';
+import { getTheme, defaultThemeId, DEFAULT_THEME } from './themes/index.js';
+import type { ThemeId, ThemeDefinition } from './themes/types.js';
 
-export const RUNTIME_THEME = {
-  '--oe-color-bg': '#ffffff',
-  '--oe-color-fg': '#1a1a1a',
-  '--oe-color-primary': '#2563eb',
-  '--oe-color-primary-fg': '#ffffff',
-  '--oe-color-muted': '#6b7280',
-  '--oe-color-border': '#e5e7eb',
-  '--oe-color-success': '#16a34a',
-  '--oe-color-error': '#dc2626',
-  '--oe-radius': '8px',
-  '--oe-spacing': '1rem',
-  '--oe-font-sans': 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-} as const;
+function flattenTheme(theme: ThemeDefinition): Record<string, string> {
+  const vars: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(theme.colors)) {
+    vars[`--oe-color-${key}`] = value;
+  }
+
+  for (const [role, token] of Object.entries(theme.typography)) {
+    vars[`--oe-font-${role}-family`] = token.fontFamily;
+    vars[`--oe-font-${role}-size`] = token.fontSize;
+    vars[`--oe-font-${role}-weight`] = String(token.fontWeight);
+    vars[`--oe-font-${role}-lineHeight`] = String(token.lineHeight);
+    if (token.letterSpacing) {
+      vars[`--oe-font-${role}-letterSpacing`] = token.letterSpacing;
+    }
+  }
+
+  for (const [key, value] of Object.entries(theme.spacing)) {
+    if (value !== undefined) {
+      vars[`--oe-space-${key}`] = value;
+    }
+  }
+
+  for (const [key, value] of Object.entries(theme.radii)) {
+    vars[`--oe-radius-${key}`] = value;
+  }
+
+  vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';
+  vars['--oe-color-fg'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
+  vars['--oe-color-border'] = theme.colors['outline'] ?? '';
+  vars['--oe-color-success'] = theme.colors['secondary'] ?? '#16a34a';
+  vars['--oe-font-sans'] = theme.typography.bodyMd.fontFamily;
+  vars['--oe-radius'] = theme.radii.DEFAULT;
+  vars['--oe-spacing'] = theme.spacing.md;
+
+  return vars;
+}
+
+const defaultFlattened = flattenTheme(DEFAULT_THEME);
+
+export const RUNTIME_THEME: Readonly<Record<string, string>> = defaultFlattened;
 
 export type RuntimeTheme = Partial<typeof RUNTIME_THEME>;
 
-const ThemeContext = createContext<RuntimeTheme | null>(null);
+const ThemeContext = createContext<ThemeDefinition | null>(null);
 
 export interface RuntimeThemeProviderProps {
-  theme?: RuntimeTheme;
+  themeId?: ThemeId;
   children: ReactNode;
 }
 
-export function RuntimeThemeProvider({ theme, children }: RuntimeThemeProviderProps): JSX.Element {
-  const merged = { ...RUNTIME_THEME, ...theme };
-  const style = Object.fromEntries(
-    Object.entries(merged).map(([k, v]) => [k, v]),
-  ) as React.CSSProperties;
+export function RuntimeThemeProvider({
+  themeId = defaultThemeId,
+  children,
+}: RuntimeThemeProviderProps): JSX.Element {
+  const definition = getTheme(themeId);
+  const vars = flattenTheme(definition);
+  const style = vars as React.CSSProperties;
 
   return (
-    <ThemeContext.Provider value={merged}>
-      <div className="open-edu-runtime" style={style}>
+    <ThemeContext.Provider value={definition}>
+      <div className="open-edu-runtime" data-theme={themeId} style={style}>
         {children}
       </div>
     </ThemeContext.Provider>
   );
 }
 
-export function useTheme(): RuntimeTheme {
+export function useTheme(): ThemeDefinition {
   const ctx = useContext(ThemeContext);
-  return ctx ?? RUNTIME_THEME;
+  return ctx ?? DEFAULT_THEME;
 }

@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  RuntimeProvider,
-  LayoutShell,
-  RuntimeThemeProvider,
-  Sidebar,
-  CompletionScreen,
-} from '@open-edu/runtime';
+import { RuntimeProvider, LayoutShell, Sidebar, CompletionScreen } from '@open-edu/runtime';
 import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
@@ -133,51 +127,49 @@ export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Eleme
   }
 
   return (
-    <RuntimeThemeProvider>
-      <AccessibilityProvider>
-        <RuntimeProvider
-          loadedPackage={pkg}
-          engine={engine}
-          initialProgress={initialProgress}
-          onProgressChange={handleProgressChange}
-          widgetRegistry={widgetRegistry}
-        >
-          {isCompleted ? (
-            <CompletionScreen badges={badges} onBack={onBackToCatalog} />
-          ) : (
-            <div style={{ display: 'flex', height: '100vh' }}>
-              <Sidebar nodes={orderedNodes} />
-              <div style={{ flex: 1, overflow: 'auto' }}>
-                <LayoutShell />
-              </div>
+    <AccessibilityProvider>
+      <RuntimeProvider
+        loadedPackage={pkg}
+        engine={engine}
+        initialProgress={initialProgress}
+        onProgressChange={handleProgressChange}
+        widgetRegistry={widgetRegistry}
+      >
+        {isCompleted ? (
+          <CompletionScreen badges={badges} onBack={onBackToCatalog} />
+        ) : (
+          <div style={{ display: 'flex', height: '100vh' }}>
+            <Sidebar nodes={orderedNodes} />
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <LayoutShell />
             </div>
-          )}
-          {toastBadgeName && (
+          </div>
+        )}
+        {toastBadgeName && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '1rem',
+              right: '1rem',
+              zIndex: 9999,
+              background: 'var(--oe-color-bg, white)',
+              border: '1px solid var(--oe-color-border)',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              opacity: toastVisible ? 1 : 0,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
             <div
-              style={{
-                position: 'fixed',
-                bottom: '1rem',
-                right: '1rem',
-                zIndex: 9999,
-                background: 'var(--oe-color-bg, white)',
-                border: '1px solid var(--oe-color-border)',
-                borderRadius: '8px',
-                padding: '0.75rem 1rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                opacity: toastVisible ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }}
+              style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--oe-color-success)' }}
             >
-              <div
-                style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--oe-color-success)' }}
-              >
-                Badge earned!
-              </div>
-              <div style={{ fontSize: '1rem' }}>{toastBadgeName}</div>
+              Badge earned!
             </div>
-          )}
-        </RuntimeProvider>
-      </AccessibilityProvider>
-    </RuntimeThemeProvider>
+            <div style={{ fontSize: '1rem' }}>{toastBadgeName}</div>
+          </div>
+        )}
+      </RuntimeProvider>
+    </AccessibilityProvider>
   );
 }

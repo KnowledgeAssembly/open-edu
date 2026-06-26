@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RuntimeThemeProvider } from '@open-edu/runtime';
+import { RuntimeThemeProvider, FontLoader, useThemePreference } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
 import { CatalogPage } from './CatalogPage';
 import { CoursePage } from './CoursePage';
@@ -10,6 +10,7 @@ type Screen = { type: 'catalog' } | { type: 'course'; pkg: LoadedPackage; packag
 
 export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>({ type: 'catalog' });
+  const [themeId] = useThemePreference();
 
   const handleStartCourse = (packageDir: string) => {
     const pkg = Object.values(packageEntries).find((p) => p.rootDir === packageDir);
@@ -23,7 +24,8 @@ export function App(): JSX.Element {
   };
 
   return (
-    <RuntimeThemeProvider>
+    <RuntimeThemeProvider themeId={themeId}>
+      <FontLoader />
       {screen.type === 'catalog' && (
         <CatalogPage packages={catalogPackages} onStartCourse={handleStartCourse} />
       )}
