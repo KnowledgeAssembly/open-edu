@@ -4,13 +4,10 @@ import { RuntimeThemeProvider, themeIds } from '@open-edu/runtime';
 import type { ThemeId } from '@open-edu/runtime';
 import axe from 'axe-core';
 import { CatalogPage } from '../CatalogPage';
-import { CourseHomePage } from '../CourseHomePage';
-import { LessonPage } from '../LessonPage';
-import { AssessmentPage } from '../AssessmentPage';
-import { CodePage } from '../CodePage';
-import { ProgressPage } from '../ProgressPage';
-import type { LoadedPackage } from '@open-edu/core';
-import type { ContentNode } from '@open-edu/schemas';
+import { HomePage } from '../HomePage';
+import { ProgressDashboard } from '../ProgressDashboard';
+import { SettingsPage } from '../SettingsPage';
+import { LeftNav } from '../LeftNav';
 import type { PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
@@ -19,56 +16,10 @@ vi.mock('../progressStorage', () => ({
   saveProgress: vi.fn(),
 }));
 
-vi.mock('../buildModules', () => ({
-  buildModules: vi.fn(() => [
-    {
-      title: 'Getting Started',
-      isLocked: false,
-      lessons: [{ id: 'nodes/lesson-01.md', title: 'Lesson 1' }],
-    },
-    {
-      title: 'Advanced Topics',
-      isLocked: true,
-      lessons: [{ id: 'nodes/lesson-02.md', title: 'Lesson 2' }],
-    },
-  ]),
+vi.mock('virtual:edu-data', () => ({
+  catalogPackages: [],
+  packageEntries: {},
 }));
-
-const samplePackage: LoadedPackage = {
-  rootDir: '/test/course',
-  manifest: {
-    id: 'test-course',
-    title: 'Test Course',
-    version: '1.0.0',
-    author: 'Test Author',
-    entry: 'nodes/lesson-01.md',
-  },
-  workflow: null,
-  rewards: null,
-  nodes: [
-    {
-      path: '/test/course/nodes/lesson-01.md',
-      relativePath: 'nodes/lesson-01.md',
-      content: '# Lesson 1\n\nContent here.',
-      node: { type: 'lesson', title: 'Lesson 1' } as unknown as ContentNode,
-    },
-    {
-      path: '/test/course/nodes/quiz-01.md',
-      relativePath: 'nodes/quiz-01.md',
-      content: '# Quiz 1',
-      node: {
-        type: 'quiz',
-        title: 'Quiz 1',
-        question: 'What is 2+2?',
-        options: [
-          { id: 'a', text: '3', correct: false },
-          { id: 'b', text: '4', correct: true },
-        ],
-      } as unknown as ContentNode,
-    },
-  ],
-  assetPaths: [],
-};
 
 const samplePackages: PackageSummary[] = [
   {
@@ -111,63 +62,27 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
     await expectNoViolations(container);
   });
 
-  it('CourseHomePage has no axe violations', async () => {
+  it('HomePage has no axe violations', async () => {
+    const { container } = renderWithTheme(<HomePage onNavigate={vi.fn()} />, themeId);
+    await expectNoViolations(container);
+  });
+
+  it('ProgressDashboard has no axe violations', async () => {
+    const { container } = renderWithTheme(<ProgressDashboard onNavigate={vi.fn()} />, themeId);
+    await expectNoViolations(container);
+  });
+
+  it('SettingsPage has no axe violations', async () => {
     const { container } = renderWithTheme(
-      <CourseHomePage
-        pkg={samplePackage}
-        onNavigate={vi.fn()}
-        currentThemeId={themeId}
-        onThemeChange={vi.fn()}
-      />,
+      <SettingsPage currentThemeId={themeId} onThemeChange={vi.fn()} />,
       themeId,
     );
     await expectNoViolations(container);
   });
 
-  it('LessonPage has no axe violations', async () => {
+  it('LeftNav has no axe violations', async () => {
     const { container } = renderWithTheme(
-      <LessonPage
-        pkg={samplePackage}
-        nodeId="nodes/lesson-01.md"
-        onNavigate={vi.fn()}
-        currentThemeId={themeId}
-        onThemeChange={vi.fn()}
-      />,
-      themeId,
-    );
-    await expectNoViolations(container);
-  });
-
-  it('AssessmentPage has no axe violations', async () => {
-    const { container } = renderWithTheme(
-      <AssessmentPage pkg={samplePackage} nodeId="nodes/quiz-01.md" onNavigate={vi.fn()} />,
-      themeId,
-    );
-    await expectNoViolations(container);
-  });
-
-  it('CodePage has no axe violations', async () => {
-    const { container } = renderWithTheme(
-      <CodePage
-        pkg={samplePackage}
-        nodeId="nodes/lesson-01.md"
-        onNavigate={vi.fn()}
-        currentThemeId={themeId}
-        onThemeChange={vi.fn()}
-      />,
-      themeId,
-    );
-    await expectNoViolations(container);
-  });
-
-  it('ProgressPage has no axe violations', async () => {
-    const { container } = renderWithTheme(
-      <ProgressPage
-        pkg={samplePackage}
-        onNavigate={vi.fn()}
-        currentThemeId={themeId}
-        onThemeChange={vi.fn()}
-      />,
+      <LeftNav currentView={{ view: 'home' }} onNavigate={vi.fn()} />,
       themeId,
     );
     await expectNoViolations(container);

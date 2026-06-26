@@ -25,6 +25,7 @@ export interface RuntimeContextValue {
   lastScore: number | null;
   visitedNodes: string[];
   completeNode: (score?: number) => void;
+  navigateToNode: (nodeId: string) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
   progressSnapshot: ProgressSnapshot | null;
@@ -110,6 +111,15 @@ export function RuntimeProvider({
     [engine],
   );
 
+  const navigateToNode = useCallback(
+    (nodeId: string) => {
+      if (nodeMap[nodeId]) {
+        setCurrentNodeId(nodeId);
+      }
+    },
+    [nodeMap],
+  );
+
   useEffect(() => {
     const handleEvent = (event: WorkflowEvent) => {
       if (event.type === 'node.entered' && event.nodeId) {
@@ -185,6 +195,7 @@ export function RuntimeProvider({
       lastScore,
       visitedNodes,
       completeNode,
+      navigateToNode,
       getNode,
       widgetRegistry,
       skillScores,
@@ -205,6 +216,7 @@ export function RuntimeProvider({
       lastScore,
       visitedNodes,
       completeNode,
+      navigateToNode,
       getNode,
       widgetRegistry,
       skillScores,

@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { RuntimeProvider, LayoutShell, Sidebar, CompletionScreen } from '@open-edu/runtime';
+import { useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
+import { RuntimeProvider, LayoutShell, CompletionScreen, useRuntime } from '@open-edu/runtime';
 import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
@@ -11,12 +11,13 @@ import type { ProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 
-export interface CoursePageProps {
+export interface CourseRuntimeProps {
   pkg: LoadedPackage;
   onBackToCatalog: () => void;
+  children?: ReactNode;
 }
 
-export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Element {
+export function CourseRuntime({ pkg, onBackToCatalog, children }: CourseRuntimeProps): JSX.Element {
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
@@ -50,9 +51,7 @@ export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Eleme
     const session = new TelemetrySession();
     session.start();
 
-    const eventSub = session.events$.subscribe({
-      next: () => {},
-    });
+    const eventSub = session.events$.subscribe({ next: () => {} });
 
     const broker = pkg.rewards
       ? new RewardBroker({
@@ -89,25 +88,20 @@ export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Eleme
       }
     });
 
-    return () => {
-      engineUnsub();
-      broker?.stop();
-      eventSub.unsubscribe();
-      session.stop();
-    };
-  }, [engine, pkg]);
-
-  useEffect(() => {
-    if (!engine) return;
-
-    const unsub = engine.subscribe((event: WorkflowEvent) => {
+    const compUnsub = engine.subscribe((event: WorkflowEvent) => {
       if (event.type === 'workflow.completed') {
         setIsCompleted(true);
       }
     });
 
-    return unsub;
-  }, [engine]);
+    return () => {
+      engineUnsub();
+      compUnsub();
+      broker?.stop();
+      eventSub.unsubscribe();
+      session.stop();
+    };
+  }, [engine, pkg]);
 
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
@@ -118,58 +112,81 @@ export function CoursePage({ pkg, onBackToCatalog }: CoursePageProps): JSX.Eleme
 
   if (!engine) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '40rem' }}>
-        <h1 style={{ color: 'var(--oe-color-error, #dc2626)' }}>Course not available</h1>
-        <p>This course has no workflow defined.</p>
-        <button onClick={onBackToCatalog}>Back to catalog</button>
+      <div className="p-lg max-w-2xl">
+        <h1 className="text-h1 font-display text-error font-bold mb-md">Course not available</h1>
+        <p className="text-on-surface-variant mb-lg">This course has no workflow defined.</p>
+        <button
+          onClick={onBackToCatalog}
+          className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold"
+        >
+          Back to catalog
+        </button>
       </div>
     );
   }
 
   return (
-    <AccessibilityProvider>
-      <RuntimeProvider
-        loadedPackage={pkg}
-        engine={engine}
-        initialProgress={initialProgress}
-        onProgressChange={handleProgressChange}
-        widgetRegistry={widgetRegistry}
-      >
-        {isCompleted ? (
-          <CompletionScreen badges={badges} onBack={onBackToCatalog} />
-        ) : (
-          <div style={{ display: 'flex', height: '100vh' }}>
-            <Sidebar nodes={orderedNodes} />
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              <LayoutShell />
-            </div>
-          </div>
-        )}
+    <div className="flex h-full" data-testid="course-runtime">
+      {children && (
+        <div className="flex-[0_0_280px] overflow-y-auto border-r border-outline-variant">
+          {children}
+        </div>
+      )}
+      <div className="flex-1 min-w-0 relative">
+        <AccessibilityProvider>
+          <RuntimeProvider
+            loadedPackage={pkg}
+            engine={engine}
+            initialProgress={initialProgress}
+            onProgressChange={handleProgressChange}
+            widgetRegistry={widgetRegistry}
+          >
+            {isCompleted ? (
+              <CompletionScreen badges={badges} onBack={onBackToCatalog} />
+            ) : (
+              <LayoutShellWithBack orderedNodes={orderedNodes} />
+            )}
+          </RuntimeProvider>
+        </AccessibilityProvider>
         {toastBadgeName && (
           <div
-            style={{
-              position: 'fixed',
-              bottom: '1rem',
-              right: '1rem',
-              zIndex: 9999,
-              background: 'var(--oe-color-bg, white)',
-              border: '1px solid var(--oe-color-border)',
-              borderRadius: '8px',
-              padding: '0.75rem 1rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              opacity: toastVisible ? 1 : 0,
-              transition: 'opacity 0.3s ease',
-            }}
+            className="fixed bottom-4 right-4 z-[9999] bg-surface border border-outline-variant rounded-lg px-4 py-3 shadow-lg transition-opacity duration-300"
+            style={{ opacity: toastVisible ? 1 : 0 }}
+            data-testid="badge-toast"
           >
-            <div
-              style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--oe-color-success)' }}
-            >
-              Badge earned!
-            </div>
-            <div style={{ fontSize: '1rem' }}>{toastBadgeName}</div>
+            <div className="font-semibold text-sm text-success">Badge earned!</div>
+            <div className="text-base">{toastBadgeName}</div>
           </div>
         )}
-      </RuntimeProvider>
-    </AccessibilityProvider>
+      </div>
+    </div>
+  );
+}
+
+function LayoutShellWithBack({ orderedNodes }: { orderedNodes: LoadedNode[] }): JSX.Element {
+  const { currentNodeId, visitedNodes, navigateToNode } = useRuntime();
+
+  const currentIndex = orderedNodes.findIndex((n) => n.relativePath === currentNodeId);
+  const canGoBack = currentIndex > 0;
+  const stepDisplay = currentIndex >= 0 ? currentIndex + 1 : 0;
+
+  const handleBack = () => {
+    const previousNodes = orderedNodes.slice(0, currentIndex);
+    for (let i = previousNodes.length - 1; i >= 0; i--) {
+      const prevId = previousNodes[i]!.relativePath;
+      if (visitedNodes.includes(prevId)) {
+        navigateToNode(prevId);
+        return;
+      }
+    }
+  };
+
+  return (
+    <LayoutShell
+      currentStep={stepDisplay}
+      totalSteps={orderedNodes.length}
+      onBack={handleBack}
+      canGoBack={canGoBack}
+    />
   );
 }
