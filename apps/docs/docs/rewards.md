@@ -33,11 +33,11 @@ broker.stop();
 
 ## Reward Actions
 
-| Action | Description |
-|---|---|
-| `badge.award` | Award a named badge to the learner |
-| `webhook` | Send a POST request with event payload to a URL |
-| `script` | Execute a shell script (requires `--allow-shell-hooks` flag) |
+| Action        | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| `badge.award` | Award a named badge to the learner                           |
+| `webhook`     | Send a POST request with event payload to a URL              |
+| `script`      | Execute a shell script (requires `--allow-shell-hooks` flag) |
 
 ### Badge Action
 
@@ -85,13 +85,13 @@ Rewards can include conditions that gate their execution:
 
 Supported condition types:
 
-| Type | Description |
-|---|---|
-| `score` | Minimum score on a specific node |
-| `skill` | Minimum mastery level for a skill |
+| Type    | Description                                       |
+| ------- | ------------------------------------------------- |
+| `score` | Minimum score on a specific node                  |
+| `skill` | Minimum mastery level for a skill                 |
 | `chain` | Set of completed node IDs (all must be completed) |
-| `and` | All sub-conditions must be met |
-| `or` | Any sub-condition must be met |
+| `and`   | All sub-conditions must be met                    |
+| `or`    | Any sub-condition must be met                     |
 
 ## Verification & Replay
 
@@ -108,8 +108,8 @@ const result = await replayRewards(telemetryEvents, broker);
 
 ## Error Types
 
-| Error | Description |
-|---|---|
-| `RewardError` | Base error type |
-| `RewardExecutionError` | Action handler failed at runtime |
+| Error                      | Description                                      |
+| -------------------------- | ------------------------------------------------ |
+| `RewardError`              | Base error type                                  |
+| `RewardExecutionError`     | Action handler failed at runtime                 |
 | `RewardConfigurationError` | Invalid reward configuration (schema validation) |

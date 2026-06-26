@@ -104,13 +104,13 @@ spacing:
 
 ## Brand & Style
 
-The design system is rooted in the philosophy of *Ma* (the space between), prioritizing intentional emptiness to foster deep focus and academic reflection. It targets learners and educators seeking a sanctuary from the high-velocity digital world. 
+The design system is rooted in the philosophy of _Ma_ (the space between), prioritizing intentional emptiness to foster deep focus and academic reflection. It targets learners and educators seeking a sanctuary from the high-velocity digital world.
 
 The visual style is a blend of **Minimalism** and **Tactile** design. It avoids the clinical coldness of modern tech in favor of organic textures and soft transitions. Surfaces should feel like washi paper or smoothed stone rather than glass or plastic. The emotional response is one of immediate decompression, clarity, and quiet authority.
 
 ## Colors
 
-The palette is derived from natural elements: moss (primary), weathered stone (secondary), and sand (neutral). 
+The palette is derived from natural elements: moss (primary), weathered stone (secondary), and sand (neutral).
 
 - **Primary (#6B705C):** A muted sage green used for primary actions and progress indicators.
 - **Secondary (#A5A58D):** A desaturated olive for supporting UI elements and accents.
@@ -120,7 +120,7 @@ The palette is derived from natural elements: moss (primary), weathered stone (s
 
 ## Typography
 
-Typography in this design system is a dialogue between modern utility and classical scholarship. 
+Typography in this design system is a dialogue between modern utility and classical scholarship.
 
 - **UI & Navigation:** Use **Manrope**. Its geometric but balanced proportions provide a clear, modern framework for functional elements.
 - **Long-form Content:** Use **Source Serif 4**. The generous x-height and classic serifs are optimized for extended reading, encouraging a slower, more rhythmic intake of information.
@@ -128,11 +128,11 @@ Typography in this design system is a dialogue between modern utility and classi
 
 ## Layout & Spacing
 
-This design system utilizes a **Fixed Grid** philosophy for desktop to ensure content remains centered and contained, mimicking the margins of a well-designed book. 
+This design system utilizes a **Fixed Grid** philosophy for desktop to ensure content remains centered and contained, mimicking the margins of a well-designed book.
 
 - **Whitespace:** Treat whitespace as a structural element. Increase padding in containers by 1.5x compared to standard SaaS patterns.
 - **Desktop:** 12-column grid, 1140px max-width, with 32px gutters.
-- **Mobile:** 4-column grid with 20px margins. 
+- **Mobile:** 4-column grid with 20px margins.
 - **Rhythm:** Use an 8px base unit. Section headers should have a minimum of 80px top margin to clearly demarcate different areas of study.
 
 ## Elevation & Depth

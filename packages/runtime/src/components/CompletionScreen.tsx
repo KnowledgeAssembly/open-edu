@@ -20,9 +20,7 @@ export function CompletionScreen({
       className={`flex flex-col items-center justify-center min-h-full p-xl text-center font-body-md ${className ?? ''}`}
       data-testid="completion-screen"
     >
-      <h1 className="text-[1.75rem] font-bold text-on-surface m-0 mb-6">
-        You finished {title}!
-      </h1>
+      <h1 className="text-[1.75rem] font-bold text-on-surface m-0 mb-6">You finished {title}!</h1>
 
       <div className="mb-6 w-full max-w-[400px]">
         <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Skills achieved</h2>

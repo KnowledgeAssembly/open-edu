@@ -36,10 +36,7 @@ export function ReflectionRenderer({
       className={`border border-outline-variant rounded-lg p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
       data-testid="reflection-renderer"
     >
-      <label
-        htmlFor={hintId}
-        className="block font-semibold text-lg mb-2"
-      >
+      <label htmlFor={hintId} className="block font-semibold text-lg mb-2">
         {node.prompt}
       </label>
 

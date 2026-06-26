@@ -102,12 +102,14 @@ spacing:
 ---
 
 ## Brand & Style
+
 The design system is engineered for cognitive accessibility, specifically targeting neurodivergent users who benefit from reduced sensory overload and clear information hierarchy. The brand personality is grounded, supportive, and exceptionally organized.
 
 The visual style is **High-Contrast / Modern**, utilizing a "Structured Minimalist" approach. By stripping away non-functional decorative elements like gradients, shadows, and blurs, the design system eliminates visual noise that can lead to executive dysfunction or overstimulation. Key characteristics include heavy structural lines, generous negative space to prevent "clutter anxiety," and a strict adherence to predictable UI patterns.
 
 ## Colors
-This design system prioritizes a high-contrast ratio (WCAG AAA compliance where possible) to ensure text and functional elements are unmistakable. 
+
+This design system prioritizes a high-contrast ratio (WCAG AAA compliance where possible) to ensure text and functional elements are unmistakable.
 
 - **Primary:** A deep, stable Blue (#003EB3) used for main actions and focus states. It provides a calm, authoritative anchor for the UI.
 - **Secondary:** A muted but distinct Forest Green (#006B3D) used for success states and secondary progress indicators, chosen for its grounding effect.
@@ -115,6 +117,7 @@ This design system prioritizes a high-contrast ratio (WCAG AAA compliance where 
 - **Surface Strategy:** Surfaces use distinct light grays to separate content blocks without relying on shadows.
 
 ## Typography
+
 Typography is the core of this design system. We use **Atkinson Hyperlegible Next** for all editorial and functional text; its character differentiation (e.g., distinguishing between 'I', 'l', and '1') is critical for users with dyslexia or processing challenges.
 
 - **Line Height:** Body text uses a generous 1.6x line height to prevent "line jumping" while reading.
@@ -122,6 +125,7 @@ Typography is the core of this design system. We use **Atkinson Hyperlegible Nex
 - **Technical Labels:** **JetBrains Mono** is used for metadata and labels. The monospaced nature provides a rhythmic, predictable structure for data-heavy information.
 
 ## Layout & Spacing
+
 The layout follows a **Fixed Grid** philosophy on desktop to limit the horizontal scanning distance, which can be taxing for neurodivergent learners.
 
 - **Content Center:** All primary learning content is constrained to a 1100px max-width container to maintain a comfortable reading eye-span.
@@ -129,6 +133,7 @@ The layout follows a **Fixed Grid** philosophy on desktop to limit the horizonta
 - **Mobile:** On mobile, margins are reduced to 20px, and gutters to 16px. Vertical stacking is strictly enforced—no multi-column layouts on mobile to reduce cognitive load.
 
 ## Elevation & Depth
+
 This design system avoids shadows entirely. Depth is communicated through **Bold Borders** and **Tonal Layers**.
 
 - **Borders:** All interactive elements (cards, inputs, buttons) must have a 2px solid border. This creates a clear "container" for the eye to land on.
@@ -136,12 +141,14 @@ This design system avoids shadows entirely. Depth is communicated through **Bold
 - **Focus States:** Focus indicators are highly aggressive—using a 4px primary-colored offset outline to ensure the user always knows exactly where the keyboard focus resides.
 
 ## Shapes
+
 We use a **Soft** shape language (4px - 8px radius). Pure sharp corners can feel overly clinical or "harsh," while fully rounded/pill shapes can look like "toys." A slight rounding provides a professional yet approachable feel that defines the edges clearly without being visually aggressive.
 
 - **Standard Radius:** 4px for small components (checkboxes, tags).
 - **Large Radius:** 8px for containers (cards, modals).
 
 ## Components
+
 - **Buttons:** Must be 2px solid bordered. Primary buttons use a solid primary color fill with white text. Secondary buttons use a white background with a primary border and text. Never use "ghost" buttons with no borders.
 - **Inputs:** Input fields must have a permanent 2px border (#1A1A1B). Active states should change the border color to Primary and increase thickness to 3px. Place labels permanently above the field; never use disappearing placeholder text as the primary label.
 - **Cards:** Use a white background with a 2px neutral border. No shadows. Use a "Header" section within the card with a light gray fill to separate the title from the body.

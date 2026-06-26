@@ -61,9 +61,9 @@ describe('TopAppBar', () => {
     expect(screen.getByTestId('top-appbar-a11y-panel').getAttribute('role')).toBe('dialog');
   });
 
-  it('has role="banner"', () => {
+  it('renders as header element', () => {
     render(<TopAppBar />);
-    expect(screen.getByTestId('top-app-bar').getAttribute('role')).toBe('banner');
+    expect(screen.getByTestId('top-app-bar').tagName).toBe('HEADER');
   });
 
   it('Escape key closes a11y panel', () => {

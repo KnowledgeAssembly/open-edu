@@ -7,6 +7,7 @@ import {
   NodeRenderer,
   AITutorPanel,
   ReadingRuler,
+  type ThemeId,
 } from '@open-edu/runtime';
 import { buildModules } from './buildModules';
 
@@ -14,9 +15,17 @@ export interface LessonPageProps {
   pkg: LoadedPackage;
   nodeId: string;
   onNavigate: (page: string, nodeId?: string) => void;
+  currentThemeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }
 
-export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.Element {
+export function LessonPage({
+  pkg,
+  nodeId,
+  onNavigate,
+  currentThemeId,
+  onThemeChange,
+}: LessonPageProps): JSX.Element {
   const [aiPanelVisible, setAiPanelVisible] = useState(true);
   const [readingRulerVisible, setReadingRulerVisible] = useState(false);
 
@@ -38,15 +47,17 @@ export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.El
         <CourseTree modules={modules} onLessonClick={(id) => onNavigate('lesson', id)} />
       </SideNav>
 
-      <main className="flex-1 flex flex-col min-w-0 bg-surface relative">
+      <div className="flex-1 flex flex-col min-w-0 bg-surface relative">
         <TopAppBar
           breadcrumbs={breadcrumbs}
           showA11yControls
           onAskAiClick={() => setAiPanelVisible((v) => !v)}
           onReadingRulerChange={(enabled) => setReadingRulerVisible(enabled)}
+          currentThemeId={currentThemeId}
+          onThemeChange={onThemeChange}
         />
 
-        <div className="flex-1 overflow-y-auto relative w-full flex justify-center">
+        <main className="flex-1 overflow-y-auto relative w-full flex justify-center">
           <ReadingRuler visible={readingRulerVisible} />
 
           <article className="w-full max-w-container-max px-lg py-xl pb-[120px]">
@@ -58,8 +69,8 @@ export function LessonPage({ pkg, nodeId, onNavigate }: LessonPageProps): JSX.El
               </div>
             )}
           </article>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <AITutorPanel visible={aiPanelVisible} />
     </div>

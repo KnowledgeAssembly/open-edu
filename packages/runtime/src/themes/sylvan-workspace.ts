@@ -3,7 +3,8 @@ import type { ThemeDefinition } from './types';
 export const sylvanWorkspace: ThemeDefinition = {
   id: 'sylvan-workspace',
   name: 'Sylvan Workspace',
-  description: 'Warm, organic learning environment inspired by a forest sanctuary. Earth tones and serif typography for deep reading.',
+  description:
+    'Warm, organic learning environment inspired by a forest sanctuary. Earth tones and serif typography for deep reading.',
   colors: {
     surface: '#f9faf6',
     ['surface-dim']: '#d9dad7',

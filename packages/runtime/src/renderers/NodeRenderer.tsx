@@ -15,7 +15,8 @@ export interface NodeRendererProps {
 
 export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
   const runtime = useRuntimeOptional();
-  const handleComplete: (score?: number) => void = onComplete ?? runtime?.completeNode ?? (() => {});
+  const handleComplete: (score?: number) => void =
+    onComplete ?? runtime?.completeNode ?? (() => {});
   const { announce } = useLiveRegion();
   const announcedRef = useRef<Set<string>>(new Set());
 

@@ -57,7 +57,7 @@ export function AICallout({ icon, title, children }: AICalloutProps): JSX.Elemen
         </span>
       )}
       <div style={contentStyle}>
-        <h3 style={titleStyle}>{title}</h3>
+        <h2 style={titleStyle}>{title}</h2>
         <div style={bodyStyle}>{children}</div>
       </div>
     </div>

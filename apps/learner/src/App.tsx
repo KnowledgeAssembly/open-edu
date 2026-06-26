@@ -20,7 +20,7 @@ type Page =
 
 export function App(): JSX.Element {
   const [page, setPage] = useState<Page>({ type: 'catalog' });
-  const [themeId] = useThemePreference();
+  const [themeId, setThemeId] = useThemePreference();
 
   const handleStartCourse = (packageDir: string) => {
     const pkg = Object.values(packageEntries).find((p) => p.rootDir === packageDir);
@@ -60,17 +60,43 @@ export function App(): JSX.Element {
       {page.type === 'catalog' && (
         <CatalogPage packages={catalogPackages} onStartCourse={handleStartCourse} />
       )}
-      {page.type === 'course-home' && <CourseHomePage pkg={page.pkg} onNavigate={handleNavigate} />}
+      {page.type === 'course-home' && (
+        <CourseHomePage
+          pkg={page.pkg}
+          onNavigate={handleNavigate}
+          currentThemeId={themeId}
+          onThemeChange={setThemeId}
+        />
+      )}
       {page.type === 'lesson' && (
-        <LessonPage pkg={page.pkg} nodeId={page.nodeId} onNavigate={handleNavigate} />
+        <LessonPage
+          pkg={page.pkg}
+          nodeId={page.nodeId}
+          onNavigate={handleNavigate}
+          currentThemeId={themeId}
+          onThemeChange={setThemeId}
+        />
       )}
       {page.type === 'assessment' && (
         <AssessmentPage pkg={page.pkg} nodeId={page.nodeId} onNavigate={handleNavigate} />
       )}
       {page.type === 'code' && (
-        <CodePage pkg={page.pkg} nodeId={page.nodeId} onNavigate={handleNavigate} />
+        <CodePage
+          pkg={page.pkg}
+          nodeId={page.nodeId}
+          onNavigate={handleNavigate}
+          currentThemeId={themeId}
+          onThemeChange={setThemeId}
+        />
       )}
-      {page.type === 'progress' && <ProgressPage pkg={page.pkg} onNavigate={handleNavigate} />}
+      {page.type === 'progress' && (
+        <ProgressPage
+          pkg={page.pkg}
+          onNavigate={handleNavigate}
+          currentThemeId={themeId}
+          onThemeChange={setThemeId}
+        />
+      )}
     </RuntimeThemeProvider>
   );
 }

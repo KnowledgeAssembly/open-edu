@@ -13,16 +13,29 @@ import { sylvanWorkspace } from './sylvan-workspace';
  * set of typography tokens regardless of which theme is active.
  */
 
-export type { ThemeDefinition, ThemeId, ColorTokens, TypographyToken, TypographyTokens, SpacingTokens, RadiiTokens } from './types';
+export type {
+  ThemeDefinition,
+  ThemeId,
+  ColorTokens,
+  TypographyToken,
+  TypographyTokens,
+  SpacingTokens,
+  RadiiTokens,
+} from './types';
 
 export const themeRegistry: Record<ThemeId, ThemeDefinition> = {
   'high-focus': highFocus,
   'lumina-scholastica': luminaScholastica,
-  'nocturnal': nocturnal,
+  nocturnal: nocturnal,
   'sylvan-workspace': sylvanWorkspace,
 };
 
-export const themeIds: ThemeId[] = ['high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace'];
+export const themeIds: ThemeId[] = [
+  'high-focus',
+  'lumina-scholastica',
+  'nocturnal',
+  'sylvan-workspace',
+];
 
 export const defaultThemeId: ThemeId = 'lumina-scholastica';
 

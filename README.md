@@ -101,19 +101,19 @@ Conditional branching (e.g. quiz score-based remediation):
 
 ## Packages
 
-| Package                   | Description                                                                                                          | Status |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------ |
-| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress                  | Done   |
-| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner        | Done   |
-| `@open-edu/workflow`      | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering                    | Done   |
-| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, Tailwind-styled layout components  | Done   |
-| `@open-edu/accessibility` | Focus traps, live regions, ARIA generation, axe-core validator                                                       | Done   |
-| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary                        | Done   |
-| `@open-edu/rewards`       | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay                        | Done   |
-| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate` | Done   |
-| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector                     | Done   |
-| `@open-edu/widgets`       | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                         | Done   |
-| `@open-edu/learner`       | Standalone learner app — course catalog, progress persistence, reward integration, E2E-tested workflow               | Done   |
+| Package                   | Description                                                                                                                        | Status |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `@open-edu/schemas`       | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress                                | Done   |
+| `@open-edu/core`          | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner                      | Done   |
+| `@open-edu/workflow`      | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering                                  | Done   |
+| `@open-edu/runtime`       | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, Tailwind-styled layout components | Done   |
+| `@open-edu/accessibility` | Focus traps, live regions, ARIA generation, axe-core validator                                                                     | Done   |
+| `@open-edu/telemetry`     | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary                                      | Done   |
+| `@open-edu/rewards`       | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay                                      | Done   |
+| `@open-edu/cli`           | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`               | Done   |
+| `@open-edu/dev-server`    | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector                                   | Done   |
+| `@open-edu/widgets`       | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                       | Done   |
+| `@open-edu/learner`       | Standalone learner app — course catalog, progress persistence, reward integration, E2E-tested workflow                             | Done   |
 
 ## Examples
 

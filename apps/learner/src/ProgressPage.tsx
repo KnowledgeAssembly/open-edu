@@ -1,14 +1,21 @@
 import { useMemo } from 'react';
 import type { LoadedPackage } from '@open-edu/core';
-import { SideNav, TopAppBar } from '@open-edu/runtime';
+import { SideNav, TopAppBar, type ThemeId } from '@open-edu/runtime';
 import { getProgress } from './progressStorage';
 
 export interface ProgressPageProps {
   pkg: LoadedPackage;
   onNavigate: (page: string, nodeId?: string) => void;
+  currentThemeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }
 
-export function ProgressPage({ pkg, onNavigate }: ProgressPageProps): JSX.Element {
+export function ProgressPage({
+  pkg,
+  onNavigate,
+  currentThemeId,
+  onThemeChange,
+}: ProgressPageProps): JSX.Element {
   const progress = getProgress(pkg.manifest.id);
   const totalNodes = pkg.nodes.length;
   const completedCount = progress?.visitedNodes?.length ?? 0;
@@ -62,6 +69,8 @@ export function ProgressPage({ pkg, onNavigate }: ProgressPageProps): JSX.Elemen
           breadcrumbs={[{ label: 'My Progress' }]}
           showA11yControls
           onAskAiClick={() => {}}
+          currentThemeId={currentThemeId}
+          onThemeChange={onThemeChange}
         />
 
         <main className="flex-1 overflow-y-auto bg-surface">

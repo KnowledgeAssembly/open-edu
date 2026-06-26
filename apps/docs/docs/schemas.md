@@ -8,20 +8,20 @@ The schema package is the single source of truth for all data structures in the 
 
 ## Exported Schemas
 
-| Schema | Description |
-|---|---|
-| `PackageManifestSchema` | Package identity — `id`, `title`, `version`, `author`, `entry`, optional `skills` |
-| `ContentNodeSchema` | Discriminated union of all node types (`lesson`, `quiz`, `reflection`, `exercise`, `custom`) |
-| `LessonNodeSchema`, `QuizNodeSchema`, `ReflectionNodeSchema`, `ExerciseNodeSchema`, `WidgetNodeSchema` | Individual node type schemas |
-| `WorkflowSchema` | Routing rules with linear `onComplete` and conditional `conditions` |
-| `RouteDefinitionSchema` | Single route — either `onComplete` or `conditions` array |
-| `ProgressSnapshotSchema` | Learner state — `currentNodeId`, `visitedNodes`, `scores`, `isCompleted` |
-| `RewardsSchema` | Reward triggers with conditional badge/webhook/script actions |
-| `SkillGraphSchema` | Skill definitions, dependencies, mastery thresholds |
-| `MasteryLevelSchema` | Enum: `not_attempted`, `in_progress`, `achieved`, `mastered` |
-| `TelemetryEventSchema` | Discriminated union of all telemetry event types |
-| `RemoteWidgetManifestSchema` | Remote widget identity, URL, integrity hash, fallback |
-| `SkillsSchema` | Skill definitions in manifest |
+| Schema                                                                                                 | Description                                                                                  |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `PackageManifestSchema`                                                                                | Package identity — `id`, `title`, `version`, `author`, `entry`, optional `skills`            |
+| `ContentNodeSchema`                                                                                    | Discriminated union of all node types (`lesson`, `quiz`, `reflection`, `exercise`, `custom`) |
+| `LessonNodeSchema`, `QuizNodeSchema`, `ReflectionNodeSchema`, `ExerciseNodeSchema`, `WidgetNodeSchema` | Individual node type schemas                                                                 |
+| `WorkflowSchema`                                                                                       | Routing rules with linear `onComplete` and conditional `conditions`                          |
+| `RouteDefinitionSchema`                                                                                | Single route — either `onComplete` or `conditions` array                                     |
+| `ProgressSnapshotSchema`                                                                               | Learner state — `currentNodeId`, `visitedNodes`, `scores`, `isCompleted`                     |
+| `RewardsSchema`                                                                                        | Reward triggers with conditional badge/webhook/script actions                                |
+| `SkillGraphSchema`                                                                                     | Skill definitions, dependencies, mastery thresholds                                          |
+| `MasteryLevelSchema`                                                                                   | Enum: `not_attempted`, `in_progress`, `achieved`, `mastered`                                 |
+| `TelemetryEventSchema`                                                                                 | Discriminated union of all telemetry event types                                             |
+| `RemoteWidgetManifestSchema`                                                                           | Remote widget identity, URL, integrity hash, fallback                                        |
+| `SkillsSchema`                                                                                         | Skill definitions in manifest                                                                |
 
 ## Usage
 

@@ -3,7 +3,8 @@ import type { ThemeDefinition } from './types';
 export const highFocus: ThemeDefinition = {
   id: 'high-focus',
   name: 'High Focus',
-  description: 'Accessibility-first, high-contrast, structured minimalist. Removes visual noise with bold borders and generous negative space.',
+  description:
+    'Accessibility-first, high-contrast, structured minimalist. Removes visual noise with bold borders and generous negative space.',
   colors: {
     surface: '#fcf8f9',
     ['surface-dim']: '#dcd9da',

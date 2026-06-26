@@ -119,7 +119,7 @@ The brand personality is authoritative yet quiet, acting as a sophisticated vess
 
 ## Colors
 
-The color strategy utilizes a multi-theme approach to accommodate different lighting environments and neurodivergent needs. 
+The color strategy utilizes a multi-theme approach to accommodate different lighting environments and neurodivergent needs.
 
 - **Light:** Optimized for high-glare environments; uses a cool slate palette to maintain a "SaaS-native" professional feel.
 - **Dark:** Inspired by Obsidian; uses deep charcoal backgrounds to reduce eye strain while maintaining sharp text-to-background contrast.
@@ -136,6 +136,7 @@ In the **High Focus** theme, the `body-reading` line height should be increased 
 ## Layout & Spacing
 
 The layout is built on a strict **8px grid system**. The primary architecture consists of three panels:
+
 1.  **Global Nav (Left):** Collapsible slim bar for high-level app switching.
 2.  **Context Explorer (Middle):** Fixed-width list of course modules and lessons.
 3.  **Reading Canvas (Right):** Fluid area where the content container is centered with a max-width of 800px to maintain optimal line lengths (65-75 characters).
@@ -154,29 +155,35 @@ To maintain a minimal profile, the design system avoids heavy drop shadows. Inst
 
 ## Shapes
 
-The shape language is "Soft" and professional. A standard radius of `0.25rem` (4px) is applied to buttons, inputs, and small cards to maintain a crisp, technical look. Larger containers like modals or the main content area use `0.5rem` (8px). 
+The shape language is "Soft" and professional. A standard radius of `0.25rem` (4px) is applied to buttons, inputs, and small cards to maintain a crisp, technical look. Larger containers like modals or the main content area use `0.5rem` (8px).
 
 In the **Zen** and **Forest** themes, the roundedness should be globally increased to **2 (Rounded)** to evoke a more organic, less clinical feeling. Progress bars always use a pill-shape (full radius) to distinguish them from interactive containers.
 
 ## Components
 
 ### Buttons
-- **Primary:** Solid background (Accent color), `body-ui` bold text, 4px radius. 
+
+- **Primary:** Solid background (Accent color), `body-ui` bold text, 4px radius.
 - **Ghost:** No background or border until hover. Used for sidebar items and secondary actions to reduce visual noise.
 
 ### Inputs
+
 - **Field:** 1px border (`border` token) with a subtle inset shadow in Dark mode. On focus, the border changes to `accent` with a 2px outer glow of 10% opacity.
 
 ### Navigation Panels
+
 - **Active State:** A vertical 2px line on the left side of the item using the `accent` color, paired with a slightly darker/lighter surface background.
 
 ### Callouts (AI Insights)
+
 - **Design:** Bordered boxes with a light tinted background of the semantic color (e.g., light blue for info, light yellow for warning). Use an icon in the top left.
 
 ### Progress Bars
+
 - **Track:** 4px height, using `surfaceElevated`.
 - **Fill:** Gradient-free `accent` color. For "Forest" theme, use a soft sage green.
 
 ### Motion & Interaction
+
 - All transitions (hover, toggle, panel collapse) must use a **200ms ease-out** curve.
 - **Reading First:** When scrolling through content, the top navigation should blur or hide to maximize the vertical space for the serif text.
