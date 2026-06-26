@@ -13,7 +13,9 @@ function getStoredTheme(): ThemeId {
         return stored as ThemeId;
       }
     }
-  } catch {}
+  } catch {
+    /* invalid or inaccessible storage */
+  }
   return defaultThemeId;
 }
 
@@ -23,7 +25,9 @@ export function useThemePreference(): [ThemeId, (id: ThemeId) => void] {
   const setTheme = useCallback((id: ThemeId) => {
     try {
       localStorage.setItem(STORAGE_KEY, id);
-    } catch {}
+    } catch {
+      /* storage unavailable */
+    }
     setThemeId(id);
   }, []);
 
