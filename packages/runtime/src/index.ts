@@ -23,10 +23,18 @@ export { WidgetRenderer } from './renderers/WidgetRenderer.js';
 export type { WidgetRendererProps } from './renderers/WidgetRenderer.js';
 export { PlaceholderRenderer } from './renderers/PlaceholderRenderer.js';
 export type { PlaceholderRendererProps } from './renderers/PlaceholderRenderer.js';
+export { AITutorPanel } from './layout/AITutorPanel.js';
+export type { AITutorPanelProps } from './layout/AITutorPanel.js';
+export { CourseTree } from './layout/CourseTree.js';
+export type { CourseTreeProps, CourseTreeModule } from './layout/CourseTree.js';
 export { LayoutShell } from './layout/LayoutShell.js';
 export type { LayoutShellProps } from './layout/LayoutShell.js';
 export { ProgressBar } from './layout/ProgressBar.js';
 export type { ProgressBarProps } from './layout/ProgressBar.js';
+export { SideNav } from './layout/SideNav.js';
+export type { SideNavProps } from './layout/SideNav.js';
+export { TopAppBar } from './layout/TopAppBar.js';
+export type { TopAppBarProps, TopAppBarBreadcrumb } from './layout/TopAppBar.js';
 export { RUNTIME_THEME, RuntimeThemeProvider, useTheme } from './theme.js';
 export type { RuntimeTheme } from './theme.js';
 export {
@@ -45,7 +53,11 @@ export type {
   SpacingTokens,
   RadiiTokens,
 } from './themes/types.js';
+export { AICallout } from './components/AICallout.js';
+export type { AICalloutProps } from './components/AICallout.js';
 export { FontLoader } from './components/FontLoader.js';
+export { ReadingRuler } from './components/ReadingRuler.js';
+export type { ReadingRulerProps } from './components/ReadingRuler.js';
 export { useThemePreference } from './components/useThemePreference.js';
 export { ThemeSelector } from './components/ThemeSelector.js';
 export type { ThemeSelectorProps } from './components/ThemeSelector.js';
