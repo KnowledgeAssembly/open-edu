@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, useRef, useEffect, type CSSProperties } from 'react';
 
 export interface AITutorPanelProps {
   visible?: boolean;
@@ -55,7 +55,7 @@ const tabBaseStyle: CSSProperties = {
   padding: '6px 12px',
   border: 'none',
   borderRadius: 'var(--oe-radius, 8px)',
-  background: 'none',
+  backgroundColor: 'transparent',
   cursor: 'pointer',
   fontSize: '0.8125rem',
   fontFamily: 'inherit',
@@ -179,6 +179,13 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
   const [messages, setMessages] = useState<Array<{ role: 'ai' | 'user'; text: string }>>([
     { role: 'ai', text: "Hello! I'm your AI tutor. Ask me anything about this course." },
   ]);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   if (!visible) return null;
 
@@ -187,7 +194,7 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
     if (!text) return;
     setMessages((prev) => [...prev, { role: 'user', text }]);
     setInputValue('');
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
@@ -205,17 +212,70 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
     }
   };
 
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    const currentIndex = toolTabs.findIndex((t) => t.id === activeTool);
+    if (currentIndex === -1) return;
+    let nextIndex: number;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        nextIndex = (currentIndex + 1) % toolTabs.length;
+        break;
+      case 'ArrowLeft':
+        nextIndex = (currentIndex - 1 + toolTabs.length) % toolTabs.length;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = toolTabs.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    const nextTabId = toolTabs[nextIndex]!.id;
+    setActiveTool(nextTabId);
+    document.getElementById(nextTabId)?.focus();
+  };
+
   const renderContent = () => {
+    const panelId = activeTool + '-panel';
+
     switch (activeTool) {
       case 'notes':
-        return <div style={emptyStateStyle}>Your notes will appear here.</div>;
+        return (
+          <div
+            id={panelId}
+            role="tabpanel"
+            aria-labelledby={activeTool}
+            style={{ flex: 1, overflow: 'hidden' }}
+          >
+            <div style={emptyStateStyle}>Your notes will appear here.</div>
+          </div>
+        );
       case 'highlights':
-        return <div style={emptyStateStyle}>Your highlights will appear here.</div>;
+        return (
+          <div
+            id={panelId}
+            role="tabpanel"
+            aria-labelledby={activeTool}
+            style={{ flex: 1, overflow: 'hidden' }}
+          >
+            <div style={emptyStateStyle}>Your highlights will appear here.</div>
+          </div>
+        );
       case 'ask-ai':
       default:
         return (
-          <>
-            <div style={chatAreaStyle} data-testid="ai-tutor-chat">
+          <div
+            id={panelId}
+            role="tabpanel"
+            aria-labelledby={activeTool}
+            style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
+          >
+            <div style={chatAreaStyle} data-testid="ai-tutor-chat" aria-live="polite">
               {messages.map((msg, idx) =>
                 msg.role === 'ai' ? (
                   <div key={idx} style={messageRowAiStyle}>
@@ -252,7 +312,7 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
                 {'\u2191'}
               </button>
             </div>
-          </>
+          </div>
         );
     }
   };
@@ -264,13 +324,20 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
         <p style={headerSubtitleStyle}>Context-aware assistant</p>
       </div>
 
-      <div style={tabBarStyle} role="tablist" aria-label="AI Tutor tools">
+      <div
+        style={tabBarStyle}
+        role="tablist"
+        aria-label="AI Tutor tools"
+        onKeyDown={handleTabKeyDown}
+      >
         {toolTabs.map((tab) => (
           <button
             key={tab.id}
+            id={tab.id}
             type="button"
             role="tab"
             aria-selected={activeTool === tab.id}
+            aria-controls={tab.id + '-panel'}
             style={activeTool === tab.id ? tabActiveStyle : tabBaseStyle}
             onClick={() => setActiveTool(tab.id)}
             data-testid={`ai-tutor-tab-${tab.id}`}

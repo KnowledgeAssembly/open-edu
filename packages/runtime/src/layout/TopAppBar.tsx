@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, useRef, useEffect, type CSSProperties } from 'react';
 import { ThemeSelector } from '../components/ThemeSelector.js';
 import type { ThemeId } from '../themes/types.js';
 
@@ -129,16 +129,62 @@ export function TopAppBar({
 }: TopAppBarProps): JSX.Element {
   const [a11yOpen, setA11yOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
+  const [breadcrumbsEnabled, setBreadcrumbsEnabled] = useState(true);
+  const [readingRulerEnabled, setReadingRulerEnabled] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!a11yOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setA11yOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    panelRef.current?.querySelector<HTMLElement>('input, button')?.focus();
+
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [a11yOpen]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--oe-font-size-scale', `${fontSize}%`);
+  }, [fontSize]);
+
+  const handlePanelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Tab') {
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = panel.querySelectorAll<HTMLElement>('input, button');
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
 
   return (
     <header style={containerStyle} data-testid="top-app-bar" role="banner">
       <div style={leftSectionStyle}>
-        {breadcrumbs && breadcrumbs.length > 0 && (
+        {breadcrumbsEnabled && breadcrumbs && breadcrumbs.length > 0 && (
           <nav aria-label="Breadcrumbs">
             <ol style={breadcrumbListStyle}>
               {breadcrumbs.map((crumb, idx) => (
                 <li key={idx} style={breadcrumbItemStyle}>
-                  {idx > 0 && <span style={breadcrumbChevronStyle}>/</span>}
+                  {idx > 0 && (
+                    <span style={breadcrumbChevronStyle} aria-hidden="true">
+                      /
+                    </span>
+                  )}
                   {crumb.href ? (
                     <a href={crumb.href} style={breadcrumbLinkStyle}>
                       {crumb.label}
@@ -157,6 +203,7 @@ export function TopAppBar({
         {showA11yControls && (
           <div style={{ position: 'relative' }}>
             <button
+              ref={triggerRef}
               type="button"
               style={iconButtonStyle}
               onClick={() => setA11yOpen((o) => !o)}
@@ -168,6 +215,7 @@ export function TopAppBar({
             </button>
             {a11yOpen && (
               <div
+                ref={panelRef}
                 style={{
                   position: 'absolute',
                   top: '100%',
@@ -186,6 +234,7 @@ export function TopAppBar({
                 data-testid="top-appbar-a11y-panel"
                 role="dialog"
                 aria-label="Accessibility controls"
+                onKeyDown={handlePanelKeyDown}
               >
                 <label
                   style={{
@@ -195,7 +244,11 @@ export function TopAppBar({
                     gap: '8px',
                   }}
                 >
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={breadcrumbsEnabled}
+                    onChange={(e) => setBreadcrumbsEnabled(e.target.checked)}
+                  />
                   Breadcrumbs
                 </label>
                 <label
@@ -206,7 +259,11 @@ export function TopAppBar({
                     gap: '8px',
                   }}
                 >
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={readingRulerEnabled}
+                    onChange={(e) => setReadingRulerEnabled(e.target.checked)}
+                  />
                   Reading Ruler
                 </label>
                 <div

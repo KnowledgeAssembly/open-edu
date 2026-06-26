@@ -104,4 +104,59 @@ describe('AITutorPanel', () => {
     const notesTab = screen.getByTestId('ai-tutor-tab-notes');
     expect(notesTab.getAttribute('aria-selected')).toBe('false');
   });
+
+  it('tab buttons have aria-controls pointing to panel', () => {
+    render(<AITutorPanel />);
+    const askAiTab = screen.getByTestId('ai-tutor-tab-ask-ai');
+    expect(askAiTab.getAttribute('aria-controls')).toBe('ask-ai-panel');
+
+    const panel = document.getElementById('ask-ai-panel');
+    expect(panel).toBeTruthy();
+    expect(panel?.getAttribute('role')).toBe('tabpanel');
+    expect(panel?.getAttribute('aria-labelledby')).toBe('ask-ai');
+  });
+
+  it('only active tabpanel is rendered', () => {
+    render(<AITutorPanel />);
+    expect(document.getElementById('ask-ai-panel')).toBeTruthy();
+    expect(document.getElementById('notes-panel')).toBeNull();
+    expect(document.getElementById('highlights-panel')).toBeNull();
+  });
+
+  it('ArrowRight switches to next tab', () => {
+    render(<AITutorPanel />);
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(screen.getByTestId('ai-tutor-tab-notes').getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('ArrowLeft switches to previous tab', () => {
+    render(<AITutorPanel />);
+    fireEvent.click(screen.getByTestId('ai-tutor-tab-highlights'));
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('ai-tutor-tab-notes').getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('Home key goes to first tab', () => {
+    render(<AITutorPanel />);
+    fireEvent.click(screen.getByTestId('ai-tutor-tab-highlights'));
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'Home' });
+    expect(screen.getByTestId('ai-tutor-tab-ask-ai').getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('End key goes to last tab', () => {
+    render(<AITutorPanel />);
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'End' });
+    expect(screen.getByTestId('ai-tutor-tab-highlights').getAttribute('aria-selected')).toBe(
+      'true',
+    );
+  });
+
+  it('chat area has aria-live="polite"', () => {
+    render(<AITutorPanel />);
+    expect(screen.getByTestId('ai-tutor-chat').getAttribute('aria-live')).toBe('polite');
+  });
 });

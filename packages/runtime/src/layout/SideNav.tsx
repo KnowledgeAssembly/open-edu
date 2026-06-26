@@ -62,7 +62,7 @@ const tabBaseStyle: CSSProperties = {
   border: 'none',
   borderLeft: '2px solid transparent',
   borderRadius: '0 var(--oe-radius, 8px) var(--oe-radius, 8px) 0',
-  background: 'none',
+  backgroundColor: 'transparent',
   cursor: 'pointer',
   textAlign: 'left',
   fontSize: '0.875rem',

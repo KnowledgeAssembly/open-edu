@@ -65,4 +65,22 @@ describe('TopAppBar', () => {
     render(<TopAppBar />);
     expect(screen.getByTestId('top-app-bar').getAttribute('role')).toBe('banner');
   });
+
+  it('Escape key closes a11y panel', () => {
+    render(<TopAppBar showA11yControls />);
+    fireEvent.click(screen.getByTestId('top-appbar-a11y'));
+    expect(screen.getByTestId('top-appbar-a11y-panel')).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('top-appbar-a11y-panel')).toBeNull();
+  });
+
+  it('font size increase button updates display', () => {
+    render(<TopAppBar showA11yControls />);
+    fireEvent.click(screen.getByTestId('top-appbar-a11y'));
+    const display = screen.getByText('100%');
+    expect(display).toBeInTheDocument();
+    const increaseBtn = screen.getByLabelText('Increase font size');
+    fireEvent.click(increaseBtn);
+    expect(screen.getByText('110%')).toBeInTheDocument();
+  });
 });
