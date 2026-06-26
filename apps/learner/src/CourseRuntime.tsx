@@ -129,38 +129,38 @@ export function CourseRuntime({ pkg, onBackToCatalog, children }: CourseRuntimeP
 
   return (
     <div className="flex h-full" data-testid="course-runtime">
-      {children && (
-        <div className="flex-[0_0_280px] overflow-y-auto border-r border-outline-variant">
-          {children}
-        </div>
-      )}
-      <div className="flex-1 min-w-0 relative">
-        <AccessibilityProvider>
-          <RuntimeProvider
-            loadedPackage={pkg}
-            engine={engine}
-            initialProgress={initialProgress}
-            onProgressChange={handleProgressChange}
-            widgetRegistry={widgetRegistry}
-          >
+      <AccessibilityProvider>
+        <RuntimeProvider
+          loadedPackage={pkg}
+          engine={engine}
+          initialProgress={initialProgress}
+          onProgressChange={handleProgressChange}
+          widgetRegistry={widgetRegistry}
+        >
+          {children && (
+            <div className="flex-[0_0_280px] overflow-y-auto border-r border-outline-variant">
+              {children}
+            </div>
+          )}
+          <div className="flex-1 min-w-0 relative">
             {isCompleted ? (
               <CompletionScreen badges={badges} onBack={onBackToCatalog} />
             ) : (
               <LayoutShellWithBack orderedNodes={orderedNodes} />
             )}
-          </RuntimeProvider>
-        </AccessibilityProvider>
-        {toastBadgeName && (
-          <div
-            className="fixed bottom-4 right-4 z-[9999] bg-surface border border-outline-variant rounded-lg px-4 py-3 shadow-lg transition-opacity duration-300"
-            style={{ opacity: toastVisible ? 1 : 0 }}
-            data-testid="badge-toast"
-          >
-            <div className="font-semibold text-sm text-success">Badge earned!</div>
-            <div className="text-base">{toastBadgeName}</div>
+            {toastBadgeName && (
+              <div
+                className="fixed bottom-4 right-4 z-[9999] bg-surface border border-outline-variant rounded-lg px-4 py-3 shadow-lg transition-opacity duration-300"
+                style={{ opacity: toastVisible ? 1 : 0 }}
+                data-testid="badge-toast"
+              >
+                <div className="font-semibold text-sm text-success">Badge earned!</div>
+                <div className="text-base">{toastBadgeName}</div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </RuntimeProvider>
+      </AccessibilityProvider>
     </div>
   );
 }

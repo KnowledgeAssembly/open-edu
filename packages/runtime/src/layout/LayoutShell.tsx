@@ -48,7 +48,7 @@ export function LayoutShell({
 
   const shellContent = (
     <section
-      className="open-edu-runtime font-body-md text-on-surface bg-surface min-h-full flex flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
+      className="font-body-md text-on-surface bg-surface min-h-full flex flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
       data-testid="layout-shell"
     >
       <header className="flex flex-col gap-sm border-b border-outline-variant pb-4">
