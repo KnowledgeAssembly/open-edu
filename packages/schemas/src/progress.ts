@@ -13,10 +13,10 @@ export const ProgressSnapshotSchema = z.object({
 export type ProgressSnapshot = z.infer<typeof ProgressSnapshotSchema>;
 
 export const ModuleProgressSnapshotSchema = z.object({
-  moduleId: z.string(),
+  moduleId: z.string().min(1).max(128),
   packageVersion: z.string().min(1).max(64),
-  currentNodeId: z.string(),
-  visitedNodes: z.array(z.string()),
+  currentNodeId: z.string().min(1).max(512),
+  visitedNodes: z.array(z.string().min(1).max(512)),
   scores: z.record(z.number()).default({}),
   isCompleted: z.boolean().default(false),
   completedAt: z.string().optional(),

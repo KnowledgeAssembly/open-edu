@@ -64,6 +64,8 @@ export class BundleEngine {
   private moduleSubscriptions: Map<string, () => void>;
   private moduleSnapshots: Record<string, ModuleProgressSnapshot>;
   private skillGraph?: SkillGraph;
+  private reverseDeps: Map<string, string[]>;
+  private completedModuleIds: Set<string>;
 
   constructor(bundleInput: BundleInput, options?: BundleEngineOptions) {
     this.bundleInput = bundleInput;
@@ -71,12 +73,22 @@ export class BundleEngine {
     this.moduleSubscriptions = new Map();
     this.moduleSnapshots = options?.moduleSnapshots ?? {};
     this.skillGraph = options?.skillGraph;
+    this.reverseDeps = new Map();
+    this.completedModuleIds = new Set<string>();
+
+    if (bundleInput.manifest.rewards) {
+      console.warn(
+        `[BundleEngine] Bundle "${bundleInput.manifest.id}" has rewards configured, but ` +
+          'bundle-level reward evaluation requires external wiring via updateContext().',
+      );
+    }
 
     this.moduleStatuses = {};
     for (const modRef of bundleInput.manifest.modules) {
       const existingSnapshot = this.moduleSnapshots[modRef.id];
       if (existingSnapshot?.isCompleted) {
         this.moduleStatuses[modRef.id] = 'completed';
+        this.completedModuleIds.add(modRef.id);
       } else if (existingSnapshot && existingSnapshot.currentNodeId) {
         this.moduleStatuses[modRef.id] = 'in_progress';
       } else if (modRef.dependsOn.length === 0) {
@@ -92,6 +104,9 @@ export class BundleEngine {
         if (!moduleIds.has(depId)) {
           throw new Error(`Module "${modRef.id}" depends on "${depId}" which is not in the bundle`);
         }
+        const dependents = this.reverseDeps.get(depId) ?? [];
+        dependents.push(modRef.id);
+        this.reverseDeps.set(depId, dependents);
       }
     }
   }
@@ -193,6 +208,10 @@ export class BundleEngine {
     return this.moduleSnapshots[moduleId] ?? null;
   }
 
+  getCompletedModuleIds(): string[] {
+    return [...this.completedModuleIds];
+  }
+
   isCompleted(): boolean {
     return this.bundleInput.manifest.modules.every(
       (m) => this.moduleStatuses[m.id] === 'completed',
@@ -257,16 +276,24 @@ export class BundleEngine {
       dfs(id, this.bundleInput.manifest.modules, new Set());
     }
 
+    const inProgress: string[] = [];
+    const unlocked: string[] = [];
+
     for (const id of result) {
-      if (this.moduleStatuses[id] === 'unlocked' || this.moduleStatuses[id] === 'in_progress') {
-        return id;
+      const status = this.moduleStatuses[id];
+      if (status === 'in_progress') {
+        inProgress.push(id);
+      } else if (status === 'unlocked') {
+        unlocked.push(id);
       }
     }
-    return undefined;
+
+    return inProgress[0] ?? unlocked[0] ?? undefined;
   }
 
   private handleModuleCompleted(moduleId: string): void {
     this.moduleStatuses[moduleId] = 'completed';
+    this.completedModuleIds.add(moduleId);
     this.moduleSnapshots[moduleId] = {
       moduleId,
       packageVersion: this.bundleInput.moduleMap.get(moduleId)?.manifest?.version ?? '0.0.0',
@@ -285,17 +312,21 @@ export class BundleEngine {
     }
   }
 
-  private evaluatePrerequisites(_completedModuleId: string): void {
-    for (const modRef of this.bundleInput.manifest.modules) {
-      if (this.moduleStatuses[modRef.id] !== 'locked') continue;
+  private evaluatePrerequisites(completedModuleId: string): void {
+    const dependents = this.reverseDeps.get(completedModuleId) ?? [];
+    for (const dependentId of dependents) {
+      if (this.moduleStatuses[dependentId] !== 'locked') continue;
+
+      const modRef = this.bundleInput.manifest.modules.find((m) => m.id === dependentId);
+      if (!modRef) continue;
 
       const allDepsCompleted = modRef.dependsOn.every(
         (depId) => this.moduleStatuses[depId] === 'completed',
       );
 
       if (allDepsCompleted) {
-        this.moduleStatuses[modRef.id] = 'unlocked';
-        this.fireEvent({ type: 'module.unlocked', moduleId: modRef.id });
+        this.moduleStatuses[dependentId] = 'unlocked';
+        this.fireEvent({ type: 'module.unlocked', moduleId: dependentId });
       }
     }
   }
@@ -307,14 +338,22 @@ export class BundleEngine {
     if (!engine) return;
 
     const currentNodeId = engine.getCurrentNodeId();
+    const existing = this.moduleSnapshots[this.currentModuleId];
+
+    // Engine is stopped (actor null). Existing snapshot is more accurate.
+    if (!currentNodeId && existing) return;
+
     const isCompleted = engine.isCompleted();
+    const existingVisited = existing?.visitedNodes ?? [];
 
     this.moduleSnapshots[this.currentModuleId] = {
       moduleId: this.currentModuleId,
       packageVersion:
         this.bundleInput.moduleMap.get(this.currentModuleId)?.manifest?.version ?? '0.0.0',
       currentNodeId,
-      visitedNodes: currentNodeId ? [currentNodeId] : [],
+      visitedNodes: currentNodeId
+        ? [...new Set([...existingVisited, currentNodeId])]
+        : existingVisited,
       scores: {},
       isCompleted,
       completedAt: isCompleted ? new Date().toISOString() : undefined,

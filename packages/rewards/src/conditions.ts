@@ -26,7 +26,11 @@ export function evaluateCondition(condition: RewardCondition, context: ContextSn
       return (context.completedModules ?? []).includes(condition.moduleId);
     }
     case 'bundleCompleted': {
-      return false; // evaluated externally by BundleEngine
+      console.warn(
+        '[rewards] bundleCompleted condition evaluated but bundle-level rewards require external wiring. ' +
+          'Call rewardBroker.updateContext({ completedModules }) before firing bundle.completed event.',
+      );
+      return false;
     }
     default:
       return false;

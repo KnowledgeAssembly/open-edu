@@ -5,7 +5,10 @@ export const BundleModuleRefSchema = z.object({
     .string()
     .min(1)
     .max(128)
-    .regex(/^[a-z0-9][a-z0-9_-]*$/, 'module id must be kebab-case'),
+    .regex(
+      /^[a-z0-9][a-z0-9_-]*$/,
+      'module id must be kebab-case (lowercase, hyphens, underscores)',
+    ),
   title: z.string().min(1).max(256),
   chapterCode: z.string().optional(),
   path: z.string().min(1).max(512),

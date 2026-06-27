@@ -55,8 +55,9 @@ export function scanBundles(dir: string): BundleSummary[] {
         rootDir: bundleDir,
         moduleSummaries,
       });
-    } catch {
-      // skip invalid bundles silently
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`[scanBundles] Skipping invalid bundle in "${bundleDir}": ${message}`);
     }
   }
 

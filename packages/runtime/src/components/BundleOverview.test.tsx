@@ -82,7 +82,7 @@ describe('BundleOverview', () => {
 
   it('shows completed status for completed module', () => {
     render(<BundleOverview {...baseProps} />);
-    expect(screen.getByText('✓ Completed')).toBeDefined();
+    expect(screen.getByTestId('completed-module-mod-a')).toBeDefined();
   });
 
   it('calls onStartModule when Start is clicked', () => {
