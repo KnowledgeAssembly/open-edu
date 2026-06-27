@@ -1,0 +1,20 @@
+{
+  "id": "test-bundle",
+  "title": "Test Bundle",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "modules": [
+    {
+      "id": "mod-a",
+      "title": "Module A",
+      "path": "./modules/mod-a",
+      "dependsOn": []
+    },
+    {
+      "id": "mod-b",
+      "title": "Module B",
+      "path": "./modules/mod-b",
+      "dependsOn": ["mod-a"]
+    }
+  ]
+}

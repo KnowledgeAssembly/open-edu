@@ -5,6 +5,8 @@ const TimestampSchema = z.number().positive();
 const BaseTelemetrySchema = z.object({
   timestamp: TimestampSchema,
   sessionId: z.string().min(1).max(128).optional(),
+  bundleId: z.string().min(1).max(128).optional(),
+  moduleId: z.string().min(1).max(128).optional(),
 });
 
 export const NodeOpenEventSchema = BaseTelemetrySchema.extend({

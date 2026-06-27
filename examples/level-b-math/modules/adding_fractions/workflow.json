@@ -1,0 +1,7 @@
+{
+  "routing": {
+    "nodes/observe.md": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}

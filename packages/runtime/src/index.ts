@@ -74,3 +74,9 @@ export { WidgetCanvas, formatWidgetName } from './components/WidgetCanvas.js';
 export type { WidgetCanvasProps } from './components/WidgetCanvas.js';
 export { WidgetErrorFallback } from './components/WidgetErrorFallback.js';
 export type { WidgetErrorFallbackProps } from './components/WidgetErrorFallback.js';
+export { BundleOverview } from './components/BundleOverview.js';
+export type {
+  BundleOverviewProps,
+  BundleOverviewModule,
+  ModuleStatus,
+} from './components/BundleOverview.js';

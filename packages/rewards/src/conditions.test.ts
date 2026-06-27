@@ -6,6 +6,7 @@ const defaultContext: ContextSnapshot = {
   scores: { quiz1: 85, quiz2: 60, quiz3: 95 },
   skills: { math: 'mastered', reading: 'achieved' },
   completedNodes: ['n1', 'n2', 'n3'],
+  completedModules: [],
 };
 
 describe('evaluateCondition', () => {
@@ -176,12 +177,39 @@ describe('shouldFireAction', () => {
   });
 });
 
+describe('moduleCompleted condition', () => {
+  it('should return true when module is completed', () => {
+    expect(
+      evaluateCondition(
+        { type: 'moduleCompleted', moduleId: 'mod-a' },
+        { ...defaultContext, completedModules: ['mod-a', 'mod-b'] },
+      ),
+    ).toBe(true);
+  });
+
+  it('should return false when module is not completed', () => {
+    expect(
+      evaluateCondition(
+        { type: 'moduleCompleted', moduleId: 'mod-c' },
+        { ...defaultContext, completedModules: ['mod-a'] },
+      ),
+    ).toBe(false);
+  });
+});
+
+describe('bundleCompleted condition', () => {
+  it('should return false by default (evaluated externally)', () => {
+    expect(evaluateCondition({ type: 'bundleCompleted' }, defaultContext)).toBe(false);
+  });
+});
+
 describe('getDefaultContext', () => {
   it('should return empty context', () => {
     expect(getDefaultContext()).toEqual({
       scores: {},
       skills: {},
       completedNodes: [],
+      completedModules: [],
     });
   });
 });

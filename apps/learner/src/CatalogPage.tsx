@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import type { PackageSummary } from '@open-edu/core';
+import type { PackageSummary, BundleSummary } from '@open-edu/core';
+import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
@@ -7,13 +8,19 @@ import type { AppView } from './LeftNav';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
+  bundleSummaries?: BundleSummary[];
+  bundleProgress?: Record<string, BundleProgressSnapshot>;
   onStartCourse: (packageDir: string) => void;
+  onStartBundle?: (bundleId: string) => void;
   onNavigate?: (view: AppView) => void;
 }
 
 export function CatalogPage({
   packages,
+  bundleSummaries,
+  bundleProgress,
   onStartCourse,
+  onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
   const progress = getAllProgress();
@@ -111,6 +118,61 @@ export function CatalogPage({
                 />
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {bundleSummaries && bundleSummaries.length > 0 && (
+        <section className="mb-xl" data-testid="bundle-list-section">
+          <h2 className="text-h2 font-display font-bold text-on-surface mb-md">Learning Bundles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+            {bundleSummaries.map((bundle) => {
+              const prog = bundleProgress?.[bundle.manifest.id];
+              const completedModules = prog
+                ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
+                : 0;
+              return (
+                <button
+                  key={bundle.manifest.id}
+                  type="button"
+                  onClick={() => onStartBundle?.(bundle.manifest.id)}
+                  className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-left cursor-pointer hover:shadow-md transition-shadow"
+                  data-testid="bundle-card"
+                  data-bundle-id={bundle.manifest.id}
+                >
+                  <div className="flex items-center gap-sm mb-sm">
+                    <span className="text-xs font-bold bg-primary-container text-primary px-2 py-0.5 rounded">
+                      Bundle
+                    </span>
+                    <h3 className="text-h3 font-title font-bold text-on-surface m-0 truncate">
+                      {bundle.manifest.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-on-surface-variant mb-sm line-clamp-2">
+                    {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
+                  </p>
+                  <div className="flex gap-md text-xs text-on-surface-variant">
+                    <span>{bundle.moduleCount} modules</span>
+                    <span>{bundle.totalNodeCount} activities</span>
+                  </div>
+                  {prog && (
+                    <div className="mt-sm">
+                      <div className="h-1.5 rounded-full bg-outline-variant overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{
+                            width: `${Math.round((completedModules / bundle.moduleCount) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-on-surface-variant mt-0.5 block">
+                        {completedModules} of {bundle.moduleCount} complete
+                      </span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </section>
       )}

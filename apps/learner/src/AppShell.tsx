@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { RuntimeThemeProvider, FontLoader, TopAppBar, useThemePreference } from '@open-edu/runtime';
-import type { LoadedPackage, PackageSummary } from '@open-edu/core';
+import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
+import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { LeftNav, type AppView } from './LeftNav';
 import { CourseRuntime } from './CourseRuntime';
 import { HomePage } from './HomePage';
@@ -8,13 +9,22 @@ import { CatalogPage } from './CatalogPage';
 import { ProgressDashboard } from './ProgressDashboard';
 import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
+import { BundleOverviewPage } from './BundleOverviewPage';
+import { getBundleProgress } from './bundleProgressStorage';
 
 export interface AppShellProps {
   catalogPackages: PackageSummary[];
   packageEntries: Record<string, LoadedPackage>;
+  catalogBundles: BundleSummary[];
+  bundleEntries: Record<string, LoadedBundle>;
 }
 
-export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JSX.Element {
+export function AppShell({
+  catalogPackages,
+  packageEntries,
+  catalogBundles,
+  bundleEntries,
+}: AppShellProps): JSX.Element {
   const [view, setView] = useState<AppView>({
     view: 'home',
   });
@@ -24,6 +34,17 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
   const pendingNavigation = useRef<AppView | null>(null);
   const preCourseView = useRef<AppView>({ view: 'home' });
+
+  const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
+    () => {
+      const progress: Record<string, BundleProgressSnapshot> = {};
+      for (const bundleId of Object.keys(bundleEntries)) {
+        const saved = getBundleProgress(bundleId);
+        if (saved) progress[bundleId] = saved;
+      }
+      return progress;
+    },
+  );
 
   const handleProgressUpdate = useCallback((current: number, total: number) => {
     setCourseProgressCurrent(current);
@@ -62,23 +83,47 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
   const handleNavigate = useCallback(
     (newView: AppView) => {
       if (newView.view === 'course') {
-        if (newView.packageId && packageEntries[newView.packageId]) {
-          if (
-            view.view === 'course' &&
-            view.packageId !== newView.packageId &&
-            isCourseInProgress
-          ) {
-            pendingNavigation.current = newView;
-            setShowExitWarning(true);
-          } else {
-            if (view.view !== 'course') {
-              preCourseView.current = view;
-            }
-            setView({ view: 'course', packageId: newView.packageId });
+        if (!newView.packageId || !packageEntries[newView.packageId]) return;
+
+        // Bundle module-to-module navigation: no exit warning
+        const currentBundleId = view.view === 'course' ? view.bundleId : undefined;
+        if (newView.bundleId && currentBundleId === newView.bundleId) {
+          setView({
+            view: 'course',
+            packageId: newView.packageId,
+            bundleId: newView.bundleId,
+            moduleId: newView.moduleId,
+          });
+          return;
+        }
+
+        if (view.view === 'course' && view.packageId !== newView.packageId && isCourseInProgress) {
+          pendingNavigation.current = newView;
+          setShowExitWarning(true);
+        } else {
+          if (view.view !== 'course') {
+            preCourseView.current = view;
           }
+          const nav = newView.bundleId
+            ? {
+                view: 'course' as const,
+                packageId: newView.packageId,
+                bundleId: newView.bundleId,
+                moduleId: newView.moduleId,
+              }
+            : { view: 'course' as const, packageId: newView.packageId };
+          setView(nav);
         }
         return;
       }
+
+      // Navigate to bundle overview while in a course
+      if (newView.view === 'bundleOverview' && isCourseInProgress) {
+        pendingNavigation.current = newView;
+        setShowExitWarning(true);
+        return;
+      }
+
       if (isCourseInProgress) {
         pendingNavigation.current = newView;
         setShowExitWarning(true);
@@ -113,6 +158,14 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
     [packageEntries],
   );
 
+  const handleStartBundle = useCallback((bundleId: string) => {
+    setView({ view: 'bundleOverview', bundleId });
+  }, []);
+
+  const handleStartBundleModule = useCallback((bundleId: string, moduleId: string) => {
+    setView({ view: 'course', packageId: moduleId, bundleId, moduleId });
+  }, []);
+
   const handleBackToCatalog = useCallback(() => {
     setView({ view: 'catalog' });
   }, []);
@@ -121,6 +174,13 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
     if (view.view !== 'course' || !view.packageId) return undefined;
     return packageEntries[view.packageId];
   }, [view, packageEntries]);
+
+  const courseBundle = useMemo<LoadedBundle | undefined>(() => {
+    if (view.view !== 'course' || !view.bundleId) return undefined;
+    const bundle = bundleEntries[view.bundleId];
+    if (!bundle) return undefined;
+    return bundle;
+  }, [view, bundleEntries]);
 
   const getBreadcrumbs = () => {
     switch (view.view) {
@@ -132,8 +192,20 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
         return [{ label: 'My Progress' }];
       case 'settings':
         return [{ label: 'Settings' }];
-      case 'course':
-        return [{ label: coursePkg?.manifest.title ?? 'Course' }];
+      case 'bundleOverview': {
+        const bundle = bundleEntries[view.bundleId];
+        return [{ label: 'Course Catalog' }, { label: bundle?.manifest.title ?? 'Bundle' }];
+      }
+      case 'course': {
+        const breadcrumbs = [{ label: coursePkg?.manifest.title ?? 'Course' }];
+        if (view.bundleId) {
+          const bundle = bundleEntries[view.bundleId];
+          if (bundle) {
+            breadcrumbs.unshift({ label: bundle.manifest.title });
+          }
+        }
+        return breadcrumbs;
+      }
       default:
         return [{ label: 'Home' }];
     }
@@ -160,6 +232,20 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
               onBackToCatalog={handleBackToCatalog}
               hideLayoutShellHeader
               onProgressUpdate={handleProgressUpdate}
+              bundleContext={
+                courseBundle
+                  ? {
+                      bundleId: courseBundle.manifest.id,
+                      bundle: courseBundle,
+                      onBundleSnapshot: (snapshot) => {
+                        setBundleProgress((prev) => ({
+                          ...prev,
+                          [courseBundle.manifest.id]: snapshot,
+                        }));
+                      },
+                    }
+                  : undefined
+              }
             >
               <LeftNav
                 currentView={view}
@@ -177,13 +263,33 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
                 {view.view === 'catalog' && (
                   <CatalogPage
                     packages={catalogPackages}
+                    bundleSummaries={catalogBundles}
+                    bundleProgress={bundleProgress}
                     onStartCourse={handleStartCourse}
+                    onStartBundle={handleStartBundle}
                     onNavigate={handleNavigate}
                   />
                 )}
                 {view.view === 'home' && (
-                  <HomePage onNavigate={handleNavigate} catalogPackages={catalogPackages} />
+                  <HomePage
+                    onNavigate={handleNavigate}
+                    catalogPackages={catalogPackages}
+                    bundleEntries={bundleEntries}
+                  />
                 )}
+                {(() => {
+                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                  const bundle = bundleEntries[view.bundleId];
+                  if (!bundle) return null;
+                  return (
+                    <BundleOverviewPage
+                      bundle={bundle}
+                      bundleProgress={bundleProgress[view.bundleId] ?? null}
+                      onStartModule={handleStartBundleModule}
+                      onBackToCatalog={handleBackToCatalog}
+                    />
+                  );
+                })()}
                 {view.view === 'progress' && (
                   <ProgressDashboard
                     onNavigate={handleNavigate}

@@ -1,0 +1,7 @@
+{
+  "routing": {
+    "nodes/lesson.md": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}

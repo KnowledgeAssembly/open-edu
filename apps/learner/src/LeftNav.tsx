@@ -7,7 +7,8 @@ export type AppView =
   | { view: 'catalog' }
   | { view: 'progress' }
   | { view: 'settings' }
-  | { view: 'course'; packageId: string };
+  | { view: 'course'; packageId: string; bundleId?: string; moduleId?: string }
+  | { view: 'bundleOverview'; bundleId: string };
 
 export interface LeftNavProps {
   currentView: AppView;

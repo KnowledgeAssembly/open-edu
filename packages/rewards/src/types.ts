@@ -31,6 +31,7 @@ export interface ContextSnapshot {
   scores: Record<string, number>;
   skills: Record<string, 'achieved' | 'mastered'>;
   completedNodes: string[];
+  completedModules: string[];
 }
 
 export interface RewardBrokerOptions {

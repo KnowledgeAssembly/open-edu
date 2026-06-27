@@ -22,6 +22,12 @@ export function evaluateCondition(condition: RewardCondition, context: ContextSn
     case 'or': {
       return condition.conditions.some((c: RewardCondition) => evaluateCondition(c, context));
     }
+    case 'moduleCompleted': {
+      return (context.completedModules ?? []).includes(condition.moduleId);
+    }
+    case 'bundleCompleted': {
+      return false; // evaluated externally by BundleEngine
+    }
     default:
       return false;
   }
@@ -40,5 +46,6 @@ export function getDefaultContext(): ContextSnapshot {
     scores: {},
     skills: {},
     completedNodes: [],
+    completedModules: [],
   };
 }

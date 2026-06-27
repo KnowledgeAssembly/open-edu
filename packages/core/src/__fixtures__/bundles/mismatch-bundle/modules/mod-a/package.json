@@ -1,0 +1,7 @@
+{
+  "id": "mod-a-different",
+  "title": "Module A",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "entry": "nodes/lesson.md"
+}

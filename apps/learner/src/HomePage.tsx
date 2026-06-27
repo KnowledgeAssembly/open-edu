@@ -2,19 +2,30 @@ import type { PackageSummary } from '@open-edu/core';
 import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
+import { getAllBundleProgress } from './bundleProgressStorage';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
   catalogPackages?: PackageSummary[];
+  bundleEntries?: Record<string, unknown>;
 }
 
-export function HomePage({ onNavigate, catalogPackages = [] }: HomePageProps): JSX.Element {
+export function HomePage({
+  onNavigate,
+  catalogPackages = [],
+  bundleEntries,
+}: HomePageProps): JSX.Element {
   const progress = getAllProgress();
   const badgeData = getAllBadges();
+  const bundleProg = getAllBundleProgress();
   const courseCount = catalogPackages.length;
-  const inProgressCount = Object.values(progress).filter(
-    (p) => !p.isCompleted && p.visitedNodes.length > 0,
-  ).length;
+  const bundleCount = bundleEntries ? Object.keys(bundleEntries).length : 0;
+  const totalUnits = courseCount + bundleCount;
+  const inProgressCount =
+    Object.values(progress).filter((p) => !p.isCompleted && p.visitedNodes.length > 0).length +
+    Object.values(bundleProg).filter(
+      (b) => !Object.values(b.moduleStatuses).every((s) => s === 'completed'),
+    ).length;
   const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
@@ -27,8 +38,8 @@ export function HomePage({ onNavigate, catalogPackages = [] }: HomePageProps): J
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
           <div className="text-3xl mb-sm">{'\uD83D\uDCDA'}</div>
-          <div className="text-h2 font-display text-primary font-bold">{courseCount}</div>
-          <p className="text-on-surface-variant text-sm">Courses Available</p>
+          <div className="text-h2 font-display text-primary font-bold">{totalUnits}</div>
+          <p className="text-on-surface-variant text-sm">Learning Units Available</p>
         </div>
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
           <div className="text-3xl mb-sm">{'\uD83D\uDCC8'}</div>

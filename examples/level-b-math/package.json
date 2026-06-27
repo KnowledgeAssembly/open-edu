@@ -1,0 +1,19 @@
+{
+  "name": "@open-edu/example-level-b-math",
+  "id": "level-b-math",
+  "title": "Level B Math",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-module math bundle example for Open-Edu",
+  "author": "Open-Edu",
+  "devDependencies": {
+    "@open-edu/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'example build placeholder'",
+    "test": "vitest run",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "clean": "rm -rf dist"
+  }
+}

@@ -1,0 +1,333 @@
+import type {
+  BundleManifest,
+  BundleModuleRef,
+  ModuleProgressSnapshot,
+  Workflow,
+} from '@open-edu/schemas';
+import type { SkillGraph } from '@open-edu/schemas';
+import { WorkflowEngine } from './engine.js';
+
+export type ModuleStatus = 'locked' | 'unlocked' | 'in_progress' | 'completed';
+
+export interface ModuleChangeEvent {
+  type: 'module.changed';
+  previousModuleId: string | null;
+  currentModuleId: string;
+}
+
+export interface ModuleCompletedEvent {
+  type: 'module.completed';
+  moduleId: string;
+}
+
+export interface BundleCompletedEvent {
+  type: 'bundle.completed';
+}
+
+export interface ModuleUnlockedEvent {
+  type: 'module.unlocked';
+  moduleId: string;
+}
+
+export type BundleEngineEvent =
+  | ModuleChangeEvent
+  | ModuleCompletedEvent
+  | BundleCompletedEvent
+  | ModuleUnlockedEvent;
+
+export type BundleEngineEventListener = (event: BundleEngineEvent) => void;
+
+export interface BundleEngineOptions {
+  entry?: string;
+  moduleSnapshots?: Record<string, ModuleProgressSnapshot>;
+  skillGraph?: SkillGraph;
+}
+
+export interface BundleModulePackage {
+  manifest: { id: string; version: string };
+  workflow: Workflow | null;
+}
+
+export interface BundleInput {
+  rootDir: string;
+  manifest: BundleManifest;
+  modules: BundleModulePackage[];
+  moduleMap: Map<string, BundleModulePackage>;
+}
+
+export class BundleEngine {
+  private bundleInput: BundleInput;
+  private engineMap: Map<string, WorkflowEngine>;
+  private currentModuleId: string | null = null;
+  private moduleStatuses: Record<string, ModuleStatus>;
+  private listeners: BundleEngineEventListener[] = [];
+  private moduleSubscriptions: Map<string, () => void>;
+  private moduleSnapshots: Record<string, ModuleProgressSnapshot>;
+  private skillGraph?: SkillGraph;
+
+  constructor(bundleInput: BundleInput, options?: BundleEngineOptions) {
+    this.bundleInput = bundleInput;
+    this.engineMap = new Map();
+    this.moduleSubscriptions = new Map();
+    this.moduleSnapshots = options?.moduleSnapshots ?? {};
+    this.skillGraph = options?.skillGraph;
+
+    this.moduleStatuses = {};
+    for (const modRef of bundleInput.manifest.modules) {
+      const existingSnapshot = this.moduleSnapshots[modRef.id];
+      if (existingSnapshot?.isCompleted) {
+        this.moduleStatuses[modRef.id] = 'completed';
+      } else if (existingSnapshot && existingSnapshot.currentNodeId) {
+        this.moduleStatuses[modRef.id] = 'in_progress';
+      } else if (modRef.dependsOn.length === 0) {
+        this.moduleStatuses[modRef.id] = 'unlocked';
+      } else {
+        this.moduleStatuses[modRef.id] = 'locked';
+      }
+    }
+
+    const moduleIds = new Set(bundleInput.manifest.modules.map((m) => m.id));
+    for (const modRef of bundleInput.manifest.modules) {
+      for (const depId of modRef.dependsOn) {
+        if (!moduleIds.has(depId)) {
+          throw new Error(`Module "${modRef.id}" depends on "${depId}" which is not in the bundle`);
+        }
+      }
+    }
+  }
+
+  start(moduleId?: string): void {
+    const targetId = moduleId ?? this.findFirstUnlocked();
+    if (!targetId) {
+      throw new Error('No unlocked module available to start');
+    }
+
+    if (this.moduleStatuses[targetId] === 'locked') {
+      throw new Error(`Module "${targetId}" is locked and cannot be started`);
+    }
+
+    this.snapshotActiveModule();
+
+    const previousModuleId = this.currentModuleId;
+
+    const pkg = this.bundleInput.moduleMap.get(targetId);
+    if (!pkg) {
+      throw new Error(`Module "${targetId}" not found in bundle`);
+    }
+    if (!pkg.workflow) {
+      throw new Error(`Module "${targetId}" has no workflow defined`);
+    }
+
+    const snapshot = this.moduleSnapshots[targetId];
+    const engine = new WorkflowEngine(pkg.workflow, {
+      entry: snapshot?.currentNodeId ?? undefined,
+      skillGraph: this.skillGraph,
+    });
+
+    const unsub = engine.subscribe((event) => {
+      if (event.type === 'workflow.completed') {
+        this.handleModuleCompleted(targetId);
+      }
+    });
+
+    const prevUnsub = this.moduleSubscriptions.get(targetId);
+    if (prevUnsub) prevUnsub();
+    this.moduleSubscriptions.set(targetId, unsub);
+
+    const prevEngine = this.engineMap.get(targetId);
+    if (prevEngine) prevEngine.stop();
+
+    this.engineMap.set(targetId, engine);
+    engine.start();
+    this.currentModuleId = targetId;
+
+    if (this.moduleStatuses[targetId] === 'unlocked') {
+      this.moduleStatuses[targetId] = 'in_progress';
+    }
+
+    if (previousModuleId !== targetId) {
+      this.fireEvent({
+        type: 'module.changed',
+        previousModuleId,
+        currentModuleId: targetId,
+      });
+    }
+  }
+
+  stop(): void {
+    this.snapshotActiveModule();
+
+    if (this.currentModuleId) {
+      const engine = this.engineMap.get(this.currentModuleId);
+      if (engine) {
+        engine.stop();
+      }
+      const unsub = this.moduleSubscriptions.get(this.currentModuleId);
+      if (unsub) {
+        unsub();
+        this.moduleSubscriptions.delete(this.currentModuleId);
+      }
+    }
+
+    this.currentModuleId = null;
+  }
+
+  getCurrentModuleId(): string | null {
+    return this.currentModuleId;
+  }
+
+  getCurrentEngine(): WorkflowEngine | null {
+    if (!this.currentModuleId) return null;
+    return this.engineMap.get(this.currentModuleId) ?? null;
+  }
+
+  getModuleStatus(moduleId: string): ModuleStatus {
+    return this.moduleStatuses[moduleId] ?? 'locked';
+  }
+
+  getModuleStatuses(): Record<string, ModuleStatus> {
+    return { ...this.moduleStatuses };
+  }
+
+  getModuleSnapshot(moduleId: string): ModuleProgressSnapshot | null {
+    return this.moduleSnapshots[moduleId] ?? null;
+  }
+
+  isCompleted(): boolean {
+    return this.bundleInput.manifest.modules.every(
+      (m) => this.moduleStatuses[m.id] === 'completed',
+    );
+  }
+
+  switchModule(moduleId: string): void {
+    if (moduleId === this.currentModuleId) return;
+
+    if (!this.bundleInput.moduleMap.has(moduleId)) {
+      throw new Error(`Module "${moduleId}" not found in bundle`);
+    }
+
+    if (this.moduleStatuses[moduleId] === 'locked') {
+      throw new Error(`Module "${moduleId}" is locked`);
+    }
+
+    this.snapshotActiveModule();
+    if (this.currentModuleId) {
+      const engine = this.engineMap.get(this.currentModuleId);
+      if (engine) {
+        engine.stop();
+      }
+      const unsub = this.moduleSubscriptions.get(this.currentModuleId);
+      if (unsub) {
+        unsub();
+        this.moduleSubscriptions.delete(this.currentModuleId);
+      }
+    }
+
+    this.start(moduleId);
+  }
+
+  subscribe(listener: BundleEngineEventListener): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
+  }
+
+  private findFirstUnlocked(): string | undefined {
+    const visited = new Set<string>();
+    const result: string[] = [];
+
+    function dfs(id: string, modules: BundleModuleRef[], stack: Set<string>): void {
+      if (visited.has(id)) return;
+      if (stack.has(id)) return;
+      stack.add(id);
+      const modRef = modules.find((m) => m.id === id);
+      if (modRef) {
+        for (const depId of modRef.dependsOn) {
+          dfs(depId, modules, stack);
+        }
+      }
+      stack.delete(id);
+      visited.add(id);
+      result.push(id);
+    }
+
+    const allIds = this.bundleInput.manifest.modules.map((m) => m.id);
+    for (const id of allIds) {
+      dfs(id, this.bundleInput.manifest.modules, new Set());
+    }
+
+    for (const id of result) {
+      if (this.moduleStatuses[id] === 'unlocked' || this.moduleStatuses[id] === 'in_progress') {
+        return id;
+      }
+    }
+    return undefined;
+  }
+
+  private handleModuleCompleted(moduleId: string): void {
+    this.moduleStatuses[moduleId] = 'completed';
+    this.moduleSnapshots[moduleId] = {
+      moduleId,
+      packageVersion: this.bundleInput.moduleMap.get(moduleId)?.manifest?.version ?? '0.0.0',
+      currentNodeId: '',
+      visitedNodes: [],
+      scores: {},
+      isCompleted: true,
+      completedAt: new Date().toISOString(),
+    };
+
+    this.fireEvent({ type: 'module.completed', moduleId });
+    this.evaluatePrerequisites(moduleId);
+
+    if (this.isCompleted()) {
+      this.fireEvent({ type: 'bundle.completed' });
+    }
+  }
+
+  private evaluatePrerequisites(_completedModuleId: string): void {
+    for (const modRef of this.bundleInput.manifest.modules) {
+      if (this.moduleStatuses[modRef.id] !== 'locked') continue;
+
+      const allDepsCompleted = modRef.dependsOn.every(
+        (depId) => this.moduleStatuses[depId] === 'completed',
+      );
+
+      if (allDepsCompleted) {
+        this.moduleStatuses[modRef.id] = 'unlocked';
+        this.fireEvent({ type: 'module.unlocked', moduleId: modRef.id });
+      }
+    }
+  }
+
+  private snapshotActiveModule(): void {
+    if (!this.currentModuleId) return;
+
+    const engine = this.engineMap.get(this.currentModuleId);
+    if (!engine) return;
+
+    const currentNodeId = engine.getCurrentNodeId();
+    const isCompleted = engine.isCompleted();
+
+    this.moduleSnapshots[this.currentModuleId] = {
+      moduleId: this.currentModuleId,
+      packageVersion:
+        this.bundleInput.moduleMap.get(this.currentModuleId)?.manifest?.version ?? '0.0.0',
+      currentNodeId,
+      visitedNodes: currentNodeId ? [currentNodeId] : [],
+      scores: {},
+      isCompleted,
+      completedAt: isCompleted ? new Date().toISOString() : undefined,
+    };
+  }
+
+  private fireEvent(event: BundleEngineEvent): void {
+    for (const listener of this.listeners) {
+      try {
+        listener(event);
+      } catch {
+        // silently handle listener errors
+      }
+    }
+  }
+}

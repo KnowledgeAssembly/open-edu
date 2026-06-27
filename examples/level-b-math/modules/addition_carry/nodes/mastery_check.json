@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "title": "Carry Practice",
+  "content": "Solve the following addition with carry:",
+  "options": [
+    { "id": "b1", "text": "42", "correct": true },
+    { "id": "b2", "text": "32", "correct": false },
+    { "id": "b3", "text": "52", "correct": false }
+  ],
+  "question": "What is 27 + 15?"
+}

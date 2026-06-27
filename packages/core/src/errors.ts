@@ -79,3 +79,41 @@ export class RewardsValidationError extends PackageLoadError {
     this.zodError = zodError ?? null;
   }
 }
+
+export class BundleValidationError extends PackageLoadError {
+  public readonly zodError: ZodError | null;
+
+  constructor(message: string, zodError?: ZodError, diagnostics?: ErrorDiagnostics) {
+    super('BUNDLE_VALIDATION_ERROR', message, diagnostics);
+    this.name = 'BundleValidationError';
+    this.zodError = zodError ?? null;
+  }
+}
+
+export class ModuleNotFoundError extends PackageLoadError {
+  constructor(message: string, diagnostics?: ErrorDiagnostics) {
+    super('MODULE_NOT_FOUND', message, diagnostics);
+    this.name = 'ModuleNotFoundError';
+  }
+}
+
+export class ModuleMismatchError extends PackageLoadError {
+  constructor(message: string, diagnostics?: ErrorDiagnostics) {
+    super('MODULE_MISMATCH', message, diagnostics);
+    this.name = 'ModuleMismatchError';
+  }
+}
+
+export class CircularDependencyError extends PackageLoadError {
+  constructor(message: string, diagnostics?: ErrorDiagnostics) {
+    super('CIRCULAR_DEPENDENCY', message, diagnostics);
+    this.name = 'CircularDependencyError';
+  }
+}
+
+export class MissingPrerequisiteError extends PackageLoadError {
+  constructor(message: string, diagnostics?: ErrorDiagnostics) {
+    super('MISSING_PREREQUISITE', message, diagnostics);
+    this.name = 'MissingPrerequisiteError';
+  }
+}

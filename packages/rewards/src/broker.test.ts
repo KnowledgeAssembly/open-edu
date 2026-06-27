@@ -162,7 +162,7 @@ describe('RewardBroker', () => {
     broker = new RewardBroker({
       rewards: conditionalRewards,
       source: subject.asObservable(),
-      context: { scores: { quiz1: 50 }, skills: {}, completedNodes: [] },
+      context: { scores: { quiz1: 50 }, skills: {}, completedNodes: [], completedModules: [] },
     });
     broker.start();
     subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
@@ -189,7 +189,7 @@ describe('RewardBroker', () => {
     broker = new RewardBroker({
       rewards: conditionalRewards,
       source: subject.asObservable(),
-      context: { scores: { quiz1: 90 }, skills: {}, completedNodes: [] },
+      context: { scores: { quiz1: 90 }, skills: {}, completedNodes: [], completedModules: [] },
     });
     broker.start();
     subject.next({ event: 'node_complete', nodeId: 'n1', timestamp: 1000 } as TelemetryEvent);
@@ -215,7 +215,7 @@ describe('RewardBroker', () => {
     broker = new RewardBroker({
       rewards: conditionalRewards,
       source: subject.asObservable(),
-      context: { scores: {}, skills: {}, completedNodes: [] },
+      context: { scores: {}, skills: {}, completedNodes: [], completedModules: [] },
     });
     broker.start();
     broker.updateContext({ scores: { quiz1: 85 } });

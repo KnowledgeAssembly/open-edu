@@ -5,7 +5,7 @@ import { TelemetryInspector } from './TelemetryInspector';
 import { AccessibilityInspector } from './AccessibilityInspector';
 import { RewardsInspector } from './RewardsInspector';
 
-type Tab = 'telemetry' | 'accessibility' | 'rewards';
+type Tab = 'telemetry' | 'accessibility' | 'rewards' | 'bundle';
 
 interface InspectorPanelProps {
   telemetryEvents: TelemetryEvent[];
@@ -16,6 +16,7 @@ interface InspectorPanelProps {
     condition?: unknown;
   }>;
   onResendReward?: (receipt: RewardReceipt) => void;
+  bundleData?: any;
 }
 
 const panelStyle: Record<string, React.CSSProperties> = {
@@ -86,6 +87,7 @@ export function InspectorPanel({
   rewardReceipts,
   definedRewards,
   onResendReward,
+  bundleData,
 }: InspectorPanelProps): JSX.Element | null {
   const [activeTab, setActiveTab] = useState<Tab>('telemetry');
   const [isOpen, setIsOpen] = useState(true);
@@ -114,8 +116,34 @@ export function InspectorPanel({
         onResend={onResendReward}
       />
     );
-  } else {
+  } else if (activeTab === 'accessibility') {
     content = <AccessibilityInspector />;
+  } else if (activeTab === 'bundle') {
+    content = (
+      <div style={{ padding: '0.5rem' }}>
+        <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Bundle Modules</h3>
+        {bundleData?.manifest?.modules?.map((mod: any) => (
+          <div
+            key={mod.id}
+            style={{
+              padding: '0.5rem',
+              marginBottom: '0.25rem',
+              background: '#fff',
+              borderRadius: '4px',
+              border: '1px solid #e5e7eb',
+            }}
+          >
+            <div style={{ fontWeight: 500 }}>{mod.title}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+              ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
+            </div>
+          </div>
+        ))}
+        {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>No modules loaded.</p>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -148,6 +176,15 @@ export function InspectorPanel({
         >
           A11y
         </button>
+        {bundleData && (
+          <button
+            type="button"
+            style={{ ...panelStyle.tab, ...(activeTab === 'bundle' ? panelStyle.activeTab : {}) }}
+            onClick={() => setActiveTab('bundle')}
+          >
+            Bundle
+          </button>
+        )}
         <button
           type="button"
           style={panelStyle.closeBtn}

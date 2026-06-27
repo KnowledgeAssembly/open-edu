@@ -1,0 +1,11 @@
+{
+  "type": "quiz",
+  "title": "Practice Addition",
+  "content": "Solve these addition problems:",
+  "options": [
+    { "id": "a1", "text": "7", "correct": true },
+    { "id": "a2", "text": "8", "correct": false },
+    { "id": "a3", "text": "6", "correct": false }
+  ],
+  "question": "What is 4 + 3?"
+}
