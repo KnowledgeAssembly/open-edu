@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { chartReader } from './ChartReader';
 
 const WidgetComponent = chartReader.render;
@@ -144,14 +144,6 @@ describe('ChartReader pictograph mode', () => {
 });
 
 describe('ChartReader observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const barConfig = {
     type: 'bar' as const,
     data: [
@@ -161,12 +153,10 @@ describe('ChartReader observe mode', () => {
     title: 'Fruit Sales',
   };
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes after clicking acknowledge in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(barConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -174,20 +164,14 @@ describe('ChartReader observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after acknowledge', () => {
     renderWidget(barConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(screen.getByTestId('chart-submitted')).toBeInTheDocument();
-    expect(screen.getByText('Completed.')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
+    expect(screen.getByText('Content acknowledged.')).toBeInTheDocument();
   });
 
   it('does not auto-complete in interactive mode', () => {
     const { complete } = renderWidget({ ...barConfig, interactive: true, correctLabel: 'Apples' });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
     expect(complete).not.toHaveBeenCalled();
   });
 });

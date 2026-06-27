@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { placeValueChart } from './PlaceValueChart';
 
 const WidgetComponent = placeValueChart.render;
@@ -29,14 +29,6 @@ describe('PlaceValueChart schema', () => {
 });
 
 describe('PlaceValueChart observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders lakh columns by default', () => {
     renderWidget({ maxPlaces: 'lakh' });
     expect(screen.getByTestId('column-L')).toBeTruthy();
@@ -96,12 +88,10 @@ describe('PlaceValueChart observe mode', () => {
     expect(screen.getByTestId('slot-O')).toHaveTextContent('4');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes when acknowledge button is clicked', () => {
     const { complete, emitInteraction } = renderWidget({ maxPlaces: 'lakh', digits: [5] });
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -109,11 +99,9 @@ describe('PlaceValueChart observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows content acknowledged after acknowledge click', () => {
     renderWidget({ maxPlaces: 'lakh', digits: [5] });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 
@@ -337,14 +325,6 @@ describe('PlaceValueChart keyboard accessibility', () => {
 });
 
 describe('PlaceValueChart edge cases', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('defaults to observe mode when interactive not specified', () => {
     renderWidget({ maxPlaces: 'lakh' });
     expect(screen.getByTestId('place-value-chart')).toBeTruthy();

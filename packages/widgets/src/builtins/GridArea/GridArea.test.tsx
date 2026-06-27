@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { gridArea } from './GridArea';
 
 const WidgetComponent = gridArea.render;
@@ -37,14 +37,6 @@ describe('GridArea schema', () => {
 });
 
 describe('GridArea observe mode (interactive: false)', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders a grid with correct dimensions', () => {
     renderWidget({ rows: 3, cols: 4, interactive: false });
     const grid = screen.getByRole('grid');
@@ -84,7 +76,7 @@ describe('GridArea observe mode (interactive: false)', () => {
     expect(screen.getByText('Area count: 3')).toBeTruthy();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes when acknowledge button is clicked', () => {
     const { complete, emitInteraction } = renderWidget({
       rows: 2,
       cols: 2,
@@ -92,9 +84,7 @@ describe('GridArea observe mode (interactive: false)', () => {
       interactive: false,
     });
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -102,11 +92,9 @@ describe('GridArea observe mode (interactive: false)', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows content acknowledged after acknowledge click', () => {
     renderWidget({ rows: 2, cols: 2, highlighted: [{ row: 0, col: 0 }], interactive: false });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 

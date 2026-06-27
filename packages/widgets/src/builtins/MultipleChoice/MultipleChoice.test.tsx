@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { multipleChoice, multipleChoicePractice } from './MultipleChoice';
 
 const WidgetComponent = multipleChoice.render;
@@ -220,14 +220,6 @@ describe('MultipleChoice multi-question interactive mode', () => {
 });
 
 describe('MultipleChoice multi-question observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     questions: [
       { question: 'What is 2 + 2?', options: ['3', '4', '5'], correctIndex: 1 },
@@ -244,17 +236,15 @@ describe('MultipleChoice multi-question observe mode', () => {
     expect(screen.getByText('✓')).toBeInTheDocument();
   });
 
-  it('does not show Next or Submit button in observe mode', () => {
+  it('shows Mark as seen button in observe mode', () => {
     renderWidget(observeConfig);
-    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByTestId('observe-acknowledge')).toHaveTextContent('Mark as seen ✓');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('auto-completes after clicking Mark as seen in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -262,13 +252,11 @@ describe('MultipleChoice multi-question observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after Mark as seen', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
-    expect(screen.getByText('Completed.')).toBeInTheDocument();
+    expect(screen.getByText('Content acknowledged.')).toBeInTheDocument();
   });
 });
 

@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 export const gridAreaSchema = z.object({
   rows: z.number().min(1).max(20),
@@ -83,20 +85,12 @@ function GridAreaComponent(props: {
     return expectedCells.size;
   }, [config, expectedCells]);
 
-  useEffect(() => {
-    if (!isObserve || submitted || !config) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, config, emitInteraction, complete]);
+  const { acknowledged, handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isObserve && !!config,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.grid-area',
+  });
 
   const toggleCell = useCallback(
     (row: number, col: number) => {
@@ -137,8 +131,9 @@ function GridAreaComponent(props: {
 
   if (!config) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-error bg-error/10 p-md text-on-surface">
+        <p className="font-semibold">Unable to load grid configuration</p>
+        <p className="text-sm opacity-80">Please check the widget settings and try again.</p>
       </div>
     );
   }
@@ -208,15 +203,23 @@ function GridAreaComponent(props: {
 
       {config.interactive && !submitted && (
         <div style={{ marginTop: '0.5rem' }}>
-          <button onClick={handleSubmit} data-testid="submit-button">
+          <ThemedButton variant="primary" onClick={handleSubmit} data-testid="submit-button">
             Submit
-          </button>
+          </ThemedButton>
         </div>
       )}
 
-      {submitted && isObserve && (
+      {showAcknowledgeButton && (
+        <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            Acknowledge
+          </ThemedButton>
+        </div>
+      )}
+
+      {!showAcknowledgeButton && acknowledged && (
         <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Observed.</p>
+          <p>Content acknowledged.</p>
         </div>
       )}
 

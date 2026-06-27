@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 export const visualCountingSchema = z.object({
   description: z.string().optional(),
@@ -59,20 +61,12 @@ function VisualCountingComponent(props: {
   const labelName = content.text ?? 'item';
   const isObserve = !content.interactive;
 
-  useEffect(() => {
-    if (!isObserve || submitted) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.visual-counting',
+  });
 
   const handleNumberClick = useCallback(
     (num: number) => {
@@ -107,8 +101,8 @@ function VisualCountingComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
   }
@@ -186,9 +180,16 @@ function VisualCountingComponent(props: {
             </>
           )}
         </div>
-        {submitted && (
+        {showAcknowledgeButton && (
+          <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+              Mark as seen ✓
+            </ThemedButton>
+          </div>
+        )}
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Observed.</p>
+            <p>Content acknowledged.</p>
           </div>
         )}
       </div>
@@ -207,24 +208,16 @@ function VisualCountingComponent(props: {
         <div role="group" aria-label="Count selection" style={{ marginTop: '1rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {numberButtons.map((num) => (
-              <button
+              <ThemedButton
                 key={num}
+                variant={selectedCount === num ? "primary" : "outline"}
+                size="sm"
                 onClick={() => handleNumberClick(num)}
                 aria-pressed={selectedCount === num}
                 aria-label={`Count ${num}`}
-                style={{
-                  padding: '0.5rem 1rem',
-                  fontSize: '1rem',
-                  fontWeight: selectedCount === num ? 'bold' : 'normal',
-                  backgroundColor: selectedCount === num ? '#3b82f6' : '#e5e7eb',
-                  color: selectedCount === num ? 'white' : 'black',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.25rem',
-                  cursor: 'pointer',
-                }}
               >
                 {num}
-              </button>
+              </ThemedButton>
             ))}
           </div>
         </div>
@@ -234,9 +227,9 @@ function VisualCountingComponent(props: {
         <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
+            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </button>
+            </ThemedButton>
           )}
         </div>
       )}
@@ -249,13 +242,13 @@ function VisualCountingComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <button onClick={handleSubmit} disabled={selectedCount === null}>
+          <ThemedButton variant="primary" onClick={handleSubmit} disabled={selectedCount === null}>
             Submit
-          </button>
+          </ThemedButton>
         ) : (
-          <button disabled data-testid="result-display">
+          <ThemedButton variant="outline" disabled data-testid="result-display">
             {selectedCount === expected ? 'Correct!' : 'Incorrect'}
-          </button>
+          </ThemedButton>
         )}
       </div>
 

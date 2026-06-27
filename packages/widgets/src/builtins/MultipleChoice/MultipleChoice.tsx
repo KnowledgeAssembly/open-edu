@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const optionSchema = z.object({
   id: z.string(),
@@ -57,21 +59,12 @@ function MultipleChoiceComponent(props: {
   const isMultiInteractive = multiParsed.success && multiParsed.data.interactive;
   const isMultiObserve = multiParsed.success && !multiParsed.data.interactive;
 
-  useEffect(() => {
-    if (!isMultiObserve || submitted) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.multiple-choice',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isMultiObserve, submitted, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isMultiObserve,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.multiple-choice',
+  });
 
   const handleLegacySubmit = useCallback(() => {
     if (!selectedId || submitted || !legacyParsed.success) return;
@@ -143,8 +136,8 @@ function MultipleChoiceComponent(props: {
 
   if (!legacyParsed.success && !multiParsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration: must provide either prompt+options or questions.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
   }
@@ -171,15 +164,15 @@ function MultipleChoiceComponent(props: {
             {opt.text}
           </label>
         ))}
-        <button onClick={handleLegacySubmit} disabled={!selectedId || submitted}>
+        <ThemedButton variant="primary" onClick={handleLegacySubmit} disabled={!selectedId || submitted}>
           {submitted ? (isCorrect ? 'Correct!' : 'Incorrect') : 'Submit'}
-        </button>
+        </ThemedButton>
         {submitted && config.explanation && <p role="status">{config.explanation}</p>}
       </div>
     );
   }
 
-  if (multiParsed.success && isMultiObserve && !submitted) {
+  if (multiParsed.success && isMultiObserve && showAcknowledgeButton) {
     const config = multiParsed.data;
     const question = config.questions[0]!;
 
@@ -202,11 +195,18 @@ function MultipleChoiceComponent(props: {
             </label>
           ))}
         </fieldset>
+        {showAcknowledgeButton && (
+          <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+              Mark as seen ✓
+            </ThemedButton>
+          </div>
+        )}
       </div>
     );
   }
 
-  if (multiParsed.success && isMultiObserve && submitted) {
+  if (multiParsed.success && isMultiObserve && !showAcknowledgeButton) {
     const config = multiParsed.data;
     const question = config.questions[0]!;
 
@@ -230,7 +230,7 @@ function MultipleChoiceComponent(props: {
           ))}
         </fieldset>
         <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Completed.</p>
+          <p>Content acknowledged.</p>
         </div>
       </div>
     );
@@ -277,9 +277,9 @@ function MultipleChoiceComponent(props: {
             </label>
           ))}
         </fieldset>
-        <button onClick={handleMultiNext} disabled={!canAdvance}>
+        <ThemedButton variant="primary" onClick={handleMultiNext} disabled={!canAdvance}>
           {isLastQuestion ? 'Submit' : 'Next'}
-        </button>
+        </ThemedButton>
       </div>
     );
   }

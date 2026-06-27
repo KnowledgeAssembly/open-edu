@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const dataItemSchema = z.object({
   label: z.string().min(1),
@@ -51,21 +53,12 @@ function ChartReaderComponent(props: {
   const isObserve = parsed.success && !parsed.data.interactive && !parsed.data.correctLabel;
   const isInteractive = parsed.success && parsed.data.interactive && !!parsed.data.correctLabel;
 
-  useEffect(() => {
-    if (!isObserve || submitted) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.chart-reader',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.chart-reader',
+  });
 
   const handleSelect = useCallback(
     (label: string) => {
@@ -87,8 +80,9 @@ function ChartReaderComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="bg-error-container text-on-error-container p-md rounded-lg">
+        <p className="font-semibold">Chart configuration is invalid</p>
+        <p className="text-sm mt-xs opacity-80">{parsed.error.issues.map((i) => i.message).join('; ')}</p>
       </div>
     );
   }
@@ -118,9 +112,16 @@ function ChartReaderComponent(props: {
         />
       )}
 
-      {submitted && (
+      {showAcknowledgeButton && (
+        <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            Mark as seen ✓
+          </ThemedButton>
+        </div>
+      )}
+      {!showAcknowledgeButton && (submitted || isObserve) && (
         <div role="status" aria-live="assertive" data-testid="chart-submitted">
-          <p>Completed.</p>
+          <p>Content acknowledged.</p>
         </div>
       )}
     </div>

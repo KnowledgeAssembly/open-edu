@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 export const matchingSchema = z.object({
   description: z.string().optional(),
@@ -57,20 +59,12 @@ function MatchingComponent(props: {
     return shuffleArray(content.pairs);
   }, [content]);
 
-  useEffect(() => {
-    if (!isObserve || submitted || !hasValidContent) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, hasValidContent, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isObserve && hasValidContent,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.matching',
+  });
 
   const handleLeftItemClick = useCallback(
     (pairId: string) => {
@@ -141,8 +135,9 @@ function MatchingComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <p className="font-medium">Unable to load matching widget</p>
+        <p className="mt-1 text-sm">The widget configuration is missing or invalid. Please check the package definition.</p>
       </div>
     );
   }
@@ -217,9 +212,16 @@ function MatchingComponent(props: {
             </div>
           </div>
         </div>
-        {submitted && (
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Observed.</p>
+            <p>Content acknowledged.</p>
+          </div>
+        )}
+        {showAcknowledgeButton && (
+          <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+              Mark as seen ✓
+            </ThemedButton>
           </div>
         )}
       </div>
@@ -275,23 +277,17 @@ function MatchingComponent(props: {
               >
                 {pair.itemA}
                 {isConnected && (
-                  <button
+                  <ThemedButton
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveConnection(pairId);
                     }}
-                    style={{
-                      marginLeft: '0.5rem',
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem',
-                      color: '#ef4444',
-                    }}
                     aria-label={`Remove match for ${pair.itemA}`}
                   >
                     ✕
-                  </button>
+                  </ThemedButton>
                 )}
               </div>
             );
@@ -371,9 +367,9 @@ function MatchingComponent(props: {
         <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
+            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </button>
+            </ThemedButton>
           )}
         </div>
       )}
@@ -386,15 +382,15 @@ function MatchingComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <button onClick={handleSubmit} disabled={!allLeftConnected}>
+          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allLeftConnected}>
             Submit
-          </button>
+          </ThemedButton>
         ) : (
-          <button disabled data-testid="result-display">
+          <ThemedButton variant="outline" disabled data-testid="result-display">
             {Array.from(connections.entries()).every(([leftId, rightId]) => leftId === rightId)
               ? 'Correct!'
               : 'Incorrect'}
-          </button>
+          </ThemedButton>
         )}
       </div>
 

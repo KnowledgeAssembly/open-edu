@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { realWorld } from './RealWorld';
 
 const WidgetComponent = realWorld.render;
@@ -36,13 +36,6 @@ describe('RealWorld widget definition', () => {
 });
 
 describe('RealWorld observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
 
   it('renders scenario in an article', () => {
     renderWidget(sampleConfig);
@@ -73,17 +66,15 @@ describe('RealWorld observe mode', () => {
     expect(screen.queryByTestId('response-textarea')).toBeNull();
   });
 
-  it('does not show complete button in observe mode', () => {
+  it('does not show interactive complete button in observe mode', () => {
     renderWidget(sampleConfig);
-    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByTestId('complete-task-button')).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes after clicking acknowledge in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(sampleConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('acknowledge-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -91,25 +82,19 @@ describe('RealWorld observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after acknowledge', () => {
     renderWidget(sampleConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('acknowledge-button'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
-    expect(screen.getByText('Completed.')).toBeInTheDocument();
+    expect(screen.getByText('Content acknowledged.')).toBeInTheDocument();
   });
 
-  it('does not auto-complete if already submitted', () => {
-    const { complete } = renderWidget(sampleConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(complete).toHaveBeenCalledTimes(1);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(complete).toHaveBeenCalledTimes(1);
+  it('hides acknowledge button after first click', () => {
+    renderWidget(sampleConfig);
+    expect(screen.getByTestId('acknowledge-button')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('acknowledge-button'));
+    expect(screen.queryByTestId('acknowledge-button')).toBeNull();
+    expect(screen.getByTestId('observe-complete')).toBeInTheDocument();
   });
 });
 
@@ -222,15 +207,7 @@ describe('RealWorld interactive mode', () => {
     expect(emittedData.responseExactMatch).toBeUndefined();
   });
 
-  it('does not auto-complete in interactive mode', () => {
-    vi.useFakeTimers();
-    const { complete } = renderWidget(interactiveConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(complete).not.toHaveBeenCalled();
-    vi.useRealTimers();
-  });
+
 });
 
 describe('RealWorld hint', () => {
@@ -292,14 +269,10 @@ describe('RealWorld accessibility', () => {
   });
 
   it('uses aria-live in observe mode results', () => {
-    vi.useFakeTimers();
     renderWidget(sampleConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('acknowledge-button'));
     const completeRegion = screen.getByTestId('observe-complete');
     expect(completeRegion.getAttribute('aria-live')).toBe('assertive');
-    vi.useRealTimers();
   });
 
   it('has role="alert" for config errors', () => {

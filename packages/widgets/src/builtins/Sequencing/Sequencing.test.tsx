@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { sequencing } from './Sequencing';
 
 const WidgetComponent = sequencing.render;
@@ -36,14 +36,6 @@ describe('Sequencing schema', () => {
 });
 
 describe('Sequencing observe mode (interactive: false)', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     items: defaultItems,
     correctOrder: defaultCorrectOrder,
@@ -65,12 +57,10 @@ describe('Sequencing observe mode (interactive: false)', () => {
     expect(screen.queryByTestId('user-sequence')).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes after clicking acknowledge in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByText('Acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -78,11 +68,9 @@ describe('Sequencing observe mode (interactive: false)', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after acknowledge', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByText('Acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 
@@ -345,14 +333,6 @@ describe('Sequencing keyboard accessibility', () => {
 });
 
 describe('Sequencing edge cases', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('defaults to observe mode when interactive not specified', () => {
     renderWidget({ items: defaultItems, correctOrder: defaultCorrectOrder });
     expect(screen.getByTestId('sequencing')).toBeTruthy();
@@ -418,14 +398,6 @@ describe('Sequencing edge cases', () => {
 });
 
 describe('Sequencing observe mode display', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('shows correct order with emojis in observe mode', () => {
     renderWidget({
       items: defaultItems,

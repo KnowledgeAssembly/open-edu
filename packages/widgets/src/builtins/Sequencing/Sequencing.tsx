@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const sequencingItemSchema = z.object({
   id: z.string(),
@@ -55,20 +57,12 @@ function SequencingComponent(props: {
     return shuffleArray(content.items);
   }, [content]);
 
-  useEffect(() => {
-    if (!isObserve || submitted || !hasValidContent) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, hasValidContent, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isObserve && hasValidContent,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.sequencing',
+  });
 
   const handleAvailableItemClick = useCallback(
     (itemId: string) => {
@@ -116,8 +110,13 @@ function SequencingComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+      >
+        <p className="font-medium">Unable to load sequencing widget</p>
+        <p className="mt-1 text-sm opacity-80">Please check the widget configuration and try again.</p>
       </div>
     );
   }
@@ -157,9 +156,16 @@ function SequencingComponent(props: {
             })}
           </div>
         </div>
-        {submitted && (
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Observed.</p>
+            <p>Content acknowledged.</p>
+          </div>
+        )}
+        {showAcknowledgeButton && !submitted && (
+          <div style={{ marginTop: '1rem' }}>
+            <ThemedButton variant="primary" onClick={handleObserveAcknowledge}>
+              Acknowledge
+            </ThemedButton>
           </div>
         )}
       </div>
@@ -286,9 +292,9 @@ function SequencingComponent(props: {
         <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
+            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </button>
+            </ThemedButton>
           )}
         </div>
       )}
@@ -301,18 +307,18 @@ function SequencingComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <button onClick={handleSubmit} disabled={!allItemsPlaced}>
+          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
-          </button>
+          </ThemedButton>
         ) : (
-          <button disabled data-testid="result-display">
+          <ThemedButton variant="outline" disabled data-testid="result-display">
             {(() => {
               const correct =
                 correctOrder.length === userOrder.length &&
                 correctOrder.every((id, i) => id === userOrder[i]);
               return correct ? 'Correct!' : 'Incorrect';
             })()}
-          </button>
+          </ThemedButton>
         )}
       </div>
 

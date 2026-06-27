@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 export const configSchema = z.object({
   type: z.enum(['ruler', 'thermometer', 'cylinder']),
@@ -34,27 +36,16 @@ function MeasurementScaleComponent(props: {
 
   const [submitted, setSubmitted] = useState(false);
   const [value, setValue] = useState(config?.value ?? config?.min ?? 0);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const isInteractive = config?.interactive ?? false;
   const isObserve = parsed.success && !isInteractive;
 
-  useEffect(() => {
-    if (isObserve && !submitted && config) {
-      const timer = setTimeout(() => {
-        emitInteraction({
-          type: 'widget.interaction',
-          widgetId: 'open-edu.measurement-scale',
-          action: 'observe',
-          observed: true,
-          correct: true,
-        });
-        complete(100);
-        setSubmitted(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isObserve, submitted, config, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton, acknowledged } = useObserveMode({
+    isObserve: isObserve && !!config,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.measurement-scale',
+  });
 
   const handleSubmit = useCallback(() => {
     if (!config || submitted) return;
@@ -126,8 +117,9 @@ function MeasurementScaleComponent(props: {
 
   if (!parsed.success || !config) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-oe-lg border border-oe-error/30 bg-oe-error/10 p-4 text-center">
+        <p className="font-oe-heading text-oe-error">Unable to load measurement scale</p>
+        <p className="text-oe-text-secondary mt-1 text-sm">Please check the widget configuration and try again.</p>
       </div>
     );
   }
@@ -448,7 +440,6 @@ function MeasurementScaleComponent(props: {
 
   return (
     <div
-      ref={containerRef}
       data-testid="measurement-scale"
       aria-label={`Measurement scale: ${cfg.type}`}
       style={{ textAlign: 'center' }}
@@ -465,9 +456,9 @@ function MeasurementScaleComponent(props: {
 
       {isInteractive && !submitted && (
         <div style={{ marginTop: '0.75rem' }}>
-          <button onClick={handleSubmit} data-testid="submit-btn">
+          <ThemedButton variant="primary" onClick={handleSubmit} data-testid="submit-btn">
             Submit
-          </button>
+          </ThemedButton>
         </div>
       )}
 
@@ -481,9 +472,17 @@ function MeasurementScaleComponent(props: {
         </div>
       )}
 
-      {isObserve && submitted && (
-        <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Observed.</p>
+      {showAcknowledgeButton && (
+        <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container" className="mt-4 text-center">
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            Acknowledge
+          </ThemedButton>
+        </div>
+      )}
+
+      {!showAcknowledgeButton && acknowledged && (
+        <div role="status" aria-live="assertive" data-testid="observe-complete" className="mt-4 text-center">
+          <p className="text-oe-text-secondary mb-2">Content acknowledged.</p>
         </div>
       )}
     </div>
