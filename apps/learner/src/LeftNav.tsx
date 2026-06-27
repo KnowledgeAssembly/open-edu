@@ -53,7 +53,7 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
                 isActive
                   ? 'border-l-primary bg-primary-container text-on-primary-container font-medium'
                   : 'border-l-transparent bg-transparent text-on-surface-variant hover:bg-surface-variant'
-              } ${isInCourse && !isActive ? 'opacity-50' : ''}`}
+              }`}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`leftnav-${item.view.view}`}
             >
@@ -103,6 +103,14 @@ function CourseStepList(): JSX.Element {
     if (!loadedPackage.workflow || !loadedPackage.manifest.entry) return [];
     return getOrderedNodes(loadedPackage.workflow, loadedPackage.manifest.entry);
   }, [loadedPackage]);
+
+  if (orderedIds.length === 0) {
+    return (
+      <p className="text-sm text-on-surface-variant px-3 py-2 m-0">
+        No steps available for this course.
+      </p>
+    );
+  }
 
   return (
     <ol

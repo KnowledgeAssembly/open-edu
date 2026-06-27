@@ -12,7 +12,7 @@ export function ProgressBadge({ percentComplete, isCompleted }: ProgressBadgePro
     bgClass = 'bg-secondary';
   } else if (percentComplete > 0) {
     label = 'In progress';
-    bgClass = 'bg-amber-600';
+    bgClass = 'bg-tertiary';
   } else {
     label = 'Not started';
     bgClass = 'bg-primary';

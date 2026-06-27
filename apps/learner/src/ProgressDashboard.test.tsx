@@ -9,9 +9,7 @@ vi.mock('../progressStorage', () => ({
 describe('ProgressDashboard', () => {
   it('shows empty state when no progress exists', () => {
     render(<ProgressDashboard onNavigate={vi.fn()} />);
-    expect(
-      screen.getByText('No progress yet. Start a course to track your learning.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Your learning journey starts here!')).toBeInTheDocument();
     expect(screen.getByText('Browse Courses')).toBeInTheDocument();
   });
 

@@ -122,10 +122,10 @@ describe('LeftNav with RuntimeProvider context', () => {
     expect(futureStep).not.toHaveAttribute('aria-current');
   });
 
-  it('dims non-active nav items when in course view', () => {
+  it('keeps non-active nav items fully visible in course view', () => {
     render(<LeftNav {...commonProps} />);
     const catalogBtn = screen.getByTestId('leftnav-catalog');
-    expect(catalogBtn.className).toContain('opacity-50');
+    expect(catalogBtn.className).not.toContain('opacity-50');
   });
 
   it('disables future step buttons', () => {
