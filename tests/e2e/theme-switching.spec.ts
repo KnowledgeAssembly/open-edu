@@ -6,13 +6,10 @@ test.describe('Theme Switching', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(LEARNER_URL);
     await expect(page.locator('[data-testid="home-page"]')).toBeVisible({ timeout: 10000 });
-    // Navigate to a course so runtime components render
-    const catalogNav = page.locator('[data-testid="leftnav-catalog"]');
-    await catalogNav.click();
-    await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
-    const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-    await startBtn.click();
-    await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
+    // Navigate to Settings page where the ThemeSelector lives
+    const settingsNav = page.locator('[data-testid="leftnav-settings"]');
+    await settingsNav.click();
+    await expect(page.locator('[data-testid="settings-page"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('default theme is Lumina Scholastica', async ({ page }) => {
@@ -22,7 +19,7 @@ test.describe('Theme Switching', () => {
     );
   });
 
-  test('theme selector trigger is visible on course pages', async ({ page }) => {
+  test('theme selector trigger is visible on settings page', async ({ page }) => {
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
     await expect(trigger).toBeVisible({ timeout: 5000 });
     await expect(trigger).toHaveAttribute('aria-label', 'Select theme');

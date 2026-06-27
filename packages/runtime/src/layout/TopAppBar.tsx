@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect, type CSSProperties } from 'react';
-import { ThemeSelector } from '../components/ThemeSelector.js';
-import type { ThemeId } from '../themes/types.js';
 
 export interface TopAppBarBreadcrumb {
   label: string;
@@ -9,13 +7,13 @@ export interface TopAppBarBreadcrumb {
 
 export interface TopAppBarProps {
   breadcrumbs?: TopAppBarBreadcrumb[];
-  currentThemeId?: ThemeId;
-  onThemeChange?: (id: ThemeId) => void;
   showA11yControls?: boolean;
   userAvatar?: string;
-  onSearchClick?: () => void;
-  onAskAiClick?: () => void;
   onReadingRulerChange?: (enabled: boolean) => void;
+  isCourseView?: boolean;
+  courseTitle?: string;
+  progressCurrent?: number;
+  progressTotal?: number;
 }
 
 const containerStyle: CSSProperties = {
@@ -94,21 +92,38 @@ const iconButtonStyle: CSSProperties = {
   transition: 'background-color 200ms ease',
 };
 
-const askAiButtonStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  padding: '6px 14px',
-  border: 'none',
-  borderRadius: 'var(--oe-radius, 8px)',
-  backgroundColor: 'var(--oe-color-primary-container, #eaddff)',
-  color: 'var(--oe-color-on-primary-container, #21005d)',
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  fontFamily: 'inherit',
+const courseTitleStyle: CSSProperties = {
+  fontSize: '1.125rem',
+  fontWeight: 700,
+  color: 'var(--oe-color-on-surface, #1a1a1a)',
   lineHeight: 1.3,
   whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
+
+const courseInfoStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+  flex: 1,
+  minWidth: 0,
+};
+
+const miniProgressStyle: CSSProperties = {
+  width: '100%',
+  maxWidth: '200px',
+  height: '4px',
+  borderRadius: '2px',
+  backgroundColor: 'var(--oe-color-outline-variant, #c4c5d6)',
+  overflow: 'hidden',
+};
+
+const miniProgressFillStyle: CSSProperties = {
+  height: '100%',
+  borderRadius: '2px',
+  backgroundColor: 'var(--oe-color-primary, #6750a4)',
+  transition: 'width 200ms ease',
 };
 
 const avatarStyle: CSSProperties = {
@@ -121,13 +136,13 @@ const avatarStyle: CSSProperties = {
 
 export function TopAppBar({
   breadcrumbs,
-  currentThemeId,
-  onThemeChange,
   showA11yControls,
   userAvatar,
-  onSearchClick,
-  onAskAiClick,
   onReadingRulerChange,
+  isCourseView,
+  courseTitle,
+  progressCurrent,
+  progressTotal,
 }: TopAppBarProps): JSX.Element {
   const [a11yOpen, setA11yOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
@@ -177,27 +192,54 @@ export function TopAppBar({
   return (
     <header style={containerStyle} data-testid="top-app-bar">
       <div style={leftSectionStyle}>
-        {breadcrumbsEnabled && breadcrumbs && breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumbs">
-            <ol style={breadcrumbListStyle}>
-              {breadcrumbs.map((crumb, idx) => (
-                <li key={idx} style={breadcrumbItemStyle}>
-                  {idx > 0 && (
-                    <span style={breadcrumbChevronStyle} aria-hidden="true">
-                      /
-                    </span>
-                  )}
-                  {crumb.href ? (
-                    <a href={crumb.href} style={breadcrumbLinkStyle}>
-                      {crumb.label}
-                    </a>
-                  ) : (
-                    <span>{crumb.label}</span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </nav>
+        {isCourseView ? (
+          <div style={courseInfoStyle}>
+            <span style={courseTitleStyle} title={courseTitle ?? 'Course'}>
+              {courseTitle ?? 'Course'}
+            </span>
+            {progressTotal != null && progressTotal > 0 && (
+              <div
+                style={miniProgressStyle}
+                role="progressbar"
+                aria-valuenow={progressCurrent ?? 0}
+                aria-valuemin={0}
+                aria-valuemax={progressTotal}
+                aria-label={`Progress: ${progressCurrent ?? 0} of ${progressTotal}`}
+              >
+                <div
+                  style={{
+                    ...miniProgressFillStyle,
+                    width: `${Math.round(((progressCurrent ?? 0) / progressTotal) * 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          breadcrumbsEnabled &&
+          breadcrumbs &&
+          breadcrumbs.length > 0 && (
+            <nav aria-label="Breadcrumbs">
+              <ol style={breadcrumbListStyle}>
+                {breadcrumbs.map((crumb, idx) => (
+                  <li key={idx} style={breadcrumbItemStyle}>
+                    {idx > 0 && (
+                      <span style={breadcrumbChevronStyle} aria-hidden="true">
+                        /
+                      </span>
+                    )}
+                    {crumb.href ? (
+                      <a href={crumb.href} style={breadcrumbLinkStyle}>
+                        {crumb.label}
+                      </a>
+                    ) : (
+                      <span>{crumb.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
         )}
       </div>
 
@@ -209,11 +251,22 @@ export function TopAppBar({
               type="button"
               style={iconButtonStyle}
               onClick={() => setA11yOpen((o) => !o)}
-              aria-label="Accessibility controls"
+              aria-label="Accessibility settings"
+              title="Accessibility settings"
               aria-expanded={a11yOpen}
               data-testid="top-appbar-a11y"
             >
-              {'\u2672'}
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 6a2 2 0 100-4 2 2 0 000 4z" />
+                <path d="M12 8c-3 0-5 1-5 1l1 2s1.5-.5 4-.5v5l-1 5h2l1-4 1 4h2l-1-5v-5c2.5 0 4 .5 4 .5l1-2s-2-1-5-1z" />
+              </svg>
             </button>
             {a11yOpen && (
               <div
@@ -318,29 +371,6 @@ export function TopAppBar({
             )}
           </div>
         )}
-
-        {currentThemeId && onThemeChange && (
-          <ThemeSelector currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
-        )}
-
-        <button
-          type="button"
-          style={iconButtonStyle}
-          onClick={onSearchClick}
-          aria-label="Search"
-          data-testid="top-appbar-search"
-        >
-          {'\uD83D\uDD0D'}
-        </button>
-
-        <button
-          type="button"
-          style={askAiButtonStyle}
-          onClick={onAskAiClick}
-          data-testid="top-appbar-ask-ai"
-        >
-          {'\u2728'} Ask AI
-        </button>
 
         {userAvatar ? (
           <img

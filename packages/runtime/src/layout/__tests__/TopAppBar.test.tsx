@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TopAppBar } from '../TopAppBar.js';
 
@@ -9,14 +9,14 @@ describe('TopAppBar', () => {
     expect(screen.getByText('Courses')).toBeInTheDocument();
   });
 
-  it('renders Ask AI button', () => {
+  it('does not render Search button', () => {
     render(<TopAppBar />);
-    expect(screen.getByTestId('top-appbar-ask-ai')).toBeInTheDocument();
+    expect(screen.queryByTestId('top-appbar-search')).toBeNull();
   });
 
-  it('renders Search button', () => {
+  it('does not render Ask AI button', () => {
     render(<TopAppBar />);
-    expect(screen.getByTestId('top-appbar-search')).toBeInTheDocument();
+    expect(screen.queryByTestId('top-appbar-ask-ai')).toBeNull();
   });
 
   it('renders user avatar placeholder when no avatar provided', () => {
@@ -24,29 +24,16 @@ describe('TopAppBar', () => {
     expect(screen.getByTestId('top-appbar-avatar')).toBeInTheDocument();
   });
 
-  it('calls onSearchClick when search clicked', () => {
-    const onSearchClick = vi.fn();
-    render(<TopAppBar onSearchClick={onSearchClick} />);
-    fireEvent.click(screen.getByTestId('top-appbar-search'));
-    expect(onSearchClick).toHaveBeenCalled();
-  });
-
-  it('calls onAskAiClick when Ask AI clicked', () => {
-    const onAskAiClick = vi.fn();
-    render(<TopAppBar onAskAiClick={onAskAiClick} />);
-    fireEvent.click(screen.getByTestId('top-appbar-ask-ai'));
-    expect(onAskAiClick).toHaveBeenCalled();
-  });
-
-  it('renders ThemeSelector when currentThemeId and onThemeChange provided', () => {
-    const onThemeChange = vi.fn();
-    render(<TopAppBar currentThemeId="lumina-scholastica" onThemeChange={onThemeChange} />);
-    expect(screen.getByTestId('theme-selector-trigger')).toBeInTheDocument();
-  });
-
   it('shows a11y controls toggle when showA11yControls is true', () => {
     render(<TopAppBar showA11yControls />);
     expect(screen.getByTestId('top-appbar-a11y')).toBeInTheDocument();
+  });
+
+  it('a11y controls button has correct aria-label and title', () => {
+    render(<TopAppBar showA11yControls />);
+    const btn = screen.getByTestId('top-appbar-a11y');
+    expect(btn.getAttribute('aria-label')).toBe('Accessibility settings');
+    expect(btn.getAttribute('title')).toBe('Accessibility settings');
   });
 
   it('a11y controls panel opens on click', () => {
@@ -82,5 +69,31 @@ describe('TopAppBar', () => {
     const increaseBtn = screen.getByLabelText('Increase font size');
     fireEvent.click(increaseBtn);
     expect(screen.getByText('110%')).toBeInTheDocument();
+  });
+
+  it('renders course title and mini progress bar in course view', () => {
+    render(
+      <TopAppBar
+        isCourseView
+        courseTitle="My Course"
+        progressCurrent={3}
+        progressTotal={10}
+        showA11yControls
+      />,
+    );
+    expect(screen.getByText('My Course')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('does not render breadcrumbs in course view', () => {
+    render(<TopAppBar isCourseView breadcrumbs={[{ label: 'Home' }]} />);
+    expect(screen.queryByText('Home')).toBeNull();
+  });
+
+  it('renders progressbar with correct aria values', () => {
+    render(<TopAppBar isCourseView progressCurrent={3} progressTotal={10} />);
+    const bar = screen.getByRole('progressbar');
+    expect(bar.getAttribute('aria-valuenow')).toBe('3');
+    expect(bar.getAttribute('aria-valuemax')).toBe('10');
   });
 });

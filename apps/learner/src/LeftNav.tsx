@@ -53,7 +53,7 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
                 isActive
                   ? 'border-l-primary bg-primary-container text-on-primary-container font-medium'
                   : 'border-l-transparent bg-transparent text-on-surface-variant hover:bg-surface-variant'
-              }`}
+              } ${isInCourse && !isActive ? 'opacity-50' : ''}`}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`leftnav-${item.view.view}`}
             >
@@ -70,22 +70,25 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
         <>
           <hr className="border-outline-variant mx-4 my-2" aria-hidden="true" />
           <div className="flex-1 overflow-y-auto px-2 py-1">
-            <div className="flex items-center justify-between px-3 py-1.5">
+            <div className="px-3 py-1.5">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant m-0">
                 {runtime.loadedPackage.manifest.title}
               </h2>
-              {onBackToCatalog && (
+            </div>
+            <CourseStepList />
+            {onBackToCatalog && (
+              <div className="px-2 pt-2 pb-3">
                 <button
                   type="button"
                   onClick={onBackToCatalog}
-                  className="text-xs text-primary font-medium bg-transparent border-none cursor-pointer hover:underline"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-high text-on-surface text-sm font-medium border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors duration-200"
                   data-testid="leftnav-back-to-catalog"
+                  aria-label="Back to course catalog"
                 >
-                  Back to catalog
+                  {'\u2190'} Back to Catalog
                 </button>
-              )}
-            </div>
-            <CourseStepList />
+              </div>
+            )}
           </div>
         </>
       )}
@@ -102,7 +105,12 @@ function CourseStepList(): JSX.Element {
   }, [loadedPackage]);
 
   return (
-    <ol className="list-none p-0 m-0" data-testid="course-step-list">
+    <ol
+      className="list-none p-0 m-0"
+      data-testid="course-step-list"
+      role="list"
+      aria-label="Course steps"
+    >
       {orderedIds.map((nodeId, idx) => {
         const node = loadedPackage.nodes.find((n) => n.relativePath === nodeId);
         const title = node
@@ -111,44 +119,70 @@ function CourseStepList(): JSX.Element {
         const isCurrent = nodeId === currentNodeId;
         const isVisited = visitedNodes.includes(nodeId);
         const isFuture = !isCurrent && !isVisited;
+        const isLast = idx === orderedIds.length - 1;
 
-        let icon: string;
-        let iconClass: string;
+        const stateLabel = isCurrent ? ' (current)' : isVisited ? ' (completed)' : ' (future)';
+
+        let indicator: JSX.Element;
         if (isCurrent) {
-          icon = '\u25CF';
-          iconClass = 'text-on-primary';
+          indicator = (
+            <span className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+              {idx + 1}
+            </span>
+          );
         } else if (isVisited) {
-          icon = '\u25CF';
-          iconClass = 'text-on-surface-variant';
+          indicator = (
+            <span
+              className="w-6 h-6 rounded-full bg-success-container text-on-success-container flex items-center justify-center flex-shrink-0"
+              aria-hidden="true"
+            >
+              {'\u2713'}
+            </span>
+          );
         } else {
-          icon = '\u25CB';
-          iconClass = 'text-on-surface-variant';
+          indicator = (
+            <span
+              className="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0"
+              aria-hidden="true"
+            />
+          );
         }
 
         return (
-          <li key={nodeId}>
-            <button
-              type="button"
-              disabled={isFuture}
-              onClick={() => {
-                if (isVisited && !isCurrent) {
-                  navigateToNode(nodeId);
-                }
-              }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-sm font-sans transition-colors duration-200 ${
-                isCurrent
-                  ? 'bg-primary text-on-primary'
-                  : isVisited
-                    ? 'bg-transparent text-on-surface hover:bg-surface-variant cursor-pointer'
-                    : 'bg-transparent text-on-surface-variant/50 cursor-not-allowed'
-              }`}
-              aria-current={isCurrent ? 'step' : undefined}
-              data-testid={`step-${nodeId}`}
-            >
-              <span className={`flex-shrink-0 ${iconClass}`}>{icon}</span>
-              <span className="flex-1 truncate">{title}</span>
-              <span className="flex-shrink-0 text-xs text-on-surface-variant/60">{idx + 1}</span>
-            </button>
+          <li key={nodeId} className="flex">
+            <div className="flex flex-col items-center w-6 flex-shrink-0">
+              {indicator}
+              {!isLast && (
+                <div
+                  className={`w-0.5 h-full min-h-[8px] ${isFuture ? 'bg-outline-variant' : 'bg-primary'}`}
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+            <div className="flex-1 ml-2.5 pb-2">
+              <button
+                type="button"
+                disabled={isFuture}
+                title={title}
+                onClick={() => {
+                  if (isVisited && !isCurrent) {
+                    navigateToNode(nodeId);
+                  }
+                }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm font-sans transition-colors duration-200 ${
+                  isCurrent
+                    ? 'bg-primary text-on-primary'
+                    : isVisited
+                      ? 'bg-transparent text-on-surface hover:bg-surface-variant cursor-pointer'
+                      : 'bg-transparent text-on-surface-variant/50 cursor-not-allowed'
+                }`}
+                aria-current={isCurrent ? 'step' : undefined}
+                aria-label={`Step ${idx + 1}: ${title}${stateLabel}`}
+                data-testid={`step-${nodeId}`}
+              >
+                <span className="flex-1 truncate">{title}</span>
+              </button>
+            </div>
           </li>
         );
       })}
