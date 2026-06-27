@@ -23,7 +23,11 @@ function simpleHash(str: string): number {
 function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.Element {
   const displayCount = Math.min(total, 5);
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${earned} of ${total} badges earned`}>
+    <div
+      className="flex items-center gap-0.5"
+      role="group"
+      aria-label={`${earned} of ${total} badges earned`}
+    >
       {Array.from({ length: displayCount }, (_, i) => (
         <svg
           key={i}
