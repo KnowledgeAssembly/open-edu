@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { fractionVisual } from './FractionVisual';
 
 const WidgetComponent = fractionVisual.render;
@@ -37,14 +37,6 @@ describe('FractionVisual schema', () => {
 });
 
 describe('FractionVisual observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders a bar fraction with shaded parts', () => {
     const { container } = renderWidget({ numerator: 3, denominator: 5, mode: 'bar' });
     expect(screen.getByTestId('fraction-bar')).toBeTruthy();
@@ -75,16 +67,14 @@ describe('FractionVisual observe mode', () => {
     expect(screen.queryByText('My Fraction')).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes when acknowledge button is clicked', () => {
     const { complete, emitInteraction } = renderWidget({
       numerator: 1,
       denominator: 4,
       mode: 'bar',
     });
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -92,11 +82,9 @@ describe('FractionVisual observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows content acknowledged after acknowledge click', () => {
     renderWidget({ numerator: 1, denominator: 4, mode: 'bar' });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 });

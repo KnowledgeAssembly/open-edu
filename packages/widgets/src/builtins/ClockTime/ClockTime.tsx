@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 export const configSchema = z.object({
   hour: z.number().int().min(0).max(23),
@@ -83,22 +85,12 @@ function ClockTimeComponent(props: {
     ? `${displayHour12}:${displayMinuteStr}`
     : `${to12(config?.hour ?? 12)}:${String(config?.minute ?? 0).padStart(2, '0')}`;
 
-  useEffect(() => {
-    if (isObserve && !submitted && config) {
-      const timer = setTimeout(() => {
-        emitInteraction({
-          type: 'widget.interaction',
-          widgetId: 'open-edu.clock-time',
-          action: 'observe',
-          observed: true,
-          correct: true,
-        });
-        complete(100);
-        setSubmitted(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isObserve, submitted, config, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isObserve && !!config,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.clock-time',
+  });
 
   const handleReadClick = useCallback(
     (hourValue: number) => {
@@ -193,8 +185,13 @@ function ClockTimeComponent(props: {
 
   if (!parsed.success || !config) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="p-lg bg-error-container text-on-error-container rounded-lg text-center"
+      >
+        <p className="text-sm font-medium">Clock configuration is missing or invalid.</p>
+        <p className="text-xs mt-xs opacity-75">Please check the widget settings.</p>
       </div>
     );
   }
@@ -334,50 +331,56 @@ function ClockTimeComponent(props: {
             <div style={{ fontSize: '0.8rem', fontWeight: mode === 'hour' ? 'bold' : 'normal' }}>
               Hour
             </div>
-            <button onClick={() => cycleHour(1)} data-testid="hour-up" aria-label="Increase hour">
+            <ThemedButton variant="outline" size="sm" onClick={() => cycleHour(1)} data-testid="hour-up" aria-label="Increase hour">
               ▲
-            </button>
+            </ThemedButton>
             <div data-testid="set-hour-display" style={{ fontSize: '1.2rem' }}>
               {displayHour12}
             </div>
-            <button
+            <ThemedButton
+              variant="outline"
+              size="sm"
               onClick={() => cycleHour(-1)}
               data-testid="hour-down"
               aria-label="Decrease hour"
             >
               ▼
-            </button>
+            </ThemedButton>
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', fontWeight: mode === 'minute' ? 'bold' : 'normal' }}>
               Minute
             </div>
-            <button
+            <ThemedButton
+              variant="outline"
+              size="sm"
               onClick={() => cycleMinute(1)}
               data-testid="minute-up"
               aria-label="Increase minute"
             >
               ▲
-            </button>
+            </ThemedButton>
             <div data-testid="set-minute-display" style={{ fontSize: '1.2rem' }}>
               {String(currentMinute).padStart(2, '0')}
             </div>
-            <button
+            <ThemedButton
+              variant="outline"
+              size="sm"
               onClick={() => cycleMinute(-1)}
               data-testid="minute-down"
               aria-label="Decrease minute"
             >
               ▼
-            </button>
+            </ThemedButton>
           </div>
         </div>
       )}
 
       {isSetMode && isInteractive && !submitted && (
         <div style={{ marginTop: '0.75rem' }}>
-          <button onClick={handleSetSubmit} data-testid="submit-btn">
+          <ThemedButton variant="primary" onClick={handleSetSubmit} data-testid="submit-btn">
             Submit
-          </button>
+          </ThemedButton>
           <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#6b7280' }}>
             Tab to switch between hour/minute, arrow keys to adjust
           </span>
@@ -403,9 +406,17 @@ function ClockTimeComponent(props: {
         </div>
       )}
 
-      {isObserve && submitted && (
+      {isObserve && (
         <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Observed.</p>
+          {showAcknowledgeButton ? (
+            <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
+              <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge-btn">
+                Acknowledge
+              </ThemedButton>
+            </div>
+          ) : (
+            <p>Content acknowledged.</p>
+          )}
         </div>
       )}
     </div>

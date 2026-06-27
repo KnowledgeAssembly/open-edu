@@ -159,7 +159,7 @@ describe('WidgetRenderer', () => {
       registry,
     );
 
-    expect(screen.getByTestId('widget-renderer-error')).toBeInTheDocument();
+    expect(screen.getByTestId('widget-error-fallback')).toBeInTheDocument();
   });
 
   it('handles undefined node config', () => {

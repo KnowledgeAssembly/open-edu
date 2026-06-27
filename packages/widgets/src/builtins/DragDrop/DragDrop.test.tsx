@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { dragDrop } from './DragDrop';
 
 const WidgetComponent = dragDrop.render;
@@ -44,14 +44,6 @@ describe('DragDrop schema', () => {
 });
 
 describe('DragDrop observe mode (interactive: false)', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     ...defaultConfig,
     interactive: false,
@@ -65,12 +57,10 @@ describe('DragDrop observe mode (interactive: false)', () => {
     expect(screen.getByTestId('observe-item-cat')).toHaveTextContent('Cat');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('auto-completes after clicking Mark as seen in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -78,11 +68,9 @@ describe('DragDrop observe mode (interactive: false)', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after Mark as seen', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 
@@ -358,14 +346,6 @@ describe('DragDrop keyboard accessibility', () => {
 });
 
 describe('DragDrop edge cases', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('defaults to observe mode when interactive not specified', () => {
     renderWidget(defaultConfig);
     expect(screen.getByTestId('observe-target-mammal')).toBeTruthy();

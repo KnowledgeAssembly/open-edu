@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { matching } from './Matching';
 
 const WidgetComponent = matching.render;
@@ -29,14 +29,6 @@ describe('Matching schema', () => {
 });
 
 describe('Matching observe mode (interactive: false)', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     pairs: [
       { id: '1', itemA: '🐶', itemB: 'Dog' },
@@ -53,12 +45,10 @@ describe('Matching observe mode (interactive: false)', () => {
     expect(screen.getByTestId('observe-right-2')).toHaveTextContent('Cat');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('auto-completes after clicking Mark as seen in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -66,11 +56,9 @@ describe('Matching observe mode (interactive: false)', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after Mark as seen', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 

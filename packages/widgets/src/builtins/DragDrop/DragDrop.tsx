@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const itemSchema = z.object({
   id: z.string(),
@@ -48,20 +50,12 @@ function DragDropComponent(props: {
 
   const unplacedItemIds = items.map((item) => item.id).filter((id) => !(id in placedItems));
 
-  useEffect(() => {
-    if (!isObserve || submitted || !hasValidContent) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, hasValidContent, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: isObserve && hasValidContent,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.drag-drop',
+  });
 
   const handleItemClick = useCallback(
     (itemId: string) => {
@@ -132,8 +126,8 @@ function DragDropComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
   }
@@ -197,9 +191,16 @@ function DragDropComponent(props: {
             })}
           </div>
         </div>
-        {submitted && (
+        {showAcknowledgeButton && (
+          <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+              Mark as seen ✓
+            </ThemedButton>
+          </div>
+        )}
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Observed.</p>
+            <p>Content acknowledged.</p>
           </div>
         )}
       </div>
@@ -313,7 +314,9 @@ function DragDropComponent(props: {
                 >
                   {item.emoji && <span>{item.emoji}</span>}
                   <span>{item.label}</span>
-                  <button
+                  <ThemedButton
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveItem(item.id);
@@ -329,7 +332,7 @@ function DragDropComponent(props: {
                     aria-label={`Remove ${item.label} from ${target.label}`}
                   >
                     ✕
-                  </button>
+                  </ThemedButton>
                 </div>
               ))}
             </div>
@@ -349,9 +352,9 @@ function DragDropComponent(props: {
         <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <button onClick={handleHintClick} style={{ fontSize: '0.8rem' }}>
+            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </button>
+            </ThemedButton>
           )}
         </div>
       )}
@@ -364,11 +367,11 @@ function DragDropComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <button onClick={handleSubmit} disabled={!allItemsPlaced}>
+          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
-          </button>
+          </ThemedButton>
         ) : (
-          <button disabled data-testid="result-display">
+          <ThemedButton variant="outline" disabled data-testid="result-display">
             {(() => {
               const totalItems = items.length;
               let correctCount = 0;
@@ -381,7 +384,7 @@ function DragDropComponent(props: {
               }
               return correctCount === totalItems ? 'Correct!' : 'Incorrect';
             })()}
-          </button>
+          </ThemedButton>
         )}
       </div>
 

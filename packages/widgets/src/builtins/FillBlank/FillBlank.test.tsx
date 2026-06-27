@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { fillBlank } from './FillBlank';
 
 const WidgetComponent = fillBlank.render;
@@ -51,14 +51,6 @@ describe('FillBlank widget definition', () => {
 });
 
 describe('FillBlank observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     template: 'The capital of France is ___. It is known for the ___.',
     blanks: [
@@ -87,12 +79,10 @@ describe('FillBlank observe mode', () => {
     expect(screen.queryByTestId(/^blank-input-/)).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('auto-completes after clicking Mark as seen in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -100,13 +90,11 @@ describe('FillBlank observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after Mark as seen', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
-    expect(screen.getByText('Completed.')).toBeInTheDocument();
+    expect(screen.getByText('Content acknowledged.')).toBeInTheDocument();
   });
 
   it('renders description in observe mode', () => {

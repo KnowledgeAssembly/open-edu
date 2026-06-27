@@ -70,3 +70,7 @@ export { CompletionScreen } from './components/CompletionScreen.js';
 export type { CompletionScreenProps, CompletionStats } from './components/CompletionScreen.js';
 export { ProgressBadge } from './components/ProgressBadge.js';
 export type { ProgressBadgeProps } from './components/ProgressBadge.js';
+export { WidgetCanvas, formatWidgetName } from './components/WidgetCanvas.js';
+export type { WidgetCanvasProps } from './components/WidgetCanvas.js';
+export { WidgetErrorFallback } from './components/WidgetErrorFallback.js';
+export type { WidgetErrorFallbackProps } from './components/WidgetErrorFallback.js';

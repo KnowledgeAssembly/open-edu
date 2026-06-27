@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const CRORE_COLUMNS = ['Cr', 'TL', 'L', 'TTh', 'Th', 'H', 'T', 'O'] as const;
 const LAKH_COLUMNS = ['L', 'TTh', 'Th', 'H', 'T', 'O'] as const;
@@ -80,20 +82,12 @@ function PlaceValueChartComponent(props: {
   const isObserve = content && !content.interactive;
   const bankDigits = content?.draggableDigits ?? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  useEffect(() => {
-    if (!isObserve || submitted || !content) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, content, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton, acknowledged } = useObserveMode({
+    isObserve: !!isObserve && !!content,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.place-value-chart',
+  });
 
   const handleSlotClick = useCallback(
     (index: number) => {
@@ -153,8 +147,8 @@ function PlaceValueChartComponent(props: {
 
   if (!parsed.success || !content) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <p className="text-sm font-medium text-red-800">Invalid widget configuration. Please check your settings.</p>
       </div>
     );
   }
@@ -255,9 +249,17 @@ function PlaceValueChartComponent(props: {
         ))}
       </div>
 
-      {isObserve && submitted && (
+      {showAcknowledgeButton && (
+        <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            Acknowledge
+          </ThemedButton>
+        </div>
+      )}
+
+      {!showAcknowledgeButton && acknowledged && (
         <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Observed.</p>
+          <p>Content acknowledged.</p>
         </div>
       )}
 
@@ -329,17 +331,17 @@ function PlaceValueChartComponent(props: {
 
           <div style={{ marginTop: '12px' }}>
             {!submitted ? (
-              <button onClick={handleSubmit} disabled={isAllNull}>
+              <ThemedButton variant="primary" onClick={handleSubmit} disabled={isAllNull}>
                 Submit
-              </button>
+              </ThemedButton>
             ) : (
-              <button disabled data-testid="result-display">
+              <ThemedButton variant="outline" disabled data-testid="result-display">
                 {hasTarget && computeNumber(placedDigits) === content.targetNumber
                   ? 'Correct!'
                   : !hasTarget
                     ? 'Submitted'
                     : 'Incorrect'}
-              </button>
+              </ThemedButton>
             )}
           </div>
 

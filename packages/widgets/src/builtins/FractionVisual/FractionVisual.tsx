@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const compareSchema = z.object({
   numerator: z.number().int().min(0),
@@ -80,20 +82,12 @@ function FractionVisualComponent(props: {
   const effectiveMask = shadedMask ?? initialMask;
   const shadedCount = countBits(effectiveMask);
 
-  useEffect(() => {
-    if (!isObserve || submitted || !content) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isObserve, submitted, content, emitInteraction, complete]);
+  const { acknowledged, handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: !!isObserve,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.fraction-visual',
+  });
 
   const handleSegmentClick = useCallback(
     (index: number) => {
@@ -124,8 +118,15 @@ function FractionVisualComponent(props: {
 
   if (!parsed.success || !content) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid widget configuration.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-lg bg-error/10 border border-error/30 p-md text-on-surface"
+      >
+        <p className="font-semibold text-error">Invalid widget configuration.</p>
+        <p className="text-sm text-on-surface/70 mt-xs">
+          Please check the fraction settings and try again.
+        </p>
       </div>
     );
   }
@@ -288,9 +289,13 @@ function FractionVisualComponent(props: {
         </div>
         {isInteractive && !submitted && (
           <div style={{ width: '100%', textAlign: 'center' }}>
-            <button onClick={handleSubmit} disabled={shadedCount === 0 && shadedMask === null}>
+            <ThemedButton
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={shadedCount === 0 && shadedMask === null}
+            >
               Submit
-            </button>
+            </ThemedButton>
           </div>
         )}
         {submitted && (
@@ -314,9 +319,13 @@ function FractionVisualComponent(props: {
 
       {isInteractive && !submitted && (
         <div style={{ marginTop: '1rem' }}>
-          <button onClick={handleSubmit} disabled={shadedCount === 0 && shadedMask === null}>
+          <ThemedButton
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={shadedCount === 0 && shadedMask === null}
+          >
             Submit
-          </button>
+          </ThemedButton>
         </div>
       )}
 
@@ -326,9 +335,17 @@ function FractionVisualComponent(props: {
         </div>
       )}
 
-      {!isInteractive && submitted && (
-        <div role="status" aria-live="assertive" data-testid="observe-complete">
-          <p>Observed.</p>
+      {!isInteractive && showAcknowledgeButton && (
+        <div role="status" aria-live="assertive" data-testid="observe-complete" style={{ marginTop: '1rem' }}>
+          <ThemedButton variant="secondary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            Acknowledge
+          </ThemedButton>
+        </div>
+      )}
+
+      {!isInteractive && acknowledged && (
+        <div role="status" aria-live="assertive" data-testid="observe-complete" style={{ marginTop: '1rem' }}>
+          <p>Content acknowledged.</p>
         </div>
       )}
     </div>

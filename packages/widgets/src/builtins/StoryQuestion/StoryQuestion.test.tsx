@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { storyQuestion } from './StoryQuestion';
 
 const WidgetComponent = storyQuestion.render;
@@ -42,14 +42,6 @@ describe('StoryQuestion widget definition', () => {
 });
 
 describe('StoryQuestion observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders story in an article', () => {
     renderWidget(sampleConfig);
     expect(screen.getByText('Once upon a time, there was a brave knight.')).toBeInTheDocument();
@@ -73,15 +65,14 @@ describe('StoryQuestion observe mode', () => {
 
   it('does not show Next or Submit button in observe mode', () => {
     renderWidget(sampleConfig);
-    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Next' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes after clicking acknowledge in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(sampleConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByText('Acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -89,13 +80,11 @@ describe('StoryQuestion observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after acknowledge', () => {
     renderWidget(sampleConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByText('Acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
-    expect(screen.getByText('Completed.')).toBeInTheDocument();
+    expect(screen.getByText('Content acknowledged.')).toBeInTheDocument();
   });
 });
 
@@ -274,14 +263,10 @@ describe('StoryQuestion accessibility', () => {
   });
 
   it('uses aria-live in observe mode results', () => {
-    vi.useFakeTimers();
     renderWidget(sampleConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByText('Acknowledge'));
     const completeRegion = screen.getByTestId('observe-complete');
     expect(completeRegion.getAttribute('aria-live')).toBe('assertive');
-    vi.useRealTimers();
   });
 
   it('has role="alert" for config errors', () => {

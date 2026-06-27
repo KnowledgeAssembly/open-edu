@@ -2,19 +2,44 @@ import { Component, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget } from '@open-edu/widgets';
+import { WidgetCanvas } from '../components/WidgetCanvas';
+import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
+
+interface WidgetErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
 
 class WidgetErrorBoundary extends Component<
-  { children: ReactNode; fallback: ReactNode },
-  { hasError: boolean }
+  { widgetId: string; children: ReactNode },
+  WidgetErrorBoundaryState
 > {
-  state = { hasError: false };
+  state: WidgetErrorBoundaryState = { hasError: false };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error(`[WidgetErrorBoundary] Error in widget ${this.props.widgetId}:`, error, info);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
   render() {
-    if (this.state.hasError) return this.props.fallback;
+    if (this.state.hasError) {
+      return (
+        <WidgetErrorFallback
+          widgetId={this.props.widgetId}
+          message="This activity couldn't load. Try refreshing the page."
+          onRetry={this.handleRetry}
+          isDevMode={process.env.NODE_ENV === 'development'}
+          devDetails={this.state.error?.message}
+        />
+      );
+    }
     return this.props.children;
   }
 }
@@ -68,14 +93,10 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   };
 
   return (
-    <WidgetErrorBoundary
-      fallback={
-        <div role="alert" data-testid="widget-renderer-error">
-          Widget &ldquo;{widgetId}&rdquo; encountered an error.
-        </div>
-      }
-    >
-      <WidgetComponent {...widgetProps} />
+    <WidgetErrorBoundary widgetId={widgetId}>
+      <WidgetCanvas widgetId={widgetId} minHeight={200}>
+        <WidgetComponent {...widgetProps} />
+      </WidgetCanvas>
     </WidgetErrorBoundary>
   );
 }
@@ -106,14 +127,23 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
           },
           complete: (score?: number) => completeNode(score),
         };
-        return <WidgetComponent {...widgetProps} />;
+        return (
+          <WidgetErrorBoundary widgetId={manifest.fallback}>
+            <WidgetCanvas widgetId={manifest.fallback} minHeight={200}>
+              <WidgetComponent {...widgetProps} />
+            </WidgetCanvas>
+          </WidgetErrorBoundary>
+        );
       }
     }
 
     return (
-      <div role="alert" data-testid="remote-widget-error">
-        Failed to load remote widget &ldquo;{manifest.id}&rdquo;: {error}
-      </div>
+      <WidgetErrorFallback
+        widgetId={manifest.id}
+        message={`Failed to load remote widget "${manifest.id}".`}
+        isDevMode={process.env.NODE_ENV === 'development'}
+        devDetails={error}
+      />
     );
   }
 
@@ -128,14 +158,10 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
   };
 
   return (
-    <WidgetErrorBoundary
-      fallback={
-        <div role="alert" data-testid="widget-renderer-error">
-          Widget &ldquo;{manifest.id}&rdquo; encountered an error.
-        </div>
-      }
-    >
-      <WidgetComponent {...widgetProps} />
+    <WidgetErrorBoundary widgetId={manifest.id}>
+      <WidgetCanvas widgetId={manifest.id} minHeight={200}>
+        <WidgetComponent {...widgetProps} />
+      </WidgetCanvas>
     </WidgetErrorBoundary>
   );
 }

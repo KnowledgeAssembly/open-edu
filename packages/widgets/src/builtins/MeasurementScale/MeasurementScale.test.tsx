@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { measurementScale } from './MeasurementScale';
 
 const WidgetComponent = measurementScale.render;
@@ -46,14 +46,6 @@ describe('MeasurementScale config validation', () => {
 });
 
 describe('MeasurementScale observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     type: 'ruler' as const,
     min: 0,
@@ -74,12 +66,10 @@ describe('MeasurementScale observe mode', () => {
     expect(screen.getByTestId('reading-live-region')).toHaveTextContent('5cm');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes when acknowledge button is clicked', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -87,24 +77,14 @@ describe('MeasurementScale observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows content acknowledged after acknowledge click', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(screen.getByTestId('observe-complete')).toHaveTextContent('Observed.');
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
+    expect(screen.getByTestId('observe-complete')).toHaveTextContent('Content acknowledged.');
   });
 });
 
 describe('MeasurementScale thermometer observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders thermometer SVG', () => {
     renderWidget({
       type: 'thermometer',
@@ -119,14 +99,6 @@ describe('MeasurementScale thermometer observe mode', () => {
 });
 
 describe('MeasurementScale cylinder observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders cylinder SVG', () => {
     renderWidget({
       type: 'cylinder',

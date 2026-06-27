@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const questionSchema = z.object({
   question: z.string().min(1),
@@ -48,22 +50,12 @@ function StoryQuestionComponent(props: {
     }
   }, [questionCount]);
 
-  useEffect(() => {
-    if (!parsed.success) return;
-    if (isInteractive || submitted) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.story-question',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [parsed.success, isInteractive, submitted, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: parsed.success && !isInteractive,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.story-question',
+  });
 
   const handleSelect = useCallback(
     (optionIndex: number) => {
@@ -119,8 +111,15 @@ function StoryQuestionComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid story question configuration.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-lg border border-error bg-error/10 p-lg text-on-surface"
+      >
+        <p className="font-semibold text-error">Invalid story question configuration.</p>
+        <p className="mt-xs text-sm text-on-surface/70">
+          Please check that your story has a scenario or story field and at least one question.
+        </p>
       </div>
     );
   }
@@ -153,9 +152,14 @@ function StoryQuestionComponent(props: {
             </label>
           ))}
         </fieldset>
-        {submitted && (
+        {showAcknowledgeButton && (
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge}>
+            Acknowledge
+          </ThemedButton>
+        )}
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Completed.</p>
+            <p>Content acknowledged.</p>
           </div>
         )}
       </div>
@@ -209,9 +213,9 @@ function StoryQuestionComponent(props: {
           </label>
         ))}
       </fieldset>
-      <button onClick={handleNext} disabled={!canAdvance}>
+      <ThemedButton variant="primary" onClick={handleNext} disabled={!canAdvance}>
         {isLastQuestion ? 'Submit' : 'Next'}
-      </button>
+      </ThemedButton>
     </div>
   );
 }

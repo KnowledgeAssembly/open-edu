@@ -56,6 +56,10 @@
   }
 }
 
+.pointer-events-none {
+  pointer-events: none
+}
+
 .\!visible {
   visibility: visible !important
 }
@@ -82,6 +86,14 @@
 
 .sticky {
   position: sticky
+}
+
+.inset-0 {
+  inset: 0px
+}
+
+.z-50 {
+  z-index: 50
 }
 
 .m-0 {
@@ -117,12 +129,24 @@
   margin-bottom: 1.5rem
 }
 
+.mb-lg {
+  margin-bottom: var(--oe-space-lg)
+}
+
+.mb-sm {
+  margin-bottom: var(--oe-space-sm)
+}
+
+.ml-0\.5 {
+  margin-left: 0.125rem
+}
+
 .mt-0 {
   margin-top: 0px
 }
 
-.mt-2 {
-  margin-top: 0.5rem
+.mt-1 {
+  margin-top: 0.25rem
 }
 
 .mt-3 {
@@ -131,6 +155,14 @@
 
 .mt-4 {
   margin-top: 1rem
+}
+
+.mt-sm {
+  margin-top: var(--oe-space-sm)
+}
+
+.mt-xs {
+  margin-top: var(--oe-space-xs)
 }
 
 .box-border {
@@ -237,6 +269,10 @@
   list-style-type: none
 }
 
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+}
+
 .flex-col {
   flex-direction: column
 }
@@ -257,6 +293,10 @@
   justify-content: space-between
 }
 
+.gap-0\.5 {
+  gap: 0.125rem
+}
+
 .gap-2 {
   gap: 0.5rem
 }
@@ -269,12 +309,20 @@
   gap: 1.5rem
 }
 
+.gap-md {
+  gap: var(--oe-space-md)
+}
+
 .gap-sm {
   gap: var(--oe-space-sm)
 }
 
 .self-end {
   align-self: flex-end
+}
+
+.overflow-auto {
+  overflow: auto
 }
 
 .overflow-hidden {
@@ -293,6 +341,10 @@
   word-break: break-all
 }
 
+.rounded {
+  border-radius: var(--oe-radius-DEFAULT)
+}
+
 .rounded-\[calc\(var\(--oe-radius-lg\)-2px\)\] {
   border-radius: calc(var(--oe-radius-lg) - 2px)
 }
@@ -303,6 +355,14 @@
 
 .rounded-lg {
   border-radius: var(--oe-radius-lg)
+}
+
+.rounded-sm {
+  border-radius: var(--oe-radius-sm)
+}
+
+.rounded-xl {
+  border-radius: var(--oe-radius-xl)
 }
 
 .border {
@@ -333,9 +393,8 @@
   border-color: var(--oe-color-outline-variant)
 }
 
-.bg-amber-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(217 119 6 / var(--tw-bg-opacity, 1))
+.border-primary-container {
+  border-color: var(--oe-color-primary-container)
 }
 
 .bg-outline-variant {
@@ -350,6 +409,10 @@
   background-color: var(--oe-color-secondary)
 }
 
+.bg-secondary-container {
+  background-color: var(--oe-color-secondary-container)
+}
+
 .bg-surface {
   background-color: var(--oe-color-surface)
 }
@@ -358,13 +421,24 @@
   background-color: var(--oe-color-surface-container-high)
 }
 
-.bg-transparent {
-  background-color: transparent
+.bg-surface-container-low {
+  background-color: var(--oe-color-surface-container-low)
 }
 
-.bg-white {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+.bg-surface-container-lowest {
+  background-color: var(--oe-color-surface-container-lowest)
+}
+
+.bg-surface-variant {
+  background-color: var(--oe-color-surface-variant)
+}
+
+.bg-tertiary {
+  background-color: var(--oe-color-tertiary)
+}
+
+.bg-transparent {
+  background-color: transparent
 }
 
 .p-0 {
@@ -391,6 +465,10 @@
   padding: var(--oe-space-xl)
 }
 
+.p-xs {
+  padding: var(--oe-space-xs)
+}
+
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem
@@ -414,6 +492,11 @@
 .px-5 {
   padding-left: 1.25rem;
   padding-right: 1.25rem
+}
+
+.px-lg {
+  padding-left: var(--oe-space-lg);
+  padding-right: var(--oe-space-lg)
 }
 
 .px-md {
@@ -459,12 +542,30 @@
   padding-top: 1rem
 }
 
+.text-left {
+  text-align: left
+}
+
 .text-center {
   text-align: center
 }
 
 .font-body-md {
   font-family: var(--oe-font-bodyMd-family)
+}
+
+.font-display {
+  font-family: var(--oe-font-display-family)
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem
 }
 
 .text-\[1\.5rem\] {
@@ -486,9 +587,20 @@
   font-weight: 400
 }
 
+.text-h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 600
+}
+
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem
 }
 
 .text-xl {
@@ -505,12 +617,25 @@
   font-weight: 700
 }
 
+.font-medium {
+  font-weight: 500
+}
+
 .font-semibold {
   font-weight: 600
 }
 
 .uppercase {
   text-transform: uppercase
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em
+}
+
+.text-amber-500 {
+  --tw-text-opacity: 1;
+  color: rgb(245 158 11 / var(--tw-text-opacity, 1))
 }
 
 .text-error {
@@ -521,8 +646,8 @@
   color: var(--oe-color-on-primary)
 }
 
-.text-on-secondary {
-  color: var(--oe-color-on-secondary)
+.text-on-secondary-container {
+  color: var(--oe-color-on-secondary-container)
 }
 
 .text-on-surface {
@@ -531,6 +656,10 @@
 
 .text-on-surface-variant {
   color: var(--oe-color-on-surface-variant)
+}
+
+.text-outline-variant {
+  color: var(--oe-color-outline-variant)
 }
 
 .text-secondary {
@@ -544,10 +673,6 @@
 
 .accent-primary {
   accent-color: var(--oe-color-primary)
-}
-
-.opacity-70 {
-  opacity: 0.7
 }
 
 .shadow-sm {
@@ -578,6 +703,10 @@
 
 .duration-200 {
   transition-duration: 200ms
+}
+
+.ease-in {
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1)
 }
 
 .\[widget\:interaction\] {

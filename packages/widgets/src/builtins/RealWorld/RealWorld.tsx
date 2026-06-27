@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
+import { ThemedButton } from '../../themed-button';
+import { useObserveMode } from '../../use-observe-mode';
 
 const realWorldSchema = z.object({
   scenario: z.string().min(1),
@@ -28,22 +30,12 @@ function RealWorldComponent(props: {
   const content = parsed.success ? parsed.data : null;
   const isInteractive = content?.interactive ?? false;
 
-  useEffect(() => {
-    if (!parsed.success) return;
-    if (isInteractive || submitted) return;
-    const timer = setTimeout(() => {
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.real-world',
-        action: 'observe',
-        observed: true,
-        correct: true,
-      });
-      complete(100);
-      setSubmitted(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [parsed.success, isInteractive, submitted, emitInteraction, complete]);
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve: parsed.success && !isInteractive,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'open-edu.real-world',
+  });
 
   const handleComplete = () => {
     if (!content) return;
@@ -69,8 +61,9 @@ function RealWorldComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error">
-        <p>Invalid real world configuration.</p>
+      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-error bg-error/10 p-md text-on-surface">
+        <p className="font-semibold text-error">Configuration Error</p>
+        <p className="mt-xs text-sm text-on-surface/70">Invalid real world configuration. Please check the scenario data.</p>
       </div>
     );
   }
@@ -90,9 +83,14 @@ function RealWorldComponent(props: {
             {prompt}
           </p>
         )}
-        {submitted && (
+        {showAcknowledgeButton && (
+          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="acknowledge-button">
+            Acknowledge
+          </ThemedButton>
+        )}
+        {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
-            <p>Completed.</p>
+            <p>Content acknowledged.</p>
           </div>
         )}
       </div>
@@ -145,9 +143,9 @@ function RealWorldComponent(props: {
           aria-describedby={hint ? 'real-world-hint' : undefined}
         />
       </div>
-      <button onClick={handleComplete} data-testid="complete-task-button">
+      <ThemedButton variant="primary" onClick={handleComplete} data-testid="complete-task-button">
         I Completed This Task
-      </button>
+      </ThemedButton>
     </div>
   );
 }

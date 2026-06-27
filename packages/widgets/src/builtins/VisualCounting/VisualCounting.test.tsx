@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { visualCounting } from './VisualCounting';
 
 const WidgetComponent = visualCounting.render;
@@ -29,14 +29,6 @@ describe('VisualCounting schema', () => {
 });
 
 describe('VisualCounting observe mode (interactive: false)', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('renders items with count label', () => {
     renderWidget({ items: ['🍎'], count: 3, text: 'apples', interactive: false });
     expect(screen.getByText('There are 3 apples.')).toBeTruthy();
@@ -48,16 +40,14 @@ describe('VisualCounting observe mode (interactive: false)', () => {
     expect(screen.queryByLabelText(/Count \d/)).toBeNull();
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('auto-completes after clicking Mark as seen in observe mode', () => {
     const { complete, emitInteraction } = renderWidget({
       items: ['🍎'],
       count: 3,
       interactive: false,
     });
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -65,11 +55,9 @@ describe('VisualCounting observe mode (interactive: false)', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after Mark as seen', () => {
     renderWidget({ items: ['🍎'], count: 3, interactive: false });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 

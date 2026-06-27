@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { clockTime } from './ClockTime';
 
 const WidgetComponent = clockTime.render;
@@ -46,14 +46,6 @@ describe('ClockTime config validation', () => {
 });
 
 describe('ClockTime observe mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const observeConfig = {
     hour: 10,
     minute: 30,
@@ -70,12 +62,10 @@ describe('ClockTime observe mode', () => {
     expect(screen.getByTestId('time-live-region')).toHaveTextContent('10:30');
   });
 
-  it('auto-completes after 1500ms in observe mode', () => {
+  it('completes after clicking acknowledge in observe mode', () => {
     const { complete, emitInteraction } = renderWidget(observeConfig);
     expect(complete).not.toHaveBeenCalled();
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
+    fireEvent.click(screen.getByTestId('observe-acknowledge-btn'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -83,24 +73,14 @@ describe('ClockTime observe mode', () => {
     );
   });
 
-  it('shows observe complete state after auto-complete', () => {
+  it('shows observe complete state after acknowledge', () => {
     renderWidget(observeConfig);
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(screen.getByTestId('observe-complete')).toHaveTextContent('Observed.');
+    fireEvent.click(screen.getByTestId('observe-acknowledge-btn'));
+    expect(screen.getByTestId('observe-complete')).toHaveTextContent('Content acknowledged.');
   });
 });
 
 describe('ClockTime interactive read mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const readConfig = {
     hour: 10,
     minute: 15,
@@ -159,14 +139,6 @@ describe('ClockTime interactive read mode', () => {
 });
 
 describe('ClockTime interactive set mode', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const setConfig = {
     hour: 9,
     minute: 0,
@@ -288,14 +260,6 @@ describe('ClockTime interactive set mode', () => {
 });
 
 describe('ClockTime set mode keyboard navigation', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   const setConfig = {
     hour: 9,
     minute: 0,
