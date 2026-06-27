@@ -27,33 +27,57 @@ function slugify(text: string): string {
 }
 
 const accessibleComponents: ComponentMap = {
-  h1: ({ children, ...props }: ComponentProps<'h1'>) => (
-    <h1 id={slugify(String(children ?? ''))} {...props}>
+  h1: ({ children, className, ...props }: ComponentProps<'h1'>) => (
+    <h1
+      id={slugify(String(children ?? ''))}
+      className={`text-h1 font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h1>
   ),
-  h2: ({ children, ...props }: ComponentProps<'h2'>) => (
-    <h2 id={slugify(String(children ?? ''))} {...props}>
+  h2: ({ children, className, ...props }: ComponentProps<'h2'>) => (
+    <h2
+      id={slugify(String(children ?? ''))}
+      className={`text-h2 font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h2>
   ),
-  h3: ({ children, ...props }: ComponentProps<'h3'>) => (
-    <h3 id={slugify(String(children ?? ''))} {...props}>
+  h3: ({ children, className, ...props }: ComponentProps<'h3'>) => (
+    <h3
+      id={slugify(String(children ?? ''))}
+      className={`text-xl font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h3>
   ),
-  h4: ({ children, ...props }: ComponentProps<'h4'>) => (
-    <h4 id={slugify(String(children ?? ''))} {...props}>
+  h4: ({ children, className, ...props }: ComponentProps<'h4'>) => (
+    <h4
+      id={slugify(String(children ?? ''))}
+      className={`text-lg font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h4>
   ),
-  h5: ({ children, ...props }: ComponentProps<'h5'>) => (
-    <h5 id={slugify(String(children ?? ''))} {...props}>
+  h5: ({ children, className, ...props }: ComponentProps<'h5'>) => (
+    <h5
+      id={slugify(String(children ?? ''))}
+      className={`text-base font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h5>
   ),
-  h6: ({ children, ...props }: ComponentProps<'h6'>) => (
-    <h6 id={slugify(String(children ?? ''))} {...props}>
+  h6: ({ children, className, ...props }: ComponentProps<'h6'>) => (
+    <h6
+      id={slugify(String(children ?? ''))}
+      className={`text-sm font-display font-bold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </h6>
   ),

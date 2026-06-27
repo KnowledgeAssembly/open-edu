@@ -587,6 +587,13 @@
   font-weight: 400
 }
 
+.text-h1 {
+  font-size: 1.875rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 600
+}
+
 .text-h2 {
   font-size: 1.5rem;
   line-height: 1.3;
