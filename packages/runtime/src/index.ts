@@ -67,6 +67,6 @@ export { CourseOutline } from './components/CourseOutline.js';
 export { CourseCard } from './components/CourseCard.js';
 export type { CourseCardProps } from './components/CourseCard.js';
 export { CompletionScreen } from './components/CompletionScreen.js';
-export type { CompletionScreenProps } from './components/CompletionScreen.js';
+export type { CompletionScreenProps, CompletionStats } from './components/CompletionScreen.js';
 export { ProgressBadge } from './components/ProgressBadge.js';
 export type { ProgressBadgeProps } from './components/ProgressBadge.js';

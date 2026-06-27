@@ -14,6 +14,7 @@ export const PackageManifestSchema = z.object({
     .regex(/^\d+\.\d+\.\d+$/, 'version must be semver format (e.g. 1.0.0)'),
   author: z.string().min(1).max(128),
   entry: z.string().min(1).max(512),
+  tags: z.array(z.string().min(1).max(64)).optional(),
 });
 
 export type PackageManifest = z.infer<typeof PackageManifestSchema>;

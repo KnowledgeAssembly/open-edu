@@ -52,6 +52,7 @@ const config: Config = {
         background: 'var(--oe-color-background)',
         'on-background': 'var(--oe-color-on-background)',
         'surface-variant': 'var(--oe-color-surface-variant)',
+        success: 'var(--oe-color-success)',
       },
       fontFamily: {
         display: 'var(--oe-font-display-family)',

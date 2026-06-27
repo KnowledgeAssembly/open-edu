@@ -161,7 +161,11 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
               <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
               <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
                 {view.view === 'catalog' && (
-                  <CatalogPage packages={catalogPackages} onStartCourse={handleStartCourse} />
+                  <CatalogPage
+                    packages={catalogPackages}
+                    onStartCourse={handleStartCourse}
+                    onNavigate={handleNavigate}
+                  />
                 )}
                 {view.view === 'home' && (
                   <HomePage onNavigate={handleNavigate} catalogPackages={catalogPackages} />

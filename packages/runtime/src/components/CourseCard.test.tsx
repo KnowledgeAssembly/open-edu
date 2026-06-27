@@ -24,7 +24,7 @@ describe('CourseCard', () => {
       />,
     );
     expect(screen.getByText('Test Course')).toBeInTheDocument();
-    expect(screen.getByText('Test Author')).toBeInTheDocument();
+    expect(screen.getByText(/Test Author/)).toBeInTheDocument();
   });
 
   it('shows "Start" button when no progress', () => {
@@ -64,7 +64,7 @@ describe('CourseCard', () => {
     expect(screen.getByRole('button', { name: /Continue/ })).toBeInTheDocument();
   });
 
-  it('shows "Completed" disabled button when completed', () => {
+  it('shows "Review" button when completed', () => {
     const progress: ProgressSnapshot = {
       packageId: 'test',
       packageVersion: '1.0.0',
@@ -84,8 +84,8 @@ describe('CourseCard', () => {
         onStart={vi.fn()}
       />,
     );
-    const button = screen.getByRole('button', { name: /Completed/ });
-    expect(button).toBeDisabled();
+    const button = screen.getByRole('button', { name: /Review/ });
+    expect(button).not.toBeDisabled();
   });
 
   it('fires onStart on click', () => {
