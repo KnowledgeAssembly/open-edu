@@ -34,27 +34,18 @@ function eduDataPlugin(): Plugin {
         }
       }
 
-      // Also load bundle module packages so they can be launched from the overview
-      for (const bundle of catalogBundles) {
-        for (const modSummary of bundle.moduleSummaries) {
-          if (packageEntries[modSummary.manifest.id]) continue;
-          try {
-            const modPkg = await loadPackage(modSummary.rootDir);
-            packageEntries[modPkg.manifest.id] = modPkg;
-          } catch {
-            // skip invalid module packages silently
-          }
-        }
-      }
-
-      const catalogJson = JSON.stringify(catalogPackages);
-      const packagesJson = JSON.stringify(packageEntries);
-
       // Load bundles; convert moduleMap to array for JSON serialization
       const bundleEntries: Record<string, unknown> = {};
       for (const bundle of catalogBundles) {
         try {
           const loaded = await loadBundle(bundle.rootDir);
+          // Add each module package from the bundle into packageEntries
+          // so they can be launched from the bundle overview
+          for (const [moduleId, modulePkg] of loaded.moduleMap) {
+            if (!packageEntries[moduleId]) {
+              packageEntries[moduleId] = modulePkg;
+            }
+          }
           bundleEntries[bundle.manifest.id] = {
             ...loaded,
             moduleMap: Array.from(loaded.moduleMap.entries()),
@@ -64,6 +55,8 @@ function eduDataPlugin(): Plugin {
         }
       }
 
+      const catalogJson = JSON.stringify(catalogPackages);
+      const packagesJson = JSON.stringify(packageEntries);
       const bundlesJson = JSON.stringify(catalogBundles);
       const bundleEntriesJson = JSON.stringify(bundleEntries);
 
