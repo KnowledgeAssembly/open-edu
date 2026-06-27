@@ -80,9 +80,26 @@ function PlaceValueChartComponent(props: {
   });
 
   const isObserve = content && !content.interactive;
-  const bankDigits = content?.draggableDigits ?? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const bankDigits = useMemo(() => {
+    if (content?.draggableDigits) return content.draggableDigits;
+    if (content?.targetNumber !== undefined) {
+      const digits = new Set<number>();
+      let num = content.targetNumber;
+      if (num === 0) return [0];
+      while (num > 0) {
+        digits.add(num % 10);
+        num = Math.floor(num / 10);
+      }
+      return Array.from(digits).sort((a, b) => a - b);
+    }
+    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  }, [content?.draggableDigits, content?.targetNumber]);
 
-  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton, acknowledged } = useObserveMode({
+  const {
+    handleAcknowledge: handleObserveAcknowledge,
+    showAcknowledgeButton,
+    acknowledged,
+  } = useObserveMode({
     isObserve: !!isObserve && !!content,
     onComplete: complete,
     onInteract: emitInteraction,
@@ -93,22 +110,24 @@ function PlaceValueChartComponent(props: {
     (index: number) => {
       if (submitted || isObserve) return;
       setPlacedDigits((prev) => {
-        const current = prev[index];
-        if (current !== null) {
-          const next = [...prev];
+        const next = [...prev];
+        const current = next[index];
+        if (current !== null && selectedDigit !== null) {
+          next[index] = selectedDigit;
+          setSelectedDigit(null);
+          return next;
+        }
+        if (current !== null && selectedDigit === null) {
           next[index] = null;
           return next;
         }
-        if (selectedDigit !== null) {
-          const next = [...prev];
+        if (current === null && selectedDigit !== null) {
           next[index] = selectedDigit;
+          setSelectedDigit(null);
           return next;
         }
         return prev;
       });
-      if (selectedDigit !== null) {
-        setSelectedDigit(null);
-      }
     },
     [submitted, isObserve, selectedDigit],
   );
@@ -147,8 +166,14 @@ function PlaceValueChartComponent(props: {
 
   if (!parsed.success || !content) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-red-200 bg-red-50 p-4">
-        <p className="text-sm font-medium text-red-800">Invalid widget configuration. Please check your settings.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
+        <p className="text-on-surface font-semibold">
+          Invalid widget configuration. Please check your settings.
+        </p>
       </div>
     );
   }
@@ -251,7 +276,11 @@ function PlaceValueChartComponent(props: {
 
       {showAcknowledgeButton && (
         <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
-          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+          <ThemedButton
+            variant="primary"
+            onClick={handleObserveAcknowledge}
+            data-testid="observe-acknowledge"
+          >
             Acknowledge
           </ThemedButton>
         </div>
@@ -322,7 +351,9 @@ function PlaceValueChartComponent(props: {
 
           <div role="status" aria-live="polite" aria-atomic="true" style={{ marginTop: '8px' }}>
             {selectedDigit !== null && (
-              <p data-testid="selected-digit-status">Selected digit: {selectedDigit}</p>
+              <p data-testid="selected-digit-status">
+                Selected: {selectedDigit} → click a column to place it
+              </p>
             )}
             {!isAllNull && selectedDigit === null && (
               <p data-testid="placement-status">Click a placed digit to remove it.</p>
@@ -334,15 +365,7 @@ function PlaceValueChartComponent(props: {
               <ThemedButton variant="primary" onClick={handleSubmit} disabled={isAllNull}>
                 Submit
               </ThemedButton>
-            ) : (
-              <ThemedButton variant="outline" disabled data-testid="result-display">
-                {hasTarget && computeNumber(placedDigits) === content.targetNumber
-                  ? 'Correct!'
-                  : !hasTarget
-                    ? 'Submitted'
-                    : 'Incorrect'}
-              </ThemedButton>
-            )}
+            ) : null}
           </div>
 
           {submitted && (

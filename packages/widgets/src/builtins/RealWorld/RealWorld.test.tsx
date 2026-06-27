@@ -36,7 +36,6 @@ describe('RealWorld widget definition', () => {
 });
 
 describe('RealWorld observe mode', () => {
-
   it('renders scenario in an article', () => {
     renderWidget(sampleConfig);
     expect(screen.getByText('You are a scientist studying climate change.')).toBeInTheDocument();
@@ -148,21 +147,35 @@ describe('RealWorld interactive mode', () => {
     const textarea = screen.getByTestId('response-textarea');
     fireEvent.change(textarea, { target: { value: 'More frequent storms.' } });
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'submit',
         response: 'More frequent storms.',
-        correct: true,
+        selfAssessment: 'well',
+        score: 100,
       }),
     );
     expect(complete).toHaveBeenCalledWith(100);
   });
 
-  it('shows completed state after submission', () => {
+  it('shows completed state after self-assessment', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    expect(screen.getByTestId('self-assessment-container')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(screen.getByTestId('real-world-result')).toBeInTheDocument();
-    expect(screen.getByText('Task completed.')).toBeInTheDocument();
+    expect(screen.getByText('Your response:')).toBeInTheDocument();
+  });
+
+  it('echoes learner response after submission', () => {
+    renderWidget(interactiveConfig);
+    const textarea = screen.getByTestId('response-textarea');
+    fireEvent.change(textarea, { target: { value: 'My test response.' } });
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
+    expect(screen.getByTestId('real-world-result')).toBeInTheDocument();
+    expect(screen.getByText('My test response.')).toBeInTheDocument();
   });
 
   it('includes expectedAnswer comparison in interaction', () => {
@@ -174,6 +187,7 @@ describe('RealWorld interactive mode', () => {
     const textarea = screen.getByTestId('response-textarea');
     fireEvent.change(textarea, { target: { value: 'Rising sea levels' } });
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({
         expectedAnswer: 'rising sea levels',
@@ -191,6 +205,7 @@ describe('RealWorld interactive mode', () => {
     const textarea = screen.getByTestId('response-textarea');
     fireEvent.change(textarea, { target: { value: 'Deforestation' } });
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({
         expectedAnswer: 'rising sea levels',
@@ -202,12 +217,68 @@ describe('RealWorld interactive mode', () => {
   it('does not include expectedAnswer comparison if not provided', () => {
     const { emitInteraction } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     const emittedData = emitInteraction.mock.calls[0][0];
     expect(emittedData.expectedAnswer).toBeUndefined();
     expect(emittedData.responseExactMatch).toBeUndefined();
   });
+});
 
+describe('RealWorld self-assessment', () => {
+  const interactiveConfig = {
+    scenario: 'Test scenario.',
+    prompt: 'What do you think?',
+    interactive: true,
+  };
 
+  it('shows self-assessment buttons after clicking complete', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    expect(screen.getByTestId('self-assessment-container')).toBeInTheDocument();
+    expect(screen.getByTestId('self-assess-well')).toBeInTheDocument();
+    expect(screen.getByTestId('self-assess-learning')).toBeInTheDocument();
+    expect(screen.getByTestId('self-assess-practice')).toBeInTheDocument();
+  });
+
+  it('scores 100 for "I understand this well"', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
+    expect(complete).toHaveBeenCalledWith(100);
+  });
+
+  it('scores 50 for "I\'m still learning"', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-learning'));
+    expect(complete).toHaveBeenCalledWith(50);
+  });
+
+  it('scores 0 for "I need more practice"', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-practice'));
+    expect(complete).toHaveBeenCalledWith(0);
+  });
+
+  it('emits self-assessment in interaction data', () => {
+    const { emitInteraction } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-learning'));
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selfAssessment: 'learning',
+        score: 50,
+      }),
+    );
+  });
+
+  it('shows self-assessment result after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
+    expect(screen.getByText(/Self-assessment:.*I understand this well/)).toBeInTheDocument();
+  });
 });
 
 describe('RealWorld hint', () => {
@@ -253,17 +324,17 @@ describe('RealWorld accessibility', () => {
     expect(article).toHaveAttribute('aria-label', 'Real World Scenario');
   });
 
-  it('has label associated with textarea', () => {
+  it('has aria-label on textarea instead of visible label', () => {
     renderWidget(interactiveConfig);
     const textarea = screen.getByTestId('response-textarea');
-    const label = screen.getByTestId('response-label');
-    expect(label).toHaveAttribute('for', 'real-world-response');
-    expect(textarea).toHaveAttribute('id', 'real-world-response');
+    expect(textarea).toHaveAttribute('aria-label', 'What impact have you observed?');
+    expect(screen.queryByTestId('response-label')).toBeNull();
   });
 
   it('uses aria-live for results', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     const result = screen.getByTestId('real-world-result');
     expect(result.getAttribute('aria-live')).toBe('assertive');
   });
@@ -297,29 +368,32 @@ describe('RealWorld edge cases', () => {
     expect(screen.getByText('A scenario.')).toBeInTheDocument();
   });
 
-  it('uses prompt as label for textarea when prompt is set', () => {
+  it('uses prompt as aria-label for textarea when prompt is set', () => {
     renderWidget({
       scenario: 'A scenario.',
       prompt: 'What do you think?',
       interactive: true,
     });
-    expect(screen.getByTestId('response-label')).toHaveTextContent('What do you think?');
+    const textarea = screen.getByTestId('response-textarea');
+    expect(textarea).toHaveAttribute('aria-label', 'What do you think?');
   });
 
-  it('falls back to default label when prompt is not provided', () => {
+  it('falls back to default aria-label when prompt is not provided', () => {
     renderWidget({
       scenario: 'A scenario.',
       interactive: true,
     });
-    expect(screen.getByTestId('response-label')).toHaveTextContent('Your response:');
+    const textarea = screen.getByTestId('response-textarea');
+    expect(textarea).toHaveAttribute('aria-label', 'Your response');
   });
 
-  it('submits with empty response', () => {
+  it('submits with empty response after self-assessment', () => {
     const { complete } = renderWidget({
       scenario: 'A scenario.',
       interactive: true,
     });
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(complete).toHaveBeenCalledWith(100);
   });
 
@@ -329,6 +403,7 @@ describe('RealWorld edge cases', () => {
       interactive: true,
     });
     fireEvent.click(screen.getByTestId('complete-task-button'));
+    fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ widgetId: 'open-edu.real-world' }),
     );

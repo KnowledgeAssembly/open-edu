@@ -57,6 +57,7 @@ function ClockTimeComponent(props: {
   const [currentMinute, setCurrentMinute] = useState(config?.minute ?? 0);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [mode, setMode] = useState<'hour' | 'minute'>('hour');
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   const isInteractive = config?.interactive ?? false;
   const isObserve = config != null && !isInteractive;
@@ -85,6 +86,10 @@ function ClockTimeComponent(props: {
     ? `${displayHour12}:${displayMinuteStr}`
     : `${to12(config?.hour ?? 12)}:${String(config?.minute ?? 0).padStart(2, '0')}`;
 
+  const showDigitalReadout =
+    (isInteractive && (isSetMode || config?.showDigital !== false)) ||
+    (!isInteractive && config?.showDigital === true);
+
   const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
     isObserve: isObserve && !!config,
     onComplete: complete,
@@ -92,39 +97,62 @@ function ClockTimeComponent(props: {
     widgetId: 'open-edu.clock-time',
   });
 
-  const handleReadClick = useCallback(
+  const handleReadSelect = useCallback(
     (hourValue: number) => {
       if (!config || !isInteractive || !isReadMode || submitted) return;
       setSelectedHour(hourValue);
-      const correct = hourValue === displayHour;
-      const score = correct ? 100 : 0;
-      setSubmitted(true);
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.clock-time',
-        action: 'submit',
-        mode: 'read',
-        selectedHour: hourValue,
-        displayedHour: displayHour,
-        correct,
-      });
-      complete(score);
+      setAwaitingConfirm(true);
     },
-    [config, isInteractive, isReadMode, submitted, displayHour, emitInteraction, complete],
+    [config, isInteractive, isReadMode, submitted],
   );
+
+  const handleReadConfirm = useCallback(() => {
+    if (!config || !isInteractive || !isReadMode || submitted || selectedHour === null) return;
+    const correct = selectedHour === displayHour;
+    const score = correct ? 100 : 0;
+    setSubmitted(true);
+    setAwaitingConfirm(false);
+    emitInteraction({
+      type: 'widget.interaction',
+      widgetId: 'open-edu.clock-time',
+      action: 'submit',
+      mode: 'read',
+      selectedHour,
+      displayedHour: displayHour,
+      correct,
+    });
+    complete(score);
+  }, [
+    config,
+    isInteractive,
+    isReadMode,
+    submitted,
+    selectedHour,
+    displayHour,
+    emitInteraction,
+    complete,
+  ]);
+
+  const computeSetScore = useCallback(() => {
+    if (!config) return 0;
+    const target = config.targetTime;
+    if (!target) return 100;
+    const hourCorrect = currentHour % 12 === target.hour % 12;
+    const minuteDiff = Math.abs(currentMinute - target.minute);
+    if (!hourCorrect) return 0;
+    if (minuteDiff <= 1) return 100;
+    if (minuteDiff <= 2) return 50;
+    if (minuteDiff <= 5) return 25;
+    return 0;
+  }, [config, currentHour, currentMinute]);
 
   const handleSetSubmit = useCallback(() => {
     if (!config || !isInteractive || !isSetMode || submitted) return;
     const target = config.targetTime;
-    if (!target) {
-      setSubmitted(true);
-      complete(100);
-      return;
-    }
-    const hourCorrect = currentHour % 12 === target.hour % 12;
-    const minuteDiff = Math.abs(currentMinute - target.minute);
-    const minuteCorrect = minuteDiff <= 5;
-    const score = hourCorrect && minuteCorrect ? 100 : 0;
+    const score = computeSetScore();
+    const hourCorrect = currentHour % 12 === (target?.hour ?? currentHour) % 12;
+    const minuteDiff = target ? Math.abs(currentMinute - target.minute) : 0;
+    const minuteCorrect = !target || minuteDiff <= 5;
     setSubmitted(true);
     emitInteraction({
       type: 'widget.interaction',
@@ -133,8 +161,8 @@ function ClockTimeComponent(props: {
       mode: 'set',
       currentHour,
       currentMinute,
-      targetHour: target.hour,
-      targetMinute: target.minute,
+      targetHour: target?.hour,
+      targetMinute: target?.minute,
       hourCorrect,
       minuteCorrect,
       score,
@@ -147,6 +175,7 @@ function ClockTimeComponent(props: {
     submitted,
     currentHour,
     currentMinute,
+    computeSetScore,
     emitInteraction,
     complete,
   ]);
@@ -171,9 +200,6 @@ function ClockTimeComponent(props: {
           e.preventDefault();
           if (mode === 'hour') cycleHour(-1);
           else cycleMinute(-1);
-        } else if (e.key === 'Tab') {
-          e.preventDefault();
-          setMode((m) => (m === 'hour' ? 'minute' : 'hour'));
         } else if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleSetSubmit();
@@ -218,7 +244,13 @@ function ClockTimeComponent(props: {
             cy={my}
             r={4}
             fill={
-              isMarked ? '#3b82f6' : isTargetRead ? '#10b981' : isWrongRead ? '#ef4444' : '#374151'
+              isMarked
+                ? 'var(--oe-primary, #3b82f6)'
+                : isTargetRead
+                  ? 'var(--oe-success, #10b981)'
+                  : isWrongRead
+                    ? 'var(--oe-error, #ef4444)'
+                    : 'var(--oe-on-surface-variant, #374151)'
             }
             aria-hidden="true"
           />
@@ -230,9 +262,15 @@ function ClockTimeComponent(props: {
               dominantBaseline="central"
               fontSize={size * 0.055}
               fontWeight={submitted && hv === displayHour ? 'bold' : 'normal'}
-              fill={isTargetRead ? '#10b981' : isWrongRead ? '#ef4444' : '#1f2937'}
+              fill={
+                isTargetRead
+                  ? 'var(--oe-success, #10b981)'
+                  : isWrongRead
+                    ? 'var(--oe-error, #ef4444)'
+                    : 'var(--oe-on-surface, #1f2937)'
+              }
               cursor={isReadMode && isInteractive && !submitted ? 'pointer' : 'default'}
-              onClick={() => handleReadClick(hv)}
+              onClick={() => handleReadSelect(hv)}
               aria-label={`${hv} o'clock`}
               data-testid={`hour-marker-${hv}`}
             >
@@ -246,7 +284,7 @@ function ClockTimeComponent(props: {
               textAnchor="middle"
               dominantBaseline="central"
               fontSize={size * 0.055}
-              fill="#1f2937"
+              fill="var(--oe-on-surface, #1f2937)"
               aria-hidden="true"
             >
               {hv}
@@ -274,14 +312,21 @@ function ClockTimeComponent(props: {
         tabIndex={isInteractive && !submitted ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
       >
-        <circle cx={cx} cy={cy} r={faceR} fill="#f9fafb" stroke="#9ca3af" strokeWidth={2} />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={faceR}
+          fill="var(--oe-surface, #f9fafb)"
+          stroke="var(--oe-outline-variant, #9ca3af)"
+          strokeWidth={2}
+        />
         {markers}
         <line
           x1={cx}
           y1={cy}
           x2={hx}
           y2={hy}
-          stroke="#1f2937"
+          stroke="var(--oe-on-surface, #1f2937)"
           strokeWidth={4}
           strokeLinecap="round"
           aria-hidden="true"
@@ -291,12 +336,12 @@ function ClockTimeComponent(props: {
           y1={cy}
           x2={mx}
           y2={my}
-          stroke="#1f2937"
+          stroke="var(--oe-on-surface, #1f2937)"
           strokeWidth={2.5}
           strokeLinecap="round"
           aria-hidden="true"
         />
-        <circle cx={cx} cy={cy} r={5} fill="#1f2937" aria-hidden="true" />
+        <circle cx={cx} cy={cy} r={5} fill="var(--oe-on-surface, #1f2937)" aria-hidden="true" />
       </svg>
     );
   }
@@ -311,9 +356,52 @@ function ClockTimeComponent(props: {
       aria-label={`Clock time widget showing ${timeAnnouncement}`}
       style={{ textAlign: 'center' }}
     >
+      {isSetMode && isInteractive && !submitted && (
+        <div className="text-sm text-on-surface-variant bg-surface-container-high p-xs rounded mb-sm">
+          Use arrow keys to adjust, Enter to submit
+        </div>
+      )}
+
       <div role="status" aria-live="polite" data-testid="time-live-region" aria-atomic="true">
-        {config.showDigital ? timeAnnouncement : ''}
+        {showDigitalReadout ? timeAnnouncement : ''}
       </div>
+
+      {showDigitalReadout && isSetMode && (
+        <div
+          data-testid="digital-readout"
+          className="font-mono text-xl my-sm"
+          aria-label={`Digital time: ${timeAnnouncement}`}
+        >
+          {timeAnnouncement}
+        </div>
+      )}
+
+      {isSetMode && isInteractive && !submitted && (
+        <div
+          className="flex gap-sm mb-sm justify-center"
+          role="group"
+          aria-label="Time adjustment mode"
+        >
+          <ThemedButton
+            variant={mode === 'hour' ? 'primary' : 'outline'}
+            size="sm"
+            onClick={() => setMode('hour')}
+            aria-pressed={mode === 'hour'}
+            data-testid="mode-hour"
+          >
+            Hour
+          </ThemedButton>
+          <ThemedButton
+            variant={mode === 'minute' ? 'primary' : 'outline'}
+            size="sm"
+            onClick={() => setMode('minute')}
+            aria-pressed={mode === 'minute'}
+            data-testid="mode-minute"
+          >
+            Minute
+          </ThemedButton>
+        </div>
+      )}
 
       {renderClockFace()}
 
@@ -331,7 +419,13 @@ function ClockTimeComponent(props: {
             <div style={{ fontSize: '0.8rem', fontWeight: mode === 'hour' ? 'bold' : 'normal' }}>
               Hour
             </div>
-            <ThemedButton variant="outline" size="sm" onClick={() => cycleHour(1)} data-testid="hour-up" aria-label="Increase hour">
+            <ThemedButton
+              variant="outline"
+              size="sm"
+              onClick={() => cycleHour(1)}
+              data-testid="hour-up"
+              aria-label="Increase hour"
+            >
               ▲
             </ThemedButton>
             <div data-testid="set-hour-display" style={{ fontSize: '1.2rem' }}>
@@ -381,20 +475,29 @@ function ClockTimeComponent(props: {
           <ThemedButton variant="primary" onClick={handleSetSubmit} data-testid="submit-btn">
             Submit
           </ThemedButton>
-          <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#6b7280' }}>
-            Tab to switch between hour/minute, arrow keys to adjust
-          </span>
         </div>
       )}
 
       {isSetMode && isInteractive && submitted && (
         <div data-testid="feedback" role="status" aria-live="assertive">
           {config.targetTime
-            ? currentHour % 12 === config.targetTime.hour % 12 &&
-              Math.abs(currentMinute - config.targetTime.minute) <= 5
-              ? 'Correct!'
-              : `Not quite. Expected ${to12(config.targetTime.hour)}:${String(config.targetTime.minute).padStart(2, '0')}.`
+            ? (() => {
+                const score = computeSetScore();
+                if (score === 100) return 'Correct!';
+                if (score === 50) return 'Close! Within 2 minutes — 50% credit.';
+                if (score === 25) return 'Within 5 minutes — 25% credit.';
+                return `Not quite. Expected ${to12(config.targetTime.hour)}:${String(config.targetTime.minute).padStart(2, '0')}.`;
+              })()
             : 'Complete.'}
+        </div>
+      )}
+
+      {isReadMode && isInteractive && !submitted && awaitingConfirm && selectedHour !== null && (
+        <div style={{ marginTop: '0.75rem' }} role="status" aria-live="polite">
+          <p className="mb-xs">You selected {selectedHour} o&apos;clock</p>
+          <ThemedButton variant="primary" onClick={handleReadConfirm} data-testid="confirm-btn">
+            Confirm
+          </ThemedButton>
         </div>
       )}
 
@@ -410,7 +513,11 @@ function ClockTimeComponent(props: {
         <div role="status" aria-live="assertive" data-testid="observe-complete">
           {showAcknowledgeButton ? (
             <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
-              <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge-btn">
+              <ThemedButton
+                variant="primary"
+                onClick={handleObserveAcknowledge}
+                data-testid="observe-acknowledge-btn"
+              >
                 Acknowledge
               </ThemedButton>
             </div>

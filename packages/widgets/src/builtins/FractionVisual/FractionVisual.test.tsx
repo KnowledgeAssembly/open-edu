@@ -208,7 +208,7 @@ describe('FractionVisual compare mode', () => {
 describe('FractionVisual edge cases', () => {
   it('shows "too many parts" message for denominator > 12', () => {
     renderWidget({ numerator: 5, denominator: 15, mode: 'bar' });
-    expect(screen.getByText('Too many parts to display.')).toBeTruthy();
+    expect(screen.getByText('This fraction has too many parts to display visually.')).toBeTruthy();
   });
 
   it('shows config error for missing numerator', () => {
@@ -236,11 +236,27 @@ describe('FractionVisual edge cases', () => {
     expect(screen.getByTestId('fraction-bar')).toBeTruthy();
   });
 
-  it('applies custom size', () => {
+  it('applies custom size with bar aspect ratio', () => {
     renderWidget({ numerator: 1, denominator: 4, mode: 'bar', size: 300 });
     const svg = screen.getByTestId('fraction-bar');
     expect(svg.getAttribute('width')).toBe('300');
-    expect(svg.getAttribute('height')).toBe('300');
+    expect(svg.getAttribute('height')).toBe('75');
+  });
+
+  it('bar SVG is wider than tall', () => {
+    renderWidget({ numerator: 1, denominator: 4, mode: 'bar', size: 200 });
+    const svg = screen.getByTestId('fraction-bar');
+    const width = parseInt(svg.getAttribute('width')!);
+    const height = parseInt(svg.getAttribute('height')!);
+    expect(width).toBeGreaterThan(height);
+  });
+
+  it('circle SVG remains square', () => {
+    renderWidget({ numerator: 1, denominator: 4, mode: 'circle', size: 200 });
+    const svg = screen.getByTestId('fraction-circle');
+    const width = parseInt(svg.getAttribute('width')!);
+    const height = parseInt(svg.getAttribute('height')!);
+    expect(width).toBe(height);
   });
 });
 
@@ -255,12 +271,57 @@ describe('FractionVisual accessibility', () => {
     renderWidget({ numerator: 1, denominator: 4, mode: 'bar' });
     const liveRegion = screen.getByTestId('fraction-live-region');
     expect(liveRegion.getAttribute('aria-live')).toBe('polite');
-    expect(liveRegion.textContent).toContain('1/4');
+    expect(liveRegion.textContent).toContain('1');
+    expect(liveRegion.textContent).toContain('4');
   });
 
   it('has aria-labels per segment', () => {
     renderWidget({ numerator: 1, denominator: 4, mode: 'bar' });
     const segments = screen.getAllByTestId('bar-segment');
     expect(segments[0]?.getAttribute('aria-label')).toBeTruthy();
+  });
+
+  it('renders fraction notation as numerator over denominator', () => {
+    renderWidget({ numerator: 3, denominator: 5, mode: 'bar' });
+    const liveRegion = screen.getByTestId('fraction-live-region');
+    expect(liveRegion.textContent).toContain('3');
+    expect(liveRegion.textContent).toContain('5');
+  });
+});
+
+describe('FractionVisual hover states', () => {
+  it('segments have cursor-pointer class in interactive mode', () => {
+    renderWidget({ numerator: 2, denominator: 4, mode: 'bar', interactive: true });
+    const segments = screen.getAllByTestId('bar-segment');
+    const className = segments[0]?.getAttribute('class');
+    expect(className).toContain('cursor-pointer');
+  });
+
+  it('segments do not have cursor-pointer in observe mode', () => {
+    renderWidget({ numerator: 2, denominator: 4, mode: 'bar' });
+    const segments = screen.getAllByTestId('bar-segment');
+    const className = segments[0]?.getAttribute('class');
+    expect(className).toBeFalsy();
+  });
+});
+
+describe('FractionVisual feedback improvements', () => {
+  it('shows specific feedback with shaded count on incorrect answer', () => {
+    renderWidget({
+      numerator: 2,
+      denominator: 4,
+      mode: 'bar',
+      interactive: true,
+    });
+    const segments = screen.getAllByTestId('bar-segment');
+    fireEvent.click(segments[2]!);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByText('You shaded 3 out of 2 segments.')).toBeTruthy();
+  });
+
+  it('shows "Correct!" on correct answer', () => {
+    renderWidget({ numerator: 2, denominator: 4, mode: 'bar', interactive: true });
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByText('Correct!')).toBeTruthy();
   });
 });

@@ -130,8 +130,8 @@ describe('GridArea interactive mode - area', () => {
     renderWidget({ rows: 3, cols: 3, interactive: true });
     const cells = getCells();
     expect(cells).toHaveLength(9);
-    cells.forEach((cell) => {
-      expect(cell.style.cursor).toBe('pointer');
+    cells.forEach((c) => {
+      expect(c.tagName.toLowerCase()).toBe('button');
     });
   });
 
@@ -152,6 +152,16 @@ describe('GridArea interactive mode - area', () => {
     expect(cell(1).getAttribute('data-highlighted')).toBe('true');
     fireEvent.click(cell(2));
     expect(cell(2).getAttribute('data-highlighted')).toBe('false');
+  });
+
+  it('shows status message when maxHighlights is reached', () => {
+    renderWidget({ rows: 3, cols: 3, maxHighlights: 2, interactive: true });
+    fireEvent.click(cell(0));
+    fireEvent.click(cell(1));
+    fireEvent.click(cell(2));
+    expect(screen.getByTestId('max-highlights-message')).toHaveTextContent(
+      'Maximum 2 cells selected',
+    );
   });
 
   it('shows running count in interactive mode', () => {
@@ -363,6 +373,82 @@ describe('GridArea accessibility', () => {
     renderWidget({ rows: 2, cols: 2, interactive: true });
     const countDisplay = screen.getByTestId('count-display');
     expect(countDisplay.getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('has focus-visible ring classes on cells', () => {
+    renderWidget({ rows: 2, cols: 2, interactive: true });
+    const c = cell(0);
+    expect(c.className).toContain('focus-visible:ring-2');
+    expect(c.className).toContain('focus-visible:ring-primary');
+  });
+
+  it('has hover classes on non-highlighted cells', () => {
+    renderWidget({ rows: 2, cols: 2, interactive: true });
+    const c = cell(0);
+    expect(c.className).toContain('hover:bg-primary-container/30');
+  });
+
+  it('does not have outline:none on cells', () => {
+    renderWidget({ rows: 2, cols: 2, interactive: true });
+    const c = cell(0);
+    expect(c.style.outline).not.toBe('none');
+  });
+});
+
+describe('GridArea large grid keyboard navigation', () => {
+  it('supports arrow key navigation on grids > 100 cells', () => {
+    renderWidget({ rows: 11, cols: 11, interactive: true });
+    const grid = screen.getByRole('grid');
+    const cells = getCells();
+
+    cells[0]?.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowRight' });
+    const focused = document.activeElement;
+    expect(focused?.getAttribute('aria-label')).toBe('Row 1, Column 2');
+  });
+
+  it('arrow down moves to next row', () => {
+    renderWidget({ rows: 11, cols: 11, interactive: true });
+    const grid = screen.getByRole('grid');
+    const cells = getCells();
+
+    cells[0]?.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowDown' });
+    const focused = document.activeElement;
+    expect(focused?.getAttribute('aria-label')).toBe('Row 2, Column 1');
+  });
+
+  it('arrow up at top row stays at top', () => {
+    renderWidget({ rows: 11, cols: 11, interactive: true });
+    const grid = screen.getByRole('grid');
+    const cells = getCells();
+
+    cells[0]?.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowUp' });
+    const focused = document.activeElement;
+    expect(focused?.getAttribute('aria-label')).toBe('Row 1, Column 1');
+  });
+
+  it('arrow left at first column stays at first column', () => {
+    renderWidget({ rows: 11, cols: 11, interactive: true });
+    const grid = screen.getByRole('grid');
+    const cells = getCells();
+
+    cells[0]?.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowLeft' });
+    const focused = document.activeElement;
+    expect(focused?.getAttribute('aria-label')).toBe('Row 1, Column 1');
+  });
+
+  it('does not enable arrow navigation on small grids', () => {
+    renderWidget({ rows: 3, cols: 3, interactive: true });
+    const grid = screen.getByRole('grid');
+    const cells = getCells();
+
+    cells[0]?.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowRight' });
+    const focused = document.activeElement;
+    expect(focused?.getAttribute('aria-label')).toBe('Row 1, Column 1');
   });
 });
 

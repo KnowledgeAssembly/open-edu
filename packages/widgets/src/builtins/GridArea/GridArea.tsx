@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { ThemedButton } from '../../themed-button';
@@ -63,6 +63,8 @@ function GridAreaComponent(props: {
 
   const [highlighted, setHighlighted] = useState<Set<CellKey>>(new Set());
   const [submitted, setSubmitted] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
 
   const isObserve = !config?.interactive;
 
@@ -85,12 +87,28 @@ function GridAreaComponent(props: {
     return expectedCells.size;
   }, [config, expectedCells]);
 
-  const { acknowledged, handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+  const {
+    acknowledged,
+    handleAcknowledge: handleObserveAcknowledge,
+    showAcknowledgeButton,
+  } = useObserveMode({
     isObserve: isObserve && !!config,
     onComplete: complete,
     onInteract: emitInteraction,
     widgetId: 'open-edu.grid-area',
   });
+
+  const totalCells = config ? config.rows * config.cols : 0;
+  const isLargeGrid = totalCells > 100;
+
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => {
+        setStatusMessage(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   const toggleCell = useCallback(
     (row: number, col: number) => {
@@ -102,6 +120,7 @@ function GridAreaComponent(props: {
           next.delete(key);
         } else {
           if (config.maxHighlights && next.size >= config.maxHighlights) {
+            setStatusMessage(`Maximum ${config.maxHighlights} cells selected`);
             return prev;
           }
           next.add(key);
@@ -129,10 +148,67 @@ function GridAreaComponent(props: {
     setSubmitted(true);
   }, [submitted, config, count, expectedCount, emitInteraction, complete]);
 
+  const handleGridKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isLargeGrid || !config?.interactive || submitted) return;
+
+      let currentRow: number;
+      let currentCol: number;
+
+      if (focusedCell) {
+        currentRow = focusedCell.row;
+        currentCol = focusedCell.col;
+      } else {
+        const active = document.activeElement;
+        const cellKey = active?.getAttribute('data-cell-key');
+        if (!cellKey) return;
+        const parsed = parseKey(cellKey as CellKey);
+        currentRow = parsed.row;
+        currentCol = parsed.col;
+      }
+
+      let nextRow = currentRow;
+      let nextCol = currentCol;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          nextRow = Math.max(0, currentRow - 1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          nextRow = Math.min(config.rows - 1, currentRow + 1);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          nextCol = Math.max(0, currentCol - 1);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          nextCol = Math.min(config.cols - 1, currentCol + 1);
+          break;
+        default:
+          return;
+      }
+
+      setFocusedCell({ row: nextRow, col: nextCol });
+      const cellKey = toKey(nextRow, nextCol);
+      const button = document.querySelector(
+        `[data-cell-key="${cellKey}"]`,
+      ) as HTMLButtonElement | null;
+      button?.focus();
+    },
+    [isLargeGrid, config, submitted, focusedCell],
+  );
+
   if (!config) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-error bg-error/10 p-md text-on-surface">
-        <p className="font-semibold">Unable to load grid configuration</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
+        <p className="text-on-surface font-semibold">Unable to load grid configuration</p>
         <p className="text-sm opacity-80">Please check the widget settings and try again.</p>
       </div>
     );
@@ -149,20 +225,25 @@ function GridAreaComponent(props: {
         cells.push(
           <button
             key={key}
+            data-cell-key={key}
             role="gridcell"
             aria-label={`Row ${r + 1}, Column ${c + 1}${isHighlighted ? ', highlighted' : ''}`}
             aria-pressed={isHighlighted}
             onClick={() => toggleCell(r, c)}
+            onFocus={() => setFocusedCell({ row: r, col: c })}
             disabled={isObserve || submitted}
             data-highlighted={isHighlighted}
+            className={`
+              border border-outline-variant
+              ${isHighlighted ? 'bg-primary' : 'bg-surface hover:bg-primary-container/30'}
+              focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+              transition-colors
+            `}
             style={{
               width: cellSizePx,
               height: cellSizePx,
-              border: '1px solid #94a3b8',
-              backgroundColor: isHighlighted ? '#3b82f6' : '#ffffff',
               cursor: config.interactive && !submitted ? 'pointer' : 'default',
               padding: 0,
-              outline: 'none',
             }}
           />,
         );
@@ -183,11 +264,12 @@ function GridAreaComponent(props: {
         aria-label={label}
         data-rows={config.rows}
         data-cols={config.cols}
+        onKeyDown={handleGridKeyDown}
         style={{
           display: 'inline-grid',
           gridTemplateColumns: `repeat(${config.cols}, ${cellSizePx}px)`,
           gap: 0,
-          border: '2px solid #475569',
+          border: '2px solid var(--oe-on-surface, #475569)',
         }}
       >
         {renderGrid()}
@@ -201,6 +283,17 @@ function GridAreaComponent(props: {
         </div>
       )}
 
+      {statusMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="max-highlights-message"
+          className="text-sm text-on-surface-variant bg-surface-container-high p-xs rounded mt-xs"
+        >
+          {statusMessage}
+        </div>
+      )}
+
       {config.interactive && !submitted && (
         <div style={{ marginTop: '0.5rem' }}>
           <ThemedButton variant="primary" onClick={handleSubmit} data-testid="submit-button">
@@ -211,7 +304,11 @@ function GridAreaComponent(props: {
 
       {showAcknowledgeButton && (
         <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
-          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+          <ThemedButton
+            variant="primary"
+            onClick={handleObserveAcknowledge}
+            data-testid="observe-acknowledge"
+          >
             Acknowledge
           </ThemedButton>
         </div>

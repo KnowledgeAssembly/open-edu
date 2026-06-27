@@ -203,7 +203,6 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('target-mammal'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.queryByText('Submit')).toBeNull();
-    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
   it('shows feedback after submission', () => {
@@ -377,5 +376,48 @@ describe('DragDrop edge cases', () => {
   it('shows config error for invalid config', () => {
     renderWidget({ interactive: true });
     expect(screen.getByTestId('widget-config-error')).toBeTruthy();
+  });
+});
+
+describe('DragDrop new features', () => {
+  const interactiveConfig = {
+    ...defaultConfig,
+    interactive: true,
+  };
+
+  it('only empty drop zones highlight when item is selected', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByTestId('unplaced-item-cat'));
+    const mammalTarget = screen.getByTestId('target-mammal');
+    const fishTarget = screen.getByTestId('target-fish');
+    expect(mammalTarget.style.cursor).toBe('default');
+    expect(fishTarget.style.cursor).toBe('pointer');
+  });
+
+  it('remove button uses neutral color not red', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    const removeButton = screen.getByLabelText('Remove Dog from Mammal');
+    expect(removeButton.style.color).not.toBe('#ef4444');
+    expect(removeButton.style.color).toContain('on-surface-variant');
+  });
+
+  it('selected item has elevated visual state', () => {
+    renderWidget(interactiveConfig);
+    const dogItem = screen.getByTestId('unplaced-item-dog');
+    fireEvent.click(dogItem);
+    expect(dogItem.style.transform).toBe('translateY(-2px)');
+    expect(dogItem.style.cursor).toBe('grabbing');
+  });
+
+  it('placed item has transition animation', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    const placedItem = screen.getByTestId('placed-item-dog');
+    expect(placedItem.style.transition).toContain('all');
   });
 });

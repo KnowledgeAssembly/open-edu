@@ -80,9 +80,15 @@ function ChartReaderComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="bg-error-container text-on-error-container p-md rounded-lg">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="bg-error-container text-on-error-container p-md rounded-lg"
+      >
         <p className="font-semibold">Chart configuration is invalid</p>
-        <p className="text-sm mt-xs opacity-80">{parsed.error.issues.map((i) => i.message).join('; ')}</p>
+        <p className="text-sm mt-xs opacity-80">
+          {parsed.error.issues.map((i) => i.message).join('; ')}
+        </p>
       </div>
     );
   }
@@ -114,7 +120,11 @@ function ChartReaderComponent(props: {
 
       {showAcknowledgeButton && (
         <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+          <ThemedButton
+            variant="primary"
+            onClick={handleObserveAcknowledge}
+            data-testid="observe-acknowledge"
+          >
             Mark as seen ✓
           </ThemedButton>
         </div>

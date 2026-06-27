@@ -95,45 +95,67 @@ describe('ClockTime interactive read mode', () => {
     expect(screen.getByTestId('hour-marker-3')).toBeInTheDocument();
   });
 
-  it('scores correct when clicking matching hour', () => {
+  it('selects hour and shows confirm button without completing', () => {
+    const { complete } = renderWidget(readConfig);
+    fireEvent.click(screen.getByTestId('hour-marker-10'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('confirm-btn')).toBeInTheDocument();
+  });
+
+  it('scores correct when confirming matching hour', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-10'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(complete).toHaveBeenCalledWith(100);
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 10, displayedHour: 10, correct: true }),
     );
   });
 
-  it('scores 0 when clicking wrong hour', () => {
+  it('scores 0 when confirming wrong hour', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-3'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(complete).toHaveBeenCalledWith(0);
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 3, displayedHour: 10, correct: false }),
     );
   });
 
-  it('shows correct feedback', () => {
+  it('allows changing selection before confirming', () => {
+    const { complete } = renderWidget(readConfig);
+    fireEvent.click(screen.getByTestId('hour-marker-3'));
+    expect(screen.getByText(/You selected 3 o'clock/)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('hour-marker-10'));
+    expect(screen.getByText(/You selected 10 o'clock/)).toBeInTheDocument();
+    expect(complete).not.toHaveBeenCalled();
+  });
+
+  it('shows correct feedback after confirm', () => {
     renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-10'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
   });
 
   it('shows incorrect feedback with expected hour', () => {
     renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-3'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Not quite. The hour shown was 10.');
   });
 
   it('handles 12-hour conversion for hour 0', () => {
     renderWidget({ ...readConfig, hour: 0 });
     fireEvent.click(screen.getByTestId('hour-marker-12'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
   });
 
   it('handles 12-hour conversion for hour 12', () => {
     renderWidget({ ...readConfig, hour: 12 });
     fireEvent.click(screen.getByTestId('hour-marker-12'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
   });
 });
@@ -209,6 +231,30 @@ describe('ClockTime interactive set mode', () => {
     expect(screen.getByTestId('time-live-region')).toHaveTextContent('9:00');
   });
 
+  it('renders Hour and Minute toggle buttons', () => {
+    renderWidget(setConfig);
+    expect(screen.getByTestId('mode-hour')).toBeInTheDocument();
+    expect(screen.getByTestId('mode-minute')).toBeInTheDocument();
+  });
+
+  it('Hour button has aria-pressed true when hour mode is active', () => {
+    renderWidget(setConfig);
+    expect(screen.getByTestId('mode-hour').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('mode-minute').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('clicking Minute button switches mode', () => {
+    renderWidget(setConfig);
+    fireEvent.click(screen.getByTestId('mode-minute'));
+    expect(screen.getByTestId('mode-minute').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('mode-hour').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('always shows digital readout in set mode', () => {
+    renderWidget({ ...setConfig, showDigital: false });
+    expect(screen.getByTestId('digital-readout')).toHaveTextContent('9:00');
+  });
+
   it('scores correct when hour matches and minutes within tolerance', () => {
     const { complete } = renderWidget(setConfig);
     fireEvent.click(screen.getByTestId('hour-up'));
@@ -235,6 +281,32 @@ describe('ClockTime interactive set mode', () => {
     expect(complete).toHaveBeenCalledWith(0);
   });
 
+  it('gives 50% credit when within 2 minutes', () => {
+    const { complete } = renderWidget({
+      ...setConfig,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    fireEvent.click(screen.getByTestId('hour-up'));
+    for (let i = 0; i < 17; i++) {
+      fireEvent.click(screen.getByTestId('minute-up'));
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(50);
+  });
+
+  it('gives 25% credit when within 5 minutes', () => {
+    const { complete } = renderWidget({
+      ...setConfig,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    fireEvent.click(screen.getByTestId('hour-up'));
+    for (let i = 0; i < 19; i++) {
+      fireEvent.click(screen.getByTestId('minute-up'));
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).toHaveBeenCalledWith(25);
+  });
+
   it('shows correct feedback on correct answer', () => {
     renderWidget(setConfig);
     fireEvent.click(screen.getByTestId('hour-up'));
@@ -249,6 +321,19 @@ describe('ClockTime interactive set mode', () => {
     renderWidget(setConfig);
     fireEvent.click(screen.getByTestId('submit-btn'));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Expected 10:15');
+  });
+
+  it('shows partial credit feedback for close answers', () => {
+    renderWidget({
+      ...setConfig,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    fireEvent.click(screen.getByTestId('hour-up'));
+    for (let i = 0; i < 17; i++) {
+      fireEvent.click(screen.getByTestId('minute-up'));
+    }
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(screen.getByTestId('feedback')).toHaveTextContent('50% credit');
   });
 
   it('disables controls after submit', () => {
@@ -288,6 +373,14 @@ describe('ClockTime set mode keyboard navigation', () => {
     fireEvent.keyDown(svg, { key: 'Enter' });
     expect(complete).toHaveBeenCalled();
   });
+
+  it('Tab key does not switch mode (normal tab behavior)', () => {
+    renderWidget(setConfig);
+    const svg = screen.getByTestId('clock-svg');
+    fireEvent.keyDown(svg, { key: 'Tab' });
+    expect(screen.getByTestId('mode-hour')).toBeInTheDocument();
+    expect(screen.getByTestId('mode-minute')).toBeInTheDocument();
+  });
 });
 
 describe('ClockTime accessibility', () => {
@@ -313,6 +406,7 @@ describe('ClockTime accessibility', () => {
   it('uses aria-live for feedback after submit', () => {
     renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-10'));
+    fireEvent.click(screen.getByTestId('confirm-btn'));
     const feedback = screen.getByTestId('feedback');
     expect(feedback.getAttribute('aria-live')).toBe('assertive');
   });
@@ -326,5 +420,28 @@ describe('ClockTime accessibility', () => {
   it('has aria-labels on hour markers', () => {
     renderWidget(readConfig);
     expect(screen.getByTestId('hour-marker-3')).toHaveAttribute('aria-label', "3 o'clock");
+  });
+
+  it('has keyboard help text above the clock in set mode', () => {
+    renderWidget({
+      hour: 9,
+      minute: 0,
+      mode: 'set' as const,
+      interactive: true,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    expect(screen.getByText('Use arrow keys to adjust, Enter to submit')).toBeInTheDocument();
+  });
+
+  it('has role="group" on mode toggle buttons', () => {
+    renderWidget({
+      hour: 9,
+      minute: 0,
+      mode: 'set' as const,
+      interactive: true,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    const group = screen.getByRole('group', { name: 'Time adjustment mode' });
+    expect(group).toBeInTheDocument();
   });
 });

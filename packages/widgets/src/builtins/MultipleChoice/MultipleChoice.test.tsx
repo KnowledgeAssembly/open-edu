@@ -59,7 +59,7 @@ describe('MultipleChoice legacy single-question mode', () => {
     const { complete } = renderWidget(baseConfig);
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
-    expect(screen.getByText('Correct!')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
     expect(complete).toHaveBeenCalledWith(100);
   });
 
@@ -67,7 +67,7 @@ describe('MultipleChoice legacy single-question mode', () => {
     const { complete } = renderWidget(baseConfig);
     fireEvent.click(screen.getByLabelText('3'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
-    expect(screen.getByText('Incorrect')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Incorrect');
     expect(complete).toHaveBeenCalledWith(0);
   });
 
@@ -120,6 +120,11 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(screen.getByLabelText('5')).toBeInTheDocument();
   });
 
+  it('shows question progress for multi-question mode', () => {
+    renderWidget(multiConfig);
+    expect(screen.getByTestId('question-progress')).toHaveTextContent('Question 1 of 2');
+  });
+
   it('shows "Next" button for intermediate questions', () => {
     renderWidget(multiConfig);
     const btn = screen.getByRole('button');
@@ -129,6 +134,8 @@ describe('MultipleChoice multi-question interactive mode', () => {
   it('shows "Submit" on last question', () => {
     renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText('What is 3 * 3?')).toBeInTheDocument();
     const btn = screen.getByRole('button');
@@ -140,10 +147,47 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
-  it('advances to next question on correct answer', () => {
+  it('shows per-question feedback before advancing', () => {
     renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    expect(screen.queryByText('What is 3 * 3?')).not.toBeInTheDocument();
+  });
+
+  it('shows feedback with explanation when available', () => {
+    const configWithExplanation = {
+      questions: [
+        {
+          question: 'What is 2 + 2?',
+          options: ['3', '4', '5'],
+          correctIndex: 1,
+          explanation: 'Two plus two equals four.',
+        },
+        { question: 'What is 3 * 3?', options: ['6', '9', '12'], correctIndex: 1 },
+      ],
+      interactive: true,
+    };
+    renderWidget(configWithExplanation);
+    fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Two plus two equals four.');
+  });
+
+  it('shows incorrect feedback with correct answer', () => {
+    renderWidget(multiConfig);
+    fireEvent.click(screen.getByLabelText('3'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Incorrect');
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('The correct answer is: 4');
+  });
+
+  it('advances to next question after feedback Next', () => {
+    renderWidget(multiConfig);
+    fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByText('What is 3 * 3?')).toBeInTheDocument();
   });
 
@@ -165,8 +209,10 @@ describe('MultipleChoice multi-question interactive mode', () => {
     const { emitInteraction, complete } = renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(emitInteraction).toHaveBeenLastCalledWith(
       expect.objectContaining({
         action: 'submit',
@@ -182,8 +228,10 @@ describe('MultipleChoice multi-question interactive mode', () => {
     renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 2 of 2 correct.');
   });
 
@@ -191,8 +239,10 @@ describe('MultipleChoice multi-question interactive mode', () => {
     renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('3'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 2 correct.');
   });
 
@@ -206,6 +256,8 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(btn).toHaveTextContent('Submit');
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(btn);
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 1 correct.');
   });
 
@@ -216,6 +268,15 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ widgetId: 'open-edu.multiple-choice' }),
     );
+  });
+
+  it('keeps correct option readable after feedback (not greyed out)', () => {
+    renderWidget(multiConfig);
+    fireEvent.click(screen.getByLabelText('3'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    const correctOption = screen.getByTestId('correct-option');
+    expect(correctOption).toHaveTextContent('4');
+    expect(correctOption).not.toHaveClass('opacity-60');
   });
 });
 
@@ -230,10 +291,16 @@ describe('MultipleChoice multi-question observe mode', () => {
   it('shows first question with correct answer highlighted', () => {
     renderWidget(observeConfig);
     expect(screen.getByText('What is 2 + 2?')).toBeInTheDocument();
-    const correctRadio = screen.getByLabelText('4');
+    const correctRadio = screen.getByLabelText('Correct answer: 4');
     expect(correctRadio).toBeChecked();
     expect(correctRadio).toBeDisabled();
     expect(screen.getByText('✓')).toBeInTheDocument();
+  });
+
+  it('has aria-hidden on checkmark icon', () => {
+    renderWidget(observeConfig);
+    const checkmark = screen.getByText('✓');
+    expect(checkmark).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('shows Mark as seen button in observe mode', () => {
@@ -294,16 +361,25 @@ describe('MultipleChoice accessibility', () => {
     });
     fireEvent.click(screen.getByLabelText('A'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
-    const statusRegion = screen.getByRole('status');
-    expect(statusRegion).toHaveTextContent('Explanation text.');
+    const statusRegions = screen.getAllByRole('status');
+    expect(statusRegions[1]).toHaveTextContent('Explanation text.');
   });
 
   it('uses aria-live for multi-question results', () => {
     renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     const result = screen.getByTestId('multi-result');
     expect(result.getAttribute('aria-live')).toBe('assertive');
+  });
+
+  it('uses aria-live for per-question feedback', () => {
+    renderWidget(multiConfig);
+    fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    const feedback = screen.getByTestId('question-feedback');
+    expect(feedback.getAttribute('aria-live')).toBe('assertive');
   });
 
   it('has aria-labels on radio options', () => {

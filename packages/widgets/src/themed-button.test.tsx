@@ -22,7 +22,11 @@ describe('ThemedButton', () => {
 
   it('does not call onClick when disabled', () => {
     const onClick = vi.fn();
-    render(<ThemedButton disabled onClick={onClick}>Disabled</ThemedButton>);
+    render(
+      <ThemedButton disabled onClick={onClick}>
+        Disabled
+      </ThemedButton>,
+    );
     fireEvent.click(screen.getByRole('button'));
     expect(onClick).not.toHaveBeenCalled();
   });
@@ -77,7 +81,11 @@ describe('ThemedButton', () => {
   });
 
   it('passes through additional HTML attributes', () => {
-    render(<ThemedButton data-testid="custom-btn" type="submit">Submit</ThemedButton>);
+    render(
+      <ThemedButton data-testid="custom-btn" type="submit">
+        Submit
+      </ThemedButton>,
+    );
     const button = screen.getByTestId('custom-btn');
     expect(button.getAttribute('type')).toBe('submit');
   });

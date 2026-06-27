@@ -167,7 +167,9 @@ describe('PlaceValueChart interactive mode', () => {
   it('shows selected digit status', () => {
     renderWidget({ maxPlaces: 'lakh', interactive: true });
     fireEvent.click(screen.getByTestId('bank-digit-3'));
-    expect(screen.getByTestId('selected-digit-status')).toHaveTextContent('Selected digit: 3');
+    expect(screen.getByTestId('selected-digit-status')).toHaveTextContent(
+      'Selected: 3 → click a column to place it',
+    );
   });
 
   it('submit button disabled when no digits placed', () => {
@@ -188,7 +190,6 @@ describe('PlaceValueChart interactive mode', () => {
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.queryByText('Submit')).toBeNull();
-    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
   it('scores 100 when placed digits match target number', () => {
@@ -211,7 +212,7 @@ describe('PlaceValueChart interactive mode', () => {
       interactive: true,
       targetNumber: 42,
     });
-    fireEvent.click(screen.getByTestId('bank-digit-5'));
+    fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledWith(0);
@@ -247,10 +248,71 @@ describe('PlaceValueChart interactive mode', () => {
       interactive: true,
       targetNumber: 42,
     });
-    fireEvent.click(screen.getByTestId('bank-digit-5'));
+    fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.getByText(/expected 42/)).toBeTruthy();
+  });
+
+  it('replaces filled slot when digit is selected and slot is occupied', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: true });
+    fireEvent.click(screen.getByTestId('bank-digit-5'));
+    fireEvent.click(screen.getByTestId('slot-O'));
+    expect(screen.getByTestId('slot-O')).toHaveTextContent('5');
+    fireEvent.click(screen.getByTestId('bank-digit-8'));
+    fireEvent.click(screen.getByTestId('slot-O'));
+    expect(screen.getByTestId('slot-O')).toHaveTextContent('8');
+  });
+
+  it('clears slot when no digit is selected and slot is occupied', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: true });
+    fireEvent.click(screen.getByTestId('bank-digit-5'));
+    fireEvent.click(screen.getByTestId('slot-O'));
+    expect(screen.getByTestId('slot-O')).toHaveTextContent('5');
+    fireEvent.click(screen.getByTestId('slot-O'));
+    expect(screen.getByTestId('slot-O')).toHaveTextContent('');
+  });
+});
+
+describe('PlaceValueChart digit bank narrowing', () => {
+  it('derives digits from targetNumber 1234', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: true, targetNumber: 1234 });
+    expect(screen.getByTestId('bank-digit-1')).toBeTruthy();
+    expect(screen.getByTestId('bank-digit-2')).toBeTruthy();
+    expect(screen.getByTestId('bank-digit-3')).toBeTruthy();
+    expect(screen.getByTestId('bank-digit-4')).toBeTruthy();
+    expect(screen.queryByTestId('bank-digit-5')).toBeNull();
+    expect(screen.queryByTestId('bank-digit-6')).toBeNull();
+    expect(screen.queryByTestId('bank-digit-7')).toBeNull();
+    expect(screen.queryByTestId('bank-digit-8')).toBeNull();
+    expect(screen.queryByTestId('bank-digit-9')).toBeNull();
+    expect(screen.queryByTestId('bank-digit-0')).toBeNull();
+  });
+
+  it('derives digits from targetNumber 500', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: true, targetNumber: 500 });
+    expect(screen.getByTestId('bank-digit-0')).toBeTruthy();
+    expect(screen.getByTestId('bank-digit-5')).toBeTruthy();
+    expect(screen.queryByTestId('bank-digit-1')).toBeNull();
+  });
+
+  it('uses draggableDigits when provided even with targetNumber', () => {
+    renderWidget({
+      maxPlaces: 'lakh',
+      interactive: true,
+      targetNumber: 1234,
+      draggableDigits: [0, 9],
+    });
+    expect(screen.getByTestId('bank-digit-0')).toBeTruthy();
+    expect(screen.getByTestId('bank-digit-9')).toBeTruthy();
+    expect(screen.queryByTestId('bank-digit-1')).toBeNull();
+  });
+
+  it('defaults to all digits 0-9 when no targetNumber', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: true });
+    for (let i = 0; i <= 9; i++) {
+      expect(screen.getByTestId(`bank-digit-${i}`)).toBeTruthy();
+    }
   });
 });
 

@@ -138,19 +138,21 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     expect(screen.getByText('Submit')).toBeDisabled();
   });
 
-  it('submit button disabled after submission', () => {
+  it('submit button is removed after submission', () => {
     renderWidget({ items: ['🍎'], count: 3, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.queryByText('Submit')).toBeNull();
-    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
-  it('shows result feedback after submission', () => {
+  it('shows feedback in styled region after correct submission', () => {
     renderWidget({ items: ['🍎'], count: 3, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('result-display')).toBeTruthy();
+    const feedback = screen.getByTestId('feedback');
+    expect(feedback).toBeTruthy();
+    expect(feedback.getAttribute('role')).toBe('status');
+    expect(feedback.getAttribute('aria-live')).toBe('assertive');
     expect(screen.getByText('Correct! The answer is 3.')).toBeTruthy();
   });
 
@@ -158,8 +160,9 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     renderWidget({ items: ['🍎'], count: 5, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('result-display')).toBeTruthy();
-    expect(screen.getByText('Not quite. The correct answer is 5.')).toBeTruthy();
+    const feedback = screen.getByTestId('feedback');
+    expect(feedback).toBeTruthy();
+    expect(screen.getByText('Not quite. The correct answer is 5. You selected 3.')).toBeTruthy();
   });
 
   it('shows selected count in live region', () => {
@@ -246,6 +249,13 @@ describe('VisualCounting edge cases', () => {
       expect.objectContaining({ widgetId: 'open-edu.visual-counting' }),
     );
   });
+
+  it('renders emoji items when only count and emoji are provided (no items array)', () => {
+    renderWidget({ count: 4, emoji: '🍎', interactive: false });
+    const items = screen.getAllByRole('listitem');
+    expect(items).toHaveLength(4);
+    expect(screen.queryByText('No items to count.')).toBeNull();
+  });
 });
 
 describe('VisualCounting accessibility', () => {
@@ -273,5 +283,22 @@ describe('VisualCounting accessibility', () => {
     fireEvent.click(screen.getByLabelText('Count 3'));
     const liveRegion = screen.getByText('Selected: 3');
     expect(liveRegion.closest('[aria-live]')).toBeTruthy();
+  });
+
+  it('uses plain text for plus and equals symbols in addition mode', () => {
+    renderWidget({ left: ['🍎', '🍎'], right: ['🍎'], sum: 3, interactive: false });
+    const container = screen.getByLabelText('Addition counting');
+    const plusSpan = container.querySelector('span[aria-label="plus"]');
+    const equalsSpan = container.querySelector('span[aria-label="equals"]');
+    expect(plusSpan).toBeNull();
+    expect(equalsSpan).toBeNull();
+  });
+});
+
+describe('VisualCounting number button randomization', () => {
+  it('number buttons are present in randomized order', () => {
+    const { container } = renderWidget({ items: ['🍎'], count: 5, interactive: true });
+    const buttons = container.querySelectorAll('button[aria-label^="Count "]');
+    expect(buttons).toHaveLength(7);
   });
 });
