@@ -8,6 +8,7 @@ import { HomePage } from '../HomePage';
 import { ProgressDashboard } from '../ProgressDashboard';
 import { SettingsPage } from '../SettingsPage';
 import { LeftNav } from '../LeftNav';
+import { CourseExitWarningDialog } from '../CourseExitWarningDialog';
 import type { PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
@@ -84,6 +85,14 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
   it('LeftNav has no axe violations', async () => {
     const { container } = renderWithTheme(
       <LeftNav currentView={{ view: 'home' }} onNavigate={vi.fn()} />,
+      themeId,
+    );
+    await expectNoViolations(container);
+  });
+
+  it('CourseExitWarningDialog has no axe violations', async () => {
+    const { container } = renderWithTheme(
+      <CourseExitWarningDialog open onStay={vi.fn()} onLeave={vi.fn()} />,
       themeId,
     );
     await expectNoViolations(container);

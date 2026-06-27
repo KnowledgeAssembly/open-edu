@@ -257,6 +257,10 @@
   justify-content: space-between
 }
 
+.gap-2 {
+  gap: 0.5rem
+}
+
 .gap-4 {
   gap: 1rem
 }
@@ -348,6 +352,10 @@
 
 .bg-surface {
   background-color: var(--oe-color-surface)
+}
+
+.bg-surface-container-high {
+  background-color: var(--oe-color-surface-container-high)
 }
 
 .bg-transparent {
@@ -582,4 +590,12 @@
 
 .disabled\:cursor-default:disabled {
   cursor: default
+}
+
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed
+}
+
+.disabled\:opacity-40:disabled {
+  opacity: 0.4
 }

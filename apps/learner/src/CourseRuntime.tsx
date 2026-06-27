@@ -16,9 +16,17 @@ export interface CourseRuntimeProps {
   pkg: LoadedPackage;
   onBackToCatalog: () => void;
   children?: ReactNode;
+  hideLayoutShellHeader?: boolean;
+  onProgressUpdate?: (current: number, total: number) => void;
 }
 
-export function CourseRuntime({ pkg, onBackToCatalog, children }: CourseRuntimeProps): JSX.Element {
+export function CourseRuntime({
+  pkg,
+  onBackToCatalog,
+  children,
+  hideLayoutShellHeader,
+  onProgressUpdate,
+}: CourseRuntimeProps): JSX.Element {
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
@@ -146,7 +154,11 @@ export function CourseRuntime({ pkg, onBackToCatalog, children }: CourseRuntimeP
             {isCompleted ? (
               <CompletionScreen badges={badges} onBack={onBackToCatalog} />
             ) : (
-              <LayoutShellWithBack orderedNodes={orderedNodes} />
+              <LayoutShellWithBack
+                orderedNodes={orderedNodes}
+                hideHeader={hideLayoutShellHeader}
+                onProgressUpdate={onProgressUpdate}
+              />
             )}
             {toastBadgeName && (
               <div
@@ -165,12 +177,24 @@ export function CourseRuntime({ pkg, onBackToCatalog, children }: CourseRuntimeP
   );
 }
 
-function LayoutShellWithBack({ orderedNodes }: { orderedNodes: LoadedNode[] }): JSX.Element {
+function LayoutShellWithBack({
+  orderedNodes,
+  hideHeader,
+  onProgressUpdate,
+}: {
+  orderedNodes: LoadedNode[];
+  hideHeader?: boolean;
+  onProgressUpdate?: (current: number, total: number) => void;
+}): JSX.Element {
   const { currentNodeId, visitedNodes, navigateToNode } = useRuntime();
 
   const currentIndex = orderedNodes.findIndex((n) => n.relativePath === currentNodeId);
   const canGoBack = currentIndex > 0;
   const stepDisplay = currentIndex >= 0 ? currentIndex + 1 : 0;
+
+  useEffect(() => {
+    onProgressUpdate?.(stepDisplay, orderedNodes.length);
+  }, [stepDisplay, orderedNodes.length, onProgressUpdate]);
 
   const handleBack = () => {
     const previousNodes = orderedNodes.slice(0, currentIndex);
@@ -189,6 +213,7 @@ function LayoutShellWithBack({ orderedNodes }: { orderedNodes: LoadedNode[] }): 
       totalSteps={orderedNodes.length}
       onBack={handleBack}
       canGoBack={canGoBack}
+      hideHeader={hideHeader}
     />
   );
 }

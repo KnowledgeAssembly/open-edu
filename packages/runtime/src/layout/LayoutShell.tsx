@@ -6,6 +6,7 @@ import { ProgressBar } from './ProgressBar';
 export interface LayoutShellProps {
   children?: ReactNode;
   headerTitle?: string;
+  hideHeader?: boolean;
   nextLabel?: string;
   backLabel?: string;
   completedLabel?: string;
@@ -19,6 +20,7 @@ export interface LayoutShellProps {
 export function LayoutShell({
   children,
   headerTitle,
+  hideHeader = false,
   nextLabel = 'Next',
   backLabel = 'Back',
   completedLabel = 'You have completed this learning experience.',
@@ -51,10 +53,12 @@ export function LayoutShell({
       className="font-body-md text-on-surface bg-surface min-h-full flex flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
       data-testid="layout-shell"
     >
-      <header className="flex flex-col gap-sm border-b border-outline-variant pb-4">
-        <h1 className="m-0 text-[1.5rem] font-bold">{title}</h1>
-        <ProgressBar current={current} total={total} />
-      </header>
+      {!hideHeader && (
+        <header className="flex flex-col gap-sm border-b border-outline-variant pb-4">
+          <h1 className="m-0 text-[1.5rem] font-bold">{title}</h1>
+          <ProgressBar current={current} total={total} />
+        </header>
+      )}
 
       <main aria-live="polite" className="flex-1 min-h-0">
         {children ?? <NodeRenderer node={currentNode} onComplete={completeNode} />}

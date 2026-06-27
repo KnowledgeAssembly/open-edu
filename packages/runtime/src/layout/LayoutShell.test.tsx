@@ -213,4 +213,21 @@ describe('LayoutShell', () => {
     const matches = getAllByText('3 / 10');
     expect(matches.length).toBe(2);
   });
+
+  it('hides header when hideHeader is true', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { container, queryByTestId } = renderShell(pkg, 'nodes/lesson-01.md', {
+      hideHeader: true,
+    });
+    const layoutHeader = container.querySelector('header[data-testid="layout-shell-header"]');
+    expect(layoutHeader).toBeNull();
+    expect(queryByTestId('progress-bar')).toBeNull();
+  });
+
+  it('shows header when hideHeader is false (default)', () => {
+    const pkg = makePackage([makeLoadedNode('nodes/lesson-01.md', { type: 'lesson' }, '# Intro')]);
+    const { getByRole, getByTestId } = renderShell(pkg, 'nodes/lesson-01.md');
+    expect(getByRole('heading', { level: 1, name: 'My Course' })).toBeInTheDocument();
+    expect(getByTestId('progress-bar')).toBeInTheDocument();
+  });
 });
