@@ -22,7 +22,7 @@ function eduDataPlugin(): Plugin {
       // Use scanAll to get filtered packages + bundles
       const { packages: catalogPackages, bundles: catalogBundles } = scanAll(CATALOG_DIR);
 
-      // Load all packages (including bundle modules) for the entries map
+      // Load all top-level packages into the entries map
       const allPackageSummaries = scanPackages(CATALOG_DIR);
       const packageEntries: Record<string, LoadedPackage> = {};
       for (const summary of allPackageSummaries) {
@@ -31,6 +31,19 @@ function eduDataPlugin(): Plugin {
           packageEntries[summary.manifest.id] = pkg;
         } catch {
           // skip invalid packages silently
+        }
+      }
+
+      // Also load bundle module packages so they can be launched from the overview
+      for (const bundle of catalogBundles) {
+        for (const modSummary of bundle.moduleSummaries) {
+          if (packageEntries[modSummary.manifest.id]) continue;
+          try {
+            const modPkg = await loadPackage(modSummary.rootDir);
+            packageEntries[modPkg.manifest.id] = modPkg;
+          } catch {
+            // skip invalid module packages silently
+          }
         }
       }
 
