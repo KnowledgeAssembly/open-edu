@@ -287,7 +287,7 @@ export function TopAppBar({
                   gap: '8px',
                 }}
                 data-testid="top-appbar-a11y-panel"
-                role="dialog"
+                role="region"
                 aria-label="Accessibility controls"
                 onKeyDown={handlePanelKeyDown}
               >

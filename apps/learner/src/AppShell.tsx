@@ -23,6 +23,7 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
   const pendingNavigation = useRef<AppView | null>(null);
+  const preCourseView = useRef<AppView>({ view: 'home' });
 
   const handleProgressUpdate = useCallback((current: number, total: number) => {
     setCourseProgressCurrent(current);
@@ -41,10 +42,11 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
+      e.returnValue = '';
     };
 
     const handlePopState = () => {
-      pendingNavigation.current = { view: 'home' };
+      pendingNavigation.current = preCourseView.current;
       setShowExitWarning(true);
     };
 
@@ -61,7 +63,19 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
     (newView: AppView) => {
       if (newView.view === 'course') {
         if (newView.packageId && packageEntries[newView.packageId]) {
-          setView({ view: 'course', packageId: newView.packageId });
+          if (
+            view.view === 'course' &&
+            view.packageId !== newView.packageId &&
+            isCourseInProgress
+          ) {
+            pendingNavigation.current = newView;
+            setShowExitWarning(true);
+          } else {
+            if (view.view !== 'course') {
+              preCourseView.current = view;
+            }
+            setView({ view: 'course', packageId: newView.packageId });
+          }
         }
         return;
       }
@@ -72,7 +86,7 @@ export function AppShell({ catalogPackages, packageEntries }: AppShellProps): JS
         setView(newView);
       }
     },
-    [packageEntries, isCourseInProgress],
+    [packageEntries, isCourseInProgress, view],
   );
 
   const handleExitStay = useCallback(() => {

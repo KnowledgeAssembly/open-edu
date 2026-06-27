@@ -42,10 +42,10 @@ describe('TopAppBar', () => {
     expect(screen.getByTestId('top-appbar-a11y-panel')).toBeInTheDocument();
   });
 
-  it('a11y panel has role="dialog"', () => {
+  it('a11y panel has role="region"', () => {
     render(<TopAppBar showA11yControls />);
     fireEvent.click(screen.getByTestId('top-appbar-a11y'));
-    expect(screen.getByTestId('top-appbar-a11y-panel').getAttribute('role')).toBe('dialog');
+    expect(screen.getByTestId('top-appbar-a11y-panel').getAttribute('role')).toBe('region');
   });
 
   it('renders as header element', () => {
