@@ -1,7 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { scanPackages, loadPackage } from '@open-edu/core';
-import type { PackageSummary, LoadedPackage } from '@open-edu/core';
+import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
+import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
@@ -19,31 +19,52 @@ function eduDataPlugin(): Plugin {
     async load(id) {
       if (id !== RESOLVED_MODULE_ID) return;
 
-      const summaries = scanPackages(CATALOG_DIR);
-      const entries: Array<{ summary: PackageSummary; pkg: LoadedPackage | null }> = [];
+      // Use scanAll to get filtered packages + bundles
+      const { packages: catalogPackages, bundles: catalogBundles } = scanAll(CATALOG_DIR);
 
-      for (const summary of summaries) {
+      // Load all top-level packages into the entries map
+      const allPackageSummaries = scanPackages(CATALOG_DIR);
+      const packageEntries: Record<string, LoadedPackage> = {};
+      for (const summary of allPackageSummaries) {
         try {
           const pkg = await loadPackage(summary.rootDir);
-          entries.push({ summary, pkg });
+          packageEntries[summary.manifest.id] = pkg;
         } catch {
-          entries.push({ summary, pkg: null });
+          // skip invalid packages silently
         }
       }
 
-      const valid = entries.filter(
-        (e): e is { summary: PackageSummary; pkg: LoadedPackage } => e.pkg !== null,
-      );
-      const catalogJson = JSON.stringify(valid.map((e) => e.summary));
-      const packagesMap: Record<string, LoadedPackage> = {};
-      for (const e of valid) {
-        packagesMap[e.summary.manifest.id] = e.pkg;
+      // Load bundles; convert moduleMap to array for JSON serialization
+      const bundleEntries: Record<string, unknown> = {};
+      for (const bundle of catalogBundles) {
+        try {
+          const loaded = await loadBundle(bundle.rootDir);
+          // Add each module package from the bundle into packageEntries
+          // so they can be launched from the bundle overview
+          for (const [moduleId, modulePkg] of loaded.moduleMap) {
+            if (!packageEntries[moduleId]) {
+              packageEntries[moduleId] = modulePkg;
+            }
+          }
+          bundleEntries[bundle.manifest.id] = {
+            ...loaded,
+            moduleMap: Array.from(loaded.moduleMap.entries()),
+          };
+        } catch {
+          // skip invalid bundles silently
+        }
       }
-      const packagesJson = JSON.stringify(packagesMap);
+
+      const catalogJson = JSON.stringify(catalogPackages);
+      const packagesJson = JSON.stringify(packageEntries);
+      const bundlesJson = JSON.stringify(catalogBundles);
+      const bundleEntriesJson = JSON.stringify(bundleEntries);
 
       return `
 export const catalogPackages = ${catalogJson};
 export const packageEntries = ${packagesJson};
+export const catalogBundles = ${bundlesJson};
+export const bundleEntries = ${bundleEntriesJson};
 `;
     },
   };

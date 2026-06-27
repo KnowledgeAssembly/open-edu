@@ -19,6 +19,13 @@ export const RewardConditionSchema = z.lazy(
       }),
       z.object({ type: z.literal('and'), conditions: z.array(RewardConditionSchema).min(1) }),
       z.object({ type: z.literal('or'), conditions: z.array(RewardConditionSchema).min(1) }),
+      z.object({
+        type: z.literal('moduleCompleted'),
+        moduleId: z.string().min(1).max(128),
+      }),
+      z.object({
+        type: z.literal('bundleCompleted'),
+      }),
     ]),
 );
 

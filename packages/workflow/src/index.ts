@@ -18,3 +18,16 @@ export type {
   SkillAchievedEvent,
   SkillEvent,
 } from './skills.js';
+export { BundleEngine } from './bundle-engine.js';
+export type {
+  BundleEngineOptions,
+  BundleEngineEvent,
+  ModuleStatus,
+  ModuleChangeEvent,
+  ModuleCompletedEvent,
+  BundleCompletedEvent,
+  ModuleUnlockedEvent,
+  BundleEngineEventListener,
+  BundleInput,
+  BundleModulePackage,
+} from './bundle-engine.js';

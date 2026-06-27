@@ -10,6 +10,7 @@ import { widgetCreate } from './commands/widget-create.js';
 import { reportTelemetry } from './commands/report.js';
 import { generatePrompt, generateFromDescription } from './commands/generate.js';
 import { patchPackage } from './commands/patch.js';
+import { importLearnEasyCommand } from './commands/import.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -202,6 +203,31 @@ program
     });
     handleResult(result, json);
   });
+
+const importCmd = program.command('import').description('Import commands');
+
+importCmd
+  .command('learn-easy')
+  .description('Import a Learn-Easy curriculum as an Open-Edu bundle')
+  .argument('<source-dir>', 'Path to the Learn-Easy curriculum directory')
+  .argument('[output-dir]', 'Output directory for the bundle')
+  .option('--bundle-title <title>', 'Override bundle title')
+  .option('--bundle-id <id>', 'Override bundle id')
+  .action(
+    async (
+      sourceDir: string,
+      outputDir: string | undefined,
+      cmdOptions: { bundleTitle?: string; bundleId?: string },
+    ) => {
+      const json = program.optsWithGlobals().json;
+      const result = await importLearnEasyCommand(sourceDir, outputDir || './output', {
+        bundleTitle: cmdOptions.bundleTitle,
+        bundleId: cmdOptions.bundleId,
+        json,
+      });
+      handleResult(result, json);
+    },
+  );
 
 function handleResult(result: CliResult, json: boolean | undefined): void {
   if (json) {

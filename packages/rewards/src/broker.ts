@@ -60,6 +60,9 @@ export class RewardBroker {
       completedNodes: [
         ...new Set([...this._context.completedNodes, ...(context.completedNodes ?? [])]),
       ],
+      completedModules: [
+        ...new Set([...this._context.completedModules, ...(context.completedModules ?? [])]),
+      ],
     };
   }
 

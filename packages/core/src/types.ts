@@ -1,4 +1,10 @@
-import type { ContentNode, Workflow, Rewards, PackageManifest } from '@open-edu/schemas';
+import type {
+  ContentNode,
+  Workflow,
+  Rewards,
+  PackageManifest,
+  BundleManifest,
+} from '@open-edu/schemas';
 
 export interface LoadedNode {
   path: string;
@@ -14,4 +20,11 @@ export interface LoadedPackage {
   rewards: Rewards | null;
   nodes: LoadedNode[];
   assetPaths: string[];
+}
+
+export interface LoadedBundle {
+  rootDir: string;
+  manifest: BundleManifest;
+  modules: LoadedPackage[];
+  moduleMap: Map<string, LoadedPackage>;
 }

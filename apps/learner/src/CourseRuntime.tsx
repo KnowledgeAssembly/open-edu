@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { RuntimeProvider, LayoutShell, CompletionScreen, useRuntime } from '@open-edu/runtime';
 import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
@@ -7,10 +7,17 @@ import { AccessibilityProvider } from '@open-edu/accessibility';
 import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
-import type { ProgressSnapshot } from '@open-edu/schemas';
-import type { LoadedPackage, LoadedNode } from '@open-edu/core';
+import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
+import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
+import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
+
+export interface BundleCourseContext {
+  bundleId: string;
+  bundle: LoadedBundle;
+  onBundleSnapshot: (snapshot: BundleProgressSnapshot) => void;
+}
 
 export interface CourseRuntimeProps {
   pkg: LoadedPackage;
@@ -18,6 +25,7 @@ export interface CourseRuntimeProps {
   children?: ReactNode;
   hideLayoutShellHeader?: boolean;
   onProgressUpdate?: (current: number, total: number) => void;
+  bundleContext?: BundleCourseContext;
 }
 
 export function CourseRuntime({
@@ -26,11 +34,13 @@ export function CourseRuntime({
   children,
   hideLayoutShellHeader,
   onProgressUpdate,
+  bundleContext,
 }: CourseRuntimeProps): JSX.Element {
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
@@ -53,6 +63,14 @@ export function CourseRuntime({
   const initialProgress = useMemo(() => {
     return getProgress(pkg.manifest.id) ?? undefined;
   }, [pkg]);
+
+  // Initialize bundle progress ref when bundle context is active
+  const initialBundleSnapshot = useMemo(() => {
+    if (!bundleContext) return null;
+    return getBundleProgress(bundleContext.bundleId);
+  }, [bundleContext]);
+
+  bundleProgressRef.current = initialBundleSnapshot;
 
   useEffect(() => {
     if (!engine) return;
@@ -116,8 +134,36 @@ export function CourseRuntime({
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
       saveProgress(pkg.manifest.id, snapshot);
+
+      if (bundleContext) {
+        const existingBundleSnapshot = bundleProgressRef.current;
+        const bundleSnapshot: BundleProgressSnapshot = {
+          bundleId: bundleContext.bundleId,
+          bundleVersion: bundleContext.bundle.manifest.version ?? '0.0.0',
+          moduleStatuses: {
+            ...existingBundleSnapshot?.moduleStatuses,
+            [pkg.manifest.id]: snapshot.isCompleted ? 'completed' : 'in_progress',
+          },
+          moduleProgress: {
+            ...existingBundleSnapshot?.moduleProgress,
+            [pkg.manifest.id]: {
+              moduleId: pkg.manifest.id,
+              packageVersion: pkg.manifest.version ?? '0.0.0',
+              currentNodeId: snapshot.currentNodeId,
+              visitedNodes: snapshot.visitedNodes,
+              scores: snapshot.scores,
+              isCompleted: snapshot.isCompleted,
+              completedAt: snapshot.isCompleted ? snapshot.updatedAt : undefined,
+            },
+          },
+          updatedAt: snapshot.updatedAt,
+        };
+
+        saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
+        bundleContext.onBundleSnapshot(bundleSnapshot);
+      }
     },
-    [pkg],
+    [pkg, bundleContext],
   );
 
   if (!engine) {

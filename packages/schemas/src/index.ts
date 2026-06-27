@@ -23,8 +23,16 @@ export type {
 export { WorkflowSchema, RouteDefinitionSchema } from './workflow.js';
 export type { Workflow, RouteDefinition, Condition } from './workflow.js';
 
-export { ProgressSnapshotSchema } from './progress.js';
-export type { ProgressSnapshot } from './progress.js';
+export {
+  ProgressSnapshotSchema,
+  ModuleProgressSnapshotSchema,
+  BundleProgressSnapshotSchema,
+} from './progress.js';
+export type {
+  ProgressSnapshot,
+  ModuleProgressSnapshot,
+  BundleProgressSnapshot,
+} from './progress.js';
 
 export {
   RewardsSchema,
@@ -62,6 +70,9 @@ export type {
   MasteryLevel,
   ValidationResult,
 } from './skills.js';
+
+export { BundleManifestSchema, BundleModuleRefSchema } from './bundle.js';
+export type { BundleManifest, BundleModuleRef } from './bundle.js';
 
 export {
   TelemetryEventSchema,

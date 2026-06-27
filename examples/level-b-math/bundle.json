@@ -1,0 +1,35 @@
+{
+  "id": "level-b-math",
+  "title": "Level B Math",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "level": "level-b",
+  "subject": "math",
+  "description": "A multi-module math bundle covering addition basics through fraction operations. Each module builds on the previous one.",
+  "modules": [
+    {
+      "id": "addition_basics",
+      "title": "Addition Basics",
+      "chapterCode": "CH1",
+      "path": "./modules/addition_basics",
+      "dependsOn": [],
+      "estimatedDuration": 15
+    },
+    {
+      "id": "addition_carry",
+      "title": "Addition with Carry",
+      "chapterCode": "CH2",
+      "path": "./modules/addition_carry",
+      "dependsOn": ["addition_basics"],
+      "estimatedDuration": 20
+    },
+    {
+      "id": "adding_fractions",
+      "title": "Adding Fractions",
+      "chapterCode": "CH3",
+      "path": "./modules/adding_fractions",
+      "dependsOn": ["addition_carry"],
+      "estimatedDuration": 25
+    }
+  ]
+}

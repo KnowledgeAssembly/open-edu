@@ -22,6 +22,16 @@ export function evaluateCondition(condition: RewardCondition, context: ContextSn
     case 'or': {
       return condition.conditions.some((c: RewardCondition) => evaluateCondition(c, context));
     }
+    case 'moduleCompleted': {
+      return (context.completedModules ?? []).includes(condition.moduleId);
+    }
+    case 'bundleCompleted': {
+      console.warn(
+        '[rewards] bundleCompleted condition evaluated but bundle-level rewards require external wiring. ' +
+          'Call rewardBroker.updateContext({ completedModules }) before firing bundle.completed event.',
+      );
+      return false;
+    }
     default:
       return false;
   }
@@ -40,5 +50,6 @@ export function getDefaultContext(): ContextSnapshot {
     scores: {},
     skills: {},
     completedNodes: [],
+    completedModules: [],
   };
 }

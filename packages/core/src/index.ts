@@ -2,7 +2,7 @@ export const CORE_VERSION = '0.1.0';
 
 export { loadPackage } from './loader.js';
 export type { LoadOptions } from './loader.js';
-export type { LoadedPackage, LoadedNode } from './types.js';
+export type { LoadedPackage, LoadedNode, LoadedBundle } from './types.js';
 export {
   PackageLoadError,
   ManifestValidationError,
@@ -33,3 +33,15 @@ export { applyPatch } from './patcher.js';
 export type { PatchOperation, PatchReport, PatchOperationResult } from './patcher.js';
 export { scanPackages } from './scanner.js';
 export type { PackageSummary } from './scanner.js';
+export { loadBundle } from './bundle-loader.js';
+export { scanBundles, scanAll } from './bundle-scanner.js';
+export type { BundleSummary } from './bundle-scanner.js';
+export {
+  BundleValidationError,
+  ModuleNotFoundError,
+  ModuleMismatchError,
+  CircularDependencyError,
+  MissingPrerequisiteError,
+} from './errors.js';
+export { importLearnEasy } from './learn-easy-importer.js';
+export type { ImportOptions, ImportResult } from './learn-easy-importer.js';

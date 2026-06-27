@@ -30,6 +30,7 @@ const mockPackageData: LoadedPackage = {
 
 vi.mock('virtual:open-edu-package', () => ({
   packageData: mockPackageData,
+  bundleData: null,
 }));
 
 const { DevApp } = await import('./DevApp');
