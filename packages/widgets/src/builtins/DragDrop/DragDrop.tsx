@@ -126,7 +126,11 @@ function DragDropComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -167,9 +171,9 @@ function DragDropComponent(props: {
                   data-testid={`observe-target-${target.id}`}
                   style={{
                     padding: '0.75rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
                     borderRadius: '0.375rem',
-                    backgroundColor: '#f9fafb',
+                    backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
                     minHeight: '2.5rem',
                   }}
                   aria-label={`Target: ${target.label}`}
@@ -193,7 +197,11 @@ function DragDropComponent(props: {
         </div>
         {showAcknowledgeButton && (
           <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            <ThemedButton
+              variant="primary"
+              onClick={handleObserveAcknowledge}
+              data-testid="observe-acknowledge"
+            >
               Mark as seen ✓
             </ThemedButton>
           </div>
@@ -222,14 +230,16 @@ function DragDropComponent(props: {
           marginTop: '0.75rem',
           marginBottom: '0.75rem',
           padding: '0.75rem',
-          border: '1px dashed #d1d5db',
+          border: '1px dashed var(--oe-outline-variant, #d1d5db)',
           borderRadius: '0.375rem',
           minHeight: '2.5rem',
-          backgroundColor: '#f9fafb',
+          backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
         }}
       >
         {unplacedItemIds.length === 0 && (
-          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>All items placed</span>
+          <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
+            All items placed
+          </span>
         )}
         {unplacedItemIds.map((itemId) => {
           const item = items.find((i) => i.id === itemId);
@@ -252,11 +262,20 @@ function DragDropComponent(props: {
               }}
               style={{
                 padding: '0.375rem 0.75rem',
-                border: isSelected ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                border: isSelected
+                  ? '2px solid var(--oe-primary, #3b82f6)'
+                  : '1px solid var(--oe-outline-variant, #d1d5db)',
                 borderRadius: '1rem',
-                cursor: 'pointer',
-                backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                cursor: isSelected ? 'grabbing' : 'pointer',
+                backgroundColor: isSelected
+                  ? 'var(--oe-primary-container, #eff6ff)'
+                  : 'var(--oe-surface, #ffffff)',
                 userSelect: 'none',
+                boxShadow: isSelected
+                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)'
+                  : 'none',
+                transform: isSelected ? 'translateY(-2px)' : 'none',
+                transition: 'all 0.2s ease',
               }}
             >
               {item.emoji && <span>{item.emoji} </span>}
@@ -273,6 +292,8 @@ function DragDropComponent(props: {
       >
         {targets.map((target) => {
           const itemsInTarget = items.filter((item) => placedItems[item.id] === target.id);
+          const hasItem = itemsInTarget.length > 0;
+          const shouldHighlight = selectedItemId !== null && !hasItem;
           return (
             <div
               key={target.id}
@@ -289,11 +310,18 @@ function DragDropComponent(props: {
               }}
               style={{
                 padding: '0.75rem',
-                border: selectedItemId !== null ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                border: shouldHighlight
+                  ? '2px dashed var(--oe-primary, #3b82f6)'
+                  : hasItem
+                    ? '1px solid var(--oe-outline-variant, #d1d5db)'
+                    : '1px solid var(--oe-outline-variant, #d1d5db)',
                 borderRadius: '0.375rem',
                 minHeight: '2.5rem',
-                backgroundColor: selectedItemId !== null ? '#eff6ff' : '#f9fafb',
-                cursor: selectedItemId !== null ? 'pointer' : 'default',
+                backgroundColor: shouldHighlight
+                  ? 'var(--oe-primary-container, #eff6ff)'
+                  : 'var(--oe-surface-container-lowest, #f9fafb)',
+                cursor: selectedItemId !== null && !hasItem ? 'pointer' : 'default',
+                transition: 'all 0.2s ease',
               }}
             >
               <strong>{target.label}</strong>
@@ -307,9 +335,10 @@ function DragDropComponent(props: {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.375rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--oe-surface, #ffffff)',
+                    transition: 'all 0.2s ease',
                   }}
                 >
                   {item.emoji && <span>{item.emoji}</span>}
@@ -326,8 +355,16 @@ function DragDropComponent(props: {
                       background: 'transparent',
                       cursor: 'pointer',
                       fontSize: '0.75rem',
-                      color: '#ef4444',
+                      color: 'var(--oe-on-surface-variant, #6b7280)',
                       padding: '0 0.25rem',
+                      borderRadius: '0.25rem',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor =
+                        'var(--oe-surface-variant, #f3f4f6)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor = 'transparent';
                     }}
                     aria-label={`Remove ${item.label} from ${target.label}`}
                   >
@@ -370,22 +407,7 @@ function DragDropComponent(props: {
           <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
           </ThemedButton>
-        ) : (
-          <ThemedButton variant="outline" disabled data-testid="result-display">
-            {(() => {
-              const totalItems = items.length;
-              let correctCount = 0;
-              for (const item of items) {
-                const placed = placedItems[item.id];
-                const expected = content!.expectedPositions[item.id];
-                if (placed && placed === expected) {
-                  correctCount++;
-                }
-              }
-              return correctCount === totalItems ? 'Correct!' : 'Incorrect';
-            })()}
-          </ThemedButton>
-        )}
+        ) : null}
       </div>
 
       {submitted && (

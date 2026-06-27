@@ -40,12 +40,82 @@ function MeasurementScaleComponent(props: {
   const isInteractive = config?.interactive ?? false;
   const isObserve = parsed.success && !isInteractive;
 
-  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton, acknowledged } = useObserveMode({
+  const {
+    handleAcknowledge: handleObserveAcknowledge,
+    showAcknowledgeButton,
+    acknowledged,
+  } = useObserveMode({
     isObserve: isObserve && !!config,
     onComplete: complete,
     onInteract: emitInteraction,
     widgetId: 'open-edu.measurement-scale',
   });
+
+  const clamp = useCallback(
+    (v: number) => {
+      if (!config) return v;
+      const stepped = Math.round((v - config.min) / config.step) * config.step + config.min;
+      return Math.min(config.max, Math.max(config.min, stepped));
+    },
+    [config],
+  );
+
+  const indicatorColor = submitted ? '#10b981' : 'var(--oe-primary, #3b82f6)';
+
+  const mapCoordinatesToValue = useCallback(
+    (clientX: number, clientY: number, rect: DOMRect) => {
+      if (!config) return value;
+      const isVertical = config.type === 'thermometer' || config.type === 'cylinder';
+      let pos: number;
+      if (isVertical) {
+        pos = 1 - (clientY - rect.top) / rect.height;
+      } else {
+        pos = (clientX - rect.left) / rect.width;
+      }
+      pos = Math.min(1, Math.max(0, pos));
+      const range = config.max - config.min;
+      return clamp(config.min + pos * range);
+    },
+    [config, clamp, value],
+  );
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<SVGSVGElement>) => {
+      if (!config || !isInteractive || submitted) return;
+      const svg = e.currentTarget;
+      const rect = svg.getBoundingClientRect();
+      const newValue = mapCoordinatesToValue(e.clientX, e.clientY, rect);
+      setValue(newValue);
+    },
+    [config, isInteractive, submitted, mapCoordinatesToValue],
+  );
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<SVGSVGElement>) => {
+      if (!config || !isInteractive || submitted) return;
+      const svg = e.currentTarget;
+      const rect = svg.getBoundingClientRect();
+      const touch = e.touches[0];
+      if (!touch) return;
+      const newValue = mapCoordinatesToValue(touch.clientX, touch.clientY, rect);
+      setValue(newValue);
+    },
+    [config, isInteractive, submitted, mapCoordinatesToValue],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<SVGSVGElement>) => {
+      if (!config || !isInteractive || submitted) return;
+      e.preventDefault();
+      const svg = e.currentTarget;
+      const rect = svg.getBoundingClientRect();
+      const touch = e.touches[0];
+      if (!touch) return;
+      const newValue = mapCoordinatesToValue(touch.clientX, touch.clientY, rect);
+      setValue(newValue);
+    },
+    [config, isInteractive, submitted, mapCoordinatesToValue],
+  );
 
   const handleSubmit = useCallback(() => {
     if (!config || submitted) return;
@@ -68,34 +138,6 @@ function MeasurementScaleComponent(props: {
     setSubmitted(true);
   }, [config, submitted, value, emitInteraction, complete]);
 
-  const clamp = useCallback(
-    (v: number) => {
-      if (!config) return v;
-      const stepped = Math.round((v - config.min) / config.step) * config.step + config.min;
-      return Math.min(config.max, Math.max(config.min, stepped));
-    },
-    [config],
-  );
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      if (!config || !isInteractive || submitted) return;
-      const svg = e.currentTarget;
-      const rect = svg.getBoundingClientRect();
-      const isVertical = config.type === 'thermometer' || config.type === 'cylinder';
-      let pos: number;
-      if (isVertical) {
-        pos = 1 - (e.clientY - rect.top) / rect.height;
-      } else {
-        pos = (e.clientX - rect.left) / rect.width;
-      }
-      pos = Math.min(1, Math.max(0, pos));
-      const range = config.max - config.min;
-      setValue(clamp(config.min + pos * range));
-    },
-    [config, isInteractive, submitted, clamp],
-  );
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (!config || !isInteractive || submitted) return;
@@ -117,9 +159,15 @@ function MeasurementScaleComponent(props: {
 
   if (!parsed.success || !config) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-oe-lg border border-oe-error/30 bg-oe-error/10 p-4 text-center">
-        <p className="font-oe-heading text-oe-error">Unable to load measurement scale</p>
-        <p className="text-oe-text-secondary mt-1 text-sm">Please check the widget configuration and try again.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
+        <p className="text-on-surface font-semibold">Unable to load measurement scale</p>
+        <p className="text-on-surface-variant mt-1 text-sm">
+          Please check the widget configuration and try again.
+        </p>
       </div>
     );
   }
@@ -197,6 +245,8 @@ function MeasurementScaleComponent(props: {
         aria-label={`Ruler scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onKeyDown={handleKeyDown}
         tabIndex={isInteractive && !submitted ? 0 : undefined}
       >
@@ -216,16 +266,29 @@ function MeasurementScaleComponent(props: {
           y1={rulerY - 8}
           x2={markerX}
           y2={rulerY + rulerH + 4}
-          stroke={submitted ? '#10b981' : '#ef4444'}
+          stroke={indicatorColor}
           strokeWidth={3}
           strokeLinecap="round"
           aria-hidden="true"
         />
         <polygon
           points={`${markerX - 6},${rulerY - 8} ${markerX + 6},${rulerY - 8} ${markerX},${rulerY - 16}`}
-          fill={submitted ? '#10b981' : '#ef4444'}
+          fill={indicatorColor}
           aria-hidden="true"
         />
+        {cfg.showReading && isInteractive && (
+          <text
+            x={markerX}
+            y={rulerY - 22}
+            textAnchor="middle"
+            fontSize={13}
+            fontWeight={600}
+            fill="var(--oe-on-surface, #1f2937)"
+            aria-hidden="true"
+          >
+            {currentReading}
+          </text>
+        )}
       </svg>
     );
   }
@@ -290,6 +353,8 @@ function MeasurementScaleComponent(props: {
         aria-label={`Thermometer scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onKeyDown={handleKeyDown}
         tabIndex={isInteractive && !submitted ? 0 : undefined}
       >
@@ -308,7 +373,7 @@ function MeasurementScaleComponent(props: {
           y={tubeBotY - fillHeight}
           width={12}
           height={fillHeight}
-          fill={submitted ? '#10b981' : '#ef4444'}
+          fill={indicatorColor}
           rx={6}
           aria-hidden="true"
         />
@@ -316,12 +381,25 @@ function MeasurementScaleComponent(props: {
           cx={tubeX}
           cy={bulbCY}
           r={bulbR}
-          fill={submitted ? '#10b981' : '#ef4444'}
+          fill={indicatorColor}
           stroke="#9ca3af"
           strokeWidth={1}
           aria-hidden="true"
         />
         {ticks}
+        {cfg.showReading && isInteractive && (
+          <text
+            x={tubeX + bulbR + 12}
+            y={bulbCY + 5}
+            textAnchor="start"
+            fontSize={13}
+            fontWeight={600}
+            fill="var(--oe-on-surface, #1f2937)"
+            aria-hidden="true"
+          >
+            {currentReading}
+          </text>
+        )}
       </svg>
     );
   }
@@ -374,6 +452,7 @@ function MeasurementScaleComponent(props: {
 
     const markerFrac = (value - cfg.min) / range;
     const fillHeight = markerFrac * cylH;
+    const liquidY = cylBot - fillHeight;
 
     return (
       <svg
@@ -385,6 +464,8 @@ function MeasurementScaleComponent(props: {
         aria-label={`Graduated cylinder scale from ${cfg.min} to ${cfg.max} ${cfg.unit}`}
         style={{ cursor: isInteractive && !submitted ? 'pointer' : 'default' }}
         onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onKeyDown={handleKeyDown}
         tabIndex={isInteractive && !submitted ? 0 : undefined}
       >
@@ -408,10 +489,10 @@ function MeasurementScaleComponent(props: {
         />
         <rect
           x={cx - cylW / 2 + 2}
-          y={cylBot - fillHeight}
+          y={liquidY}
           width={cylW - 4}
           height={fillHeight}
-          fill={submitted ? '#10b981' : '#60a5fa'}
+          fill={indicatorColor}
           opacity={0.6}
           aria-hidden="true"
         />
@@ -420,7 +501,7 @@ function MeasurementScaleComponent(props: {
           cy={cylBot}
           rx={cylW / 2}
           ry={10}
-          fill={submitted ? '#10b981' : '#60a5fa'}
+          fill={indicatorColor}
           opacity={0.6}
           aria-hidden="true"
         />
@@ -434,6 +515,19 @@ function MeasurementScaleComponent(props: {
           strokeWidth={1}
         />
         {ticks}
+        {cfg.showReading && isInteractive && (
+          <text
+            x={cx + cylW / 2 + 20}
+            y={liquidY + 5}
+            textAnchor="start"
+            fontSize={13}
+            fontWeight={600}
+            fill="var(--oe-on-surface, #1f2937)"
+            aria-hidden="true"
+          >
+            {currentReading}
+          </text>
+        )}
       </svg>
     );
   }
@@ -473,15 +567,29 @@ function MeasurementScaleComponent(props: {
       )}
 
       {showAcknowledgeButton && (
-        <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container" className="mt-4 text-center">
-          <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="observe-acknowledge-container"
+          className="mt-4 text-center"
+        >
+          <ThemedButton
+            variant="primary"
+            onClick={handleObserveAcknowledge}
+            data-testid="observe-acknowledge"
+          >
             Acknowledge
           </ThemedButton>
         </div>
       )}
 
       {!showAcknowledgeButton && acknowledged && (
-        <div role="status" aria-live="assertive" data-testid="observe-complete" className="mt-4 text-center">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="observe-complete"
+          className="mt-4 text-center"
+        >
           <p className="text-oe-text-secondary mb-2">Content acknowledged.</p>
         </div>
       )}

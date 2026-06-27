@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { ThemedButton } from '../../themed-button';
@@ -51,7 +51,14 @@ function VisualCountingComponent(props: {
   const [hintIndex, setHintIndex] = useState(0);
   const [selectedCount, setSelectedCount] = useState<number | null>(null);
 
-  const displayItems = content.items ?? [];
+  const displayItems = useMemo(() => {
+    if (content.items && content.items.length > 0) return content.items;
+    if (content.count && content.emoji) {
+      return Array.from({ length: content.count }, () => content.emoji!);
+    }
+    return [];
+  }, [content.items, content.count, content.emoji]);
+
   const leftItems = Array.isArray(content.left) ? content.left : [];
   const rightItems = Array.isArray(content.right) ? content.right : [];
   const leftCount = typeof content.left === 'number' ? content.left : leftItems.length;
@@ -60,6 +67,20 @@ function VisualCountingComponent(props: {
   const emojiSize = SIZE_MAP[content.size ?? 'md'];
   const labelName = content.text ?? 'item';
   const isObserve = !content.interactive;
+
+  const numberButtons = useMemo(() => {
+    const nums: number[] = [];
+    for (let i = Math.max(1, expected - 3); i <= expected + 3; i++) {
+      nums.push(i);
+    }
+    for (let i = nums.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = nums[i]!;
+      nums[i] = nums[j]!;
+      nums[j] = tmp;
+    }
+    return nums;
+  }, [expected]);
 
   const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
     isObserve,
@@ -101,17 +122,14 @@ function VisualCountingComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
-  }
-
-  const start = Math.max(1, expected - 3);
-  const end = expected + 3;
-  const numberButtons: number[] = [];
-  for (let i = start; i <= end; i++) {
-    numberButtons.push(i);
   }
 
   const renderItems = (items: string[], displayCount?: number) => {
@@ -119,7 +137,14 @@ function VisualCountingComponent(props: {
     const count = displayCount ?? items.length;
     return (
       <ul
-        style={{ listStyle: 'none', display: 'flex', gap: '0.5rem', padding: 0, margin: 0 }}
+        style={{
+          listStyle: 'none',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(3rem, 1fr))',
+          gap: '0.5rem',
+          padding: 0,
+          margin: 0,
+        }}
         role="list"
         aria-label={labelName}
       >
@@ -144,18 +169,14 @@ function VisualCountingComponent(props: {
       {leftCount > 0 && leftItems.length === 0 && (
         <span style={{ fontSize: emojiSize }}>{leftCount} items</span>
       )}
-      <span role="img" aria-label="plus" style={{ fontSize: emojiSize }}>
-        +
-      </span>
+      <span style={{ fontSize: emojiSize }}>+</span>
       {rightItems.length > 0 && renderItems(rightItems)}
       {rightCount > 0 && rightItems.length === 0 && (
         <span style={{ fontSize: emojiSize }}>{rightCount} items</span>
       )}
       {showTotal && (
         <>
-          <span role="img" aria-label="equals" style={{ fontSize: emojiSize }}>
-            =
-          </span>
+          <span style={{ fontSize: emojiSize }}>=</span>
           <span style={{ fontSize: emojiSize, fontWeight: 'bold' }}>{expected}</span>
         </>
       )}
@@ -182,7 +203,11 @@ function VisualCountingComponent(props: {
         </div>
         {showAcknowledgeButton && (
           <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            <ThemedButton
+              variant="primary"
+              onClick={handleObserveAcknowledge}
+              data-testid="observe-acknowledge"
+            >
               Mark as seen ✓
             </ThemedButton>
           </div>
@@ -210,7 +235,7 @@ function VisualCountingComponent(props: {
             {numberButtons.map((num) => (
               <ThemedButton
                 key={num}
-                variant={selectedCount === num ? "primary" : "outline"}
+                variant={selectedCount === num ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => handleNumberClick(num)}
                 aria-pressed={selectedCount === num}
@@ -245,11 +270,7 @@ function VisualCountingComponent(props: {
           <ThemedButton variant="primary" onClick={handleSubmit} disabled={selectedCount === null}>
             Submit
           </ThemedButton>
-        ) : (
-          <ThemedButton variant="outline" disabled data-testid="result-display">
-            {selectedCount === expected ? 'Correct!' : 'Incorrect'}
-          </ThemedButton>
-        )}
+        ) : null}
       </div>
 
       {selectedCount !== null && !submitted && (
@@ -259,11 +280,13 @@ function VisualCountingComponent(props: {
       )}
 
       {submitted && (
-        <div role="status" aria-live="assertive" data-testid="feedback">
+        <div role="status" aria-live="assertive" data-testid="feedback" className="mt-sm">
           {selectedCount === expected ? (
-            <p>Correct! The answer is {expected}.</p>
+            <p className="text-success font-semibold">Correct! The answer is {expected}.</p>
           ) : (
-            <p>Not quite. The correct answer is {expected}.</p>
+            <p className="text-error font-semibold">
+              Not quite. The correct answer is {expected}. You selected {selectedCount}.
+            </p>
           )}
         </div>
       )}

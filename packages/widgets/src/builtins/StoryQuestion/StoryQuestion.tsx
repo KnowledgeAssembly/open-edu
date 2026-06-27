@@ -8,6 +8,7 @@ const questionSchema = z.object({
   question: z.string().min(1),
   options: z.array(z.string()).min(2),
   correctIndex: z.number().int().min(0),
+  explanation: z.string().optional(),
 });
 
 const storyQuestionSchema = z
@@ -22,6 +23,18 @@ const storyQuestionSchema = z
     message: 'Either scenario or story field is required',
   });
 
+type FeedbackState = {
+  selectedIndex: number;
+  correctIndex: number;
+  isCorrect: boolean;
+  explanation?: string;
+} | null;
+
+type ResponseRecord = {
+  correct: boolean;
+  selectedIndex: number;
+};
+
 function StoryQuestionComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
@@ -35,7 +48,8 @@ function StoryQuestionComponent(props: {
   const [submitted, setSubmitted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selections, setSelections] = useState<(number | null)[]>([]);
-  const [responses, setResponses] = useState<{ correct: boolean }[]>([]);
+  const [responses, setResponses] = useState<ResponseRecord[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
 
   const content = parsed.success ? parsed.data : null;
   const questionCount = content?.questions.length ?? 0;
@@ -59,14 +73,14 @@ function StoryQuestionComponent(props: {
 
   const handleSelect = useCallback(
     (optionIndex: number) => {
-      if (submitted) return;
+      if (submitted || feedback) return;
       setSelections((prev) => {
         const next = [...prev];
         next[currentIndex] = optionIndex;
         return next;
       });
     },
-    [submitted, currentIndex],
+    [submitted, feedback, currentIndex],
   );
 
   const handleNext = useCallback(() => {
@@ -78,28 +92,41 @@ function StoryQuestionComponent(props: {
     if (!question) return;
     const isCorrect = currentSelection === question.correctIndex;
 
-    const newResponses = [...responses, { correct: isCorrect }];
+    const newResponses = [...responses, { correct: isCorrect, selectedIndex: currentSelection }];
     setResponses(newResponses);
 
+    emitInteraction({
+      type: 'widget.interaction',
+      widgetId: 'open-edu.story-question',
+      action: 'answer',
+      questionIndex: currentIndex,
+      selectedIndex: currentSelection,
+      correct: isCorrect,
+    });
+
+    setFeedback({
+      selectedIndex: currentSelection,
+      correctIndex: question.correctIndex,
+      isCorrect,
+      explanation: question.explanation,
+    });
+  }, [content, selections, currentIndex, responses, emitInteraction]);
+
+  const handleAdvanceAfterFeedback = useCallback(() => {
+    if (!content) return;
+    setFeedback(null);
+
     if (currentIndex < content.questions.length - 1) {
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'open-edu.story-question',
-        action: 'answer',
-        questionIndex: currentIndex,
-        selectedIndex: currentSelection,
-        correct: isCorrect,
-      });
       setCurrentIndex((i) => i + 1);
     } else {
-      const correctCount = newResponses.filter((r) => r.correct).length;
+      const correctCount = responses.filter((r) => r.correct).length;
       const totalQuestions = content.questions.length;
       const accuracy = correctCount / totalQuestions;
       emitInteraction({
         type: 'widget.interaction',
         widgetId: 'open-edu.story-question',
         action: 'submit',
-        responses: newResponses,
+        responses,
         correctCount,
         totalQuestions,
         accuracy,
@@ -107,7 +134,7 @@ function StoryQuestionComponent(props: {
       complete(accuracy * 100);
       setSubmitted(true);
     }
-  }, [content, selections, currentIndex, responses, emitInteraction, complete]);
+  }, [content, currentIndex, responses, emitInteraction, complete]);
 
   if (!parsed.success) {
     return (
@@ -126,15 +153,25 @@ function StoryQuestionComponent(props: {
 
   const { questions } = parsed.data;
 
+  const storyCallout = (
+    <div className="bg-primary-container/20 rounded-lg p-md border-l-4 border-primary mb-lg">
+      {visual && (
+        <span className="text-3xl mr-sm" aria-hidden="true">
+          {visual}
+        </span>
+      )}
+      <article aria-label={visual ? `${visual} Story` : 'Story'}>
+        <p>{story}</p>
+      </article>
+    </div>
+  );
+
   if (!isInteractive) {
     const question = questions[0]!;
 
     return (
       <div data-testid="story-question-observe">
-        <article aria-label={visual ? `${visual} Story` : 'Story'}>
-          {visual && <span aria-hidden="true">{visual} </span>}
-          <p>{story}</p>
-        </article>
+        {storyCallout}
         <fieldset>
           <legend>{question.question}</legend>
           {question.options.map((opt, idx) => (
@@ -145,10 +182,10 @@ function StoryQuestionComponent(props: {
                 value={idx}
                 checked={idx === question.correctIndex}
                 disabled
-                aria-label={opt}
+                aria-label={idx === question.correctIndex ? `Correct answer: ${opt}` : opt}
               />{' '}
               {opt}
-              {idx === question.correctIndex && <span> ✓</span>}
+              {idx === question.correctIndex && <span aria-hidden="true"> ✓</span>}
             </label>
           ))}
         </fieldset>
@@ -172,15 +209,50 @@ function StoryQuestionComponent(props: {
 
     return (
       <div data-testid="story-question">
-        <article aria-label={visual ? `${visual} Story` : 'Story'}>
-          {visual && <span aria-hidden="true">{visual} </span>}
-          <p>{story}</p>
-        </article>
-        <div role="status" aria-live="assertive" data-testid="story-result">
-          <p>
+        {storyCallout}
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="story-result"
+          className="mb-lg p-md rounded-lg bg-surface-container border border-outline-variant"
+        >
+          <p className="font-semibold text-lg">
             You got {correctCount} of {totalQuestions} correct.
           </p>
         </div>
+        {questions.map((q, qIdx) => {
+          const response = responses[qIdx];
+          if (!response) return null;
+          return (
+            <div key={qIdx} className="mb-lg">
+              <p className="font-semibold mb-xs">
+                Question {qIdx + 1}: {q.question}
+              </p>
+              {q.options.map((opt, optIdx) => {
+                const isSelected = response.selectedIndex === optIdx;
+                const isCorrectOption = optIdx === q.correctIndex;
+                const isWrongSelected = isSelected && !isCorrectOption;
+
+                return (
+                  <div
+                    key={optIdx}
+                    className={`my-xs p-sm rounded-lg ${
+                      isCorrectOption
+                        ? 'opacity-100 border-2 border-success'
+                        : isWrongSelected
+                          ? 'opacity-60 border-2 border-error'
+                          : 'opacity-60'
+                    }`}
+                  >
+                    {isCorrectOption && <span aria-hidden="true">✓ </span>}
+                    {isWrongSelected && <span aria-hidden="true">✗ </span>}
+                    {opt}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -189,33 +261,97 @@ function StoryQuestionComponent(props: {
   const isLastQuestion = currentIndex === questions.length - 1;
   const currentSelection = selections[currentIndex];
   const canAdvance = currentSelection !== null && currentSelection !== undefined;
+  const hasFeedback = feedback !== null;
 
   return (
     <div data-testid="story-question">
-      <article aria-label={visual ? `${visual} Story` : 'Story'}>
-        {visual && <span aria-hidden="true">{visual} </span>}
-        <p>{story}</p>
-      </article>
+      {storyCallout}
+      {questions.length > 1 && (
+        <p className="text-sm text-on-surface/70 mb-sm" data-testid="question-progress">
+          Question {currentIndex + 1} of {questions.length}
+        </p>
+      )}
       <fieldset>
         <legend>{question.question}</legend>
-        {question.options.map((opt, idx) => (
-          <label key={idx} style={{ display: 'block', margin: '0.5em 0' }}>
-            <input
-              type="radio"
-              name={`sq-option-${currentIndex}`}
-              value={idx}
-              checked={currentSelection === idx}
-              onChange={() => handleSelect(idx)}
-              disabled={submitted}
-              aria-label={opt}
-            />{' '}
-            {opt}
-          </label>
-        ))}
+        {question.options.map((opt, idx) => {
+          const isSelected = currentSelection === idx;
+          const isCorrectOption = idx === question.correctIndex;
+          const showResult = hasFeedback;
+          const isWrongSelected = showResult && isSelected && !isCorrectOption;
+          const isCorrectShown = showResult && isCorrectOption;
+
+          let optionClasses = '';
+          if (showResult) {
+            if (isCorrectOption) {
+              optionClasses = 'opacity-100 border-2 border-success rounded-lg p-sm';
+            } else if (isSelected) {
+              optionClasses = 'opacity-60 border-2 border-error rounded-lg p-sm';
+            } else {
+              optionClasses = 'opacity-60';
+            }
+          }
+
+          return (
+            <label
+              key={idx}
+              className={`block my-xs ${optionClasses}`}
+              data-testid={isCorrectShown ? 'correct-option' : undefined}
+            >
+              <input
+                type="radio"
+                name={`sq-option-${currentIndex}`}
+                value={idx}
+                checked={isSelected}
+                onChange={() => handleSelect(idx)}
+                disabled={showResult}
+                aria-label={opt}
+              />{' '}
+              {showResult && isCorrectOption && <span aria-hidden="true">✓ </span>}
+              {showResult && isWrongSelected && <span aria-hidden="true">✗ </span>}
+              {opt}
+            </label>
+          );
+        })}
       </fieldset>
-      <ThemedButton variant="primary" onClick={handleNext} disabled={!canAdvance}>
-        {isLastQuestion ? 'Submit' : 'Next'}
-      </ThemedButton>
+
+      {hasFeedback && feedback && (
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="question-feedback"
+          className="mt-md p-md rounded-lg border border-outline-variant bg-surface-container"
+        >
+          {feedback.isCorrect ? (
+            <p className="text-success font-semibold">✓ Correct!</p>
+          ) : (
+            <div>
+              <p className="text-error font-semibold">✗ Incorrect</p>
+              <p className="mt-xs text-on-surface/70">
+                The correct answer is: {question.options[feedback.correctIndex]}
+              </p>
+            </div>
+          )}
+          {feedback.explanation && (
+            <p className="mt-sm text-on-surface/70">{feedback.explanation}</p>
+          )}
+        </div>
+      )}
+
+      <div className="mt-md">
+        {hasFeedback ? (
+          <ThemedButton
+            variant="primary"
+            onClick={handleAdvanceAfterFeedback}
+            data-testid="feedback-next"
+          >
+            {isLastQuestion ? 'See Results' : 'Next'}
+          </ThemedButton>
+        ) : (
+          <ThemedButton variant="primary" onClick={handleNext} disabled={!canAdvance}>
+            {isLastQuestion ? 'Submit' : 'Next'}
+          </ThemedButton>
+        )}
+      </div>
     </div>
   );
 }

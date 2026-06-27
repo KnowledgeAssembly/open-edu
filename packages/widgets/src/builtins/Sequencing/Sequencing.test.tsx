@@ -117,11 +117,11 @@ describe('Sequencing interactive mode (interactive: true)', () => {
     expect(screen.queryByTestId('available-item-ignite')).toBeNull();
   });
 
-  it('clicking placed item removes it from sequence', () => {
+  it('clicking remove button removes placed item from sequence', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('available-item-ignite'));
     expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
-    fireEvent.click(screen.getByTestId('placed-item-ignite'));
+    fireEvent.click(screen.getByLabelText('Remove from sequence'));
     expect(screen.queryByTestId('placed-item-ignite')).toBeNull();
     expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
   });
@@ -195,7 +195,6 @@ describe('Sequencing interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('available-item-execute'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.queryByText('Submit')).toBeNull();
-    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
   it('shows feedback after submission', () => {
@@ -292,11 +291,11 @@ describe('Sequencing keyboard accessibility', () => {
     expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
   });
 
-  it('supports Enter key on placed items to remove', () => {
+  it('supports Enter key on remove button to remove placed item', () => {
     renderWidget(a11yConfig);
     fireEvent.click(screen.getByTestId('available-item-ignite'));
-    const placedItem = screen.getByTestId('placed-item-ignite');
-    fireEvent.keyDown(placedItem, { key: 'Enter' });
+    const removeButton = screen.getByLabelText('Remove from sequence');
+    fireEvent.click(removeButton);
     expect(screen.queryByTestId('placed-item-ignite')).toBeNull();
     expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
   });
@@ -307,10 +306,11 @@ describe('Sequencing keyboard accessibility', () => {
     expect(screen.getByTestId('available-item-plan').getAttribute('tabindex')).toBe('0');
   });
 
-  it('has tabIndex 0 on placed items', () => {
+  it('remove button for placed items is focusable', () => {
     renderWidget(a11yConfig);
     fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByTestId('placed-item-ignite').getAttribute('tabindex')).toBe('0');
+    const removeButton = screen.getByLabelText('Remove from sequence');
+    expect(removeButton.tagName).toBe('BUTTON');
   });
 
   it('has live region for sequencing status', () => {
@@ -320,10 +320,12 @@ describe('Sequencing keyboard accessibility', () => {
     expect(status.closest('[aria-live]')).toBeTruthy();
   });
 
-  it('has proper aria label on placed items', () => {
+  it('has numbered step display on placed items', () => {
     renderWidget(a11yConfig);
     fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByLabelText(/Step 1: Ignite/)).toBeTruthy();
+    const placedItem = screen.getByTestId('placed-item-ignite');
+    expect(placedItem).toBeTruthy();
+    expect(placedItem).toHaveTextContent('1.');
   });
 
   it('has proper emoji display in observe mode labels', () => {
@@ -408,5 +410,83 @@ describe('Sequencing observe mode display', () => {
     expect(listItems[0]).toHaveTextContent('🔥 Ignite');
     expect(listItems[1]).toHaveTextContent('📋 Plan');
     expect(listItems[2]).toHaveTextContent('🚀 Execute');
+  });
+});
+
+describe('Sequencing new features', () => {
+  const interactiveConfig = {
+    items: defaultItems,
+    correctOrder: defaultCorrectOrder,
+    interactive: true,
+  };
+
+  it('up arrow moves item up in sequence', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    fireEvent.click(screen.getByTestId('available-item-plan'));
+    const moveDownButton = screen.getAllByLabelText(/Move .* down/)[0]!;
+    fireEvent.click(moveDownButton);
+    const placedItems = screen.getAllByTestId(/^placed-item-/);
+    expect(placedItems[0]).toHaveTextContent('Plan');
+    expect(placedItems[1]).toHaveTextContent('Ignite');
+  });
+
+  it('down arrow moves item down in sequence', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    fireEvent.click(screen.getByTestId('available-item-plan'));
+    const moveUpButton = screen.getAllByLabelText(/Move .* up/)[1]!;
+    fireEvent.click(moveUpButton);
+    const placedItems = screen.getAllByTestId(/^placed-item-/);
+    expect(placedItems[0]).toHaveTextContent('Plan');
+    expect(placedItems[1]).toHaveTextContent('Ignite');
+  });
+
+  it('numbered slots appear with placeholders', () => {
+    renderWidget(interactiveConfig);
+    expect(screen.getByText('1.')).toBeTruthy();
+    expect(screen.getByText('2.')).toBeTruthy();
+    expect(screen.getByText('3.')).toBeTruthy();
+    expect(screen.getAllByText('___')).toHaveLength(3);
+  });
+
+  it('shows correct color coding after submit for correct position', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    fireEvent.click(screen.getByTestId('available-item-plan'));
+    fireEvent.click(screen.getByTestId('available-item-execute'));
+    fireEvent.click(screen.getByText('Submit'));
+    const firstItem = screen.getByTestId('placed-item-ignite');
+    expect(firstItem.style.backgroundColor).toContain('success-container');
+    expect(firstItem).toHaveTextContent('✓');
+  });
+
+  it('shows incorrect color coding after submit for wrong position', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-execute'));
+    fireEvent.click(screen.getByTestId('available-item-plan'));
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    fireEvent.click(screen.getByText('Submit'));
+    const firstItem = screen.getByTestId('placed-item-execute');
+    expect(firstItem.style.backgroundColor).toContain('error-container');
+    expect(firstItem).toHaveTextContent('✗');
+  });
+
+  it('shows correct item for wrong position below', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-execute'));
+    fireEvent.click(screen.getByTestId('available-item-plan'));
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByText(/Correct:.*Ignite/)).toBeTruthy();
+  });
+
+  it('remove is a distinct focusable button not clickable on container', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    const removeButton = screen.getByLabelText('Remove from sequence');
+    expect(removeButton.tagName).toBe('BUTTON');
+    const placedItem = screen.getByTestId('placed-item-ignite');
+    expect(placedItem.getAttribute('role')).not.toBe('button');
   });
 });

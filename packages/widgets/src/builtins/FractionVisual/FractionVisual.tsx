@@ -62,6 +62,18 @@ function countBits(mask: number): number {
   return count;
 }
 
+function FractionNotation({ numerator, denominator }: { numerator: number; denominator: number }) {
+  return (
+    <span
+      className="inline-flex flex-col items-center leading-none"
+      aria-label={`${numerator} over ${denominator}`}
+    >
+      <span className="border-b-2 border-on-surface px-1 text-lg font-semibold">{numerator}</span>
+      <span className="px-1 text-lg font-semibold">{denominator}</span>
+    </span>
+  );
+}
+
 function FractionVisualComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
@@ -73,6 +85,7 @@ function FractionVisualComponent(props: {
   const content = parsed.success ? parsed.data : null;
   const [submitted, setSubmitted] = useState(false);
   const [shadedMask, setShadedMask] = useState<number | null>(null);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const isObserve = content && !content.interactive;
   const size = content?.size ?? 200;
@@ -82,7 +95,11 @@ function FractionVisualComponent(props: {
   const effectiveMask = shadedMask ?? initialMask;
   const shadedCount = countBits(effectiveMask);
 
-  const { acknowledged, handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+  const {
+    acknowledged,
+    handleAcknowledge: handleObserveAcknowledge,
+    showAcknowledgeButton,
+  } = useObserveMode({
     isObserve: !!isObserve,
     onComplete: complete,
     onInteract: emitInteraction,
@@ -134,10 +151,16 @@ function FractionVisualComponent(props: {
   if (content.denominator > 12) {
     return (
       <div data-testid="fraction-too-many">
-        <p>Too many parts to display.</p>
+        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+          <p className="text-on-surface-variant">
+            This fraction has too many parts to display visually.
+          </p>
+        </div>
       </div>
     );
   }
+
+  const barHeight = Math.max(40, size / 4);
 
   function renderBarSvg(baseNum: number, den: number, interactive: boolean, svgTestId: string) {
     const segWidth = size / den;
@@ -146,15 +169,20 @@ function FractionVisualComponent(props: {
 
     for (let i = 0; i < den; i++) {
       const isShaded = (mask & (1 << i)) !== 0;
+      const isHovered = hoverIndex === i;
+      let fillColor = isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6';
+      if (interactive && isHovered) {
+        fillColor = isShaded ? '#60a5fa' : '#e5e7eb';
+      }
       segs.push(
         <rect
           key={i}
           x={i * segWidth}
           y={0}
           width={segWidth + 0.5}
-          height={size}
-          fill={isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6'}
-          stroke="#1e3a5f"
+          height={barHeight}
+          fill={fillColor}
+          stroke="var(--oe-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="bar-segment"
           data-shaded={isShaded ? 'true' : 'false'}
@@ -162,6 +190,8 @@ function FractionVisualComponent(props: {
           role={interactive ? 'button' : undefined}
           tabIndex={interactive ? 0 : undefined}
           onClick={interactive ? () => handleSegmentClick(i) : undefined}
+          onMouseEnter={interactive ? () => setHoverIndex(i) : undefined}
+          onMouseLeave={interactive ? () => setHoverIndex(null) : undefined}
           onKeyDown={
             interactive
               ? (e) => {
@@ -169,7 +199,7 @@ function FractionVisualComponent(props: {
                 }
               : undefined
           }
-          style={{ cursor: interactive ? 'pointer' : undefined }}
+          className={interactive ? 'cursor-pointer' : undefined}
         />,
       );
     }
@@ -177,8 +207,8 @@ function FractionVisualComponent(props: {
     return (
       <svg
         width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
+        height={barHeight}
+        viewBox={`0 0 ${size} ${barHeight}`}
         data-testid={svgTestId}
         aria-label={`Fraction bar: ${baseNum}/${den}`}
         role="img"
@@ -200,13 +230,18 @@ function FractionVisualComponent(props: {
       const startAngle = i * anglePerSeg;
       const endAngle = (i + 1) * anglePerSeg;
       const isShaded = (mask & (1 << i)) !== 0;
+      const isHovered = hoverIndex === i;
+      let fillColor = isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6';
+      if (interactive && isHovered) {
+        fillColor = isShaded ? '#60a5fa' : '#e5e7eb';
+      }
       const d = describeArc(cx, cy, r, startAngle, endAngle);
       segs.push(
         <path
           key={i}
           d={d}
-          fill={isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6'}
-          stroke="#1e3a5f"
+          fill={fillColor}
+          stroke="var(--oe-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="circle-segment"
           data-shaded={isShaded ? 'true' : 'false'}
@@ -214,6 +249,8 @@ function FractionVisualComponent(props: {
           role={interactive ? 'button' : undefined}
           tabIndex={interactive ? 0 : undefined}
           onClick={interactive ? () => handleSegmentClick(i) : undefined}
+          onMouseEnter={interactive ? () => setHoverIndex(i) : undefined}
+          onMouseLeave={interactive ? () => setHoverIndex(null) : undefined}
           onKeyDown={
             interactive
               ? (e) => {
@@ -221,7 +258,7 @@ function FractionVisualComponent(props: {
                 }
               : undefined
           }
-          style={{ cursor: interactive ? 'pointer' : undefined }}
+          className={interactive ? 'cursor-pointer' : undefined}
         />,
       );
     }
@@ -265,7 +302,7 @@ function FractionVisualComponent(props: {
         <div style={{ textAlign: 'center' }}>
           {renderFraction(content.numerator, content.denominator, isInteractive, 'fraction-bar')}
           <div aria-label={`Fraction value: ${content.numerator}/${content.denominator}`}>
-            {content.numerator}/{content.denominator}
+            <FractionNotation numerator={content.numerator} denominator={content.denominator} />
           </div>
         </div>
         <div
@@ -284,7 +321,10 @@ function FractionVisualComponent(props: {
           <div
             aria-label={`Fraction value: ${content.compare.numerator}/${content.compare.denominator}`}
           >
-            {content.compare.numerator}/{content.compare.denominator}
+            <FractionNotation
+              numerator={content.compare.numerator}
+              denominator={content.compare.denominator}
+            />
           </div>
         </div>
         {isInteractive && !submitted && (
@@ -300,7 +340,13 @@ function FractionVisualComponent(props: {
         )}
         {submitted && (
           <div data-testid="feedback" role="status" aria-live="assertive">
-            {shadedCount === content.numerator ? <p>Correct!</p> : <p>Not quite.</p>}
+            {shadedCount === content.numerator ? (
+              <p>Correct!</p>
+            ) : (
+              <p>
+                You shaded {shadedCount} out of {content.numerator} segments.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -312,7 +358,7 @@ function FractionVisualComponent(props: {
       {content.showLabel !== false && content.label && <p>{content.label}</p>}
 
       <div role="status" aria-live="polite" data-testid="fraction-live-region" aria-atomic="true">
-        {displayIndex}
+        <FractionNotation numerator={content.numerator} denominator={content.denominator} />
       </div>
 
       {renderFraction(content.numerator, content.denominator, isInteractive, `fraction-${mode}`)}
@@ -331,20 +377,40 @@ function FractionVisualComponent(props: {
 
       {isInteractive && submitted && (
         <div data-testid="feedback" role="status" aria-live="assertive">
-          {shadedCount === content.numerator ? <p>Correct!</p> : <p>Not quite.</p>}
+          {shadedCount === content.numerator ? (
+            <p>Correct!</p>
+          ) : (
+            <p>
+              You shaded {shadedCount} out of {content.numerator} segments.
+            </p>
+          )}
         </div>
       )}
 
       {!isInteractive && showAcknowledgeButton && (
-        <div role="status" aria-live="assertive" data-testid="observe-complete" style={{ marginTop: '1rem' }}>
-          <ThemedButton variant="secondary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="observe-complete"
+          style={{ marginTop: '1rem' }}
+        >
+          <ThemedButton
+            variant="secondary"
+            onClick={handleObserveAcknowledge}
+            data-testid="observe-acknowledge"
+          >
             Acknowledge
           </ThemedButton>
         </div>
       )}
 
       {!isInteractive && acknowledged && (
-        <div role="status" aria-live="assertive" data-testid="observe-complete" style={{ marginTop: '1rem' }}>
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="observe-complete"
+          style={{ marginTop: '1rem' }}
+        >
           <p>Content acknowledged.</p>
         </div>
       )}

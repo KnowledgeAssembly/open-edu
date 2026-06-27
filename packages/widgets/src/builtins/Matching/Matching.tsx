@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { ThemedButton } from '../../themed-button';
@@ -50,6 +50,9 @@ function MatchingComponent(props: {
   const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
   const [connections, setConnections] = useState<Map<string, string>>(new Map());
   const [hintIndex, setHintIndex] = useState(0);
+  const [connectorPositions, setConnectorPositions] = useState<
+    Array<{ x1: number; y1: number; x2: number; y2: number; leftId: string; rightId: string }>
+  >([]);
 
   const isObserve = content?.interactive !== true;
   const pairs = content?.pairs ?? [];
@@ -59,6 +62,8 @@ function MatchingComponent(props: {
     return shuffleArray(content.pairs);
   }, [content]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
     isObserve: isObserve && hasValidContent,
     onComplete: complete,
@@ -66,12 +71,62 @@ function MatchingComponent(props: {
     widgetId: 'open-edu.matching',
   });
 
+  const updateConnectorPositions = useCallback(() => {
+    if (!containerRef.current) return;
+    const positions: Array<{
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      leftId: string;
+      rightId: string;
+    }> = [];
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    for (const [leftId, rightId] of connections.entries()) {
+      const leftEl = containerRef.current.querySelector(`[data-connector-left="${leftId}"]`);
+      const rightEl = containerRef.current.querySelector(`[data-connector-right="${rightId}"]`);
+      if (leftEl && rightEl) {
+        const leftRect = leftEl.getBoundingClientRect();
+        const rightRect = rightEl.getBoundingClientRect();
+        positions.push({
+          x1: leftRect.right - containerRect.left,
+          y1: leftRect.top + leftRect.height / 2 - containerRect.top,
+          x2: rightRect.left - containerRect.left,
+          y2: rightRect.top + rightRect.height / 2 - containerRect.top,
+          leftId,
+          rightId,
+        });
+      }
+    }
+    setConnectorPositions(positions);
+  }, [connections]);
+
+  useEffect(() => {
+    updateConnectorPositions();
+  }, [connections, updateConnectorPositions]);
+
+  useEffect(() => {
+    const handleResize = () => updateConnectorPositions();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [updateConnectorPositions]);
+
   const handleLeftItemClick = useCallback(
     (pairId: string) => {
       if (submitted) return;
+      if (connections.has(pairId)) {
+        setConnections((prev) => {
+          const next = new Map(prev);
+          next.delete(pairId);
+          return next;
+        });
+        setSelectedLeftId(pairId);
+        return;
+      }
       setSelectedLeftId((prev) => (prev === pairId ? null : pairId));
     },
-    [submitted],
+    [submitted, connections],
   );
 
   const handleRightItemClick = useCallback(
@@ -135,9 +190,12 @@ function MatchingComponent(props: {
 
   if (!hasValidContent) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-        <p className="font-medium">Unable to load matching widget</p>
-        <p className="mt-1 text-sm">The widget configuration is missing or invalid. Please check the package definition.</p>
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="rounded-lg border border-outline-variant bg-surface-container-lowest p-md text-center"
+      >
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
   }
@@ -167,6 +225,7 @@ function MatchingComponent(props: {
                   <div
                     key={pairId}
                     data-testid={`observe-left-${pairId}`}
+                    data-observe-left={pairId}
                     style={{ padding: '0.5rem', margin: '0.25rem 0' }}
                     aria-label={pair.itemA}
                   >
@@ -175,7 +234,39 @@ function MatchingComponent(props: {
                 );
               })}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+              }}
+            >
+              <svg
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                }}
+                aria-hidden="true"
+              >
+                {pairs.map((pair, idx) => {
+                  const pairId = getPairId(pair, idx);
+                  return (
+                    <line
+                      key={pairId}
+                      x1="0%"
+                      y1={`${(idx / Math.max(pairs.length - 1, 1)) * 100}%`}
+                      x2="100%"
+                      y2={`${(idx / Math.max(pairs.length - 1, 1)) * 100}%`}
+                      stroke="var(--oe-primary, #3b82f6)"
+                      strokeWidth={2}
+                    />
+                  );
+                })}
+              </svg>
               {pairs.map((pair, idx) => {
                 const pairId = getPairId(pair, idx);
                 return (
@@ -189,9 +280,7 @@ function MatchingComponent(props: {
                       justifyContent: 'center',
                       margin: '0.25rem 0',
                     }}
-                  >
-                    ───
-                  </div>
+                  />
                 );
               })}
             </div>
@@ -202,6 +291,7 @@ function MatchingComponent(props: {
                   <div
                     key={pairId}
                     data-testid={`observe-right-${pairId}`}
+                    data-observe-right={pairId}
                     style={{ padding: '0.5rem', margin: '0.25rem 0' }}
                     aria-label={pair.itemB}
                   >
@@ -219,7 +309,11 @@ function MatchingComponent(props: {
         )}
         {showAcknowledgeButton && (
           <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-            <ThemedButton variant="primary" onClick={handleObserveAcknowledge} data-testid="observe-acknowledge">
+            <ThemedButton
+              variant="primary"
+              onClick={handleObserveAcknowledge}
+              data-testid="observe-acknowledge"
+            >
               Mark as seen ✓
             </ThemedButton>
           </div>
@@ -229,130 +323,187 @@ function MatchingComponent(props: {
   }
 
   return (
-    <div data-testid="matching" aria-label="Matching activity">
+    <div data-testid="matching" aria-label="Matching activity" ref={containerRef}>
       {content.description && <p>{content.description}</p>}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          gap: '1rem',
-          alignItems: 'start',
-        }}
-        role="group"
-        aria-label="Matching columns"
-      >
-        <div role="list" aria-label="Items to match">
-          {pairs.map((pair, idx) => {
-            const pairId = getPairId(pair, idx);
-            const isSelected = selectedLeftId === pairId;
-            const isConnected = connections.has(pairId);
-            return (
-              <div
-                key={pairId}
-                role="listitem"
-                data-testid={`left-item-${pairId}`}
-                tabIndex={0}
-                aria-label={`Match ${pair.itemA}`}
-                aria-selected={isSelected}
-                onClick={() => handleLeftItemClick(pairId)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleLeftItemClick(pairId);
-                  }
-                }}
-                style={{
-                  padding: '0.5rem',
-                  margin: '0.25rem 0',
-                  border: isSelected
-                    ? '2px solid #3b82f6'
-                    : isConnected
-                      ? '2px solid #22c55e'
-                      : '1px solid #d1d5db',
-                  borderRadius: '0.25rem',
-                  cursor: 'pointer',
-                  backgroundColor: isSelected ? '#eff6ff' : isConnected ? '#f0fdf4' : 'transparent',
-                }}
-              >
-                {pair.itemA}
-                {isConnected && (
-                  <ThemedButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveConnection(pairId);
-                    }}
-                    aria-label={`Remove match for ${pair.itemA}`}
-                  >
-                    ✕
-                  </ThemedButton>
-                )}
-              </div>
-            );
-          })}
+      <div style={{ position: 'relative' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
+            gap: '1rem',
+            alignItems: 'start',
+          }}
+          role="group"
+          aria-label="Matching columns"
+        >
+          <div role="list" aria-label="Items to match">
+            {pairs.map((pair, idx) => {
+              const pairId = getPairId(pair, idx);
+              const isSelected = selectedLeftId === pairId;
+              const isConnected = connections.has(pairId);
+              return (
+                <div
+                  key={pairId}
+                  role="listitem"
+                  data-testid={`left-item-${pairId}`}
+                  data-connector-left={pairId}
+                  tabIndex={0}
+                  aria-label={`Match ${pair.itemA}`}
+                  aria-selected={isSelected}
+                  onClick={() => handleLeftItemClick(pairId)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleLeftItemClick(pairId);
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem',
+                    margin: '0.25rem 0',
+                    border: isSelected
+                      ? '2px solid var(--oe-primary, #3b82f6)'
+                      : isConnected
+                        ? '2px solid var(--oe-success, #22c55e)'
+                        : '1px solid var(--oe-outline-variant, #d1d5db)',
+                    borderRadius: '0.25rem',
+                    cursor: 'pointer',
+                    backgroundColor: isSelected
+                      ? 'var(--oe-primary-container, #eff6ff)'
+                      : isConnected
+                        ? 'var(--oe-success-container, #f0fdf4)'
+                        : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span>{pair.itemA}</span>
+                  {isConnected && (
+                    <ThemedButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveConnection(pairId);
+                      }}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        color: 'var(--oe-on-surface-variant, #6b7280)',
+                        padding: '0 0.25rem',
+                        borderRadius: '0.25rem',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLElement).style.backgroundColor =
+                          'var(--oe-surface-variant, #f3f4f6)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                      }}
+                      aria-label={`Remove match for ${pair.itemA}`}
+                    >
+                      ✕
+                    </ThemedButton>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+            aria-hidden="true"
+          >
+            {pairs.map((pair, idx) => {
+              const pairId = getPairId(pair, idx);
+              return (
+                <div
+                  key={pairId}
+                  style={{
+                    width: '2rem',
+                    height: '2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0.25rem 0',
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          <div role="list" aria-label="Target items">
+            {shuffledRightPairs.map((pair) => {
+              const pairId = getPairId(pair, pairs.indexOf(pair));
+              const isMatched = Array.from(connections.values()).includes(pairId);
+              return (
+                <div
+                  key={pairId}
+                  role="listitem"
+                  data-testid={`right-item-${pairId}`}
+                  data-connector-right={pairId}
+                  tabIndex={selectedLeftId !== null ? 0 : -1}
+                  aria-label={`Match with ${pair.itemB}`}
+                  onClick={() => handleRightItemClick(pairId)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleRightItemClick(pairId);
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem',
+                    margin: '0.25rem 0',
+                    border: isMatched
+                      ? '2px solid var(--oe-success, #22c55e)'
+                      : '1px solid var(--oe-outline-variant, #d1d5db)',
+                    borderRadius: '0.25rem',
+                    cursor: selectedLeftId !== null ? 'pointer' : 'default',
+                    backgroundColor: isMatched
+                      ? 'var(--oe-success-container, #f0fdf4)'
+                      : 'transparent',
+                    opacity: isMatched ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span>{pair.itemB}</span>
+                  {isMatched && <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+          }}
           aria-hidden="true"
         >
-          {pairs.map((pair, idx) => {
-            const pairId = getPairId(pair, idx);
-            const isConnected = connections.has(pairId);
-            return (
-              <div
-                key={pairId}
-                style={{
-                  width: '2rem',
-                  height: '2rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0.25rem 0',
-                  color: isConnected ? '#22c55e' : '#d1d5db',
-                }}
-              >
-                {isConnected ? '───' : '   '}
-              </div>
-            );
-          })}
-        </div>
-
-        <div role="list" aria-label="Target items">
-          {shuffledRightPairs.map((pair) => {
-            const pairId = getPairId(pair, pairs.indexOf(pair));
-            const isMatched = Array.from(connections.values()).includes(pairId);
-            return (
-              <div
-                key={pairId}
-                role="listitem"
-                data-testid={`right-item-${pairId}`}
-                tabIndex={selectedLeftId !== null ? 0 : -1}
-                aria-label={`Match with ${pair.itemB}`}
-                onClick={() => handleRightItemClick(pairId)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleRightItemClick(pairId);
-                  }
-                }}
-                style={{
-                  padding: '0.5rem',
-                  margin: '0.25rem 0',
-                  border: isMatched ? '2px solid #22c55e' : '1px solid #d1d5db',
-                  borderRadius: '0.25rem',
-                  cursor: selectedLeftId !== null ? 'pointer' : 'default',
-                  backgroundColor: isMatched ? '#f0fdf4' : 'transparent',
-                  opacity: isMatched && selectedLeftId === null ? 0.7 : 1,
-                }}
-              >
-                {pair.itemB}
-              </div>
-            );
-          })}
-        </div>
+          {connectorPositions.map((conn, i) => (
+            <line
+              key={`${conn.leftId}-${conn.rightId}-${i}`}
+              x1={conn.x1}
+              y1={conn.y1}
+              x2={conn.x2}
+              y2={conn.y2}
+              stroke="var(--oe-primary, #3b82f6)"
+              strokeWidth={2}
+              strokeDasharray={conn.leftId === conn.rightId ? 'none' : '4 2'}
+            />
+          ))}
+        </svg>
       </div>
 
       <div role="status" aria-live="polite" aria-atomic="true" style={{ marginTop: '0.5rem' }}>
@@ -364,7 +515,11 @@ function MatchingComponent(props: {
       </div>
 
       {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
             <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
@@ -375,7 +530,11 @@ function MatchingComponent(props: {
       )}
 
       {!submitted && content.hint && !content.hints && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hint}</p>
         </div>
       )}
@@ -385,13 +544,7 @@ function MatchingComponent(props: {
           <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allLeftConnected}>
             Submit
           </ThemedButton>
-        ) : (
-          <ThemedButton variant="outline" disabled data-testid="result-display">
-            {Array.from(connections.entries()).every(([leftId, rightId]) => leftId === rightId)
-              ? 'Correct!'
-              : 'Incorrect'}
-          </ThemedButton>
-        )}
+        ) : null}
       </div>
 
       {submitted && (

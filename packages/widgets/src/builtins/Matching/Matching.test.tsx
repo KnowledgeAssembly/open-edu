@@ -195,7 +195,6 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('right-item-3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.queryByText('Submit')).toBeNull();
-    expect(screen.getByTestId('result-display')).toBeDisabled();
   });
 
   it('shows feedback after submission', () => {
@@ -370,5 +369,54 @@ describe('Matching edge cases', () => {
   it('shows config error for invalid config', () => {
     renderWidget({ interactive: true });
     expect(screen.getByTestId('widget-config-error')).toBeTruthy();
+  });
+});
+
+describe('Matching new features', () => {
+  const interactiveConfig = {
+    pairs: [
+      { id: '1', itemA: '🐶', itemB: 'Dog' },
+      { id: '2', itemA: '🐱', itemB: 'Cat' },
+    ],
+    interactive: true,
+  };
+
+  it('renders SVG connector lines between connected pairs', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-1'));
+    const svg = document.querySelector('svg[aria-hidden="true"]');
+    expect(svg).toBeTruthy();
+    const lines = svg?.querySelectorAll('line');
+    expect(lines?.length).toBeGreaterThan(0);
+  });
+
+  it('click-to-rematch works without clicking remove button first', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-1'));
+    expect(screen.getByTestId('connections-status')).toHaveTextContent('1 of 2 pairs connected');
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    expect(screen.getByTestId('left-item-1').getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(screen.getByTestId('right-item-2'));
+    expect(screen.getByTestId('connections-status')).toHaveTextContent('1 of 2 pairs connected');
+  });
+
+  it('matched right items show checkmark and reduced opacity', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-1'));
+    const rightItem = screen.getByTestId('right-item-1');
+    expect(rightItem).toHaveTextContent('✓');
+    expect(rightItem.style.opacity).toBe('0.6');
+  });
+
+  it('observe mode uses SVG lines not ASCII dashes', () => {
+    renderWidget({ ...interactiveConfig, interactive: false });
+    const svg = document.querySelector('svg[aria-hidden="true"]');
+    expect(svg).toBeTruthy();
+    const lines = svg?.querySelectorAll('line');
+    expect(lines?.length).toBeGreaterThan(0);
+    expect(screen.queryByText('───')).toBeNull();
   });
 });

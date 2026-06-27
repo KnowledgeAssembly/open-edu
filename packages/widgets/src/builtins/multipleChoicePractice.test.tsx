@@ -45,7 +45,7 @@ describe('multipleChoicePractice', () => {
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
-    expect(screen.getByText('Correct!')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
     expect(complete).toHaveBeenCalledWith(100);
   });
 
@@ -63,7 +63,7 @@ describe('multipleChoicePractice', () => {
     fireEvent.click(screen.getByLabelText('3'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
-    expect(screen.getByText('Incorrect')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Incorrect');
     expect(complete).toHaveBeenCalledWith(0);
   });
 

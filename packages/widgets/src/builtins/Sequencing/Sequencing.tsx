@@ -72,12 +72,26 @@ function SequencingComponent(props: {
     [submitted, isObserve],
   );
 
-  const handlePlacedItemClick = useCallback(
+  const handleRemoveItem = useCallback(
     (itemId: string) => {
       if (submitted || isObserve) return;
       setUserOrder((prev) => prev.filter((id) => id !== itemId));
     },
     [submitted, isObserve],
+  );
+
+  const moveItem = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (submitted || isObserve) return;
+      if (toIndex < 0 || toIndex >= userOrder.length) return;
+      setUserOrder((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, moved!);
+        return next;
+      });
+    },
+    [submitted, isObserve, userOrder.length],
   );
 
   const handleSubmit = useCallback(() => {
@@ -113,10 +127,9 @@ function SequencingComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+        className="rounded-lg border border-outline-variant bg-surface-container-lowest p-md text-center"
       >
-        <p className="font-medium">Unable to load sequencing widget</p>
-        <p className="mt-1 text-sm opacity-80">Please check the widget configuration and try again.</p>
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
   }
@@ -145,7 +158,7 @@ function SequencingComponent(props: {
                   style={{
                     padding: '0.5rem',
                     margin: '0.25rem 0',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
                   }}
                 >
@@ -185,14 +198,16 @@ function SequencingComponent(props: {
             flexWrap: 'wrap',
             gap: '0.5rem',
             padding: '0.75rem',
-            border: '1px dashed #d1d5db',
+            border: '1px dashed var(--oe-outline-variant, #d1d5db)',
             borderRadius: '0.375rem',
             minHeight: '2.5rem',
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
           }}
         >
           {availableItems.length === 0 && (
-            <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>All items placed</span>
+            <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
+              All items placed
+            </span>
           )}
           {availableItems.map((item) => (
             <div
@@ -210,10 +225,10 @@ function SequencingComponent(props: {
               }}
               style={{
                 padding: '0.375rem 0.75rem',
-                border: '1px solid #d1d5db',
+                border: '1px solid var(--oe-outline-variant, #d1d5db)',
                 borderRadius: '1rem',
                 cursor: 'pointer',
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--oe-surface, #ffffff)',
                 userSelect: 'none',
               }}
             >
@@ -233,50 +248,162 @@ function SequencingComponent(props: {
             flexDirection: 'column',
             gap: '0.5rem',
             padding: '0.75rem',
-            border: '2px solid #3b82f6',
+            border: '2px solid var(--oe-primary, #3b82f6)',
             borderRadius: '0.375rem',
             minHeight: '2.5rem',
-            backgroundColor: '#eff6ff',
+            backgroundColor: 'var(--oe-primary-container, #eff6ff)',
           }}
         >
           {userOrder.length === 0 && (
-            <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>
+            <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
               Click items above to build your sequence
             </span>
           )}
-          {placedItems.map((item, idx) => (
-            <div
-              key={item.id}
-              data-testid={`placed-item-${item.id}`}
-              role="button"
-              tabIndex={0}
-              aria-label={`Step ${idx + 1}: ${item.label}. Click to remove`}
-              onClick={() => handlePlacedItemClick(item.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handlePlacedItemClick(item.id);
-                }
-              }}
-              style={{
-                padding: '0.5rem',
-                border: '1px solid #93c5fd',
-                borderRadius: '0.25rem',
-                backgroundColor: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                cursor: 'pointer',
-              }}
-            >
-              <span style={{ fontWeight: 'bold', color: '#3b82f6', minWidth: '1.5rem' }}>
-                {idx + 1}.
-              </span>
-              {item.emoji && <span>{item.emoji}</span>}
-              <span>{item.label}</span>
-              <span style={{ marginLeft: 'auto', color: '#ef4444', fontSize: '0.75rem' }}>✕</span>
-            </div>
-          ))}
+          {correctOrder.map((correctItemId, slotIndex) => {
+            const placedItem = placedItems[slotIndex];
+            const isCorrectPosition = submitted && placedItem?.id === correctItemId;
+            const isIncorrectPosition = submitted && placedItem && placedItem.id !== correctItemId;
+
+            return (
+              <div
+                key={`slot-${slotIndex}`}
+                data-testid={placedItem ? `placed-item-${placedItem.id}` : `slot-${slotIndex}`}
+                style={{
+                  padding: '0.5rem',
+                  border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                  borderRadius: '0.25rem',
+                  backgroundColor: isCorrectPosition
+                    ? 'var(--oe-success-container, #dcfce7)'
+                    : isIncorrectPosition
+                      ? 'var(--oe-error-container, #fee2e2)'
+                      : 'var(--oe-surface, #ffffff)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.375rem',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 'bold',
+                    color: 'var(--oe-primary, #3b82f6)',
+                    minWidth: '1.5rem',
+                  }}
+                >
+                  {slotIndex + 1}.
+                </span>
+                {placedItem ? (
+                  <>
+                    {placedItem.emoji && <span>{placedItem.emoji}</span>}
+                    <span className="flex-1">{placedItem.label}</span>
+                    {isCorrectPosition && (
+                      <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>
+                    )}
+                    {isIncorrectPosition && (
+                      <span style={{ color: 'var(--oe-error, #ef4444)' }}>✗</span>
+                    )}
+                    {!submitted && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          marginLeft: 'auto',
+                        }}
+                      >
+                        <ThemedButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveItem(slotIndex, slotIndex - 1)}
+                          disabled={slotIndex === 0}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: slotIndex === 0 ? 'default' : 'pointer',
+                            fontSize: '0.875rem',
+                            padding: '0 0.25rem',
+                            opacity: slotIndex === 0 ? 0.4 : 1,
+                          }}
+                          aria-label={`Move ${placedItem.label} up`}
+                        >
+                          ↑
+                        </ThemedButton>
+                        <ThemedButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveItem(slotIndex, slotIndex + 1)}
+                          disabled={slotIndex === userOrder.length - 1}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: slotIndex === userOrder.length - 1 ? 'default' : 'pointer',
+                            fontSize: '0.875rem',
+                            padding: '0 0.25rem',
+                            opacity: slotIndex === userOrder.length - 1 ? 0.4 : 1,
+                          }}
+                          aria-label={`Move ${placedItem.label} down`}
+                        >
+                          ↓
+                        </ThemedButton>
+                        <ThemedButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveItem(placedItem.id)}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            color: 'var(--oe-on-surface-variant, #6b7280)',
+                            padding: '0 0.25rem',
+                            borderRadius: '0.25rem',
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor =
+                              'var(--oe-surface-variant, #f3f4f6)';
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                          }}
+                          aria-label="Remove from sequence"
+                        >
+                          ✕
+                        </ThemedButton>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <span
+                    style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+                  >
+                    ___
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          {submitted &&
+            correctOrder.map((correctItemId, slotIndex) => {
+              const placedItem = placedItems[slotIndex];
+              const isIncorrectPosition = placedItem && placedItem.id !== correctItemId;
+              if (!isIncorrectPosition) return null;
+              const correctItem = items.find((i) => i.id === correctItemId);
+              return (
+                <div
+                  key={`correction-${slotIndex}`}
+                  style={{
+                    padding: '0.25rem 0.5rem',
+                    marginLeft: '1.5rem',
+                    fontSize: '0.875rem',
+                    color: 'var(--oe-on-surface-variant, #6b7280)',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  Correct: {correctItem?.emoji && <span>{correctItem.emoji} </span>}
+                  {correctItem?.label}
+                </div>
+              );
+            })}
         </div>
       </div>
 
@@ -289,7 +416,11 @@ function SequencingComponent(props: {
       </div>
 
       {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
             <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
@@ -300,7 +431,11 @@ function SequencingComponent(props: {
       )}
 
       {!submitted && content.hint && !content.hints && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hint}</p>
         </div>
       )}
@@ -310,16 +445,7 @@ function SequencingComponent(props: {
           <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
           </ThemedButton>
-        ) : (
-          <ThemedButton variant="outline" disabled data-testid="result-display">
-            {(() => {
-              const correct =
-                correctOrder.length === userOrder.length &&
-                correctOrder.every((id, i) => id === userOrder[i]);
-              return correct ? 'Correct!' : 'Incorrect';
-            })()}
-          </ThemedButton>
-        )}
+        ) : null}
       </div>
 
       {submitted && (

@@ -231,6 +231,170 @@ describe('MeasurementScale interactive mode', () => {
   });
 });
 
+describe('MeasurementScale touch support', () => {
+  const interactiveConfig = {
+    type: 'ruler' as const,
+    min: 0,
+    max: 10,
+    step: 1,
+    unit: 'cm',
+    interactive: true,
+    targetValue: 5,
+    showReading: true,
+  };
+
+  it('updates value on touch start', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    const rect = svg.getBoundingClientRect();
+    const midX = rect.left + rect.width * 0.5;
+    fireEvent.touchStart(svg, {
+      touches: [{ clientX: midX, clientY: rect.top + rect.height / 2 }],
+    });
+    expect(screen.getByTestId('reading-live-region')).not.toHaveTextContent('0cm');
+  });
+
+  it('updates value on touch move', () => {
+    renderWidget(interactiveConfig);
+    const svg = screen.getByTestId('ruler-svg');
+    const rect = svg.getBoundingClientRect();
+    fireEvent.touchStart(svg, {
+      touches: [{ clientX: rect.left, clientY: rect.top }],
+    });
+    fireEvent.touchMove(svg, {
+      touches: [{ clientX: rect.left + rect.width * 0.7, clientY: rect.top + rect.height / 2 }],
+    });
+    expect(screen.getByTestId('reading-live-region')).not.toHaveTextContent('0cm');
+  });
+
+  it('thermometer responds to touch', () => {
+    renderWidget({
+      type: 'thermometer',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: '°C',
+      interactive: true,
+      value: 0,
+    });
+    const svg = screen.getByTestId('thermometer-svg');
+    const rect = svg.getBoundingClientRect();
+    fireEvent.touchStart(svg, {
+      touches: [{ clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height * 0.3 }],
+    });
+    expect(screen.getByTestId('reading-live-region')).not.toHaveTextContent('0°C');
+  });
+});
+
+describe('MeasurementScale floating reading label', () => {
+  it('shows reading inside ruler SVG in interactive mode', () => {
+    renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      interactive: true,
+      value: 5,
+      showReading: true,
+    });
+    const svg = screen.getByTestId('ruler-svg');
+    const textElements = svg.querySelectorAll('text');
+    const readingText = Array.from(textElements).find((t) => t.textContent === '5cm');
+    expect(readingText).toBeTruthy();
+  });
+
+  it('shows reading inside thermometer SVG in interactive mode', () => {
+    renderWidget({
+      type: 'thermometer',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: '°C',
+      interactive: true,
+      value: 37,
+      showReading: true,
+    });
+    const svg = screen.getByTestId('thermometer-svg');
+    const textElements = svg.querySelectorAll('text');
+    const readingText = Array.from(textElements).find((t) => t.textContent === '37°C');
+    expect(readingText).toBeTruthy();
+  });
+
+  it('shows reading inside cylinder SVG in interactive mode', () => {
+    renderWidget({
+      type: 'cylinder',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: 'mL',
+      interactive: true,
+      value: 50,
+      showReading: true,
+    });
+    const svg = screen.getByTestId('cylinder-svg');
+    const textElements = svg.querySelectorAll('text');
+    const readingText = Array.from(textElements).find((t) => t.textContent === '50mL');
+    expect(readingText).toBeTruthy();
+  });
+});
+
+describe('MeasurementScale indicator color', () => {
+  it('uses blue (not red) as default indicator color for ruler', () => {
+    renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      interactive: true,
+      value: 5,
+    });
+    const svg = screen.getByTestId('ruler-svg');
+    const polygon = svg.querySelector('polygon');
+    expect(polygon).toBeTruthy();
+    const fill = polygon?.getAttribute('fill');
+    expect(fill).not.toBe('#ef4444');
+    expect(fill).toContain('oe-primary');
+  });
+
+  it('uses blue (not red) as default indicator color for thermometer', () => {
+    renderWidget({
+      type: 'thermometer',
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: '°C',
+      interactive: true,
+      value: 37,
+    });
+    const svg = screen.getByTestId('thermometer-svg');
+    const circles = svg.querySelectorAll('circle');
+    const bulb = circles[0];
+    expect(bulb).toBeTruthy();
+    const fill = bulb?.getAttribute('fill');
+    expect(fill).not.toBe('#ef4444');
+    expect(fill).toContain('oe-primary');
+  });
+
+  it('uses green indicator color after submission', () => {
+    renderWidget({
+      type: 'ruler',
+      min: 0,
+      max: 10,
+      step: 1,
+      unit: 'cm',
+      interactive: true,
+      targetValue: 5,
+      value: 5,
+    });
+    fireEvent.click(screen.getByTestId('submit-btn'));
+    const svg = screen.getByTestId('ruler-svg');
+    const polygon = svg.querySelector('polygon');
+    expect(polygon?.getAttribute('fill')).toBe('#10b981');
+  });
+});
+
 describe('MeasurementScale scoring tolerance', () => {
   it('scores correct when within step tolerance', () => {
     const { complete } = renderWidget({

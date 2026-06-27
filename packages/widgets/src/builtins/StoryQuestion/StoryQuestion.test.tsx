@@ -52,7 +52,7 @@ describe('StoryQuestion observe mode', () => {
   it('shows first question with correct answer highlighted', () => {
     renderWidget(sampleConfig);
     expect(screen.getByText('Who is the story about?')).toBeInTheDocument();
-    const correctRadio = screen.getByLabelText('A knight');
+    const correctRadio = screen.getByLabelText('Correct answer: A knight');
     expect(correctRadio).toBeChecked();
     expect(correctRadio).toBeDisabled();
     expect(screen.getByText('✓')).toBeInTheDocument();
@@ -109,6 +109,11 @@ describe('StoryQuestion interactive mode', () => {
     expect(screen.getByLabelText('A king')).toBeInTheDocument();
   });
 
+  it('shows question progress for multi-question mode', () => {
+    renderWidget(interactiveConfig);
+    expect(screen.getByTestId('question-progress')).toHaveTextContent('Question 1 of 2');
+  });
+
   it('shows "Next" button for intermediate questions', () => {
     renderWidget(interactiveConfig);
     const btn = screen.getByRole('button');
@@ -118,6 +123,8 @@ describe('StoryQuestion interactive mode', () => {
   it('shows "Submit" on last question', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText('What was the knight?')).toBeInTheDocument();
     const btn = screen.getByRole('button');
@@ -129,10 +136,30 @@ describe('StoryQuestion interactive mode', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
-  it('advances to next question on correct answer', () => {
+  it('shows per-question feedback before advancing', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A knight'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    expect(screen.queryByText('What was the knight?')).not.toBeInTheDocument();
+  });
+
+  it('shows incorrect feedback with correct answer', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A dragon'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Incorrect');
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent(
+      'The correct answer is: A knight',
+    );
+  });
+
+  it('advances to next question after feedback Next', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByText('What was the knight?')).toBeInTheDocument();
   });
 
@@ -154,8 +181,10 @@ describe('StoryQuestion interactive mode', () => {
     const { emitInteraction, complete } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A knight'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(emitInteraction).toHaveBeenLastCalledWith(
       expect.objectContaining({
         action: 'submit',
@@ -171,8 +200,10 @@ describe('StoryQuestion interactive mode', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A knight'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('story-result')).toHaveTextContent('You got 2 of 2 correct.');
   });
 
@@ -180,8 +211,10 @@ describe('StoryQuestion interactive mode', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A dragon'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('story-result')).toHaveTextContent('You got 1 of 2 correct.');
   });
 
@@ -189,8 +222,10 @@ describe('StoryQuestion interactive mode', () => {
     const { complete } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A dragon'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(complete).toHaveBeenCalledWith(50);
   });
 });
@@ -219,6 +254,80 @@ describe('StoryQuestion legacy story field support', () => {
   });
 });
 
+describe('StoryQuestion result screen', () => {
+  const interactiveConfig = {
+    ...sampleConfig,
+    interactive: true,
+  };
+
+  it('keeps story visible after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('Brave'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    expect(screen.getByText('Once upon a time, there was a brave knight.')).toBeInTheDocument();
+  });
+
+  it('shows all questions with their results after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('Brave'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    expect(screen.getByText('Question 1: Who is the story about?')).toBeInTheDocument();
+    expect(screen.getByText('Question 2: What was the knight?')).toBeInTheDocument();
+  });
+
+  it('shows correct answer with checkmark in results', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('Brave'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    const checkmarks = screen.getAllByText('✓');
+    expect(checkmarks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows incorrect answer with cross in results', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A dragon'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('Brave'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    const crosses = screen.getAllByText('✗');
+    expect(crosses.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('StoryQuestion callout styling', () => {
+  it('renders story in a distinct callout box', () => {
+    renderWidget({ ...sampleConfig, interactive: true });
+    const callout = document.querySelector('.bg-primary-container\\/20');
+    expect(callout).toBeInTheDocument();
+  });
+
+  it('renders visual at larger size in callout', () => {
+    renderWidget({ ...sampleConfig, interactive: true });
+    const visual = screen.getByText('🛡️');
+    expect(visual).toHaveClass('text-3xl');
+  });
+
+  it('callout has left border styling', () => {
+    renderWidget({ ...sampleConfig, interactive: true });
+    const callout = document.querySelector('.border-l-4');
+    expect(callout).toBeInTheDocument();
+  });
+});
+
 describe('StoryQuestion accessibility', () => {
   const interactiveConfig = {
     ...sampleConfig,
@@ -243,10 +352,20 @@ describe('StoryQuestion accessibility', () => {
     renderWidget(interactiveConfig);
     fireEvent.click(screen.getByLabelText('A knight'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
     const result = screen.getByTestId('story-result');
     expect(result.getAttribute('aria-live')).toBe('assertive');
+  });
+
+  it('uses aria-live for per-question feedback', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByLabelText('A knight'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    const feedback = screen.getByTestId('question-feedback');
+    expect(feedback.getAttribute('aria-live')).toBe('assertive');
   });
 
   it('has aria-labels on radio options', () => {
@@ -304,6 +423,8 @@ describe('StoryQuestion edge cases', () => {
     expect(btn).toHaveTextContent('Submit');
     fireEvent.click(screen.getByLabelText('A'));
     fireEvent.click(btn);
+    expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
+    fireEvent.click(screen.getByTestId('feedback-next'));
     expect(screen.getByTestId('story-result')).toHaveTextContent('You got 1 of 1 correct.');
   });
 
