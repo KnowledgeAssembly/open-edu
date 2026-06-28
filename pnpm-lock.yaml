@@ -413,6 +413,9 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@types/mdast':
+        specifier: ^4.0.0
+        version: 4.0.4
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.43)(jsdom@24.1.3)(terser@5.48.0)
