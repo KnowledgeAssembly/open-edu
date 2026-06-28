@@ -12,8 +12,8 @@
     --popover-foreground: var(--oe-color-on-surface);
     --primary: var(--oe-color-primary);
     --primary-foreground: var(--oe-color-on-primary);
-    --secondary: var(--oe-color-secondary-container);
-    --secondary-foreground: var(--oe-color-on-secondary-container);
+    --secondary: var(--oe-color-surface-variant);
+    --secondary-foreground: var(--oe-color-on-surface-variant);
     --muted: var(--oe-color-surface-variant);
     --muted-foreground: var(--oe-color-on-surface-variant);
     --accent: var(--oe-color-primary-container);
@@ -26,5 +26,9 @@
     --input: var(--oe-color-outline);
     --ring: var(--oe-color-primary);
     --radius: var(--oe-radius-DEFAULT);
+  }
+
+  .open-edu-runtime {
+    color: var(--foreground);
   }
 }

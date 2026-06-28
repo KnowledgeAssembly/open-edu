@@ -36,6 +36,7 @@ function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   vars['--oe-font-sans'] = theme.typography.bodyMd.fontFamily;
   vars['--oe-radius'] = theme.radii.DEFAULT;
   vars['--oe-spacing'] = theme.spacing.md;
+  vars['color'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
 
   return vars;
 }
