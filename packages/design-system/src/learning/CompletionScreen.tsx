@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState, type ReactNode } from 'react';
 import { Button } from '../primitives/button.js';
+import { motionSafe } from '../tokens/motion.js';
 
 interface PackageManifest {
   id: string;
@@ -47,16 +48,6 @@ function StatCard({ icon, value, label }: { icon: string; value: number; label: 
 }
 
 function ConfettiParticles(): JSX.Element {
-  const prefersReducedMotion = useMemo(() => {
-    try {
-      return typeof window !== 'undefined'
-        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        : false;
-    } catch {
-      return false;
-    }
-  }, []);
-
   const particles = useMemo(
     () =>
       Array.from({ length: 30 }, (_, i) => ({
@@ -76,8 +67,6 @@ function ConfettiParticles(): JSX.Element {
     [],
   );
 
-  if (prefersReducedMotion) return <></>;
-
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
       {particles.map((p) => (
@@ -94,12 +83,14 @@ function ConfettiParticles(): JSX.Element {
           }}
         />
       ))}
-      <style>{`
+      <style>
+        {motionSafe(`
         @keyframes confetti-fall {
           0% { transform: translateY(0) rotate(0deg); opacity: 1; }
           100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
-      `}</style>
+      `)}
+      </style>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AIChat } from '../AIChat.jsx';
 import type { ChatMessage } from '../AIChat.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('AIChat', () => {
   const messages: ChatMessage[] = [
@@ -49,5 +50,9 @@ describe('AIChat', () => {
     fireEvent.change(input, { target: { value: 'Enter send' } });
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false });
     expect(onSend).toHaveBeenCalledWith('Enter send');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<AIChat messages={[]} onSend={vi.fn()} />);
   });
 });

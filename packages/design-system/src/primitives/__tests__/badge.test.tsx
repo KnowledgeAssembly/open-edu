@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '../badge.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Badge', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Badge>Badge</Badge>);
+  });
   it('renders with text', () => {
     render(<Badge>New</Badge>);
     expect(screen.getByText('New')).toBeDefined();

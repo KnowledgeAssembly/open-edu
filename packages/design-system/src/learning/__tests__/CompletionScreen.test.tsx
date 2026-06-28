@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CompletionScreen } from '../CompletionScreen.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 const mockCourse = {
   manifest: { id: 'test', title: 'Test Course', version: '1.0', author: 'Test', entry: 'test.md' },
@@ -77,5 +78,9 @@ describe('CompletionScreen', () => {
       <CompletionScreen title="Test" onBack={vi.fn()} className="custom" />,
     );
     expect(container.firstChild).toHaveClass('custom');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<CompletionScreen title="Test" onBack={vi.fn()} />);
   });
 });

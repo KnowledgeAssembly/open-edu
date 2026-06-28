@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Button } from '../button.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Button', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Button>Click me</Button>);
+  });
   it('renders with default variant', () => {
     render(<Button>Click me</Button>);
     expect(screen.getByRole('button')).toHaveTextContent('Click me');

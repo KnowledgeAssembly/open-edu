@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TopAppBar } from '../TopAppBar.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('TopAppBar', () => {
   it('renders breadcrumbs when provided', () => {
@@ -85,5 +86,9 @@ describe('TopAppBar', () => {
     const bar = screen.getByRole('progressbar');
     expect(bar.getAttribute('aria-valuenow')).toBe('3');
     expect(bar.getAttribute('aria-valuemax')).toBe('10');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<TopAppBar />);
   });
 });

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CourseCard } from '../CourseCard.js';
 import type { CourseCardProps } from '../CourseCard.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 function makeProps(overrides: Partial<CourseCardProps> = {}): CourseCardProps {
   return {
@@ -87,5 +88,9 @@ describe('CourseCard', () => {
     render(<CourseCard {...makeProps({ onStart })} />);
     fireEvent.click(screen.getByRole('button'));
     expect(onStart).toHaveBeenCalledOnce();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<CourseCard {...makeProps()} />);
   });
 });

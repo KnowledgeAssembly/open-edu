@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BundleOverview } from '../BundleOverview.js';
 import type { BundleOverviewModule } from '../BundleOverview.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 const sampleModules: BundleOverviewModule[] = [
   {
@@ -136,5 +137,17 @@ describe('BundleOverview', () => {
   it('does not show estimated duration for completed modules', () => {
     renderDefault();
     expect(screen.queryByText('~10 min')).toBeNull();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <BundleOverview
+        bundleTitle="Test"
+        bundleId="test"
+        modules={[]}
+        onStartModule={vi.fn()}
+        onBackToCatalog={vi.fn()}
+      />,
+    );
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DashboardLayout } from '../DashboardLayout.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('DashboardLayout', () => {
   it('renders children', () => {
@@ -28,5 +29,9 @@ describe('DashboardLayout', () => {
       </DashboardLayout>,
     );
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<DashboardLayout>Content</DashboardLayout>);
   });
 });

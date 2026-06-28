@@ -8,8 +8,34 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from '../drawer.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Drawer', () => {
+  it('has no accessibility violations in closed state', async () => {
+    await checkAccessibility(
+      <Drawer>
+        <DrawerTrigger>Open</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Title</DrawerTitle>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>,
+    );
+  });
+
+  it('has no accessibility violations in open state', async () => {
+    await checkAccessibility(
+      <Drawer defaultOpen>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Drawer title</DrawerTitle>
+            <DrawerDescription>Drawer description</DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>,
+    );
+  });
   it('renders trigger', () => {
     render(
       <Drawer>

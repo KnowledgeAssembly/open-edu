@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SideNav } from '../SideNav.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('SideNav', () => {
   it('renders OpenEdu heading', () => {
@@ -84,5 +85,9 @@ describe('SideNav', () => {
     render(<SideNav defaultActiveTab="progress" />);
     const progressTab = screen.getByTestId('sidenav-tab-progress');
     expect(progressTab.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<SideNav />);
   });
 });

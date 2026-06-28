@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SuggestedQuestions } from '../SuggestedQuestions.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('SuggestedQuestions', () => {
   it('renders all questions', () => {
@@ -16,5 +17,9 @@ describe('SuggestedQuestions', () => {
     render(<SuggestedQuestions questions={['Click me']} onSelect={onSelect} />);
     fireEvent.click(screen.getByText('Click me'));
     expect(onSelect).toHaveBeenCalledWith('Click me');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<SuggestedQuestions questions={['Question 1']} onSelect={vi.fn()} />);
   });
 });

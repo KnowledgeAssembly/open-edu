@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Breadcrumb } from '../breadcrumb.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Breadcrumb', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Breadcrumb items={[{ label: 'Home' }]} />);
+  });
   it('renders items', () => {
     render(<Breadcrumb items={[{ label: 'Home' }, { label: 'Section' }]} />);
     expect(screen.getByText('Home')).toBeDefined();

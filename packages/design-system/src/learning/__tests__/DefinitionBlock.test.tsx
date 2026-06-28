@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DefinitionBlock } from '../DefinitionBlock.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('DefinitionBlock', () => {
   it('renders term', () => {
@@ -24,5 +25,11 @@ describe('DefinitionBlock', () => {
       </DefinitionBlock>,
     );
     expect(screen.getByTestId('definition-block')).toHaveClass('custom-class');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <DefinitionBlock term="Accessibility">Test definition</DefinitionBlock>,
+    );
   });
 });

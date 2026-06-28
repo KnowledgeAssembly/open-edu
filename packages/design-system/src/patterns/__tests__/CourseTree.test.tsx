@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CourseTree } from '../CourseTree.js';
 import type { CourseTreeModule } from '../CourseTree.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 const sampleModules: CourseTreeModule[] = [
   {
@@ -82,5 +83,9 @@ describe('CourseTree', () => {
     expect(screen.queryByText('Introduction')).toBeNull();
     fireEvent.click(moduleBtn);
     expect(screen.getByText('Introduction')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<CourseTree modules={sampleModules} />);
   });
 });

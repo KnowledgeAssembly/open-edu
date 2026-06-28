@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { Toaster } from '../notification.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Toaster', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Toaster />);
+  });
   it('renders sonner Toaster', () => {
     const { container } = render(<Toaster />);
     expect(container.querySelector('.toaster')).toBeDefined();

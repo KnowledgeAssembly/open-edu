@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThinkingIndicator } from '../ThinkingIndicator.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('ThinkingIndicator', () => {
   it('shows default label', () => {
@@ -16,5 +17,9 @@ describe('ThinkingIndicator', () => {
   it('has data-testid', () => {
     render(<ThinkingIndicator />);
     expect(screen.getByTestId('thinking-indicator')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<ThinkingIndicator />);
   });
 });

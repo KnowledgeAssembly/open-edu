@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AICallout } from '../AICallout.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('AICallout', () => {
   it('renders title and children', () => {
@@ -35,5 +36,9 @@ describe('AICallout', () => {
   it('has aria-label matching title', () => {
     render(<AICallout title="My Callout">Content</AICallout>);
     expect(screen.getByRole('complementary')).toHaveAttribute('aria-label', 'My Callout');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<AICallout title="Test">Accessible content</AICallout>);
   });
 });

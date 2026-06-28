@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Lesson } from '../Lesson.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('Lesson', () => {
   it('renders title', () => {
@@ -33,5 +34,9 @@ describe('Lesson', () => {
       </Lesson>,
     );
     expect(screen.getByText('🔬')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Lesson title="Test">Accessible content</Lesson>);
   });
 });

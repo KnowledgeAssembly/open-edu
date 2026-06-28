@@ -13,10 +13,12 @@ export function DefinitionBlock({ term, children, className }: DefinitionBlockPr
       data-testid="definition-block"
       className={cn('border-l-2 border-solid border-primary pl-4 py-1', className)}
     >
-      <dt className="m-0 text-sm font-semibold text-on-surface">{term}</dt>
-      <dd className="m-0 mt-1 text-sm text-on-surface-variant font-body-md leading-relaxed">
-        {children}
-      </dd>
+      <dl className="m-0">
+        <dt className="m-0 text-sm font-semibold text-on-surface">{term}</dt>
+        <dd className="m-0 mt-1 text-sm text-on-surface-variant font-body-md leading-relaxed">
+          {children}
+        </dd>
+      </dl>
     </div>
   );
 }

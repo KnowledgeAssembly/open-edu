@@ -102,17 +102,21 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
         <OverallProgressBar modules={modules} />
       </div>
 
-      <div className="flex flex-col gap-md" aria-label="Bundle modules" data-testid="module-list">
+      <ul
+        className="flex flex-col gap-md list-none m-0 p-0"
+        role="list"
+        aria-label="Bundle modules"
+        data-testid="module-list"
+      >
         {modules.map((mod) => {
           const badgeCfg = statusBadgeConfig[mod.status];
 
           return (
-            <div
+            <li
               key={mod.id}
-              role="region"
               aria-labelledby={`module-title-${mod.id}`}
               className={cn(
-                'border border-outline-variant rounded-xl p-md transition-colors',
+                'border border-outline-variant rounded-xl p-md transition-colors list-none',
                 mod.status === 'locked' && 'opacity-60',
               )}
               data-testid="module-card"
@@ -203,10 +207,10 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                   </span>
                 )}
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       {modules.length === 0 && (
         <p className="text-on-surface-variant py-lg text-center">No modules in this bundle.</p>

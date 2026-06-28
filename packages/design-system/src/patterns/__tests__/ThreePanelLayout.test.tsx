@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThreePanelLayout } from '../ThreePanelLayout.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('ThreePanelLayout', () => {
   it('renders content', () => {
@@ -26,5 +27,9 @@ describe('ThreePanelLayout', () => {
       />,
     );
     expect(screen.getByTestId('rightpanel')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<ThreePanelLayout content={<div>Content</div>} />);
   });
 });
