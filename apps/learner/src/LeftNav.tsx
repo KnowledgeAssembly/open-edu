@@ -57,7 +57,7 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
             <Button
               key={item.label}
               variant={isActive ? 'secondary' : 'ghost'}
-              className="justify-start w-full"
+              className="justify-start w-full gap-2"
               onClick={() => onNavigate(item.view)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`leftnav-${item.view.view}`}
