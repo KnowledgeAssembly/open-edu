@@ -158,3 +158,57 @@ export type {
   CommandItemProps,
   CommandEmptyProps,
 } from './patterns/CommandPalette.js';
+
+// Learning components
+export { BundleOverview } from './learning/BundleOverview.js';
+export type {
+  BundleOverviewProps,
+  BundleOverviewModule,
+  ModuleStatus,
+} from './learning/BundleOverview.js';
+
+export { CourseCard } from './learning/CourseCard.js';
+export type { CourseCardProps } from './learning/CourseCard.js';
+
+export { ProgressBadge } from './learning/ProgressBadge.js';
+export type { ProgressBadgeProps } from './learning/ProgressBadge.js';
+
+export { CompletionScreen } from './learning/CompletionScreen.js';
+export type { CompletionScreenProps, CompletionStats } from './learning/CompletionScreen.js';
+
+export { Lesson } from './learning/Lesson.js';
+export type { LessonProps } from './learning/Lesson.js';
+
+export { Module } from './learning/Module.js';
+export type { ModuleProps, ModuleLesson } from './learning/Module.js';
+
+export { ConceptCard } from './learning/ConceptCard.js';
+export type { ConceptCardProps } from './learning/ConceptCard.js';
+
+export { DefinitionBlock } from './learning/DefinitionBlock.js';
+export type { DefinitionBlockProps } from './learning/DefinitionBlock.js';
+
+// AI Components
+export { AICallout } from './ai/AICallout.js';
+export type { AICalloutProps } from './ai/AICallout.js';
+
+export { AITutorPanel } from './ai/AITutorPanel.js';
+export type { AITutorPanelProps } from './ai/AITutorPanel.js';
+
+export { TutorMessage } from './ai/TutorMessage.js';
+export type { TutorMessageProps } from './ai/TutorMessage.js';
+
+export { ThinkingIndicator } from './ai/ThinkingIndicator.js';
+export type { ThinkingIndicatorProps } from './ai/ThinkingIndicator.js';
+
+export { Citation } from './ai/Citation.js';
+export type { CitationProps } from './ai/Citation.js';
+
+export { ReferenceCard } from './ai/ReferenceCard.js';
+export type { ReferenceCardProps } from './ai/ReferenceCard.js';
+
+export { SuggestedQuestions } from './ai/SuggestedQuestions.js';
+export type { SuggestedQuestionsProps } from './ai/SuggestedQuestions.js';
+
+export { AIChat } from './ai/AIChat.js';
+export type { AIChatProps, ChatMessage } from './ai/AIChat.js';
