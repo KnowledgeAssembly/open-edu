@@ -1,27 +1,17 @@
-import type { ThemeDefinition, ThemeId } from './types';
-import { highFocus } from './high-focus';
-import { luminaScholastica } from './lumina-scholastica';
-import { nocturnal } from './nocturnal';
-import { sylvanWorkspace } from './sylvan-workspace';
+import type { ThemeDefinition, ThemeId } from '@open-edu/design-system';
+import { highFocus } from './high-focus.js';
+import { luminaScholastica } from './lumina-scholastica.js';
+import { nocturnal } from './nocturnal.js';
+import { sylvanWorkspace } from './sylvan-workspace.js';
 
-/**
- * Note on typography roles:
- * The DESIGN.md YAML frontmatter for each theme uses inconsistent typography role names
- * (e.g. body-copy vs body-lg, label-caps vs label-sm). The implementation standardizes
- * to 9 semantic roles across all themes: display, headlineLg, headlineMd, title,
- * bodyLg, bodyMd, label, caption, mono. This ensures consumers can rely on a stable
- * set of typography tokens regardless of which theme is active.
- */
-
+export type { ThemeDefinition, ThemeId } from '@open-edu/design-system';
 export type {
-  ThemeDefinition,
-  ThemeId,
   ColorTokens,
   TypographyToken,
   TypographyTokens,
   SpacingTokens,
   RadiiTokens,
-} from './types';
+} from '@open-edu/design-system';
 
 export const themeRegistry: Record<ThemeId, ThemeDefinition> = {
   'high-focus': highFocus,

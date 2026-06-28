@@ -1,4 +1,4 @@
-import type { ThemeDefinition } from './types';
+import type { ThemeDefinition } from '@open-edu/design-system';
 
 export const nocturnal: ThemeDefinition = {
   id: 'nocturnal',
