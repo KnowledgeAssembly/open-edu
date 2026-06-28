@@ -153,16 +153,17 @@ E2E tests live in `tests/e2e/` and use Playwright with Chromium (single worker, 
 
 ### Test Files
 
-| File                          | What it covers                                                       |
-| ----------------------------- | -------------------------------------------------------------------- |
-| `learner-experience.spec.ts`  | Full catalog → course navigation → progress persistence → completion |
-| `package-execution.spec.ts`   | Runs 7 different example packages end-to-end                         |
-| `accessibility.spec.ts`       | Landmark regions, keyboard Tab/Enter navigation, a11y inspector      |
-| `keyboard-navigation.spec.ts` | Tab/Enter/Space/Escape through lessons and quizzes                   |
-| `rewards.spec.ts`             | DevTools rewards inspector panel                                     |
-| `telemetry.spec.ts`           | Telemetry event capture after lesson completion                      |
-| `hot-reload.spec.ts`          | HMR state preservation after markdown/JSON edits                     |
-| `theme-switching.spec.ts`     | Theme switching across all 4 themes, popover behavior, persistence   |
+| File                          | What it covers                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `learner-experience.spec.ts`  | Full catalog → course navigation → progress persistence → completion                |
+| `package-execution.spec.ts`   | Runs 7 different example packages end-to-end                                        |
+| `accessibility.spec.ts`       | Landmark regions, keyboard Tab/Enter navigation, a11y inspector                     |
+| `keyboard-navigation.spec.ts` | Tab/Enter/Space/Escape through lessons and quizzes                                  |
+| `rewards.spec.ts`             | DevTools rewards inspector panel                                                    |
+| `telemetry.spec.ts`           | Telemetry event capture after lesson completion                                     |
+| `hot-reload.spec.ts`          | HMR state preservation after markdown/JSON edits                                    |
+| `theme-switching.spec.ts`     | Theme switching across all 4 themes, popover behavior, persistence                  |
+| `bundle-navigation.spec.ts`   | Bundle catalog cards, bundle overview, module cards, module launch, backward compat |
 
 ### Web Server Config
 

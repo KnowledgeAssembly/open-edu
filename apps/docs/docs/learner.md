@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Learner App
 
-The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, progress tracking, reward integration, and **theme switching**.
+The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, **bundle overviews**, progress tracking, reward integration, **theme switching**, and a **modernized UI** built on shadcn/ui components with Radix UI primitives and Lucide icons.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ The **learner app** (`@open-edu/learner`) is a standalone application that provi
 pnpm --filter @open-edu/learner dev
 ```
 
-Opens at `http://localhost:4001`. The app scans all example packages in the repository and presents them as a browsable catalog. You can switch between all 4 built-in themes using the palette icon in the TopAppBar.
+Opens at `http://localhost:4001`. The app scans all example packages and bundles in the repository and presents them as a browsable catalog. You can switch between all 4 built-in themes using the palette icon in the TopAppBar.
 
 ## Architecture
 
@@ -20,10 +20,11 @@ The learner app is built on top of the Open-Edu runtime packages:
 
 ```
 @open-edu/learner
-  ├── @open-edu/core       — scanPackages, loadPackage
-  ├── @open-edu/workflow   — WorkflowEngine, getOrderedNodes
+  ├── @open-edu/core       — scanPackages, scanAll, loadPackage, loadBundle
+  ├── @open-edu/workflow   — WorkflowEngine, BundleEngine, getOrderedNodes
   ├── @open-edu/runtime    — RuntimeThemeProvider, FontLoader, useThemePreference,
-  │                           TopAppBar, SideNav, AITutorPanel, NodeRenderer, etc.
+  │                           TopAppBar, SideNav, AITutorPanel, NodeRenderer,
+  │                           BundleOverview, etc.
   ├── @open-edu/rewards    — RewardBroker for badge delivery
   ├── @open-edu/telemetry  — TelemetrySession for event capture
   ├── @open-edu/accessibility — AccessibilityProvider
@@ -45,7 +46,32 @@ The app uses a 6-page `Page` union type with state-based routing (no React Route
 
 ## Course Catalog
 
-On startup, the app uses `scanPackages()` to discover all valid packages in the `../../examples` directory. Each package is displayed as a **CourseCard** showing its title, progress badge (not started / in progress / completed), and a Start or Continue button.
+On startup, the app uses `scanPackages()` to discover all valid packages and `scanBundles()` to discover multi-module bundles in the `../../examples` directory. Each package is displayed as a **CourseCard** showing its title, progress badge (not started / in progress / completed), and a Start or Continue button.
+
+### Bundle Cards
+
+Bundles appear in a separate **"Learning Bundles"** section of the catalog. Each bundle card (`[data-testid="bundle-card"]`) shows:
+
+- Bundle title and description
+- Module count and total activity count
+- Overall progress bar (if started)
+- A **"Browse Bundle"** button to navigate to the bundle overview
+
+## Bundle Overview
+
+When you click a bundle card, the app loads the bundle via `loadBundle()` and renders a **BundleOverviewPage** (`[data-testid="bundle-overview"]`). This page shows:
+
+- Bundle title and metadata
+- **Module cards** (`[data-testid="module-card"]`) — one per module with status badges:
+  - `locked` — prerequisite modules not yet completed
+  - `unlocked` — ready to start
+  - `completed` — finished with score
+- Per-module progress bars and estimated duration
+- **Start Module** buttons on unlocked modules (launches the course runtime for that module)
+
+### Module-to-Module Navigation
+
+When a module is completed within a bundle, the app updates the `BundleProgressSnapshot` (persisted to `localStorage` under `open-edu-bundle-progress`), evaluates prerequisites, and unlocks dependent modules. The exit warning dialog is suppressed when navigating between modules within the same bundle.
 
 ## Course View
 
@@ -84,11 +110,32 @@ After the workflow reaches `COMPLETED`, the app renders a **CompletionScreen** s
 - List of earned badges (if any)
 - "Back to catalog" button
 
+## shadcn/ui Component Library
+
+The learner app includes a custom **shadcn/ui component library** at `src/components/ui/` with 10 components built on Radix UI primitives:
+
+| Component  | Radix Primitive | Usage in the app                                        |
+| ---------- | --------------- | ------------------------------------------------------- |
+| `Button`   | `Slot`          | Start/Continue, navigation, submit actions              |
+| `Card`     | —               | Catalog cards, bundle cards, settings panels            |
+| `Badge`    | —               | Progress status (not-started/doing/done), bundle badges |
+| `Input`    | —               | Search bar, reflection responses                        |
+| `Dialog`   | `Dialog`        | Course exit confirmation, course-exit warning           |
+| `Select`   | `Select`        | Catalog sort/filter, module selector                    |
+| `Progress` | `Progress`      | Course progress bars, bundle progress bars              |
+| `Tabs`     | `Tabs`          | Settings page sections, dashboard tabs                  |
+| `Switch`   | `Switch`        | Theme auto-switch, preferences toggles                  |
+| `Tooltip`  | `Tooltip`       | Icon descriptions, badge explanations                   |
+
+All components use `class-variance-authority` (cva) for variants, the `cn()` utility from `@/lib/utils`, and Tailwind CSS utility classes mapped to `--oe-*` theme tokens.
+
 ## Virtual Module
 
 The app uses a Vite plugin (`eduDataPlugin`) that exposes a virtual module `virtual:edu-data` at dev time. This module exports:
 
 - `catalogPackages` — `PackageSummary[]` for the catalog grid
 - `packageEntries` — `Record<string, LoadedPackage>` keyed by package ID
+- `catalogBundles` — `BundleSummary[]` for the bundle catalog section
+- `bundleEntries` — `Record<string, LoadedBundle>` keyed by bundle ID
 
-This avoids filesystem access in the browser while keeping the dev server as the single source of truth for package data.
+This avoids filesystem access in the browser while keeping the dev server as the single source of truth for package and bundle data.

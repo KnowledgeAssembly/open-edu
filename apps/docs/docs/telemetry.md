@@ -108,3 +108,5 @@ edu report ./telemetry.jsonl --json  # Machine-readable
 | `hint_triggered`     | Learner requested a hint                  |
 | `widget_interaction` | Learner interacted with a widget          |
 | `route_triggered`    | Workflow routed to a specific node        |
+
+All telemetry events support optional `bundleId` and `moduleId` fields for correlation when the learner is working within a multi-module bundle. This enables bundle-level analytics without breaking existing JSONL format or readers.

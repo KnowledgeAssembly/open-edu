@@ -68,9 +68,10 @@ node packages/cli/dist/cli.js --help
 ## What's Next?
 
 - [Architecture](./architecture) — How the framework is built
-- [Learner App](./learner) — Standalone course player with catalog, progress, and theme switching
-- [Package Format](./package-format) — Structure of educational packages
+- [Learner App](./learner) — Standalone course player with catalog, bundle overview, progress, and theme switching
+- [Package Format](./package-format) — Structure of educational packages and multi-module bundles
 - [Package Authoring Guide](./package-authoring) — How to create packages
-- [Runtime Packages](./runtime) — Node renderers, layout components, and theming
-- [CLI Reference](./cli/overview) — All CLI commands
+- [Runtime Packages](./runtime) — Node renderers, layout components, theming, and bundle overview
+- [CLI Reference](./cli/overview) — All CLI commands, including `edu import learn-easy`
 - [Widget SDK](./widgets/overview) — Building custom interactive widgets
+- [Testing Guide](./testing) — Unit and E2E testing, including bundle navigation tests

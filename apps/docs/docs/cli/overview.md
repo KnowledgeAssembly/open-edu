@@ -108,3 +108,19 @@ edu widget create ./my-widget --id my-widget-id --title "My Widget"
 ```
 
 Generates a complete widget package with `package.json`, `src/index.tsx`, `src/index.test.tsx`, and `vitest.config.ts`.
+
+### Import Learn-Easy
+
+Import Learn-Easy curriculum content and generate an Open-Edu bundle:
+
+```bash
+edu import learn-easy ./source-dir ./output-dir
+edu import learn-easy ./source-dir ./output-dir --bundle-title "Math Bundle" --bundle-id "math-bundle"
+```
+
+Reads JSON module files from the source directory, auto-detects node types from naming conventions, and generates:
+
+- `bundle.json` — bundle manifest with `BundleManifestSchema`-compliant structure
+- Per-module directories with `package.json`, `workflow.json`, node files, and `validate.test.ts`
+- Root-level `validate.test.ts` for the bundle
+- Returns JSON output with `--json` flag: `{ bundleDir, moduleCount, nodeCount, warnings }`

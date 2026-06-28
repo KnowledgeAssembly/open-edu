@@ -16,6 +16,10 @@ The schema package is the single source of truth for all data structures in the 
 | `WorkflowSchema`                                                                                       | Routing rules with linear `onComplete` and conditional `conditions`                          |
 | `RouteDefinitionSchema`                                                                                | Single route — either `onComplete` or `conditions` array                                     |
 | `ProgressSnapshotSchema`                                                                               | Learner state — `currentNodeId`, `visitedNodes`, `scores`, `isCompleted`                     |
+| `BundleProgressSnapshotSchema`                                                                         | Bundle-level progress — `bundleId`, `moduleStatuses`, per-module `ModuleProgressSnapshot`    |
+| `ModuleProgressSnapshotSchema`                                                                         | Per-module progress snapshot — `moduleId`, `currentNodeId`, `visitedNodes`, `scores`         |
+| `BundleManifestSchema`                                                                                 | Bundle identity — `id`, `title`, `version`, `author`, ordered `modules` array                |
+| `BundleModuleRefSchema`                                                                                | Module reference — `id`, `title`, `path`, `dependsOn`, `estimatedDuration`                   |
 | `RewardsSchema`                                                                                        | Reward triggers with conditional badge/webhook/script actions                                |
 | `SkillGraphSchema`                                                                                     | Skill definitions, dependencies, mastery thresholds                                          |
 | `MasteryLevelSchema`                                                                                   | Enum: `not_attempted`, `in_progress`, `achieved`, `mastered`                                 |
