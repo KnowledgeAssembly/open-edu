@@ -2,19 +2,19 @@ import * as React from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 
-export interface EmptyStateProps {
+export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
-  className?: string;
 }
 
 const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
-  ({ icon, title, description, action, className }, ref) => (
+  ({ icon, title, description, action, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn('flex flex-col items-center justify-center gap-2 py-12 text-center', className)}
+      {...props}
     >
       {icon && <div className="text-muted-foreground mb-2">{icon}</div>}
       <h3 className="text-lg font-semibold text-foreground">{title}</h3>

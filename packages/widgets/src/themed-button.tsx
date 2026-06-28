@@ -13,14 +13,14 @@ export interface ThemedButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
   children: ReactNode;
 }
 
-const variantMap: Record<string, ButtonProps['variant']> = {
+const variantMap: Record<NonNullable<ThemedButtonProps['variant']>, ButtonProps['variant']> = {
   primary: 'default',
   secondary: 'secondary',
   outline: 'outline',
   ghost: 'ghost',
 };
 
-const sizeMap: Record<string, ButtonProps['size']> = {
+const sizeMap: Record<NonNullable<ThemedButtonProps['size']>, ButtonProps['size']> = {
   sm: 'sm',
   md: 'default',
   lg: 'lg',

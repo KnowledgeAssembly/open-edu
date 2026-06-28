@@ -14,6 +14,13 @@ describe('EmptyState', () => {
     expect(screen.getByText('Action')).toBeDefined();
   });
 
+  it('passes through HTML attributes', () => {
+    const { container } = render(<EmptyState title="Test" data-testid="empty" id="my-id" />);
+    const root = container.firstChild as HTMLElement;
+    expect(root.getAttribute('data-testid')).toBe('empty');
+    expect(root.getAttribute('id')).toBe('my-id');
+  });
+
   it('sets displayName', () => {
     expect(EmptyState.displayName).toBe('EmptyState');
   });

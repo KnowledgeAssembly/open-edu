@@ -24,7 +24,7 @@ describe('ProgressBar', () => {
   it('fills to the correct percentage', () => {
     const { container } = render(<ProgressBar current={1} total={4} />);
     const fill = container.querySelector('[role="progressbar"] > div');
-    expect(fill?.getAttribute('style')).toContain('width: 25%');
+    expect(fill?.getAttribute('style')).toContain('translateX(-75%)');
   });
 
   it('clamps current to [0, total]', () => {

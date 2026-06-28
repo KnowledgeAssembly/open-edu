@@ -10,8 +10,8 @@ const tagVariants = cva(
       variant: {
         default: 'bg-primary/10 text-primary',
         secondary: 'bg-secondary/10 text-secondary-foreground',
-        success: 'bg-green-100 text-green-800',
-        warning: 'bg-amber-100 text-amber-800',
+        success: 'bg-success/10 text-success',
+        warning: 'bg-secondary/10 text-secondary-foreground',
         danger: 'bg-destructive/10 text-destructive-foreground',
         outline: 'border border-border text-foreground',
       },

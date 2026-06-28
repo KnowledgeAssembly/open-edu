@@ -4,11 +4,15 @@ import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@open-edu/design-system';
-import { Button } from '@open-edu/design-system';
-import { Badge } from '@open-edu/design-system';
-import { Progress } from '@open-edu/design-system';
 import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Progress,
   Select,
   SelectContent,
   SelectItem,

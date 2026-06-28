@@ -1,4 +1,5 @@
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -6,7 +7,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@open-edu/design-system';
-import { Button } from '@open-edu/design-system';
 
 export interface CourseExitWarningDialogProps {
   open: boolean;

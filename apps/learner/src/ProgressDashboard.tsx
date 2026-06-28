@@ -4,10 +4,14 @@ import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
-import { Card, CardContent, CardDescription } from '@open-edu/design-system';
-import { Button } from '@open-edu/design-system';
-import { Badge } from '@open-edu/design-system';
-import { Progress } from '@open-edu/design-system';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  Progress,
+} from '@open-edu/design-system';
 import { BookOpen, CheckCircle2 } from 'lucide-react';
 
 export interface ProgressDashboardProps {

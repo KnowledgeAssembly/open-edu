@@ -49,6 +49,7 @@ export {
 } from './primitives/select.js';
 
 export { Progress } from './primitives/progress.js';
+export type { ProgressProps } from './primitives/progress.js';
 
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './primitives/tabs.js';
 
