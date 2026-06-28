@@ -19,7 +19,7 @@ describe('createCompileCommand', () => {
     expect(outputOption).toBeDefined();
   });
 
-  it('has --validate option with default true', () => {
+  it('has --validate option with default false', () => {
     const cmd = createCompileCommand();
     const validateOption = cmd.options.find((o) => o.long === '--validate');
     expect(validateOption).toBeDefined();

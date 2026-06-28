@@ -50,7 +50,7 @@ export async function compile(
   diagnostics.push(...validationDiags);
 
   const hasErrors = diagnostics.some((d) => d.severity === 'error');
-  if (hasErrors && options.validate !== false) {
+  if (hasErrors && options.validate === true) {
     return { success: false, diagnostics };
   }
 
@@ -61,8 +61,8 @@ export async function compile(
   const genResult = await generatePackage(parsed.model, outputDir, { verbose: options.verbose });
   diagnostics.push(...genResult.diagnostics);
 
-  // Validate generated output with @open-edu/core (if --validate is not explicitly false)
-  if (options.validate !== false) {
+  // Validate generated output with @open-edu/core (only when --validate is passed)
+  if (options.validate === true) {
     try {
       if (parsed.model.modules.length === 1) {
         await loadPackage(outputDir);
@@ -94,7 +94,7 @@ export function createCompileCommand(): Command {
     .option('-o, --output <dir>', 'Output directory', './out')
     .option('-w, --watch', 'Watch mode — recompile on file changes', false)
     .option('-v, --verbose', 'Verbose output', false)
-    .option('--validate', 'Validate output against @open-edu/core schemas', true)
+    .option('--validate', 'Validate output against @open-edu/core schemas', false)
     .option('-f, --format <format>', 'Output format', 'package')
     .action(async (file: string, cmdOptions: Record<string, unknown>) => {
       const options: CompileOptions = {

@@ -24,8 +24,6 @@
   },
   "dependencies": {
     "@open-edu/core": "workspace:*",
-    "@open-edu/schemas": "workspace:*",
-    "chokidar": "^4.0.0",
     "commander": "^12.0.0",
     "remark-frontmatter": "^5.0.0",
     "remark-parse": "^11.0.0",
