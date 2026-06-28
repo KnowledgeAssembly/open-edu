@@ -4,12 +4,23 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../too
 import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Tooltip', () => {
-  it('has no accessibility violations', async () => {
+  it('has no accessibility violations in closed state', async () => {
     await checkAccessibility(
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover</TooltipTrigger>
           <TooltipContent>Tooltip content</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+  });
+
+  it('has no accessibility violations in open state', async () => {
+    await checkAccessibility(
+      <TooltipProvider>
+        <Tooltip defaultOpen>
+          <TooltipTrigger>Hover</TooltipTrigger>
+          <TooltipContent role="tooltip">Tooltip content</TooltipContent>
         </Tooltip>
       </TooltipProvider>,
     );

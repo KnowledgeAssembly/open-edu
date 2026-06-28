@@ -4,11 +4,20 @@ import { Popover, PopoverTrigger, PopoverContent } from '../popover.jsx';
 import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Popover', () => {
-  it('has no accessibility violations', async () => {
+  it('has no accessibility violations in closed state', async () => {
     await checkAccessibility(
       <Popover>
         <PopoverTrigger>Open</PopoverTrigger>
         <PopoverContent>Content</PopoverContent>
+      </Popover>,
+    );
+  });
+
+  it('has no accessibility violations in open state', async () => {
+    await checkAccessibility(
+      <Popover defaultOpen>
+        <PopoverTrigger>Open</PopoverTrigger>
+        <PopoverContent>Popover content</PopoverContent>
       </Popover>,
     );
   });

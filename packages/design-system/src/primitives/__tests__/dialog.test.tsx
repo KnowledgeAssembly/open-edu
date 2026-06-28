@@ -12,13 +12,26 @@ import {
 import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Dialog', () => {
-  it('has no accessibility violations', async () => {
+  it('has no accessibility violations in closed state', async () => {
     await checkAccessibility(
       <Dialog>
         <DialogTrigger>Open</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Title</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+  });
+
+  it('has no accessibility violations in open state', async () => {
+    await checkAccessibility(
+      <Dialog defaultOpen>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dialog title</DialogTitle>
+            <DialogDescription>Dialog description</DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>,
