@@ -27,6 +27,7 @@
     "react-dom": "^18.0.0"
   },
   "dependencies": {
+    "@open-edu/design-system": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {

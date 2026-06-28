@@ -12,8 +12,7 @@ import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button, Card, CardContent } from '@open-edu/design-system';
 import { ArrowLeft, Award } from 'lucide-react';
 
 export interface BundleCourseContext {

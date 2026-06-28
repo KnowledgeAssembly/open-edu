@@ -3,8 +3,7 @@ import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button, Card, CardContent } from '@open-edu/design-system';
 import { BookOpen, TrendingUp, Trophy, Sparkles, PlayCircle } from 'lucide-react';
 
 export interface HomePageProps {
