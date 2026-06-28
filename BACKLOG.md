@@ -12,7 +12,7 @@ The backlog is written for coding agents with limited repo context. Each story i
 
 ## Current Baseline
 
-- The core MVP packages exist: `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`, `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`, and `@open-edu/dev-server`.
+- The core MVP packages exist: `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`, `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`, `@open-edu/dev-server`, and `@open-edu/course-compiler`.
 - Example packages exist under `examples/` and are covered by Vitest validation tests plus Playwright E2E tests.
 - `@open-edu/widgets` is currently a placeholder that exports only `WIDGETS_VERSION`.
 - Exercise and custom nodes are schema-supported, but `packages/runtime/src/renderers/NodeRenderer.tsx` renders placeholders for both.

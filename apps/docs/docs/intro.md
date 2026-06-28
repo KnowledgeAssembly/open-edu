@@ -72,6 +72,7 @@ node packages/cli/dist/cli.js --help
 - [Package Format](./package-format) — Structure of educational packages and multi-module bundles
 - [Package Authoring Guide](./package-authoring) — How to create packages
 - [Runtime Packages](./runtime) — Node renderers, layout components, theming, and bundle overview
-- [CLI Reference](./cli/overview) — All CLI commands, including `edu import learn-easy`
+- [Course Compiler](./course-compiler) — Compile `course-spec.md` into validated packages with `edu compile`
+- [CLI Reference](./cli/overview) — All CLI commands, including `edu import learn-easy` and `edu compile`
 - [Widget SDK](./widgets/overview) — Building custom interactive widgets
 - [Testing Guide](./testing) — Unit and E2E testing, including bundle navigation tests

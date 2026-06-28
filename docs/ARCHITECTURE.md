@@ -135,6 +135,7 @@ packages/
 ├── accessibility/
 ├── widgets/
 ├── cli/
+├── course-compiler/
 
 examples/
 ├── hello-world/

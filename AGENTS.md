@@ -39,6 +39,8 @@ pnpm --filter @open-edu/learner dev   # Start the learner app (port 4001)
 pnpm test:e2e                         # Run Playwright E2E tests
 pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle
+pnpm --filter @open-edu/course-compiler test  # Run course-compiler tests
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile course-spec.md -o ./output  # Compile a course spec
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -60,6 +62,7 @@ open-edu/
 │   ├── telemetry/           # RxJS telemetry + JSONL reader + summary
 │   ├── rewards/             # Reward broker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
+│   ├── course-compiler/     # Course spec compiler (course-spec.md → OpenEdu package)
 │   └── widgets/             # Widget SDK + registry + 14 built-in widgets + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
@@ -93,7 +96,7 @@ All packages use the `@open-edu/` scope:
 
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
-- `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`
+- `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -116,6 +119,9 @@ Epic 1 (Foundation)  ← CURRENT
 
 Epic 13 (Learner App)
   └─► Epics 3, 4, 5, 6, 7, 8, 11 (consumes all packages)
+
+Epic 29 (Course Compiler)
+  └─► Epics 2, 3 (compiles specs into validated packages)
 ```
 
 ### Theme System (Epics 138–145)

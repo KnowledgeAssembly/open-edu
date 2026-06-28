@@ -109,6 +109,18 @@ edu widget create ./my-widget --id my-widget-id --title "My Widget"
 
 Generates a complete widget package with `package.json`, `src/index.tsx`, `src/index.test.tsx`, and `vitest.config.ts`.
 
+### Compile
+
+Compile a `course-spec.md` into a validated OpenEdu educational package:
+
+```bash
+edu compile ./course-spec.md --output ./my-course
+edu compile ./course-spec.md --validate
+edu compile ./course-spec.md --verbose
+```
+
+Parses Markdown via Remark/Unified, semantically validates structure (duplicate IDs, missing fields, dependency loops), and generates the package directory with `package.json`/`bundle.json`, `workflow.json`, lesson nodes, quiz JSON, and placeholder assets. Diagnostics are collected from each pipeline stage and reported to the user.
+
 ### Import Learn-Easy
 
 Import Learn-Easy curriculum content and generate an Open-Edu bundle:
