@@ -8,7 +8,12 @@ import {
 } from '@open-edu/design-system/tokens';
 
 const config: Config = {
-  content: ['./index.html', './src/**/*.{ts,tsx}', '../../packages/runtime/src/**/*.{ts,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{ts,tsx}',
+    '../../packages/runtime/src/**/*.{ts,tsx}',
+    '../../packages/design-system/src/**/*.{ts,tsx}',
+  ],
   theme: {
     extend: {
       colors: tailwindColorExtensions,

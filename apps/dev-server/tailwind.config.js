@@ -8,7 +8,12 @@ import {
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}', '../../packages/runtime/src/**/*.{ts,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{ts,tsx}',
+    '../../packages/runtime/src/**/*.{ts,tsx}',
+    '../../packages/design-system/src/**/*.{ts,tsx}',
+  ],
   theme: {
     extend: {
       colors: tailwindColorExtensions,
