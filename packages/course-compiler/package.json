@@ -1,9 +1,8 @@
 {
-  "name": "@open-edu/cli",
+  "name": "@open-edu/course-compiler",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "description": "edu CLI for Open-Edu",
+  "description": "Compile course-spec.md into validated OpenEdu educational packages",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -16,9 +15,6 @@
   "files": [
     "dist"
   ],
-  "bin": {
-    "edu": "./dist/cli.js"
-  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -28,13 +24,15 @@
   },
   "dependencies": {
     "@open-edu/core": "workspace:*",
-    "@open-edu/course-compiler": "workspace:*",
-    "@open-edu/dev-server": "workspace:*",
-    "@open-edu/telemetry": "workspace:*",
     "commander": "^12.0.0",
-    "tar": "^7.5.16"
+    "remark-frontmatter": "^5.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/tar": "^7.0.87"
-  }
+    "@types/mdast": "^4.0.0",
+    "vitest": "^1.0.0"
+  },
+  "type": "module"
 }
