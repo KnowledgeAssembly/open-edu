@@ -18,7 +18,7 @@ export const palette = {
   gray85: '#ece6ee',
   gray90: '#f2ecf4',
   gray92: '#f8f2fa',
-  gray95: '#ded8e0',
+  gray75: '#ded8e0',
   gray99: '#fdf7ff',
   red20: '#93000a',
   red30: '#ba1a1a',
@@ -88,9 +88,6 @@ export interface SemanticColorTokens {
   fg: string;
   border: string;
   success: string;
-  warning: string;
-  danger: string;
-  info: string;
 }
 
 type DeepColorTokens = Record<string, string | Record<string, string>>;

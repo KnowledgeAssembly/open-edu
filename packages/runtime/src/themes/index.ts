@@ -4,8 +4,9 @@ import { luminaScholastica } from './lumina-scholastica.js';
 import { nocturnal } from './nocturnal.js';
 import { sylvanWorkspace } from './sylvan-workspace.js';
 
-export type { ThemeDefinition, ThemeId } from '@open-edu/design-system';
 export type {
+  ThemeDefinition,
+  ThemeId,
   ColorTokens,
   TypographyToken,
   TypographyTokens,

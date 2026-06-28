@@ -8,7 +8,7 @@ export const luminaScholastica: ThemeDefinition = {
     'Modern minimalist learning environment with a content-first three-panel architecture.',
   colors: {
     surface: palette.purple99,
-    ['surface-dim']: palette.gray95,
+    ['surface-dim']: palette.gray75,
     ['surface-bright']: palette.purple99,
     ['surface-container-lowest']: palette.white,
     ['surface-container-low']: palette.gray92,
