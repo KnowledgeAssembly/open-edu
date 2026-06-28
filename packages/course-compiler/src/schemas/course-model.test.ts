@@ -103,7 +103,7 @@ describe('CourseMetadataSchema', () => {
   });
 
   it('defaults language to en', () => {
-    const { language, ...rest } = validMetadata();
+    const { language: _language, ...rest } = validMetadata();
     const result = CourseMetadataSchema.safeParse(rest);
     expect(result.success).toBe(true);
     if (result.success) {

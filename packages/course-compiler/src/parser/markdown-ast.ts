@@ -56,8 +56,6 @@ function parseSimpleYaml(value: string): Record<string, unknown> {
         val = true;
       } else if (val === 'false') {
         val = false;
-      } else if (/^\d+\.\d+$/.test(val)) {
-        val = val;
       } else if (/^\d+$/.test(val)) {
         val = Number(val);
       } else if (val.startsWith('"') && val.endsWith('"')) {
