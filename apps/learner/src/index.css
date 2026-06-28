@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --background: var(--oe-color-surface);
+    --foreground: var(--oe-color-on-surface);
+    --card: var(--oe-color-surface-container-lowest);
+    --card-foreground: var(--oe-color-on-surface);
+    --popover: var(--oe-color-surface-container);
+    --popover-foreground: var(--oe-color-on-surface);
+    --primary: var(--oe-color-primary);
+    --primary-foreground: var(--oe-color-on-primary);
+    --secondary: var(--oe-color-secondary-container);
+    --secondary-foreground: var(--oe-color-on-secondary-container);
+    --muted: var(--oe-color-surface-variant);
+    --muted-foreground: var(--oe-color-on-surface-variant);
+    --accent: var(--oe-color-primary-container);
+    --accent-foreground: var(--oe-color-on-primary-container);
+    --destructive: var(--oe-color-error);
+    --destructive-foreground: var(--oe-color-on-error);
+    --success: var(--oe-color-success);
+    --success-foreground: var(--oe-color-on-secondary);
+    --border: var(--oe-color-outline);
+    --input: var(--oe-color-outline);
+    --ring: var(--oe-color-primary);
+    --radius: var(--oe-radius-DEFAULT);
+  }
+}

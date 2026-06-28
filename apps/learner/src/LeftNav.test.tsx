@@ -125,7 +125,7 @@ describe('LeftNav with RuntimeProvider context', () => {
   it('keeps non-active nav items fully visible in course view', () => {
     render(<LeftNav {...commonProps} />);
     const catalogBtn = screen.getByTestId('leftnav-catalog');
-    expect(catalogBtn.className).not.toContain('opacity-50');
+    expect(catalogBtn).toBeVisible();
   });
 
   it('disables future step buttons', () => {

@@ -3,6 +3,9 @@ import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { BookOpen, TrendingUp, Trophy, Sparkles, PlayCircle } from 'lucide-react';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
@@ -36,47 +39,48 @@ export function HomePage({
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
-          <div className="text-3xl mb-sm">{'\uD83D\uDCDA'}</div>
-          <div className="text-h2 font-display text-primary font-bold">{totalUnits}</div>
-          <p className="text-on-surface-variant text-sm">Learning Units Available</p>
-        </div>
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
-          <div className="text-3xl mb-sm">{'\uD83D\uDCC8'}</div>
-          <div className="text-h2 font-display text-primary font-bold">{inProgressCount}</div>
-          <p className="text-on-surface-variant text-sm">In Progress</p>
-        </div>
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
-          <div className="text-3xl mb-sm">{'\uD83C\uDFC6'}</div>
-          <div className="text-h2 font-display text-primary font-bold">{badgeCount}</div>
-          <p className="text-on-surface-variant text-sm">Badges Earned</p>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center p-6 text-center">
+            <BookOpen className="h-8 w-8 text-primary mb-2" />
+            <div className="text-3xl font-bold text-primary">{totalUnits}</div>
+            <p className="text-sm text-muted-foreground">Learning Units Available</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col items-center p-6 text-center">
+            <TrendingUp className="h-8 w-8 text-primary mb-2" />
+            <div className="text-3xl font-bold text-primary">{inProgressCount}</div>
+            <p className="text-sm text-muted-foreground">In Progress</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col items-center p-6 text-center">
+            <Trophy className="h-8 w-8 text-primary mb-2" />
+            <div className="text-3xl font-bold text-primary">{badgeCount}</div>
+            <p className="text-sm text-muted-foreground">Badges Earned</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex flex-col gap-md">
-        <div className="bg-primary-container/20 border border-primary-container rounded-xl p-md">
-          <h2 className="text-h2 font-title text-primary mb-sm">Quick Links</h2>
-          <div className="flex flex-wrap gap-sm">
-            <button
-              onClick={() => onNavigate({ view: 'catalog' })}
-              className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold"
-            >
-              Browse Courses
-            </button>
-            <button
-              onClick={() => onNavigate({ view: 'progress' })}
-              className="bg-surface-container-high text-on-surface border border-outline-variant px-lg py-sm rounded-lg font-semibold"
-            >
-              View Progress
-            </button>
-            <button
-              onClick={() => onNavigate({ view: 'settings' })}
-              className="bg-surface-container-high text-on-surface border border-outline-variant px-lg py-sm rounded-lg font-semibold"
-            >
-              Settings
-            </button>
-          </div>
-        </div>
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
+              <Sparkles className="h-5 w-5" /> Quick Links
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => onNavigate({ view: 'catalog' })}>
+                <PlayCircle className="h-4 w-4 mr-2" /> Browse Courses
+              </Button>
+              <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
+                View Progress
+              </Button>
+              <Button variant="outline" onClick={() => onNavigate({ view: 'settings' })}>
+                Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

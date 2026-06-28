@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ThemeSelector, type ThemeId } from '@open-edu/runtime';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
 
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
@@ -31,76 +35,82 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
       <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Settings</h1>
 
       <div className="flex flex-col gap-lg">
-        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-          <h2 className="text-h2 font-title text-on-surface mb-md">Theme</h2>
-          <ThemeSelector currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
-        </section>
+        <Card>
+          <CardHeader>
+            <h2 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+              <Sun className="h-5 w-5" /> Theme
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <ThemeSelector currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
+          </CardContent>
+        </Card>
 
-        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-          <h2 className="text-h2 font-title text-on-surface mb-md">Accessibility</h2>
-
-          <div className="flex flex-col gap-md">
+        <Card>
+          <CardHeader>
+            <h2 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+              <Eye className="h-5 w-5" /> Accessibility
+            </h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-on-surface text-sm">Font Size</p>
-                <p className="text-xs text-on-surface-variant">Adjust text size</p>
+              <div className="flex items-center gap-2">
+                <Type className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">Font Size</p>
+                  <p className="text-xs text-muted-foreground">Adjust text size</p>
+                </div>
               </div>
-              <div className="flex items-center gap-sm">
-                <button
-                  type="button"
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setFontSize((s) => Math.max(80, s - 10))}
-                  className="px-2 py-1 text-sm border border-outline-variant rounded bg-surface hover:bg-surface-variant"
                   aria-label="Decrease font size"
                 >
-                  A-
-                </button>
-                <span className="text-sm min-w-[3em] text-center font-mono">{fontSize}%</span>
-                <button
-                  type="button"
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="w-12 text-center text-sm font-mono">{fontSize}%</span>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setFontSize((s) => Math.min(150, s + 10))}
-                  className="px-2 py-1 text-sm border border-outline-variant rounded bg-surface hover:bg-surface-variant"
                   aria-label="Increase font size"
                 >
-                  A+
-                </button>
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-on-surface text-sm">Reduced Motion</p>
-                <p className="text-xs text-on-surface-variant">Minimize animations</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="font-medium text-sm">Reduced Motion</p>
+                  <p className="text-xs text-muted-foreground">Minimize animations</p>
+                </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={reducedMotion}
-                  onChange={(e) => setReducedMotion(e.target.checked)}
-                  className="sr-only peer"
-                  aria-label="Reduced Motion"
-                />
-                <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
-              </label>
+              <Switch
+                checked={reducedMotion}
+                onCheckedChange={setReducedMotion}
+                aria-label="Reduced Motion"
+              />
             </div>
 
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-on-surface text-sm">High Contrast</p>
-                <p className="text-xs text-on-surface-variant">Increase color contrast</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="font-medium text-sm">High Contrast</p>
+                  <p className="text-xs text-muted-foreground">Increase color contrast</p>
+                </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={highContrast}
-                  onChange={(e) => setHighContrast(e.target.checked)}
-                  className="sr-only peer"
-                  aria-label="High Contrast"
-                />
-                <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
-              </label>
+              <Switch
+                checked={highContrast}
+                onCheckedChange={setHighContrast}
+                aria-label="High Contrast"
+              />
             </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

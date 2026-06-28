@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useRuntimeOptional } from '@open-edu/runtime';
 import { getOrderedNodes } from '@open-edu/workflow';
+import { Home, TrendingUp, BookOpen, Settings, ArrowLeft, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export type AppView =
   | { view: 'home' }
@@ -16,11 +18,17 @@ export interface LeftNavProps {
   onBackToCatalog?: () => void;
 }
 
-const navItems: Array<{ view: AppView; label: string; icon: string }> = [
-  { view: { view: 'home' }, label: 'Home', icon: '\uD83C\uDFE0' },
-  { view: { view: 'progress' }, label: 'My Progress', icon: '\uD83D\uDCC8' },
-  { view: { view: 'catalog' }, label: 'Course Catalog', icon: '\uD83D\uDCDA' },
-  { view: { view: 'settings' }, label: 'Settings', icon: '\u2699\uFE0F' },
+interface NavItem {
+  view: AppView;
+  label: string;
+  icon: JSX.Element;
+}
+
+const navItems: NavItem[] = [
+  { view: { view: 'home' }, label: 'Home', icon: <Home className="h-5 w-5" /> },
+  { view: { view: 'progress' }, label: 'My Progress', icon: <TrendingUp className="h-5 w-5" /> },
+  { view: { view: 'catalog' }, label: 'Course Catalog', icon: <BookOpen className="h-5 w-5" /> },
+  { view: { view: 'settings' }, label: 'Settings', icon: <Settings className="h-5 w-5" /> },
 ];
 
 function isSameView(a: AppView, b: AppView): boolean {
@@ -46,23 +54,17 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
         {navItems.map((item) => {
           const isActive = isSameView(currentView, item.view);
           return (
-            <button
+            <Button
               key={item.label}
-              type="button"
+              variant={isActive ? 'secondary' : 'ghost'}
+              className="justify-start w-full"
               onClick={() => onNavigate(item.view)}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-left text-sm font-sans transition-colors duration-200 border-l-2 ${
-                isActive
-                  ? 'border-l-primary bg-primary-container text-on-primary-container font-medium'
-                  : 'border-l-transparent bg-transparent text-on-surface-variant hover:bg-surface-variant'
-              }`}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`leftnav-${item.view.view}`}
             >
-              <span className="flex-shrink-0 text-base w-5 text-center" aria-hidden="true">
-                {item.icon}
-              </span>
+              {item.icon}
               {item.label}
-            </button>
+            </Button>
           );
         })}
       </nav>
@@ -79,15 +81,17 @@ export function LeftNav({ currentView, onNavigate, onBackToCatalog }: LeftNavPro
             <CourseStepList />
             {onBackToCatalog && (
               <div className="px-2 pt-2 pb-3">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
                   onClick={onBackToCatalog}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-high text-on-surface text-sm font-medium border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors duration-200"
                   data-testid="leftnav-back-to-catalog"
                   aria-label="Back to course catalog"
                 >
-                  {'\u2190'} Back to Catalog
-                </button>
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Back to Catalog
+                </Button>
               </div>
             )}
           </div>
@@ -141,19 +145,13 @@ function CourseStepList(): JSX.Element {
           );
         } else if (isVisited) {
           indicator = (
-            <span
-              className="w-6 h-6 rounded-full bg-success-container text-on-success-container flex items-center justify-center flex-shrink-0"
-              aria-hidden="true"
-            >
-              {'\u2713'}
+            <span className="w-6 h-6 rounded-full bg-success-container text-on-success-container flex items-center justify-center flex-shrink-0">
+              <Check className="h-3 w-3" />
             </span>
           );
         } else {
           indicator = (
-            <span
-              className="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0"
-              aria-hidden="true"
-            />
+            <span className="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0" />
           );
         }
 
