@@ -1,4 +1,10 @@
-export type ThemeId = 'high-focus' | 'lumina-scholastica' | 'nocturnal' | 'sylvan-workspace';
+export type ThemeId =
+  | 'high-focus'
+  | 'lumina-scholastica'
+  | 'nocturnal'
+  | 'sylvan-workspace'
+  | 'zen'
+  | 'forest';
 
 export type ColorTokens = Record<string, string>;
 

@@ -3,6 +3,8 @@ import { highFocus } from '../high-focus';
 import { luminaScholastica } from '../lumina-scholastica';
 import { nocturnal } from '../nocturnal';
 import { sylvanWorkspace } from '../sylvan-workspace';
+import { zen } from '../zen';
+import { forest } from '../forest';
 import type { ThemeDefinition } from '../types';
 
 const themes: Record<string, ThemeDefinition> = {
@@ -10,6 +12,8 @@ const themes: Record<string, ThemeDefinition> = {
   'lumina-scholastica': luminaScholastica,
   nocturnal: nocturnal,
   'sylvan-workspace': sylvanWorkspace,
+  zen: zen,
+  forest: forest,
 };
 
 const requiredColorKeys = [

@@ -3,6 +3,8 @@ import { highFocus } from './high-focus.js';
 import { luminaScholastica } from './lumina-scholastica.js';
 import { nocturnal } from './nocturnal.js';
 import { sylvanWorkspace } from './sylvan-workspace.js';
+import { zen } from './zen.js';
+import { forest } from './forest.js';
 
 export type {
   ThemeDefinition,
@@ -19,6 +21,8 @@ export const themeRegistry: Record<ThemeId, ThemeDefinition> = {
   'lumina-scholastica': luminaScholastica,
   nocturnal: nocturnal,
   'sylvan-workspace': sylvanWorkspace,
+  zen: zen,
+  forest: forest,
 };
 
 export const themeIds: ThemeId[] = [
@@ -26,6 +30,8 @@ export const themeIds: ThemeId[] = [
   'lumina-scholastica',
   'nocturnal',
   'sylvan-workspace',
+  'zen',
+  'forest',
 ];
 
 export const defaultThemeId: ThemeId = 'lumina-scholastica';
