@@ -1,0 +1,22 @@
+{
+  "name": "@open-edu/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens": "./src/tokens/index.ts",
+    "./tokens/tailwind": "./src/tokens/tailwind.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.0.0"
+  }
+}
