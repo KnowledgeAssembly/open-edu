@@ -37,7 +37,7 @@ describe('CommandPalette', () => {
   it('calls onOpenChange when backdrop clicked', () => {
     const onOpenChange = vi.fn();
     render(<CommandPalette open={true} onOpenChange={onOpenChange} />);
-    const backdrop = document.querySelector('[aria-hidden="true"]')!;
+    const backdrop = screen.getByRole('dialog').querySelector('[aria-hidden="true"]')!;
     fireEvent.click(backdrop);
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });

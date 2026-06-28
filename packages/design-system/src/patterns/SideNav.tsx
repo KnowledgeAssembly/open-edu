@@ -1,13 +1,16 @@
 import { useState, type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 
+export type NavTabId = 'overview' | 'modules' | 'progress' | 'bookmarks' | 'settings';
+
 export interface SideNavProps {
   courseTitle?: string;
   children?: ReactNode;
   onResumeLesson?: () => void;
+  activeTab?: NavTabId;
+  defaultActiveTab?: NavTabId;
+  onTabChange?: (tab: NavTabId) => void;
 }
-
-type NavTabId = 'overview' | 'modules' | 'progress' | 'bookmarks' | 'settings';
 
 const navTabs: Array<{ id: NavTabId; label: string; icon: string }> = [
   { id: 'overview', label: 'Course Overview', icon: '\uD83C\uDF93' },
@@ -17,8 +20,15 @@ const navTabs: Array<{ id: NavTabId; label: string; icon: string }> = [
   { id: 'settings', label: 'Settings', icon: '\u2699\uFE0F' },
 ];
 
-export function SideNav({ courseTitle, children, onResumeLesson }: SideNavProps): JSX.Element {
-  const [activeTab, setActiveTab] = useState<NavTabId>('overview');
+export function SideNav({ courseTitle, children, onResumeLesson, activeTab: controlledTab, defaultActiveTab, onTabChange }: SideNavProps): JSX.Element {
+  const [internalTab, setInternalTab] = useState<NavTabId>(defaultActiveTab ?? 'overview');
+  const activeTab = controlledTab ?? internalTab;
+  const handleTabClick = (tab: NavTabId) => {
+    if (controlledTab === undefined) {
+      setInternalTab(tab);
+    }
+    onTabChange?.(tab);
+  };
 
   return (
     <aside
@@ -38,7 +48,7 @@ export function SideNav({ courseTitle, children, onResumeLesson }: SideNavProps)
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabClick(tab.id)}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             data-testid={`sidenav-tab-${tab.id}`}
             className={cn(

@@ -12,9 +12,9 @@ export function DashboardLayout({ header, sidebar, children }: DashboardLayoutPr
       {header && <div className="shrink-0">{header}</div>}
       <div className="flex flex-1 overflow-hidden">
         {sidebar && (
-          <aside className="w-64 shrink-0 border-r border-outline-variant p-4 overflow-y-auto">
+          <div className="w-64 shrink-0 border-r border-outline-variant p-4 overflow-y-auto">
             {sidebar}
-          </aside>
+          </div>
         )}
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </div>

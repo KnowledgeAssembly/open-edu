@@ -120,7 +120,7 @@ export { Toaster } from './primitives/notification.js';
 
 // Patterns (nav components)
 export { SideNav } from './patterns/SideNav.js';
-export type { SideNavProps } from './patterns/SideNav.js';
+export type { SideNavProps, NavTabId } from './patterns/SideNav.js';
 
 export { TopAppBar } from './patterns/TopAppBar.js';
 export type { TopAppBarProps, TopAppBarBreadcrumb } from './patterns/TopAppBar.js';

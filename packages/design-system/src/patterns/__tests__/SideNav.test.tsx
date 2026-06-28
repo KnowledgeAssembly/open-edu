@@ -64,4 +64,25 @@ describe('SideNav', () => {
     const aside = screen.getByTestId('side-nav');
     expect(aside.getAttribute('aria-label')).toBe('Course navigation');
   });
+
+  it('calls onTabChange when a tab is clicked', () => {
+    const onTabChange = vi.fn();
+    render(<SideNav onTabChange={onTabChange} />);
+    fireEvent.click(screen.getByTestId('sidenav-tab-settings'));
+    expect(onTabChange).toHaveBeenCalledWith('settings');
+  });
+
+  it('uses controlled activeTab when provided', () => {
+    render(<SideNav activeTab="settings" />);
+    const settingsTab = screen.getByTestId('sidenav-tab-settings');
+    expect(settingsTab.getAttribute('aria-current')).toBe('page');
+    const overviewTab = screen.getByTestId('sidenav-tab-overview');
+    expect(overviewTab.getAttribute('aria-current')).toBeNull();
+  });
+
+  it('uses defaultActiveTab when provided', () => {
+    render(<SideNav defaultActiveTab="progress" />);
+    const progressTab = screen.getByTestId('sidenav-tab-progress');
+    expect(progressTab.getAttribute('aria-current')).toBe('page');
+  });
 });
