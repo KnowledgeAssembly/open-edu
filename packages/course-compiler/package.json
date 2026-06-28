@@ -1,0 +1,39 @@
+{
+  "name": "@open-edu/course-compiler",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compile course-spec.md into validated OpenEdu educational packages",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@open-edu/core": "workspace:*",
+    "@open-edu/schemas": "workspace:*",
+    "chokidar": "^4.0.0",
+    "commander": "^12.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  },
+  "type": "module"
+}
