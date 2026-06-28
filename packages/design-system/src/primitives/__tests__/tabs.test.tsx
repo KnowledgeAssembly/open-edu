@@ -1,8 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../tabs.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Tabs', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <Tabs defaultValue="tab1">
+        <TabsList>
+          <TabsTrigger value="tab1">Tab 1</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tab1">Content</TabsContent>
+      </Tabs>,
+    );
+  });
   it('renders tabs with trigger and content', () => {
     render(
       <Tabs defaultValue="tab1">

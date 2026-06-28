@@ -1,8 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Tag } from '../tag.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Tag', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Tag>Tag</Tag>);
+  });
   it('renders with text', () => {
     render(<Tag>React</Tag>);
     expect(screen.getByText('React')).toBeDefined();

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ConceptCard } from '../ConceptCard.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('ConceptCard', () => {
   it('renders title', () => {
@@ -33,5 +34,9 @@ describe('ConceptCard', () => {
       </ConceptCard>,
     );
     expect(screen.getByTestId('concept-card')).toHaveClass('custom-class');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<ConceptCard title="Concept">Accessible content</ConceptCard>);
   });
 });

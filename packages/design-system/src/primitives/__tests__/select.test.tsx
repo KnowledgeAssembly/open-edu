@@ -1,8 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../select.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Select', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <Select>
+        <SelectTrigger aria-label="Select an option">
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+  });
   it('renders trigger with value', () => {
     render(
       <Select>

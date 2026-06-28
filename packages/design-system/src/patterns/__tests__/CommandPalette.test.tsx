@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CommandPalette, CommandGroup, CommandItem, CommandEmpty } from '../CommandPalette.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('CommandPalette', () => {
   it('does not render when closed', () => {
@@ -45,6 +46,10 @@ describe('CommandPalette', () => {
   it('renders with custom placeholder', () => {
     render(<CommandPalette open={true} onOpenChange={vi.fn()} placeholder="Type to search..." />);
     expect(screen.getByPlaceholderText('Type to search...')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<CommandPalette open={true} onOpenChange={vi.fn()} />);
   });
 });
 

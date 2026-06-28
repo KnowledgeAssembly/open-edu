@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ProgressBadge } from '../ProgressBadge.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('ProgressBadge', () => {
   it('shows "Complete" when isCompleted', () => {
@@ -16,5 +17,9 @@ describe('ProgressBadge', () => {
   it('shows "Not started" when percentComplete === 0', () => {
     render(<ProgressBadge percentComplete={0} isCompleted={false} />);
     expect(screen.getByTestId('progress-badge')).toHaveTextContent('Not started');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<ProgressBadge percentComplete={50} isCompleted={false} />);
   });
 });

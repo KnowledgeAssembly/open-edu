@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AITutorPanel } from '../AITutorPanel.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('AITutorPanel', () => {
   it('renders AI Tutor heading', () => {
@@ -47,5 +48,9 @@ describe('AITutorPanel', () => {
     render(<AITutorPanel />);
     fireEvent.click(screen.getByText('My Notes'));
     expect(screen.getByText('Your notes will appear here.')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<AITutorPanel />);
   });
 });

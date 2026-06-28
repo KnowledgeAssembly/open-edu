@@ -102,7 +102,12 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
         <OverallProgressBar modules={modules} />
       </div>
 
-      <div className="flex flex-col gap-md" aria-label="Bundle modules" data-testid="module-list">
+      <div
+        className="flex flex-col gap-md"
+        role="list"
+        aria-label="Bundle modules"
+        data-testid="module-list"
+      >
         {modules.map((mod) => {
           const badgeCfg = statusBadgeConfig[mod.status];
 

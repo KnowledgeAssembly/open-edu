@@ -64,7 +64,10 @@ export function SideNav({
                 'border-l-primary bg-primary-container text-on-primary-container font-medium',
             )}
           >
-            <span className="flex items-center justify-center shrink-0 text-base w-5 h-5" aria-hidden="true">
+            <span
+              className="flex items-center justify-center shrink-0 text-base w-5 h-5"
+              aria-hidden="true"
+            >
               {tab.icon}
             </span>
             {tab.label}

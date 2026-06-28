@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CourseViewerLayout } from '../CourseViewerLayout.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('CourseViewerLayout', () => {
   it('renders content', () => {
@@ -36,5 +37,9 @@ describe('CourseViewerLayout', () => {
       />,
     );
     expect(screen.getByTestId('rightpanel')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<CourseViewerLayout content={<div>Content</div>} />);
   });
 });

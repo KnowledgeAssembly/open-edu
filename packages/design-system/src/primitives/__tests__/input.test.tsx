@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Input } from '../input.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Input', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Input placeholder="Enter text" />);
+  });
   it('renders input element', () => {
     render(<Input placeholder="Enter text" />);
     expect(screen.getByPlaceholderText('Enter text')).toBeDefined();

@@ -26,6 +26,18 @@ const themeInfo: Array<{ id: ThemeId; name: string; description: string; swatche
     description: 'Warm, organic reading',
     swatches: ['#f9faf6', '#061b0e', '#1a1c1a', '#536253'],
   },
+  {
+    id: 'zen',
+    name: 'Zen',
+    description: 'Minimalist light, reduced visual noise',
+    swatches: ['#fafaf9', '#57534e', '#1c1917', '#72706e'],
+  },
+  {
+    id: 'forest',
+    name: 'Forest',
+    description: 'Earthy greens and warm browns',
+    swatches: ['#f6f7f3', '#2d4a2c', '#1a1c1a', '#6b5b4a'],
+  },
 ];
 
 export interface ThemeSelectorProps {

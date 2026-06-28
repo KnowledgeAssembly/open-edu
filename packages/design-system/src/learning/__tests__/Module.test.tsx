@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Module } from '../Module.js';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 const sampleLessons = [
   { id: 'intro', title: 'Introduction', isActive: true },
@@ -60,5 +61,11 @@ describe('Module', () => {
     expect(header?.getAttribute('aria-expanded')).toBe('true');
     fireEvent.click(header!);
     expect(header?.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <Module title="Test Module" lessons={[{ id: '1', title: 'Lesson 1' }]} />,
+    );
   });
 });

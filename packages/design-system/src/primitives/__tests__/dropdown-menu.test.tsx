@@ -6,8 +6,19 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '../dropdown-menu.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('DropdownMenu', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(
+      <DropdownMenu>
+        <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>Item</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>,
+    );
+  });
   it('renders trigger', () => {
     render(
       <DropdownMenu>

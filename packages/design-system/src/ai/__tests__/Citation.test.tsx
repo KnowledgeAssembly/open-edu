@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Citation } from '../Citation.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.js';
 
 describe('Citation', () => {
   it('renders source label', () => {
@@ -16,5 +17,9 @@ describe('Citation', () => {
   it('has data-testid', () => {
     render(<Citation source="Src">Text</Citation>);
     expect(screen.getByTestId('citation')).toBeDefined();
+  });
+
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Citation source="Test Source">Cited content</Citation>);
   });
 });

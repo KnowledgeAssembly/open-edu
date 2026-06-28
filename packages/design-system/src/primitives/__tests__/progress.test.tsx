@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Progress } from '../progress.jsx';
+import { checkAccessibility } from '../../test-utils/a11y.jsx';
 
 describe('Progress', () => {
+  it('has no accessibility violations', async () => {
+    await checkAccessibility(<Progress value={50} label="Loading progress" />);
+  });
   it('renders with value', () => {
     render(<Progress value={50} />);
     const root = screen.getByRole('progressbar');
