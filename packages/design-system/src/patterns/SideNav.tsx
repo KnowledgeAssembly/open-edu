@@ -59,12 +59,12 @@ export function SideNav({
             aria-current={activeTab === tab.id ? 'page' : undefined}
             data-testid={`sidenav-tab-${tab.id}`}
             className={cn(
-              'flex items-center gap-2.5 px-3 py-2 border-none border-l-2 border-transparent rounded-r-[var(--oe-radius,8px)] rounded-l-none bg-transparent cursor-pointer text-left text-sm font-body-md text-on-surface-variant transition-[background-color,color] duration-200',
+              'flex items-center gap-2.5 px-3 py-2 border-none border-l-2 border-transparent rounded-r-md rounded-l-none bg-transparent cursor-pointer text-left text-sm font-body-md text-on-surface-variant transition-[background-color,color,border-color] duration-200',
               activeTab === tab.id &&
-                'border-l-[var(--oe-color-primary,#6750a4)] bg-primary-container text-on-primary-container font-medium',
+                'border-l-primary bg-primary-container text-on-primary-container font-medium',
             )}
           >
-            <span className="shrink-0 text-base w-5 text-center" aria-hidden="true">
+            <span className="flex items-center justify-center shrink-0 text-base w-5 h-5" aria-hidden="true">
               {tab.icon}
             </span>
             {tab.label}

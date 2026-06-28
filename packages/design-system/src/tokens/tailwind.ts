@@ -1,4 +1,5 @@
 export const tailwindColorExtensions: Record<string, string> = {
+  // Surface colors
   surface: 'var(--oe-color-surface)',
   'surface-dim': 'var(--oe-color-surface-dim)',
   'surface-bright': 'var(--oe-color-surface-bright)',
@@ -11,26 +12,39 @@ export const tailwindColorExtensions: Record<string, string> = {
   'on-surface-variant': 'var(--oe-color-on-surface-variant)',
   'inverse-surface': 'var(--oe-color-inverse-surface)',
   'inverse-on-surface': 'var(--oe-color-inverse-on-surface)',
+  'surface-variant': 'var(--oe-color-surface-variant)',
+
+  // Outline / border
   outline: 'var(--oe-color-outline)',
   'outline-variant': 'var(--oe-color-outline-variant)',
   'surface-tint': 'var(--oe-color-surface-tint)',
+
+  // Primary
   primary: 'var(--oe-color-primary)',
   'on-primary': 'var(--oe-color-on-primary)',
   'primary-container': 'var(--oe-color-primary-container)',
   'on-primary-container': 'var(--oe-color-on-primary-container)',
   'inverse-primary': 'var(--oe-color-inverse-primary)',
+
+  // Secondary
   secondary: 'var(--oe-color-secondary)',
   'on-secondary': 'var(--oe-color-on-secondary)',
   'secondary-container': 'var(--oe-color-secondary-container)',
   'on-secondary-container': 'var(--oe-color-on-secondary-container)',
+
+  // Tertiary
   tertiary: 'var(--oe-color-tertiary)',
   'on-tertiary': 'var(--oe-color-on-tertiary)',
   'tertiary-container': 'var(--oe-color-tertiary-container)',
   'on-tertiary-container': 'var(--oe-color-on-tertiary-container)',
+
+  // Error / destructive
   error: 'var(--oe-color-error)',
   'on-error': 'var(--oe-color-on-error)',
   'error-container': 'var(--oe-color-error-container)',
   'on-error-container': 'var(--oe-color-on-error-container)',
+
+  // Fixed variants
   'primary-fixed': 'var(--oe-color-primary-fixed)',
   'primary-fixed-dim': 'var(--oe-color-primary-fixed-dim)',
   'on-primary-fixed': 'var(--oe-color-on-primary-fixed)',
@@ -43,10 +57,45 @@ export const tailwindColorExtensions: Record<string, string> = {
   'tertiary-fixed-dim': 'var(--oe-color-tertiary-fixed-dim)',
   'on-tertiary-fixed': 'var(--oe-color-on-tertiary-fixed)',
   'on-tertiary-fixed-variant': 'var(--oe-color-on-tertiary-fixed-variant)',
+
+  // Background
   background: 'var(--oe-color-background)',
   'on-background': 'var(--oe-color-on-background)',
-  'surface-variant': 'var(--oe-color-surface-variant)',
+
+  // Misc
   success: 'var(--oe-color-success)',
+
+  // Shadcn/ui semantic aliases — map to design-system tokens
+  foreground: 'var(--oe-color-on-surface)',
+  border: 'var(--oe-color-outline-variant)',
+  input: 'var(--oe-color-outline-variant)',
+  ring: 'var(--oe-color-primary)',
+  'ring-offset': 'var(--oe-color-background)',
+
+  // Card
+  card: 'var(--oe-color-surface-container-lowest)',
+  'card-foreground': 'var(--oe-color-on-surface)',
+
+  // Popover
+  popover: 'var(--oe-color-surface-container)',
+  'popover-foreground': 'var(--oe-color-on-surface)',
+
+  // Muted
+  muted: 'var(--oe-color-surface-variant)',
+  'muted-foreground': 'var(--oe-color-on-surface-variant)',
+
+  // Accent
+  accent: 'var(--oe-color-secondary-container)',
+  'accent-foreground': 'var(--oe-color-on-secondary-container)',
+
+  // Primary foreground
+  'primary-foreground': 'var(--oe-color-on-primary)',
+
+  // Secondary foreground
+  'secondary-foreground': 'var(--oe-color-on-secondary)',
+
+  // Destructive foreground
+  'destructive-foreground': 'var(--oe-color-on-error)',
 };
 
 export const tailwindFontFamilyExtensions: Record<string, string> = {
