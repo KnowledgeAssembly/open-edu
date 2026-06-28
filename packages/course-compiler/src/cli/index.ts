@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { parseCourseSpec } from '../parser/index.js';
 import { validateCourseModel } from '../validators/index.js';
 import { generatePackage } from '../generators/index.js';
+import { loadPackage, loadBundle } from '@open-edu/core';
 import type { CompilerDiagnostic } from '../schemas/index.js';
 
 export interface CompileOptions {
@@ -59,6 +60,24 @@ export async function compile(
 
   const genResult = await generatePackage(parsed.model, outputDir, { verbose: options.verbose });
   diagnostics.push(...genResult.diagnostics);
+
+  // Validate generated output with @open-edu/core (if --validate is not explicitly false)
+  if (options.validate !== false) {
+    try {
+      if (parsed.model.modules.length === 1) {
+        await loadPackage(outputDir);
+      } else {
+        await loadBundle(outputDir);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      diagnostics.push({
+        severity: 'error',
+        message: `Generated package validation failed: ${message}`,
+        code: 'OUTPUT_VALIDATION_ERROR',
+      });
+    }
+  }
 
   const finalErrors = diagnostics.filter((d) => d.severity === 'error');
   return {
