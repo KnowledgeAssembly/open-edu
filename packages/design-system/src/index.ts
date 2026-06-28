@@ -117,3 +117,44 @@ export { EmptyState } from './primitives/empty-state.js';
 export type { EmptyStateProps } from './primitives/empty-state.js';
 
 export { Toaster } from './primitives/notification.js';
+
+// Patterns (nav components)
+export { SideNav } from './patterns/SideNav.js';
+export type { SideNavProps } from './patterns/SideNav.js';
+
+export { TopAppBar } from './patterns/TopAppBar.js';
+export type { TopAppBarProps, TopAppBarBreadcrumb } from './patterns/TopAppBar.js';
+
+export { CourseTree } from './patterns/CourseTree.js';
+export type { CourseTreeProps, CourseTreeModule } from './patterns/CourseTree.js';
+
+export { AppLayout } from './patterns/AppLayout.js';
+export type { AppLayoutProps } from './patterns/AppLayout.js';
+
+export { ThreePanelLayout } from './patterns/ThreePanelLayout.js';
+export type { ThreePanelLayoutProps } from './patterns/ThreePanelLayout.js';
+
+export { CourseViewerLayout } from './patterns/CourseViewerLayout.js';
+export type { CourseViewerLayoutProps } from './patterns/CourseViewerLayout.js';
+
+export { SettingsLayout } from './patterns/SettingsLayout.js';
+export type { SettingsLayoutProps } from './patterns/SettingsLayout.js';
+
+export { DashboardLayout } from './patterns/DashboardLayout.js';
+export type { DashboardLayoutProps } from './patterns/DashboardLayout.js';
+
+export { SplitView } from './patterns/SplitView.js';
+export type { SplitViewProps } from './patterns/SplitView.js';
+
+export {
+  CommandPalette,
+  CommandGroup,
+  CommandItem,
+  CommandEmpty,
+} from './patterns/CommandPalette.js';
+export type {
+  CommandPaletteProps,
+  CommandGroupProps,
+  CommandItemProps,
+  CommandEmptyProps,
+} from './patterns/CommandPalette.js';
