@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@open-edu/core": "workspace:*",
+    "@open-edu/course-compiler": "workspace:*",
     "@open-edu/dev-server": "workspace:*",
     "@open-edu/telemetry": "workspace:*",
     "commander": "^12.0.0",

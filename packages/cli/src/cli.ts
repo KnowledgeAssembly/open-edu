@@ -11,6 +11,7 @@ import { reportTelemetry } from './commands/report.js';
 import { generatePrompt, generateFromDescription } from './commands/generate.js';
 import { patchPackage } from './commands/patch.js';
 import { importLearnEasyCommand } from './commands/import.js';
+import { createCompileCommand } from '@open-edu/course-compiler';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -66,6 +67,8 @@ program
     const result = await packagePackage(packageDir, cmdOptions.output, { json });
     handleResult(result, json);
   });
+
+program.addCommand(createCompileCommand());
 
 program
   .command('create')
