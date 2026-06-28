@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { RuntimeThemeProvider, themeIds } from '@open-edu/runtime';
 import type { ThemeId } from '@open-edu/runtime';
 import axe from 'axe-core';
@@ -95,6 +95,7 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
       <CourseExitWarningDialog open onStay={vi.fn()} onLeave={vi.fn()} />,
       themeId,
     );
+    await screen.findByRole('dialog');
     await expectNoViolations(container);
   });
 });

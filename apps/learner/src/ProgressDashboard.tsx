@@ -4,6 +4,11 @@ import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './LeftNav';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
+import { Card, CardContent, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, CheckCircle2 } from 'lucide-react';
 
 export interface ProgressDashboardProps {
   onNavigate: (view: AppView) => void;
@@ -64,24 +69,18 @@ export function ProgressDashboard({
     return (
       <div className="p-xl max-w-4xl mx-auto" data-testid="progress-dashboard">
         <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">My Progress</h1>
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl text-center">
-          <span className="text-5xl block mb-md" aria-hidden="true">
-            📚
-          </span>
-          <p className="text-h2 font-title text-on-surface mb-sm">
-            Your learning journey starts here!
-          </p>
-          <p className="text-body-ui text-on-surface-variant mb-lg">
-            Begin a course and your progress will appear here.
-          </p>
-          <button
-            type="button"
-            onClick={() => onNavigate({ view: 'catalog' })}
-            className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold cursor-pointer border-none"
-          >
-            Browse Courses
-          </button>
-        </div>
+        <Card className="text-center p-8">
+          <CardContent>
+            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold leading-none tracking-tight mb-2">
+              Your learning journey starts here!
+            </h2>
+            <CardDescription className="mb-6">
+              Begin a course and your progress will appear here.
+            </CardDescription>
+            <Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -112,52 +111,47 @@ export function ProgressDashboard({
           const badgeCount = packageBadges.length;
 
           return (
-            <div
+            <Card
               key={packageId}
-              className={`bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-md ${
-                snap.isCompleted ? 'border-l-4 border-l-success opacity-80' : ''
-              }`}
+              className={`${snap.isCompleted ? 'border-l-4 border-l-success opacity-80' : ''}`}
               data-testid={`progress-card-${packageId}`}
             >
-              <div className="flex-1 w-full">
-                <h2 className="text-h2 font-title text-on-surface">{title}</h2>
-                <div className="flex items-center gap-md mt-sm text-sm text-on-surface-variant flex-wrap">
-                  <span>
-                    {snap.visitedNodes.length} of {totalNodes} steps
-                  </span>
-                  <span>Last: {lastTitle}</span>
-                  {lastStudied && <span className="text-on-surface-variant/70">{lastStudied}</span>}
-                  {badgeCount > 0 && (
-                    <span className="text-tertiary font-medium">
-                      {badgeCount} badge{badgeCount > 1 ? 's' : ''}
+              <CardContent className="p-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-md">
+                <div className="flex-1 w-full">
+                  <h2 className="text-h2 font-title text-on-surface">{title}</h2>
+                  <div className="flex items-center gap-md mt-sm text-sm text-on-surface-variant flex-wrap">
+                    <span>
+                      {snap.visitedNodes.length} of {totalNodes} steps
                     </span>
+                    <span>Last: {lastTitle}</span>
+                    {lastStudied && (
+                      <span className="text-on-surface-variant/70">{lastStudied}</span>
+                    )}
+                    {badgeCount > 0 && (
+                      <span className="text-tertiary font-medium">
+                        {badgeCount} badge{badgeCount > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-sm w-full">
+                    <Progress value={percent} className="h-2" />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-md flex-shrink-0">
+                  <span className="text-h2 font-display text-primary font-bold">{percent}%</span>
+                  {snap.isCompleted ? (
+                    <Badge variant="secondary">
+                      Completed <CheckCircle2 className="h-3 w-3 ml-1 inline" />
+                    </Badge>
+                  ) : (
+                    <Button size="sm" onClick={() => onNavigate({ view: 'course', packageId })}>
+                      Continue
+                    </Button>
                   )}
                 </div>
-                <div className="mt-sm w-full bg-surface-variant rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-md flex-shrink-0">
-                <span className="text-h2 font-display text-primary font-bold">{percent}%</span>
-                {snap.isCompleted ? (
-                  <span className="bg-secondary-container text-on-secondary-container px-sm py-xs rounded text-xs font-semibold">
-                    Completed ✓
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onNavigate({ view: 'course', packageId })}
-                    className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold text-sm cursor-pointer border-none"
-                  >
-                    Continue
-                  </button>
-                )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

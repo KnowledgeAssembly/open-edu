@@ -12,6 +12,9 @@ import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Award } from 'lucide-react';
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -64,7 +67,6 @@ export function CourseRuntime({
     return getProgress(pkg.manifest.id) ?? undefined;
   }, [pkg]);
 
-  // Initialize bundle progress ref when bundle context is active
   const initialBundleSnapshot = useMemo(() => {
     if (!bundleContext) return null;
     return getBundleProgress(bundleContext.bundleId);
@@ -168,15 +170,13 @@ export function CourseRuntime({
 
   if (!engine) {
     return (
-      <div className="p-lg max-w-2xl">
+      <div className="p-lg max-w-2xl" data-testid="course-runtime">
         <h1 className="text-h1 font-display text-error font-bold mb-md">Course not available</h1>
         <p className="text-on-surface-variant mb-lg">This course has no workflow defined.</p>
-        <button
-          onClick={onBackToCatalog}
-          className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold"
-        >
+        <Button onClick={onBackToCatalog}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to catalog
-        </button>
+        </Button>
       </div>
     );
   }
@@ -207,14 +207,18 @@ export function CourseRuntime({
               />
             )}
             {toastBadgeName && (
-              <div
-                className="fixed bottom-4 right-4 z-[9999] bg-surface border border-outline-variant rounded-lg px-4 py-3 shadow-lg transition-opacity duration-300"
+              <Card
+                className="fixed bottom-4 right-4 z-[9999] shadow-lg"
                 style={{ opacity: toastVisible ? 1 : 0 }}
                 data-testid="badge-toast"
               >
-                <div className="font-semibold text-sm text-success">Badge earned!</div>
-                <div className="text-base">{toastBadgeName}</div>
-              </div>
+                <CardContent className="p-3">
+                  <div className="font-semibold text-sm text-success flex items-center gap-1">
+                    <Award className="h-4 w-4" /> Badge earned!
+                  </div>
+                  <div className="text-base">{toastBadgeName}</div>
+                </CardContent>
+              </Card>
             )}
           </div>
         </RuntimeProvider>

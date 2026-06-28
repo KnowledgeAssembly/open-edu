@@ -72,5 +72,10 @@ export const bundleEntries = ${bundleEntriesJson};
 
 export default defineConfig({
   plugins: [react(), eduDataPlugin()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
   server: { port: 4001 },
 });

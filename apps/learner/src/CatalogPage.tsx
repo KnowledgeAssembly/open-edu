@@ -4,6 +4,17 @@ import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { AppView } from './LeftNav';
 
 export interface CatalogPageProps {
@@ -96,13 +107,9 @@ export function CatalogPage({
           <div className="flex items-center justify-between mb-md">
             <h2 className="text-h2 font-display font-bold text-on-surface">Continue Learning</h2>
             {onNavigate && (
-              <button
-                type="button"
-                onClick={() => onNavigate({ view: 'progress' })}
-                className="text-sm text-primary bg-transparent border-none cursor-pointer font-semibold"
-              >
+              <Button variant="link" size="sm" onClick={() => onNavigate({ view: 'progress' })}>
                 View all
-              </button>
+              </Button>
             )}
           </div>
           <div className="flex gap-md overflow-x-auto pb-sm">
@@ -132,45 +139,40 @@ export function CatalogPage({
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
                 : 0;
               return (
-                <button
+                <Card
                   key={bundle.manifest.id}
-                  type="button"
+                  className="cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => onStartBundle?.(bundle.manifest.id)}
-                  className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-left cursor-pointer hover:shadow-md transition-shadow"
                   data-testid="bundle-card"
                   data-bundle-id={bundle.manifest.id}
                 >
-                  <div className="flex items-center gap-sm mb-sm">
-                    <span className="text-xs font-bold bg-primary-container text-primary px-2 py-0.5 rounded">
-                      Bundle
-                    </span>
-                    <h3 className="text-h3 font-title font-bold text-on-surface m-0 truncate">
-                      {bundle.manifest.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-on-surface-variant mb-sm line-clamp-2">
-                    {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
-                  </p>
-                  <div className="flex gap-md text-xs text-on-surface-variant">
-                    <span>{bundle.moduleCount} modules</span>
-                    <span>{bundle.totalNodeCount} activities</span>
-                  </div>
-                  {prog && (
-                    <div className="mt-sm">
-                      <div className="h-1.5 rounded-full bg-outline-variant overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{
-                            width: `${Math.round((completedModules / bundle.moduleCount) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs text-on-surface-variant mt-0.5 block">
-                        {completedModules} of {bundle.moduleCount} complete
-                      </span>
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary">Bundle</Badge>
+                      <CardTitle className="text-lg truncate">{bundle.manifest.title}</CardTitle>
                     </div>
-                  )}
-                </button>
+                    <CardDescription>
+                      {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>{bundle.moduleCount} modules</span>
+                      <span>{bundle.totalNodeCount} activities</span>
+                    </div>
+                    {prog && (
+                      <div className="mt-2">
+                        <Progress
+                          value={Math.round((completedModules / bundle.moduleCount) * 100)}
+                          className="h-2"
+                        />
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          {completedModules} of {bundle.moduleCount} complete
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -179,56 +181,43 @@ export function CatalogPage({
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-sm mb-md" data-testid="filter-chips">
-          <button
-            type="button"
+          <Button
+            variant={activeTag === null ? 'default' : 'outline'}
+            size="sm"
+            className="rounded-full px-3"
             onClick={() => setActiveTag(null)}
-            className={`px-md py-sm rounded-full text-sm font-semibold border-none cursor-pointer transition-colors ${
-              activeTag === null
-                ? 'bg-primary text-on-primary'
-                : 'bg-surface-variant text-on-surface-variant'
-            }`}
           >
             All
-          </button>
+          </Button>
           {tags.map((tag) => (
-            <button
+            <Button
               key={tag}
-              type="button"
+              variant={activeTag === tag ? 'default' : 'outline'}
+              size="sm"
+              className="rounded-full px-3"
               onClick={() => setActiveTag(tag)}
-              className={`px-md py-sm rounded-full text-sm font-semibold border-none cursor-pointer transition-colors ${
-                activeTag === tag
-                  ? 'bg-primary text-on-primary'
-                  : 'bg-surface-variant text-on-surface-variant'
-              }`}
             >
               {tag}
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
       <div className="flex items-center gap-md mb-md" data-testid="sort-controls">
         <span className="text-sm text-on-surface-variant font-semibold">Sort:</span>
-        {(
-          [
-            ['newest', 'Newest'],
-            ['inProgress', 'In Progress First'],
-            ['alphabetical', 'Alphabetical'],
-          ] as const
-        ).map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setSortBy(value)}
-            className={`px-sm py-xs rounded text-sm font-semibold border-none cursor-pointer transition-colors ${
-              sortBy === value
-                ? 'bg-primary-container text-on-primary-container'
-                : 'bg-transparent text-on-surface-variant hover:bg-surface-variant'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        <Select
+          value={sortBy}
+          onValueChange={(v) => setSortBy(v as 'newest' | 'inProgress' | 'alphabetical')}
+        >
+          <SelectTrigger className="w-[180px]" aria-label="Sort by">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest</SelectItem>
+            <SelectItem value="inProgress">In Progress First</SelectItem>
+            <SelectItem value="alphabetical">Alphabetical</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {sorted.length === 0 ? (
