@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ThemeSelector, type ThemeId } from '@open-edu/runtime';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader } from '@open-edu/design-system';
+import { Button } from '@open-edu/design-system';
+import { Switch } from '@open-edu/design-system';
 import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
 
 export interface SettingsPageProps {

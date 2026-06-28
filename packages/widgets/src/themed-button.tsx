@@ -1,4 +1,11 @@
+/**
+ * @deprecated Use Button from `@open-edu/design-system` instead.
+ * Migration: `variant` mapping — primary→default, secondary→secondary, outline→outline, ghost→ghost.
+ * Size mapping — sm→sm, md→default, lg→lg.
+ */
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { Button } from '@open-edu/design-system';
+import type { ButtonProps } from '@open-edu/design-system';
 
 export interface ThemedButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -6,36 +13,34 @@ export interface ThemedButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
   children: ReactNode;
 }
 
-const baseClasses =
-  'inline-flex items-center justify-center font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-
-const variantClasses: Record<'primary' | 'secondary' | 'outline' | 'ghost', string> = {
-  primary: 'bg-primary text-on-primary hover:bg-primary-hover focus:ring-primary',
-  secondary: 'bg-secondary text-on-secondary hover:bg-secondary-hover focus:ring-secondary',
-  outline:
-    'border border-outline-variant bg-surface text-on-surface hover:bg-surface-variant focus:ring-outline-variant',
-  ghost: 'text-on-surface hover:bg-surface-variant focus:ring-outline-variant',
+const variantMap: Record<string, ButtonProps['variant']> = {
+  primary: 'default',
+  secondary: 'secondary',
+  outline: 'outline',
+  ghost: 'ghost',
 };
 
-const sizeClasses: Record<'sm' | 'md' | 'lg', string> = {
-  sm: 'px-sm py-xs text-xs',
-  md: 'px-lg py-sm text-sm',
-  lg: 'px-xl py-md text-base',
+const sizeMap: Record<string, ButtonProps['size']> = {
+  sm: 'sm',
+  md: 'default',
+  lg: 'lg',
 };
 
 export function ThemedButton({
   variant = 'primary',
   size = 'md',
-  className = '',
+  className,
   children,
   ...props
 }: ThemedButtonProps): JSX.Element {
   return (
-    <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    <Button
+      variant={variantMap[variant] ?? 'default'}
+      size={sizeMap[size] ?? 'default'}
+      className={className}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }

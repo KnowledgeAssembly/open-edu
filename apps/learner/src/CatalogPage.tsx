@@ -4,17 +4,17 @@ import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@open-edu/design-system';
+import { Button } from '@open-edu/design-system';
+import { Badge } from '@open-edu/design-system';
+import { Progress } from '@open-edu/design-system';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@open-edu/design-system';
 import type { AppView } from './LeftNav';
 
 export interface CatalogPageProps {

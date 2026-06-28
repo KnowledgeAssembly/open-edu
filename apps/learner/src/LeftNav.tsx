@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useRuntimeOptional } from '@open-edu/runtime';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings, ArrowLeft, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@open-edu/design-system';
 
 export type AppView =
   | { view: 'home' }

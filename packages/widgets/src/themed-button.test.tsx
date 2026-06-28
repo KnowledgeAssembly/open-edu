@@ -35,7 +35,7 @@ describe('ThemedButton', () => {
     render(<ThemedButton>Primary</ThemedButton>);
     const button = screen.getByRole('button');
     expect(button.className).toContain('bg-primary');
-    expect(button.className).toContain('text-on-primary');
+    expect(button.className).toContain('text-primary-foreground');
   });
 
   it('applies secondary variant classes', () => {
@@ -47,31 +47,33 @@ describe('ThemedButton', () => {
   it('applies outline variant classes', () => {
     render(<ThemedButton variant="outline">Outline</ThemedButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('border-outline-variant');
+    expect(button.className).toContain('border-input');
   });
 
   it('applies ghost variant classes', () => {
     render(<ThemedButton variant="ghost">Ghost</ThemedButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('text-on-surface');
+    expect(button.className).toContain('hover:text-accent-foreground');
   });
 
   it('applies sm size classes', () => {
     render(<ThemedButton size="sm">Small</ThemedButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('text-xs');
+    expect(button.className).toContain('h-9');
+    expect(button.className).toContain('rounded-md');
   });
 
   it('applies md size classes by default', () => {
     render(<ThemedButton>Medium</ThemedButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('text-sm');
+    expect(button.className).toContain('h-10');
   });
 
   it('applies lg size classes', () => {
     render(<ThemedButton size="lg">Large</ThemedButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('text-base');
+    expect(button.className).toContain('h-11');
+    expect(button.className).toContain('rounded-md');
   });
 
   it('merges custom className', () => {
