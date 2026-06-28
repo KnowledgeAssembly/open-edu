@@ -20,7 +20,14 @@ const navTabs: Array<{ id: NavTabId; label: string; icon: string }> = [
   { id: 'settings', label: 'Settings', icon: '\u2699\uFE0F' },
 ];
 
-export function SideNav({ courseTitle, children, onResumeLesson, activeTab: controlledTab, defaultActiveTab, onTabChange }: SideNavProps): JSX.Element {
+export function SideNav({
+  courseTitle,
+  children,
+  onResumeLesson,
+  activeTab: controlledTab,
+  defaultActiveTab,
+  onTabChange,
+}: SideNavProps): JSX.Element {
   const [internalTab, setInternalTab] = useState<NavTabId>(defaultActiveTab ?? 'overview');
   const activeTab = controlledTab ?? internalTab;
   const handleTabClick = (tab: NavTabId) => {
