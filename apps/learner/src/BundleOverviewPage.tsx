@@ -26,7 +26,11 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
     return bundle.manifest.modules.map((mod) => {
       const progress = bundleProgress?.moduleProgress[mod.id];
       const snapshotStatus = bundleProgress?.moduleStatuses[mod.id];
-      const status = snapshotStatus ?? (mod.dependsOn.length === 0 ? 'unlocked' : 'locked');
+      const status =
+        snapshotStatus ??
+        (mod.dependsOn.length === 0 || mod.dependsOn.every((depId) => bundleProgress?.moduleStatuses[depId] === 'completed')
+          ? 'unlocked'
+          : 'locked');
 
       const prerequisiteLabel =
         status === 'locked' && mod.dependsOn.length > 0
@@ -58,6 +62,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
       description={bundle.manifest.description}
       modules={overviewModules}
       onStartModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
+      onContinueModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
       onBackToCatalog={onBackToCatalog}
     />
   );
