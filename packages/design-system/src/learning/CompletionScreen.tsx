@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState, type ReactNode } from 'react';
+import { Button } from '../primitives/button.js';
 
 interface PackageManifest {
   id: string;
@@ -201,14 +202,14 @@ export function CompletionScreen({
                   </p>
                 </div>
                 {onNavigateToCourse && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="default"
+                    size="sm"
                     onClick={() => onNavigateToCourse(course.rootDir)}
-                    className="bg-primary text-on-primary border-none rounded-lg px-md py-sm text-sm font-semibold cursor-pointer"
                     data-testid="view-course-btn"
                   >
                     View Course
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
@@ -216,14 +217,9 @@ export function CompletionScreen({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={onBack}
-        className="bg-primary text-on-primary border-none rounded-lg px-5 py-2.5 text-base font-semibold cursor-pointer"
-        data-testid="back-to-catalog"
-      >
+      <Button variant="default" onClick={onBack} data-testid="back-to-catalog">
         Back to catalog
-      </button>
+      </Button>
     </div>
   );
 }

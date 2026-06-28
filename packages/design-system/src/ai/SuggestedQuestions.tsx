@@ -18,6 +18,7 @@ export function SuggestedQuestions({
         {questions.map((question, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => onSelect(question)}
             className={cn(
               'rounded-md border-l-2 border-primary bg-surface-container px-3 py-2 text-left text-sm text-on-surface',

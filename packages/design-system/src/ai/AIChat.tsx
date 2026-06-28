@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../lib/utils.js';
+import { Textarea } from '../primitives/textarea.js';
 import { TutorMessage } from './TutorMessage.js';
 import { Citation } from './Citation.js';
 import { ThinkingIndicator } from './ThinkingIndicator.js';
@@ -39,7 +40,7 @@ export function AIChat({
     setInput('');
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -75,16 +76,13 @@ export function AIChat({
         )}
       </div>
       <div className="flex items-end gap-2 border-t border-outline-variant p-4">
-        <textarea
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           rows={2}
-          className={cn(
-            'min-h-[44px] flex-1 resize-none rounded-md border border-outline-variant bg-surface-container px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-muted',
-            'focus:outline-none focus:ring-2 focus:ring-primary',
-          )}
+          className="min-h-11 resize-none"
           data-testid="ai-chat-input"
         />
         <button
