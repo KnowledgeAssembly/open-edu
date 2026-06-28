@@ -181,22 +181,24 @@ export function CatalogPage({
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-sm mb-md" data-testid="filter-chips">
-          <Badge
+          <Button
             variant={activeTag === null ? 'default' : 'outline'}
-            className="cursor-pointer"
+            size="sm"
+            className="rounded-full px-3"
             onClick={() => setActiveTag(null)}
           >
             All
-          </Badge>
+          </Button>
           {tags.map((tag) => (
-            <Badge
+            <Button
               key={tag}
               variant={activeTag === tag ? 'default' : 'outline'}
-              className="cursor-pointer"
+              size="sm"
+              className="rounded-full px-3"
               onClick={() => setActiveTag(tag)}
             >
               {tag}
-            </Badge>
+            </Button>
           ))}
         </div>
       )}

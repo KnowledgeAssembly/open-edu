@@ -36,11 +36,13 @@ describe('CourseExitWarningDialog', () => {
     expect(onStay).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onStay on Escape key when closed', async () => {
+  it('calls onStay when close button is clicked', async () => {
     const onStay = vi.fn();
-    render(<CourseExitWarningDialog open={false} onStay={onStay} onLeave={vi.fn()} />);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(onStay).not.toHaveBeenCalled();
+    render(<CourseExitWarningDialog open onStay={onStay} onLeave={vi.fn()} />);
+    await screen.findByRole('dialog');
+    const closeButton = screen.getByRole('button', { name: 'Close' });
+    fireEvent.click(closeButton);
+    expect(onStay).toHaveBeenCalledTimes(1);
   });
 
   it('has accessible dialog role and aria attributes', async () => {

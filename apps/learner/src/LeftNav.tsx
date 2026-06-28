@@ -139,19 +139,28 @@ function CourseStepList(): JSX.Element {
         let indicator: JSX.Element;
         if (isCurrent) {
           indicator = (
-            <span className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <span
+              className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold flex-shrink-0"
+              aria-hidden="true"
+            >
               {idx + 1}
             </span>
           );
         } else if (isVisited) {
           indicator = (
-            <span className="w-6 h-6 rounded-full bg-success-container text-on-success-container flex items-center justify-center flex-shrink-0">
+            <span
+              className="w-6 h-6 rounded-full bg-success-container text-on-success-container flex items-center justify-center flex-shrink-0"
+              aria-hidden="true"
+            >
               <Check className="h-3 w-3" />
             </span>
           );
         } else {
           indicator = (
-            <span className="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0" />
+            <span
+              className="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0"
+              aria-hidden="true"
+            />
           );
         }
 
