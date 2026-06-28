@@ -69,6 +69,32 @@ broker.stop();
 }
 ```
 
+#### Bundle Conditions
+
+For multi-module bundles, the rewards schema supports two additional event types:
+
+| Event             | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `moduleCompleted` | A single module within a bundle is completed |
+| `bundleCompleted` | All modules in the bundle are completed      |
+
+```typescript
+{
+  onEvent: 'moduleCompleted',
+  conditions: [
+    { type: 'module', moduleId: 'addition_basics' },
+  ],
+  rewards: [{ action: 'badge.award', badge: 'basics-master' }],
+}
+```
+
+```typescript
+{
+  onEvent: 'bundleCompleted',
+  rewards: [{ action: 'badge.award', badge: 'level-b-math-complete' }],
+}
+```
+
 ## Conditional Rules
 
 Rewards can include conditions that gate their execution:

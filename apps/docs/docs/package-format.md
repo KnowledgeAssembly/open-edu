@@ -254,6 +254,147 @@ Supported condition types: `score`, `skill`, `chain` (completed node IDs), `and`
 - **webhook** — Send a POST request to a URL
 - **script** — Execute a shell script (requires `--allow-shell-hooks`)
 
+## Multi-Module Bundles
+
+A **bundle** is a collection of standard Open-Edu packages organized as a hierarchical curriculum. Bundles are defined by a `bundle.json` manifest at the root directory.
+
+### Bundle Directory Structure
+
+```
+level-b-math/
+├── bundle.json                  # Bundle manifest
+├── modules/
+│   ├── addition_basics/         # Standard Open-Edu package
+│   │   ├── package.json
+│   │   ├── workflow.json
+│   │   └── nodes/
+│   ├── addition_carry/          # Depends on addition_basics
+│   │   ├── package.json
+│   │   └── ...
+│   └── adding_fractions/        # Depends on addition_carry
+│       ├── package.json
+│       └── ...
+```
+
+### Bundle Manifest (bundle.json)
+
+```json
+{
+  "id": "level-b-math",
+  "title": "Level B Math",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "description": "A three-module math curriculum",
+  "modules": [
+    {
+      "id": "addition_basics",
+      "title": "Addition Basics",
+      "path": "modules/addition_basics",
+      "dependsOn": [],
+      "estimatedDuration": 15
+    },
+    {
+      "id": "addition_carry",
+      "title": "Addition with Carrying",
+      "path": "modules/addition_carry",
+      "dependsOn": ["addition_basics"],
+      "estimatedDuration": 20
+    },
+    {
+      "id": "adding_fractions",
+      "title": "Adding Fractions",
+      "path": "modules/adding_fractions",
+      "dependsOn": ["addition_carry"],
+      "estimatedDuration": 25
+    }
+  ]
+}
+```
+
+### Bundle Manifest Fields
+
+| Field         | Description                                |
+| ------------- | ------------------------------------------ |
+| `id`          | kebab-case bundle identifier               |
+| `type`        | Must be `"bundle"` (default)               |
+| `title`       | Human-readable name                        |
+| `version`     | Semver string (e.g. `1.0.0`)               |
+| `author`      | Creator name                               |
+| `description` | Optional description                       |
+| `modules`     | Ordered array of module references (min 1) |
+| `skills`      | Optional list of skills covered            |
+
+### Module Reference Fields
+
+| Field               | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `id`                | Module identifier (kebab-case, matches package id) |
+| `title`             | Human-readable module name                         |
+| `chapterCode`       | Optional chapter code for display                  |
+| `path`              | Relative path to the module directory              |
+| `dependsOn`         | Array of module IDs that must be completed first   |
+| `estimatedDuration` | Optional estimated time in minutes                 |
+
+### Bundle Loading API
+
+```typescript
+import { loadBundle, scanBundles, scanAll } from '@open-edu/core';
+
+// Load a single bundle
+const bundle = await loadBundle('./examples/level-b-math');
+
+// Discover all bundles in a directory
+const bundles = scanBundles('./examples');
+
+// Discover both packages and bundles simultaneously
+const { packages, bundles } = scanAll('./examples');
+```
+
+### BundleEngine
+
+The `BundleEngine` (from `@open-edu/workflow`) orchestrates per-module `WorkflowEngine` instances:
+
+```typescript
+import { BundleEngine } from '@open-edu/workflow';
+
+const engine = new BundleEngine(bundle, { entry: 'addition_basics' });
+engine.subscribe((event) => {
+  if (event.type === 'module.completed') {
+    console.log(`${event.moduleId} completed!`);
+  }
+});
+engine.start('addition_basics');
+```
+
+Module status values: `locked`, `unlocked`, `in_progress`, `completed`. The engine evaluates prerequisites on each completion and automatically unlocks dependent modules.
+
+### Bundle Progress Snapshots
+
+```json
+{
+  "bundleId": "level-b-math",
+  "bundleVersion": "1.0.0",
+  "currentModuleId": "addition_carry",
+  "moduleStatuses": {
+    "addition_basics": "completed",
+    "addition_carry": "in_progress",
+    "adding_fractions": "locked"
+  },
+  "moduleProgress": {
+    "addition_basics": {
+      "moduleId": "addition_basics",
+      "packageVersion": "1.0.0",
+      "currentNodeId": "nodes/quiz.json",
+      "visitedNodes": ["nodes/observe.md", "nodes/quiz.json"],
+      "scores": { "nodes/quiz.json": 90 },
+      "isCompleted": true,
+      "completedAt": "2026-06-27T12:00:00.000Z"
+    }
+  },
+  "updatedAt": "2026-06-27T12:30:00.000Z"
+}
+```
+
 ## Progress Snapshots
 
 The runtime emits and accepts progress snapshots for persistence and resume:

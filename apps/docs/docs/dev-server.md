@@ -22,8 +22,20 @@ edu dev ./my-package
 ## Features
 
 - **Hot reload** — Markdown and JSON changes reflect instantly without full page reload
-- **Runtime mounting** — Automatically loads and renders any educational package
-- **Inspector panels** — Debug accessibility, telemetry, and rewards in real time
+- **Runtime mounting** — Automatically loads and renders any educational package or bundle
+- **Inspector panels** — Debug accessibility, telemetry, rewards, and bundles in real time
+
+## Multi-Module Bundle Mode
+
+The dev-server automatically detects bundle projects by checking for `bundle.json` (when no `package.json` is found). In bundle mode:
+
+- A **"Bundle Mode"** badge is shown
+- A **module selector dropdown** lets you switch between modules
+- A **"Bundle Overview"** button renders the `BundleOverview` component
+- Telemetry events are tagged with `bundleId` and `moduleId` for correlation
+- Hot reload works across all module files
+
+You can also set the `OPEN_EDU_BUNDLE_DIR` environment variable for explicit bundle detection.
 
 ## Inspector Panels
 
@@ -33,11 +45,15 @@ Displays axe-core violation reports for the current page, including impact level
 
 ### Telemetry Inspector
 
-Shows a live stream of telemetry events as they fire — node opens, completions, quiz answers, and widget interactions. Each event shows its type, timestamp, and payload.
+Shows a live stream of telemetry events as they fire — node opens, completions, quiz answers, widget interactions, and bundle module events. Each event shows its type, timestamp, and payload.
 
 ### Rewards Inspector
 
 Displays reward configuration for the loaded package and tracks reward receipt status as events trigger. Shows which conditions were evaluated and whether rewards were delivered, skipped, or failed.
+
+### Bundle Inspector
+
+When running in bundle mode, a **Bundle** tab lists all modules with their IDs, dependency chains, and current status (`locked` / `unlocked` / `in_progress` / `completed`). Helps debug prerequisite logic and module transitions.
 
 ## How It Works
 

@@ -8,21 +8,22 @@ Open-Edu is an open runtime for educational experiences — a monorepo framework
 
 ## Technology Stack
 
-| Layer           | Technology            |
-| --------------- | --------------------- |
-| Language        | TypeScript 5.x        |
-| Package Manager | pnpm 9.x              |
-| Monorepo        | pnpm workspaces       |
-| Build Tool      | Vite 5.x              |
-| Schemas         | Zod 3.x               |
-| State Machine   | XState 5.x            |
-| UI Framework    | React 18.x            |
-| Styling         | Tailwind CSS 3.x      |
-| Accessibility   | React Aria + axe-core |
-| Telemetry       | RxJS 7.x              |
-| CLI             | Commander 12.x        |
-| Testing         | Vitest 1.x            |
-| E2E             | Playwright 1.x        |
+| Layer           | Technology                                     |
+| --------------- | ---------------------------------------------- |
+| Language        | TypeScript 5.x                                 |
+| Package Manager | pnpm 9.x                                       |
+| Monorepo        | pnpm workspaces                                |
+| Build Tool      | Vite 5.x                                       |
+| Schemas         | Zod 3.x                                        |
+| State Machine   | XState 5.x                                     |
+| UI Framework    | React 18.x                                     |
+| UI Primitives   | Radix UI + shadcn/ui + Lucide Icons            |
+| Styling         | Tailwind CSS 3.x + clsx + cva + tailwind-merge |
+| Accessibility   | React Aria + axe-core                          |
+| Telemetry       | RxJS 7.x                                       |
+| CLI             | Commander 12.x                                 |
+| Testing         | Vitest 1.x                                     |
+| E2E             | Playwright 1.x                                 |
 
 ## Essential Commands
 
@@ -36,6 +37,8 @@ pnpm format:check                     # Check formatting
 pnpm format                           # Auto-format all files
 pnpm --filter @open-edu/learner dev   # Start the learner app (port 4001)
 pnpm test:e2e                         # Run Playwright E2E tests
+pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -64,12 +67,13 @@ open-edu/
 │   ├── fractions/
 │   ├── hello-world/
 │   ├── intro-javascript/
+│   ├── level-b-math/        # Multi-module bundle example (3 modules)
 │   ├── living-vs-nonliving/
 │   ├── remote-widget-demo/
 │   ├── skill-graph/
 │   ├── widget-practice/
 │   └── widget-showcase/
-├── tests/e2e/               # Playwright integration tests (8 spec files)
+├── tests/e2e/               # Playwright integration tests (9 spec files)
 ├── docs/                    # Architecture docs (VISION, ARCHITECTURE, FRAMEWORK_SPEC)
 └── PLAN.md                  # Implementation plan with epic/story breakdown
 ```

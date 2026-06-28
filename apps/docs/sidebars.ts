@@ -37,6 +37,7 @@ const sidebars: SidebarsConfig = {
         'examples/widget-practice',
         'examples/widget-showcase',
         'examples/remote-widget-demo',
+        'examples/level-b-math',
       ],
     },
   ],

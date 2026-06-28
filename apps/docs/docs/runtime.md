@@ -221,6 +221,33 @@ function MyComponent() {
 }
 ```
 
+## BundleOverview
+
+For multi-module bundles, the `BundleOverview` component renders a syllabus-style page:
+
+```tsx
+import { BundleOverview } from '@open-edu/runtime';
+import type { LoadedBundle } from '@open-edu/core';
+
+function MyBundlePage({ bundle }: { bundle: LoadedBundle }) {
+  return (
+    <BundleOverview
+      bundle={bundle}
+      modules={modules} // BundleOverviewModule[]
+      onStartModule={(moduleId) => startModule(moduleId)}
+      snapshot={bundleSnapshot} // optional BundleProgressSnapshot
+    />
+  );
+}
+```
+
+Features:
+
+- Module cards with status badges (`locked` / `unlocked` / `completed`)
+- Progress bars for in-progress modules
+- Prerequisite dependency visualization
+- Start / Continue buttons per module
+
 ## Node Renderers
 
 | Component             | Renders                                                                  |

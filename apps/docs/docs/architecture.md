@@ -7,20 +7,23 @@ sidebar_position: 2
 ## High-Level Architecture
 
 ```
-Educational Package (Markdown + JSON)
+Educational Package / Bundle (Markdown + JSON)
         │
         ▼
   ┌──────────────┐
   │     Core     │  Package loader, scanner, patcher, lint, generator
   ├──────────────┤
   │ scanPackages │  Discover packages → catalog
+  │ scanBundles  │  Discover bundles → bundle catalog
+  │ loadBundle   │  Load multi-module bundles
   └──────┬───────┘
          │
          ▼
   ┌──────────────┐
   │   Workflow   │  XState + skill tracking + mastery routing
   ├──────────────┤
-  │ getOrderedNodes │  Topological sort for course outline
+  │ BundleEngine │  Orchestrates per-module WorkflowEngine instances,
+  │              │  prerequisite unlock, resume/checkpoint snapshots
   └──────┬───────┘
          │
          ▼
@@ -32,6 +35,9 @@ Educational Package (Markdown + JSON)
   │  SideNav     TopAppBar   │
   │  CourseTree  AITutorPanel│
   │  AICallout   ReadingRuler│
+  ├──────────────────────────┤
+  │ Bundle Components:       │
+  │  BundleOverview          │  Syllabus page with module status + progress
   ├──────────────────────────┤
   │ Renderers: Markdown, Quiz│
   │  Reflection, Widget,     │
@@ -50,32 +56,35 @@ Educational Package (Markdown + JSON)
                   ▼
            ┌──────────┐
            │ Rewards  │  Badges, conditions, verification
+           │          │  moduleCompleted / bundleCompleted conditions
            └──────────┘
                   │
                   ▼
            ┌────────────────────┐
            │   Learner App      │  Standalone app
-           │   Catalog · Course  │  · Progress · Themes
+           │   Catalog · Course  │  · Bundles · Progress · Themes
+           │   shadcn/ui + Radix │  · Lucide icons
            └────────────────────┘
 ```
 
 ## Technology Stack
 
-| Layer           | Technology            |
-| --------------- | --------------------- |
-| Language        | TypeScript 5.x        |
-| Package Manager | pnpm 9.x              |
-| Monorepo        | pnpm workspaces       |
-| Build Tool      | Vite 5.x              |
-| Schemas         | Zod 3.x               |
-| State Machine   | XState 5.x            |
-| UI Framework    | React 18.x            |
-| Styling         | Tailwind CSS 3.x      |
-| Accessibility   | React Aria + axe-core |
-| Telemetry       | RxJS 7.x              |
-| CLI             | Commander 12.x        |
-| Testing         | Vitest 1.x            |
-| E2E             | Playwright 1.x        |
+| Layer           | Technology                                     |
+| --------------- | ---------------------------------------------- |
+| Language        | TypeScript 5.x                                 |
+| Package Manager | pnpm 9.x                                       |
+| Monorepo        | pnpm workspaces                                |
+| Build Tool      | Vite 5.x                                       |
+| Schemas         | Zod 3.x                                        |
+| State Machine   | XState 5.x                                     |
+| UI Framework    | React 18.x                                     |
+| UI Primitives   | Radix UI + shadcn/ui + Lucide Icons            |
+| Styling         | Tailwind CSS 3.x + clsx + cva + tailwind-merge |
+| Accessibility   | React Aria + axe-core                          |
+| Telemetry       | RxJS 7.x                                       |
+| CLI             | Commander 12.x                                 |
+| Testing         | Vitest 1.x                                     |
+| E2E             | Playwright 1.x                                 |
 
 ## Package Architecture
 
@@ -100,6 +109,15 @@ Zod serves as the single source of truth for runtime validation, TypeScript type
 ## Workflow Engine
 
 The workflow engine (XState) controls navigation, progression, remediation loops, and adaptive routing through declarative routing rules defined in `workflow.json`. It also supports **skill tracking** — accumulating weighted scores per skill and emitting `SKILL_UPDATED` / `SKILL_ACHIEVED` events when mastery thresholds are crossed.
+
+### BundleEngine
+
+For multi-module bundles, the `BundleEngine` (at `@open-edu/workflow`) orchestrates per-module `WorkflowEngine` instances:
+
+- **Module lifecycle** — manages status transitions (`locked` → `unlocked` → `in_progress` → `completed`) based on prerequisite completion
+- **Prerequisite unlocking** — when a module completes, `evaluatePrerequisites()` walks the reverse dependency graph and unlocks dependents whose all dependencies are met
+- **Resume/checkpoint** — serializes per-module `ModuleProgressSnapshot` snapshots and restores on return visits
+- **Events** — emits `module.changed`, `module.completed`, `module.unlocked`, and `bundle.completed` events
 
 ## Skill Tracking
 
@@ -131,7 +149,7 @@ Both the learner app and dev-server map `--oe-*` tokens to Tailwind utility clas
 
 ## Runtime Renderer
 
-The React-based renderer handles node rendering, widget loading, progress tracking, and accessibility integration. Key layout components include `SideNav` (fixed left navigation), `TopAppBar` (sticky header with breadcrumbs and theme selector), `AITutorPanel` (right sidebar for AI chat, notes, highlights), `CourseTree` (expandable module tree), `AICallout` (insight callout boxes), and `ReadingRuler` (focus band overlay). It supports:
+The React-based renderer handles node rendering, widget loading, progress tracking, and accessibility integration. Key layout components include `SideNav` (fixed left navigation), `TopAppBar` (sticky header with breadcrumbs and theme selector), `AITutorPanel` (right sidebar for AI chat, notes, highlights), `CourseTree` (expandable module tree), `AICallout` (insight callout boxes), `ReadingRuler` (focus band overlay), and `BundleOverview` (syllabus page for multi-module bundles with module status badges and progress bars). It supports:
 
 - **Progress snapshots** — serialize and restore learner state via `initialProgress` / `onProgressChange`
 - **Embed adapter** — mount the runtime in any DOM element via `createRuntime()` without importing React directly
@@ -165,17 +183,18 @@ The reward broker consumes learning events and executes configured reward action
 
 The `edu` CLI provides 10+ commands organized around the package lifecycle:
 
-| Command         | Purpose                                   |
-| --------------- | ----------------------------------------- |
-| `dev`           | Start development server                  |
-| `validate`      | Schema validation + integrity checks      |
-| `build`         | Package build with manifest metadata      |
-| `package`       | Deterministic archive creation            |
-| `create`        | Scaffold a new package directory          |
-| `report`        | Summarize telemetry JSONL files           |
-| `lint-content`  | Content quality checks beyond schemas     |
-| `patch`         | Apply surgical, validated JSON patches    |
-| `generate`      | Agent-ready prompt and package generation |
-| `widget create` | Scaffold a new widget package             |
+| Command             | Purpose                                         |
+| ------------------- | ----------------------------------------------- |
+| `dev`               | Start development server                        |
+| `validate`          | Schema validation + integrity checks            |
+| `build`             | Package build with manifest metadata            |
+| `package`           | Deterministic archive creation                  |
+| `create`            | Scaffold a new package directory                |
+| `report`            | Summarize telemetry JSONL files                 |
+| `lint-content`      | Content quality checks beyond schemas           |
+| `patch`             | Apply surgical, validated JSON patches          |
+| `generate`          | Agent-ready prompt and package generation       |
+| `widget create`     | Scaffold a new widget package                   |
+| `import learn-easy` | Import Learn-Easy content as an Open-Edu bundle |
 
 All commands support `--json` for machine-readable output.
