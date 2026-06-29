@@ -100,18 +100,18 @@ export const tailwindColorExtensions: Record<string, string> = {
 };
 
 export const tailwindFontFamilyExtensions: Record<string, string> = {
-  display: 'var(--oe-font-display-family)',
-  'display-lg': 'var(--oe-font-display-family)',
-  'headline-lg': 'var(--oe-font-headlineLg-family)',
-  'headline-md': 'var(--oe-font-headlineMd-family)',
-  title: 'var(--oe-font-title-family)',
-  'body-lg': 'var(--oe-font-bodyLg-family)',
-  'body-md': 'var(--oe-font-bodyMd-family)',
-  'body-reading': 'var(--oe-font-bodyLg-family)',
-  label: 'var(--oe-font-label-family)',
-  'label-caps': 'var(--oe-font-label-family)',
-  caption: 'var(--oe-font-caption-family)',
-  mono: 'var(--oe-font-mono-family)',
+  display: 'var(--oe-font-expressive-display-family)',
+  'display-lg': 'var(--oe-font-expressive-display-family)',
+  'headline-lg': 'var(--oe-font-productive-heading-family)',
+  'headline-md': 'var(--oe-font-productive-subheading-family)',
+  title: 'var(--oe-font-productive-subheading-family)',
+  'body-lg': 'var(--oe-font-expressive-body-family)',
+  'body-md': 'var(--oe-font-productive-body-family)',
+  'body-reading': 'var(--oe-font-expressive-body-family)',
+  label: 'var(--oe-font-productive-label-family)',
+  'label-caps': 'var(--oe-font-productive-label-family)',
+  caption: 'var(--oe-font-productive-caption-family)',
+  mono: 'var(--oe-font-productive-code-family)',
 };
 
 export const tailwindFontSizeExtensions: Record<string, [string, Record<string, string>]> = {
