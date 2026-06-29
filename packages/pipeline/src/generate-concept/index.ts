@@ -54,7 +54,7 @@ export async function generateConcepts(
   subject: string,
 ): Promise<{ concepts: GeneratedConcept[]; warnings: string[] }> {
   const template = loadPromptTemplate();
-  const registry = new ConceptRegistry(levelAConceptIds, []);
+  const registry = new ConceptRegistry(levelAConceptIds);
   const concepts: GeneratedConcept[] = [];
   const warnings: string[] = [];
 

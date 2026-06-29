@@ -2,7 +2,10 @@ import type { LlmProvider } from '@open-edu/llm-config';
 import { extractPDF } from '../extract/index.js';
 import { chunkContent } from '../chunk/index.js';
 import { generateConcepts } from '../generate-concept/index.js';
-import { generateAllActivities } from '../generate-activities/index.js';
+import {
+  generateAllActivities,
+  generateActivitiesForConcept,
+} from '../generate-activities/index.js';
 import { validateWithRetry } from '../validate/index.js';
 import { writeCourseSpecOutput } from '../output/index.js';
 import type {
@@ -207,12 +210,12 @@ export async function runPipeline(
   try {
     validated = await validateWithRetry(
       {
-        regenerateConcept: async (conceptId, _validationErrors) => {
+        regenerateConcept: async (conceptId, validationErrors) => {
           const concept = concepts.find((c) => c.conceptId === conceptId);
           if (!concept) return null;
-          const activities = activitiesMap.get(conceptId);
-          if (!activities) return null;
-          const pair: ConceptActivityPair = { concept, activities };
+          const result = await generateActivitiesForConcept(llm, concept, validationErrors);
+          if (result.errors.length > 0) return null;
+          const pair: ConceptActivityPair = { concept, activities: result.activities };
           return pair;
         },
       },

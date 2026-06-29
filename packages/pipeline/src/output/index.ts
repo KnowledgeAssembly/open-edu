@@ -1,14 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type {
-  GeneratedConcept,
-  GeneratedActivity,
-  ConceptActivityPair,
-  MCQQuestion,
-} from '../types.js';
-
-const VALID_COURSE_SPEC_TYPES = ['reading', 'exercise', 'quiz', 'reflection'] as const;
+import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
 
 interface ChapterGroup {
   chapterCode: string;
@@ -18,7 +11,7 @@ interface ChapterGroup {
 }
 
 function escapeYamlValue(value: string): string {
-  if (/[:\n#\[\]{},"']/.test(value) || value.includes('  ')) {
+  if (/[\]{},"':#\n[]/.test(value) || value.includes('  ')) {
     return `"${value.replace(/"/g, '\\"')}"`;
   }
   return value;
@@ -78,8 +71,6 @@ function renderModule(group: ChapterGroup, moduleIndex: number): string {
   const moduleNum = moduleIndex + 1;
   const moduleTitle = `${group.chapterName}`;
   lines.push(`# Module ${moduleNum}: ${moduleTitle}`);
-  lines.push('');
-  lines.push(`This module covers ${group.chapterName.toLowerCase()}.`);
   lines.push('');
 
   for (let i = 0; i < group.concepts.length; i++) {
@@ -179,7 +170,7 @@ function renderActivity(activity: GeneratedActivity): string[] {
     }
   } else if (activity.courseSpecType === 'reading') {
     const label = activity.content.description || stepLabels[activity.step] || 'Reading';
-    lines.push(`### Activity: Reading`);
+    lines.push(`### Activity: ${label}`);
     lines.push('');
     if (activity.content.instructions) {
       lines.push(activity.content.instructions);
@@ -187,7 +178,7 @@ function renderActivity(activity: GeneratedActivity): string[] {
     }
   } else if (activity.courseSpecType === 'exercise') {
     const label = activity.content.description || 'Practice';
-    lines.push(`### Activity: Exercise`);
+    lines.push(`### Activity: ${label}`);
     lines.push('');
     if (activity.content.instructions) {
       lines.push(activity.content.instructions);

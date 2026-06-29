@@ -1,8 +1,8 @@
 export class ConceptRegistry {
   private knownIds: Set<string>;
 
-  constructor(levelAConcepts: string[], levelBConcepts: string[]) {
-    this.knownIds = new Set([...levelAConcepts, ...levelBConcepts]);
+  constructor(levelAConcepts: string[], levelBConcepts?: string[]) {
+    this.knownIds = new Set([...levelAConcepts, ...(levelBConcepts ?? [])]);
   }
 
   register(id: string): void {

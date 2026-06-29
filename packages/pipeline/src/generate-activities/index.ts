@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import type { LlmProvider } from '@open-edu/llm-config';
-import type {
-  GeneratedConcept,
-  GeneratedActivity,
-  ActivityContent,
-  MCQQuestion,
-} from '../types.js';
+import type { GeneratedConcept, GeneratedActivity, ActivityContent } from '../types.js';
 import { selectTypesForConcept } from './type-selector.js';
 import { EXEMPLARS } from './exemplars.js';
 import { OBSERVE_PROMPT } from './prompts/observe.js';
@@ -65,7 +60,12 @@ function stepOutputSchema(type: string): z.ZodType {
   }
 }
 
-function buildStepPrompt(step: string, type: string, concept: GeneratedConcept): string {
+function buildStepPrompt(
+  step: string,
+  type: string,
+  concept: GeneratedConcept,
+  validationErrors?: string[],
+): string {
   const template = STEP_PROMPTS[step];
   if (!template) throw new Error(`Unknown step: ${step}`);
 
@@ -75,6 +75,11 @@ function buildStepPrompt(step: string, type: string, concept: GeneratedConcept):
       ? `\n## Good Example for This Type+Step\n${filteredExemplars.map((e) => JSON.stringify(e.content, null, 2)).join('\n\n')}`
       : '';
 
+  const retrySection =
+    validationErrors && validationErrors.length > 0
+      ? `\n\n## Validation Errors to Fix\n${validationErrors.map((e) => `  - ${e}`).join('\n')}\nPlease ensure your output does not have these issues.`
+      : '';
+
   const prompt = template
     .replace(/{CONCEPT_ID}/g, concept.conceptId)
     .replace(/{LEARNING_OBJECTIVE}/g, concept.learningObjective)
@@ -82,7 +87,7 @@ function buildStepPrompt(step: string, type: string, concept: GeneratedConcept):
     .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
     .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'));
 
-  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields.${exemplarSection}`;
+  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields.${exemplarSection}${retrySection}`;
 }
 
 function buildRetryPrompt(basePrompt: string, errors: string[], previousAttempt: unknown): string {
@@ -116,11 +121,12 @@ async function generateStep(
   concept: GeneratedConcept,
   order: number,
   maxRetries: number,
+  validationErrors?: string[],
 ): Promise<{
   activity: GeneratedActivity | null;
   errors: string[];
 }> {
-  const basePrompt = buildStepPrompt(step, type, concept);
+  const basePrompt = buildStepPrompt(step, type, concept, validationErrors);
   const outputSchema = stepOutputSchema(type);
 
   let lastErrors: string[] = [];
@@ -168,6 +174,7 @@ const MAX_RETRIES = 3;
 export async function generateActivitiesForConcept(
   llm: LlmProvider,
   concept: GeneratedConcept,
+  validationErrors?: string[],
 ): Promise<{
   activities: GeneratedActivity[];
   warnings: string[];
@@ -182,7 +189,15 @@ export async function generateActivitiesForConcept(
     const step = STEP_ORDER[i]!;
     const type = types[step]!;
 
-    const result = await generateStep(llm, step, type, concept, i + 1, MAX_RETRIES);
+    const result = await generateStep(
+      llm,
+      step,
+      type,
+      concept,
+      i + 1,
+      MAX_RETRIES,
+      validationErrors,
+    );
 
     if (result.activity) {
       activities.push(result.activity);

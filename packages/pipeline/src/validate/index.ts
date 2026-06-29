@@ -201,10 +201,5 @@ export async function validateWithRetry(
     }
   }
 
-  const finalResult = validateAll(currentPairs);
-  return {
-    passed: finalResult.passed,
-    failed: finalResult.failed.map((f) => ({ ...f, retries: maxRetries })),
-    warnings: [...allWarnings, ...finalResult.warnings],
-  };
+  throw new Error('validateWithRetry reached unreachable state');
 }

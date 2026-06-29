@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { LlmProvider, LlmConfig } from '../types.js';
 
 export class OpenAIProvider implements LlmProvider {
@@ -28,7 +28,14 @@ export class OpenAIProvider implements LlmProvider {
   ): Promise<T> {
     const response = await this.client.beta.chat.completions.parse({
       model: this.model,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an expert curriculum designer. Generate educational content that is clear, accurate, and pedagogically sound. Always output valid structured data matching the requested schema.',
+        },
+        { role: 'user', content: prompt },
+      ],
       response_format: zodResponseFormat(schema, 'result'),
       max_tokens: options?.maxTokens ?? this.defaultMaxTokens,
       temperature: options?.temperature ?? this.defaultTemperature,

@@ -1,44 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { validateConceptPair, validateAll } from '../index.js';
-import type { GeneratedConcept, GeneratedActivity, ConceptActivityPair } from '../../types.js';
+import type { ConceptActivityPair } from '../../types.js';
+import { makeConcept, makeActivity } from '../../test-helpers.js';
 
-function makeConcept(overrides: Partial<GeneratedConcept> = {}): GeneratedConcept {
-  return {
-    conceptId: 'addition_1_10',
-    chapterCode: 'CH1',
-    chapterName: 'Addition',
-    learningObjective: 'Add two numbers with sum up to 10',
-    coreIdea: 'Addition means putting groups together.',
-    examples: ['2 + 1 = 3'],
-    misconceptions: [],
-    supports: { visual: true },
-    masteryCriteria: 0.8,
-    difficulty: 'beginner',
-    estimatedDuration: 15,
-    dependencies: [],
-    ...overrides,
-  };
-}
-
-function makeActivity(step: string, order: number): GeneratedActivity {
-  return {
-    step: step as GeneratedActivity['step'],
-    courseSpecType: 'exercise' as GeneratedActivity['courseSpecType'],
-    order,
-    content: { description: 'Test', instructions: 'Do it' },
-  };
-}
-
-function makeQuizActivity(): GeneratedActivity {
-  return {
-    step: 'mastery_check',
-    courseSpecType: 'quiz',
-    order: 4,
+function makeQuizActivity() {
+  return makeActivity('mastery_check', 4, {
+    courseSpecType: 'quiz' as const,
     content: {
       description: 'Quiz',
       questions: [{ question: 'Q1', options: ['A', 'B', 'C', 'D'], correctIndex: 0 }],
     },
-  };
+  });
 }
 
 describe('validateConceptPair', () => {

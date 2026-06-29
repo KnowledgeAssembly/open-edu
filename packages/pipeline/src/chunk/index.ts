@@ -24,12 +24,12 @@ const conceptCandidateSchema = z.object({
       }),
     )
     .min(1)
-    .max(10),
+    .max(8),
 });
 
 const TOKEN_LIMIT = 50000;
 
-function estimateTokens(text: string): number {
+export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
