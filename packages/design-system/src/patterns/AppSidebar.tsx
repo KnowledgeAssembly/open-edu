@@ -79,7 +79,7 @@ export function AppSidebar({
     <aside
       className={cn(
         'h-full flex flex-col bg-surface-container border-r border-outline-variant overflow-hidden transition-[width] duration-200',
-        collapsed ? 'w-16' : 'w-[var(--oe-space-panel-nav,260px)]',
+        collapsed ? 'w-16' : 'w-[var(--oe-space-panelNav,260px)]',
       )}
       data-testid="app-sidebar"
       aria-label="Main navigation"
@@ -129,7 +129,12 @@ export function AppSidebar({
                     </h2>
                   </div>
                 )}
-                <ol className="list-none p-0 m-0" role="list" aria-label={section.title}>
+                <ol
+                  className="list-none p-0 m-0"
+                  role="list"
+                  aria-label={section.title}
+                  data-testid="course-step-list"
+                >
                   {section.items.map((step) => {
                     const isCurrent = step.status === 'current';
                     const isCompleted = step.status === 'completed';

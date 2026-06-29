@@ -62,7 +62,7 @@ const triggerStyle: CSSProperties = {
 const popoverStyle: CSSProperties = {
   position: 'absolute',
   top: 'calc(100% + 8px)',
-  right: 0,
+  left: 0,
   zIndex: 50,
   width: '320px',
   padding: '12px',
