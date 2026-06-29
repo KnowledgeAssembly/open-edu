@@ -193,6 +193,8 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                      | Done   |
 | `@open-edu/cli`             | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                              | Done   |
 | `@open-edu/course-compiler` | Remark/Unified-based compiler that converts human/AI-generated `course-spec.md` files into validated OpenEdu educational packages with automatic module/bundle detection, semantic validation, and plugin support                                                                         | Done   |
+| `@open-edu/llm-config`     | LLM provider abstraction — `LlmProvider` interface with Zod structured output support, OpenAI provider implementation with retry and temperature control                                                                                                                                  | Done   |
+| `@open-edu/pipeline`       | AI-driven content generation pipeline — 6-stage PDF-to-course-spec.md pipeline (extract, chunk, enrich, generate activities, validate, output) with LLM-based concept detection and activity scaffolding                                                                                 | Done   |
 | `@open-edu/dev-server`      | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector, **bundle inspector tab**, **multi-module bundle mode**                                                                                                                                  | Done   |
 | `@open-edu/widgets`         | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                                                                                                                                                                              | Done   |
 | `@open-edu/learner`         | Standalone learner app — course catalog, **6-page router** (catalog, course home, lesson, assessment, code, progress), **bundle catalog + overview**, **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward integration, E2E-tested workflow | Done   |
@@ -379,6 +381,8 @@ open-edu/
 │   ├── rewards/             # Reward broker, conditions, verification
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md → OpenEdu package)
+│   ├── llm-config/          # LLM provider abstraction (OpenAI)
+│   ├── pipeline/            # AI curriculum generation pipeline (PDF → course-spec.md)
 │   └── widgets/             # Widget SDK, registry, builtins, remote loader
 ├── examples/                # Example educational packages
 │   ├── course-compiler/     # Course specification examples (3 sample specs)
