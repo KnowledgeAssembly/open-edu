@@ -75,6 +75,10 @@ export const forest: ThemeDefinition = {
         fontWeight: '600',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Source Serif 4', fontSize: '20px', fontWeight: '600', lineHeight: '1.4' },
+      heading4: { fontFamily: 'Source Serif 4', fontSize: '18px', fontWeight: '500', lineHeight: '1.4' },
+      heading5: { fontFamily: 'Source Serif 4', fontSize: '16px', fontWeight: '500', lineHeight: '1.5' },
+      heading6: { fontFamily: 'Source Serif 4', fontSize: '14px', fontWeight: '500', lineHeight: '1.5' },
       body: {
         fontFamily: 'Hanken Grotesk',
         fontSize: '14px',
@@ -121,6 +125,10 @@ export const forest: ThemeDefinition = {
         fontWeight: '600',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Hanken Grotesk', fontSize: '18px', fontWeight: '600', lineHeight: '1.4' },
+      heading4: { fontFamily: 'Hanken Grotesk', fontSize: '16px', fontWeight: '500', lineHeight: '1.5' },
+      heading5: { fontFamily: 'Hanken Grotesk', fontSize: '14px', fontWeight: '500', lineHeight: '1.5' },
+      heading6: { fontFamily: 'Hanken Grotesk', fontSize: '12px', fontWeight: '500', lineHeight: '1.6' },
       body: {
         fontFamily: 'Source Serif 4',
         fontSize: '18px',

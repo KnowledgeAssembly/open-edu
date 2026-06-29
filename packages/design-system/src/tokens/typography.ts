@@ -30,6 +30,10 @@ const productiveSet: TypographySet = {
     letterSpacing: '-0.01em',
   },
   subheading: { fontFamily: 'Inter', fontSize: '24px', fontWeight: '600', lineHeight: '1.3' },
+  heading3: { fontFamily: 'Inter', fontSize: '20px', fontWeight: '600', lineHeight: '1.4' },
+  heading4: { fontFamily: 'Inter', fontSize: '18px', fontWeight: '600', lineHeight: '1.4' },
+  heading5: { fontFamily: 'Inter', fontSize: '16px', fontWeight: '500', lineHeight: '1.5' },
+  heading6: { fontFamily: 'Inter', fontSize: '14px', fontWeight: '500', lineHeight: '1.5' },
   body: productiveBody,
   label: {
     fontFamily: 'Inter',
@@ -63,6 +67,10 @@ const expressiveSet: TypographySet = {
     fontWeight: '600',
     lineHeight: '1.3',
   },
+  heading3: { fontFamily: 'Source Serif 4', fontSize: '20px', fontWeight: '600', lineHeight: '1.4' },
+  heading4: { fontFamily: 'Source Serif 4', fontSize: '18px', fontWeight: '600', lineHeight: '1.5' },
+  heading5: { fontFamily: 'Source Serif 4', fontSize: '16px', fontWeight: '500', lineHeight: '1.6' },
+  heading6: { fontFamily: 'Source Serif 4', fontSize: '14px', fontWeight: '500', lineHeight: '1.6' },
   body: expressiveBody,
   label: {
     fontFamily: 'Inter',

@@ -77,6 +77,10 @@ export const sylvanWorkspace: ThemeDefinition = {
         fontWeight: '600',
         lineHeight: '36px',
       },
+      heading3: { fontFamily: 'Source Serif 4', fontSize: '22px', fontWeight: '600', lineHeight: '30px' },
+      heading4: { fontFamily: 'Source Serif 4', fontSize: '20px', fontWeight: '600', lineHeight: '28px' },
+      heading5: { fontFamily: 'Source Serif 4', fontSize: '18px', fontWeight: '500', lineHeight: '26px' },
+      heading6: { fontFamily: 'Source Serif 4', fontSize: '16px', fontWeight: '500', lineHeight: '26px' },
       body: {
         fontFamily: 'Literata',
         fontSize: '16px',
@@ -123,6 +127,10 @@ export const sylvanWorkspace: ThemeDefinition = {
         fontWeight: '600',
         lineHeight: '36px',
       },
+      heading3: { fontFamily: 'Source Serif 4', fontSize: '22px', fontWeight: '600', lineHeight: '30px' },
+      heading4: { fontFamily: 'Source Serif 4', fontSize: '20px', fontWeight: '600', lineHeight: '28px' },
+      heading5: { fontFamily: 'Source Serif 4', fontSize: '18px', fontWeight: '500', lineHeight: '28px' },
+      heading6: { fontFamily: 'Source Serif 4', fontSize: '16px', fontWeight: '500', lineHeight: '26px' },
       body: {
         fontFamily: 'Literata',
         fontSize: '18px',

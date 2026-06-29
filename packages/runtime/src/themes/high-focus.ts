@@ -76,6 +76,10 @@ export const highFocus: ThemeDefinition = {
         fontWeight: '700',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '22px', fontWeight: '700', lineHeight: '1.3' },
+      heading4: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '20px', fontWeight: '600', lineHeight: '1.3' },
+      heading5: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '18px', fontWeight: '600', lineHeight: '1.4' },
+      heading6: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '16px', fontWeight: '500', lineHeight: '1.5' },
       body: {
         fontFamily: 'Atkinson Hyperlegible Next',
         fontSize: '16px',
@@ -123,6 +127,10 @@ export const highFocus: ThemeDefinition = {
         fontWeight: '700',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '20px', fontWeight: '700', lineHeight: '1.3' },
+      heading4: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '18px', fontWeight: '600', lineHeight: '1.4' },
+      heading5: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '16px', fontWeight: '600', lineHeight: '1.4' },
+      heading6: { fontFamily: 'Atkinson Hyperlegible Next', fontSize: '14px', fontWeight: '500', lineHeight: '1.5' },
       body: {
         fontFamily: 'Atkinson Hyperlegible Next',
         fontSize: '18px',

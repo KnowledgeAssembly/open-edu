@@ -76,6 +76,10 @@ export const zen: ThemeDefinition = {
         fontWeight: '400',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Inter', fontSize: '18px', fontWeight: '400', lineHeight: '1.4' },
+      heading4: { fontFamily: 'Inter', fontSize: '16px', fontWeight: '400', lineHeight: '1.4' },
+      heading5: { fontFamily: 'Inter', fontSize: '14px', fontWeight: '400', lineHeight: '1.5' },
+      heading6: { fontFamily: 'Inter', fontSize: '12px', fontWeight: '400', lineHeight: '1.5' },
       body: {
         fontFamily: 'Inter',
         fontSize: '14px',
@@ -122,6 +126,10 @@ export const zen: ThemeDefinition = {
         fontWeight: '400',
         lineHeight: '1.3',
       },
+      heading3: { fontFamily: 'Inter', fontSize: '18px', fontWeight: '400', lineHeight: '1.4' },
+      heading4: { fontFamily: 'Inter', fontSize: '16px', fontWeight: '400', lineHeight: '1.5' },
+      heading5: { fontFamily: 'Inter', fontSize: '14px', fontWeight: '300', lineHeight: '1.6' },
+      heading6: { fontFamily: 'Inter', fontSize: '12px', fontWeight: '300', lineHeight: '1.6' },
       body: {
         fontFamily: 'Inter',
         fontSize: '17px',
