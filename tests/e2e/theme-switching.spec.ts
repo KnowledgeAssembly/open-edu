@@ -7,7 +7,7 @@ test.describe('Theme Switching', () => {
     await page.goto(LEARNER_URL);
     await expect(page.locator('[data-testid="home-page"]')).toBeVisible({ timeout: 10000 });
     // Navigate to Settings page where the ThemeSelector lives
-    const settingsNav = page.locator('[data-testid="leftnav-settings"]');
+    const settingsNav = page.locator('[data-testid="appsidebar-nav-settings"]');
     await settingsNav.click();
     await expect(page.locator('[data-testid="settings-page"]')).toBeVisible({ timeout: 10000 });
   });

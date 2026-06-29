@@ -16,7 +16,7 @@ async function navigateToCatalog(page: Page): Promise<void> {
   if (await browseBtn.isVisible().catch(() => false)) {
     await browseBtn.click();
   } else {
-    const catalogNav = page.locator('[data-testid="leftnav-catalog"]');
+    const catalogNav = page.locator('[data-testid="appsidebar-nav-catalog"]');
     if (await catalogNav.isVisible().catch(() => false)) {
       await catalogNav.click();
     }
@@ -138,7 +138,7 @@ test.describe('Learner Experience', () => {
     await startFirstCourse(page);
 
     await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('[data-testid="left-nav"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="app-sidebar"]')).toBeVisible({ timeout: 10000 });
 
     const heading = page.locator('h1').first();
     await expect(heading).toBeVisible();
@@ -153,7 +153,7 @@ test.describe('Learner Experience', () => {
 
     await navigateThroughCourse(page);
 
-    await expect(page.locator('[data-testid="left-nav"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="app-sidebar"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('navigation between steps works', async ({ page }) => {
