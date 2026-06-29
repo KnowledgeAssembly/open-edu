@@ -15,21 +15,62 @@ const expressiveBody: TypographyToken = {
 };
 
 const productiveSet: TypographySet = {
-  display: { fontFamily: 'Inter', fontSize: '48px', fontWeight: '700', lineHeight: '1.1', letterSpacing: '-0.02em' },
-  heading: { fontFamily: 'Inter', fontSize: '30px', fontWeight: '600', lineHeight: '1.3', letterSpacing: '-0.01em' },
+  display: {
+    fontFamily: 'Inter',
+    fontSize: '48px',
+    fontWeight: '700',
+    lineHeight: '1.1',
+    letterSpacing: '-0.02em',
+  },
+  heading: {
+    fontFamily: 'Inter',
+    fontSize: '30px',
+    fontWeight: '600',
+    lineHeight: '1.3',
+    letterSpacing: '-0.01em',
+  },
   subheading: { fontFamily: 'Inter', fontSize: '24px', fontWeight: '600', lineHeight: '1.3' },
   body: productiveBody,
-  label: { fontFamily: 'Inter', fontSize: '12px', fontWeight: '600', lineHeight: '1.0', letterSpacing: '0.05em' },
+  label: {
+    fontFamily: 'Inter',
+    fontSize: '12px',
+    fontWeight: '600',
+    lineHeight: '1.0',
+    letterSpacing: '0.05em',
+  },
   caption: { fontFamily: 'Inter', fontSize: '14px', fontWeight: '400', lineHeight: '1.5' },
   code: { fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: '400', lineHeight: '1.6' },
 };
 
 const expressiveSet: TypographySet = {
-  display: { fontFamily: 'Source Serif 4', fontSize: '48px', fontWeight: '700', lineHeight: '1.1', letterSpacing: '-0.02em' },
-  heading: { fontFamily: 'Source Serif 4', fontSize: '30px', fontWeight: '600', lineHeight: '1.3', letterSpacing: '-0.01em' },
-  subheading: { fontFamily: 'Source Serif 4', fontSize: '24px', fontWeight: '600', lineHeight: '1.3' },
+  display: {
+    fontFamily: 'Source Serif 4',
+    fontSize: '48px',
+    fontWeight: '700',
+    lineHeight: '1.1',
+    letterSpacing: '-0.02em',
+  },
+  heading: {
+    fontFamily: 'Source Serif 4',
+    fontSize: '30px',
+    fontWeight: '600',
+    lineHeight: '1.3',
+    letterSpacing: '-0.01em',
+  },
+  subheading: {
+    fontFamily: 'Source Serif 4',
+    fontSize: '24px',
+    fontWeight: '600',
+    lineHeight: '1.3',
+  },
   body: expressiveBody,
-  label: { fontFamily: 'Inter', fontSize: '12px', fontWeight: '600', lineHeight: '1.0', letterSpacing: '0.05em' },
+  label: {
+    fontFamily: 'Inter',
+    fontSize: '12px',
+    fontWeight: '600',
+    lineHeight: '1.0',
+    letterSpacing: '0.05em',
+  },
   caption: { fontFamily: 'Source Serif 4', fontSize: '14px', fontWeight: '400', lineHeight: '1.5' },
   code: { fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: '400', lineHeight: '1.6' },
 };

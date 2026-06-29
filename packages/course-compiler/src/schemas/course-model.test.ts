@@ -67,7 +67,12 @@ function validLesson() {
       shuffleQuestions: true,
     },
     assets: [
-      { id: 'asset-1', path: 'images/variable.png', type: 'image' as const, description: 'Variable diagram' },
+      {
+        id: 'asset-1',
+        path: 'images/variable.png',
+        type: 'image' as const,
+        description: 'Variable diagram',
+      },
     ],
     glossary: [{ term: 'variable', definition: 'A symbol that represents a quantity' }],
     references: [{ title: 'Algebra 101', url: 'https://example.com/algebra' }],

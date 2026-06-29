@@ -103,10 +103,7 @@ export function AppSidebar({
               key={item.id}
               variant={isActive ? 'secondary' : 'ghost'}
               size={collapsed ? 'icon' : 'sm'}
-              className={cn(
-                'gap-2',
-                collapsed ? 'justify-center w-full' : 'justify-start w-full',
-              )}
+              className={cn('gap-2', collapsed ? 'justify-center w-full' : 'justify-start w-full')}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`appsidebar-nav-${item.id}`}
@@ -174,9 +171,7 @@ export function AppSidebar({
                               <span className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-outline-variant flex-shrink-0" />
                             )}
                           </span>
-                          {!collapsed && (
-                            <span className="truncate text-sm">{step.label}</span>
-                          )}
+                          {!collapsed && <span className="truncate text-sm">{step.label}</span>}
                         </Button>
                       </li>
                     );
@@ -209,9 +204,7 @@ export function AppSidebar({
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className="flex items-center justify-center w-full py-2 border-t border-outline-variant bg-transparent text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
       >
-        <span
-          className={cn('transition-transform duration-200', collapsed && 'rotate-180')}
-        >
+        <span className={cn('transition-transform duration-200', collapsed && 'rotate-180')}>
           {ChevronLeft}
         </span>
       </button>

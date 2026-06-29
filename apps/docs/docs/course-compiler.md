@@ -62,6 +62,7 @@ This module covers the foundation of algebra.
 ## Lesson 1.1: Variables
 
 **Objectives:**
+
 - Understand what a variable represents
 - Identify variables in expressions
 
@@ -74,6 +75,7 @@ Read the chapter on variables.
 ### Quiz: Variables Quiz
 
 1. What is a variable?
+
 - [x] A symbol for a quantity
 - [ ] A type of number
 - [ ] An equation
@@ -120,13 +122,13 @@ output/
 
 Plugins can hook into the compilation pipeline at 5 lifecycle stages:
 
-| Hook              | When                          | Use Case                              |
-| ----------------- | ----------------------------- | ------------------------------------- |
-| `beforeParse`     | Before Markdown parsing       | Preprocess raw content                |
-| `afterAST`        | After AST construction        | Inspect/modify the remark AST         |
-| `transformModel`  | After semantic parsing        | Add custom fields to the CourseModel  |
-| `beforeGenerate`  | Before file generation        | Inject diagnostics or modify the model |
-| `afterGenerate`   | After files are written       | Post-processing or cleanup            |
+| Hook             | When                    | Use Case                               |
+| ---------------- | ----------------------- | -------------------------------------- |
+| `beforeParse`    | Before Markdown parsing | Preprocess raw content                 |
+| `afterAST`       | After AST construction  | Inspect/modify the remark AST          |
+| `transformModel` | After semantic parsing  | Add custom fields to the CourseModel   |
+| `beforeGenerate` | Before file generation  | Inject diagnostics or modify the model |
+| `afterGenerate`  | After files are written | Post-processing or cleanup             |
 
 ## Diagnostics
 

@@ -53,7 +53,9 @@ Read the chapter on variables.
     expect(model.modules[0]!.lessons[0]!.id).toBe('lesson-11');
     expect(model.modules[0]!.lessons[0]!.title).toBe('Variables');
     expect(model.modules[0]!.lessons[0]!.objectives).toHaveLength(2);
-    expect(model.modules[0]!.lessons[0]!.objectives[0]!.description).toBe('Understand what a variable represents');
+    expect(model.modules[0]!.lessons[0]!.objectives[0]!.description).toBe(
+      'Understand what a variable represents',
+    );
   });
 
   it('maps frontmatter fields to course metadata', () => {

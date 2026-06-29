@@ -99,7 +99,7 @@ open-edu/
 | 11  | Example Packages [DONE]     | 4       | P1       | Epic 2                     |
 | 12  | Integration Testing [DONE]  | 2       | P1       | Epics 5, 6, 10, 11         |
 | 13  | Learner App [DONE]          | 4       | P0       | Epics 3, 4, 5, 6, 7, 8, 11 |
-| 29  | Course Compiler [DONE]      | 7       | P1       | Epics 2, 3                  |
+| 29  | Course Compiler [DONE]      | 7       | P1       | Epics 2, 3                 |
 
 ---
 

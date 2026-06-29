@@ -55,7 +55,8 @@ function withTempDir(fn: (dir: string) => Promise<void>) {
 }
 
 describe('generatePackage', () => {
-  it('generates single-module package with correct structure',
+  it(
+    'generates single-module package with correct structure',
     withTempDir(async (dir) => {
       const model = validModel();
       const result = await generatePackage(model, dir);
@@ -68,7 +69,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates manifest with correct fields',
+  it(
+    'generates manifest with correct fields',
     withTempDir(async (dir) => {
       const model = validModel();
       await generatePackage(model, dir);
@@ -82,7 +84,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates workflow with linear routing',
+  it(
+    'generates workflow with linear routing',
     withTempDir(async (dir) => {
       const model = validModel();
       await generatePackage(model, dir);
@@ -94,7 +97,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates lesson markdown files',
+  it(
+    'generates lesson markdown files',
     withTempDir(async (dir) => {
       const model = validModel();
       await generatePackage(model, dir);
@@ -109,7 +113,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates quiz JSON files',
+  it(
+    'generates quiz JSON files',
     withTempDir(async (dir) => {
       const model = validModel();
       await generatePackage(model, dir);
@@ -122,7 +127,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates placeholder SVG assets when placeholderGenerated is true',
+  it(
+    'generates placeholder SVG assets when placeholderGenerated is true',
     withTempDir(async (dir) => {
       const model = validModel();
       model.modules[0]!.lessons[0]!.assets = [
@@ -137,7 +143,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates bundle structure for multi-module course',
+  it(
+    'generates bundle structure for multi-module course',
     withTempDir(async (dir) => {
       const model: CourseModel = {
         metadata: { title: 'Multi Module Course', description: 'A bundle', language: 'en' },
@@ -145,13 +152,27 @@ describe('generatePackage', () => {
           {
             id: 'mod-1',
             title: 'Module 1',
-            lessons: [{ id: 'l1', title: 'Lesson 1', objectives: [{ id: 'o1', description: 'Obj' }], content: 'Content' }],
+            lessons: [
+              {
+                id: 'l1',
+                title: 'Lesson 1',
+                objectives: [{ id: 'o1', description: 'Obj' }],
+                content: 'Content',
+              },
+            ],
             prerequisites: [],
           },
           {
             id: 'mod-2',
             title: 'Module 2',
-            lessons: [{ id: 'l2', title: 'Lesson 2', objectives: [{ id: 'o2', description: 'Obj' }], content: 'Content' }],
+            lessons: [
+              {
+                id: 'l2',
+                title: 'Lesson 2',
+                objectives: [{ id: 'o2', description: 'Obj' }],
+                content: 'Content',
+              },
+            ],
             prerequisites: ['mod-1'],
           },
         ],
@@ -171,7 +192,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('uses metadata author and version in manifest',
+  it(
+    'uses metadata author and version in manifest',
     withTempDir(async (dir) => {
       const model = validModel();
       model.metadata.author = 'Test Author';
@@ -184,7 +206,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('generates nodes directory with all files',
+  it(
+    'generates nodes directory with all files',
     withTempDir(async (dir) => {
       const model = validModel();
       await generatePackage(model, dir);
@@ -194,7 +217,8 @@ describe('generatePackage', () => {
     }),
   );
 
-  it('records info diagnostics for placeholder assets',
+  it(
+    'records info diagnostics for placeholder assets',
     withTempDir(async (dir) => {
       const model = validModel();
       model.modules[0]!.lessons[0]!.assets = [
@@ -202,9 +226,7 @@ describe('generatePackage', () => {
       ];
       const result = await generatePackage(model, dir);
 
-      const placeholderDiags = result.diagnostics.filter(
-        (d) => d.code === 'PLACEHOLDER_GENERATED',
-      );
+      const placeholderDiags = result.diagnostics.filter((d) => d.code === 'PLACEHOLDER_GENERATED');
       expect(placeholderDiags.length).toBeGreaterThanOrEqual(1);
       expect(placeholderDiags[0]!.severity).toBe('info');
     }),

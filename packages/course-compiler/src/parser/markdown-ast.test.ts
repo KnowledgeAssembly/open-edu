@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseMarkdown, findHeading, getSectionContent, extractHeadingText, serializeContentToMarkdown } from './markdown-ast.js';
+import {
+  parseMarkdown,
+  findHeading,
+  getSectionContent,
+  extractHeadingText,
+  serializeContentToMarkdown,
+} from './markdown-ast.js';
 
 describe('parseMarkdown', () => {
   it('parses basic markdown with frontmatter', () => {

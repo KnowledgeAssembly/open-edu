@@ -1,13 +1,27 @@
 import type { Root, Heading, Content, Paragraph, Text, List, ListItem } from 'mdast';
-import type { CourseModel, CourseMetadata, CourseModule, Lesson, LearningObjective, Activity, Quiz, Question, GlossaryEntry, Reference, Asset, CompilerDiagnostic } from '../schemas/index.js';
+import type {
+  CourseModel,
+  CourseMetadata,
+  CourseModule,
+  Lesson,
+  LearningObjective,
+  Activity,
+  Quiz,
+  Question,
+  GlossaryEntry,
+  Reference,
+  Asset,
+  CompilerDiagnostic,
+} from '../schemas/index.js';
 import { extractHeadingText, serializeContentToMarkdown } from './markdown-ast.js';
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    || 'unnamed';
+  return (
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'unnamed'
+  );
 }
 
 function moduleIdFromTitle(title: string): string {
@@ -57,14 +71,19 @@ interface ParseContext {
   diagnostics: CompilerDiagnostic[];
 }
 
-function addDiagnostic(ctx: ParseContext, severity: 'error' | 'warning' | 'info', message: string, code?: string) {
+function addDiagnostic(
+  ctx: ParseContext,
+  severity: 'error' | 'warning' | 'info',
+  message: string,
+  code?: string,
+) {
   ctx.diagnostics.push({ severity, message, code });
 }
 
-export function parseSemantic(input: {
-  ast: Root;
-  frontmatter: Record<string, unknown>;
-}): { model: CourseModel | null; diagnostics: CompilerDiagnostic[] } {
+export function parseSemantic(input: { ast: Root; frontmatter: Record<string, unknown> }): {
+  model: CourseModel | null;
+  diagnostics: CompilerDiagnostic[];
+} {
   const ctx: ParseContext = { diagnostics: [] };
 
   const metadata = parseMetadata(input.frontmatter, ctx);
@@ -98,10 +117,20 @@ function parseMetadata(frontmatter: Record<string, unknown>, ctx: ParseContext):
   };
 
   if (!frontmatter.title) {
-    addDiagnostic(ctx, 'warning', 'Course title not found in frontmatter, using "Untitled Course"', 'MISSING_TITLE');
+    addDiagnostic(
+      ctx,
+      'warning',
+      'Course title not found in frontmatter, using "Untitled Course"',
+      'MISSING_TITLE',
+    );
   }
   if (!frontmatter.description) {
-    addDiagnostic(ctx, 'warning', 'Course description not found in frontmatter', 'MISSING_DESCRIPTION');
+    addDiagnostic(
+      ctx,
+      'warning',
+      'Course description not found in frontmatter',
+      'MISSING_DESCRIPTION',
+    );
   }
 
   return metadata;
@@ -113,7 +142,10 @@ function parseModules(ast: Root, ctx: ParseContext): CourseModule[] {
 
   while (i < ast.children.length) {
     const node = ast.children[i];
-    if (!node) { i++; continue; }
+    if (!node) {
+      i++;
+      continue;
+    }
     if (node.type === 'heading' && node.depth === 1) {
       const headingText = extractHeadingText(node);
       const moduleId = moduleIdFromTitle(headingText);
@@ -123,7 +155,10 @@ function parseModules(ast: Root, ctx: ParseContext): CourseModule[] {
       const moduleContent: Content[] = [];
       while (i < ast.children.length) {
         const child = ast.children[i];
-        if (!child) { i++; continue; }
+        if (!child) {
+          i++;
+          continue;
+        }
         if (child.type === 'heading' && child.depth === 1) break;
         moduleContent.push(child);
         i++;
@@ -180,7 +215,10 @@ function parseLessons(content: Content[], ctx: ParseContext): Lesson[] {
 
   while (i < content.length) {
     const node = content[i];
-    if (!node) { i++; continue; }
+    if (!node) {
+      i++;
+      continue;
+    }
     if (node.type === 'heading' && node.depth === 2) {
       const headingText = extractHeadingText(node);
       const lessonId = lessonIdFromTitle(headingText);
@@ -190,7 +228,10 @@ function parseLessons(content: Content[], ctx: ParseContext): Lesson[] {
       const lessonContent: Content[] = [];
       while (i < content.length) {
         const child = content[i];
-        if (!child) { i++; continue; }
+        if (!child) {
+          i++;
+          continue;
+        }
         if (child.type === 'heading' && (child.depth === 2 || child.depth === 1)) break;
         lessonContent.push(child);
         i++;
@@ -206,16 +247,13 @@ function parseLessons(content: Content[], ctx: ParseContext): Lesson[] {
   return lessons;
 }
 
-function parseLesson(
-  id: string,
-  title: string,
-  content: Content[],
-  ctx: ParseContext,
-): Lesson {
-  const objectives = extractLessonObjectives(content) || [{
-    id: 'obj-1',
-    description: `Understand ${title.toLowerCase()}`,
-  }];
+function parseLesson(id: string, title: string, content: Content[], ctx: ParseContext): Lesson {
+  const objectives = extractLessonObjectives(content) || [
+    {
+      id: 'obj-1',
+      description: `Understand ${title.toLowerCase()}`,
+    },
+  ];
   const lessonBody = extractLessonBody(content);
   const activities = parseActivities(content, ctx);
   const quiz = parseQuiz(content, ctx);
@@ -255,7 +293,14 @@ function extractLessonObjectives(content: Content[]): LearningObjective[] | unde
 
 function extractLessonBody(content: Content[]): string {
   const bodyNodes = content.filter((node) => {
-    if (node.type !== 'paragraph' && node.type !== 'list' && node.type !== 'thematicBreak' && node.type !== 'code' && node.type !== 'blockquote') return false;
+    if (
+      node.type !== 'paragraph' &&
+      node.type !== 'list' &&
+      node.type !== 'thematicBreak' &&
+      node.type !== 'code' &&
+      node.type !== 'blockquote'
+    )
+      return false;
     if (node.type === 'paragraph' && node.children.length > 0) {
       if (findStrongText(node.children, 'Objectives:')) return false;
       if (findStrongText(node.children, 'Glossary:')) return false;
@@ -355,7 +400,9 @@ function parseQuestionsFromNodes(nodes: Content[], _ctx: ParseContext): Question
       const list = node as { ordered: boolean; children: Content[] };
       if (list.ordered) {
         for (const item of list.children) {
-          const para = (item as { children: Content[] }).children.find((c): c is Paragraph => c.type === 'paragraph');
+          const para = (item as { children: Content[] }).children.find(
+            (c): c is Paragraph => c.type === 'paragraph',
+          );
           if (!para) continue;
           const text = extractInlineContent(para.children).trim();
           if (!text) continue;
@@ -375,7 +422,9 @@ function parseQuestionsFromNodes(nodes: Content[], _ctx: ParseContext): Question
           const lastQuestion = questions[questions.length - 1];
           if (!lastQuestion || lastQuestion.type !== 'multiple-choice') continue;
 
-          const para = (item as { children: Content[] }).children.find((c): c is Paragraph => c.type === 'paragraph');
+          const para = (item as { children: Content[] }).children.find(
+            (c): c is Paragraph => c.type === 'paragraph',
+          );
           if (!para) continue;
 
           // Check for checkbox
@@ -494,4 +543,3 @@ function parseAssets(content: Content[]): Asset[] {
   }
   return assets;
 }
-

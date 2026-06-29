@@ -28,7 +28,8 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
       const snapshotStatus = bundleProgress?.moduleStatuses[mod.id];
       const status =
         snapshotStatus ??
-        (mod.dependsOn.length === 0 || mod.dependsOn.every((depId) => bundleProgress?.moduleStatuses[depId] === 'completed')
+        (mod.dependsOn.length === 0 ||
+        mod.dependsOn.every((depId) => bundleProgress?.moduleStatuses[depId] === 'completed')
           ? 'unlocked'
           : 'locked');
 

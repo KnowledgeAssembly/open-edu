@@ -21,10 +21,7 @@ export interface CompileResult {
   outputPath?: string;
 }
 
-export async function compile(
-  specPath: string,
-  options: CompileOptions,
-): Promise<CompileResult> {
+export async function compile(specPath: string, options: CompileOptions): Promise<CompileResult> {
   const resolvedPath = resolve(specPath);
   const diagnostics: CompilerDiagnostic[] = [];
 
@@ -35,7 +32,9 @@ export async function compile(
     const message = error instanceof Error ? error.message : String(error);
     return {
       success: false,
-      diagnostics: [{ severity: 'error', message: `Cannot read file: ${message}`, code: 'FILE_READ_ERROR' }],
+      diagnostics: [
+        { severity: 'error', message: `Cannot read file: ${message}`, code: 'FILE_READ_ERROR' },
+      ],
     };
   }
 
@@ -119,7 +118,11 @@ export function createCompileCommand(): Command {
 }
 
 export function printDiagnostics(diagnostics: CompilerDiagnostic[], verbose: boolean): void {
-  const groups: { error: CompilerDiagnostic[]; warning: CompilerDiagnostic[]; info: CompilerDiagnostic[] } = {
+  const groups: {
+    error: CompilerDiagnostic[];
+    warning: CompilerDiagnostic[];
+    info: CompilerDiagnostic[];
+  } = {
     error: [],
     warning: [],
     info: [],
@@ -152,9 +155,7 @@ export function printDiagnostics(diagnostics: CompilerDiagnostic[], verbose: boo
 }
 
 function printDiagnostic(d: CompilerDiagnostic, _verbose: boolean): void {
-  const location = d.location
-    ? ` [${d.location.file ?? ''}:${d.location.line}]`
-    : '';
+  const location = d.location ? ` [${d.location.file ?? ''}:${d.location.line}]` : '';
   const code = d.code ? ` [${d.code}]` : '';
   console.error(`  ${d.message}${code}${location}`);
   if (d.hint) {

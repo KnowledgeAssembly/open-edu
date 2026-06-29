@@ -1,11 +1,21 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { RuntimeThemeProvider, FontLoader, TopAppBar, useThemePreference, useRuntimeOptional } from '@open-edu/runtime';
+import {
+  RuntimeThemeProvider,
+  FontLoader,
+  TopAppBar,
+  useThemePreference,
+  useRuntimeOptional,
+} from '@open-edu/runtime';
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings } from 'lucide-react';
 import { AppSidebar, AppLayout } from '@open-edu/design-system';
-import type { AppSidebarItem, AppSidebarSection, AppSidebarStepItem } from '@open-edu/design-system';
+import type {
+  AppSidebarItem,
+  AppSidebarSection,
+  AppSidebarStepItem,
+} from '@open-edu/design-system';
 import { CourseRuntime } from './CourseRuntime';
 import { HomePage } from './HomePage';
 import { CatalogPage } from './CatalogPage';
@@ -233,22 +243,25 @@ export function AppShell({
 
   const currentNavId = view.view === 'bundleOverview' ? 'catalog' : view.view;
 
-  const handleNavAction = useCallback((id: string) => {
-    switch (id) {
-      case 'home':
-        handleNavigate({ view: 'home' });
-        break;
-      case 'catalog':
-        handleNavigate({ view: 'catalog' });
-        break;
-      case 'progress':
-        handleNavigate({ view: 'progress' });
-        break;
-      case 'settings':
-        handleNavigate({ view: 'settings' });
-        break;
-    }
-  }, [handleNavigate]);
+  const handleNavAction = useCallback(
+    (id: string) => {
+      switch (id) {
+        case 'home':
+          handleNavigate({ view: 'home' });
+          break;
+        case 'catalog':
+          handleNavigate({ view: 'catalog' });
+          break;
+        case 'progress':
+          handleNavigate({ view: 'progress' });
+          break;
+        case 'settings':
+          handleNavigate({ view: 'settings' });
+          break;
+      }
+    },
+    [handleNavigate],
+  );
 
   function CourseStepWrapper(): JSX.Element | null {
     const runtime = useRuntimeOptional();

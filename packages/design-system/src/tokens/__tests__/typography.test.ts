@@ -30,14 +30,20 @@ describe('typography tokens', () => {
   });
 
   it('typographyTokenToCssVar produces correct CSS variable string', () => {
-    expect(typographyTokenToCssVar('body', 'fontFamily', 'productive')).toBe('var(--oe-font-productive-body-family)');
+    expect(typographyTokenToCssVar('body', 'fontFamily', 'productive')).toBe(
+      'var(--oe-font-productive-body-family)',
+    );
   });
 
   it('typographyTokenToCssVar maps fontSize to size suffix', () => {
-    expect(typographyTokenToCssVar('display', 'fontSize', 'expressive')).toBe('var(--oe-font-expressive-display-size)');
+    expect(typographyTokenToCssVar('display', 'fontSize', 'expressive')).toBe(
+      'var(--oe-font-expressive-display-size)',
+    );
   });
 
   it('typographyTokenToCssVar defaults to productive set', () => {
-    expect(typographyTokenToCssVar('code', 'fontWeight')).toBe('var(--oe-font-productive-code-weight)');
+    expect(typographyTokenToCssVar('code', 'fontWeight')).toBe(
+      'var(--oe-font-productive-code-weight)',
+    );
   });
 });

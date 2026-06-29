@@ -68,10 +68,7 @@ const requiredColorKeys = [
 
 const hexRegex = /^#[0-9a-fA-F]{6}$/;
 
-const typographySetKeys: Array<keyof ThemeDefinition['typography']> = [
-  'productive',
-  'expressive',
-];
+const typographySetKeys: Array<keyof ThemeDefinition['typography']> = ['productive', 'expressive'];
 
 const spacingKeys: Array<keyof ThemeDefinition['spacing']> = [
   'base',
@@ -125,7 +122,15 @@ describe('theme definitions', () => {
         for (const setName of typographySetKeys) {
           const typographySet = theme.typography[setName];
           expect(typographySet).toBeDefined();
-          for (const role of ['display', 'heading', 'subheading', 'body', 'label', 'caption', 'code'] as const) {
+          for (const role of [
+            'display',
+            'heading',
+            'subheading',
+            'body',
+            'label',
+            'caption',
+            'code',
+          ] as const) {
             const token = typographySet[role];
             expect(token).toBeDefined();
             expect(token.fontFamily).toBeDefined();

@@ -92,7 +92,10 @@ describe('createPluginEngine', () => {
       hooks: {
         transformModel: (ctx) => ({
           ...ctx,
-          diagnostics: [...ctx.diagnostics, { severity: 'info', message: 'from plugin', code: 'TEST' }],
+          diagnostics: [
+            ...ctx.diagnostics,
+            { severity: 'info', message: 'from plugin', code: 'TEST' },
+          ],
         }),
       },
     });
@@ -171,9 +174,7 @@ describe('createPlaceholderAssetPlugin', () => {
               title: 'Lesson 1',
               objectives: [{ id: 'o1', description: 'Obj' }],
               content: 'Content',
-              assets: [
-                { id: 'img-1', path: 'img.png', type: 'image', placeholderGenerated: true },
-              ],
+              assets: [{ id: 'img-1', path: 'img.png', type: 'image', placeholderGenerated: true }],
             },
           ],
         },
