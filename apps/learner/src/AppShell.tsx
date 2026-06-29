@@ -1,8 +1,21 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { RuntimeThemeProvider, FontLoader, TopAppBar, useThemePreference } from '@open-edu/runtime';
+import {
+  RuntimeThemeProvider,
+  FontLoader,
+  TopAppBar,
+  useThemePreference,
+  useRuntimeOptional,
+} from '@open-edu/runtime';
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
-import { LeftNav, type AppView } from './LeftNav';
+import { getOrderedNodes } from '@open-edu/workflow';
+import { Home, TrendingUp, BookOpen, Settings } from 'lucide-react';
+import { AppSidebar, AppLayout } from '@open-edu/design-system';
+import type {
+  AppSidebarItem,
+  AppSidebarSection,
+  AppSidebarStepItem,
+} from '@open-edu/design-system';
 import { CourseRuntime } from './CourseRuntime';
 import { HomePage } from './HomePage';
 import { CatalogPage } from './CatalogPage';
@@ -11,6 +24,14 @@ import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { getBundleProgress } from './bundleProgressStorage';
+
+export type AppView =
+  | { view: 'home' }
+  | { view: 'catalog' }
+  | { view: 'progress' }
+  | { view: 'settings' }
+  | { view: 'course'; packageId: string; bundleId?: string; moduleId?: string }
+  | { view: 'bundleOverview'; bundleId: string };
 
 export interface AppShellProps {
   catalogPackages: PackageSummary[];
@@ -213,6 +234,74 @@ export function AppShell({
 
   const isCourseView = view.view === 'course';
 
+  const navItems: AppSidebarItem[] = [
+    { id: 'home', label: 'Home', icon: <Home className="h-5 w-5" /> },
+    { id: 'progress', label: 'My Progress', icon: <TrendingUp className="h-5 w-5" /> },
+    { id: 'catalog', label: 'Course Catalog', icon: <BookOpen className="h-5 w-5" /> },
+    { id: 'settings', label: 'Settings', icon: <Settings className="h-5 w-5" /> },
+  ];
+
+  const currentNavId = view.view === 'bundleOverview' ? 'catalog' : view.view;
+
+  const handleNavAction = useCallback(
+    (id: string) => {
+      switch (id) {
+        case 'home':
+          handleNavigate({ view: 'home' });
+          break;
+        case 'catalog':
+          handleNavigate({ view: 'catalog' });
+          break;
+        case 'progress':
+          handleNavigate({ view: 'progress' });
+          break;
+        case 'settings':
+          handleNavigate({ view: 'settings' });
+          break;
+      }
+    },
+    [handleNavigate],
+  );
+
+  function CourseStepWrapper(): JSX.Element | null {
+    const runtime = useRuntimeOptional();
+    if (!runtime || !isCourseView) return null;
+
+    const orderedIds = getOrderedNodes(
+      runtime.loadedPackage.workflow!,
+      runtime.loadedPackage.manifest.entry!,
+    );
+    if (orderedIds.length === 0) return null;
+
+    const items: AppSidebarStepItem[] = orderedIds.map((nodeId) => {
+      const node = runtime.loadedPackage.nodes.find((n) => n.relativePath === nodeId);
+      const title = node
+        ? ((node.node as { title?: string }).title ?? nodeId.replace('.md', ''))
+        : nodeId;
+      let status: 'current' | 'completed' | 'future';
+      if (nodeId === runtime.currentNodeId) status = 'current';
+      else if (runtime.visitedNodes.includes(nodeId)) status = 'completed';
+      else status = 'future';
+      return {
+        id: nodeId,
+        label: title,
+        status,
+        onClick: () => runtime.navigateToNode(nodeId),
+      };
+    });
+
+    const section: AppSidebarSection = { title: 'Course Steps', items };
+    return (
+      <AppSidebar
+        items={navItems}
+        currentItemId={currentNavId}
+        onNavigate={handleNavAction}
+        sections={[section]}
+        onBack={{ label: 'Back to Catalog', onClick: handleBackToCatalog }}
+      />
+    );
+  }
+
   return (
     <RuntimeThemeProvider themeId={themeId}>
       <FontLoader />
@@ -247,62 +336,63 @@ export function AppShell({
                   : undefined
               }
             >
-              <LeftNav
-                currentView={view}
-                onNavigate={handleNavigate}
-                onBackToCatalog={handleBackToCatalog}
-              />
+              <CourseStepWrapper />
             </CourseRuntime>
           </div>
         ) : (
-          <>
-            <LeftNav currentView={view} onNavigate={handleNavigate} />
-            <div className="flex-1 flex flex-col min-w-0">
-              <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
-              <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
-                {view.view === 'catalog' && (
-                  <CatalogPage
-                    packages={catalogPackages}
-                    bundleSummaries={catalogBundles}
-                    bundleProgress={bundleProgress}
-                    onStartCourse={handleStartCourse}
-                    onStartBundle={handleStartBundle}
-                    onNavigate={handleNavigate}
+          <AppLayout
+            sidebar={
+              <AppSidebar
+                items={navItems}
+                currentItemId={currentNavId}
+                onNavigate={handleNavAction}
+              />
+            }
+            topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
+          >
+            <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
+              {view.view === 'catalog' && (
+                <CatalogPage
+                  packages={catalogPackages}
+                  bundleSummaries={catalogBundles}
+                  bundleProgress={bundleProgress}
+                  onStartCourse={handleStartCourse}
+                  onStartBundle={handleStartBundle}
+                  onNavigate={handleNavigate}
+                />
+              )}
+              {view.view === 'home' && (
+                <HomePage
+                  onNavigate={handleNavigate}
+                  catalogPackages={catalogPackages}
+                  bundleEntries={bundleEntries}
+                />
+              )}
+              {(() => {
+                if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                const bundle = bundleEntries[view.bundleId];
+                if (!bundle) return null;
+                return (
+                  <BundleOverviewPage
+                    bundle={bundle}
+                    bundleProgress={bundleProgress[view.bundleId] ?? null}
+                    onStartModule={handleStartBundleModule}
+                    onBackToCatalog={handleBackToCatalog}
                   />
-                )}
-                {view.view === 'home' && (
-                  <HomePage
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    bundleEntries={bundleEntries}
-                  />
-                )}
-                {(() => {
-                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                  const bundle = bundleEntries[view.bundleId];
-                  if (!bundle) return null;
-                  return (
-                    <BundleOverviewPage
-                      bundle={bundle}
-                      bundleProgress={bundleProgress[view.bundleId] ?? null}
-                      onStartModule={handleStartBundleModule}
-                      onBackToCatalog={handleBackToCatalog}
-                    />
-                  );
-                })()}
-                {view.view === 'progress' && (
-                  <ProgressDashboard
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    packageEntries={packageEntries}
-                  />
-                )}
-                {view.view === 'settings' && (
-                  <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
-                )}
-              </main>
-            </div>
-          </>
+                );
+              })()}
+              {view.view === 'progress' && (
+                <ProgressDashboard
+                  onNavigate={handleNavigate}
+                  catalogPackages={catalogPackages}
+                  packageEntries={packageEntries}
+                />
+              )}
+              {view.view === 'settings' && (
+                <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
+              )}
+            </main>
+          </AppLayout>
         )}
         <CourseExitWarningDialog
           open={showExitWarning}

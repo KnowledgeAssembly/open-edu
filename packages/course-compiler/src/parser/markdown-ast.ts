@@ -22,9 +22,7 @@ export function parseMarkdown(markdown: string): {
   ast: Root;
   frontmatter: Record<string, unknown>;
 } {
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkFrontmatter, ['yaml']);
+  const processor = unified().use(remarkParse).use(remarkFrontmatter, ['yaml']);
 
   const ast = processor.parse(markdown);
 
@@ -62,10 +60,7 @@ function parseSimpleYaml(value: string): Record<string, unknown> {
         val = val.slice(1, -1);
       } else if (val.startsWith("'") && val.endsWith("'")) {
         val = val.slice(1, -1);
-      } else if (
-        val.startsWith('[') &&
-        val.endsWith(']')
-      ) {
+      } else if (val.startsWith('[') && val.endsWith(']')) {
         val = val
           .slice(1, -1)
           .split(',')
@@ -74,7 +69,8 @@ function parseSimpleYaml(value: string): Record<string, unknown> {
             if (t === 'true') return true;
             if (t === 'false') return false;
             if (!isNaN(Number(t)) && t.length > 0) return Number(t);
-            if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) return t.slice(1, -1);
+            if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'")))
+              return t.slice(1, -1);
             return t;
           });
       }
@@ -97,10 +93,7 @@ export function findHeading(
   );
 }
 
-export function getSectionContent(
-  ast: Root,
-  headingIndex: number,
-): Content[] {
+export function getSectionContent(ast: Root, headingIndex: number): Content[] {
   const heading = ast.children[headingIndex];
   if (!heading || heading.type !== 'heading') return [];
 
@@ -148,7 +141,8 @@ function serializeNode(node: Content): string {
         .map((item, idx) => {
           const listItem = item as { checked?: boolean | null; children: Content[] };
           const prefix = list.ordered ? `${(list.start ?? 1) + idx}. ` : '- ';
-          const checkbox = listItem.checked === true ? '[x] ' : listItem.checked === false ? '[ ] ' : '';
+          const checkbox =
+            listItem.checked === true ? '[x] ' : listItem.checked === false ? '[ ] ' : '';
           const paragraph = listItem.children[0] as Paragraph | undefined;
           return prefix + checkbox + (paragraph ? serializeChildren(paragraph) : '');
         })
@@ -161,7 +155,13 @@ function serializeNode(node: Content): string {
     case 'thematicBreak':
       return '---';
     case 'code':
-      return '```' + ((node as { lang?: string }).lang ?? '') + '\n' + (node as { value: string }).value + '\n```';
+      return (
+        '```' +
+        ((node as { lang?: string }).lang ?? '') +
+        '\n' +
+        (node as { value: string }).value +
+        '\n```'
+      );
     case 'inlineCode':
       return '`' + (node as { value: string }).value + '`';
     case 'emphasis':

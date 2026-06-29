@@ -45,7 +45,9 @@ describe('CompilerDiagnosticSchema', () => {
   });
 
   it('accepts minimal diagnostic', () => {
-    expect(CompilerDiagnosticSchema.safeParse({ severity: 'info', message: 'Done' }).success).toBe(true);
+    expect(CompilerDiagnosticSchema.safeParse({ severity: 'info', message: 'Done' }).success).toBe(
+      true,
+    );
   });
 
   it('rejects missing severity', () => {

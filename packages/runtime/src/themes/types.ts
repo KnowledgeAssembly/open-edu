@@ -3,6 +3,7 @@ export type {
   ThemeDefinition,
   ColorTokens,
   TypographyToken,
+  TypographySet,
   TypographyTokens,
   SpacingTokens,
   RadiiTokens,

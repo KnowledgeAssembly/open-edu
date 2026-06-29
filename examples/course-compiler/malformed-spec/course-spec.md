@@ -8,6 +8,7 @@ description: This spec has intentional errors for testing validation
 ## Lesson 1: First Lesson
 
 **Objectives:**
+
 - Learn something
 
 Content here.
@@ -25,7 +26,8 @@ Content here.
 ## Lesson 2: Second Lesson
 
 **Objectives:**
-- 
+
+-
 
 No meaningful objectives here.
 

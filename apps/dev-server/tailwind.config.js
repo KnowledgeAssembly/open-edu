@@ -19,8 +19,11 @@ export default {
       colors: tailwindColorExtensions,
       fontFamily: tailwindFontFamilyExtensions,
       fontSize: tailwindFontSizeExtensions,
-      spacing: tailwindSpacingExtensions,
+      spacing: { ...tailwindSpacingExtensions, paragraph: 'var(--oe-paragraph-spacing)' },
       borderRadius: tailwindRadiusExtensions,
+      maxWidth: {
+        reading: 'var(--oe-reading-width)',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

@@ -59,11 +59,11 @@ describe('RuntimeThemeProvider', () => {
       </RuntimeThemeProvider>,
     );
     const wrapper = container.querySelector('.open-edu-runtime') as HTMLElement;
-    expect(wrapper?.style.getPropertyValue('--oe-font-display-family')).toBe(
+    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-family')).toBe(
       'Atkinson Hyperlegible Next',
     );
-    expect(wrapper?.style.getPropertyValue('--oe-font-display-size')).toBe('32px');
-    expect(wrapper?.style.getPropertyValue('--oe-font-display-weight')).toBe('700');
+    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-size')).toBe('32px');
+    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-weight')).toBe('700');
   });
 
   it('provides ThemeDefinition via useTheme hook', () => {

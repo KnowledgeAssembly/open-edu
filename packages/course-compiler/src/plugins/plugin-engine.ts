@@ -1,7 +1,12 @@
 import type { CourseModel, CompilerDiagnostic } from '../schemas/index.js';
 import type { Root } from 'mdast';
 
-export type PluginHook = 'beforeParse' | 'afterAST' | 'transformModel' | 'beforeGenerate' | 'afterGenerate';
+export type PluginHook =
+  | 'beforeParse'
+  | 'afterAST'
+  | 'transformModel'
+  | 'beforeGenerate'
+  | 'afterGenerate';
 
 export interface PluginContext {
   model: CourseModel;
@@ -12,7 +17,9 @@ export interface PluginContext {
 
 export interface CompilerPlugin {
   name: string;
-  hooks: Partial<Record<PluginHook, (context: PluginContext) => PluginContext | Promise<PluginContext>>>;
+  hooks: Partial<
+    Record<PluginHook, (context: PluginContext) => PluginContext | Promise<PluginContext>>
+  >;
 }
 
 export interface PluginEngine {

@@ -34,7 +34,14 @@ describe('validateCourseModel', () => {
     model.modules.push({
       id: 'mod-1',
       title: 'Duplicate Module',
-      lessons: [{ id: 'l2', title: 'Lesson 2', objectives: [{ id: 'o1', description: 'Obj' }], content: 'C' }],
+      lessons: [
+        {
+          id: 'l2',
+          title: 'Lesson 2',
+          objectives: [{ id: 'o1', description: 'Obj' }],
+          content: 'C',
+        },
+      ],
     });
     const diags = validateCourseModel(model);
     expect(diags.some((d) => d.code === 'DUPLICATE_MODULE_ID')).toBe(true);
@@ -77,9 +84,30 @@ describe('validateCourseModel', () => {
     const model: CourseModel = {
       metadata: { title: 'T', description: 'D', language: 'en' },
       modules: [
-        { id: 'mod-a', title: 'A', prerequisites: ['mod-b'], lessons: [{ id: 'l1', title: 'L1', objectives: [{ id: 'o1', description: 'O' }], content: 'C' }] },
-        { id: 'mod-b', title: 'B', prerequisites: ['mod-c'], lessons: [{ id: 'l2', title: 'L2', objectives: [{ id: 'o2', description: 'O' }], content: 'C' }] },
-        { id: 'mod-c', title: 'C', prerequisites: ['mod-a'], lessons: [{ id: 'l3', title: 'L3', objectives: [{ id: 'o3', description: 'O' }], content: 'C' }] },
+        {
+          id: 'mod-a',
+          title: 'A',
+          prerequisites: ['mod-b'],
+          lessons: [
+            { id: 'l1', title: 'L1', objectives: [{ id: 'o1', description: 'O' }], content: 'C' },
+          ],
+        },
+        {
+          id: 'mod-b',
+          title: 'B',
+          prerequisites: ['mod-c'],
+          lessons: [
+            { id: 'l2', title: 'L2', objectives: [{ id: 'o2', description: 'O' }], content: 'C' },
+          ],
+        },
+        {
+          id: 'mod-c',
+          title: 'C',
+          prerequisites: ['mod-a'],
+          lessons: [
+            { id: 'l3', title: 'L3', objectives: [{ id: 'o3', description: 'O' }], content: 'C' },
+          ],
+        },
       ],
     };
     const diags = validateCourseModel(model);

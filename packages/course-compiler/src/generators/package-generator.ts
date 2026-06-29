@@ -1,6 +1,12 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CourseModel, CompilerDiagnostic, CourseModule, Lesson, Quiz } from '../schemas/index.js';
+import type {
+  CourseModel,
+  CompilerDiagnostic,
+  CourseModule,
+  Lesson,
+  Quiz,
+} from '../schemas/index.js';
 
 export interface GenerateOptions {
   verbose?: boolean;
@@ -140,7 +146,9 @@ async function generateBundle(
   await writeJson(join(outputDir, 'bundle.json'), bundle);
 }
 
-function generateWorkflow(nodeFiles: { id: string; title: string; path: string }[]): Record<string, unknown> {
+function generateWorkflow(
+  nodeFiles: { id: string; title: string; path: string }[],
+): Record<string, unknown> {
   const routing: Record<string, unknown> = {};
 
   for (let i = 0; i < nodeFiles.length; i++) {
@@ -217,7 +225,12 @@ function generateQuizJson(quiz: Quiz): Record<string, unknown> {
   };
 }
 
-function generatePlaceholderSvg(asset: { id: string; path: string; type: string; description?: string }): string {
+function generatePlaceholderSvg(asset: {
+  id: string;
+  path: string;
+  type: string;
+  description?: string;
+}): string {
   const label = asset.description ?? asset.id;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
   <rect width="400" height="300" fill="#f0f0f0" rx="8"/>
@@ -227,7 +240,11 @@ function generatePlaceholderSvg(asset: { id: string; path: string; type: string;
 }
 
 function escapeXml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function capitalize(s: string): string {

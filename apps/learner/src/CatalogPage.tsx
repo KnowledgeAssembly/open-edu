@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@open-edu/design-system';
-import type { AppView } from './LeftNav';
+import type { AppView } from './AppShell';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];

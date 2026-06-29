@@ -100,29 +100,79 @@ export const tailwindColorExtensions: Record<string, string> = {
 };
 
 export const tailwindFontFamilyExtensions: Record<string, string> = {
-  display: 'var(--oe-font-display-family)',
-  'display-lg': 'var(--oe-font-display-family)',
-  'headline-lg': 'var(--oe-font-headlineLg-family)',
-  'headline-md': 'var(--oe-font-headlineMd-family)',
-  title: 'var(--oe-font-title-family)',
-  'body-lg': 'var(--oe-font-bodyLg-family)',
-  'body-md': 'var(--oe-font-bodyMd-family)',
-  'body-reading': 'var(--oe-font-bodyLg-family)',
-  label: 'var(--oe-font-label-family)',
-  'label-caps': 'var(--oe-font-label-family)',
-  caption: 'var(--oe-font-caption-family)',
-  mono: 'var(--oe-font-mono-family)',
+  display: 'var(--oe-font-expressive-display-family)',
+  'display-lg': 'var(--oe-font-expressive-display-family)',
+  'headline-lg': 'var(--oe-font-productive-heading-family)',
+  'headline-md': 'var(--oe-font-productive-subheading-family)',
+  title: 'var(--oe-font-productive-subheading-family)',
+  'body-lg': 'var(--oe-font-expressive-body-family)',
+  'body-md': 'var(--oe-font-productive-body-family)',
+  'body-reading': 'var(--oe-font-expressive-body-family)',
+  label: 'var(--oe-font-productive-label-family)',
+  'label-caps': 'var(--oe-font-productive-label-family)',
+  caption: 'var(--oe-font-productive-caption-family)',
+  mono: 'var(--oe-font-productive-code-family)',
 };
 
 export const tailwindFontSizeExtensions: Record<string, [string, Record<string, string>]> = {
-  'display-lg': ['3rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
-  h1: ['1.875rem', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '600' }],
-  h2: ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
-  'headline-lg': ['2rem', { lineHeight: '1.25', letterSpacing: '-0.01em', fontWeight: '600' }],
-  'body-reading': ['1.125rem', { lineHeight: '1.7', fontWeight: '400' }],
-  'body-ui': ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }],
-  'label-caps': ['0.75rem', { lineHeight: '1', letterSpacing: '0.05em', fontWeight: '600' }],
-  mono: ['0.8125rem', { lineHeight: '1.6', fontWeight: '400' }],
+  'display-lg': [
+    'var(--oe-font-expressive-display-size)',
+    {
+      lineHeight: 'var(--oe-font-expressive-display-lineHeight)',
+      letterSpacing: 'var(--oe-font-expressive-display-letterSpacing)',
+      fontWeight: 'var(--oe-font-expressive-display-weight)',
+    },
+  ],
+  h1: [
+    'var(--oe-font-productive-heading-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-heading-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-heading-weight)',
+    },
+  ],
+  h2: [
+    'var(--oe-font-productive-subheading-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-subheading-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-subheading-weight)',
+    },
+  ],
+  'headline-lg': [
+    'var(--oe-font-productive-display-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-display-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-display-weight)',
+    },
+  ],
+  'body-reading': [
+    'var(--oe-font-expressive-body-size)',
+    {
+      lineHeight: 'var(--oe-font-expressive-body-lineHeight)',
+      fontWeight: 'var(--oe-font-expressive-body-weight)',
+    },
+  ],
+  'body-ui': [
+    'var(--oe-font-productive-body-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-body-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-body-weight)',
+    },
+  ],
+  'label-caps': [
+    'var(--oe-font-productive-label-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-label-lineHeight)',
+      letterSpacing: 'var(--oe-font-productive-label-letterSpacing)',
+      fontWeight: 'var(--oe-font-productive-label-weight)',
+    },
+  ],
+  mono: [
+    'var(--oe-font-productive-code-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-code-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-code-weight)',
+    },
+  ],
 };
 
 export const tailwindSpacingExtensions: Record<string, string> = {
@@ -138,6 +188,8 @@ export const tailwindSpacingExtensions: Record<string, string> = {
   'container-max': 'var(--oe-space-container-max)',
   'panel-nav': 'var(--oe-space-panel-nav)',
   'panel-explorer': 'var(--oe-space-panel-explorer)',
+  'reading-width': 'var(--oe-reading-width)',
+  'paragraph-spacing': 'var(--oe-paragraph-spacing)',
 };
 
 export const tailwindRadiusExtensions: Record<string, string> = {

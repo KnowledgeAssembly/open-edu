@@ -1,5 +1,5 @@
 import type { PackageSummary } from '@open-edu/core';
-import { type AppView } from './LeftNav';
+import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';

@@ -195,7 +195,7 @@ The `edu` CLI provides 12+ commands organized around the package lifecycle:
 | `patch`             | Apply surgical, validated JSON patches          |
 | `generate`          | Agent-ready prompt and package generation       |
 | `widget create`     | Scaffold a new widget package                   |
-| `compile`            | Compile course-spec.md into a validated package |
+| `compile`           | Compile course-spec.md into a validated package |
 | `import learn-easy` | Import Learn-Easy content as an Open-Edu bundle |
 
 All commands support `--json` for machine-readable output.

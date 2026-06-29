@@ -44,19 +44,37 @@ function validateDuplicateIds(model: CourseModel, diagnostics: CompilerDiagnosti
 
   for (const [id, count] of moduleIdCount) {
     if (count > 1) {
-      addDiag(diagnostics, 'error', `Duplicate module ID: "${id}"`, 'DUPLICATE_MODULE_ID', `Rename one of the modules with id "${id}"`);
+      addDiag(
+        diagnostics,
+        'error',
+        `Duplicate module ID: "${id}"`,
+        'DUPLICATE_MODULE_ID',
+        `Rename one of the modules with id "${id}"`,
+      );
     }
   }
 
   for (const [key, count] of lessonKeyCount) {
     if (count > 1) {
-      addDiag(diagnostics, 'error', `Duplicate lesson ID within module: "${key}"`, 'DUPLICATE_LESSON_ID', `Rename one of the lessons`);
+      addDiag(
+        diagnostics,
+        'error',
+        `Duplicate lesson ID within module: "${key}"`,
+        'DUPLICATE_LESSON_ID',
+        `Rename one of the lessons`,
+      );
     }
   }
 
   for (const [id, count] of quizIdCount) {
     if (count > 1) {
-      addDiag(diagnostics, 'error', `Duplicate quiz ID: "${id}"`, 'DUPLICATE_QUIZ_ID', `Rename one of the quizzes with id "${id}"`);
+      addDiag(
+        diagnostics,
+        'error',
+        `Duplicate quiz ID: "${id}"`,
+        'DUPLICATE_QUIZ_ID',
+        `Rename one of the quizzes with id "${id}"`,
+      );
     }
   }
 }
@@ -69,22 +87,44 @@ function validateRequiredFields(model: CourseModel, diagnostics: CompilerDiagnos
 
     for (const lesson of mod.lessons) {
       if (!lesson.title || lesson.title.trim() === '') {
-        addDiag(diagnostics, 'error', `Lesson "${lesson.id}" in module "${mod.id}" is missing a title`, 'MISSING_TITLE');
+        addDiag(
+          diagnostics,
+          'error',
+          `Lesson "${lesson.id}" in module "${mod.id}" is missing a title`,
+          'MISSING_TITLE',
+        );
       }
 
       if (!lesson.objectives || lesson.objectives.length === 0) {
-        addDiag(diagnostics, 'warning', `Lesson "${lesson.id}" in module "${mod.id}" has no learning objectives`, 'MISSING_OBJECTIVES', 'Add at least one learning objective to this lesson');
+        addDiag(
+          diagnostics,
+          'warning',
+          `Lesson "${lesson.id}" in module "${mod.id}" has no learning objectives`,
+          'MISSING_OBJECTIVES',
+          'Add at least one learning objective to this lesson',
+        );
       }
 
       if (lesson.quiz) {
         if (!lesson.quiz.questions || lesson.quiz.questions.length === 0) {
-          addDiag(diagnostics, 'error', `Quiz "${lesson.quiz.id}" in lesson "${lesson.id}" has no questions`, 'EMPTY_QUIZ', 'Add at least one question to the quiz');
+          addDiag(
+            diagnostics,
+            'error',
+            `Quiz "${lesson.quiz.id}" in lesson "${lesson.id}" has no questions`,
+            'EMPTY_QUIZ',
+            'Add at least one question to the quiz',
+          );
         }
 
         for (const question of lesson.quiz.questions) {
           const prompt = question.type === 'fill-blank' ? question.template : question.prompt;
           if (!prompt || prompt.trim() === '') {
-            addDiag(diagnostics, 'error', `Question "${question.id}" in quiz "${lesson.quiz.id}" has no prompt`, 'MISSING_QUESTION_PROMPT');
+            addDiag(
+              diagnostics,
+              'error',
+              `Question "${question.id}" in quiz "${lesson.quiz.id}" has no prompt`,
+              'MISSING_QUESTION_PROMPT',
+            );
           }
         }
       }
@@ -99,7 +139,13 @@ function validateCrossReferences(model: CourseModel, diagnostics: CompilerDiagno
     if (mod.prerequisites) {
       for (const prereq of mod.prerequisites) {
         if (!moduleIds.has(prereq)) {
-          addDiag(diagnostics, 'error', `Module "${mod.id}" references prerequisite "${prereq}" which does not exist`, 'BROKEN_PREREQUISITE', `Create a module with id "${prereq}" or remove this prerequisite`);
+          addDiag(
+            diagnostics,
+            'error',
+            `Module "${mod.id}" references prerequisite "${prereq}" which does not exist`,
+            'BROKEN_PREREQUISITE',
+            `Create a module with id "${prereq}" or remove this prerequisite`,
+          );
         }
       }
     }
@@ -129,7 +175,13 @@ function validateDependencyLoops(model: CourseModel, diagnostics: CompilerDiagno
     const visited = new Set<string>();
     const stack = new Set<string>();
     if (hasCycle(id, visited, stack)) {
-      addDiag(diagnostics, 'error', `Circular dependency detected involving module "${id}"`, 'CYCLE_DETECTED', 'Remove the circular prerequisite chain');
+      addDiag(
+        diagnostics,
+        'error',
+        `Circular dependency detected involving module "${id}"`,
+        'CYCLE_DETECTED',
+        'Remove the circular prerequisite chain',
+      );
       break;
     }
   }
@@ -143,11 +195,23 @@ function validateQuizStructure(model: CourseModel, diagnostics: CompilerDiagnost
       for (const question of lesson.quiz.questions) {
         if (question.type === 'multiple-choice') {
           if (!question.options || question.options.length < 2) {
-            addDiag(diagnostics, 'error', `Multiple-choice question "${question.id}" in quiz "${lesson.quiz.id}" has fewer than 2 options`, 'INVALID_QUESTION_OPTIONS', 'Add at least 2 options to the multiple-choice question');
+            addDiag(
+              diagnostics,
+              'error',
+              `Multiple-choice question "${question.id}" in quiz "${lesson.quiz.id}" has fewer than 2 options`,
+              'INVALID_QUESTION_OPTIONS',
+              'Add at least 2 options to the multiple-choice question',
+            );
           }
           const hasCorrect = question.options.some((o) => o.correct);
           if (!hasCorrect) {
-            addDiag(diagnostics, 'warning', `Multiple-choice question "${question.id}" in quiz "${lesson.quiz.id}" has no correct option marked`, 'MISSING_CORRECT_OPTION', 'Mark at least one option as correct');
+            addDiag(
+              diagnostics,
+              'warning',
+              `Multiple-choice question "${question.id}" in quiz "${lesson.quiz.id}" has no correct option marked`,
+              'MISSING_CORRECT_OPTION',
+              'Mark at least one option as correct',
+            );
           }
         }
       }
@@ -158,12 +222,27 @@ function validateQuizStructure(model: CourseModel, diagnostics: CompilerDiagnost
 function validateEmptyContent(model: CourseModel, diagnostics: CompilerDiagnostic[]) {
   for (const mod of model.modules) {
     if (!mod.lessons || mod.lessons.length === 0) {
-      addDiag(diagnostics, 'error', `Module "${mod.id}" has no lessons`, 'EMPTY_MODULE', 'Add at least one lesson to this module');
+      addDiag(
+        diagnostics,
+        'error',
+        `Module "${mod.id}" has no lessons`,
+        'EMPTY_MODULE',
+        'Add at least one lesson to this module',
+      );
     }
 
     for (const lesson of mod.lessons) {
-      if ((!lesson.content || lesson.content.trim() === '') && (!lesson.activities || lesson.activities.length === 0)) {
-        addDiag(diagnostics, 'warning', `Lesson "${lesson.id}" in module "${mod.id}" has no content and no activities`, 'EMPTY_LESSON', 'Add lesson content or activities');
+      if (
+        (!lesson.content || lesson.content.trim() === '') &&
+        (!lesson.activities || lesson.activities.length === 0)
+      ) {
+        addDiag(
+          diagnostics,
+          'warning',
+          `Lesson "${lesson.id}" in module "${mod.id}" has no content and no activities`,
+          'EMPTY_LESSON',
+          'Add lesson content or activities',
+        );
       }
     }
   }
@@ -175,7 +254,13 @@ function validateAssets(model: CourseModel, diagnostics: CompilerDiagnostic[]) {
       if (!lesson.assets) continue;
       for (const asset of lesson.assets) {
         if (asset.placeholderGenerated) {
-          addDiag(diagnostics, 'info', `Asset "${asset.id}" at "${asset.path}" is a generated placeholder`, 'PLACEHOLDER_ASSET', 'Replace the placeholder with the actual asset file');
+          addDiag(
+            diagnostics,
+            'info',
+            `Asset "${asset.id}" at "${asset.path}" is a generated placeholder`,
+            'PLACEHOLDER_ASSET',
+            'Replace the placeholder with the actual asset file',
+          );
         }
       }
     }
