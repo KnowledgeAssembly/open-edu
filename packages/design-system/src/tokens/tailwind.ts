@@ -39,6 +39,7 @@ export const tailwindColorExtensions: Record<string, string> = {
   'on-tertiary-container': 'var(--oe-color-on-tertiary-container)',
 
   // Error / destructive
+  destructive: 'var(--oe-color-error)',
   error: 'var(--oe-color-error)',
   'on-error': 'var(--oe-color-on-error)',
   'error-container': 'var(--oe-color-error-container)',

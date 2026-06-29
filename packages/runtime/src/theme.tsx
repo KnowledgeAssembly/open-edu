@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { flattenTheme } from '@open-edu/design-system';
 import { getTheme, defaultThemeId, DEFAULT_THEME } from './themes/index.js';
 import type { ThemeId, ThemeDefinition } from './themes/types.js';
@@ -21,8 +21,15 @@ export function RuntimeThemeProvider({
   children,
 }: RuntimeThemeProviderProps): JSX.Element {
   const definition = getTheme(themeId);
-  const vars = flattenTheme(definition);
+  const vars = useMemo(() => flattenTheme(definition), [definition]);
   const style = vars as React.CSSProperties;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    for (const [key, value] of Object.entries(vars)) {
+      root.style.setProperty(key, value);
+    }
+  }, [vars]);
 
   return (
     <ThemeContext.Provider value={definition}>
