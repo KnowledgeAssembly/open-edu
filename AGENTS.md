@@ -41,6 +41,9 @@ pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle
 pnpm --filter @open-edu/course-compiler test  # Run course-compiler tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile course-spec.md -o ./output  # Compile a course spec
+pnpm --filter @open-edu/pipeline test  # Run pipeline tests
+pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math  # Generate curriculum from PDF
+pnpm --filter @open-edu/llm-config test  # Run LLM config tests
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -63,6 +66,8 @@ open-edu/
 │   ├── rewards/             # Reward broker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md → OpenEdu package)
+│   ├── llm-config/          # LLM provider abstraction (LlmProvider interface + OpenAI)
+│   ├── pipeline/            # AI curriculum generation pipeline (PDF → course-spec.md)
 │   └── widgets/             # Widget SDK + registry + 14 built-in widgets + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
@@ -97,6 +102,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
+- `@open-edu/llm-config`, `@open-edu/pipeline`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -122,6 +128,11 @@ Epic 13 (Learner App)
 
 Epic 29 (Course Compiler)
   └─► Epics 2, 3 (compiles specs into validated packages)
+
+Epic 31 (Pipeline)
+  └─► Epics 2 (schemas used in zod schemas)
+        └─► @open-edu/llm-config (LLM provider abstraction)
+              └─► @open-edu/pipeline (6-stage PDF → course-spec.md)
 
 Epic 30 (Step Titles)
   └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)

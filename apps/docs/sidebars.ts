@@ -102,6 +102,8 @@ const sidebars: SidebarsConfig = {
         'runtime',
         'dev-server',
         'course-compiler',
+        'pipeline',
+        'llm-config',
       ],
     },
     {
