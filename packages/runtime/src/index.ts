@@ -35,6 +35,13 @@ export { SideNav } from './layout/SideNav.js';
 export type { SideNavProps } from './layout/SideNav.js';
 export { TopAppBar } from './layout/TopAppBar.js';
 export type { TopAppBarProps, TopAppBarBreadcrumb } from './layout/TopAppBar.js';
+export { AppSidebar } from './layout/AppSidebar.js';
+export type {
+  AppSidebarProps,
+  AppSidebarItem,
+  AppSidebarSection,
+  AppSidebarStepItem,
+} from './layout/AppSidebar.js';
 export { RUNTIME_THEME, RuntimeThemeProvider, useTheme } from './theme.js';
 export type { RuntimeTheme } from './theme.js';
 export {

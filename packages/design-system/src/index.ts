@@ -119,6 +119,14 @@ export type { EmptyStateProps } from './primitives/empty-state.js';
 export { Toaster } from './primitives/notification.js';
 
 // Patterns (nav components)
+export { AppSidebar } from './patterns/AppSidebar.js';
+export type {
+  AppSidebarProps,
+  AppSidebarItem,
+  AppSidebarSection,
+  AppSidebarStepItem,
+} from './patterns/AppSidebar.js';
+
 export { SideNav } from './patterns/SideNav.js';
 export type { SideNavProps, NavTabId } from './patterns/SideNav.js';
 
