@@ -28,32 +28,37 @@ const ExerciseConfigSchema = z.object({
   config: z.record(z.unknown()).optional(),
 });
 
+const NodeFields = {
+  title: z.string().max(256).optional(),
+  skills: SkillsSchema.optional(),
+} as const;
+
 export const LessonNodeSchema = z.object({
   type: z.literal('lesson'),
-  skills: SkillsSchema.optional(),
+  ...NodeFields,
 });
 
 export const QuizNodeSchema = z.object({
   type: z.literal('quiz'),
-  skills: SkillsSchema.optional(),
+  ...NodeFields,
   ...QuizConfigSchema.shape,
 });
 
 export const ReflectionNodeSchema = z.object({
   type: z.literal('reflection'),
-  skills: SkillsSchema.optional(),
+  ...NodeFields,
   ...ReflectionConfigSchema.shape,
 });
 
 export const ExerciseNodeSchema = z.object({
   type: z.literal('exercise'),
-  skills: SkillsSchema.optional(),
+  ...NodeFields,
   ...ExerciseConfigSchema.shape,
 });
 
 export const WidgetNodeSchema = z.object({
   type: z.literal('custom'),
-  skills: SkillsSchema.optional(),
+  ...NodeFields,
   ...WidgetConfigSchema.shape,
   remoteWidget: RemoteWidgetManifestSchema.optional(),
 });

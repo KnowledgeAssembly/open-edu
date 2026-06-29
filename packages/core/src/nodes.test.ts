@@ -38,6 +38,7 @@ describe('loadNodes', () => {
     const lesson = nodes.find((n) => n.relativePath === 'nodes/lesson-01.md');
     expect(lesson).toBeDefined();
     expect(lesson!.node.type).toBe('lesson');
+    expect(lesson!.node.title).toBe('Introduction to Variables');
     expect(lesson!.content).toContain('# Introduction to Variables');
   });
 
@@ -86,6 +87,77 @@ describe('loadNodes', () => {
       await mkdir(join(dir, 'nodes', 'subdir'), { recursive: true });
       await writeFile(join(dir, 'nodes', 'subdir', 'a.md'), '# A');
       await expect(loadNodes(dir)).rejects.toThrow(NodeLoadError);
+    });
+  });
+
+  it('should extract title from first # heading in markdown', async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, 'nodes', 'intro.md'),
+        '# Getting Started\n\nSome content.\n\n## Subheading\n\nMore content.',
+      );
+      const nodes = await loadNodes(dir);
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]!.node.title).toBe('Getting Started');
+    });
+  });
+
+  it('should return undefined title for markdown without # heading', async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(join(dir, 'nodes', 'plain.md'), 'Just some text without a heading.');
+      const nodes = await loadNodes(dir);
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]!.node.title).toBeUndefined();
+    });
+  });
+
+  it('should use only the first # heading as title', async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, 'nodes', 'multi.md'),
+        '# First Heading\n\nContent.\n\n# Second Heading\n\nMore content.',
+      );
+      const nodes = await loadNodes(dir);
+      expect(nodes[0]!.node.title).toBe('First Heading');
+    });
+  });
+
+  it('should preserve title from JSON node files', async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, 'nodes', 'quiz.json'),
+        JSON.stringify({
+          type: 'quiz',
+          title: 'My Quiz',
+          question: 'Test?',
+          options: [
+            { id: 'a', text: 'yes', correct: true },
+            { id: 'b', text: 'no', correct: false },
+          ],
+        }),
+      );
+      const nodes = await loadNodes(dir);
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]!.node.title).toBe('My Quiz');
+    });
+  });
+
+  it('should return undefined title for JSON node files without title field', async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, 'nodes', 'quiz.json'),
+        JSON.stringify({
+          type: 'quiz',
+          question: 'Test?',
+          options: [
+            { id: 'a', text: 'yes', correct: true },
+            { id: 'b', text: 'no', correct: false },
+          ],
+        }),
+      );
+      const nodes = await loadNodes(dir);
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]!.node.title).toBeUndefined();
     });
   });
 });

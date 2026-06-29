@@ -276,7 +276,7 @@ export function AppShell({
     const items: AppSidebarStepItem[] = orderedIds.map((nodeId) => {
       const node = runtime.loadedPackage.nodes.find((n) => n.relativePath === nodeId);
       const title = node
-        ? ((node.node as { title?: string }).title ?? nodeId.replace('.md', ''))
+        ? (node.node.title ?? nodeId.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '))
         : nodeId;
       let status: 'current' | 'completed' | 'future';
       if (nodeId === runtime.currentNodeId) status = 'current';

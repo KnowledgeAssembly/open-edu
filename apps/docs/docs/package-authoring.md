@@ -65,6 +65,7 @@ Content goes here. Use standard Markdown.
 ```json
 {
   "type": "quiz",
+  "title": "Basic Math Quiz", // optional — shown in course nav
   "question": "What is 2 + 2?",
   "options": [
     { "id": "a", "text": "3", "correct": false },
@@ -78,6 +79,7 @@ Content goes here. Use standard Markdown.
 ```json
 {
   "type": "reflection",
+  "title": "Lesson Reflection", // optional — shown in course nav
   "prompt": "What did you learn from this lesson?"
 }
 ```
@@ -87,6 +89,7 @@ Content goes here. Use standard Markdown.
 ```json
 {
   "type": "exercise",
+  "title": "Practice Exercise", // optional — shown in course nav
   "widget": "open-edu.multiple-choice-practice",
   "config": {
     "prompt": "Select the correct answer.",
@@ -103,6 +106,7 @@ Content goes here. Use standard Markdown.
 ```json
 {
   "type": "custom",
+  "title": "Remote Exercise", // optional — shown in course nav
   "remoteWidget": {
     "id": "my-remote-widget",
     "version": "1.0.0",
@@ -121,6 +125,7 @@ Content goes here. Use standard Markdown.
 ```json
 {
   "type": "exercise",
+  "title": "Algebra Skills Check", // optional — shown in course nav
   "widget": "open-edu.multiple-choice-practice",
   "assessments": [{ "skillId": "algebra.basics", "weight": 1.0 }],
   "config": {

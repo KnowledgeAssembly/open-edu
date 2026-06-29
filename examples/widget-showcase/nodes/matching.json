@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Fruit Color Matching",
   "widget": "open-edu.matching",
   "config": {
     "description": "Match each fruit to its color.",

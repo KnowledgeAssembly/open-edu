@@ -20,6 +20,13 @@ describe('LessonNodeSchema', () => {
       skills: ['math.basics'],
     });
   });
+
+  it('should accept a lesson node with title', () => {
+    expect(LessonNodeSchema.parse({ type: 'lesson', title: 'Introduction' })).toEqual({
+      type: 'lesson',
+      title: 'Introduction',
+    });
+  });
 });
 
 describe('QuizNodeSchema', () => {
@@ -76,6 +83,12 @@ describe('QuizNodeSchema', () => {
       skills: ['javascript.variables'],
     });
   });
+
+  it('should accept a quiz node with title', () => {
+    expect(
+      QuizNodeSchema.parse({ ...validQuiz, title: 'Variables Knowledge Check' }),
+    ).toMatchObject({ title: 'Variables Knowledge Check' });
+  });
 });
 
 describe('ReflectionNodeSchema', () => {
@@ -98,6 +111,16 @@ describe('ReflectionNodeSchema', () => {
       }),
     ).toMatchObject({ skills: ['reflection.meta'] });
   });
+
+  it('should accept a reflection node with title', () => {
+    expect(
+      ReflectionNodeSchema.parse({
+        type: 'reflection',
+        prompt: 'What did you learn?',
+        title: 'Learning Reflection',
+      }),
+    ).toMatchObject({ title: 'Learning Reflection' });
+  });
 });
 
 describe('ExerciseNodeSchema', () => {
@@ -113,6 +136,12 @@ describe('ExerciseNodeSchema', () => {
         config: { denominator: 4 },
       }),
     ).toMatchObject({ widget: '@open-edu/fraction-slider', config: { denominator: 4 } });
+  });
+
+  it('should accept an exercise node with title', () => {
+    expect(
+      ExerciseNodeSchema.parse({ type: 'exercise', title: 'Grid Area Practice' }),
+    ).toMatchObject({ title: 'Grid Area Practice' });
   });
 });
 
@@ -136,6 +165,12 @@ describe('WidgetNodeSchema', () => {
 
   it('should reject widget node without widget field', () => {
     expect(() => WidgetNodeSchema.parse({ type: 'custom' })).toThrow();
+  });
+
+  it('should accept a widget node with title', () => {
+    expect(
+      WidgetNodeSchema.parse({ type: 'custom', widget: 'test', title: 'Custom Widget' }),
+    ).toMatchObject({ title: 'Custom Widget' });
   });
 });
 
@@ -186,6 +221,49 @@ describe('ContentNodeSchema (discriminated union)', () => {
     expect(() =>
       ContentNodeSchema.parse({ type: 'quiz', options: [{ id: 'a', text: 'yes', correct: true }] }),
     ).toThrow();
+  });
+
+  it('should strip unknown fields from lesson nodes', () => {
+    const result = ContentNodeSchema.parse({ type: 'lesson', unknownField: 'test' });
+    expect(result).not.toHaveProperty('unknownField');
+  });
+
+  it('should preserve title field when present on lesson node', () => {
+    const result = ContentNodeSchema.parse({ type: 'lesson', title: 'Hello' });
+    expect(result).toMatchObject({ title: 'Hello' });
+  });
+});
+
+describe('title field validation', () => {
+  const validQuiz = {
+    type: 'quiz' as const,
+    question: 'Test?',
+    options: [
+      { id: 'a', text: 'yes', correct: true },
+      { id: 'b', text: 'no', correct: false },
+    ],
+  };
+
+  it('should reject title exceeding 256 characters', () => {
+    expect(() => LessonNodeSchema.parse({ type: 'lesson', title: 'a'.repeat(257) })).toThrow();
+
+    expect(() => QuizNodeSchema.parse({ ...validQuiz, title: 'a'.repeat(257) })).toThrow();
+  });
+
+  it('should accept title at exactly 256 characters', () => {
+    expect(LessonNodeSchema.parse({ type: 'lesson', title: 'a'.repeat(256) })).toMatchObject({
+      title: 'a'.repeat(256),
+    });
+  });
+
+  it('should accept nodes without a title (optional)', () => {
+    expect(LessonNodeSchema.parse({ type: 'lesson' })).not.toHaveProperty('title');
+    expect(QuizNodeSchema.parse(validQuiz)).not.toHaveProperty('title');
+    expect(
+      ReflectionNodeSchema.parse({ type: 'reflection', prompt: 'Reflect' }),
+    ).not.toHaveProperty('title');
+    expect(ExerciseNodeSchema.parse({ type: 'exercise' })).not.toHaveProperty('title');
+    expect(WidgetNodeSchema.parse({ type: 'custom', widget: 'test' })).not.toHaveProperty('title');
   });
 });
 

@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Life Cycle Sequencing",
   "widget": "open-edu.sequencing",
   "config": {
     "description": "Put the life cycle steps in correct order.",

@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Visual Counting",
   "widget": "open-edu.visual-counting",
   "config": {
     "description": "Count the stars!",

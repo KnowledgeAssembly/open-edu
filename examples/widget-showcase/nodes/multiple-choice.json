@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "General Knowledge Quiz",
   "widget": "open-edu.multiple-choice",
   "config": {
     "questions": [

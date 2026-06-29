@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Story Question",
   "widget": "open-edu.story-question",
   "config": {
     "scenario": "Maya planted a sunflower seed in a small pot. She placed it by the window and watered it every morning. After one week, a tiny green sprout appeared. Maya was excited! She continued watering it and gave it plant food. After two months, the sunflower grew taller than Maya. It had a big yellow flower on top that followed the sun across the sky.",

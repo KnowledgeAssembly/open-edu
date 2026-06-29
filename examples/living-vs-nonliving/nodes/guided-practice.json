@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Living vs Non-Living Match",
   "widget": "open-edu.matching",
   "config": {
     "description": "Match each item with whether it is living or non-living.",

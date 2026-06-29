@@ -23,7 +23,8 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
   useEffect(() => {
     if (node && !announcedRef.current.has(node.relativePath)) {
       announcedRef.current.add(node.relativePath);
-      const title = (node.node as { title?: string }).title ?? node.relativePath;
+      const title =
+        node.node.title ?? node.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
       announce(`Loaded ${node.node.type}: ${title}`);
     }
   }, [node, announce]);

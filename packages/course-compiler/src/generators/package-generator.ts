@@ -203,6 +203,7 @@ function generateQuizJson(quiz: Quiz): Record<string, unknown> {
     if (firstQuestion.type === 'multiple-choice') {
       return {
         type: 'quiz',
+        title: quiz.title,
         question: firstQuestion.prompt,
         options: firstQuestion.options.map((opt) => ({
           id: opt.id,
@@ -216,6 +217,7 @@ function generateQuizJson(quiz: Quiz): Record<string, unknown> {
 
   return {
     type: 'quiz',
+    title: quiz.title,
     question: quiz.title,
     options: [
       { id: 'a', text: 'Answer A', correct: true },

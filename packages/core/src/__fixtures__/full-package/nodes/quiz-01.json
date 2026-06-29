@@ -1,5 +1,6 @@
 {
   "type": "quiz",
+  "title": "Full Test Quiz",
   "question": "Test?",
   "options": [
     { "id": "a", "text": "Yes", "correct": true },

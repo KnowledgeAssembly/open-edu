@@ -245,7 +245,9 @@ function WorkflowAnnouncer(): null {
   useEffect(() => {
     if (currentNode && currentNodeId && !announcedRef.current.has(currentNodeId)) {
       announcedRef.current.add(currentNodeId);
-      const title = (currentNode.node as { title?: string }).title ?? currentNode.relativePath;
+      const title =
+        currentNode.node.title ??
+        currentNode.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
       announce(`Now viewing: ${title}`);
     }
   }, [currentNodeId, currentNode, announce]);

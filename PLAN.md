@@ -100,6 +100,7 @@ open-edu/
 | 12  | Integration Testing [DONE]  | 2       | P1       | Epics 5, 6, 10, 11         |
 | 13  | Learner App [DONE]          | 4       | P0       | Epics 3, 4, 5, 6, 7, 8, 11 |
 | 29  | Course Compiler [DONE]      | 7       | P1       | Epics 2, 3                 |
+| 30  | Step Titles                 | 8       | P1       | Epics 2, 3, 4, 5           |
 
 ---
 
@@ -122,6 +123,16 @@ Epic 1 (Foundation)
 
 Epic 13 (Learner App) [DONE]
   └─► Epics 3, 4, 5, 6, 7, 8, 11 (consumes all packages)
+
+Epic 30 (Step Titles)
+  └─► Epics 2, 3, 4, 5 (schema, loader, topology, runtime)
+        ├─► Story 1: Schema — adds `title` to ContentNode
+        │     └─► Stories 2, 6, 7, 8 (consumers of schema change)
+        ├─► Story 2: Core — extracts titles from .md + preserves .json titles
+        │     └─► Story 4: UI — typed title in runtime components
+        ├─► Story 3: Workflow — excludes COMPLETED sentinel from BFS
+        ├─► Story 5: Examples — adds `title` to 28 JSON node files
+        └─► Story 6: Course-Compiler — emits `title` in generated quiz JSON
 ```
 
 ---
@@ -207,6 +218,17 @@ Epic 13 (Learner App) [DONE]
 - Story 13.2: Catalog page — course grid from `scanPackages`, progress badges, click-to-launch
 - Story 13.3: Course page — sidebar, runtime provider, reward broker wiring, toast notifications, completion screen
 - Story 13.4: Progress persistence (localStorage roundtrip), Vite virtual module for package data, E2E tests
+
+### Epic 30: Step Titles
+
+- Story 30.1: Add `title` field to ContentNode schema (all 5 node types)
+- Story 30.2: Extract title from markdown `# Heading` at load time + preserve title from JSON through Zod validation
+- Story 30.3: Fix `getOrderedNodes` to exclude COMPLETED sentinel from BFS traversal
+- Story 30.4: Update runtime UI components (`Sidebar`, `NodeRenderer`, `RuntimeContext`, `embed.tsx`, `AppShell`, `ProgressDashboard`) to use typed `node.node.title`
+- Story 30.5: Add `title` to all 28 example JSON node files
+- Story 30.6: Emit `title` in course-compiler generated quiz JSON
+- Story 30.7: Update docs (`package-format.md`, `package-authoring.md`) and agent prompt with `title` field documentation
+- Story 30.8: Update test fixtures to include `title` in fake node data
 
 ---
 

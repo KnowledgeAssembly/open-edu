@@ -122,6 +122,9 @@ Epic 13 (Learner App)
 
 Epic 29 (Course Compiler)
   └─► Epics 2, 3 (compiles specs into validated packages)
+
+Epic 30 (Step Titles)
+  └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)
 ```
 
 ### Theme System (Epics 138–145)

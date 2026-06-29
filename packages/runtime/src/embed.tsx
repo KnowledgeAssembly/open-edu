@@ -88,7 +88,9 @@ function EmbedAnnouncementBridge({
 
   useEffect(() => {
     if (!currentNode || !currentNodeId) return;
-    const title = (currentNode.node as { title?: string }).title ?? currentNode.relativePath;
+    const title =
+      currentNode.node.title ??
+      currentNode.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     onAnnouncement(`Now viewing: ${title}`, 'polite');
   }, [currentNodeId, currentNode, onAnnouncement]);
 

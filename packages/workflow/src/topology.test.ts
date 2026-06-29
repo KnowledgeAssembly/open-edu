@@ -82,4 +82,53 @@ describe('getOrderedNodes', () => {
     };
     expect(getOrderedNodes(workflow, 'only')).toEqual(['only']);
   });
+
+  it('excludes COMPLETED sentinel from linear workflow', () => {
+    const workflow: Workflow = {
+      routing: {
+        a: { onComplete: 'COMPLETED' },
+      },
+    };
+    expect(getOrderedNodes(workflow, 'a')).toEqual(['a']);
+  });
+
+  it('excludes COMPLETED sentinel from conditional workflow', () => {
+    const workflow: Workflow = {
+      routing: {
+        a: {
+          conditions: [
+            { if: 'x', then: 'COMPLETED' },
+            { if: 'y', then: 'COMPLETED' },
+          ],
+        },
+      },
+    };
+    expect(getOrderedNodes(workflow, 'a')).toEqual(['a']);
+  });
+
+  it('excludes COMPLETED and continues with remaining nodes', () => {
+    const workflow: Workflow = {
+      routing: {
+        a: { onComplete: 'b' },
+        b: { onComplete: 'COMPLETED' },
+        c: { onComplete: 'd' },
+      },
+    };
+    expect(getOrderedNodes(workflow, 'a')).toEqual(['a', 'b']);
+  });
+
+  it('excludes COMPLETED in mixed conditional targets', () => {
+    const workflow: Workflow = {
+      routing: {
+        a: {
+          conditions: [
+            { if: 'score >= 80', then: 'COMPLETED' },
+            { if: 'score < 80', then: 'b' },
+          ],
+        },
+        b: { onComplete: 'COMPLETED' },
+      },
+    };
+    expect(getOrderedNodes(workflow, 'a')).toEqual(['a', 'b']);
+  });
 });
