@@ -5,29 +5,39 @@ import type { TypographyRole } from '../typography.js';
 describe('typography tokens', () => {
   const roles: TypographyRole[] = [
     'display',
-    'headlineLg',
-    'headlineMd',
-    'title',
-    'bodyLg',
-    'bodyMd',
+    'heading',
+    'subheading',
+    'body',
     'label',
     'caption',
-    'mono',
+    'code',
   ];
 
-  it('exports all 9 typography roles', () => {
+  it('exports productive set with all 7 typography roles', () => {
     for (const role of roles) {
-      expect(defaultTypography[role]).toBeDefined();
-      expect(defaultTypography[role].fontFamily).toBeDefined();
-      expect(defaultTypography[role].fontSize).toBeDefined();
+      expect(defaultTypography.productive[role]).toBeDefined();
+      expect(defaultTypography.productive[role].fontFamily).toBeDefined();
+      expect(defaultTypography.productive[role].fontSize).toBeDefined();
+    }
+  });
+
+  it('exports expressive set with all 7 typography roles', () => {
+    for (const role of roles) {
+      expect(defaultTypography.expressive[role]).toBeDefined();
+      expect(defaultTypography.expressive[role].fontFamily).toBeDefined();
+      expect(defaultTypography.expressive[role].fontSize).toBeDefined();
     }
   });
 
   it('typographyTokenToCssVar produces correct CSS variable string', () => {
-    expect(typographyTokenToCssVar('bodyMd', 'fontFamily')).toBe('var(--oe-font-bodyMd-family)');
+    expect(typographyTokenToCssVar('body', 'fontFamily', 'productive')).toBe('var(--oe-font-productive-body-family)');
   });
 
   it('typographyTokenToCssVar maps fontSize to size suffix', () => {
-    expect(typographyTokenToCssVar('display', 'fontSize')).toBe('var(--oe-font-display-size)');
+    expect(typographyTokenToCssVar('display', 'fontSize', 'expressive')).toBe('var(--oe-font-expressive-display-size)');
+  });
+
+  it('typographyTokenToCssVar defaults to productive set', () => {
+    expect(typographyTokenToCssVar('code', 'fontWeight')).toBe('var(--oe-font-productive-code-weight)');
   });
 });

@@ -16,16 +16,19 @@ export interface TypographyToken {
   letterSpacing?: string;
 }
 
-export interface TypographyTokens {
+export interface TypographySet {
   display: TypographyToken;
-  headlineLg: TypographyToken;
-  headlineMd: TypographyToken;
-  title: TypographyToken;
-  bodyLg: TypographyToken;
-  bodyMd: TypographyToken;
+  heading: TypographyToken;
+  subheading: TypographyToken;
+  body: TypographyToken;
   label: TypographyToken;
   caption: TypographyToken;
-  mono: TypographyToken;
+  code: TypographyToken;
+}
+
+export interface TypographyTokens {
+  productive: TypographySet;
+  expressive: TypographySet;
 }
 
 export interface SpacingTokens {
@@ -41,6 +44,8 @@ export interface SpacingTokens {
   containerMax: string;
   panelNav?: string;
   panelExplorer?: string;
+  readingWidth: string;
+  paragraphSpacing: string;
 }
 
 export interface RadiiTokens {

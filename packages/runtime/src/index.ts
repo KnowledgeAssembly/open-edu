@@ -49,6 +49,7 @@ export type {
   ThemeId,
   ColorTokens,
   TypographyToken,
+  TypographySet,
   TypographyTokens,
   SpacingTokens,
   RadiiTokens,

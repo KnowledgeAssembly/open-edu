@@ -68,16 +68,9 @@ const requiredColorKeys = [
 
 const hexRegex = /^#[0-9a-fA-F]{6}$/;
 
-const typographyKeys: Array<keyof ThemeDefinition['typography']> = [
-  'display',
-  'headlineLg',
-  'headlineMd',
-  'title',
-  'bodyLg',
-  'bodyMd',
-  'label',
-  'caption',
-  'mono',
+const typographySetKeys: Array<keyof ThemeDefinition['typography']> = [
+  'productive',
+  'expressive',
 ];
 
 const spacingKeys: Array<keyof ThemeDefinition['spacing']> = [
@@ -91,6 +84,8 @@ const spacingKeys: Array<keyof ThemeDefinition['spacing']> = [
   'marginDesktop',
   'marginMobile',
   'containerMax',
+  'readingWidth',
+  'paragraphSpacing',
 ];
 
 const radiiKeys: Array<keyof ThemeDefinition['radii']> = [
@@ -126,14 +121,18 @@ describe('theme definitions', () => {
         expect(Object.keys(theme.colors).length).toBe(requiredColorKeys.length);
       });
 
-      it('has all required typography tokens with font properties', () => {
-        for (const key of typographyKeys) {
-          const token = theme.typography[key];
-          expect(token).toBeDefined();
-          expect(token.fontFamily).toBeDefined();
-          expect(token.fontSize).toBeDefined();
-          expect(token.fontWeight).toBeDefined();
-          expect(token.lineHeight).toBeDefined();
+      it('has both productive and expressive typography sets', () => {
+        for (const setName of typographySetKeys) {
+          const typographySet = theme.typography[setName];
+          expect(typographySet).toBeDefined();
+          for (const role of ['display', 'heading', 'subheading', 'body', 'label', 'caption', 'code'] as const) {
+            const token = typographySet[role];
+            expect(token).toBeDefined();
+            expect(token.fontFamily).toBeDefined();
+            expect(token.fontSize).toBeDefined();
+            expect(token.fontWeight).toBeDefined();
+            expect(token.lineHeight).toBeDefined();
+          }
         }
       });
 

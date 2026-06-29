@@ -1,4 +1,4 @@
-import type { ThemeDefinition } from './types.js';
+import type { ThemeDefinition, TypographySet, TypographyToken } from './types.js';
 
 export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -7,13 +7,17 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
     vars[`--oe-color-${key}`] = value;
   }
 
-  for (const [role, token] of Object.entries(theme.typography)) {
-    vars[`--oe-font-${role}-family`] = token.fontFamily;
-    vars[`--oe-font-${role}-size`] = token.fontSize;
-    vars[`--oe-font-${role}-weight`] = String(token.fontWeight);
-    vars[`--oe-font-${role}-lineHeight`] = String(token.lineHeight);
-    if (token.letterSpacing) {
-      vars[`--oe-font-${role}-letterSpacing`] = token.letterSpacing;
+  for (const [setName, set] of Object.entries(theme.typography)) {
+    const typographySet = set as TypographySet;
+    for (const [role, token] of Object.entries(typographySet)) {
+      const t = token as TypographyToken;
+      vars[`--oe-font-${setName}-${role}-family`] = t.fontFamily;
+      vars[`--oe-font-${setName}-${role}-size`] = t.fontSize;
+      vars[`--oe-font-${setName}-${role}-weight`] = String(t.fontWeight);
+      vars[`--oe-font-${setName}-${role}-lineHeight`] = String(t.lineHeight);
+      if (t.letterSpacing) {
+        vars[`--oe-font-${setName}-${role}-letterSpacing`] = t.letterSpacing;
+      }
     }
   }
 
@@ -31,7 +35,7 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   vars['--oe-color-fg'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
   vars['--oe-color-border'] = theme.colors['outline'] ?? '';
   vars['--oe-color-success'] = theme.colors['secondary'] ?? '#16a34a';
-  vars['--oe-font-sans'] = theme.typography.bodyMd.fontFamily;
+  vars['--oe-font-sans'] = theme.typography.productive.body.fontFamily;
   vars['--oe-radius'] = theme.radii.DEFAULT;
   vars['--oe-spacing'] = theme.spacing.md;
   vars['color'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
