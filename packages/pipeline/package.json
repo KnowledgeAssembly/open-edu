@@ -1,0 +1,37 @@
+{
+  "name": "@open-edu/pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-driven content generation pipeline that transforms PDF textbooks into course-spec.md files",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "curriculum:generate": "node dist/cli/index.js"
+  },
+  "dependencies": {
+    "@open-edu/llm-config": "workspace:*",
+    "zod": "^3.22.0",
+    "dotenv": "^16.0.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0"
+  }
+}

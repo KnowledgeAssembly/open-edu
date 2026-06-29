@@ -1,0 +1,237 @@
+import { z } from 'zod';
+import type { LlmProvider } from '@open-edu/llm-config';
+import type { GeneratedConcept, GeneratedActivity, ActivityContent } from '../types.js';
+import { selectTypesForConcept } from './type-selector.js';
+import { EXEMPLARS } from './exemplars.js';
+import { OBSERVE_PROMPT } from './prompts/observe.js';
+import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
+import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
+import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
+import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
+
+const STEP_PROMPTS: Record<string, string> = {
+  observe: OBSERVE_PROMPT,
+  guided_practice: GUIDED_PRACTICE_PROMPT,
+  independent_practice: INDEPENDENT_PRACTICE_PROMPT,
+  mastery_check: MASTERY_CHECK_PROMPT,
+  positive_completion: POSITIVE_COMPLETION_PROMPT,
+};
+
+const readingContentSchema = z.object({
+  description: z.string(),
+  instructions: z.string(),
+  examples: z.array(z.string()).optional(),
+});
+
+const exerciseContentSchema = z.object({
+  description: z.string(),
+  instructions: z.string(),
+  examples: z.array(z.string()).optional(),
+});
+
+const quizContentSchema = z.object({
+  description: z.string(),
+  questions: z.array(
+    z.object({
+      question: z.string(),
+      options: z.array(z.string()).length(4),
+      correctIndex: z.number().min(0).max(3),
+    }),
+  ),
+});
+
+const reflectionContentSchema = z.object({
+  description: z.string(),
+  instructions: z.string(),
+});
+
+function stepOutputSchema(type: string): z.ZodType {
+  switch (type) {
+    case 'reading':
+      return z.object({ type: z.literal('reading'), content: readingContentSchema });
+    case 'exercise':
+      return z.object({ type: z.literal('exercise'), content: exerciseContentSchema });
+    case 'quiz':
+      return z.object({ type: z.literal('quiz'), content: quizContentSchema });
+    case 'reflection':
+      return z.object({ type: z.literal('reflection'), content: reflectionContentSchema });
+    default:
+      throw new Error(`Unknown activity type: ${type}`);
+  }
+}
+
+function buildStepPrompt(
+  step: string,
+  type: string,
+  concept: GeneratedConcept,
+  validationErrors?: string[],
+): string {
+  const template = STEP_PROMPTS[step];
+  if (!template) throw new Error(`Unknown step: ${step}`);
+
+  const filteredExemplars = EXEMPLARS.filter((e) => e.type === type && e.step === step);
+  const exemplarSection =
+    filteredExemplars.length > 0
+      ? `\n## Good Example for This Type+Step\n${filteredExemplars.map((e) => JSON.stringify(e.content, null, 2)).join('\n\n')}`
+      : '';
+
+  const retrySection =
+    validationErrors && validationErrors.length > 0
+      ? `\n\n## Validation Errors to Fix\n${validationErrors.map((e) => `  - ${e}`).join('\n')}\nPlease ensure your output does not have these issues.`
+      : '';
+
+  const prompt = template
+    .replace(/{CONCEPT_ID}/g, concept.conceptId)
+    .replace(/{LEARNING_OBJECTIVE}/g, concept.learningObjective)
+    .replace(/{CORE_IDEA}/g, concept.coreIdea)
+    .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
+    .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'));
+
+  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields.${exemplarSection}${retrySection}`;
+}
+
+function buildRetryPrompt(basePrompt: string, errors: string[], previousAttempt: unknown): string {
+  return `${basePrompt}\n\nThe previous attempt failed validation with these errors:\n${errors.map((e) => `  - ${e}`).join('\n')}\n\nPrevious attempt:\n${JSON.stringify(previousAttempt, null, 2)}\n\nPlease fix the issues and try again.`;
+}
+
+function contentToActivityContent(type: string, content: Record<string, unknown>): ActivityContent {
+  if (type === 'quiz') {
+    const questions =
+      (content.questions as Array<Record<string, unknown>>)?.map((q) => ({
+        question: q.question as string,
+        options: q.options as string[],
+        correctIndex: q.correctIndex as number,
+      })) ?? [];
+    return {
+      description: content.description as string,
+      questions,
+    };
+  }
+  return {
+    description: content.description as string,
+    instructions: content.instructions as string,
+    examples: content.examples as string[] | undefined,
+  };
+}
+
+async function generateStep(
+  llm: LlmProvider,
+  step: string,
+  type: string,
+  concept: GeneratedConcept,
+  order: number,
+  maxRetries: number,
+  validationErrors?: string[],
+): Promise<{
+  activity: GeneratedActivity | null;
+  errors: string[];
+}> {
+  const basePrompt = buildStepPrompt(step, type, concept, validationErrors);
+  const outputSchema = stepOutputSchema(type);
+
+  let lastErrors: string[] = [];
+  let lastAttempt: unknown = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const prompt =
+        attempt === 0 ? basePrompt : buildRetryPrompt(basePrompt, lastErrors, lastAttempt);
+      const result = await llm.generateStructured(prompt, outputSchema, {
+        temperature: attempt === 0 ? 0.4 : 0.5,
+        maxTokens: 4096,
+      });
+
+      const activity: GeneratedActivity = {
+        step: step as GeneratedActivity['step'],
+        courseSpecType: type as GeneratedActivity['courseSpecType'],
+        order,
+        content: contentToActivityContent(type, result.content as Record<string, unknown>),
+      };
+
+      return { activity, errors: [] };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      lastErrors = [message];
+      lastAttempt = null;
+    }
+  }
+
+  return {
+    activity: null,
+    errors: [`${step} (${type}): failed after ${maxRetries + 1} attempts`],
+  };
+}
+
+const STEP_ORDER = [
+  'observe',
+  'guided_practice',
+  'independent_practice',
+  'mastery_check',
+  'positive_completion',
+] as const;
+const MAX_RETRIES = 3;
+
+export async function generateActivitiesForConcept(
+  llm: LlmProvider,
+  concept: GeneratedConcept,
+  validationErrors?: string[],
+): Promise<{
+  activities: GeneratedActivity[];
+  warnings: string[];
+  errors: string[];
+}> {
+  const types = selectTypesForConcept(concept);
+  const activities: GeneratedActivity[] = [];
+  const allWarnings: string[] = [];
+  const allErrors: string[] = [];
+
+  for (let i = 0; i < STEP_ORDER.length; i++) {
+    const step = STEP_ORDER[i]!;
+    const type = types[step]!;
+
+    const result = await generateStep(
+      llm,
+      step,
+      type,
+      concept,
+      i + 1,
+      MAX_RETRIES,
+      validationErrors,
+    );
+
+    if (result.activity) {
+      activities.push(result.activity);
+    } else {
+      allErrors.push(...result.errors);
+    }
+  }
+
+  return { activities, warnings: allWarnings, errors: allErrors };
+}
+
+export async function generateAllActivities(
+  llm: LlmProvider,
+  concepts: GeneratedConcept[],
+): Promise<{
+  activitiesMap: Map<string, GeneratedActivity[]>;
+  warnings: string[];
+  errors: string[];
+}> {
+  const activitiesMap = new Map<string, GeneratedActivity[]>();
+  const warnings: string[] = [];
+  const errors: string[] = [];
+
+  for (const concept of concepts) {
+    const result = await generateActivitiesForConcept(llm, concept);
+
+    if (result.errors.length > 0) {
+      errors.push(...result.errors);
+      continue;
+    }
+
+    activitiesMap.set(concept.conceptId, result.activities);
+    warnings.push(...result.warnings);
+  }
+
+  return { activitiesMap, warnings, errors };
+}
