@@ -7,8 +7,8 @@ import { CatalogPage } from '../CatalogPage';
 import { HomePage } from '../HomePage';
 import { ProgressDashboard } from '../ProgressDashboard';
 import { SettingsPage } from '../SettingsPage';
-import { LeftNav } from '../LeftNav';
 import { CourseExitWarningDialog } from '../CourseExitWarningDialog';
+import { AppSidebar } from '@open-edu/design-system';
 import type { PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
@@ -82,9 +82,16 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
     await expectNoViolations(container);
   });
 
-  it('LeftNav has no axe violations', async () => {
+  it('AppSidebar has no axe violations', async () => {
     const { container } = renderWithTheme(
-      <LeftNav currentView={{ view: 'home' }} onNavigate={vi.fn()} />,
+      <AppSidebar
+        items={[
+          { id: 'home', label: 'Home', icon: <span aria-hidden="true">🏠</span> },
+          { id: 'catalog', label: 'Catalog', icon: <span aria-hidden="true">📚</span> },
+        ]}
+        currentItemId="home"
+        onNavigate={vi.fn()}
+      />,
       themeId,
     );
     await expectNoViolations(container);

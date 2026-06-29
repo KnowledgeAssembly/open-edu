@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { PackageSummary, LoadedPackage } from '@open-edu/core';
 import { getOrderedNodes } from '@open-edu/workflow';
-import { type AppView } from './LeftNav';
+import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import {

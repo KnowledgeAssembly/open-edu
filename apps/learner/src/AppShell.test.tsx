@@ -34,10 +34,10 @@ describe('AppShell', () => {
         bundleEntries={emptyBundleEntries}
       />,
     );
-    expect(screen.getByTestId('left-nav')).toBeInTheDocument();
+    expect(screen.getByTestId('app-sidebar')).toBeInTheDocument();
   });
 
-  it('renders LeftNav Section 1 items', () => {
+  it('renders AppSidebar nav items', () => {
     render(
       <AppShell
         catalogPackages={emptyPackages}
@@ -46,9 +46,9 @@ describe('AppShell', () => {
         bundleEntries={emptyBundleEntries}
       />,
     );
-    expect(screen.getByTestId('leftnav-progress')).toBeInTheDocument();
-    expect(screen.getByTestId('leftnav-catalog')).toBeInTheDocument();
-    expect(screen.getByTestId('leftnav-settings')).toBeInTheDocument();
+    expect(screen.getByTestId('appsidebar-nav-progress')).toBeInTheDocument();
+    expect(screen.getByTestId('appsidebar-nav-catalog')).toBeInTheDocument();
+    expect(screen.getByTestId('appsidebar-nav-settings')).toBeInTheDocument();
   });
 
   it('renders the TopAppBar', () => {
