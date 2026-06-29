@@ -6,11 +6,16 @@ import type { ContentNode } from '@open-edu/schemas';
 import { NodeLoadError } from './errors.js';
 import type { LoadedNode } from './types.js';
 
+function extractTitle(content: string): string | undefined {
+  const match = content.match(/^#\s+(.+)/m);
+  return match?.[1]?.trim();
+}
+
 function detectNodeType(filePath: string, content: string): ContentNode {
   const ext = extname(filePath);
 
   if (ext === '.md') {
-    return { type: 'lesson' };
+    return { type: 'lesson', title: extractTitle(content) };
   }
 
   if (ext === '.json') {

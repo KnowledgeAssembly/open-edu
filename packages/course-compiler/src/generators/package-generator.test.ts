@@ -121,6 +121,7 @@ describe('generatePackage', () => {
 
       const quiz = JSON.parse(readFileSync(join(dir, 'nodes/quiz-1.json'), 'utf-8'));
       expect(quiz.type).toBe('quiz');
+      expect(quiz.title).toBe('Intro Quiz');
       expect(quiz.question).toBe('What is 2+2?');
       expect(quiz.options).toHaveLength(2);
       expect(quiz.options[0].correct).toBe(true);

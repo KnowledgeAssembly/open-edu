@@ -52,7 +52,7 @@ export function ProgressDashboard({
     const map: Record<string, string> = {};
     Object.values(packageEntries).forEach((pkg) => {
       pkg.nodes.forEach((n) => {
-        const title = (n.node as { title?: string }).title;
+        const title = n.node.title;
         if (title) map[n.relativePath] = title;
       });
     });

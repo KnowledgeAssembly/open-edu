@@ -1,5 +1,6 @@
 {
   "type": "quiz",
+  "title": "Park Story Comprehension",
   "question": "What did Sam and Max do at the park?",
   "options": [
     { "id": "a", "text": "They fed the ducks", "correct": true },

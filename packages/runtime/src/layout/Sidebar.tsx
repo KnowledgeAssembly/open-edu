@@ -23,7 +23,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
         <ol className="list-none p-0 m-0">
           {nodes.map((node) => {
             const nodeTitle =
-              (node.node as { title?: string }).title ?? node.relativePath.replace('.md', '');
+              node.node.title ?? node.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
             const isCurrent = node.relativePath === currentNodeId;
             const isVisited = visitedNodes.includes(node.relativePath);
 

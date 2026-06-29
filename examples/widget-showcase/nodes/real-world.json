@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Real World Application",
   "widget": "open-edu.real-world",
   "config": {
     "description": "Apply measurement to the real world.",

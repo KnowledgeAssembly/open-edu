@@ -73,6 +73,7 @@ Multiple choice assessment with correct/incorrect options:
 ```json
 {
   "type": "quiz",
+  "title": "Variables Knowledge Check", // optional — shown in course nav
   "question": "Which keyword creates a constant?",
   "options": [
     { "id": "a", "text": "var", "correct": false },
@@ -88,6 +89,7 @@ Open-ended prompt for learner reflection:
 ```json
 {
   "type": "reflection",
+  "title": "Learning Reflection", // optional — shown in course nav
   "prompt": "Describe what you learned."
 }
 ```
@@ -99,6 +101,7 @@ Widget-based interactive exercise:
 ```json
 {
   "type": "exercise",
+  "title": "Capital Cities Quiz", // optional — shown in course nav
   "widget": "open-edu.multiple-choice-practice",
   "config": {
     "prompt": "What is the capital of France?",
@@ -117,6 +120,7 @@ Nodes can load widgets from remote URLs at runtime:
 ```json
 {
   "type": "custom",
+  "title": "Remote Widget Demo", // optional — shown in course nav
   "remoteWidget": {
     "id": "my-remote-widget",
     "version": "1.0.0",
@@ -137,6 +141,7 @@ Exercise and custom nodes can assess skills:
 ```json
 {
   "type": "exercise",
+  "title": "Algebra Basics Assessment", // optional — shown in course nav
   "widget": "open-edu.multiple-choice-practice",
   "assessments": [{ "skillId": "algebra.basics", "weight": 1.0 }],
   "config": {

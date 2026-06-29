@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Grid Area Practice",
   "widget": "open-edu.grid-area",
   "config": {
     "description": "Highlight 6 cells to match the area shown.",

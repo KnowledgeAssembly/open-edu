@@ -1,5 +1,6 @@
 {
   "type": "quiz",
+  "title": "Advanced Algebra Quiz",
   "question": "Which statements about advanced algebra are correct?",
   "options": [
     { "id": "a", "text": "A quadratic equation has the form ax² + bx + c = 0", "correct": true },

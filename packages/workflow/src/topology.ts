@@ -22,11 +22,13 @@ export function getOrderedNodes(workflow: Workflow, entry: string): string[] {
       continue;
     }
 
-    if (route.onComplete) {
+    if (route.onComplete && route.onComplete !== 'COMPLETED') {
       queue.push(route.onComplete);
     } else if (route.conditions) {
       for (const condition of route.conditions) {
-        queue.push(condition.then);
+        if (condition.then !== 'COMPLETED') {
+          queue.push(condition.then);
+        }
       }
     }
   }

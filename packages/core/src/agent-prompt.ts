@@ -95,13 +95,14 @@ Rules:
 Each node file lives in \`nodes/\` and is either \`.md\` (lesson) or \`.json\` (all other types).
 
 ### Lesson Node (.md)
-Markdown files automatically become type \`lesson\`. No frontmatter or JSON needed. Just write educational markdown content.
+Markdown files automatically become type \`lesson\`. No frontmatter or JSON needed. Just write educational markdown content. The first \`# Heading\` is extracted at load time and used as the node's \`title\` for display in the course navigation.
 
 ### Quiz Node (.json)
 Zod Schema:
 \`\`\`
 {
   "type": "quiz",
+  "title": "string (max 256)",     // optional — display name in course nav
   "skills": ["string"],           // optional
   "question": "string (1-2048 chars)",
   "options": [
@@ -117,6 +118,7 @@ Zod Schema:
 \`\`\`
 {
   "type": "reflection",
+  "title": "string (max 256)",     // optional — display name in course nav
   "skills": ["string"],           // optional
   "prompt": "string (1-4096 chars)"
 }
@@ -127,6 +129,7 @@ Zod Schema:
 \`\`\`
 {
   "type": "exercise",
+  "title": "string (max 256)",     // optional — display name in course nav
   "skills": ["string"],           // optional
   "widget": "string (1-256)",      // optional — one of the widget IDs below
   "config": { "key": "value" }    // optional — widget-specific config (see Widget Catalog)
@@ -138,6 +141,7 @@ Zod Schema:
 \`\`\`
 {
   "type": "custom",
+  "title": "string (max 256)",     // optional — display name in course nav
   "skills": ["string"],           // optional
   "widget": "string (1-256)",      // required — one of the widget IDs below
   "version": "string (1-64)",      // optional

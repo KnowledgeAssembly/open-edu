@@ -1,5 +1,6 @@
 {
   "type": "exercise",
+  "title": "Thermometer Reading",
   "widget": "open-edu.measurement-scale",
   "config": {
     "description": "Set the thermometer to 25 degrees.",

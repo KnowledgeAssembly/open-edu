@@ -1,5 +1,6 @@
 {
   "type": "custom",
+  "title": "Remote Practice Questions",
   "widget": "open-edu.remote-practice",
   "config": {
     "questions": [

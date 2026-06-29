@@ -1,5 +1,6 @@
 {
   "type": "quiz",
+  "title": "Fraction Fundamentals Quiz",
   "question": "Which statements about fractions are correct?",
   "options": [
     { "id": "a", "text": "The top number is called the numerator", "correct": true },

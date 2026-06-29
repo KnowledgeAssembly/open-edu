@@ -85,7 +85,7 @@ test.describe('intro-javascript (multi-node linear)', () => {
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText('Congratulations!')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Congratulations!' })).toBeVisible();
     await expect(
       page.getByText("You've completed the Introduction to JavaScript lesson"),
     ).toBeVisible();
@@ -246,7 +246,7 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Let's Review Adaptive Learning")).toBeVisible();
+    await expect(page.getByRole('heading', { name: "Let's Review Adaptive Learning" })).toBeVisible();
   });
 });
 
@@ -286,7 +286,7 @@ test.describe('skill-graph (mastery-based routing)', () => {
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText('Algebra Mastery Complete')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Algebra Mastery Complete' })).toBeVisible();
     await page.getByRole('button', { name: 'Next' }).click();
 
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
@@ -303,7 +303,7 @@ test.describe('skill-graph (mastery-based routing)', () => {
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Let's Review Algebra")).toBeVisible();
+    await expect(page.getByRole('heading', { name: "Let's Review Algebra" })).toBeVisible();
   });
 });
 
