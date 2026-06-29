@@ -30,7 +30,7 @@ const accessibleComponents: ComponentMap = {
   h1: ({ children, className, ...props }: ComponentProps<'h1'>) => (
     <h1
       id={slugify(String(children ?? ''))}
-      className={`text-h1 font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h1 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -39,7 +39,7 @@ const accessibleComponents: ComponentMap = {
   h2: ({ children, className, ...props }: ComponentProps<'h2'>) => (
     <h2
       id={slugify(String(children ?? ''))}
-      className={`text-h2 font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h2 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -48,7 +48,7 @@ const accessibleComponents: ComponentMap = {
   h3: ({ children, className, ...props }: ComponentProps<'h3'>) => (
     <h3
       id={slugify(String(children ?? ''))}
-      className={`text-xl font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h3 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -57,7 +57,7 @@ const accessibleComponents: ComponentMap = {
   h4: ({ children, className, ...props }: ComponentProps<'h4'>) => (
     <h4
       id={slugify(String(children ?? ''))}
-      className={`text-lg font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h4 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -66,7 +66,7 @@ const accessibleComponents: ComponentMap = {
   h5: ({ children, className, ...props }: ComponentProps<'h5'>) => (
     <h5
       id={slugify(String(children ?? ''))}
-      className={`text-base font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h5 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -75,11 +75,106 @@ const accessibleComponents: ComponentMap = {
   h6: ({ children, className, ...props }: ComponentProps<'h6'>) => (
     <h6
       id={slugify(String(children ?? ''))}
-      className={`text-sm font-display font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h6 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
     </h6>
+  ),
+  p: ({ children, className, ...props }: ComponentProps<'p'>) => (
+    <p
+      className={`font-body-reading mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </p>
+  ),
+  ul: ({ children, className, ...props }: ComponentProps<'ul'>) => (
+    <ul
+      className={`font-body-reading mb-paragraph-spacing list-disc pl-6${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </ul>
+  ),
+  ol: ({ children, className, ...props }: ComponentProps<'ol'>) => (
+    <ol
+      className={`font-body-reading mb-paragraph-spacing list-decimal pl-6${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </ol>
+  ),
+  li: ({ children, className, ...props }: ComponentProps<'li'>) => (
+    <li className={`font-body-reading${className ? ` ${className}` : ''}`} {...props}>
+      {children}
+    </li>
+  ),
+  blockquote: ({ children, className, ...props }: ComponentProps<'blockquote'>) => (
+    <blockquote
+      className={`font-body-reading mb-paragraph-spacing border-l-4 border-outline pl-4 italic${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </blockquote>
+  ),
+  pre: ({ children, className, ...props }: ComponentProps<'pre'>) => (
+    <pre
+      className={`font-mono mb-paragraph-spacing overflow-x-auto rounded-md bg-surface-container p-4 text-sm${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </pre>
+  ),
+  code: ({ children, className, ...props }: ComponentProps<'code'>) => {
+    const isInline = !className?.includes('language-');
+    if (isInline) {
+      return (
+        <code
+          className={`font-mono rounded-sm bg-surface-container px-1.5 py-0.5 text-sm${className ? ` ${className}` : ''}`}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    }
+    return (
+      <code className={`font-mono text-sm${className ? ` ${className}` : ''}`} {...props}>
+        {children}
+      </code>
+    );
+  },
+  table: ({ children, className, ...props }: ComponentProps<'table'>) => (
+    <div className="mb-paragraph-spacing overflow-x-auto">
+      <table
+        className={`w-full border-collapse text-body-ui${className ? ` ${className}` : ''}`}
+        {...props}
+      >
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children, className, ...props }: ComponentProps<'th'>) => (
+    <th
+      className={`border-b border-outline-variant bg-surface-container px-3 py-2 text-left font-semibold${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </th>
+  ),
+  td: ({ children, className, ...props }: ComponentProps<'td'>) => (
+    <td
+      className={`border-b border-outline-variant px-3 py-2${className ? ` ${className}` : ''}`}
+      {...props}
+    >
+      {children}
+    </td>
+  ),
+  hr: ({ className, ...props }: ComponentProps<'hr'>) => (
+    <hr
+      className={`mb-paragraph-spacing border-outline-variant${className ? ` ${className}` : ''}`}
+      {...props}
+    />
   ),
   img: ({ alt, src, ...props }: ComponentProps<'img'>) => {
     if (!alt || alt.trim() === '') {
@@ -87,12 +182,13 @@ const accessibleComponents: ComponentMap = {
     }
     return <img {...props} src={src} alt={alt} />;
   },
-  a: ({ href, children, ...props }: ComponentProps<'a'>) => {
+  a: ({ href, children, className, ...props }: ComponentProps<'a'>) => {
     const isExternal =
       typeof href === 'string' && (href.startsWith('http://') || href.startsWith('https://'));
     return (
       <a
         href={href}
+        className={`text-primary underline underline-offset-2${className ? ` ${className}` : ''}`}
         {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         {...props}
       >

@@ -20,6 +20,10 @@ export interface TypographySet {
   display: TypographyToken;
   heading: TypographyToken;
   subheading: TypographyToken;
+  heading3: TypographyToken;
+  heading4: TypographyToken;
+  heading5: TypographyToken;
+  heading6: TypographyToken;
   body: TypographyToken;
   label: TypographyToken;
   caption: TypographyToken;

@@ -137,6 +137,34 @@ export const tailwindFontSizeExtensions: Record<string, [string, Record<string, 
       fontWeight: 'var(--oe-font-productive-subheading-weight)',
     },
   ],
+  h3: [
+    'var(--oe-font-productive-heading3-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-heading3-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-heading3-weight)',
+    },
+  ],
+  h4: [
+    'var(--oe-font-productive-heading4-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-heading4-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-heading4-weight)',
+    },
+  ],
+  h5: [
+    'var(--oe-font-productive-heading5-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-heading5-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-heading5-weight)',
+    },
+  ],
+  h6: [
+    'var(--oe-font-productive-heading6-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-heading6-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-heading6-weight)',
+    },
+  ],
   'headline-lg': [
     'var(--oe-font-productive-display-size)',
     {
