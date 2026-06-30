@@ -292,14 +292,15 @@ function extractLessonObjectives(content: Content[]): LearningObjective[] | unde
 }
 
 function extractLessonBody(content: Content[]): string {
-  // Find index ranges of quiz sections to exclude from body
+  // Find index ranges of quiz and activity sections to exclude from body
   const excludedRanges: [number, number][] = [];
 
   for (let i = 0; i < content.length; i++) {
     const node = content[i];
     if (node?.type === 'heading' && node.depth === 3) {
       const text = extractHeadingText(node);
-      if (text.toLowerCase().startsWith('quiz:')) {
+      const lower = text.toLowerCase();
+      if (lower.startsWith('quiz:') || lower.startsWith('activity:')) {
         const start = i;
         let end = i + 1;
         while (end < content.length) {
@@ -366,9 +367,11 @@ function parseActivities(content: Content[], _ctx: ParseContext): Activity[] {
           activity = { id: actId, type: 'video', url: actContent };
         }
 
-        if (activity) {
-          activities.push(activity);
+        if (!activity) {
+          activity = { id: actId, type: 'reading', content: actContent };
         }
+
+        activities.push(activity);
       }
     }
   }
