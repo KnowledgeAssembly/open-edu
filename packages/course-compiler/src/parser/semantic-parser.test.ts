@@ -212,14 +212,12 @@ Content
     expect(lesson.quiz).toBeDefined();
     expect(lesson.quiz!.title).toBe('Test Quiz');
 
-    // Check that the lesson body includes the quiz content (question and options exist)
-    expect(lesson.content).toContain('What is 2+2');
+    // Quiz content should not leak into the lesson body
+    expect(lesson.content).not.toContain('What is 2+2');
 
     // Questions are extracted from the serialized content when possible
-    // Currently supports basic multiple-choice parsing
-    if (lesson.quiz!.questions.length > 0) {
-      expect(lesson.quiz!.questions[0]!.type).toBe('multiple-choice');
-    }
+    expect(lesson.quiz!.questions.length).toBe(1);
+    expect(lesson.quiz!.questions[0]!.type).toBe('multiple-choice');
   });
 
   it('generates IDs from heading slugs', () => {

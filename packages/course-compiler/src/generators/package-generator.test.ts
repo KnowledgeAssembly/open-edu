@@ -120,11 +120,54 @@ describe('generatePackage', () => {
       await generatePackage(model, dir);
 
       const quiz = JSON.parse(readFileSync(join(dir, 'nodes/quiz-1.json'), 'utf-8'));
-      expect(quiz.type).toBe('quiz');
+      expect(quiz.type).toBe('exercise');
+      expect(quiz.widget).toBe('open-edu.multiple-choice');
       expect(quiz.title).toBe('Intro Quiz');
-      expect(quiz.question).toBe('What is 2+2?');
-      expect(quiz.options).toHaveLength(2);
-      expect(quiz.options[0].correct).toBe(true);
+      expect(quiz.config.questions).toHaveLength(1);
+      expect(quiz.config.questions[0].question).toBe('What is 2+2?');
+      expect(quiz.config.questions[0].options).toEqual(['4', '5']);
+      expect(quiz.config.questions[0].correctIndex).toBe(0);
+      expect(quiz.config.interactive).toBe(true);
+    }),
+  );
+
+  it(
+    'generates quiz with all questions not just first',
+    withTempDir(async (dir) => {
+      const model = validModel();
+      model.modules[0]!.lessons[0]!.quiz = {
+        id: 'quiz-multi',
+        title: 'Multi Quiz',
+        questions: [
+          {
+            id: 'q1',
+            type: 'multiple-choice',
+            prompt: 'First question?',
+            options: [
+              { id: 'a', text: 'Correct', correct: true },
+              { id: 'b', text: 'Wrong', correct: false },
+            ],
+          },
+          {
+            id: 'q2',
+            type: 'multiple-choice',
+            prompt: 'Second question?',
+            options: [
+              { id: 'c', text: 'No', correct: false },
+              { id: 'd', text: 'Yes', correct: true },
+            ],
+          },
+        ],
+        shuffleQuestions: false,
+      };
+      await generatePackage(model, dir);
+
+      const quiz = JSON.parse(readFileSync(join(dir, 'nodes/quiz-multi.json'), 'utf-8'));
+      expect(quiz.config.questions).toHaveLength(2);
+      expect(quiz.config.questions[0].question).toBe('First question?');
+      expect(quiz.config.questions[0].correctIndex).toBe(0);
+      expect(quiz.config.questions[1].question).toBe('Second question?');
+      expect(quiz.config.questions[1].correctIndex).toBe(1);
     }),
   );
 
