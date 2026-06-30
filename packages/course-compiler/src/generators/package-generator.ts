@@ -58,7 +58,12 @@ async function generateSingleModule(
       .join(' ');
   }
 
+  await mkdir(join(outputDir, 'nodes'), { recursive: true });
+  await mkdir(join(outputDir, 'assets'), { recursive: true });
+
   for (const lesson of mod.lessons) {
+    const lessonContent = generateLessonMarkdown(lesson);
+    await writeFile(join(outputDir, `nodes/${lesson.id}.md`), lessonContent, 'utf-8');
     nodeFiles.push({
       id: lesson.id,
       title: lesson.title,
@@ -74,10 +79,24 @@ async function generateSingleModule(
           title: displayTitle(activity.id, activity.type),
           path: `nodes/${slug}${ext}`,
         });
+        if (activity.type === 'reflection') {
+          await writeJson(
+            join(outputDir, `nodes/${slug}.json`),
+            generateReflectionNode(activity),
+          );
+        } else {
+          await writeFile(
+            join(outputDir, `nodes/${slug}.md`),
+            generateActivityMarkdown(activity),
+            'utf-8',
+          );
+        }
       }
     }
 
     if (lesson.quiz) {
+      const quizContent = generateQuizJson(lesson.quiz);
+      await writeJson(join(outputDir, `nodes/${lesson.quiz.id}.json`), quizContent);
       nodeFiles.push({
         id: lesson.quiz.id,
         title: lesson.quiz.title,
@@ -87,9 +106,6 @@ async function generateSingleModule(
   }
 
   const entry = nodeFiles[0]?.path ?? 'nodes/start.md';
-
-  await mkdir(join(outputDir, 'nodes'), { recursive: true });
-  await mkdir(join(outputDir, 'assets'), { recursive: true });
 
   const pkg = {
     id: mod.id,
@@ -102,33 +118,6 @@ async function generateSingleModule(
 
   const workflow = generateWorkflow(nodeFiles);
   await writeJson(join(outputDir, 'workflow.json'), workflow);
-
-  for (const lesson of mod.lessons) {
-    const mdContent = generateLessonMarkdown(lesson);
-    await writeFile(join(outputDir, `nodes/${lesson.id}.md`), mdContent, 'utf-8');
-
-    if (lesson.activities) {
-      for (const activity of lesson.activities) {
-        if (activity.type === 'reflection') {
-          await writeJson(
-            join(outputDir, `nodes/${activity.id}.json`),
-            generateReflectionNode(activity),
-          );
-        } else {
-          await writeFile(
-            join(outputDir, `nodes/${activity.id}.md`),
-            generateActivityMarkdown(activity),
-            'utf-8',
-          );
-        }
-      }
-    }
-
-    if (lesson.quiz) {
-      const quizContent = generateQuizJson(lesson.quiz);
-      await writeJson(join(outputDir, `nodes/${lesson.quiz.id}.json`), quizContent);
-    }
-  }
 
   for (const lesson of mod.lessons) {
     if (!lesson.assets) continue;

@@ -327,4 +327,34 @@ describe('generatePackage', () => {
       expect(placeholderDiags[0]!.severity).toBe('info');
     }),
   );
+
+  it(
+    'deduplicates activity slugs when same id appears across lessons',
+    withTempDir(async (dir) => {
+      const model = validModel();
+      model.modules[0]!.lessons[0]!.activities = [
+        { id: 'activity-reflection', type: 'reflection', prompt: 'First', private: true },
+      ];
+      model.modules[0]!.lessons[1]!.activities = [
+        { id: 'activity-reflection', type: 'reflection', prompt: 'Second', private: true },
+      ];
+      await generatePackage(model, dir);
+
+      const nodes = readdirSync(join(dir, 'nodes')).sort();
+      expect(nodes).toContain('activity-reflection.json');
+      expect(nodes).toContain('activity-reflection-1.json');
+
+      const first = JSON.parse(readFileSync(join(dir, 'nodes/activity-reflection.json'), 'utf-8'));
+      expect(first.prompt).toBe('First');
+
+      const second = JSON.parse(
+        readFileSync(join(dir, 'nodes/activity-reflection-1.json'), 'utf-8'),
+      );
+      expect(second.prompt).toBe('Second');
+
+      const workflow = JSON.parse(readFileSync(join(dir, 'workflow.json'), 'utf-8'));
+      expect(workflow.routing['nodes/activity-reflection.json']).toBeDefined();
+      expect(workflow.routing['nodes/activity-reflection-1.json']).toBeDefined();
+    }),
+  );
 });
