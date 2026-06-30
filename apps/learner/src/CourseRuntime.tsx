@@ -195,7 +195,7 @@ export function CourseRuntime({
               {children}
             </div>
           )}
-          <div className="flex-1 min-w-0 relative">
+          <div className="flex-1 min-w-0 relative overflow-y-auto">
             {isCompleted ? (
               <CompletionScreen badges={badges} onBack={onBackToCatalog} />
             ) : (
