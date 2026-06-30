@@ -198,32 +198,34 @@ function generateLessonMarkdown(lesson: Lesson): string {
 }
 
 function generateQuizJson(quiz: Quiz): Record<string, unknown> {
-  if (quiz.questions.length > 0) {
-    const firstQuestion = quiz.questions[0]!;
-    if (firstQuestion.type === 'multiple-choice') {
-      return {
-        type: 'quiz',
-        title: quiz.title,
-        question: firstQuestion.prompt,
-        options: firstQuestion.options.map((opt) => ({
-          id: opt.id,
-          text: opt.text,
-          correct: opt.correct,
-        })),
-        skills: [],
-      };
+  const questions: { question: string; options: string[]; correctIndex: number }[] = [];
+
+  for (const q of quiz.questions) {
+    if (q.type === 'multiple-choice') {
+      questions.push({
+        question: q.prompt,
+        options: q.options.map((opt) => opt.text),
+        correctIndex: q.options.findIndex((opt) => opt.correct),
+      });
     }
   }
 
+  if (questions.length === 0) {
+    questions.push({
+      question: quiz.title,
+      options: ['Yes', 'No'],
+      correctIndex: 0,
+    });
+  }
+
   return {
-    type: 'quiz',
+    type: 'exercise',
+    widget: 'open-edu.multiple-choice',
     title: quiz.title,
-    question: quiz.title,
-    options: [
-      { id: 'a', text: 'Answer A', correct: true },
-      { id: 'b', text: 'Answer B', correct: false },
-    ],
-    skills: [],
+    config: {
+      questions,
+      interactive: true,
+    },
   };
 }
 

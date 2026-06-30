@@ -292,7 +292,33 @@ function extractLessonObjectives(content: Content[]): LearningObjective[] | unde
 }
 
 function extractLessonBody(content: Content[]): string {
-  const bodyNodes = content.filter((node) => {
+  // Find index ranges of quiz sections to exclude from body
+  const excludedRanges: [number, number][] = [];
+
+  for (let i = 0; i < content.length; i++) {
+    const node = content[i];
+    if (node?.type === 'heading' && node.depth === 3) {
+      const text = extractHeadingText(node);
+      if (text.toLowerCase().startsWith('quiz:')) {
+        const start = i;
+        let end = i + 1;
+        while (end < content.length) {
+          const next = content[end];
+          if (!next) {
+            end++;
+            continue;
+          }
+          if (next.type === 'heading' && next.depth <= 3) break;
+          end++;
+        }
+        excludedRanges.push([start, end]);
+      }
+    }
+  }
+
+  const bodyNodes = content.filter((node, idx) => {
+    if (excludedRanges.some(([s, e]) => idx >= s && idx < e)) return false;
+
     if (
       node.type !== 'paragraph' &&
       node.type !== 'list' &&
