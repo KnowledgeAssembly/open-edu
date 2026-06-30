@@ -122,14 +122,14 @@ function renderLesson(pair: ConceptActivityPair, lessonNum: number): string[] {
   }
 
   for (const activity of activities) {
-    const activityLines = renderActivity(activity);
+    const activityLines = renderActivity(activity, pair.concept.conceptId);
     lines.push(...activityLines);
   }
 
   return lines;
 }
 
-function renderActivity(activity: GeneratedActivity): string[] {
+function renderActivity(activity: GeneratedActivity, conceptId?: string): string[] {
   const lines: string[] = [];
 
   const stepLabels: Record<string, string> = {
@@ -142,7 +142,8 @@ function renderActivity(activity: GeneratedActivity): string[] {
 
   if (activity.step === 'mastery_check') {
     const label = activity.content.description || 'Mastery Check';
-    lines.push(`### Quiz: ${label}`);
+    const quizId = conceptId ? `${conceptId}-mastery-check` : 'quiz-mastery-check';
+    lines.push(`### Quiz: ${label} (${quizId})`);
     lines.push('');
 
     const questions = activity.content.questions || [];
