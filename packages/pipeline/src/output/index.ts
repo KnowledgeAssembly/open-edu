@@ -122,14 +122,14 @@ function renderLesson(pair: ConceptActivityPair, lessonNum: number): string[] {
   }
 
   for (const activity of activities) {
-    const activityLines = renderActivity(activity, pair.concept.conceptId, lessonNum);
+    const activityLines = renderActivity(activity, pair.concept.conceptId);
     lines.push(...activityLines);
   }
 
   return lines;
 }
 
-function renderActivity(activity: GeneratedActivity, conceptId?: string, lessonNum?: number): string[] {
+function renderActivity(activity: GeneratedActivity, conceptId?: string): string[] {
   const lines: string[] = [];
 
   const stepLabels: Record<string, string> = {
