@@ -317,8 +317,24 @@ function extractLessonBody(content: Content[]): string {
     }
   }
 
+  const excludedParagraphIndices = new Set<number>();
+  for (let i = 0; i < content.length; i++) {
+    const node = content[i];
+    if (node?.type !== 'paragraph' || !node.children.length) continue;
+    if (
+      findStrongText(node.children, 'Objectives:') ||
+      findStrongText(node.children, 'Glossary:') ||
+      findStrongText(node.children, 'References:')
+    ) {
+      excludedParagraphIndices.add(i);
+      const next = content[i + 1];
+      if (next?.type === 'list') excludedParagraphIndices.add(i + 1);
+    }
+  }
+
   const bodyNodes = content.filter((node, idx) => {
     if (excludedRanges.some(([s, e]) => idx >= s && idx < e)) return false;
+    if (excludedParagraphIndices.has(idx)) return false;
 
     if (
       node.type !== 'paragraph' &&
@@ -328,11 +344,6 @@ function extractLessonBody(content: Content[]): string {
       node.type !== 'blockquote'
     )
       return false;
-    if (node.type === 'paragraph' && node.children.length > 0) {
-      if (findStrongText(node.children, 'Objectives:')) return false;
-      if (findStrongText(node.children, 'Glossary:')) return false;
-      if (findStrongText(node.children, 'References:')) return false;
-    }
     return true;
   });
 
