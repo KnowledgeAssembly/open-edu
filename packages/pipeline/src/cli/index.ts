@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
 import { createLlmProvider } from '@open-edu/llm-config';
@@ -144,6 +144,10 @@ function validateArgs(options: CLIOptions): string[] {
 
 export async function runPipelineCLI(): Promise<void> {
   const options = parseArgs();
+
+  const cwd = process.env.INIT_CWD || process.cwd();
+  if (options.pdf) options.pdf = resolve(cwd, options.pdf);
+  options.outputDir = resolve(cwd, options.outputDir);
 
   logger.divider();
   logger.info('OpenEdu Pipeline — Curriculum Generator');

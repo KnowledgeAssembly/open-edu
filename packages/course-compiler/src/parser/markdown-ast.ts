@@ -1,6 +1,7 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkFrontmatter from 'remark-frontmatter';
+import remarkGfm from 'remark-gfm';
 import type { Root, Heading, Yaml, Content, Paragraph, Text } from 'mdast';
 
 function findYamlNodes(node: Content | Root): Yaml[] {
@@ -22,7 +23,7 @@ export function parseMarkdown(markdown: string): {
   ast: Root;
   frontmatter: Record<string, unknown>;
 } {
-  const processor = unified().use(remarkParse).use(remarkFrontmatter, ['yaml']);
+  const processor = unified().use(remarkParse).use(remarkFrontmatter, ['yaml']).use(remarkGfm);
 
   const ast = processor.parse(markdown);
 

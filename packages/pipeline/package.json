@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/chunk/prompts dist/generate-concept/prompts && cp src/chunk/prompts/*.txt dist/chunk/prompts/ && cp src/generate-concept/prompts/*.txt dist/generate-concept/prompts/",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",

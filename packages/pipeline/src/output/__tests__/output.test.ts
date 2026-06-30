@@ -71,7 +71,7 @@ describe('renderCourseSpec', () => {
 
   it('renders mastery check as Quiz', () => {
     const result = renderCourseSpec([makeFullPair()]);
-    expect(result).toContain('### Quiz: Mastery Check');
+    expect(result).toContain('### Quiz: Mastery Check (addition_1_10-mastery-check)');
     expect(result).toContain('What is 2 + 1?');
     expect(result).toContain('- [x] 3');
     expect(result).toContain('- [ ] 2');
