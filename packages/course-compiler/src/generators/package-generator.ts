@@ -6,6 +6,7 @@ import type {
   CourseModule,
   Lesson,
   Quiz,
+  Activity,
 } from '../schemas/index.js';
 
 export interface GenerateOptions {
@@ -40,6 +41,22 @@ async function generateSingleModule(
   diagnostics: CompilerDiagnostic[],
 ): Promise<void> {
   const nodeFiles: { id: string; title: string; path: string }[] = [];
+  const usedSlugs = new Map<string, number>();
+
+  function uniqueSlug(base: string): string {
+    const count = usedSlugs.get(base) ?? 0;
+    usedSlugs.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count}`;
+  }
+
+  function displayTitle(slug: string, fallback: string): string {
+    const cleaned = slug.replace(/^activity-/, '').replace(/^quiz-/, '');
+    if (!cleaned) return fallback;
+    return cleaned
+      .split('-')
+      .map(capitalize)
+      .join(' ');
+  }
 
   for (const lesson of mod.lessons) {
     nodeFiles.push({
@@ -47,6 +64,19 @@ async function generateSingleModule(
       title: lesson.title,
       path: `nodes/${lesson.id}.md`,
     });
+
+    if (lesson.activities) {
+      for (const activity of lesson.activities) {
+        const slug = uniqueSlug(activity.id);
+        const ext = activity.type === 'reflection' ? '.json' : '.md';
+        nodeFiles.push({
+          id: slug,
+          title: displayTitle(activity.id, activity.type),
+          path: `nodes/${slug}${ext}`,
+        });
+      }
+    }
+
     if (lesson.quiz) {
       nodeFiles.push({
         id: lesson.quiz.id,
@@ -76,6 +106,23 @@ async function generateSingleModule(
   for (const lesson of mod.lessons) {
     const mdContent = generateLessonMarkdown(lesson);
     await writeFile(join(outputDir, `nodes/${lesson.id}.md`), mdContent, 'utf-8');
+
+    if (lesson.activities) {
+      for (const activity of lesson.activities) {
+        if (activity.type === 'reflection') {
+          await writeJson(
+            join(outputDir, `nodes/${activity.id}.json`),
+            generateReflectionNode(activity),
+          );
+        } else {
+          await writeFile(
+            join(outputDir, `nodes/${activity.id}.md`),
+            generateActivityMarkdown(activity),
+            'utf-8',
+          );
+        }
+      }
+    }
 
     if (lesson.quiz) {
       const quizContent = generateQuizJson(lesson.quiz);
@@ -179,21 +226,6 @@ function generateLessonMarkdown(lesson: Lesson): string {
     parts.push('');
   }
 
-  if (lesson.activities) {
-    for (const activity of lesson.activities) {
-      parts.push(`## ${capitalize(activity.type)}`);
-      parts.push('');
-      if ('content' in activity && activity.content) {
-        parts.push(activity.content);
-      } else if ('instructions' in activity && activity.instructions) {
-        parts.push(activity.instructions);
-      } else if ('prompt' in activity && activity.prompt) {
-        parts.push(activity.prompt);
-      }
-      parts.push('');
-    }
-  }
-
   return parts.join('\n');
 }
 
@@ -226,6 +258,31 @@ function generateQuizJson(quiz: Quiz): Record<string, unknown> {
       questions,
       interactive: true,
     },
+  };
+}
+
+function generateActivityMarkdown(activity: Activity): string {
+  const heading = activity.id
+    .replace(/^activity-/, '')
+    .split('-')
+    .map(capitalize)
+    .join(' ');
+  const parts: string[] = [`# ${heading || capitalize(activity.type)}`, ''];
+  if ('content' in activity && activity.content) {
+    parts.push(activity.content);
+  } else if ('instructions' in activity && activity.instructions) {
+    parts.push(activity.instructions);
+  } else if ('prompt' in activity && activity.prompt) {
+    parts.push(activity.prompt);
+  }
+  return parts.join('\n') + '\n';
+}
+
+function generateReflectionNode(activity: Activity): Record<string, unknown> {
+  return {
+    type: 'reflection',
+    title: 'Reflection',
+    prompt: 'prompt' in activity ? activity.prompt : '',
   };
 }
 

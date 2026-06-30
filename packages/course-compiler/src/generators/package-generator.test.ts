@@ -172,6 +172,58 @@ describe('generatePackage', () => {
   );
 
   it(
+    'generates separate node files for each activity',
+    withTempDir(async (dir) => {
+      const model = validModel();
+      model.modules[0]!.lessons[0]!.activities = [
+        { id: 'act-reading-1', type: 'reading', content: 'Read this text.' },
+        { id: 'act-exercise-1', type: 'exercise', instructions: 'Solve these.' },
+        { id: 'act-reflection-1', type: 'reflection', prompt: 'Reflect on this.', private: true },
+      ];
+      await generatePackage(model, dir);
+
+      const nodes = readdirSync(join(dir, 'nodes')).sort();
+      expect(nodes).toContain('act-reading-1.md');
+      expect(nodes).toContain('act-exercise-1.md');
+      expect(nodes).toContain('act-reflection-1.json');
+
+      const reflection = JSON.parse(
+        readFileSync(join(dir, 'nodes/act-reflection-1.json'), 'utf-8'),
+      );
+      expect(reflection.type).toBe('reflection');
+      expect(reflection.prompt).toBe('Reflect on this.');
+
+      const reading = readFileSync(join(dir, 'nodes/act-reading-1.md'), 'utf-8');
+      expect(reading).toContain('Read this text.');
+
+      // Activities should not appear in lesson markdown
+      const lesson = readFileSync(join(dir, 'nodes/lesson-1.md'), 'utf-8');
+      expect(lesson).not.toContain('Read this text.');
+      expect(lesson).not.toContain('Solve these.');
+      expect(lesson).not.toContain('Reflect on this.');
+    }),
+  );
+
+  it(
+    'includes activity nodes in workflow routing',
+    withTempDir(async (dir) => {
+      const model = validModel();
+      model.modules[0]!.lessons[0]!.activities = [
+        { id: 'act-1', type: 'reading', content: 'Activity A' },
+        { id: 'act-2', type: 'reflection', prompt: 'Reflect', private: true },
+      ];
+      await generatePackage(model, dir);
+
+      const workflow = JSON.parse(readFileSync(join(dir, 'workflow.json'), 'utf-8'));
+      const routing = workflow.routing;
+      expect(routing['nodes/lesson-1.md'].onComplete).toBe('nodes/act-1.md');
+      expect(routing['nodes/act-1.md'].onComplete).toBe('nodes/act-2.json');
+      expect(routing['nodes/act-2.json'].onComplete).toBe('nodes/quiz-1.json');
+      expect(routing['nodes/quiz-1.json'].onComplete).toBe('nodes/lesson-2.md');
+    }),
+  );
+
+  it(
     'generates placeholder SVG assets when placeholderGenerated is true',
     withTempDir(async (dir) => {
       const model = validModel();

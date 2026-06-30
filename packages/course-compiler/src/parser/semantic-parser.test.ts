@@ -184,6 +184,41 @@ Discuss the topic.
     expect(lesson.activities![2]!.type).toBe('discussion');
   });
 
+  it('treats untyped activities as reading fallback', () => {
+    const md = `---
+title: Course
+description: Desc
+---
+
+# Module
+
+## Lesson
+
+**Objectives:**
+- Objective
+
+Content
+
+### Activity: Defining a Family
+
+This is explanatory content.
+
+### Activity: Label the Parts
+
+Identify the parts of a family.
+`;
+
+    const result = parse(md);
+    const lesson = result.model!.modules[0]!.lessons[0]!;
+    expect(lesson.activities).toBeDefined();
+    expect(lesson.activities).toHaveLength(2);
+    expect(lesson.activities![0]!.type).toBe('reading');
+    expect(lesson.activities![1]!.type).toBe('reading');
+    // Content should not be duplicated in lesson body
+    expect(lesson.content).not.toContain('explanatory content');
+    expect(lesson.content).not.toContain('Solve these problems');
+  });
+
   it('detects quiz sections from H3 headings', () => {
     const md = `---
 title: Course
