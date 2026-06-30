@@ -13,6 +13,17 @@ describe('createLlmProvider', () => {
     expect(provider.constructor.name).toBe('OpenAIProvider');
   });
 
+  it('creates an OpenRouter provider for openrouter config', () => {
+    const provider = createLlmProvider({
+      provider: 'openrouter',
+      model: 'openai/gpt-4o-mini',
+      apiKey: 'test-key',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+    expect(provider.constructor.name).toBe('OpenRouterProvider');
+  });
+
   it('throws for unknown provider', () => {
     expect(() =>
       createLlmProvider({
