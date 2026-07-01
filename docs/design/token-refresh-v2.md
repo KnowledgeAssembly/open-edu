@@ -316,17 +316,17 @@ Applied identically across Forest, High Focus, Nocturnal, Sylvan Workspace, and 
 
 **Direction:** Softer, less saturated greens. Warmer, lighter browns. Reduced sensory load while keeping nature identity.
 
-| Key token | v1 | v2 |
-|---|---|---|
-| surface | `#f6f7f3` | `#faf8f5` |
-| on-surface | `#1a1c1a` | `#1c1a17` |
-| primary | `#2d4a2c` | `#3a5a38` |
-| on-primary | `#ffffff` | `#ffffff` |
+| Key token         | v1        | v2        |
+| ----------------- | --------- | --------- |
+| surface           | `#f6f7f3` | `#faf8f5` |
+| on-surface        | `#1a1c1a` | `#1c1a17` |
+| primary           | `#2d4a2c` | `#3a5a38` |
+| on-primary        | `#ffffff` | `#ffffff` |
 | primary-container | `#d4e8cf` | `#b8d4b4` |
-| secondary | `#4a5f3a` | `#5e6d56` |
-| tertiary | `#6b5b4a` | `#7a6b4a` |
-| on-tertiary | `#ffffff` | `#ffffff` |
-| error | `#8b3a3a` | `#ba1a1a` |
+| secondary         | `#4a5f3a` | `#5e6d56` |
+| tertiary          | `#6b5b4a` | `#7a6b4a` |
+| on-tertiary       | `#ffffff` | `#ffffff` |
+| error             | `#8b3a3a` | `#ba1a1a` |
 
 All remaining tokens follow the same luminance deltas as v1, shifted to the v2 base hues.
 
@@ -334,60 +334,61 @@ All remaining tokens follow the same luminance deltas as v1, shifted to the v2 b
 
 **Direction:** Maintain max AAA contrast. Softer blue primary. Slightly warmer surface. Reduce visual aggression while keeping accessibility guarantees.
 
-| Key token | v1 | v2 |
-|---|---|---|
-| surface | `#fcf8f9` | `#fcfaf7` |
-| on-surface | `#1b1b1c` | `#1c1b1a` |
-| primary | `#002a81` | `#003d8a` |
-| on-primary | `#ffffff` | `#ffffff` |
+| Key token         | v1        | v2        |
+| ----------------- | --------- | --------- |
+| surface           | `#fcf8f9` | `#fcfaf7` |
+| on-surface        | `#1b1b1c` | `#1c1b1a` |
+| primary           | `#002a81` | `#003d8a` |
+| on-primary        | `#ffffff` | `#ffffff` |
 | primary-container | `#003eb3` | `#1a5acc` |
-| secondary | `#046d3f` | `#1a7a50` |
-| tertiary | `#631700` | `#7a2a10` |
-| error | `#ba1a1a` | `#ba1a1a` |
+| secondary         | `#046d3f` | `#1a7a50` |
+| tertiary          | `#631700` | `#7a2a10` |
+| error             | `#ba1a1a` | `#ba1a1a` |
 
 ### 12.4 Nocturnal — Softer Neon Accents
 
 **Direction:** Keep dark base. Reduce saturation on secondary (teal) and tertiary (yellow) neon accents. Less eye strain in dark mode.
 
-| Key token | v1 | v2 |
-|---|---|---|
-| surface | `#151219` | `#151219` |
+| Key token  | v1        | v2        |
+| ---------- | --------- | --------- |
+| surface    | `#151219` | `#151219` |
 | on-surface | `#e8e0ea` | `#e8e2ea` |
-| primary | `#dab9ff` | `#d4bdfa` |
+| primary    | `#dab9ff` | `#d4bdfa` |
 | on-primary | `#460283` | `#460283` |
-| secondary | `#46f5e0` | `#5adfd0` |
-| tertiary | `#d4ca38` | `#c4bc50` |
-| error | `#ffb4ab` | `#ffb4ab` |
+| secondary  | `#46f5e0` | `#5adfd0` |
+| tertiary   | `#d4ca38` | `#c4bc50` |
+| error      | `#ffb4ab` | `#ffb4ab` |
 
 ### 12.5 Sylvan Workspace — Muted Organic
 
 **Direction:** Softer, more muted earth tones. Less saturation, more readability. Warm organic feel preserved.
 
-| Key token | v1 | v2 |
-|---|---|---|
-| surface | `#f9faf6` | `#faf8f4` |
-| on-surface | `#1a1c1a` | `#1c1b17` |
-| primary | `#061b0e` | `#1a301a` |
+| Key token         | v1        | v2        |
+| ----------------- | --------- | --------- |
+| surface           | `#f9faf6` | `#faf8f4` |
+| on-surface        | `#1a1c1a` | `#1c1b17` |
+| primary           | `#061b0e` | `#1a301a` |
 | primary-container | `#b4cdb8` | `#c4dcc4` |
-| secondary | `#536253` | `#5e6e5a` |
-| tertiary | `#251207` | `#3a2a1a` |
+| secondary         | `#536253` | `#5e6e5a` |
+| tertiary          | `#251207` | `#3a2a1a` |
 
 ### 12.6 Zen — Softer Neutral
 
 **Direction:** Reduce surface/on-surface contrast gap slightly. Slightly warmer stone tones. Gentler minimalism.
 
-| Key token | v1 | v2 |
-|---|---|---|
-| surface | `#fafaf9` | `#fcfaf8` |
+| Key token  | v1        | v2        |
+| ---------- | --------- | --------- |
+| surface    | `#fafaf9` | `#fcfaf8` |
 | on-surface | `#1c1917` | `#1f1c1a` |
-| primary | `#57534e` | `#5d5a54` |
+| primary    | `#57534e` | `#5d5a54` |
 | on-primary | `#ffffff` | `#ffffff` |
-| secondary | `#6e6a66` | `#726e68` |
-| tertiary | `#6b6b6b` | `#727070` |
+| secondary  | `#6e6a66` | `#726e68` |
+| tertiary   | `#6b6b6b` | `#727070` |
 
 ### 12.7 Implementation Notes
 
 For each theme, the full token maps (all ~55 color tokens) are inlined in the theme definition file. Tokens not listed above preserve the same luminance deltas as v1, shifted to the v2 base hues. The relations are:
+
 - `surface-container-dim` = surface − ~12 L\*
 - `surface-container-low` = surface − ~2 L\*
 - `outline` = surface − ~50 L\*
