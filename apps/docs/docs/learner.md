@@ -101,6 +101,43 @@ Progress is saved to `localStorage` under the key `open-edu-progress` (a JSON ma
 
 If a package includes `rewards.json`, the app creates a `RewardBroker` that listens for events from the `WorkflowEngine`. When a badge is earned, a toast notification appears in the bottom-right corner for 3 seconds, and the badge is recorded for display on the completion screen.
 
+## Collection Binder
+
+The **Collection Binder** is a sidebar-accessible view that displays all unlocked Living Knowledge Cards across every loaded package. Each card category forms a **shelf** with a `ProgressRing` showing collection progress.
+
+**Access:** Click the "Collection Binder" link in the sidebar (`Library` icon) on any non-course page.
+
+**Features:**
+- Category shelves sorted alphabetically
+- Circular progress ring per shelf (`unlockedCount / totalCount`)
+- Card grid with glassmorphism cards showing type icon, level stars, and lock state
+- CardViewer dialog on click with full card details and mastery level progression
+- Progress persisted to localStorage (`open-edu-cards` key)
+- Restores cross-session card levels via `CardBroker.initialLevels`
+
+### Persistence
+
+| Key | Format | Description |
+|---|---|---|
+| `open-edu-cards` | `{ [cardId]: { level, unlockedAt } }` | Card level progress per card ID |
+
+### Implementation
+
+The Collection Binder is wired in `AppShell.tsx` through the `collection` view type. It receives all `packageEntries` and aggregates cards from every package that has a `cards.json` file. The `CardBroker` is instantiated inside `CourseRuntime.tsx` and feeds telemetry events to evaluate unlock/level-up conditions.
+
+```typescript
+// CourseRuntime.tsx — CardBroker setup
+const cardBroker = pkg.cards?.cards
+  ? new CardBroker({
+      cards: pkg.cards.cards,
+      source: session.events$,
+      initialLevels: fromEntries(/* saved progress */),
+      onCardUnlocked: (card) => { /* show toast, save progress */ },
+      onCardLeveledUp: (card, newLevel) => { /* show toast, save progress */ },
+    })
+  : null;
+```
+
 ## Completion Screen
 
 After the workflow reaches `COMPLETED`, the app renders a **CompletionScreen** showing:

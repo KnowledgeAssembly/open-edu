@@ -84,6 +84,7 @@ my-lesson/
 ├── package.json       # Manifest — id, title, version, author, entry
 ├── workflow.json      # Routing — how learners navigate between nodes
 ├── rewards.json       # Rewards — badges, webhooks, scripts (optional)
+├── cards.json         # Living Knowledge Cards — unlockable achievements (optional)
 ├── nodes/             # Content — markdown lessons, JSON quizzes/reflections
 │   ├── intro.md
 │   ├── quiz.json
@@ -191,14 +192,14 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **4 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                | Done   |
 | `@open-edu/accessibility`   | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                                                                                                            | Done   |
 | `@open-edu/telemetry`       | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                 | Done   |
-| `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                      | Done   |
+| `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                             | Done   |
 | `@open-edu/cli`             | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                              | Done   |
 | `@open-edu/dev-server`      | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector, **bundle inspector tab**, **multi-module bundle mode**                                                                                                                                  | Done   |
 | `@open-edu/widgets`         | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                                                                                                                                                                              | Done   |
 | `@open-edu/course-compiler` | Remark/Unified-based compiler that converts `course-spec.md` or `course-spec.json` into validated OpenEdu packages — auto-detects format by extension                                                                                                                                     | Done   |
 | `@open-edu/pipeline`        | AI-driven PDF → course spec generation pipeline — 6 stages (extract, chunk, concepts, activities, validate, output), LLM-driven widget selection, supports `--format md/json/both`                                                                                                        | Done   |
 | `@open-edu/llm-config`      | LLM provider abstraction — `generateStructured<T>()` with Zod validation, supports OpenAI + OpenRouter providers                                                                                                                                                                          | Done   |
-| `@open-edu/learner`         | Standalone learner app — course catalog, **6-page router** (catalog, course home, lesson, assessment, code, progress), **bundle catalog + overview**, **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward integration, E2E-tested workflow | Done   |
+| `@open-edu/learner`         | Standalone learner app — course catalog, **6-page router** (catalog, course home, lesson, assessment, code, progress), **bundle catalog + overview**, **Collection Binder** (card museum with category shelves), **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward + card integration, E2E-tested workflow | Done   |
 
 ## Examples
 
@@ -209,7 +210,7 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | [fractions](./examples/fractions)                     | Fractions quiz with score-based remediation and feedback                                   | Conditional branching                                         |
 | [autism-reading](./examples/autism-reading)           | Accessibility-first reading lesson with reflection                                         | Linear + reflection node                                      |
 | [adaptive-study](./examples/adaptive-study)           | Advanced adaptive learning with checkpoint, remediation loop, reflection, and badge reward | Conditional branching + remediation loop + reflection + badge |
-| [living-vs-nonliving](./examples/living-vs-nonliving) | Multi-activity science lesson with observation, quizzes, mastery check, and badge rewards  | Linear chain with quiz branching + rewards                    |
+| [living-vs-nonliving](./examples/living-vs-nonliving) | Multi-activity science lesson with observation, quizzes, mastery check, badge rewards, and Knowledge Cards | Linear chain with quiz branching + rewards + cards            |
 | [skill-graph](./examples/skill-graph)                 | Mastery-based routing — pass `algebra.basics` to unlock `algebra.advanced`                 | Skill-graph conditional branching + remediation loop          |
 | [level-b-math](./examples/level-b-math)               | Multi-module bundle — 3 modules (addition basics → carry → fractions) with prerequisites   | Bundle (prerequisite chain across modules)                    |
 | [widget-practice](./examples/widget-practice)         | Widget-based exercise rendering using the built-in multiple-choice widget                  | Linear → COMPLETED                                            |
@@ -318,8 +319,8 @@ Educational Package (Markdown + JSON)
   └────┘└────┘└───┬────┘└──────────┘
                   ▼
            ┌─────────┐
-           │ Rewards  │  Badges, webhooks, scripts
-           └─────────┘
+            │ Rewards  │  Badges, webhooks, scripts, CardBroker
+            └─────────┘
                   │
                   ▼
            ┌────────────────────┐
@@ -380,7 +381,7 @@ open-edu/
 │   ├── runtime/             # React runtime + layout components + 4 themes + theme selector
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry, JSONL reader + summary
-│   ├── rewards/             # Reward broker, conditions, verification
+│   ├── rewards/             # Reward broker, CardBroker, conditions, verification
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline

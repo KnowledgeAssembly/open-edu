@@ -6,7 +6,7 @@ import type { LoadedPackage } from '@open-edu/core';
 import { getAllCardProgress } from './cardsStorage';
 
 export interface CollectionBinderPageProps {
-  pkg?: LoadedPackage;
+  packages: Record<string, LoadedPackage>;
 }
 
 interface ShelfData {
@@ -14,22 +14,22 @@ interface ShelfData {
   cards: CardGridItem[];
 }
 
-export function CollectionBinderPage({ pkg }: CollectionBinderPageProps): JSX.Element {
+export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
   const savedProgress = useMemo(() => getAllCardProgress(), []);
 
   const allCardItems = useMemo<CardGridItem[]>(() => {
-    if (!pkg?.cards?.cards) return [];
-    return pkg.cards.cards.map((card) => {
-      const saved = savedProgress[card.id];
-      const level = saved?.level ?? (savedProgress[card.id] ? 1 : 0);
-      return {
-        card,
-        level,
-        isLocked: level === 0,
-      };
-    });
-  }, [pkg, savedProgress]);
+    const items: CardGridItem[] = [];
+    for (const pkg of Object.values(packages)) {
+      if (!pkg.cards?.cards) continue;
+      for (const card of pkg.cards.cards) {
+        const saved = savedProgress[card.id];
+        const level = saved?.level ?? (savedProgress[card.id] ? 1 : 0);
+        items.push({ card, level, isLocked: level === 0 });
+      }
+    }
+    return items;
+  }, [packages, savedProgress]);
 
   const shelves = useMemo<ShelfData[]>(() => {
     const grouped: Record<string, CardGridItem[]> = {};

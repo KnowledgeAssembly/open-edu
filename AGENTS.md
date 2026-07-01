@@ -63,7 +63,7 @@ open-edu/
 │   ├── runtime/             # React runtime + 6 layout components + 4 themes + 7 renderers
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry + JSONL reader + summary
-│   ├── rewards/             # Reward broker + conditions + verification + replay
+│   ├── rewards/             # Reward broker + CardBroker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline
@@ -142,6 +142,9 @@ Epic 31 (Pipeline)
 
 Epic 32 (LLM Config)
   └─► Epic 31 (LLM provider abstraction — OpenAI + OpenRouter)
+
+Epic 298 (Recognition Engine)
+  └─► Epics 2, 3, 8, 5, 13 (card schemas, loader, CardBroker, card UI components, Collection Binder learner app integration)
 ```
 
 ### Theme System (Epics 138–145)

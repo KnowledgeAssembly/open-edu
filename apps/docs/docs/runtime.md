@@ -291,6 +291,102 @@ if (isValidSnapshot(data)) {
 }
 ```
 
+## Living Knowledge Card Components
+
+The runtime includes 5 reusable card UI components for the Recognition Engine.
+
+### Card
+
+A glassmorphism card with category-based color accents, locked/unlocked states, and level stars.
+
+```tsx
+import { Card } from '@open-edu/runtime';
+import type { CardDefinition } from '@open-edu/schemas';
+
+const card: CardDefinition = { /* ... */ };
+
+<Card card={card} level={2} isLocked={false} onClick={() => openViewer(card)} />;
+```
+
+Features:
+- Category-specific gradient backgrounds (emerald for knowledge, indigo for skill, etc.)
+- Locked state with `grayscale` filter, lock icon, and `aria-disabled`
+- Level stars (up to `maximumLevel`) in amber on unlocked cards
+- Full keyboard accessibility (`role="button"`, tabIndex, Enter/Space handlers)
+
+### CardGrid
+
+Responsive grid with roving tabindex keyboard navigation (arrow keys, Home, End).
+
+```tsx
+import { CardGrid } from '@open-edu/runtime';
+
+const items = cards.map((card) => ({
+  card,
+  level: getLevel(card.id),
+  isLocked: getLevel(card.id) === 0,
+}));
+
+<CardGrid cards={items} onCardClick={(card) => setSelected(card)} />;
+```
+
+### CardViewer
+
+Dialog showing full card details with a mastery level evolution stepper.
+
+```tsx
+import { CardViewer } from '@open-edu/runtime';
+
+{selectedCard && (
+  <CardViewer
+    card={selectedCard}
+    level={savedProgress[selectedCard.id]?.level ?? 1}
+    onClose={() => setSelectedCard(null)}
+    onRelatedLessonClick={(nodeId) => navigate(nodeId)}
+  />
+)}
+```
+
+Features:
+- 5-level mastery stepper (Introduced → Understand → Explain → Apply → Master)
+- Current level highlighted with primary border
+- Related lessons and quizzes as clickable links
+- Tags, difficulty, and type badges
+
+### ProgressRing
+
+SVG circular progress indicator with color transitions (red → amber → green).
+
+```tsx
+import { ProgressRing } from '@open-edu/runtime';
+
+<ProgressRing progress={75} size={64} strokeWidth={4} />;
+```
+
+### CardUnlockedToast
+
+Non-blocking bottom-right toast notification for card unlock/level-up events.
+
+```tsx
+import { CardUnlockedToast } from '@open-edu/runtime';
+
+<CardUnlockedToast
+  card={card}
+  newLevel={2}
+  visible={showToast}
+  type="levelUp"
+  onDismiss={() => setShowToast(false)}
+  autoDismissMs={4000}
+/>;
+```
+
+Features:
+- Slide-in animation (respects `prefers-reduced-motion`)
+- Auto-dismiss with configurable timeout
+- Escape key dismiss
+- `role="status"` with `aria-live="polite"`
+- View button for navigating to the Collection Binder
+
 ## Embed Adapter
 
 Mount the runtime in any DOM element without importing React directly:

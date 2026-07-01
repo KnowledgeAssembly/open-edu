@@ -26,6 +26,10 @@ The schema package is the single source of truth for all data structures in the 
 | `TelemetryEventSchema`                                                                                 | Discriminated union of all telemetry event types                                             |
 | `RemoteWidgetManifestSchema`                                                                           | Remote widget identity, URL, integrity hash, fallback                                        |
 | `SkillsSchema`                                                                                         | Skill definitions in manifest                                                                |
+| `CardDefinitionSchema`                                                                                 | A single Living Knowledge Card — `id`, `title`, `type`, `category`, `summary`, `unlock` etc. |
+| `CardDefinitionsSchema`                                                                                | Object wrapper `{ cards: [...] }` for card definitions                                       |
+| `CardTypeSchema`                                                                                       | Enum: `knowledge`, `skill`, `achievement`, `exploration`, `mentor`                           |
+| `CardDifficultySchema`                                                                                 | Enum: `easy`, `medium`, `hard`                                                               |
 
 ## Usage
 
