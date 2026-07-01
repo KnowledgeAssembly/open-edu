@@ -40,7 +40,10 @@ pnpm test:e2e                         # Run Playwright E2E tests
 pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle
 pnpm --filter @open-edu/course-compiler test  # Run course-compiler tests
-pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile course-spec.md -o ./output  # Compile a course spec
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile course-spec.md -o ./output  # Compile a course spec (also supports .json)
+pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math  # Generate curriculum from PDF
+pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --format json  # JSON-only pipeline output
+pnpm --filter @open-edu/pipeline test  # Run pipeline tests
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -62,7 +65,9 @@ open-edu/
 │   ├── telemetry/           # RxJS telemetry + JSONL reader + summary
 │   ├── rewards/             # Reward broker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
-│   ├── course-compiler/     # Course spec compiler (course-spec.md → OpenEdu package)
+│   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
+│   ├── pipeline/            # AI-driven PDF → course spec generation pipeline
+│   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
 │   └── widgets/             # Widget SDK + registry + 14 built-in widgets + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
@@ -97,6 +102,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
+- `@open-edu/pipeline`, `@open-edu/llm-config`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -125,6 +131,12 @@ Epic 29 (Course Compiler)
 
 Epic 30 (Step Titles)
   └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)
+
+Epic 31 (Pipeline)
+  └─► Epics 2, 3, 29, widgets (AI-generated PDF → course-spec via LLM pipeline)
+
+Epic 32 (LLM Config)
+  └─► Epic 31 (LLM provider abstraction — OpenAI + OpenRouter)
 ```
 
 ### Theme System (Epics 138–145)
