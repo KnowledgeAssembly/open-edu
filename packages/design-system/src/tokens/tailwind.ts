@@ -228,3 +228,15 @@ export const tailwindRadiusExtensions: Record<string, string> = {
   xl: 'var(--oe-radius-xl)',
   full: 'var(--oe-radius-full)',
 };
+
+export const tailwindTransitionDurationExtensions: Record<string, string> = {
+  fast: 'var(--oe-motion-duration-fast)',
+  normal: 'var(--oe-motion-duration-normal)',
+  slow: 'var(--oe-motion-duration-slow)',
+};
+
+export const tailwindTransitionTimingExtensions: Record<string, string> = {
+  in: 'var(--oe-motion-easing-ease-in)',
+  out: 'var(--oe-motion-easing-ease-out)',
+  'in-out': 'var(--oe-motion-easing-ease-in-out)',
+};

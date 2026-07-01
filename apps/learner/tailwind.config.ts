@@ -5,6 +5,8 @@ import {
   tailwindFontSizeExtensions,
   tailwindSpacingExtensions,
   tailwindRadiusExtensions,
+  tailwindTransitionDurationExtensions,
+  tailwindTransitionTimingExtensions,
 } from '@open-edu/design-system/tokens';
 
 const config: Config = {
@@ -21,6 +23,8 @@ const config: Config = {
       fontSize: tailwindFontSizeExtensions,
       spacing: { ...tailwindSpacingExtensions, paragraph: 'var(--oe-paragraph-spacing)' },
       borderRadius: tailwindRadiusExtensions,
+      transitionDuration: tailwindTransitionDurationExtensions,
+      transitionTimingFunction: tailwindTransitionTimingExtensions,
       maxWidth: {
         reading: 'var(--oe-reading-width)',
       },
