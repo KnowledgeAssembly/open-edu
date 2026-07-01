@@ -7,6 +7,7 @@ import { dirname, resolve } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOG_DIR = resolve(__dirname, '../../examples');
+const PKGS_DIR = resolve(__dirname, '../../packages');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
 
@@ -73,9 +74,16 @@ export const bundleEntries = ${bundleEntriesJson};
 export default defineConfig({
   plugins: [react(), eduDataPlugin()],
   resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-    },
+    alias: [
+      { find: /^fs\/promises$/, replacement: resolve(__dirname, 'src/stubs/fs-promises.ts') },
+      { find: /^fs$/, replacement: resolve(__dirname, 'src/stubs/fs.ts') },
+      { find: /^path$/, replacement: resolve(__dirname, 'src/stubs/path.ts') },
+      { find: /^child_process$/, replacement: resolve(__dirname, 'src/stubs/child_process.ts') },
+      { find: /^util$/, replacement: resolve(__dirname, 'src/stubs/util.ts') },
+      { find: '@', replacement: resolve(__dirname, './src') },
+      { find: /^@open-edu\/telemetry$/, replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts') },
+      { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
+    ],
   },
   server: { port: 4001 },
 });
