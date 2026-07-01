@@ -129,6 +129,11 @@ Epic 13 (Learner App)
 Epic 29 (Course Compiler)
   └─► Epics 2, 3 (compiles specs into validated packages)
 
+Epic 31 (Pipeline)
+  └─► Epics 2 (schemas used in zod schemas)
+        └─► @open-edu/llm-config (LLM provider abstraction)
+              └─► @open-edu/pipeline (6-stage PDF → course-spec.md)
+
 Epic 30 (Step Titles)
   └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)
 
