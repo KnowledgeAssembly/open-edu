@@ -88,6 +88,7 @@ const samplePackage: LoadedPackage = {
     },
   } as any,
   rewards: null,
+  cards: null,
   nodes: [
     {
       path: '/test/course/nodes/lesson-01.md',

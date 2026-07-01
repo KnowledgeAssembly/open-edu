@@ -24,6 +24,7 @@ const validPkg: LoadedPackage = {
   rewards: {
     triggers: [{ onEvent: 'node_complete', rewards: [{ action: 'badge.award', badge: 'done' }] }],
   },
+  cards: null,
   nodes: [
     {
       path: '/tmp/test-pkg/nodes/start.md',

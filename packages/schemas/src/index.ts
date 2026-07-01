@@ -94,6 +94,14 @@ export type {
   RouteTriggeredEvent,
 } from './telemetry.js';
 
+export {
+  CardTypeSchema,
+  CardDifficultySchema,
+  CardDefinitionSchema,
+  CardDefinitionsSchema,
+} from './cards.js';
+export type { CardType, CardDifficulty, CardDefinition, CardDefinitions } from './cards.js';
+
 export const SCHEMAS_VERSION = '0.1.0';
 
 export { toJsonSchema } from './json-schema.js';

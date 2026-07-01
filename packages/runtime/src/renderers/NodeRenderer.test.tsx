@@ -29,6 +29,7 @@ function makePackage(
     },
     workflow: { routing: {} },
     rewards: null,
+    cards: null,
     nodes: nodes.map((n) => makeLoadedNode(n.relativePath, n.node, n.content)),
     assetPaths: [],
   };

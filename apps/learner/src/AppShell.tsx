@@ -9,7 +9,7 @@ import {
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
-import { Home, TrendingUp, BookOpen, Settings } from 'lucide-react';
+import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
 import { AppSidebar, AppLayout } from '@open-edu/design-system';
 import type {
   AppSidebarItem,
@@ -23,6 +23,7 @@ import { ProgressDashboard } from './ProgressDashboard';
 import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
+import { CollectionBinderPage } from './CollectionBinderPage';
 import { getBundleProgress } from './bundleProgressStorage';
 
 export type AppView =
@@ -31,7 +32,8 @@ export type AppView =
   | { view: 'progress' }
   | { view: 'settings' }
   | { view: 'course'; packageId: string; bundleId?: string; moduleId?: string }
-  | { view: 'bundleOverview'; bundleId: string };
+  | { view: 'bundleOverview'; bundleId: string }
+  | { view: 'collection' };
 
 export interface AppShellProps {
   catalogPackages: PackageSummary[];
@@ -237,11 +239,17 @@ export function AppShell({
   const navItems: AppSidebarItem[] = [
     { id: 'home', label: 'Home', icon: <Home className="h-5 w-5" /> },
     { id: 'progress', label: 'My Progress', icon: <TrendingUp className="h-5 w-5" /> },
+    { id: 'collection', label: 'Collection Binder', icon: <Library className="h-5 w-5" /> },
     { id: 'catalog', label: 'Course Catalog', icon: <BookOpen className="h-5 w-5" /> },
     { id: 'settings', label: 'Settings', icon: <Settings className="h-5 w-5" /> },
   ];
 
-  const currentNavId = view.view === 'bundleOverview' ? 'catalog' : view.view;
+  const currentNavId =
+    view.view === 'bundleOverview'
+      ? 'catalog'
+      : view.view === 'collection'
+        ? 'collection'
+        : view.view;
 
   const handleNavAction = useCallback(
     (id: string) => {
@@ -254,6 +262,9 @@ export function AppShell({
           break;
         case 'progress':
           handleNavigate({ view: 'progress' });
+          break;
+        case 'collection':
+          handleNavigate({ view: 'collection' });
           break;
         case 'settings':
           handleNavigate({ view: 'settings' });
@@ -391,6 +402,7 @@ export function AppShell({
               {view.view === 'settings' && (
                 <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
               )}
+              {view.view === 'collection' && <CollectionBinderPage pkg={coursePkg ?? undefined} />}
             </main>
           </AppLayout>
         )}

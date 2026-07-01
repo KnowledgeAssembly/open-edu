@@ -21,6 +21,7 @@ function makePackage(
     },
     workflow: { routing: {} },
     rewards: null,
+    cards: null,
     nodes: nodes.map((n) => ({
       path: `/tmp/${n.relativePath}`,
       relativePath: n.relativePath,

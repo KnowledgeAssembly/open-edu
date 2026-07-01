@@ -54,6 +54,7 @@ function makePackage(nodes: LoadedNode[]): LoadedPackage {
     },
     workflow: { routing: {} },
     rewards: null,
+    cards: null,
     nodes,
     assetPaths: [],
   };

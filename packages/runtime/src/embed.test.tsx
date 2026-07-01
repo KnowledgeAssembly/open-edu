@@ -19,6 +19,7 @@ const mockPackage: LoadedPackage = {
     },
   },
   rewards: null,
+  cards: null,
   nodes: [
     {
       path: '/mock/nodes/start.md',

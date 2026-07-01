@@ -18,6 +18,7 @@ const testPkg: LoadedPackage = {
   },
   workflow: null,
   rewards: null,
+  cards: null,
   nodes: [
     {
       path: '/tmp/test-pkg/nodes/entry.md',

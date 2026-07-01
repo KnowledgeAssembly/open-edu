@@ -23,6 +23,7 @@ function makePkg(overrides: Partial<LoadedPackage>): LoadedPackage {
     },
     workflow: null,
     rewards: null,
+    cards: null,
     nodes: [],
     assetPaths: [],
     ...overrides,

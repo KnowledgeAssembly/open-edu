@@ -69,6 +69,7 @@ describe('generateFromDescription', () => {
       },
       workflow: null,
       rewards: null,
+      cards: null,
       nodes: [
         {
           path: join(tempDir, 'nodes/intro.md'),

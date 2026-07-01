@@ -1,0 +1,20 @@
+{
+  "cards": [
+    {
+      "id": "living-things",
+      "title": "Living Things",
+      "category": "Biology",
+      "type": "knowledge",
+      "summary": "Learn what makes something alive.",
+      "unlock": { "type": "chain", "completedNodeIds": ["nodes/guided-practice.json"] }
+    },
+    {
+      "id": "careful-observer",
+      "title": "Careful Observer",
+      "category": "Science Skills",
+      "type": "skill",
+      "summary": "You observe carefully and notice details.",
+      "unlock": { "type": "score", "nodeId": "nodes/independent-practice.json", "minScore": 100 }
+    }
+  ]
+}

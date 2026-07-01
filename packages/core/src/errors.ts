@@ -80,6 +80,16 @@ export class RewardsValidationError extends PackageLoadError {
   }
 }
 
+export class CardsValidationError extends PackageLoadError {
+  public readonly zodError: ZodError | null;
+
+  constructor(message: string, zodError?: ZodError, diagnostics?: ErrorDiagnostics) {
+    super('CARDS_VALIDATION_ERROR', message, diagnostics);
+    this.name = 'CardsValidationError';
+    this.zodError = zodError ?? null;
+  }
+}
+
 export class BundleValidationError extends PackageLoadError {
   public readonly zodError: ZodError | null;
 
