@@ -264,6 +264,61 @@ Reference skills in the manifest to enable skill tracking:
 }
 ```
 
+## Cards (Living Knowledge Cards)
+
+Cards are unlockable achievements that persist across sessions, displayed in the Collection Binder:
+
+```json
+{
+  "cards": [
+    {
+      "id": "living-things",
+      "title": "Living Things",
+      "category": "Biology",
+      "type": "knowledge",
+      "summary": "Learn what makes something alive.",
+      "level": 1,
+      "maximumLevel": 2,
+      "unlock": { "type": "chain", "completedNodeIds": ["nodes/guided-practice.json"] },
+      "nextLevel": { "type": "score", "nodeId": "nodes/mastery-check.json", "minScore": 80 }
+    }
+  ]
+}
+```
+
+### Card Types
+
+| Type          | Color    | Description              |
+| ------------- | -------- | ------------------------ |
+| `knowledge`   | Emerald  | Conceptual understanding |
+| `skill`       | Indigo   | Practiced ability        |
+| `achievement` | Amber    | Milestone completion     |
+| `exploration` | Teal     | Discovery and curiosity  |
+| `mentor`      | Rose     | Teaching others          |
+
+### Unlock Conditions
+
+Reuses the same condition system as rewards:
+
+```json
+{ "type": "chain", "completedNodeIds": ["nodes/quiz.json", "nodes/reflection.json"] }
+{ "type": "score", "nodeId": "nodes/mastery-check.json", "minScore": 80 }
+{ "type": "and", "conditions": [{ "type": "chain", ... }, { "type": "score", ... }] }
+```
+
+### Leveling Up
+
+Add a `nextLevel` condition to allow cards to advance from their starting `level` up to `maximumLevel`:
+
+```json
+{
+  "level": 1,
+  "maximumLevel": 3,
+  "unlock": { "type": "chain", "completedNodeIds": ["nodes/intro.md"] },
+  "nextLevel": { "type": "score", "nodeId": "nodes/advanced-quiz.json", "minScore": 85 }
+}
+```
+
 ## Validation and Linting
 
 ```bash
@@ -311,6 +366,9 @@ edu report ./telemetry.jsonl --json
 - **JSON formatting** — Ensure all `.json` files are valid JSON.
 - **Skill dependency typos** — Skill IDs in `dependencies` and `assessments` must match defined skill IDs.
 - **Circular skill dependencies** — Skills must not depend on each other in a cycle.
+- **Card level exceeds maximumLevel** — Card `level` must not exceed `maximumLevel` (validated by schema).
+- **Duplicate card IDs** — All card IDs in `cards.json` must be unique (validated by schema).
+- **Unreachable unlock conditions** — Card unlock conditions reference node IDs that must exist in the workflow.
 
 ## Agentic AI Workflow
 
@@ -383,6 +441,7 @@ Each patch is validated atomically — if the result doesn't pass `loadPackage()
 7. Workflow routing keys must match node file paths exactly.
 8. The terminal route is always `COMPLETED`.
 9. Rewards should use `badge.award` action only unless webhooks or scripts are explicitly requested.
+10. Cards use the same condition types as rewards (`score`, `chain`, `and`, `or`). `bundleCompleted` and `moduleCompleted` are for bundle-level use only.
 10. Keep content short and deterministic.
 
 ### Validation Checklist

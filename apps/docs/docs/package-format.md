@@ -13,6 +13,7 @@ my-package/
 ├── package.json         # Manifest — id, title, version, author, entry, skills
 ├── workflow.json        # Routing — linear, conditional, skill-based branching
 ├── rewards.json         # Rewards — badges, conditions, actions (optional)
+├── cards.json           # Living Knowledge Cards — achievements (optional)
 ├── skills.json          # Skill definitions and assessments (optional)
 ├── nodes/               # Content — markdown lessons, JSON quizzes/reflections
 │   ├── intro.md
@@ -258,6 +259,50 @@ Supported condition types: `score`, `skill`, `chain` (completed node IDs), `and`
 - **badge.award** — Award a named badge
 - **webhook** — Send a POST request to a URL
 - **script** — Execute a shell script (requires `--allow-shell-hooks`)
+
+## Living Knowledge Cards
+
+Optional `cards.json` defines unlockable achievement cards that persist across sessions:
+
+```json
+{
+  "cards": [
+    {
+      "id": "living-things",
+      "title": "Living Things",
+      "category": "Biology",
+      "type": "knowledge",
+      "summary": "Learn what makes something alive.",
+      "difficulty": "easy",
+      "level": 1,
+      "maximumLevel": 2,
+      "unlock": {
+        "type": "chain",
+        "completedNodeIds": ["nodes/guided-practice.json"]
+      },
+      "nextLevel": {
+        "type": "score",
+        "nodeId": "nodes/mastery-check.json",
+        "minScore": 80
+      }
+    }
+  ]
+}
+```
+
+### Card Types
+
+| Type          | Description              |
+| ------------- | ------------------------ |
+| `knowledge`   | Conceptual understanding |
+| `skill`       | Practiced ability        |
+| `achievement` | Milestone completion     |
+| `exploration` | Discovery and curiosity  |
+| `mentor`      | Teaching others          |
+
+### Card Unlock Conditions
+
+Cards use the same condition types as rewards: `score`, `chain`, `and`, `or`. Cards are loaded by the package loader alongside rewards and evaluated by the `CardBroker` from `@open-edu/rewards`. See the [rewards documentation](./rewards.md) for condition details.
 
 ## Multi-Module Bundles
 
