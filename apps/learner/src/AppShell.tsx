@@ -402,7 +402,7 @@ export function AppShell({
               {view.view === 'settings' && (
                 <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
               )}
-              {view.view === 'collection' && <CollectionBinderPage pkg={coursePkg ?? undefined} />}
+              {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
             </main>
           </AppLayout>
         )}
