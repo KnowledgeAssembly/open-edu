@@ -178,8 +178,14 @@ export function parseCourseSpecJSON(jsonStr: string): {
     estimatedHours: parsed.metadata.estimatedHours,
   };
 
+  const moduleId = parsed.metadata.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    || 'untitled';
+
   const mod: CourseModule = {
-    id: 'module-1',
+    id: moduleId,
     title: parsed.metadata.title,
     description: parsed.metadata.description,
     lessons,

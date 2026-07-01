@@ -47,7 +47,11 @@ export function CourseRuntime({
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
     const saved = getProgress(pkg.manifest.id);
-    const entry = saved?.currentNodeId ?? pkg.manifest.entry;
+    const savedNode = saved?.currentNodeId;
+    const entry =
+      savedNode && savedNode in pkg.workflow.routing
+        ? savedNode
+        : pkg.manifest.entry;
     if (!entry) return null;
     return new WorkflowEngine(pkg.workflow, { entry });
   }, [pkg]);

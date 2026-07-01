@@ -56,11 +56,19 @@ const widgetContentSchema = z.object({
 });
 
 function stepOutputSchema(type: string): z.ZodType {
+  if (type === 'reading' || type === 'exercise') {
+    const textContent = type === 'reading' ? readingContentSchema : exerciseContentSchema;
+    return z.discriminatedUnion('type', [
+      z.object({ type: z.literal(type), content: textContent }),
+      z.object({
+        type: z.literal('widget'),
+        widgetId: z.string().min(1),
+        widgetConfig: z.record(z.unknown()),
+        content: widgetContentSchema,
+      }),
+    ]);
+  }
   switch (type) {
-    case 'reading':
-      return z.object({ type: z.literal('reading'), content: readingContentSchema });
-    case 'exercise':
-      return z.object({ type: z.literal('exercise'), content: exerciseContentSchema });
     case 'quiz':
       return z.object({ type: z.literal('quiz'), content: quizContentSchema });
     case 'reflection':
@@ -86,10 +94,12 @@ function buildStepPrompt(
   const template = STEP_PROMPTS[step];
   if (!template) throw new Error(`Unknown step: ${step}`);
 
-  const filteredExemplars = EXEMPLARS.filter((e) => e.type === type && e.step === step);
+  const defaultExemplars = EXEMPLARS.filter((e) => e.type === type && e.step === step);
+  const widgetExemplars = EXEMPLARS.filter((e) => e.type === 'widget' && e.step === step);
+  const allExemplars = [...defaultExemplars, ...widgetExemplars];
   const exemplarSection =
-    filteredExemplars.length > 0
-      ? `\n## Good Example for This Type+Step\n${filteredExemplars.map((e) => JSON.stringify(e.content, null, 2)).join('\n\n')}`
+    allExemplars.length > 0
+      ? `\n## Good Examples for This Step\n${allExemplars.map((e) => JSON.stringify(e, null, 2)).join('\n\n')}`
       : '';
 
   const retrySection =
@@ -104,7 +114,7 @@ function buildStepPrompt(
     .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
     .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'));
 
-  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields. The default type for this step is "${type}", but you may choose a different type if it better suits the concept.${exemplarSection}${retrySection}`;
+  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object. You may use "${type}" for text or "widget" for an interactive activity from the catalog — choose whichever suits the concept best.${exemplarSection}${retrySection}`;
 }
 
 function buildRetryPrompt(basePrompt: string, errors: string[], previousAttempt: unknown): string {
