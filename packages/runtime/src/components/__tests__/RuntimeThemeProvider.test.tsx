@@ -46,8 +46,8 @@ describe('RuntimeThemeProvider', () => {
       </RuntimeThemeProvider>,
     );
     const wrapper = container.querySelector('.open-edu-runtime') as HTMLElement;
-    expect(wrapper?.style.getPropertyValue('--oe-color-primary')).toBe('#002a81');
-    expect(wrapper?.style.getPropertyValue('--oe-color-surface')).toBe('#fcf8f9');
+    expect(wrapper?.style.getPropertyValue('--oe-color-primary')).toBe('#003d8a');
+    expect(wrapper?.style.getPropertyValue('--oe-color-surface')).toBe('#fcfaf7');
     expect(wrapper?.style.getPropertyValue('--oe-space-md')).toBe('24px');
     expect(wrapper?.style.getPropertyValue('--oe-radius-DEFAULT')).toBe('0.375rem');
   });
