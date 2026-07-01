@@ -49,7 +49,7 @@ describe('RuntimeThemeProvider', () => {
     expect(wrapper?.style.getPropertyValue('--oe-color-primary')).toBe('#002a81');
     expect(wrapper?.style.getPropertyValue('--oe-color-surface')).toBe('#fcf8f9');
     expect(wrapper?.style.getPropertyValue('--oe-space-md')).toBe('24px');
-    expect(wrapper?.style.getPropertyValue('--oe-radius-DEFAULT')).toBe('0.25rem');
+    expect(wrapper?.style.getPropertyValue('--oe-radius-DEFAULT')).toBe('0.375rem');
   });
 
   it('injects typography CSS variables', () => {
