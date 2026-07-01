@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm -r build && pnpm --filter @open-edu/learner build:deploy",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "framework": "vite"
+}
