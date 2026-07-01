@@ -53,6 +53,11 @@ export const zen: ThemeDefinition = {
     background: palette.stone95,
     'on-background': palette.stone10,
     'surface-variant': palette.stone85,
+    bg: palette.stone95,
+    fg: palette.stone10,
+    border: palette.stone75,
+    success: '#16a34a',
+    'success-container': '#dafbe3',
   },
   typography: {
     productive: {

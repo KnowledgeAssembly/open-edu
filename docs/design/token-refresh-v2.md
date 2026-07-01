@@ -100,19 +100,20 @@ For the Nocturnal theme and dark variants, maintain the same hue shift:
 
 **What changes:** Not the sizes — the _frequency_ and _weight deltas_.
 
-| Role                  | v1               | v2 Change                                  | Rationale                                                                |
-| --------------------- | ---------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
-| Display (productive)  | 48px/700/-0.02em | 40px/700/-0.02em                           | Slightly smaller for hero moments only. Still large enough.              |
-| Heading (productive)  | 30px/600/-0.01em | **28px/650/-0.01em**                       | Heavier weight + slightly smaller to create hierarchy without more size. |
-| Subheading            | 24px/600         | 24px/600                                   | Keep.                                                                    |
-| heading3              | 20px/600         | 20px/600                                   | Keep.                                                                    |
-| heading4              | 18px/600         | 18px/600                                   | Keep.                                                                    |
-| heading5              | 16px/500         | 16px/600                                   | **Bump weight** to distinguish from body.                                |
-| heading6              | 14px/500         | 14px/600                                   | Bump weight.                                                             |
-| **Body (productive)** | **14px/400/1.5** | **14px/420/1.6**                           | Slightly heavier weight + more line height for readability.              |
-| **Body (expressive)** | **18px/400/1.7** | **18px/420/1.7** + `letterSpacing: 0.01em` | Dyslexia-friendly: slight letter-spacing improves word recognition.      |
-| Label                 | 12px/600/0.05em  | **11px/600/0.08em**                        | Tighter label, more tracking — modern feel.                              |
-| Caption               | 14px/400         | 13px/420                                   | Match body feel but smaller.                                             |
+| Role                               | v1               | v2 Change                                  | Rationale                                                                |
+| ---------------------------------- | ---------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
+| Display (productive)               | 48px/700/-0.02em | 40px/700/-0.02em                           | Slightly smaller for hero moments only. Still large enough.              |
+| Heading (productive)               | 30px/600/-0.01em | **28px/650/-0.01em**                       | Heavier weight + slightly smaller to create hierarchy without more size. |
+| Subheading                         | 24px/600         | 24px/600                                   | Keep.                                                                    |
+| heading3                           | 20px/600         | 20px/600                                   | Keep.                                                                    |
+| heading4                           | 18px/600         | 18px/600                                   | Keep.                                                                    |
+| heading5                           | 16px/500         | 16px/600                                   | **Bump weight** to distinguish from body.                                |
+| heading6                           | 14px/500         | 14px/600                                   | Bump weight.                                                             |
+| **Body (productive)**              | **14px/400/1.5** | **14px/420/1.6**                           | Slightly heavier weight + more line height for readability.              |
+| **Body (expressive)**              | **18px/400/1.7** | **18px/420/1.7** + `letterSpacing: 0.01em` | Dyslexia-friendly: slight letter-spacing improves word recognition.      |
+| Label                              | 12px/600/0.05em  | **11px/600/0.08em**                        | Tighter label, more tracking — modern feel.                              |
+| Caption                            | 14px/400         | 13px/420                                   | Match body feel but smaller.                                             |
+| Expressive heading (letterSpacing) | `-0.01em`        | **removed**                                | Redundant at 28px/650 weight with 1.3 line-height.                       |
 
 ### Typography usage guidelines (new)
 
@@ -186,6 +187,8 @@ Rationale: Using `#1f1c18` (the on-surface color) tinted black makes shadows fee
 | `easingEaseInOut` | cubic-bezier(0.4, 0, 0.2, 1) | **cubic-bezier(0.4, 0, 0.2, 1)** | Keep — standard                       |
 | `easingEaseOut`   | cubic-bezier(0, 0, 0.2, 1)   | **cubic-bezier(0, 0, 0.15, 1)**  | Slightly snappier exit                |
 
+> **⏳ Status:** Motion tokens are **not yet implemented** — deferred to a follow-up story. The current motion values in `elevation.ts` work correctly; only cosmetic refinement.
+
 All animations respect `prefers-reduced-motion` and the app's Reduced Motion toggle.
 
 ---
@@ -212,13 +215,14 @@ Every color change was checked for WCAG 2.1 AA compliance:
 
 The token changes map directly to source files:
 
-| File                                                | Change                                                                   |
-| --------------------------------------------------- | ------------------------------------------------------------------------ |
-| `packages/runtime/src/themes/lumina-scholastica.ts` | Update all color hex values to v2 palette                                |
-| `packages/design-system/src/tokens/colors.ts`       | Add warm neutral palette colors, keep existing                           |
-| `packages/design-system/src/tokens/typography.ts`   | Update productive/expressive sets (weights, letter-spacing, line-height) |
-| `packages/design-system/src/tokens/elevation.ts`    | Update shadow colors to use warm-tinted rgba                             |
-| `packages/design-system/src/tokens/radius.ts`       | Update DEFAULT, md, lg values                                            |
+| File                                                | Change                                                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `packages/runtime/src/themes/lumina-scholastica.ts` | Update all color hex values to v2 palette; add `bg`/`fg`/`border` aliases + `success`/`success-container` |
+| `packages/runtime/src/themes/*.ts`                  | Add `bg`/`fg`/`border`/`success`/`success-container` tokens to all 6 themes                               |
+| `packages/design-system/src/tokens/colors.ts`       | Add warm greige palette entries (`greigeWhite`, `purpleMuted`, `goldTertiary`, etc.)                      |
+| `packages/design-system/src/tokens/typography.ts`   | Update productive/expressive sets (weights, letter-spacing, line-height)                                  |
+| `packages/design-system/src/tokens/elevation.ts`    | Update shadow colors to use warm-tinted rgba                                                              |
+| `packages/design-system/src/tokens/radius.ts`       | Update DEFAULT, md, lg values                                                                             |
 
 No structural changes needed. The token architecture, CSS var mapping, Tailwind config, and component classes all work identically — only the hex values change.
 

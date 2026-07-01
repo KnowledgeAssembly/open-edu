@@ -53,6 +53,11 @@ export const nocturnal: ThemeDefinition = {
     background: '#151219',
     ['on-background']: '#e8e0ea',
     ['surface-variant']: '#37333b',
+    bg: '#151219',
+    fg: '#e8e0ea',
+    border: '#4b4452',
+    success: '#16a34a',
+    ['success-container']: '#dafbe3',
   },
   typography: {
     productive: {

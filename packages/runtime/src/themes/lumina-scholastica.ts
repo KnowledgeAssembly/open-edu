@@ -53,6 +53,11 @@ export const luminaScholastica: ThemeDefinition = {
     background: '#fcfaf8',
     ['on-background']: '#1f1c18',
     ['surface-variant']: '#e4dfda',
+    bg: '#fcfaf8',
+    fg: '#1f1c18',
+    border: '#ccc6c0',
+    success: '#16a34a',
+    ['success-container']: '#dafbe3',
   },
   typography: {
     productive: {
