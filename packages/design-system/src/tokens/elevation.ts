@@ -4,8 +4,8 @@ export interface ElevationToken {
 
 export const elevationScale: Record<string, ElevationToken> = {
   flat: { boxShadow: 'none' },
-  raised: { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
-  overlay: { boxShadow: '0 4px 16px rgba(0,0,0,0.15)' },
-  modal: { boxShadow: '0 8px 32px rgba(0,0,0,0.2)' },
-  sticky: { boxShadow: '0 2px 8px rgba(0,0,0,0.12)' },
+  raised: { boxShadow: '0 1px 2px rgba(31,28,24,0.08)' },
+  overlay: { boxShadow: '0 4px 12px rgba(31,28,24,0.10)' },
+  modal: { boxShadow: '0 8px 24px rgba(31,28,24,0.14)' },
+  sticky: { boxShadow: '0 2px 6px rgba(31,28,24,0.08)' },
 };

@@ -98,6 +98,13 @@ export const palette = {
   red50: '#dc2626',
   red88: '#f4d4d4',
   red93: '#fee2e2',
+  // Warm greige — Lumina Scholastica v2
+  greigeWhite: '#fcfaf8',
+  greigeDim: '#e3dfda',
+  greigeBright: '#fefcf9',
+  greigeOutline: '#ccc6c0',
+  purpleMuted: '#5d4a8a',
+  goldTertiary: '#b8862d',
 } as const;
 
 export interface SemanticColorTokens {
