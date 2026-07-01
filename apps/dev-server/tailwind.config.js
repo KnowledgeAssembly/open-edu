@@ -4,6 +4,8 @@ import {
   tailwindFontSizeExtensions,
   tailwindSpacingExtensions,
   tailwindRadiusExtensions,
+  tailwindTransitionDurationExtensions,
+  tailwindTransitionTimingExtensions,
 } from '@open-edu/design-system/tokens';
 
 /** @type {import('tailwindcss').Config} */
@@ -21,6 +23,8 @@ export default {
       fontSize: tailwindFontSizeExtensions,
       spacing: { ...tailwindSpacingExtensions, paragraph: 'var(--oe-paragraph-spacing)' },
       borderRadius: tailwindRadiusExtensions,
+      transitionDuration: tailwindTransitionDurationExtensions,
+      transitionTimingFunction: tailwindTransitionTimingExtensions,
       maxWidth: {
         reading: 'var(--oe-reading-width)',
       },

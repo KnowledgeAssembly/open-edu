@@ -355,7 +355,7 @@ describe('MeasurementScale indicator color', () => {
     expect(polygon).toBeTruthy();
     const fill = polygon?.getAttribute('fill');
     expect(fill).not.toBe('#ef4444');
-    expect(fill).toContain('oe-primary');
+    expect(fill).toContain('oe-color-primary');
   });
 
   it('uses blue (not red) as default indicator color for thermometer', () => {
@@ -374,7 +374,7 @@ describe('MeasurementScale indicator color', () => {
     expect(bulb).toBeTruthy();
     const fill = bulb?.getAttribute('fill');
     expect(fill).not.toBe('#ef4444');
-    expect(fill).toContain('oe-primary');
+    expect(fill).toContain('oe-color-primary');
   });
 
   it('uses green indicator color after submission', () => {
@@ -391,7 +391,7 @@ describe('MeasurementScale indicator color', () => {
     fireEvent.click(screen.getByTestId('submit-btn'));
     const svg = screen.getByTestId('ruler-svg');
     const polygon = svg.querySelector('polygon');
-    expect(polygon?.getAttribute('fill')).toBe('#10b981');
+    expect(polygon?.getAttribute('fill')).toContain('oe-color-success');
   });
 });
 

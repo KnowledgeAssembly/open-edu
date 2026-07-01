@@ -181,10 +181,16 @@ function BarChart({
                   y1={y}
                   x2={svgWidth - padding.right}
                   y2={y}
-                  stroke="#e5e7eb"
+                  stroke="var(--oe-color-outline-variant, #e5e7eb)"
                   strokeWidth={1}
                 />
-                <text x={padding.left - 6} y={y + 4} textAnchor="end" fontSize={12} fill="#6b7280">
+                <text
+                  x={padding.left - 6}
+                  y={y + 4}
+                  textAnchor="end"
+                  fontSize={12}
+                  fill="var(--oe-color-on-surface-variant, #6b7280)"
+                >
                   {Math.round(maxValue * frac)}
                 </text>
               </g>
@@ -205,7 +211,7 @@ function BarChart({
               y={y}
               width={barWidth}
               height={barHeight}
-              fill="#3b82f6"
+              fill="var(--oe-color-primary, #3b82f6)"
               rx={4}
               aria-label={`${item.label}: ${item.value}`}
               role={interactive && !submitted ? 'button' : 'graphics-symbol'}
@@ -228,7 +234,7 @@ function BarChart({
                 y={y - 6}
                 textAnchor="middle"
                 fontSize={12}
-                fill="#374151"
+                fill="var(--oe-color-on-surface, #374151)"
                 data-testid={`bar-value-${item.label}`}
               >
                 {item.value}
@@ -239,7 +245,7 @@ function BarChart({
               y={chartBottom + 16}
               textAnchor="middle"
               fontSize={12}
-              fill="#374151"
+              fill="var(--oe-color-on-surface, #374151)"
             >
               {item.label}
             </text>
@@ -320,7 +326,14 @@ function PictographChart({
               ))}
             </span>
             {showValues && (
-              <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>{item.value}</span>
+              <span
+                style={{
+                  marginLeft: '0.5rem',
+                  color: 'var(--oe-color-on-surface-variant, #6b7280)',
+                }}
+              >
+                {item.value}
+              </span>
             )}
           </RowTag>
         );

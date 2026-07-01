@@ -170,9 +170,15 @@ function FractionVisualComponent(props: {
     for (let i = 0; i < den; i++) {
       const isShaded = (mask & (1 << i)) !== 0;
       const isHovered = hoverIndex === i;
-      let fillColor = isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6';
+      let fillColor = isShaded
+        ? interactive
+          ? 'var(--oe-color-primary, #3b82f6)'
+          : 'var(--oe-color-primary-fixed-dim, #2563eb)'
+        : 'var(--oe-color-surface-container-high, #f3f4f6)';
       if (interactive && isHovered) {
-        fillColor = isShaded ? '#60a5fa' : '#e5e7eb';
+        fillColor = isShaded
+          ? 'var(--oe-color-primary-container, #60a5fa)'
+          : 'var(--oe-color-surface-variant, #e5e7eb)';
       }
       segs.push(
         <rect
@@ -182,7 +188,7 @@ function FractionVisualComponent(props: {
           width={segWidth + 0.5}
           height={barHeight}
           fill={fillColor}
-          stroke="var(--oe-outline, #1e3a5f)"
+          stroke="var(--oe-color-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="bar-segment"
           data-shaded={isShaded ? 'true' : 'false'}
@@ -231,9 +237,15 @@ function FractionVisualComponent(props: {
       const endAngle = (i + 1) * anglePerSeg;
       const isShaded = (mask & (1 << i)) !== 0;
       const isHovered = hoverIndex === i;
-      let fillColor = isShaded ? (interactive ? '#3b82f6' : '#2563eb') : '#f3f4f6';
+      let fillColor = isShaded
+        ? interactive
+          ? 'var(--oe-color-primary, #3b82f6)'
+          : 'var(--oe-color-primary-fixed-dim, #2563eb)'
+        : 'var(--oe-color-surface-container-high, #f3f4f6)';
       if (interactive && isHovered) {
-        fillColor = isShaded ? '#60a5fa' : '#e5e7eb';
+        fillColor = isShaded
+          ? 'var(--oe-color-primary-container, #60a5fa)'
+          : 'var(--oe-color-surface-variant, #e5e7eb)';
       }
       const d = describeArc(cx, cy, r, startAngle, endAngle);
       segs.push(
@@ -241,7 +253,7 @@ function FractionVisualComponent(props: {
           key={i}
           d={d}
           fill={fillColor}
-          stroke="var(--oe-outline, #1e3a5f)"
+          stroke="var(--oe-color-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="circle-segment"
           data-shaded={isShaded ? 'true' : 'false'}

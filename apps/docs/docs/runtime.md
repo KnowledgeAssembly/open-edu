@@ -8,16 +8,18 @@ The React-based runtime handles node rendering, widget loading, progress trackin
 
 ## Theming System
 
-The framework ships with **4 built-in themes** that provide full color palettes, typography stacks, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS variables on a wrapper `<div>`.
+The framework ships with **6 built-in themes** that provide full color palettes, typography stacks, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS variables on a wrapper `<div>`.
 
 ### Available Themes
 
-| Theme              | ID                   | Description                        | Font Stack                                  |
-| ------------------ | -------------------- | ---------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist — the default    | Inter + Source Serif 4 + JetBrains Mono     |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                          | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest aesthetic           | Source Serif 4 + Literata + Hanken Grotesk  |
+| Theme              | ID                   | Description                              | Font Stack                                  |
+| ------------------ | -------------------- | ---------------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)              | Inter + Source Serif 4 + JetBrains Mono     |
+| Forest             | `forest`             | Warm nature-inspired earthy greens       | Source Serif 4 + Hanken Grotesk             |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast       | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                                | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary                 | Source Serif 4 + Literata + Hanken Grotesk  |
+| Zen                | `zen`                | Minimalist light with reduced noise      | Inter                                       |
 
 ### RuntimeThemeProvider
 
@@ -76,7 +78,7 @@ const [themeId, setThemeId] = useThemePreference();
 
 ### ThemeSelector
 
-A popover component displaying all 4 themes as preview cards with color swatches, names, and descriptions. The active theme is highlighted with a primary border and checkmark badge. Supports keyboard navigation (Tab, Shift+Tab, Escape) and click-outside-to-close.
+A popover component displaying all 6 themes as preview cards with color swatches, names, and descriptions. The active theme is highlighted with a primary border and checkmark badge. Supports keyboard navigation (Tab, Shift+Tab, Escape) and click-outside-to-close.
 
 ```tsx
 import { ThemeSelector } from '@open-edu/runtime';
@@ -93,7 +95,7 @@ import { themeRegistry, getTheme, themeIds, defaultThemeId } from '@open-edu/run
 
 const theme = getTheme('nocturnal');
 // theme.colors, theme.typography, theme.spacing, theme.radii
-console.log(themeIds); // ['high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace']
+console.log(themeIds); // ['forest', 'high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace', 'zen']
 ```
 
 ## Layout Components
@@ -303,12 +305,15 @@ A glassmorphism card with category-based color accents, locked/unlocked states, 
 import { Card } from '@open-edu/runtime';
 import type { CardDefinition } from '@open-edu/schemas';
 
-const card: CardDefinition = { /* ... */ };
+const card: CardDefinition = {
+  /* ... */
+};
 
 <Card card={card} level={2} isLocked={false} onClick={() => openViewer(card)} />;
 ```
 
 Features:
+
 - Category-specific gradient backgrounds (emerald for knowledge, indigo for skill, etc.)
 - Locked state with `grayscale` filter, lock icon, and `aria-disabled`
 - Level stars (up to `maximumLevel`) in amber on unlocked cards
@@ -337,17 +342,20 @@ Dialog showing full card details with a mastery level evolution stepper.
 ```tsx
 import { CardViewer } from '@open-edu/runtime';
 
-{selectedCard && (
-  <CardViewer
-    card={selectedCard}
-    level={savedProgress[selectedCard.id]?.level ?? 1}
-    onClose={() => setSelectedCard(null)}
-    onRelatedLessonClick={(nodeId) => navigate(nodeId)}
-  />
-)}
+{
+  selectedCard && (
+    <CardViewer
+      card={selectedCard}
+      level={savedProgress[selectedCard.id]?.level ?? 1}
+      onClose={() => setSelectedCard(null)}
+      onRelatedLessonClick={(nodeId) => navigate(nodeId)}
+    />
+  );
+}
 ```
 
 Features:
+
 - 5-level mastery stepper (Introduced → Understand → Explain → Apply → Master)
 - Current level highlighted with primary border
 - Related lessons and quizzes as clickable links
@@ -381,6 +389,7 @@ import { CardUnlockedToast } from '@open-edu/runtime';
 ```
 
 Features:
+
 - Slide-in animation (respects `prefers-reduced-motion`)
 - Auto-dismiss with configurable timeout
 - Escape key dismiss

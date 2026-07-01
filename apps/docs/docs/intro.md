@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Open-Edu Framework
 
-**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skill tracking, rewards, and a **4-theme system** with Tailwind CSS styling.
+**An open runtime for educational experiences** that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skill tracking, rewards, and a **6-theme system** with Tailwind CSS styling.
 
 ## Core Idea
 
@@ -40,7 +40,7 @@ An extensible widget architecture allows specialized learning experiences withou
 
 ### Thematic Flexibility
 
-The framework ships with 4 themes (Lumina Scholastica, High Focus, Nocturnal, Sylvan Workspace) that control colors, typography, spacing, and border radii via CSS custom properties. Themes are switchable at runtime, persisted to localStorage, and all components are styled with Tailwind utility classes mapped to `--oe-*` tokens.
+The framework ships with 6 themes (Lumina Scholastica, Forest, High Focus, Nocturnal, Sylvan Workspace, and Zen) that control colors, typography, spacing, and border radii via CSS custom properties. Themes are switchable at runtime, persisted to localStorage, and all components are styled with Tailwind utility classes mapped to `--oe-*` tokens.
 
 ## Quick Start
 

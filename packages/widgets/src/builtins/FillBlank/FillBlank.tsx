@@ -148,7 +148,11 @@ function FillBlankComponent(props: {
   function renderBlankControl(blank: BlankItem, idx: number) {
     const userAnswer = userAnswers[blank.id];
     const isAnswerCorrect = submitted && String(userAnswer) === String(blank.correctAnswer);
-    const borderColor = submitted ? (isAnswerCorrect ? '#16a34a' : '#dc2626') : '#d1d5db';
+    const borderColor = submitted
+      ? isAnswerCorrect
+        ? 'var(--oe-color-success, #16a34a)'
+        : 'var(--oe-color-error, #dc2626)'
+      : 'var(--oe-color-outline-variant, #d1d5db)';
 
     if (c.mode === 'type') {
       return (
@@ -192,7 +196,7 @@ function FillBlankComponent(props: {
             margin: '0 0.125rem',
             fontSize: 'inherit',
             cursor: submitted ? 'default' : 'pointer',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--oe-color-surface, #ffffff)',
             minWidth: '4rem',
           }}
         >
@@ -208,8 +212,8 @@ function FillBlankComponent(props: {
               top: '100%',
               left: 0,
               zIndex: 10,
-              backgroundColor: '#ffffff',
-              border: '1px solid #d1d5db',
+              backgroundColor: 'var(--oe-color-surface, #ffffff)',
+              border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
               borderRadius: '0.25rem',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               display: 'flex',
@@ -258,8 +262,8 @@ function FillBlankComponent(props: {
                       display: 'inline-block',
                       padding: '0 0.25rem',
                       fontWeight: 'bold',
-                      color: '#16a34a',
-                      borderBottom: '2px solid #16a34a',
+                      color: 'var(--oe-color-success, #16a34a)',
+                      borderBottom: '2px solid var(--oe-color-success, #16a34a)',
                       margin: '0 0.125rem',
                     }}
                   >
@@ -306,7 +310,11 @@ function FillBlankComponent(props: {
       </div>
 
       {!submitted && c.hints && c.hints.length > 0 && c.hints[hintIndex] && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
+        >
           <p>{c.hints[hintIndex]}</p>
           {hintIndex < c.hints.length - 1 && (
             <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
@@ -317,7 +325,11 @@ function FillBlankComponent(props: {
       )}
 
       {!submitted && c.hint && !c.hints && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
+        >
           <p>{c.hint}</p>
         </div>
       )}

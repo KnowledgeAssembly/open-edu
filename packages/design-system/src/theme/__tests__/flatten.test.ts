@@ -189,4 +189,14 @@ describe('flattenTheme', () => {
     const vars = flattenTheme(testTheme);
     expect(vars['--oe-space-md']).toBe('12px');
   });
+
+  it('emits motion CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-motion-duration-fast']).toBe('100ms');
+    expect(vars['--oe-motion-duration-normal']).toBe('200ms');
+    expect(vars['--oe-motion-duration-slow']).toBe('300ms');
+    expect(vars['--oe-motion-easing-ease-in-out']).toContain('cubic-bezier');
+    expect(vars['--oe-motion-easing-ease-out']).toContain('cubic-bezier');
+    expect(vars['--oe-motion-easing-ease-in']).toContain('cubic-bezier');
+  });
 });

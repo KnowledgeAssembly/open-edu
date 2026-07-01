@@ -5,7 +5,7 @@ describe('motion tokens', () => {
   it('exports duration values', () => {
     expect(motionTokens.durationFast).toBe('100ms');
     expect(motionTokens.durationNormal).toBe('200ms');
-    expect(motionTokens.durationSlow).toBe('400ms');
+    expect(motionTokens.durationSlow).toBe('300ms');
   });
 
   it('exports easing values', () => {

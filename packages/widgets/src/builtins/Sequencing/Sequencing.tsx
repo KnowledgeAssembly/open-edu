@@ -158,7 +158,7 @@ function SequencingComponent(props: {
                   style={{
                     padding: '0.5rem',
                     margin: '0.25rem 0',
-                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                    border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
                   }}
                 >
@@ -198,14 +198,16 @@ function SequencingComponent(props: {
             flexWrap: 'wrap',
             gap: '0.5rem',
             padding: '0.75rem',
-            border: '1px dashed var(--oe-outline-variant, #d1d5db)',
+            border: '1px dashed var(--oe-color-outline-variant, #d1d5db)',
             borderRadius: '0.375rem',
             minHeight: '2.5rem',
-            backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
+            backgroundColor: 'var(--oe-color-surface-container-lowest, #f9fafb)',
           }}
         >
           {availableItems.length === 0 && (
-            <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
+            <span
+              style={{ color: 'var(--oe-color-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+            >
               All items placed
             </span>
           )}
@@ -225,10 +227,10 @@ function SequencingComponent(props: {
               }}
               style={{
                 padding: '0.375rem 0.75rem',
-                border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
                 borderRadius: '1rem',
                 cursor: 'pointer',
-                backgroundColor: 'var(--oe-surface, #ffffff)',
+                backgroundColor: 'var(--oe-color-surface, #ffffff)',
                 userSelect: 'none',
               }}
             >
@@ -248,14 +250,16 @@ function SequencingComponent(props: {
             flexDirection: 'column',
             gap: '0.5rem',
             padding: '0.75rem',
-            border: '2px solid var(--oe-primary, #3b82f6)',
+            border: '2px solid var(--oe-color-primary, #3b82f6)',
             borderRadius: '0.375rem',
             minHeight: '2.5rem',
-            backgroundColor: 'var(--oe-primary-container, #eff6ff)',
+            backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
           }}
         >
           {userOrder.length === 0 && (
-            <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
+            <span
+              style={{ color: 'var(--oe-color-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+            >
               Click items above to build your sequence
             </span>
           )}
@@ -270,13 +274,13 @@ function SequencingComponent(props: {
                 data-testid={placedItem ? `placed-item-${placedItem.id}` : `slot-${slotIndex}`}
                 style={{
                   padding: '0.5rem',
-                  border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                  border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
                   borderRadius: '0.25rem',
                   backgroundColor: isCorrectPosition
-                    ? 'var(--oe-success-container, #dcfce7)'
+                    ? 'var(--oe-color-success-container, #dcfce7)'
                     : isIncorrectPosition
-                      ? 'var(--oe-error-container, #fee2e2)'
-                      : 'var(--oe-surface, #ffffff)',
+                      ? 'var(--oe-color-error-container, #fee2e2)'
+                      : 'var(--oe-color-surface, #ffffff)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.375rem',
@@ -286,7 +290,7 @@ function SequencingComponent(props: {
                 <span
                   style={{
                     fontWeight: 'bold',
-                    color: 'var(--oe-primary, #3b82f6)',
+                    color: 'var(--oe-color-primary, #3b82f6)',
                     minWidth: '1.5rem',
                   }}
                 >
@@ -354,13 +358,13 @@ function SequencingComponent(props: {
                             background: 'transparent',
                             cursor: 'pointer',
                             fontSize: '0.75rem',
-                            color: 'var(--oe-on-surface-variant, #6b7280)',
+                            color: 'var(--oe-color-on-surface-variant, #6b7280)',
                             padding: '0 0.25rem',
                             borderRadius: '0.25rem',
                           }}
                           onMouseEnter={(e) => {
                             (e.target as HTMLElement).style.backgroundColor =
-                              'var(--oe-surface-variant, #f3f4f6)';
+                              'var(--oe-color-surface-variant, #f3f4f6)';
                           }}
                           onMouseLeave={(e) => {
                             (e.target as HTMLElement).style.backgroundColor = 'transparent';
@@ -374,7 +378,10 @@ function SequencingComponent(props: {
                   </>
                 ) : (
                   <span
-                    style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+                    style={{
+                      color: 'var(--oe-color-on-surface-variant, #9ca3af)',
+                      fontStyle: 'italic',
+                    }}
                   >
                     ___
                   </span>
@@ -395,7 +402,7 @@ function SequencingComponent(props: {
                     padding: '0.25rem 0.5rem',
                     marginLeft: '1.5rem',
                     fontSize: '0.875rem',
-                    color: 'var(--oe-on-surface-variant, #6b7280)',
+                    color: 'var(--oe-color-on-surface-variant, #6b7280)',
                     fontStyle: 'italic',
                   }}
                 >
@@ -419,7 +426,7 @@ function SequencingComponent(props: {
         <div
           role="status"
           aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
         >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
@@ -434,7 +441,7 @@ function SequencingComponent(props: {
         <div
           role="status"
           aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
         >
           <p>{content.hint}</p>
         </div>

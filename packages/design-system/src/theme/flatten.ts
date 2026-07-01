@@ -1,4 +1,5 @@
 import type { ThemeDefinition, TypographySet, TypographyToken } from './types.js';
+import { motionTokens } from '../tokens/motion.js';
 
 export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -29,6 +30,12 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
 
   for (const [key, value] of Object.entries(theme.radii)) {
     vars[`--oe-radius-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(motionTokens)) {
+    if (typeof value === 'string') {
+      vars[`--oe-motion-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] = value;
+    }
   }
 
   vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';

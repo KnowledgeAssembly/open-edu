@@ -261,7 +261,7 @@ function MatchingComponent(props: {
                       y1={`${(idx / Math.max(pairs.length - 1, 1)) * 100}%`}
                       x2="100%"
                       y2={`${(idx / Math.max(pairs.length - 1, 1)) * 100}%`}
-                      stroke="var(--oe-primary, #3b82f6)"
+                      stroke="var(--oe-color-primary, #3b82f6)"
                       strokeWidth={2}
                     />
                   );
@@ -362,16 +362,16 @@ function MatchingComponent(props: {
                     padding: '0.5rem',
                     margin: '0.25rem 0',
                     border: isSelected
-                      ? '2px solid var(--oe-primary, #3b82f6)'
+                      ? '2px solid var(--oe-color-primary, #3b82f6)'
                       : isConnected
                         ? '2px solid var(--oe-success, #22c55e)'
-                        : '1px solid var(--oe-outline-variant, #d1d5db)',
+                        : '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
                     cursor: 'pointer',
                     backgroundColor: isSelected
-                      ? 'var(--oe-primary-container, #eff6ff)'
+                      ? 'var(--oe-color-primary-container, #eff6ff)'
                       : isConnected
-                        ? 'var(--oe-success-container, #f0fdf4)'
+                        ? 'var(--oe-color-success-container, #f0fdf4)'
                         : 'transparent',
                     display: 'flex',
                     alignItems: 'center',
@@ -392,13 +392,13 @@ function MatchingComponent(props: {
                         background: 'transparent',
                         cursor: 'pointer',
                         fontSize: '0.75rem',
-                        color: 'var(--oe-on-surface-variant, #6b7280)',
+                        color: 'var(--oe-color-on-surface-variant, #6b7280)',
                         padding: '0 0.25rem',
                         borderRadius: '0.25rem',
                       }}
                       onMouseEnter={(e) => {
                         (e.target as HTMLElement).style.backgroundColor =
-                          'var(--oe-surface-variant, #f3f4f6)';
+                          'var(--oe-color-surface-variant, #f3f4f6)';
                       }}
                       onMouseLeave={(e) => {
                         (e.target as HTMLElement).style.backgroundColor = 'transparent';
@@ -459,11 +459,11 @@ function MatchingComponent(props: {
                     margin: '0.25rem 0',
                     border: isMatched
                       ? '2px solid var(--oe-success, #22c55e)'
-                      : '1px solid var(--oe-outline-variant, #d1d5db)',
+                      : '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
                     cursor: selectedLeftId !== null ? 'pointer' : 'default',
                     backgroundColor: isMatched
-                      ? 'var(--oe-success-container, #f0fdf4)'
+                      ? 'var(--oe-color-success-container, #f0fdf4)'
                       : 'transparent',
                     opacity: isMatched ? 0.6 : 1,
                     display: 'flex',
@@ -498,7 +498,7 @@ function MatchingComponent(props: {
               y1={conn.y1}
               x2={conn.x2}
               y2={conn.y2}
-              stroke="var(--oe-primary, #3b82f6)"
+              stroke="var(--oe-color-primary, #3b82f6)"
               strokeWidth={2}
               strokeDasharray={conn.leftId === conn.rightId ? 'none' : '4 2'}
             />
@@ -518,7 +518,7 @@ function MatchingComponent(props: {
         <div
           role="status"
           aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
         >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
@@ -533,7 +533,7 @@ function MatchingComponent(props: {
         <div
           role="status"
           aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-on-surface-variant, #6b7280)' }}
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
         >
           <p>{content.hint}</p>
         </div>
