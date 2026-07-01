@@ -209,9 +209,9 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
     const cityBtn = screen.getByTestId('blank-select-city');
-    expect(cityBtn.style.borderColor).toBe('rgb(22, 163, 74)');
+    expect(cityBtn.style.border).toContain('oe-color-success');
     const landmarkBtn = screen.getByTestId('blank-select-landmark');
-    expect(landmarkBtn.style.borderColor).toBe('rgb(22, 163, 74)');
+    expect(landmarkBtn.style.border).toContain('oe-color-success');
   });
 
   it('shows red border on incorrect answer after submission', () => {
@@ -222,7 +222,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
     const cityBtn = screen.getByTestId('blank-select-city');
-    expect(cityBtn.style.borderColor).toBe('rgb(220, 38, 38)');
+    expect(cityBtn.style.border).toContain('oe-color-error');
   });
 
   it('shows feedback after submission', () => {
@@ -355,7 +355,7 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'Paris' } });
     fireEvent.click(screen.getByText('Submit'));
-    expect(input.style.borderColor).toBe('rgb(22, 163, 74)');
+    expect(input.style.border).toContain('oe-color-success');
   });
 
   it('shows red border on incorrect answer', () => {
@@ -363,7 +363,7 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'London' } });
     fireEvent.click(screen.getByText('Submit'));
-    expect(input.style.borderColor).toBe('rgb(220, 38, 38)');
+    expect(input.style.border).toContain('oe-color-error');
   });
 
   it('disables input after submission', () => {

@@ -198,9 +198,9 @@ function PlaceValueChartComponent(props: {
           display: 'inline-flex',
           gap: '4px',
           padding: '12px',
-          border: '1px solid #d1d5db',
+          border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
           borderRadius: '8px',
-          background: '#f9fafb',
+          background: 'var(--oe-color-surface-container, #f9fafb)',
         }}
       >
         {columns.map((col, i) => (
@@ -222,7 +222,7 @@ function PlaceValueChartComponent(props: {
                 style={{
                   fontSize: '11px',
                   fontWeight: 600,
-                  color: '#6b7280',
+                  color: 'var(--oe-color-on-surface-variant, #6b7280)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
                 }}
@@ -252,10 +252,10 @@ function PlaceValueChartComponent(props: {
                 height: '56px',
                 border:
                   displayDigits[i] !== null
-                    ? '2px solid #3b82f6'
+                    ? '2px solid var(--oe-color-primary, #3b82f6)'
                     : selectedDigit !== null
-                      ? '2px dashed #93c5fd'
-                      : '2px solid #d1d5db',
+                      ? '2px dashed var(--oe-color-primary-container, #93c5fd)'
+                      : '2px solid var(--oe-color-outline-variant, #d1d5db)',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',
@@ -263,7 +263,10 @@ function PlaceValueChartComponent(props: {
                 fontSize: '24px',
                 fontWeight: 700,
                 fontFamily: 'monospace',
-                background: displayDigits[i] !== null ? '#eff6ff' : '#ffffff',
+                background:
+                  displayDigits[i] !== null
+                    ? 'var(--oe-color-primary-container, #eff6ff)'
+                    : 'var(--oe-color-surface, #ffffff)',
                 cursor: isObserve ? 'default' : 'pointer',
                 transition: 'all 0.1s ease',
               }}
@@ -304,9 +307,9 @@ function PlaceValueChartComponent(props: {
               gap: '6px',
               marginTop: '12px',
               padding: '10px',
-              border: '1px dashed #d1d5db',
+              border: '1px dashed var(--oe-color-outline-variant, #d1d5db)',
               borderRadius: '8px',
-              background: '#f9fafb',
+              background: 'var(--oe-color-surface-container, #f9fafb)',
               maxWidth: `${colCount * 60 + (colCount - 1) * 4 + 24}px`,
             }}
           >
@@ -330,7 +333,9 @@ function PlaceValueChartComponent(props: {
                   style={{
                     width: '40px',
                     height: '44px',
-                    border: isSelected ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                    border: isSelected
+                      ? '2px solid var(--oe-color-primary, #3b82f6)'
+                      : '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
@@ -338,7 +343,9 @@ function PlaceValueChartComponent(props: {
                     fontSize: '20px',
                     fontWeight: 700,
                     fontFamily: 'monospace',
-                    background: isSelected ? '#eff6ff' : '#ffffff',
+                    background: isSelected
+                      ? 'var(--oe-color-primary-container, #eff6ff)'
+                      : 'var(--oe-color-surface, #ffffff)',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}

@@ -386,7 +386,11 @@ function DragDropComponent(props: {
       </div>
 
       {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
             <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
@@ -397,7 +401,11 @@ function DragDropComponent(props: {
       )}
 
       {!submitted && content.hint && !content.hints && (
-        <div role="status" aria-live="polite" style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
+        >
           <p>{content.hint}</p>
         </div>
       )}

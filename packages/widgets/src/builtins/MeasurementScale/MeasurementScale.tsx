@@ -60,7 +60,9 @@ function MeasurementScaleComponent(props: {
     [config],
   );
 
-  const indicatorColor = submitted ? '#10b981' : 'var(--oe-primary, #3b82f6)';
+  const indicatorColor = submitted
+    ? 'var(--oe-color-success, #10b981)'
+    : 'var(--oe-color-primary, #3b82f6)';
 
   const mapCoordinatesToValue = useCallback(
     (clientX: number, clientY: number, rect: DOMRect) => {
@@ -210,7 +212,7 @@ function MeasurementScaleComponent(props: {
           y1={rulerY}
           x2={x}
           y2={rulerY + tickH}
-          stroke="#374151"
+          stroke="var(--oe-color-on-surface, #374151)"
           strokeWidth={isMajor ? 2 : 1}
           aria-hidden="true"
         />,
@@ -223,7 +225,7 @@ function MeasurementScaleComponent(props: {
             y={rulerY + 32}
             textAnchor="middle"
             fontSize={11}
-            fill="#374151"
+            fill="var(--oe-color-on-surface, #374151)"
             aria-hidden="true"
           >
             {v}
@@ -255,8 +257,8 @@ function MeasurementScaleComponent(props: {
           y={rulerY}
           width={usable}
           height={rulerH}
-          fill="#f9fafb"
-          stroke="#9ca3af"
+          fill="var(--oe-color-surface-container, #f9fafb)"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
           rx={4}
         />
@@ -318,7 +320,7 @@ function MeasurementScaleComponent(props: {
           y1={y}
           x2={tubeX}
           y2={y}
-          stroke="#374151"
+          stroke="var(--oe-color-on-surface, #374151)"
           strokeWidth={isMajor ? 2 : 1}
           aria-hidden="true"
         />,
@@ -331,7 +333,7 @@ function MeasurementScaleComponent(props: {
             y={y + 4}
             textAnchor="end"
             fontSize={11}
-            fill="#374151"
+            fill="var(--oe-color-on-surface, #374151)"
             aria-hidden="true"
           >
             {v}
@@ -363,8 +365,8 @@ function MeasurementScaleComponent(props: {
           y={tubeTopY}
           width={16}
           height={tubeLen}
-          fill="#f3f4f6"
-          stroke="#9ca3af"
+          fill="var(--oe-color-surface-container-high, #f3f4f6)"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
           rx={8}
         />
@@ -382,11 +384,11 @@ function MeasurementScaleComponent(props: {
           cy={bulbCY}
           r={bulbR}
           fill={indicatorColor}
-          stroke="#9ca3af"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
           aria-hidden="true"
         />
-        {ticks}
+        ,{ticks}
         {cfg.showReading && isInteractive && (
           <text
             x={tubeX + bulbR + 12}
@@ -428,7 +430,7 @@ function MeasurementScaleComponent(props: {
           y1={y}
           x2={cx + cylW / 2 + tickW}
           y2={y}
-          stroke="#374151"
+          stroke="var(--oe-color-on-surface, #374151)"
           strokeWidth={isMajor ? 2 : 1}
           aria-hidden="true"
         />,
@@ -441,7 +443,7 @@ function MeasurementScaleComponent(props: {
             y={y + 4}
             textAnchor="start"
             fontSize={11}
-            fill="#374151"
+            fill="var(--oe-color-on-surface, #374151)"
             aria-hidden="true"
           >
             {v}
@@ -474,8 +476,8 @@ function MeasurementScaleComponent(props: {
           cy={cylTop}
           rx={cylW / 2}
           ry={10}
-          fill="#e5e7eb"
-          stroke="#9ca3af"
+          fill="var(--oe-color-surface-variant, #e5e7eb)"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
         />
         <rect
@@ -484,7 +486,7 @@ function MeasurementScaleComponent(props: {
           width={cylW}
           height={cylH}
           fill="none"
-          stroke="#9ca3af"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
         />
         <rect
@@ -511,7 +513,7 @@ function MeasurementScaleComponent(props: {
           rx={cylW / 2}
           ry={10}
           fill="none"
-          stroke="#9ca3af"
+          stroke="var(--oe-color-outline, #9ca3af)"
           strokeWidth={1}
         />
         {ticks}

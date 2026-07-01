@@ -221,11 +221,21 @@ export function TopAppBar({
           />
         ) : (
           <div
-            className="w-8 h-8 rounded-full object-cover border-2 border-outline-variant bg-primary-container flex items-center justify-center text-sm font-semibold text-on-primary-container"
+            className="w-8 h-8 rounded-full border-2 border-outline-variant bg-primary-container flex items-center justify-center"
+            role="img"
             aria-label="User avatar placeholder"
             data-testid="top-appbar-avatar"
           >
-            {'\uD83D\uDC64'}
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="text-on-primary-container"
+              aria-hidden="true"
+            >
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
           </div>
         )}
       </div>
