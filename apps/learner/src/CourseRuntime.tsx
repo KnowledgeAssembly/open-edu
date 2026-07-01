@@ -5,15 +5,18 @@ import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import { createDefaultRegistry } from '@open-edu/widgets';
-import { RewardBroker } from '@open-edu/rewards';
+import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
+import type { CardDefinition } from '@open-edu/schemas';
 import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
+import { saveCardProgress } from './cardsStorage';
 import { Button, Card, CardContent } from '@open-edu/design-system';
 import { ArrowLeft, Award } from 'lucide-react';
+import { CardUnlockedToast } from '@open-edu/runtime';
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -42,16 +45,17 @@ export function CourseRuntime({
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastCard, setToastCard] = useState<CardDefinition | null>(null);
+  const [toastCardLevel, setToastCardLevel] = useState(0);
+  const [toastCardType, setToastCardType] = useState<'unlock' | 'levelUp'>('unlock');
+  const [toastCardVisible, setToastCardVisible] = useState(false);
   const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
     const saved = getProgress(pkg.manifest.id);
     const savedNode = saved?.currentNodeId;
-    const entry =
-      savedNode && savedNode in pkg.workflow.routing
-        ? savedNode
-        : pkg.manifest.entry;
+    const entry = savedNode && savedNode in pkg.workflow.routing ? savedNode : pkg.manifest.entry;
     if (!entry) return null;
     return new WorkflowEngine(pkg.workflow, { entry });
   }, [pkg]);
@@ -103,6 +107,28 @@ export function CourseRuntime({
       : null;
     broker?.start();
 
+    const cardBroker = pkg.cards?.cards
+      ? new CardBroker({
+          cards: pkg.cards.cards,
+          source: session.events$,
+          onCardUnlocked: (card) => {
+            saveCardProgress(card.id, card.level);
+            setToastCard(card);
+            setToastCardLevel(card.level);
+            setToastCardType('unlock');
+            setToastCardVisible(true);
+          },
+          onCardLeveledUp: (card, newLevel) => {
+            saveCardProgress(card.id, newLevel);
+            setToastCard(card);
+            setToastCardLevel(newLevel);
+            setToastCardType('levelUp');
+            setToastCardVisible(true);
+          },
+        })
+      : null;
+    cardBroker?.start();
+
     const engineUnsub = engine.subscribe((event: WorkflowEvent) => {
       if (event.type === 'node.entered' && event.nodeId) {
         session.emit({ event: 'node_open', nodeId: event.nodeId } as never);
@@ -113,6 +139,10 @@ export function CourseRuntime({
           score: event.score,
         } as never);
         broker?.updateContext({
+          scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
+          completedNodes: [event.nodeId],
+        });
+        cardBroker?.updateContext({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
@@ -131,6 +161,7 @@ export function CourseRuntime({
       engineUnsub();
       compUnsub();
       broker?.stop();
+      cardBroker?.stop();
       eventSub.unsubscribe();
       session.stop();
     };
@@ -222,6 +253,18 @@ export function CourseRuntime({
                   <div className="text-base">{toastBadgeName}</div>
                 </CardContent>
               </Card>
+            )}
+            {toastCard && (
+              <CardUnlockedToast
+                card={toastCard}
+                newLevel={toastCardLevel}
+                visible={toastCardVisible}
+                type={toastCardType}
+                onDismiss={() => {
+                  setToastCardVisible(false);
+                  setTimeout(() => setToastCard(null), 300);
+                }}
+              />
             )}
           </div>
         </RuntimeProvider>

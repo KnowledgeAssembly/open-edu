@@ -2,6 +2,7 @@ import type {
   ContentNode,
   Workflow,
   Rewards,
+  CardDefinitions,
   PackageManifest,
   BundleManifest,
 } from '@open-edu/schemas';
@@ -18,6 +19,7 @@ export interface LoadedPackage {
   manifest: PackageManifest;
   workflow: Workflow | null;
   rewards: Rewards | null;
+  cards: CardDefinitions | null;
   nodes: LoadedNode[];
   assetPaths: string[];
 }

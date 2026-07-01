@@ -58,6 +58,7 @@ const validPkg: LoadedPackage = {
   manifest: { id: 'my-pkg', title: 'My Pkg', version: '2.0.0', author: 'A', entry: 'nodes/n.md' },
   workflow: null,
   rewards: null,
+  cards: null,
   nodes: [
     {
       path: '/tmp/pkg/nodes/n.md',

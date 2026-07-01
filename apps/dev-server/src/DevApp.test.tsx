@@ -17,6 +17,7 @@ const mockPackageData: LoadedPackage = {
     },
   },
   rewards: null,
+  cards: null,
   nodes: [
     {
       path: '/test/nodes/lesson.md',

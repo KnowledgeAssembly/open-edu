@@ -13,3 +13,5 @@ export { RewardError, RewardExecutionError, RewardConfigurationError } from './e
 export { evaluateCondition, shouldFireAction, getDefaultContext } from './conditions';
 export { verifyReceipt, replayRewards } from './verification';
 export type { ReplayResult } from './verification';
+export { CardBroker } from './card-broker';
+export type { CardBrokerOptions } from './card-broker';

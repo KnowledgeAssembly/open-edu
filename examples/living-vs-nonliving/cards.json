@@ -1,0 +1,55 @@
+{
+  "cards": [
+    {
+      "id": "living-things",
+      "title": "Living Things",
+      "category": "Biology",
+      "type": "knowledge",
+      "summary": "Learn what makes something alive.",
+      "detailedExplanation": "Living things grow, reproduce, respond to their environment, and need energy. This card introduces the fundamental characteristics that distinguish living from non-living things.",
+      "tags": ["biology", "life", "classification"],
+      "difficulty": "easy",
+      "level": 1,
+      "maximumLevel": 2,
+      "unlock": {
+        "type": "chain",
+        "completedNodeIds": ["nodes/guided-practice.json"]
+      },
+      "nextLevel": {
+        "type": "score",
+        "nodeId": "nodes/mastery-check.json",
+        "minScore": 80
+      },
+      "relatedLessons": ["nodes/intro.md", "nodes/observe.json"],
+      "relatedQuizzes": ["nodes/mastery-check.json"]
+    },
+    {
+      "id": "careful-observer",
+      "title": "Careful Observer",
+      "category": "Science Skills",
+      "type": "skill",
+      "summary": "You observe carefully and notice details — a key scientific skill.",
+      "tags": ["observation", "science", "attention"],
+      "level": 1,
+      "maximumLevel": 1,
+      "unlock": {
+        "type": "score",
+        "nodeId": "nodes/independent-practice.json",
+        "minScore": 100
+      }
+    },
+    {
+      "id": "biologist",
+      "title": "Biologist",
+      "category": "Biology",
+      "type": "achievement",
+      "summary": "You completed the Living vs Non-Living course!",
+      "tags": ["achievement", "course-completion"],
+      "level": 1,
+      "maximumLevel": 1,
+      "unlock": {
+        "type": "bundleCompleted"
+      }
+    }
+  ]
+}

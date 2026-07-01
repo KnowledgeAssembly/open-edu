@@ -2,6 +2,7 @@ import type { LoadedPackage } from './types.js';
 import { loadManifest } from './manifest.js';
 import { loadWorkflow } from './workflow.js';
 import { loadRewards } from './rewards.js';
+import { loadCards } from './cards.js';
 import { loadNodes } from './nodes.js';
 import { resolveAssets } from './assets.js';
 import { EntryNodeNotFoundError, WorkflowRouteError } from './errors.js';
@@ -35,9 +36,10 @@ export async function loadPackage(
 ): Promise<LoadedPackage> {
   const manifest = await loadManifest(packageDir);
 
-  const [workflow, rewards, nodes, assetPaths] = await Promise.all([
+  const [workflow, rewards, cards, nodes, assetPaths] = await Promise.all([
     loadWorkflow(packageDir),
     loadRewards(packageDir),
+    loadCards(packageDir),
     loadNodes(packageDir),
     resolveAssets(packageDir),
   ]);
@@ -93,6 +95,7 @@ export async function loadPackage(
     manifest,
     workflow,
     rewards,
+    cards,
     nodes,
     assetPaths,
   };
