@@ -1,13 +1,17 @@
 import { z } from 'zod';
 import type { LlmProvider } from '@open-edu/llm-config';
 import type { GeneratedConcept, GeneratedActivity, ActivityContent } from '../types.js';
-import { selectTypesForConcept } from './type-selector.js';
+
 import { EXEMPLARS } from './exemplars.js';
 import { OBSERVE_PROMPT } from './prompts/observe.js';
 import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
 import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
 import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
 import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
+import { getWidgetSchema, registerAllWidgetSchemas } from './widget-schemas.js';
+
+// Register widget schemas once at module load
+registerAllWidgetSchemas();
 
 const STEP_PROMPTS: Record<string, string> = {
   observe: OBSERVE_PROMPT,
@@ -45,6 +49,12 @@ const reflectionContentSchema = z.object({
   instructions: z.string(),
 });
 
+const widgetContentSchema = z.object({
+  description: z.string(),
+  instructions: z.string(),
+  examples: z.array(z.string()).optional(),
+});
+
 function stepOutputSchema(type: string): z.ZodType {
   switch (type) {
     case 'reading':
@@ -55,6 +65,13 @@ function stepOutputSchema(type: string): z.ZodType {
       return z.object({ type: z.literal('quiz'), content: quizContentSchema });
     case 'reflection':
       return z.object({ type: z.literal('reflection'), content: reflectionContentSchema });
+    case 'widget':
+      return z.object({
+        type: z.literal('widget'),
+        widgetId: z.string().min(1),
+        widgetConfig: z.record(z.unknown()),
+        content: widgetContentSchema,
+      });
     default:
       throw new Error(`Unknown activity type: ${type}`);
   }
@@ -87,14 +104,18 @@ function buildStepPrompt(
     .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
     .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'));
 
-  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields.${exemplarSection}${retrySection}`;
+  return `${prompt}\n\nGenerate the ${step} activity now as a JSON object with "type" and "content" fields. The default type for this step is "${type}", but you may choose a different type if it better suits the concept.${exemplarSection}${retrySection}`;
 }
 
 function buildRetryPrompt(basePrompt: string, errors: string[], previousAttempt: unknown): string {
   return `${basePrompt}\n\nThe previous attempt failed validation with these errors:\n${errors.map((e) => `  - ${e}`).join('\n')}\n\nPrevious attempt:\n${JSON.stringify(previousAttempt, null, 2)}\n\nPlease fix the issues and try again.`;
 }
 
-function contentToActivityContent(type: string, content: Record<string, unknown>): ActivityContent {
+function contentToActivityContent(
+  type: string,
+  content: Record<string, unknown>,
+  widgetConfig?: Record<string, unknown>,
+): ActivityContent {
   if (type === 'quiz') {
     const questions =
       (content.questions as Array<Record<string, unknown>>)?.map((q) => ({
@@ -111,6 +132,7 @@ function contentToActivityContent(type: string, content: Record<string, unknown>
     description: content.description as string,
     instructions: content.instructions as string,
     examples: content.examples as string[] | undefined,
+    widgetConfig: type === 'widget' ? widgetConfig : undefined,
   };
 }
 
@@ -141,11 +163,54 @@ async function generateStep(
         maxTokens: 4096,
       });
 
+      // Determine the actual type from the LLM response (may differ from the initial type)
+      const responseType = (result.type as string) || type;
+
+      // Validate widget config if widget type
+      let validatedWidgetConfig: Record<string, unknown> | undefined;
+      if (responseType === 'widget') {
+        const widgetId = result.widgetId as string;
+        const rawConfig = result.widgetConfig as Record<string, unknown> | undefined;
+        const widgetSchema = getWidgetSchema(widgetId);
+        if (widgetSchema && rawConfig) {
+          const parseResult = widgetSchema.safeParse(rawConfig);
+          if (!parseResult.success) {
+            if (attempt < maxRetries) {
+              lastErrors = [`Widget '${widgetId}' config validation failed: ${parseResult.error.message}`];
+              lastAttempt = result;
+              continue;
+            }
+            // Fall back to reading type
+            const content = result.content as Record<string, unknown> | undefined;
+            const fallbackActivity: GeneratedActivity = {
+              step: step as GeneratedActivity['step'],
+              courseSpecType: 'reading',
+              order,
+              content: {
+                description: (content?.description as string) || '',
+                instructions: (content?.instructions as string) || '',
+                examples: content?.examples as string[] | undefined,
+              },
+            };
+            return { activity: fallbackActivity, errors: [] };
+          }
+          validatedWidgetConfig = parseResult.data;
+        } else {
+          validatedWidgetConfig = rawConfig;
+        }
+      }
+
       const activity: GeneratedActivity = {
         step: step as GeneratedActivity['step'],
-        courseSpecType: type as GeneratedActivity['courseSpecType'],
+        courseSpecType: responseType as GeneratedActivity['courseSpecType'],
         order,
-        content: contentToActivityContent(type, result.content as Record<string, unknown>),
+        content: contentToActivityContent(
+          responseType,
+          (result.content as Record<string, unknown>) || {},
+          validatedWidgetConfig,
+        ),
+        widgetId: responseType === 'widget' ? (result.widgetId as string) : undefined,
+        widgetConfig: validatedWidgetConfig,
       };
 
       return { activity, errors: [] };
@@ -169,6 +234,15 @@ const STEP_ORDER = [
   'mastery_check',
   'positive_completion',
 ] as const;
+
+const DEFAULT_TYPES: Record<string, string> = {
+  observe: 'reading',
+  guided_practice: 'exercise',
+  independent_practice: 'exercise',
+  mastery_check: 'quiz',
+  positive_completion: 'reflection',
+};
+
 const MAX_RETRIES = 3;
 
 export async function generateActivitiesForConcept(
@@ -180,14 +254,13 @@ export async function generateActivitiesForConcept(
   warnings: string[];
   errors: string[];
 }> {
-  const types = selectTypesForConcept(concept);
   const activities: GeneratedActivity[] = [];
   const allWarnings: string[] = [];
   const allErrors: string[] = [];
 
   for (let i = 0; i < STEP_ORDER.length; i++) {
     const step = STEP_ORDER[i]!;
-    const type = types[step]!;
+    const type = DEFAULT_TYPES[step]!;
 
     const result = await generateStep(
       llm,
