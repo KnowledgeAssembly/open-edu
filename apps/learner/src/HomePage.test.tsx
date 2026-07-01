@@ -6,10 +6,26 @@ vi.mock('../progressStorage', () => ({
   getAllProgress: vi.fn(() => ({})),
 }));
 
+vi.mock('../badgesStorage', () => ({
+  getAllBadges: vi.fn(() => ({})),
+}));
+
+vi.mock('../bundleProgressStorage', () => ({
+  getAllBundleProgress: vi.fn(() => ({})),
+}));
+
 describe('HomePage', () => {
   it('renders welcome heading', () => {
     render(<HomePage onNavigate={vi.fn()} />);
     expect(screen.getByText('Welcome to OpenEdu')).toBeInTheDocument();
+  });
+
+  it('renders inline stats with default zero counts', () => {
+    const { container } = render(<HomePage onNavigate={vi.fn()} />);
+    const statsContainer = container.querySelector('.flex-wrap');
+    expect(statsContainer?.textContent).toMatch(/0.*learning units/);
+    expect(statsContainer?.textContent).toMatch(/0.*in progress/);
+    expect(statsContainer?.textContent).toMatch(/0.*badges earned/);
   });
 
   it('renders quick link buttons', () => {

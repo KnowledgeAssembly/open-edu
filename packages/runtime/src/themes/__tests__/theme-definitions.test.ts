@@ -164,4 +164,15 @@ describe('theme definitions', () => {
       });
     });
   });
+
+  it('lumina-scholastica uses v2 warm palette', () => {
+    const theme = luminaScholastica;
+    expect(theme.colors['surface']).toBe('#fcfaf8');
+    expect(theme.colors['primary']).toBe('#5d4a8a');
+    expect(theme.colors['tertiary']).toBe('#b8862d');
+    expect(theme.colors['on-surface']).toBe('#1f1c18');
+    expect(theme.colors['on-surface-variant']).toBe('#48443f');
+    expect(theme.colors['outline']).toBe('#76706b');
+    expect(theme.colors['outline-variant']).toBe('#ccc6c0');
+  });
 });
