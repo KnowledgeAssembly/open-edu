@@ -4,27 +4,29 @@ sidebar_position: 8
 
 # Course Compiler
 
-The `@open-edu/course-compiler` package compiles human/AI-generated Markdown specification files (`course-spec.md`) into fully validated, production-ready OpenEdu educational packages.
+The `@open-edu/course-compiler` package compiles human/AI-generated course specification files into fully validated, production-ready OpenEdu educational packages. It supports both **Markdown** (`course-spec.md`) and **JSON** (`course-spec.json`) input formats, auto-detected by file extension.
 
 ## Pipeline
 
 ```
-course-spec.md
+course-spec.md / course-spec.json
     │
     ▼
-┌────────────────┐
-│ Markdown Parser│  Remark/Unified AST + YAML frontmatter
-├────────────────┤
-│Semantic Parser │  AST → CourseModel (modules, lessons, quizzes, activities)
-├────────────────┤
-│   Validator    │  Duplicate IDs, missing fields, cross-references, dependency loops
-├────────────────┤
-│Plugin Pipeline │  Lifecycle hooks (beforeParse, afterAST, transformModel, etc.)
-├────────────────┤
-│Package Gen.    │  Single-module (package.json) or bundle (bundle.json) output
-├────────────────┤
-│Core Validation │  Validates output with @open-edu/core loadPackage/loadBundle
-└────────────────┘
+┌───────────────────────┐
+│ Input Parser          │  Markdown (Remark/Unified AST + YAML frontmatter)
+│                       │  or JSON (Zod-validated CourseModel structure)
+├───────────────────────┤
+│ Semantic Parser       │  AST → CourseModel (modules, lessons, quizzes, activities)
+├───────────────────────┤
+│    Validator          │  Duplicate IDs, missing fields, cross-references, dependency loops
+├───────────────────────┤
+│ Plugin Pipeline       │  Lifecycle hooks (beforeParse, afterAST, transformModel, etc.)
+├───────────────────────┤
+│ Package Generator     │  Single-module (package.json) or bundle (bundle.json) output
+│                       │  Emits widget JSON nodes with Zod-validated config
+├───────────────────────┤
+│ Core Validation       │  Validates output with @open-edu/core loadPackage/loadBundle
+└───────────────────────┘
     │
     ▼
    package/ or bundle/
@@ -33,8 +35,9 @@ course-spec.md
 ## Usage
 
 ```bash
-# Basic compilation
+# Basic compilation (auto-detects .md vs .json)
 edu compile ./course-spec.md --output ./my-course
+edu compile ./course-spec.json --output ./my-course
 
 # Validate output against @open-edu/core schemas
 edu compile ./course-spec.md --output ./my-course --validate
@@ -85,10 +88,70 @@ Read the chapter on variables.
 
 - `#` headings define **modules** (one module = single package; multiple = bundle)
 - `##` headings define **lessons** within modules
-- `### Activity:` headings define activities (reading, exercise, discussion, reflection, video)
+- `### Activity:` headings define activities (reading, exercise, discussion, reflection, video, widget)
 - `### Quiz:` headings define quizzes with ordered lists for questions and unordered lists for options
 - **`Objectives:`** (bold) followed by a list defines learning objectives
 - **`Glossary:`** / **`References:`** support term:definition and link entries
+
+## JSON Input Format
+
+A `course-spec.json` file uses the same `CourseModel` schema as the compiler's internal representation:
+
+```json
+{
+  "title": "Introduction to Algebra",
+  "description": "Learn the basics of algebra",
+  "author": "OpenEdu",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "algebra-basics",
+      "title": "Algebra Basics",
+      "description": "The foundation of algebra.",
+      "lessons": [
+        {
+          "id": "variables",
+          "title": "Variables",
+          "objectives": [
+            "Understand what a variable represents",
+            "Identify variables in expressions"
+          ],
+          "content": "Variables are symbols that represent quantities in mathematics.",
+          "activities": [
+            { "type": "reading", "title": "Reading", "content": "Read the chapter on variables." },
+            {
+              "type": "widget",
+              "title": "Matching Exercise",
+              "widgetId": "open-edu.matching",
+              "config": {
+                "pairs": [
+                  { "term": "Variable", "definition": "A symbol for a quantity" },
+                  { "term": "Constant", "definition": "A fixed value" }
+                ]
+              }
+            }
+          ],
+          "quiz": {
+            "title": "Variables Quiz",
+            "questions": [
+              {
+                "text": "What is a variable?",
+                "options": [
+                  { "text": "A symbol for a quantity", "correct": true },
+                  { "text": "A type of number", "correct": false },
+                  { "text": "An equation", "correct": false }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+JSON input is auto-detected by the `.json` file extension. Widget activities (`type: "widget"`) are emitted as first-class widget JSON nodes in the output package, with their config validated against the widget's own Zod schema.
 
 ## Output
 

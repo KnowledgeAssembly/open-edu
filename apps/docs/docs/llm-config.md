@@ -14,6 +14,8 @@ The `@open-edu/llm-config` package provides a lightweight abstraction over LLM p
 ├────────────────────┤
 │  OpenAIProvider    │  Implementation using OpenAI SDK + zodResponseFormat
 ├────────────────────┤
+│ OpenRouterProvider │  Implementation for OpenRouter API with structured output fallback
+├────────────────────┤
 │  createLlmProvider │  Factory — creates provider from config or env vars
 └────────────────────┘
 ```
@@ -25,17 +27,18 @@ interface LlmProvider {
   generateStructured<T>(
     prompt: string,
     schema: z.ZodType<T>,
-    options?: { temperature?: number; maxTokens?: number }
+    options?: { temperature?: number; maxTokens?: number },
   ): Promise<T>;
 }
 ```
 
 The `generateStructured` method takes:
+
 - A text prompt describing what to generate
 - A Zod schema defining the expected output structure
 - Optional temperature and max token overrides
 
-The LLM is instructed with a system message to act as an expert curriculum designer, and output is validated against the provided Zod schema before being returned.
+Output is validated against the provided Zod schema before being returned.
 
 ## Usage
 
@@ -51,14 +54,14 @@ const schema = z.object({
     z.object({
       conceptId: z.string(),
       learningObjective: z.string(),
-    })
+    }),
   ),
 });
 
 const result = await llm.generateStructured(
   'Identify 3 math concepts from this chapter...',
   schema,
-  { temperature: 0.3 }
+  { temperature: 0.3 },
 );
 ```
 
@@ -66,14 +69,14 @@ const result = await llm.generateStructured(
 
 Load configuration from environment variables:
 
-| Variable             | Default        | Description          |
-| -------------------- | -------------- | -------------------- |
-| `LLM_PROVIDER`       | `openai`       | Provider name        |
-| `LLM_MODEL`          | `gpt-4o-mini`  | Model name           |
-| `OPENAI_API_KEY`     | —              | API key              |
-| `LLM_API_KEY`        | —              | Alternative API key  |
-| `LLM_MAX_TOKENS`     | `4096`         | Max tokens per call  |
-| `LLM_TEMPERATURE`    | `0.3`          | LLM temperature      |
+| Variable          | Default       | Description         |
+| ----------------- | ------------- | ------------------- |
+| `LLM_PROVIDER`    | `openai`      | Provider name       |
+| `LLM_MODEL`       | `gpt-4o-mini` | Model name          |
+| `OPENAI_API_KEY`  | —             | API key             |
+| `LLM_API_KEY`     | —             | Alternative API key |
+| `LLM_MAX_TOKENS`  | `4096`        | Max tokens per call |
+| `LLM_TEMPERATURE` | `0.3`         | LLM temperature     |
 
 ```typescript
 import { loadConfig, createLlmProvider } from '@open-edu/llm-config';
@@ -93,7 +96,20 @@ const provider = createLlmProvider({
 
 ## Provider Support
 
-Currently bundled:
-- **OpenAI** — Uses `openai/beta/chat/completions` with `zodResponseFormat` for structured output
+### OpenAI
 
-The `LlmProvider` interface is designed to be implemented for additional providers (Anthropic, Google, local models, etc.).
+Uses the OpenAI SDK with `zodResponseFormat` for structured output. Set `LLM_PROVIDER=openai` and provide `OPENAI_API_KEY`.
+
+### OpenRouter
+
+Provides access to models from multiple providers (OpenAI, Anthropic, Google, etc.) through a single API. Set `LLM_PROVIDER=openrouter` and provide `LLM_API_KEY` (your OpenRouter API key).
+
+Supports `JSON mode` with fallback: if the OpenRouter API response format causes a schema validation failure, the provider falls back to prompting with "Respond ONLY with valid JSON" instructions, retrying up to 3 times before failing.
+
+```typescript
+const provider = createLlmProvider({
+  provider: 'openrouter',
+  model: 'openai/gpt-4o',
+  apiKey: process.env.LLM_API_KEY!,
+});
+```
