@@ -285,7 +285,7 @@ function MeasurementScaleComponent(props: {
             textAnchor="middle"
             fontSize={13}
             fontWeight={600}
-            fill="var(--oe-on-surface, #1f2937)"
+            fill="var(--oe-color-on-surface, #1f2937)"
             aria-hidden="true"
           >
             {currentReading}
@@ -396,7 +396,7 @@ function MeasurementScaleComponent(props: {
             textAnchor="start"
             fontSize={13}
             fontWeight={600}
-            fill="var(--oe-on-surface, #1f2937)"
+            fill="var(--oe-color-on-surface, #1f2937)"
             aria-hidden="true"
           >
             {currentReading}
@@ -524,7 +524,7 @@ function MeasurementScaleComponent(props: {
             textAnchor="start"
             fontSize={13}
             fontWeight={600}
-            fill="var(--oe-on-surface, #1f2937)"
+            fill="var(--oe-color-on-surface, #1f2937)"
             aria-hidden="true"
           >
             {currentReading}

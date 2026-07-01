@@ -188,7 +188,7 @@ function FractionVisualComponent(props: {
           width={segWidth + 0.5}
           height={barHeight}
           fill={fillColor}
-          stroke="var(--oe-outline, #1e3a5f)"
+          stroke="var(--oe-color-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="bar-segment"
           data-shaded={isShaded ? 'true' : 'false'}
@@ -253,7 +253,7 @@ function FractionVisualComponent(props: {
           key={i}
           d={d}
           fill={fillColor}
-          stroke="var(--oe-outline, #1e3a5f)"
+          stroke="var(--oe-color-outline, #1e3a5f)"
           strokeWidth={1}
           data-testid="circle-segment"
           data-shaded={isShaded ? 'true' : 'false'}

@@ -269,7 +269,7 @@ function GridAreaComponent(props: {
           display: 'inline-grid',
           gridTemplateColumns: `repeat(${config.cols}, ${cellSizePx}px)`,
           gap: 0,
-          border: '2px solid var(--oe-on-surface, #475569)',
+          border: '2px solid var(--oe-color-on-surface, #475569)',
         }}
       >
         {renderGrid()}

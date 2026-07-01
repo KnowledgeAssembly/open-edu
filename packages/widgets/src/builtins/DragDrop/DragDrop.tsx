@@ -171,9 +171,9 @@ function DragDropComponent(props: {
                   data-testid={`observe-target-${target.id}`}
                   style={{
                     padding: '0.75rem',
-                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                    border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '0.375rem',
-                    backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
+                    backgroundColor: 'var(--oe-color-surface-container-lowest, #f9fafb)',
                     minHeight: '2.5rem',
                   }}
                   aria-label={`Target: ${target.label}`}
@@ -230,14 +230,16 @@ function DragDropComponent(props: {
           marginTop: '0.75rem',
           marginBottom: '0.75rem',
           padding: '0.75rem',
-          border: '1px dashed var(--oe-outline-variant, #d1d5db)',
+          border: '1px dashed var(--oe-color-outline-variant, #d1d5db)',
           borderRadius: '0.375rem',
           minHeight: '2.5rem',
-          backgroundColor: 'var(--oe-surface-container-lowest, #f9fafb)',
+          backgroundColor: 'var(--oe-color-surface-container-lowest, #f9fafb)',
         }}
       >
         {unplacedItemIds.length === 0 && (
-          <span style={{ color: 'var(--oe-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}>
+          <span
+            style={{ color: 'var(--oe-color-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+          >
             All items placed
           </span>
         )}
@@ -263,13 +265,13 @@ function DragDropComponent(props: {
               style={{
                 padding: '0.375rem 0.75rem',
                 border: isSelected
-                  ? '2px solid var(--oe-primary, #3b82f6)'
-                  : '1px solid var(--oe-outline-variant, #d1d5db)',
+                  ? '2px solid var(--oe-color-primary, #3b82f6)'
+                  : '1px solid var(--oe-color-outline-variant, #d1d5db)',
                 borderRadius: '1rem',
                 cursor: isSelected ? 'grabbing' : 'pointer',
                 backgroundColor: isSelected
-                  ? 'var(--oe-primary-container, #eff6ff)'
-                  : 'var(--oe-surface, #ffffff)',
+                  ? 'var(--oe-color-primary-container, #eff6ff)'
+                  : 'var(--oe-color-surface, #ffffff)',
                 userSelect: 'none',
                 boxShadow: isSelected
                   ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)'
@@ -311,15 +313,15 @@ function DragDropComponent(props: {
               style={{
                 padding: '0.75rem',
                 border: shouldHighlight
-                  ? '2px dashed var(--oe-primary, #3b82f6)'
+                  ? '2px dashed var(--oe-color-primary, #3b82f6)'
                   : hasItem
-                    ? '1px solid var(--oe-outline-variant, #d1d5db)'
-                    : '1px solid var(--oe-outline-variant, #d1d5db)',
+                    ? '1px solid var(--oe-color-outline-variant, #d1d5db)'
+                    : '1px solid var(--oe-color-outline-variant, #d1d5db)',
                 borderRadius: '0.375rem',
                 minHeight: '2.5rem',
                 backgroundColor: shouldHighlight
-                  ? 'var(--oe-primary-container, #eff6ff)'
-                  : 'var(--oe-surface-container-lowest, #f9fafb)',
+                  ? 'var(--oe-color-primary-container, #eff6ff)'
+                  : 'var(--oe-color-surface-container-lowest, #f9fafb)',
                 cursor: selectedItemId !== null && !hasItem ? 'pointer' : 'default',
                 transition: 'all 0.2s ease',
               }}
@@ -335,9 +337,9 @@ function DragDropComponent(props: {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.375rem',
-                    border: '1px solid var(--oe-outline-variant, #d1d5db)',
+                    border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
                     borderRadius: '0.25rem',
-                    backgroundColor: 'var(--oe-surface, #ffffff)',
+                    backgroundColor: 'var(--oe-color-surface, #ffffff)',
                     transition: 'all 0.2s ease',
                   }}
                 >
@@ -355,13 +357,13 @@ function DragDropComponent(props: {
                       background: 'transparent',
                       cursor: 'pointer',
                       fontSize: '0.75rem',
-                      color: 'var(--oe-on-surface-variant, #6b7280)',
+                      color: 'var(--oe-color-on-surface-variant, #6b7280)',
                       padding: '0 0.25rem',
                       borderRadius: '0.25rem',
                     }}
                     onMouseEnter={(e) => {
                       (e.target as HTMLElement).style.backgroundColor =
-                        'var(--oe-surface-variant, #f3f4f6)';
+                        'var(--oe-color-surface-variant, #f3f4f6)';
                     }}
                     onMouseLeave={(e) => {
                       (e.target as HTMLElement).style.backgroundColor = 'transparent';

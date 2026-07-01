@@ -245,12 +245,12 @@ function ClockTimeComponent(props: {
             r={4}
             fill={
               isMarked
-                ? 'var(--oe-primary, #3b82f6)'
+                ? 'var(--oe-color-primary, #3b82f6)'
                 : isTargetRead
                   ? 'var(--oe-success, #10b981)'
                   : isWrongRead
                     ? 'var(--oe-error, #ef4444)'
-                    : 'var(--oe-on-surface-variant, #374151)'
+                    : 'var(--oe-color-on-surface-variant, #374151)'
             }
             aria-hidden="true"
           />
@@ -267,7 +267,7 @@ function ClockTimeComponent(props: {
                   ? 'var(--oe-success, #10b981)'
                   : isWrongRead
                     ? 'var(--oe-error, #ef4444)'
-                    : 'var(--oe-on-surface, #1f2937)'
+                    : 'var(--oe-color-on-surface, #1f2937)'
               }
               cursor={isReadMode && isInteractive && !submitted ? 'pointer' : 'default'}
               onClick={() => handleReadSelect(hv)}
@@ -284,7 +284,7 @@ function ClockTimeComponent(props: {
               textAnchor="middle"
               dominantBaseline="central"
               fontSize={size * 0.055}
-              fill="var(--oe-on-surface, #1f2937)"
+              fill="var(--oe-color-on-surface, #1f2937)"
               aria-hidden="true"
             >
               {hv}
@@ -316,8 +316,8 @@ function ClockTimeComponent(props: {
           cx={cx}
           cy={cy}
           r={faceR}
-          fill="var(--oe-surface, #f9fafb)"
-          stroke="var(--oe-outline-variant, #9ca3af)"
+          fill="var(--oe-color-surface, #f9fafb)"
+          stroke="var(--oe-color-outline-variant, #9ca3af)"
           strokeWidth={2}
         />
         {markers}
@@ -326,7 +326,7 @@ function ClockTimeComponent(props: {
           y1={cy}
           x2={hx}
           y2={hy}
-          stroke="var(--oe-on-surface, #1f2937)"
+          stroke="var(--oe-color-on-surface, #1f2937)"
           strokeWidth={4}
           strokeLinecap="round"
           aria-hidden="true"
@@ -336,12 +336,18 @@ function ClockTimeComponent(props: {
           y1={cy}
           x2={mx}
           y2={my}
-          stroke="var(--oe-on-surface, #1f2937)"
+          stroke="var(--oe-color-on-surface, #1f2937)"
           strokeWidth={2.5}
           strokeLinecap="round"
           aria-hidden="true"
         />
-        <circle cx={cx} cy={cy} r={5} fill="var(--oe-on-surface, #1f2937)" aria-hidden="true" />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={5}
+          fill="var(--oe-color-on-surface, #1f2937)"
+          aria-hidden="true"
+        />
       </svg>
     );
   }
