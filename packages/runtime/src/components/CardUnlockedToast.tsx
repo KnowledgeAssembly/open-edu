@@ -1,9 +1,9 @@
-import { useEffect, useCallback } from 'react';
-import { type CardDefinition } from '@open-edu/schemas';
+import { useEffect, useCallback, useRef } from 'react';
+import { type CardDefinition, type CardType } from '@open-edu/schemas';
 import { cn } from '@open-edu/design-system';
 import { BookOpen, Brain, Award, Compass, Heart, X } from 'lucide-react';
 
-const typeIcons: Record<string, typeof BookOpen> = {
+const typeIcons: Record<CardType, typeof BookOpen> = {
   knowledge: BookOpen,
   skill: Brain,
   achievement: Award,
@@ -31,10 +31,12 @@ export function CardUnlockedToast({
   type,
 }: CardUnlockedToastProps): JSX.Element {
   const IconComponent = typeIcons[card.type] ?? BookOpen;
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
 
   const handleDismiss = useCallback(() => {
-    onDismiss();
-  }, [onDismiss]);
+    onDismissRef.current();
+  }, []);
 
   useEffect(() => {
     if (!visible) return;

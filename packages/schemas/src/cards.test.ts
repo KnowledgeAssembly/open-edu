@@ -34,9 +34,6 @@ const fullCard = {
   nextLevel: { type: 'score', nodeId: 'nodes/butterfly-quiz.json', minScore: 80 },
   relatedLessons: ['nodes/butterfly-life-cycle.md'],
   relatedQuizzes: ['nodes/butterfly-quiz.json'],
-  relatedVideos: ['https://example.com/butterfly'],
-  relatedProjects: ['nodes/butterfly-observation.json'],
-  audioNarration: '/audio/butterfly.mp3',
 };
 
 describe('CardTypeSchema', () => {
@@ -127,6 +124,18 @@ describe('CardDefinitionSchema', () => {
     expect(() => CardDefinitionSchema.parse({ ...minimalCard, level: 1.5 })).toThrow();
   });
 
+  it('should reject level exceeding maximumLevel', () => {
+    expect(() =>
+      CardDefinitionSchema.parse({ ...minimalCard, level: 4, maximumLevel: 3 }),
+    ).toThrow();
+  });
+
+  it('should accept level equal to maximumLevel', () => {
+    const result = CardDefinitionSchema.parse({ ...minimalCard, level: 3, maximumLevel: 3 });
+    expect(result.level).toBe(3);
+    expect(result.maximumLevel).toBe(3);
+  });
+
   it('should accept optional nextLevel', () => {
     const withNext = CardDefinitionSchema.parse(fullCard);
     expect(withNext.nextLevel).toBeDefined();
@@ -172,5 +181,20 @@ describe('CardDefinitionsSchema', () => {
   it('should accept an empty cards array', () => {
     const result = CardDefinitionsSchema.parse({ cards: [] });
     expect(result.cards).toHaveLength(0);
+  });
+
+  it('should reject duplicate card IDs', () => {
+    expect(() =>
+      CardDefinitionsSchema.parse({
+        cards: [minimalCard, { ...minimalCard, id: 'living-things', title: 'Duplicate' }],
+      }),
+    ).toThrow();
+  });
+
+  it('should accept unique card IDs', () => {
+    const result = CardDefinitionsSchema.parse({
+      cards: [minimalCard, { ...minimalCard, id: 'other-card', title: 'Other Card' }],
+    });
+    expect(result.cards).toHaveLength(2);
   });
 });

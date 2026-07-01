@@ -1,4 +1,4 @@
-import { type CardDefinition } from '@open-edu/schemas';
+import { type CardDefinition, type CardType } from '@open-edu/schemas';
 import { cn } from '@open-edu/design-system';
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
 } from '@open-edu/design-system';
 import { BookOpen, Brain, Award, Compass, Heart, ExternalLink } from 'lucide-react';
 
-const typeIcons: Record<string, typeof BookOpen> = {
+const typeIcons: Record<CardType, typeof BookOpen> = {
   knowledge: BookOpen,
   skill: Brain,
   achievement: Award,
@@ -175,7 +175,10 @@ export function CardViewer({
                 >
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    {lessonId.replace(/\.(md|json)$/, '').replace(/[-_/]/g, ' ')}
+                    {lessonId
+                      .replace(/^.*[/\\]/, '')
+                      .replace(/\.(md|json)$/, '')
+                      .replace(/[-_]/g, ' ')}
                   </span>
                 </button>
               ))}
@@ -198,7 +201,10 @@ export function CardViewer({
                 >
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    {quizId.replace(/\.(md|json)$/, '').replace(/[-_/]/g, ' ')}
+                    {quizId
+                      .replace(/^.*[/\\]/, '')
+                      .replace(/\.(md|json)$/, '')
+                      .replace(/[-_]/g, ' ')}
                   </span>
                 </button>
               ))}

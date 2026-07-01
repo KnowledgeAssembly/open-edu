@@ -7,6 +7,7 @@ export interface CardBrokerOptions {
   cards: CardDefinition[];
   source: Observable<TelemetryEvent>;
   context?: ContextSnapshot;
+  initialLevels?: Record<string, number>;
   onCardUnlocked?: (card: CardDefinition) => void;
   onCardLeveledUp?: (card: CardDefinition, newLevel: number) => void;
 }
@@ -21,6 +22,11 @@ export class CardBroker {
     this.options = options;
     this.unlockedCards = new Map();
     this._context = options.context ?? getDefaultContext();
+    if (options.initialLevels) {
+      for (const [id, level] of Object.entries(options.initialLevels)) {
+        if (level > 0) this.unlockedCards.set(id, level);
+      }
+    }
   }
 
   start(): void {
@@ -67,8 +73,10 @@ export class CardBroker {
   }
 
   setCardLevel(cardId: string, level: number): void {
-    if (level > 0) {
-      this.unlockedCards.set(cardId, level);
+    const card = this.options.cards.find((c) => c.id === cardId);
+    const clampedLevel = card ? Math.min(level, card.maximumLevel) : level;
+    if (clampedLevel > 0) {
+      this.unlockedCards.set(cardId, clampedLevel);
     } else {
       this.unlockedCards.delete(cardId);
     }

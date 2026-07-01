@@ -48,7 +48,8 @@
       "level": 1,
       "maximumLevel": 1,
       "unlock": {
-        "type": "bundleCompleted"
+        "type": "chain",
+        "completedNodeIds": ["nodes/outro.md"]
       }
     }
   ]

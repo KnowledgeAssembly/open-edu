@@ -13,7 +13,7 @@ import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
-import { saveCardProgress } from './cardsStorage';
+import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button, Card, CardContent } from '@open-edu/design-system';
 import { ArrowLeft, Award } from 'lucide-react';
 import { CardUnlockedToast } from '@open-edu/runtime';
@@ -111,6 +111,9 @@ export function CourseRuntime({
       ? new CardBroker({
           cards: pkg.cards.cards,
           source: session.events$,
+          initialLevels: Object.fromEntries(
+            Object.entries(getAllCardProgress()).map(([id, p]) => [id, p.level]),
+          ),
           onCardUnlocked: (card) => {
             saveCardProgress(card.id, card.level);
             setToastCard(card);
@@ -133,11 +136,6 @@ export function CourseRuntime({
       if (event.type === 'node.entered' && event.nodeId) {
         session.emit({ event: 'node_open', nodeId: event.nodeId } as never);
       } else if (event.type === 'node.completed' && event.nodeId) {
-        session.emit({
-          event: 'node_complete',
-          nodeId: event.nodeId,
-          score: event.score,
-        } as never);
         broker?.updateContext({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
@@ -146,6 +144,11 @@ export function CourseRuntime({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
+        session.emit({
+          event: 'node_complete',
+          nodeId: event.nodeId,
+          score: event.score,
+        } as never);
       } else if (event.type === 'workflow.completed') {
         session.emit({ event: 'workflow_complete' } as never);
       }

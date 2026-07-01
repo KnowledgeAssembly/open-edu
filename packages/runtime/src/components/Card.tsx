@@ -1,8 +1,8 @@
-import { type CardDefinition } from '@open-edu/schemas';
+import { type CardDefinition, type CardType } from '@open-edu/schemas';
 import { cn } from '@open-edu/design-system';
 import { BookOpen, Brain, Award, Compass, Heart, Star, Lock } from 'lucide-react';
 
-const typeConfig: Record<string, { icon: typeof BookOpen; gradient: string; ring: string }> = {
+const typeConfig: Record<CardType, { icon: typeof BookOpen; gradient: string; ring: string }> = {
   knowledge: {
     icon: BookOpen,
     gradient: 'from-emerald-500/20 to-emerald-600/10',
