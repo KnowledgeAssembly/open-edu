@@ -73,18 +73,35 @@ async function generateSingleModule(
     if (lesson.activities) {
       for (const activity of lesson.activities) {
         const slug = uniqueSlug(activity.id);
-        const ext = activity.type === 'reflection' ? '.json' : '.md';
-        nodeFiles.push({
-          id: slug,
-          title: displayTitle(activity.id, activity.type),
-          path: `nodes/${slug}${ext}`,
-        });
         if (activity.type === 'reflection') {
+          nodeFiles.push({
+            id: slug,
+            title: displayTitle(activity.id, activity.type),
+            path: `nodes/${slug}.json`,
+          });
           await writeJson(
             join(outputDir, `nodes/${slug}.json`),
             generateReflectionNode(activity),
           );
+        } else if (activity.type === 'widget') {
+          const widgetContent = {
+            type: 'exercise' as const,
+            widget: activity.widgetId,
+            title: displayTitle(activity.id, activity.widgetId || activity.type),
+            config: activity.config,
+          };
+          nodeFiles.push({
+            id: slug,
+            title: displayTitle(activity.id, activity.widgetId || activity.type),
+            path: `nodes/${slug}.json`,
+          });
+          await writeJson(join(outputDir, `nodes/${slug}.json`), widgetContent);
         } else {
+          nodeFiles.push({
+            id: slug,
+            title: displayTitle(activity.id, activity.type),
+            path: `nodes/${slug}.md`,
+          });
           await writeFile(
             join(outputDir, `nodes/${slug}.md`),
             generateActivityMarkdown(activity),

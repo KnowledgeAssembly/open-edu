@@ -1,7 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
+import type { GeneratedActivity, ConceptActivityPair, MCQQuestion } from '../types.js';
 
 interface ChapterGroup {
   chapterCode: string;
@@ -169,6 +169,17 @@ function renderActivity(activity: GeneratedActivity, conceptId?: string): string
       lines.push(activity.content.instructions);
       lines.push('');
     }
+  } else if (activity.courseSpecType === 'widget') {
+    const label = activity.content.description || 'Interactive Activity';
+    const widgetName = activity.widgetId?.replace('open-edu.', '') || 'widget';
+    lines.push(`### Activity: ${label} [Widget]`);
+    lines.push('');
+    if (activity.content.instructions) {
+      lines.push(activity.content.instructions);
+      lines.push('');
+    }
+    lines.push(`> 🧩 **Interactive ${widgetName} activity** — full configuration available in \`course-spec.json\``);
+    lines.push('');
   } else if (activity.courseSpecType === 'reading') {
     const label = activity.content.description || stepLabels[activity.step] || 'Reading';
     lines.push(`### Activity: ${label}`);
@@ -227,7 +238,8 @@ export function writeCourseSpec(
     throw new Error(`File already exists: ${filePath}. Use --force to overwrite.`);
   }
 
-  const tmpPath = join(tmpdir(), `course-spec-${Date.now()}.md`);
+  const ext = filename.endsWith('.json') ? '.json' : '.md';
+  const tmpPath = join(tmpdir(), `course-spec-${Date.now()}${ext}`);
   writeFileSync(tmpPath, content, 'utf-8');
   renameSync(tmpPath, filePath);
 
@@ -244,5 +256,120 @@ export function writeCourseSpecOutput(
   const filename = `${filenamePrefix}course-spec.md`;
   const filePath = writeCourseSpec(outputDir, filename, content, force);
 
+  return { filePath, concepts: pairs.length };
+}
+
+// ---- JSON output types ----
+
+export interface CourseSpecJSON {
+  format: 'openedu-course-spec';
+  version: 1;
+  generatedAt: string;
+  metadata: {
+    title: string;
+    description: string;
+    author?: string;
+    version?: string;
+    difficulty?: 'beginner' | 'intermediate' | 'advanced';
+    estimatedHours?: number;
+    generated: boolean;
+  };
+  lessons: CourseSpecLessonJSON[];
+}
+
+export interface CourseSpecLessonJSON {
+  id: string;
+  title: string;
+  objectives: string[];
+  coreIdea: string;
+  examples: string[];
+  misconceptions: string[];
+  estimatedMinutes?: number;
+  activities: CourseSpecActivityJSON[];
+}
+
+export interface CourseSpecActivityJSON {
+  step: 'observe' | 'guided_practice' | 'independent_practice' | 'mastery_check' | 'positive_completion';
+  order: number;
+  type: 'reading' | 'exercise' | 'quiz' | 'reflection' | 'widget';
+  description: string;
+  instructions?: string;
+  examples?: string[];
+  questions?: MCQQuestion[];
+  widgetId?: string;
+  widgetConfig?: Record<string, unknown>;
+}
+
+export function renderCourseSpecJSON(pairs: ConceptActivityPair[]): CourseSpecJSON {
+  const first = pairs[0]?.concept;
+  const estimatedHours =
+    pairs.reduce((sum, p) => sum + (p.concept.estimatedDuration || 15), 0) / 60;
+
+  const difficulty = pairs.some((p) => p.concept.difficulty === 'advanced')
+    ? 'advanced'
+    : pairs.some((p) => p.concept.difficulty === 'intermediate')
+      ? 'intermediate'
+      : 'beginner';
+
+  const title = first?.chapterName
+    ? `${first.chapterName} — Auto-generated Course`
+    : 'Auto-generated Course';
+
+  const lessons: CourseSpecLessonJSON[] = [];
+
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i]!;
+    const lessonNum = 101 + i;
+    const lessonId = `lesson-${lessonNum}`;
+
+    lessons.push({
+      id: lessonId,
+      title: pair.concept.learningObjective,
+      objectives: [pair.concept.learningObjective],
+      coreIdea: pair.concept.coreIdea,
+      examples: pair.concept.examples,
+      misconceptions: pair.concept.misconceptions,
+      estimatedMinutes: pair.concept.estimatedDuration,
+      activities: pair.activities.map((act) => ({
+        step: act.step,
+        order: act.order,
+        type: act.courseSpecType,
+        description: act.content.description,
+        instructions: act.content.instructions,
+        examples: act.content.examples,
+        questions: act.content.questions,
+        widgetId: act.widgetId,
+        widgetConfig: act.widgetConfig,
+      })),
+    });
+  }
+
+  return {
+    format: 'openedu-course-spec',
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    metadata: {
+      title,
+      description: `Auto-generated from ${pairs.length} concepts`,
+      author: 'OpenEdu Pipeline',
+      version: '1.0.0',
+      difficulty: difficulty as 'beginner' | 'intermediate' | 'advanced',
+      estimatedHours: Math.max(1, Math.round(estimatedHours)),
+      generated: true,
+    },
+    lessons,
+  };
+}
+
+export function writeCourseSpecJSONOutput(
+  outputDir: string,
+  filenamePrefix: string,
+  pairs: ConceptActivityPair[],
+  force: boolean,
+): { filePath: string; concepts: number } {
+  const content = renderCourseSpecJSON(pairs);
+  const filename = `${filenamePrefix}course-spec.json`;
+  const jsonStr = JSON.stringify(content, null, 2);
+  const filePath = writeCourseSpec(outputDir, filename, jsonStr, force);
   return { filePath, concepts: pairs.length };
 }

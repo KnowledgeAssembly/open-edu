@@ -8,7 +8,7 @@ export const ACTIVITY_STEPS = [
 
 export type ActivityStep = (typeof ACTIVITY_STEPS)[number];
 
-export const COURSE_SPEC_TYPES = ['reading', 'exercise', 'quiz', 'reflection'] as const;
+export const COURSE_SPEC_TYPES = ['reading', 'exercise', 'quiz', 'reflection', 'widget'] as const;
 
 export type CourseSpecActivityType = (typeof COURSE_SPEC_TYPES)[number];
 
@@ -75,6 +75,7 @@ export interface ActivityContent {
   examples?: string[];
   hints?: string[];
   questions?: MCQQuestion[];
+  widgetConfig?: Record<string, unknown>;
 }
 
 export interface GeneratedActivity {
@@ -82,6 +83,8 @@ export interface GeneratedActivity {
   courseSpecType: CourseSpecActivityType;
   order: number;
   content: ActivityContent;
+  widgetId?: string;
+  widgetConfig?: Record<string, unknown>;
 }
 
 export interface ConceptActivityPair {

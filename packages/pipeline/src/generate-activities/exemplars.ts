@@ -7,7 +7,9 @@ export interface Exemplar {
     instructions?: string;
     examples?: string[];
     questions?: { question: string; options: string[]; correctIndex: number }[];
+    widgetConfig?: Record<string, unknown>;
   };
+  widgetId?: string;
 }
 
 export const EXEMPLARS: Exemplar[] = [
@@ -200,5 +202,65 @@ export const EXEMPLARS: Exemplar[] = [
         },
       ],
     },
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'family_types — Identify different family structures',
+    content: {
+      description: 'Family Types Matching',
+      instructions: 'Match each family type to its description.',
+      widgetConfig: {
+        pairs: [
+          { itemA: 'Joint Family', itemB: 'Multiple generations living together' },
+          { itemA: 'Nuclear Family', itemB: 'Parents and children only' },
+          { itemA: 'Single-Parent Family', itemB: 'One parent raising children' },
+        ],
+      },
+    },
+    widgetId: 'open-edu.matching',
+  },
+  {
+    type: 'widget',
+    step: 'guided_practice',
+    conceptDescription: 'girls_education — Issues affecting girls\' status',
+    content: {
+      description: 'Issues Affecting Girls',
+      instructions: 'Drag each issue to the correct category.',
+      widgetConfig: {
+        items: [
+          { id: 'i1', label: 'Female infanticide', emoji: '⚠️' },
+          { id: 'i2', label: 'Less education for girls', emoji: '📚' },
+          { id: 'i3', label: 'Early marriage', emoji: '💍' },
+        ],
+        targets: [
+          { id: 't1', label: 'Social Issue' },
+          { id: 't2', label: 'Educational Issue' },
+        ],
+        expectedPositions: { i1: 't1', i2: 't2', i3: 't1' },
+        interactive: true,
+      },
+    },
+    widgetId: 'open-edu.drag-drop',
+  },
+  {
+    type: 'widget',
+    step: 'independent_practice',
+    conceptDescription: 'respect_elders — Explain the importance of respecting elders',
+    content: {
+      description: 'Ways to Respect Elders',
+      instructions: 'Put the steps in the correct order for showing respect to elders.',
+      widgetConfig: {
+        items: [
+          { id: 's1', label: 'Listen carefully' },
+          { id: 's2', label: 'Acknowledge their advice' },
+          { id: 's3', label: 'Apply what you learned' },
+          { id: 's4', label: 'Thank them' },
+        ],
+        correctOrder: ['s1', 's2', 's3', 's4'],
+        interactive: true,
+      },
+    },
+    widgetId: 'open-edu.sequencing',
   },
 ];

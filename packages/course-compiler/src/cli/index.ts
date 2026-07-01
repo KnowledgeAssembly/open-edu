@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
 import { Command } from 'commander';
-import { parseCourseSpec } from '../parser/index.js';
+import { parseCourseSpec, parseCourseSpecJSON } from '../parser/index.js';
 import { validateCourseModel } from '../validators/index.js';
 import { generatePackage } from '../generators/index.js';
 import { loadPackage, loadBundle } from '@open-edu/core';
@@ -38,7 +38,8 @@ export async function compile(specPath: string, options: CompileOptions): Promis
     };
   }
 
-  const parsed = parseCourseSpec(content);
+  const isJson = resolvedPath.toLowerCase().endsWith('.json');
+  const parsed = isJson ? parseCourseSpecJSON(content) : parseCourseSpec(content);
   diagnostics.push(...parsed.diagnostics);
 
   if (!parsed.model) {
@@ -88,8 +89,8 @@ export async function compile(specPath: string, options: CompileOptions): Promis
 
 export function createCompileCommand(): Command {
   return new Command('compile')
-    .description('Compile a course-spec.md into an OpenEdu educational package')
-    .argument('<file>', 'Path to course-spec.md')
+    .description('Compile a course-spec.md or course-spec.json into an OpenEdu educational package')
+    .argument('<file>', 'Path to course-spec.md or course-spec.json')
     .option('-o, --output <dir>', 'Output directory', './out')
     .option('-w, --watch', 'Watch mode — recompile on file changes', false)
     .option('-v, --verbose', 'Verbose output', false)

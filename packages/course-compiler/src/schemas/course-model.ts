@@ -162,12 +162,25 @@ export const VideoActivitySchema = z
   })
   .strict();
 
+export const WidgetActivitySchema = z
+  .object({
+    id: z.string(),
+    type: z.literal('widget'),
+    widgetId: z.string(),
+    config: z.record(z.unknown()),
+    description: z.string().optional(),
+  })
+  .strict();
+
+export type WidgetActivity = z.infer<typeof WidgetActivitySchema>;
+
 export const ActivitySchema = z.discriminatedUnion('type', [
   ReadingActivitySchema,
   ExerciseActivitySchema,
   DiscussionActivitySchema,
   ReflectionActivitySchema,
   VideoActivitySchema,
+  WidgetActivitySchema,
 ]);
 
 export type Activity = z.infer<typeof ActivitySchema>;

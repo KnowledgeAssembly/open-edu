@@ -21,5 +21,5 @@ Generate a JSON object with:
 The instructions should include:
 - A congratulatory message
 - A reflection question about the concept
-- A suggestion for real-world practice
+- A suggestion for a real-world visual activity the learner can do (e.g., 'Draw a family tree showing the different types of families you learned about', 'Create a bar chart of your weekly schedule')
 `;

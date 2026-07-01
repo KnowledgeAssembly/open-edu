@@ -29,6 +29,7 @@ interface CLIOptions {
   verbose: boolean;
   outputDir: string;
   maxRetries: number;
+  format: 'md' | 'json' | 'both';
 }
 
 function parseArgs(): CLIOptions {
@@ -43,6 +44,7 @@ function parseArgs(): CLIOptions {
     verbose: false,
     outputDir: join(__dirname, '..', '..', '..', '..', 'output'),
     maxRetries: 3,
+    format: 'both',
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -83,6 +85,15 @@ function parseArgs(): CLIOptions {
       case '--chapter':
         options.chapter = parseInt(args[++i] || '0', 10);
         break;
+      case '--format': {
+        const formatVal = args[++i] || 'both';
+        if (!['md', 'json', 'both'].includes(formatVal)) {
+          console.error(`Invalid format: ${formatVal}. Use md, json, or both.`);
+          process.exit(1);
+        }
+        options.format = formatVal as 'md' | 'json' | 'both';
+        break;
+      }
       case '--help':
       case '-h':
         printHelp();
@@ -112,6 +123,7 @@ Options:
   --output-dir <path>   Custom output directory (default: ./output)
   --max-retries <num>   Max retries per concept (default: 3)
   --chapter <num>       Process only a single chapter (e.g., --chapter 3)
+  --format <type>       Output format: md, json, both (default: both)
   --help, -h            Show this help message
 
 Examples:
@@ -206,6 +218,7 @@ export async function runPipelineCLI(): Promise<void> {
       verbose: options.verbose,
       maxRetries: options.maxRetries,
       levelAConceptIds: LEVEL_A_CONCEPT_IDS,
+      format: options.format,
     });
 
     logger.divider();

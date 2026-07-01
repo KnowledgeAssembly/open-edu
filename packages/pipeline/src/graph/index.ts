@@ -7,7 +7,7 @@ import {
   generateActivitiesForConcept,
 } from '../generate-activities/index.js';
 import { validateWithRetry } from '../validate/index.js';
-import { writeCourseSpecOutput } from '../output/index.js';
+import { writeCourseSpecOutput, writeCourseSpecJSONOutput } from '../output/index.js';
 import type {
   ConceptCandidate,
   GeneratedConcept,
@@ -30,6 +30,7 @@ export interface PipelineOptions {
   verbose: boolean;
   maxRetries: number;
   levelAConceptIds: string[];
+  format: 'md' | 'json' | 'both';
 }
 
 export interface PipelineReport {
@@ -240,23 +241,44 @@ export async function runPipeline(
   warnings.push(...validated.warnings.map((w) => `${w.conceptId}: ${w.warnings.join(', ')}`));
 
   // 6. Write output
-  let filePath: string | null = null;
+  const filePaths: string[] = [];
 
   if (!options.dryRun) {
-    log(options.verbose, '\n[6/6] Writing course-spec.md...');
-    try {
-      const result = writeCourseSpecOutput(
-        options.outputDir,
-        `${options.levelCode?.toLowerCase() || ''}-${options.subject || ''}-`,
-        validated.passed,
-        options.force,
-      );
-      filePath = result.filePath;
-      log(options.verbose, `  ✓ ${result.concepts} concepts written to course-spec.md`);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      errors.push(`File writing failed: ${msg}`);
-      log(options.verbose, `  ✗ ${msg}`);
+    log(options.verbose, '\n[6/6] Writing output...');
+    const prefix = `${options.levelCode?.toLowerCase() || ''}-${options.subject || ''}-`;
+
+    if (options.format === 'md' || options.format === 'both') {
+      try {
+        const result = writeCourseSpecOutput(
+          options.outputDir,
+          prefix,
+          validated.passed,
+          options.force,
+        );
+        filePaths.push(result.filePath);
+        log(options.verbose, `  ✓ ${result.concepts} concepts written to course-spec.md`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Markdown file writing failed: ${msg}`);
+        log(options.verbose, `  ✗ ${msg}`);
+      }
+    }
+
+    if (options.format === 'json' || options.format === 'both') {
+      try {
+        const result = writeCourseSpecJSONOutput(
+          options.outputDir,
+          prefix,
+          validated.passed,
+          options.force,
+        );
+        filePaths.push(result.filePath);
+        log(options.verbose, `  ✓ ${result.concepts} concepts written to course-spec.json`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`JSON file writing failed: ${msg}`);
+        log(options.verbose, `  ✗ ${msg}`);
+      }
     }
   } else {
     log(options.verbose, '\n[6/6] Dry run — files not written');
@@ -271,13 +293,13 @@ export async function runPipeline(
     status:
       errors.length === 0
         ? 'complete'
-        : filePath !== null && validated.passed.length > 0
+        : filePaths.length > 0 && validated.passed.length > 0
           ? 'partial'
           : 'failed',
     chaptersProcessed: chapters?.length ?? 0,
     conceptsGenerated: concepts.length,
     activitiesGenerated: activitiesGenCount,
-    filesWritten: filePath ? 1 : 0,
+    filesWritten: filePaths.length,
     filesSkipped: 0,
     validationErrors: validated.failed.length,
     retriesNeeded: retryCount,
@@ -285,6 +307,6 @@ export async function runPipeline(
     warnings,
     errors,
     duration: Date.now() - startTime,
-    outputPaths: filePath ? [filePath] : [],
+    outputPaths: filePaths,
   };
 }
