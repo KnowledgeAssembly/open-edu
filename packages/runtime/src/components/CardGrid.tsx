@@ -1,6 +1,6 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { type CardDefinition } from '@open-edu/schemas';
-import { cn } from '@open-edu/design-system';
+import { cn, StaggerReveal } from '@open-edu/design-system';
 import { Card } from './Card.js';
 
 export interface CardGridItem {
@@ -76,16 +76,18 @@ export function CardGrid({ cards, onCardClick, className }: CardGridProps): JSX.
         className,
       )}
     >
-      {cards.map((item, index) => (
-        <div key={item.card.id} role="listitem" data-card-index={index}>
-          <Card
-            card={item.card}
-            level={item.level}
-            isLocked={item.isLocked}
-            onClick={() => onCardClick?.(item.card)}
-          />
-        </div>
-      ))}
+      <StaggerReveal delayMs={80} className="contents">
+        {cards.map((item, index) => (
+          <div key={item.card.id} role="listitem" data-card-index={index}>
+            <Card
+              card={item.card}
+              level={item.level}
+              isLocked={item.isLocked}
+              onClick={() => onCardClick?.(item.card)}
+            />
+          </div>
+        ))}
+      </StaggerReveal>
     </div>
   );
 }
