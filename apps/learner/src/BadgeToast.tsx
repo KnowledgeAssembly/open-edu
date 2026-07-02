@@ -16,6 +16,7 @@ export function BadgeToast({
   autoDismissMs = 4000,
 }: BadgeToastProps): JSX.Element | null {
   const [shouldRender, setShouldRender] = useState(false);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
@@ -24,6 +25,7 @@ export function BadgeToast({
     if (visible) {
       setShouldRender(true);
       setIsAnimatingOut(false);
+      setIsAnimatingIn(false);
     } else if (shouldRender) {
       setIsAnimatingOut(true);
       const timer = setTimeout(() => {
@@ -42,6 +44,15 @@ export function BadgeToast({
     return () => clearTimeout(timer);
   }, [visible, shouldRender, autoDismissMs]);
 
+  useEffect(() => {
+    if (shouldRender && !isAnimatingOut) {
+      const raf = requestAnimationFrame(() => {
+        setIsAnimatingIn(true);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [shouldRender, isAnimatingOut]);
+
   if (!shouldRender) return null;
 
   return (
@@ -51,8 +62,8 @@ export function BadgeToast({
       aria-label={`Badge earned: ${badgeName}`}
       className={cn(
         'fixed bottom-4 right-4 z-[9999] max-w-xs',
-        'transition-all duration-300 motion-safe:transition-all motion-safe:duration-300',
-        isAnimatingOut ? 'translate-y-4 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100',
+        'motion-safe:transition-all motion-safe:duration-300',
+        isAnimatingOut ? 'translate-y-4 opacity-0 pointer-events-none' : isAnimatingIn ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
       )}
       data-testid="badge-toast"
     >
