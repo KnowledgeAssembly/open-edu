@@ -20,7 +20,9 @@
     "clean": "pnpm -r run clean",
     "changeset": "changeset",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "storybook": "pnpm --filter @open-edu/design-system storybook",
+    "build-storybook": "pnpm --filter @open-edu/design-system build-storybook"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
