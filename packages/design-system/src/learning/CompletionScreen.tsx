@@ -1,6 +1,8 @@
-import { useMemo, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Button } from '../primitives/button.js';
-import { motionSafe } from '../tokens/motion.js';
+import { StaggerReveal } from '../effects/StaggerReveal.js';
+import { GlowPulse } from '../effects/GlowPulse.js';
+import { ConfettiBurst } from '../effects/ConfettiBurst.js';
 
 interface PackageManifest {
   id: string;
@@ -47,54 +49,6 @@ function StatCard({ icon, value, label }: { icon: string; value: number; label: 
   );
 }
 
-function ConfettiParticles(): JSX.Element {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 30 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        color: [
-          'var(--oe-color-error, #dc2626)',
-          'var(--oe-color-warning, #e7c365)',
-          'var(--oe-color-success, #16a34a)',
-          'var(--oe-color-info, #003eb3)',
-          'var(--oe-color-primary, #6750a4)',
-        ][i % 5],
-        delay: Math.random() * 2,
-        duration: 2 + Math.random() * 2,
-        size: 6 + Math.random() * 6,
-      })),
-    [],
-  );
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-sm"
-          style={{
-            left: `${p.left}%`,
-            top: '-10px',
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            backgroundColor: p.color,
-            animation: `confetti-fall ${p.duration}s ease-in ${p.delay}s forwards`,
-          }}
-        />
-      ))}
-      <style>
-        {motionSafe(`
-        @keyframes confetti-fall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-      `)}
-      </style>
-    </div>
-  );
-}
-
 export function CompletionScreen({
   title,
   badges,
@@ -125,7 +79,7 @@ export function CompletionScreen({
       className={`flex flex-col items-center justify-center min-h-full p-xl text-center font-body-md ${className ?? ''}`}
       data-testid="completion-screen"
     >
-      {showConfetti && <ConfettiParticles />}
+      {showConfetti && <ConfettiBurst variant="fall" particleCount={30} />}
 
       <h1 className="text-[1.75rem] font-bold text-on-surface m-0 mb-2">You finished {title}!</h1>
       <p className="text-body-ui text-on-surface-variant m-0 mb-lg">
@@ -142,27 +96,29 @@ export function CompletionScreen({
       {badges && badges.length > 0 && (
         <div className="mb-6 w-full max-w-[400px]">
           <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Badges earned</h2>
-          <div className="grid grid-cols-2 gap-md">
+          <StaggerReveal delayMs={200} className="grid grid-cols-2 gap-md">
             {badges.map((badge) => (
               <div
                 key={badge}
                 className="bg-primary-container/30 border border-primary-container rounded-xl p-md text-center"
                 data-testid={`badge-${badge}`}
               >
-                <span className="text-3xl" aria-hidden="true">
-                  🏆
-                </span>
+                <GlowPulse duration={0.8}>
+                  <span className="text-3xl" aria-hidden="true">
+                    🏆
+                  </span>
+                </GlowPulse>
                 <h3 className="font-semibold mt-sm text-on-surface text-sm">{badge}</h3>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       )}
 
       {hasStats && (
         <div className="mb-6 w-full max-w-[400px]">
           <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Your progress</h2>
-          <div className="grid grid-cols-2 gap-md">
+          <StaggerReveal delayMs={150} className="grid grid-cols-2 gap-md">
             <StatCard icon="📝" value={displayStats.stepsCompleted} label="Steps completed" />
             <StatCard icon="✅" value={displayStats.quizzesAnswered} label="Quizzes answered" />
             <StatCard
@@ -171,7 +127,7 @@ export function CompletionScreen({
               label="Reflections written"
             />
             <StatCard icon="⏱️" value={displayStats.timeSpentMinutes} label="Minutes spent" />
-          </div>
+          </StaggerReveal>
         </div>
       )}
 

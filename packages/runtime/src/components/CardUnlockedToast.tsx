@@ -1,7 +1,7 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { type CardDefinition, type CardType } from '@open-edu/schemas';
-import { cn } from '@open-edu/design-system';
-import { BookOpen, Brain, Award, Compass, Heart, X } from 'lucide-react';
+import { cn, GlowPulse, ConfettiBurst } from '@open-edu/design-system';
+import { BookOpen, Brain, Award, Compass, Heart, Star, X } from 'lucide-react';
 
 const typeIcons: Record<CardType, typeof BookOpen> = {
   knowledge: BookOpen,
@@ -29,20 +29,40 @@ export function CardUnlockedToast({
   onView,
   autoDismissMs = 4000,
   type,
-}: CardUnlockedToastProps): JSX.Element {
+}: CardUnlockedToastProps): JSX.Element | null {
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(false);
 
   const handleDismiss = useCallback(() => {
-    onDismissRef.current();
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      onDismissRef.current();
+      setShouldRender(false);
+      setIsAnimatingOut(false);
+      setIsAnimatingIn(false);
+    }, 300);
   }, []);
 
   useEffect(() => {
-    if (!visible) return;
+    if (visible) {
+      setShouldRender(true);
+      setIsAnimatingOut(false);
+      const raf = requestAnimationFrame(() => {
+        setIsAnimatingIn(true);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible || !shouldRender) return;
     const timer = setTimeout(handleDismiss, autoDismissMs);
     return () => clearTimeout(timer);
-  }, [visible, autoDismissMs, handleDismiss]);
+  }, [visible, shouldRender, autoDismissMs, handleDismiss]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -50,70 +70,92 @@ export function CardUnlockedToast({
     }
   };
 
+  if (!shouldRender) return null;
+
+  const animClass = isAnimatingOut
+    ? 'translate-x-full opacity-0 pointer-events-none'
+    : isAnimatingIn
+      ? 'translate-x-0 opacity-100'
+      : 'translate-x-8 opacity-0';
+
   return (
     <div
       role="status"
       aria-live="polite"
       aria-label={`${type === 'unlock' ? 'Card unlocked' : 'Level up'}: ${card.title}`}
       onKeyDown={handleKeyDown}
-      className={cn(
-        'fixed bottom-4 right-4 z-[9999] max-w-sm',
-        'transition-all duration-300 motion-safe:transition-all motion-safe:duration-300',
-        visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none',
-      )}
+      className={cn('max-w-sm', 'motion-safe:transition-all motion-safe:duration-300', animClass)}
       data-testid="card-unlocked-toast"
     >
-      <div
-        className={cn(
-          'flex items-start gap-3 p-4 rounded-xl shadow-lg',
-          'bg-surface border border-outline-variant',
+      <div className="relative">
+        {type === 'unlock' && (
+          <div className="absolute -top-6 left-0 pointer-events-none">
+            <ConfettiBurst particleCount={8} duration={1} />
+          </div>
         )}
-      >
         <div
           className={cn(
-            'flex items-center justify-center w-10 h-10 rounded-lg shrink-0',
-            'bg-gradient-to-br from-primary/20 to-primary/10',
+            'flex items-start gap-3 p-4 rounded-xl shadow-lg',
+            'bg-surface border border-outline-variant',
           )}
         >
-          <IconComponent className="w-5 h-5 text-primary" />
-        </div>
-
-        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-          <span className="text-sm font-semibold text-on-surface">
-            {type === 'levelUp' ? `Level Up! ★ ${newLevel}` : 'Card Unlocked!'}
-          </span>
-          <span className="text-sm text-on-surface-variant truncate">{card.title}</span>
-          {type === 'levelUp' && (
-            <span className="text-xs text-on-surface-variant">{card.summary}</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 shrink-0">
-          {onView && (
-            <button
-              onClick={onView}
+          <GlowPulse duration={1.2}>
+            <div
               className={cn(
-                'text-xs font-medium px-2.5 py-1.5 rounded-lg',
-                'bg-primary text-on-primary hover:bg-primary/90',
-                'transition-colors',
+                'flex items-center justify-center w-10 h-10 rounded-lg shrink-0',
+                'bg-gradient-to-br from-primary/20 to-primary/10',
               )}
             >
-              View
-            </button>
-          )}
-          <button
-            onClick={handleDismiss}
-            className={cn(
-              'flex items-center justify-center w-7 h-7 rounded-lg',
-              'text-muted-foreground hover:text-on-surface hover:bg-muted/50',
-              'transition-colors',
+              <IconComponent className="w-5 h-5 text-primary" />
+            </div>
+          </GlowPulse>
+
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-sm font-semibold text-on-surface">
+              {type === 'levelUp' ? (
+                <span className="flex items-center gap-1">
+                  Level Up! <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Level{' '}
+                  {newLevel}
+                </span>
+              ) : (
+                'Card Unlocked!'
+              )}
+            </span>
+            <span className="text-sm font-medium text-on-surface-variant truncate">
+              {card.title}
+            </span>
+            <span className="text-xs text-on-surface-variant line-clamp-1">{card.summary}</span>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            {onView && (
+              <button
+                onClick={onView}
+                className={cn(
+                  'text-xs font-medium px-2.5 py-1.5 rounded-lg',
+                  'bg-primary text-on-primary hover:bg-primary/90',
+                  'transition-colors',
+                )}
+              >
+                View
+              </button>
             )}
-            aria-label="Dismiss"
-          >
-            <X className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleDismiss}
+              className={cn(
+                'flex items-center justify-center w-7 h-7 rounded-lg',
+                'text-muted-foreground hover:text-on-surface hover:bg-muted/50',
+                'transition-colors',
+              )}
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+CardUnlockedToast.displayName = 'CardUnlockedToast';

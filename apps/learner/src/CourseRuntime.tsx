@@ -14,9 +14,10 @@ import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
-import { Button, Card, CardContent } from '@open-edu/design-system';
-import { ArrowLeft, Award } from 'lucide-react';
+import { Button } from '@open-edu/design-system';
+import { ArrowLeft } from 'lucide-react';
 import { CardUnlockedToast } from '@open-edu/runtime';
+import { BadgeToast } from './BadgeToast';
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -100,7 +101,6 @@ export function CourseRuntime({
               addBadge(pkg.manifest.id, badgeName);
               setToastBadgeName(badgeName);
               setToastVisible(true);
-              setTimeout(() => setToastVisible(false), 3000);
             }
           },
         })
@@ -243,32 +243,31 @@ export function CourseRuntime({
                 onProgressUpdate={onProgressUpdate}
               />
             )}
-            {toastBadgeName && (
-              <Card
-                className="fixed bottom-4 right-4 z-[9999] shadow-lg"
-                style={{ opacity: toastVisible ? 1 : 0 }}
-                data-testid="badge-toast"
-              >
-                <CardContent className="p-3">
-                  <div className="font-semibold text-sm text-success flex items-center gap-1">
-                    <Award className="h-4 w-4" /> Badge earned!
-                  </div>
-                  <div className="text-base">{toastBadgeName}</div>
-                </CardContent>
-              </Card>
-            )}
-            {toastCard && (
-              <CardUnlockedToast
-                card={toastCard}
-                newLevel={toastCardLevel}
-                visible={toastCardVisible}
-                type={toastCardType}
-                onDismiss={() => {
-                  setToastCardVisible(false);
-                  setTimeout(() => setToastCard(null), 300);
-                }}
-              />
-            )}
+            <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+              {toastBadgeName && (
+                <div className="pointer-events-auto">
+                  <BadgeToast
+                    badgeName={toastBadgeName}
+                    visible={toastVisible}
+                    onDismiss={() => setToastVisible(false)}
+                  />
+                </div>
+              )}
+              {toastCard && (
+                <div className="pointer-events-auto">
+                  <CardUnlockedToast
+                    card={toastCard}
+                    newLevel={toastCardLevel}
+                    visible={toastCardVisible}
+                    type={toastCardType}
+                    onDismiss={() => {
+                      setToastCardVisible(false);
+                      setToastCard(null);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </RuntimeProvider>
       </AccessibilityProvider>
