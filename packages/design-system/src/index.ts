@@ -223,3 +223,6 @@ export type { SuggestedQuestionsProps } from './ai/SuggestedQuestions.js';
 
 export { AIChat } from './ai/AIChat.js';
 export type { AIChatProps, ChatMessage } from './ai/AIChat.js';
+
+// Effects
+export { ConfettiBurst, type ConfettiBurstProps } from './effects/ConfettiBurst.js';
