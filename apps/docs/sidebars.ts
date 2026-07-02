@@ -10,6 +10,28 @@ const sidebars: SidebarsConfig = {
     'testing',
     {
       type: 'category',
+      label: 'The OpenEdu Way',
+      link: { type: 'doc', id: 'openedu-way/overview' },
+      items: [
+        {
+          type: 'category',
+          label: 'Volume I — Philosophy',
+          link: { type: 'doc', id: 'openedu-way/philosophy/philosophy' },
+          items: [
+            'openedu-way/philosophy/philosophy',
+            'openedu-way/philosophy/project-pipili',
+            'openedu-way/philosophy/open-modules',
+            'openedu-way/philosophy/the-companion',
+            'openedu-way/philosophy/design-principles',
+            'openedu-way/philosophy/temporal-design',
+            'openedu-way/philosophy/motion-language',
+          ],
+        },
+        'openedu-way/ai-context',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Design System',
       items: [
         {
