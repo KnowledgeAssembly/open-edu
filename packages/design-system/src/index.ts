@@ -226,3 +226,4 @@ export type { AIChatProps, ChatMessage } from './ai/AIChat.js';
 
 // Effects
 export { ConfettiBurst, type ConfettiBurstProps } from './effects/ConfettiBurst.js';
+export { GlowPulse, type GlowPulseProps } from './effects/GlowPulse.js';

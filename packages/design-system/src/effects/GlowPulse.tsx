@@ -1,0 +1,38 @@
+import { type ReactNode } from 'react';
+import { motionSafe } from '../tokens/motion.js';
+import { cn } from '../lib/utils.js';
+
+export interface GlowPulseProps {
+  children: ReactNode;
+  color?: string;
+  duration?: number;
+  className?: string;
+}
+
+export function GlowPulse({
+  children,
+  color = 'var(--oe-color-primary, #6750a4)',
+  duration = 1.2,
+  className,
+}: GlowPulseProps): JSX.Element {
+  return (
+    <div
+      className={cn('relative inline-block', className)}
+      data-testid="glow-pulse"
+    >
+      <style>{motionSafe(`
+        @keyframes glow-pulse {
+          0% { box-shadow: 0 0 0 0 ${color}66; }
+          50% { box-shadow: 0 0 20px 8px ${color}44; }
+          100% { box-shadow: 0 0 0 0 ${color}00; }
+        }
+        [data-testid="glow-pulse"] {
+          animation: glow-pulse ${duration}s ease-out;
+        }
+      `)}</style>
+      {children}
+    </div>
+  );
+}
+
+GlowPulse.displayName = 'GlowPulse';
