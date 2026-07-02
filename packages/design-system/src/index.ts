@@ -118,6 +118,9 @@ export type { EmptyStateProps } from './primitives/empty-state.js';
 
 export { Toaster } from './primitives/notification.js';
 
+// Contexts
+export { FontSizeProvider, useFontSize } from './font-size-context.js';
+
 // Patterns (nav components)
 export { AppSidebar } from './patterns/AppSidebar.js';
 export type {

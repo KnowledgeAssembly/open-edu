@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ThemeSelector, type ThemeId } from '@open-edu/runtime';
-import { Button, Card, CardContent, CardHeader, Switch } from '@open-edu/design-system';
+import { Button, Card, CardContent, CardHeader, Switch, useFontSize } from '@open-edu/design-system';
 import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
 
 export interface SettingsPageProps {
@@ -9,13 +9,9 @@ export interface SettingsPageProps {
 }
 
 export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProps): JSX.Element {
-  const [fontSize, setFontSize] = useState(100);
+  const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--oe-font-size-scale', `${fontSize}%`);
-  }, [fontSize]);
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -63,7 +59,7 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setFontSize((s) => Math.max(80, s - 10))}
+                  onClick={decreaseFontSize}
                   aria-label="Decrease font size"
                 >
                   <Minus className="h-4 w-4" />
@@ -72,7 +68,7 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setFontSize((s) => Math.min(150, s + 10))}
+                  onClick={increaseFontSize}
                   aria-label="Increase font size"
                 >
                   <Plus className="h-4 w-4" />

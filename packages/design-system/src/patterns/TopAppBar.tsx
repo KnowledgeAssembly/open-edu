@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useFontSize } from '../font-size-context.js';
 
 export interface TopAppBarBreadcrumb {
   label: string;
@@ -27,7 +28,7 @@ export function TopAppBar({
   progressTotal,
 }: TopAppBarProps): JSX.Element {
   const [a11yOpen, setA11yOpen] = useState(false);
-  const [fontSize, setFontSize] = useState(100);
+  const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
   const [breadcrumbsEnabled, setBreadcrumbsEnabled] = useState(true);
   const [readingRulerEnabled, setReadingRulerEnabled] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -48,10 +49,6 @@ export function TopAppBar({
 
     return () => document.removeEventListener('keydown', handleEscape);
   }, [a11yOpen]);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--oe-font-size-scale', `${fontSize}%`);
-  }, [fontSize]);
 
   const handlePanelKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {
@@ -191,7 +188,7 @@ export function TopAppBar({
                   <span>Font:</span>
                   <button
                     type="button"
-                    onClick={() => setFontSize((s) => Math.max(80, s - 10))}
+                    onClick={decreaseFontSize}
                     aria-label="Decrease font size"
                     className="px-2 py-0.5 text-xs border border-outline-variant rounded bg-transparent cursor-pointer"
                   >
@@ -200,7 +197,7 @@ export function TopAppBar({
                   <span className="text-xs min-w-[2em] text-center">{fontSize}%</span>
                   <button
                     type="button"
-                    onClick={() => setFontSize((s) => Math.min(150, s + 10))}
+                    onClick={increaseFontSize}
                     aria-label="Increase font size"
                     className="px-2 py-0.5 text-xs border border-outline-variant rounded bg-transparent cursor-pointer"
                   >
