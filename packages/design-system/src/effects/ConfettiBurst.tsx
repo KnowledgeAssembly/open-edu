@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motionSafe } from '../tokens/motion.js';
+import { cn } from '../lib/utils.js';
 
 const DEFAULT_COLORS = [
   'var(--oe-color-primary, #6750a4)',
@@ -29,8 +30,6 @@ export function ConfettiBurst({
     return () => clearTimeout(timer);
   }, [duration]);
 
-  if (animDone) return null;
-
   const particles = useMemo(
     () =>
       Array.from({ length: particleCount }, (_, i) => {
@@ -38,7 +37,7 @@ export function ConfettiBurst({
         const distance = 40 + Math.random() * 60;
         return {
           id: i,
-          color: colors[i % colors.length],
+          color: colors.length > 0 ? colors[i % colors.length] : '#6750a4',
           translateX: Math.cos((angle * Math.PI) / 180) * distance,
           translateY: Math.sin((angle * Math.PI) / 180) * distance,
           rotation: Math.random() * 720,
@@ -49,6 +48,8 @@ export function ConfettiBurst({
     [particleCount, colors],
   );
 
+  if (animDone) return null;
+
   return (
     <>
       <style>{motionSafe(`
@@ -58,7 +59,7 @@ export function ConfettiBurst({
         }
       `)}</style>
       <div
-        className={`relative pointer-events-none ${className ?? ''}`}
+        className={cn('relative pointer-events-none', className)}
         data-testid="confetti-burst"
         aria-hidden="true"
       >
@@ -83,3 +84,5 @@ export function ConfettiBurst({
     </>
   );
 }
+
+ConfettiBurst.displayName = 'ConfettiBurst';
