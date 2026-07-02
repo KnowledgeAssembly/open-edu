@@ -45,4 +45,35 @@ describe('BadgeToast', () => {
     expect(screen.queryByText('Test')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
+
+  it('sets accessible role and aria-live attributes', () => {
+    render(<BadgeToast badgeName="Test Badge" visible={true} />);
+    const toast = screen.getByTestId('badge-toast');
+    expect(toast).toHaveAttribute('role', 'status');
+    expect(toast).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('sets aria-label containing badge name', () => {
+    render(<BadgeToast badgeName="Super Star" visible={true} />);
+    const toast = screen.getByTestId('badge-toast');
+    expect(toast).toHaveAttribute('aria-label', 'Badge earned: Super Star');
+  });
+
+  it('respects autoDismissMs custom override', () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+    render(<BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={2000} />);
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(onDismiss).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('does not call onDismiss before autoDismissMs elapses', () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+    render(<BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={4000} />);
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(onDismiss).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });
