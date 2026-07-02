@@ -29,7 +29,7 @@ export function CardUnlockedToast({
   onView,
   autoDismissMs = 4000,
   type,
-}: CardUnlockedToastProps): JSX.Element {
+}: CardUnlockedToastProps): JSX.Element | null {
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
@@ -118,13 +118,16 @@ export function CardUnlockedToast({
             <span className="text-sm font-semibold text-on-surface">
               {type === 'levelUp' ? (
                 <span className="flex items-center gap-1">
-                  Level Up! <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Level {newLevel}
+                  Level Up! <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Level{' '}
+                  {newLevel}
                 </span>
               ) : (
                 'Card Unlocked!'
               )}
             </span>
-            <span className="text-sm font-medium text-on-surface-variant truncate">{card.title}</span>
+            <span className="text-sm font-medium text-on-surface-variant truncate">
+              {card.title}
+            </span>
             <span className="text-xs text-on-surface-variant line-clamp-1">{card.summary}</span>
           </div>
 
