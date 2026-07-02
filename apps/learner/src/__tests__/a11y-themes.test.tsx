@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { RuntimeThemeProvider, themeIds } from '@open-edu/runtime';
 import type { ThemeId } from '@open-edu/runtime';
 import axe from 'axe-core';
+import { FontSizeProvider } from '@open-edu/design-system';
 import { CatalogPage } from '../CatalogPage';
 import { HomePage } from '../HomePage';
 import { ProgressDashboard } from '../ProgressDashboard';
@@ -39,7 +40,7 @@ const samplePackages: PackageSummary[] = [
 ];
 
 function renderWithTheme(ui: React.ReactElement, themeId: ThemeId) {
-  return render(<RuntimeThemeProvider themeId={themeId}>{ui}</RuntimeThemeProvider>);
+  return render(<RuntimeThemeProvider themeId={themeId}><FontSizeProvider>{ui}</FontSizeProvider></RuntimeThemeProvider>);
 }
 
 const themes = themeIds as readonly ThemeId[];

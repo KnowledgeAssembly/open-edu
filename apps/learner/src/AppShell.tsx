@@ -10,7 +10,7 @@ import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from 
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
-import { AppSidebar, AppLayout } from '@open-edu/design-system';
+import { AppSidebar, AppLayout, FontSizeProvider } from '@open-edu/design-system';
 import type {
   AppSidebarItem,
   AppSidebarSection,
@@ -316,6 +316,7 @@ export function AppShell({
   return (
     <RuntimeThemeProvider themeId={themeId}>
       <FontLoader />
+      <FontSizeProvider>
       <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
         {isCourseView && coursePkg ? (
           <div className="flex-1 flex flex-col min-w-0">
@@ -412,6 +413,7 @@ export function AppShell({
           onLeave={handleExitLeave}
         />
       </div>
+      </FontSizeProvider>
     </RuntimeThemeProvider>
   );
 }
