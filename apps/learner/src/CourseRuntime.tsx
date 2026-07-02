@@ -258,7 +258,7 @@ export function CourseRuntime({
                 type={toastCardType}
                 onDismiss={() => {
                   setToastCardVisible(false);
-                  setTimeout(() => setToastCard(null), 300);
+                  setToastCard(null);
                 }}
               />
             )}
