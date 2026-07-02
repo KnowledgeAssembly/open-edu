@@ -42,6 +42,7 @@ const config: Config = {
       },
       items: [
         { to: '/docs/intro', label: 'Docs', position: 'left' },
+        { to: '/docs/openedu-way', label: 'The OpenEdu Way', position: 'left' },
         { to: '/docs/architecture', label: 'Architecture', position: 'left' },
         { to: '/docs/package-format', label: 'Package Format', position: 'left' },
         {
@@ -58,6 +59,7 @@ const config: Config = {
           title: 'Docs',
           items: [
             { label: 'Introduction', to: '/docs/intro' },
+            { label: 'The OpenEdu Way', to: '/docs/openedu-way' },
             { label: 'Architecture', to: '/docs/architecture' },
             { label: 'Package Format', to: '/docs/package-format' },
             { label: 'Package Authoring Guide', to: '/docs/package-authoring' },
