@@ -19,10 +19,12 @@ describe('BadgeToast', () => {
   });
 
   it('calls onDismiss after auto-dismiss timeout', async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'requestAnimationFrame'] });
     const onDismiss = vi.fn();
     render(<BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} />);
-    act(() => { vi.advanceTimersByTime(4000); });
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
     expect(onDismiss).toHaveBeenCalled();
     vi.useRealTimers();
   });
@@ -37,11 +39,13 @@ describe('BadgeToast', () => {
   });
 
   it('unmounts from DOM after dismiss with animation delay', () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'requestAnimationFrame'] });
     const { rerender } = render(<BadgeToast badgeName="Test" visible={true} />);
     expect(screen.getByText('Test')).toBeInTheDocument();
     rerender(<BadgeToast badgeName="Test" visible={false} />);
-    act(() => { vi.advanceTimersByTime(300); });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
     expect(screen.queryByText('Test')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
@@ -60,19 +64,27 @@ describe('BadgeToast', () => {
   });
 
   it('respects autoDismissMs custom override', () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'requestAnimationFrame'] });
     const onDismiss = vi.fn();
-    render(<BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={2000} />);
-    act(() => { vi.advanceTimersByTime(2000); });
+    render(
+      <BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={2000} />,
+    );
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
     expect(onDismiss).toHaveBeenCalled();
     vi.useRealTimers();
   });
 
   it('does not call onDismiss before autoDismissMs elapses', () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'requestAnimationFrame'] });
     const onDismiss = vi.fn();
-    render(<BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={4000} />);
-    act(() => { vi.advanceTimersByTime(1000); });
+    render(
+      <BadgeToast badgeName="Test" visible={true} onDismiss={onDismiss} autoDismissMs={4000} />,
+    );
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     expect(onDismiss).not.toHaveBeenCalled();
     vi.useRealTimers();
   });

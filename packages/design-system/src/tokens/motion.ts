@@ -13,6 +13,13 @@ export const motionSafe = (animations: string) => `
 @media (prefers-reduced-motion: no-preference) {
   ${animations}
 }
+[style*="--oe-reduced-motion: reduce"] *,
+[style*="--oe-reduced-motion: reduce"] *::before,
+[style*="--oe-reduced-motion: reduce"] *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+}
 `;
 
 export function useReducedMotion(): boolean {

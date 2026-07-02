@@ -21,17 +21,17 @@ export function GlowPulse({
     <div
       className={cn('relative inline-block', className)}
       data-testid="glow-pulse"
+      style={{ animation: `glow-pulse ${duration}s ease-out` } as React.CSSProperties}
     >
-      <style>{motionSafe(`
+      <style>
+        {motionSafe(`
         @keyframes glow-pulse {
           0% { box-shadow: 0 0 0 0 ${color}66; }
           50% { box-shadow: 0 0 ${20 * intensity}px ${8 * intensity}px ${color}44; }
           100% { box-shadow: 0 0 0 0 ${color}00; }
         }
-        [data-testid="glow-pulse"] {
-          animation: glow-pulse ${duration}s ease-out;
-        }
-      `)}</style>
+      `)}
+      </style>
       {children}
     </div>
   );

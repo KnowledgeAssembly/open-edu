@@ -55,7 +55,35 @@ describe('ConfettiBurst', () => {
   it('returns null after animation completes', () => {
     vi.useFakeTimers();
     const { container } = render(<ConfettiBurst />);
-    act(() => { vi.advanceTimersByTime(1500); });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(container.innerHTML).toBe('');
+    vi.useRealTimers();
+  });
+
+  it('renders fall variant with confetti-fall testid', () => {
+    render(<ConfettiBurst variant="fall" />);
+    expect(screen.getByTestId('confetti-fall')).toBeInTheDocument();
+  });
+
+  it('fall variant uses fixed positioning', () => {
+    render(<ConfettiBurst variant="fall" />);
+    const container = screen.getByTestId('confetti-fall');
+    expect(container.className).toContain('fixed');
+  });
+
+  it('burst variant is default', () => {
+    render(<ConfettiBurst />);
+    expect(screen.getByTestId('confetti-burst')).toBeInTheDocument();
+  });
+
+  it('fall variant unmounts after completion', () => {
+    vi.useFakeTimers();
+    const { container } = render(<ConfettiBurst variant="fall" />);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(container.innerHTML).toBe('');
     vi.useRealTimers();
   });
