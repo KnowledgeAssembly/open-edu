@@ -1,5 +1,7 @@
 import { useMemo, useEffect, useState, type ReactNode } from 'react';
 import { Button } from '../primitives/button.js';
+import { StaggerReveal } from '../effects/StaggerReveal.js';
+import { GlowPulse } from '../effects/GlowPulse.js';
 import { motionSafe } from '../tokens/motion.js';
 
 interface PackageManifest {
@@ -142,36 +144,34 @@ export function CompletionScreen({
       {badges && badges.length > 0 && (
         <div className="mb-6 w-full max-w-[400px]">
           <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Badges earned</h2>
-          <div className="grid grid-cols-2 gap-md">
+          <StaggerReveal delayMs={200} className="grid grid-cols-2 gap-md">
             {badges.map((badge) => (
               <div
                 key={badge}
                 className="bg-primary-container/30 border border-primary-container rounded-xl p-md text-center"
                 data-testid={`badge-${badge}`}
               >
-                <span className="text-3xl" aria-hidden="true">
-                  🏆
-                </span>
+                <GlowPulse duration={0.8}>
+                  <span className="text-3xl" aria-hidden="true">
+                    🏆
+                  </span>
+                </GlowPulse>
                 <h3 className="font-semibold mt-sm text-on-surface text-sm">{badge}</h3>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       )}
 
       {hasStats && (
         <div className="mb-6 w-full max-w-[400px]">
           <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Your progress</h2>
-          <div className="grid grid-cols-2 gap-md">
+          <StaggerReveal delayMs={150} className="grid grid-cols-2 gap-md">
             <StatCard icon="📝" value={displayStats.stepsCompleted} label="Steps completed" />
             <StatCard icon="✅" value={displayStats.quizzesAnswered} label="Quizzes answered" />
-            <StatCard
-              icon="✍️"
-              value={displayStats.reflectionsWritten}
-              label="Reflections written"
-            />
+            <StatCard icon="✍️" value={displayStats.reflectionsWritten} label="Reflections written" />
             <StatCard icon="⏱️" value={displayStats.timeSpentMinutes} label="Minutes spent" />
-          </div>
+          </StaggerReveal>
         </div>
       )}
 
