@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motionSafe } from '../tokens/motion.js';
 
 const DEFAULT_COLORS = [
@@ -21,7 +21,16 @@ export function ConfettiBurst({
   colors = DEFAULT_COLORS,
   duration = 1.5,
   className,
-}: ConfettiBurstProps): JSX.Element {
+}: ConfettiBurstProps): JSX.Element | null {
+  const [animDone, setAnimDone] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimDone(true), duration * 1000);
+    return () => clearTimeout(timer);
+  }, [duration]);
+
+  if (animDone) return null;
+
   const particles = useMemo(
     () =>
       Array.from({ length: particleCount }, (_, i) => {
