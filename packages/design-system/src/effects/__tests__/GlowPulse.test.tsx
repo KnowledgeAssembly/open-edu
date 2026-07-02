@@ -16,4 +16,11 @@ describe('GlowPulse', () => {
   it('has displayName set', () => {
     expect(GlowPulse.displayName).toBe('GlowPulse');
   });
+
+  it('accepts and uses intensity prop', () => {
+    render(<GlowPulse intensity={2}><span>intense</span></GlowPulse>);
+    const container = screen.getByTestId('glow-pulse');
+    expect(container).toBeInTheDocument();
+    expect(screen.getByText('intense')).toBeInTheDocument();
+  });
 });
