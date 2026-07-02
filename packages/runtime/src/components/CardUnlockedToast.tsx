@@ -84,11 +84,7 @@ export function CardUnlockedToast({
       aria-live="polite"
       aria-label={`${type === 'unlock' ? 'Card unlocked' : 'Level up'}: ${card.title}`}
       onKeyDown={handleKeyDown}
-      className={cn(
-        'fixed bottom-4 right-4 z-[9999] max-w-sm',
-        'motion-safe:transition-all motion-safe:duration-300',
-        animClass,
-      )}
+      className={cn('max-w-sm', 'motion-safe:transition-all motion-safe:duration-300', animClass)}
       data-testid="card-unlocked-toast"
     >
       <div className="relative">

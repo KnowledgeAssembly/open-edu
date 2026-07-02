@@ -61,9 +61,13 @@ export function BadgeToast({
       aria-live="polite"
       aria-label={`Badge earned: ${badgeName}`}
       className={cn(
-        'fixed bottom-4 right-4 z-[9999] max-w-xs',
+        'max-w-xs',
         'motion-safe:transition-all motion-safe:duration-300',
-        isAnimatingOut ? 'translate-y-4 opacity-0 pointer-events-none' : isAnimatingIn ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+        isAnimatingOut
+          ? 'translate-y-4 opacity-0 pointer-events-none'
+          : isAnimatingIn
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-4 opacity-0',
       )}
       data-testid="badge-toast"
     >
@@ -78,9 +82,7 @@ export function BadgeToast({
             </div>
           </GlowPulse>
           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <span className="text-sm font-semibold text-amber-600">
-              Achievement Unlocked!
-            </span>
+            <span className="text-sm font-semibold text-amber-600">Achievement Unlocked!</span>
             <span className="text-sm text-on-surface truncate">{badgeName}</span>
           </div>
         </div>

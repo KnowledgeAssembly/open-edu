@@ -243,25 +243,31 @@ export function CourseRuntime({
                 onProgressUpdate={onProgressUpdate}
               />
             )}
-            {toastBadgeName && (
-              <BadgeToast
-                badgeName={toastBadgeName}
-                visible={toastVisible}
-                onDismiss={() => setToastVisible(false)}
-              />
-            )}
-            {toastCard && (
-              <CardUnlockedToast
-                card={toastCard}
-                newLevel={toastCardLevel}
-                visible={toastCardVisible}
-                type={toastCardType}
-                onDismiss={() => {
-                  setToastCardVisible(false);
-                  setToastCard(null);
-                }}
-              />
-            )}
+            <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+              {toastBadgeName && (
+                <div className="pointer-events-auto">
+                  <BadgeToast
+                    badgeName={toastBadgeName}
+                    visible={toastVisible}
+                    onDismiss={() => setToastVisible(false)}
+                  />
+                </div>
+              )}
+              {toastCard && (
+                <div className="pointer-events-auto">
+                  <CardUnlockedToast
+                    card={toastCard}
+                    newLevel={toastCardLevel}
+                    visible={toastCardVisible}
+                    type={toastCardType}
+                    onDismiss={() => {
+                      setToastCardVisible(false);
+                      setToastCard(null);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </RuntimeProvider>
       </AccessibilityProvider>
