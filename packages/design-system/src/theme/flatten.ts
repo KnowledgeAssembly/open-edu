@@ -6,6 +6,7 @@ import { borderWidthScale, borderStyleScale } from '../tokens/borders.js';
 import { focusTokens } from '../tokens/focus.js';
 import { iconSizeScale, iconStrokeScale } from '../tokens/icons.js';
 import { layoutTokens } from '../tokens/layout.js';
+import { elevationScale } from '../tokens/elevation.js';
 
 export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -72,6 +73,10 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
 
   for (const [key, value] of Object.entries(layoutTokens)) {
     vars[`--oe-layout-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(elevationScale)) {
+    vars[`--oe-elevation-${key}`] = value.boxShadow;
   }
 
   vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';

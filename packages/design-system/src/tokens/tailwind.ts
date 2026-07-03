@@ -64,6 +64,7 @@ export const tailwindColorExtensions: Record<string, string> = {
   'on-background': 'var(--oe-color-on-background)',
 
   // Misc
+  'primary-light': 'var(--oe-color-primary-light)',
   success: 'var(--oe-color-success)',
 
   // Shadcn/ui semantic aliases — map to design-system tokens
@@ -86,8 +87,8 @@ export const tailwindColorExtensions: Record<string, string> = {
   'muted-foreground': 'var(--oe-color-on-surface-variant)',
 
   // Accent
-  accent: 'var(--oe-color-secondary-container)',
-  'accent-foreground': 'var(--oe-color-on-secondary-container)',
+  accent: 'var(--oe-color-accent)',
+  'accent-foreground': 'var(--oe-color-on-secondary)',
 
   // Primary foreground
   'primary-foreground': 'var(--oe-color-on-primary)',
@@ -300,6 +301,14 @@ export const tailwindIconSizeExtensions: Record<string, string> = {
   lg: 'var(--oe-icon-size-lg)',
   xl: 'var(--oe-icon-size-xl)',
   '2xl': 'var(--oe-icon-size-2xl)',
+};
+
+export const tailwindElevationExtensions: Record<string, string> = {
+  'elevation-flat': 'var(--oe-elevation-flat)',
+  'elevation-raised': 'var(--oe-elevation-raised)',
+  'elevation-overlay': 'var(--oe-elevation-overlay)',
+  'elevation-modal': 'var(--oe-elevation-modal)',
+  'elevation-sticky': 'var(--oe-elevation-sticky)',
 };
 
 export const tailwindLayoutExtensions: Record<string, string> = {

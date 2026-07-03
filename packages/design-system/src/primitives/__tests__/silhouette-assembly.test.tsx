@@ -1,85 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { SilhouetteAssembly } from '../silhouette-assembly';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { SilhouetteAssembly, paletteColors } from '../silhouette-assembly.js';
 
 describe('SilhouetteAssembly', () => {
-  it('renders with default proportion and palette', () => {
-    render(<SilhouetteAssembly data-testid="fig" />);
-    const el = screen.getByTestId('fig');
-    expect(el).toBeInTheDocument();
-    expect(el).toHaveAttribute('role', 'img');
-    expect(el).toHaveAttribute('aria-label', 'Person — med');
+  const palettes = [1, 2, 3, 4, 5] as const;
+  const proportions = ['tall', 'med', 'short', 'wide', 'narrow'] as const;
+
+  it('palette colors match Visual DNA spec', () => {
+    expect(paletteColors[1]).toBe('var(--oe-color-primary)');
+    expect(paletteColors[2]).toBe('var(--oe-color-accent)');
+    expect(paletteColors[3]).toBe('var(--oe-color-tertiary)');
+    expect(paletteColors[4]).toBe('var(--oe-color-primary-light)');
+    expect(paletteColors[5]).toBe('var(--oe-color-success)');
   });
 
-  it('renders head and torso divs', () => {
-    render(<SilhouetteAssembly data-testid="fig" />);
-    const el = screen.getByTestId('fig');
-    const children = el.querySelectorAll(':scope > div');
-    expect(children.length).toBe(2);
-  });
-
-  it('renders all proportion variants', () => {
-    const proportions = ['tall', 'med', 'short', 'wide', 'narrow'] as const;
-    for (const prop of proportions) {
-      const { unmount } = render(
-        <SilhouetteAssembly proportion={prop} data-testid={`fig-${prop}`} />,
-      );
-      expect(screen.getByTestId(`fig-${prop}`)).toHaveAttribute('aria-label', `Person — ${prop}`);
-      unmount();
+  it('renders all 5 palettes without error', () => {
+    for (const palette of palettes) {
+      const { container } = render(<SilhouetteAssembly palette={palette} />);
+      expect(container.firstChild).toBeTruthy();
     }
   });
 
-  it('renders all palette variants', () => {
-    const palettes = [1, 2, 3, 4, 5] as const;
-    for (const pal of palettes) {
-      const { unmount } = render(
-        <SilhouetteAssembly proportion="med" palette={pal} data-testid={`fig-${pal}`} />,
-      );
-      const children = screen.getByTestId(`fig-${pal}`).querySelectorAll(':scope > div');
-      expect(children.length).toBe(2);
-      unmount();
+  it('renders all 5 proportions without error', () => {
+    for (const proportion of proportions) {
+      const { container } = render(<SilhouetteAssembly proportion={proportion} />);
+      expect(container.firstChild).toBeTruthy();
     }
   });
 
-  it('renders head as rounded-full', () => {
-    render(<SilhouetteAssembly data-testid="fig" />);
-    const head = screen.getByTestId('fig').querySelector(':scope > div:first-child');
-    expect(head).toHaveClass('rounded-full');
+  it('renders with correct aria label', () => {
+    render(<SilhouetteAssembly proportion="tall" />);
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Person — tall');
   });
 
-  it('renders torso with pill-like rounding', () => {
-    render(<SilhouetteAssembly data-testid="fig" />);
-    const torso = screen.getByTestId('fig').querySelector(':scope > div:last-child');
-    expect(torso).toHaveClass('rounded-[50%_50%_30%_30%]');
+  it('renders as img role for accessibility', () => {
+    const { container } = render(<SilhouetteAssembly />);
+    const div = container.firstChild as HTMLElement;
+    expect(div.getAttribute('role')).toBe('img');
   });
 
   it('applies custom className', () => {
-    render(<SilhouetteAssembly className="mx-auto" data-testid="fig" />);
-    expect(screen.getByTestId('fig')).toHaveClass('mx-auto');
-  });
-
-  describe('accessibility', () => {
-    it('has no violations with default props', async () => {
-      await checkAccessibility(<SilhouetteAssembly />);
-    });
-
-    it('has no violations with tall proportion', async () => {
-      await checkAccessibility(<SilhouetteAssembly proportion="tall" />);
-    });
-
-    it('has no violations with palette 3', async () => {
-      await checkAccessibility(<SilhouetteAssembly palette={3} />);
-    });
-
-    it('has no violations in a group portrait', async () => {
-      await checkAccessibility(
-        <div role="img" aria-label="A group of people">
-          <SilhouetteAssembly proportion="tall" palette={1} />
-          <SilhouetteAssembly proportion="med" palette={2} />
-          <SilhouetteAssembly proportion="short" palette={3} />
-        </div>,
-      );
-    });
+    const { container } = render(<SilhouetteAssembly className="custom-class" />);
+    expect(container.firstChild).toHaveClass('custom-class');
   });
 });

@@ -57,7 +57,7 @@ function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.E
           fill={i < earned ? 'currentColor' : 'none'}
           stroke="currentColor"
           strokeWidth="2"
-          className={i < earned ? 'text-amber-500' : 'text-outline-variant'}
+          className={i < earned ? 'text-tertiary' : 'text-outline-variant'}
           aria-hidden="true"
         >
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -94,7 +94,7 @@ export function CourseCard({
 
   return (
     <article
-      className="border border-outline-variant rounded-lg bg-surface-container-lowest shadow-sm font-body-md overflow-hidden"
+      className="border border-outline-variant rounded-lg bg-surface-container-lowest shadow-elevation-raised font-body-md overflow-hidden"
       data-testid="course-card"
     >
       <div className="h-2 w-full" style={{ background: gradient }} aria-hidden="true" />

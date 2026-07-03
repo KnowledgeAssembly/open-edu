@@ -46,14 +46,14 @@ export function CommandPalette({
       aria-label="Global command palette"
     >
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-inverse-surface/50"
         onClick={() => onOpenChange(false)}
         aria-hidden="true"
       />
       <div
         className={cn(
           'relative w-full max-w-[560px] max-h-[400px] flex flex-col overflow-hidden rounded-xl',
-          'bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-outline-variant',
+          'bg-surface shadow-elevation-modal border border-outline-variant',
         )}
       >
         <div className="flex items-center border-b border-outline-variant px-4">

@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   RuntimeThemeProvider,
-  FontLoader,
   TopAppBar,
   useThemePreference,
   useRuntimeOptional,
@@ -318,7 +317,6 @@ export function AppShell({
 
   return (
     <RuntimeThemeProvider themeId={themeId}>
-      <FontLoader />
       <FontSizeProvider>
         <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
           {isCourseView && coursePkg ? (

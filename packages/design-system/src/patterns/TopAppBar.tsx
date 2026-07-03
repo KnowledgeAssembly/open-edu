@@ -159,7 +159,7 @@ export function TopAppBar({
             {a11yOpen && (
               <div
                 ref={panelRef}
-                className="absolute top-full right-0 z-[60] w-[200px] p-3 bg-surface-container-highest border border-outline-variant rounded-[var(--oe-radius-lg,12px)] shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex flex-col gap-2"
+                className="absolute top-full right-0 z-[60] w-[200px] p-3 bg-surface-container-highest border border-outline-variant rounded-lg shadow-elevation-overlay flex flex-col gap-2"
                 data-testid="top-appbar-a11y-panel"
                 role="region"
                 aria-label="Accessibility controls"

@@ -60,7 +60,7 @@ describe('RuntimeThemeProvider', () => {
     );
     const wrapper = container.querySelector('.open-edu-runtime') as HTMLElement;
     expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-family')).toBe(
-      'Atkinson Hyperlegible Next',
+      '"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, sans-serif',
     );
     expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-size')).toBe('32px');
     expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-weight')).toBe('700');

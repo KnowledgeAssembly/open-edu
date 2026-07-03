@@ -1,5 +1,6 @@
 import {
   tailwindColorExtensions,
+  tailwindElevationExtensions,
   tailwindFontFamilyExtensions,
   tailwindFontSizeExtensions,
   tailwindSpacingExtensions,
@@ -26,6 +27,7 @@ export default {
   ],
   theme: {
     extend: {
+      boxShadow: tailwindElevationExtensions,
       colors: tailwindColorExtensions,
       fontFamily: tailwindFontFamilyExtensions,
       fontSize: tailwindFontSizeExtensions,

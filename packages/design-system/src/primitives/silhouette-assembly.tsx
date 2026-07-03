@@ -21,11 +21,11 @@ const proportionConfig: Record<
   narrow: { head: 16, torsoW: 20, torsoH: 36 },
 };
 
-const paletteColors: Record<SilhouettePalette, string> = {
+export const paletteColors: Record<SilhouettePalette, string> = {
   1: 'var(--oe-color-primary)',
-  2: 'var(--oe-color-secondary-container)',
-  3: '#b45309',
-  4: 'var(--oe-color-primary-fixed)',
+  2: 'var(--oe-color-accent)',
+  3: 'var(--oe-color-tertiary)',
+  4: 'var(--oe-color-primary-light)',
   5: 'var(--oe-color-success)',
 };
 

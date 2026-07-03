@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 import {
   tailwindColorExtensions,
+  tailwindElevationExtensions,
   tailwindFontFamilyExtensions,
   tailwindFontSizeExtensions,
   tailwindSpacingExtensions,
@@ -21,6 +22,7 @@ const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      boxShadow: tailwindElevationExtensions,
       colors: tailwindColorExtensions,
       fontFamily: tailwindFontFamilyExtensions,
       fontSize: tailwindFontSizeExtensions,
