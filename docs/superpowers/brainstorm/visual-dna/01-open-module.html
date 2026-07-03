@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual DNA — Open Module Options</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --fg: #1c1917;
+    --fg-muted: #78716c;
+    --primary: #6d28d9;
+    --primary-light: #8b5cf6;
+    --accent: #06b6d4;
+    --border: #e7e5e4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .header {
+    max-width: 900px;
+    margin: 0 auto 3rem;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--fg);
+  }
+  .header .stage {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: rgba(109,40,217,0.08);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+  }
+  .header p {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .context {
+    max-width: 900px;
+    margin: 0 auto 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    line-height: 1.7;
+  }
+  .context strong { color: var(--fg); }
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(139,92,246,0.1);
+    transform: translateY(-2px);
+  }
+  .card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(109,40,217,0.15);
+  }
+  .card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .card-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+  }
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .card p {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+  .visual {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #f5f5f4;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(109,40,217,0.06);
+    color: var(--primary);
+  }
+  .tag.green {
+    background: rgba(5,150,105,0.08);
+    color: #059669;
+  }
+  .tag.amber {
+    background: rgba(217,119,6,0.08);
+    color: #b45309;
+  }
+
+  /* === OPEN MODULE VISUALS === */
+
+  /* Option A: Orbital Cluster */
+  .orbital { position: relative; width: 140px; height: 140px; }
+  .orbital .core {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .orbital .sat {
+    position: absolute;
+    width: 22px; height: 22px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    opacity: 0.7;
+  }
+  .orbital .sat:nth-child(2) { top: 8px; left: 50%; transform: translateX(-50%); }
+  .orbital .sat:nth-child(3) { top: 30%; right: 8px; }
+  .orbital .sat:nth-child(4) { bottom: 30%; right: 8px; }
+  .orbital .sat:nth-child(5) { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .orbital .sat:nth-child(6) { bottom: 30%; left: 8px; }
+  .orbital .sat:nth-child(7) { top: 30%; left: 8px; }
+  .orbital .ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px; height: 100px;
+    border: 1.5px dashed rgba(109,40,217,0.2);
+    border-radius: 50%;
+  }
+
+  /* Option B: Stacked Layers */
+  .layers { position: relative; width: 120px; height: 120px; }
+  .layers .layer {
+    position: absolute;
+    border-radius: 12px;
+    border: 2px solid;
+  }
+  .layers .layer:nth-child(1) {
+    width: 100px; height: 100px;
+    top: 10px; left: 10px;
+    border-color: rgba(109,40,217,0.15);
+    background: rgba(109,40,217,0.03);
+  }
+  .layers .layer:nth-child(2) {
+    width: 76px; height: 76px;
+    top: 22px; left: 22px;
+    border-color: rgba(109,40,217,0.3);
+    background: rgba(109,40,217,0.05);
+  }
+  .layers .layer:nth-child(3) {
+    width: 52px; height: 52px;
+    top: 34px; left: 34px;
+    border-color: rgba(109,40,217,0.5);
+    background: rgba(109,40,217,0.08);
+  }
+  .layers .layer:nth-child(4) {
+    width: 28px; height: 28px;
+    top: 46px; left: 46px;
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+
+  /* Option C: Connected Nodes */
+  .nodes { position: relative; width: 160px; height: 100px; }
+  .nodes .node {
+    position: absolute;
+    width: 26px; height: 26px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .nodes .node:nth-child(1) { top: 10px; left: 20px; }
+  .nodes .node:nth-child(2) { top: 37px; left: 67px; width: 32px; height: 32px; }
+  .nodes .node:nth-child(3) { top: 10px; right: 20px; }
+  .nodes .node:nth-child(4) { bottom: 8px; left: 40px; width: 20px; height: 20px; opacity: 0.5; }
+  .nodes .node:nth-child(5) { bottom: 8px; right: 30px; width: 20px; height: 20px; opacity: 0.5; }
+  .nodes svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .nodes svg line {
+    stroke: rgba(109,40,217,0.25);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  /* Option D: Overlapping Gradient */
+  .overlap { position: relative; width: 140px; height: 100px; }
+  .overlap .circle {
+    position: absolute;
+    border-radius: 50%;
+  }
+  .overlap .circle:nth-child(1) {
+    width: 70px; height: 70px;
+    top: 15px; left: 15px;
+    background: rgba(109,40,217,0.25);
+  }
+  .overlap .circle:nth-child(2) {
+    width: 70px; height: 70px;
+    top: 15px; left: 55px;
+    background: rgba(139,92,246,0.25);
+  }
+  .overlap .circle:nth-child(3) {
+    width: 70px; height: 70px;
+    top: 35px; left: 35px;
+    background: rgba(109,40,217,0.35);
+  }
+  .overlap .dot {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .footer {
+    max-width: 900px;
+    margin: 3rem auto 0;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 0.8rem;
+  }
+  .footer strong { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="stage">Stage 3 — Visual DNA</div>
+  <h1>Open Module — Visual Expression</h1>
+  <p>How should a single learning module look? It must emerge from the geometric primitive (circle), suggest that another connection is always possible, and create beauty through repetition.</p>
+</div>
+
+<div class="context">
+  <strong>Philosophy:</strong> "A module is never complete — it should always suggest that another connection is possible." One module is simple; many modules create beauty. Every visual pattern emerges naturally from repeated modules. Assembly over hierarchy.
+</div>
+
+<div class="grid">
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="a">
+    <div class="card-label">Option A</div>
+    <h3>Orbital Cluster</h3>
+    <p>A central circle surrounded by satellite circles on an orbit path. Suggests a core concept with connected sub-topics. The dashed orbit implies potential for more satellites — the module is never complete.</p>
+    <div class="visual">
+      <div class="orbital">
+        <div class="ring"></div>
+        <div class="core"></div>
+        <div class="sat"></div>
+        <div class="sat"></div>
+        <div class="sat"></div>
+        <div class="sat"></div>
+        <div class="sat"></div>
+        <div class="sat"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">assembly</span>
+      <span class="tag">growth</span>
+      <span class="tag green">scales well</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="b">
+    <div class="card-label">Option B</div>
+    <h3>Stacked Layers</h3>
+    <p>Nested rounded rectangles with increasing opacity toward the center. Represents depth — a module contains layers of understanding. The outermost layer is always "open" (lighter, incomplete feeling).</p>
+    <div class="visual">
+      <div class="layers">
+        <div class="layer"></div>
+        <div class="layer"></div>
+        <div class="layer"></div>
+        <div class="layer"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">depth</span>
+      <span class="tag">progressive</span>
+      <span class="tag amber">contained</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="c">
+    <div class="card-label">Option C</div>
+    <h3>Connected Nodes</h3>
+    <p>Circles of varying sizes connected by dashed lines. A small network graph. Directly expresses "assembly" — modules connect to form understanding. Dashed lines suggest connections yet to be made.</p>
+    <div class="visual">
+      <div class="nodes">
+        <svg>
+          <line x1="33" y1="23" x2="83" y2="53"/>
+          <line x1="83" y1="53" x2="133" y2="23"/>
+          <line x1="83" y1="53" x2="50" y2="83"/>
+          <line x1="83" y1="53" x2="120" y2="83"/>
+          <line x1="33" y1="23" x2="50" y2="83"/>
+          <line x1="133" y1="23" x2="120" y2="83"/>
+        </svg>
+        <div class="node"></div>
+        <div class="node"></div>
+        <div class="node"></div>
+        <div class="node"></div>
+        <div class="node"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">network</span>
+      <span class="tag">connection</span>
+      <span class="tag green">most literal</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="d">
+    <div class="card-label">Option D</div>
+    <h3>Overlapping Circles</h3>
+    <p>Three overlapping circles with transparency, creating a shared intersection. The overlap zones are darker — meaning emerges from the intersection of ideas. A single dot at the center marks the core concept.</p>
+    <div class="visual">
+      <div class="overlap">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">intersection</span>
+      <span class="tag">emergence</span>
+      <span class="tag green">minimal</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Click a card to select your preferred option. You can select multiple to narrow down.</p>
+  <p style="margin-top:0.5rem"><strong>Philosophy check:</strong> Does it feel assembled? Does it suggest openness? Does it create beauty through repetition?</p>
+</div>
+
+<script>
+function toggleSelect(el) {
+  el.classList.toggle('selected');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual DNA — Illustration Language Options</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --fg: #1c1917;
+    --fg-muted: #78716c;
+    --primary: #6d28d9;
+    --primary-light: #8b5cf6;
+    --accent: #06b6d4;
+    --border: #e7e5e4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--fg);
+    line-height: 1.6; padding: 2rem;
+  }
+  .header { max-width: 960px; margin: 0 auto 3rem; text-align: center; }
+  .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .header .stage {
+    display: inline-block; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--primary); background: rgba(109,40,217,0.08);
+    padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 1rem;
+  }
+  .header p { color: var(--fg-muted); font-size: 0.95rem; max-width: 620px; margin: 0 auto; }
+  .context {
+    max-width: 960px; margin: 0 auto 2.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.5rem;
+    font-size: 0.85rem; color: var(--fg-muted); line-height: 1.7;
+  }
+  .context strong { color: var(--fg); }
+  .grid {
+    max-width: 960px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  .card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    cursor: pointer; transition: all 0.2s ease; position: relative;
+  }
+  .card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(139,92,246,0.1);
+    transform: translateY(-2px);
+  }
+  .card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(109,40,217,0.15);
+  }
+  .card.selected::after {
+    content: '✓'; position: absolute; top: 12px; right: 12px;
+    width: 24px; height: 24px; background: var(--primary); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .card-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 0.75rem;
+  }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.8rem; color: var(--fg-muted); margin-bottom: 1rem; line-height: 1.5; }
+  .visual {
+    width: 100%; aspect-ratio: 4/3;
+    background: #f5f5f4; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem; overflow: hidden; position: relative;
+  }
+  .visual-label {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    font-size: 0.6rem; font-weight: 600; color: var(--fg-muted);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    background: rgba(250,250,249,0.85); padding: 0.15rem 0.5rem; border-radius: 4px;
+  }
+  .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.65rem; font-weight: 500;
+    padding: 0.2rem 0.5rem; border-radius: 999px;
+    background: rgba(109,40,217,0.06); color: var(--primary);
+  }
+  .tag.green { background: rgba(5,150,105,0.08); color: #059669; }
+  .tag.amber { background: rgba(217,119,6,0.08); color: #b45309; }
+  .tag.red { background: rgba(220,38,38,0.08); color: #dc2626; }
+
+  /* === ILLUSTRATION VISUALS === */
+
+  /* A: Circle People */
+  .circle-people {
+    display: flex; gap: 24px; align-items: flex-end;
+  }
+  .circle-person {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .circle-person .head {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--primary);
+  }
+  .circle-person .body {
+    width: 22px; height: 32px; border-radius: 11px; background: var(--primary-light);
+  }
+  .circle-person .legs {
+    display: flex; gap: 4px;
+  }
+  .circle-person .leg {
+    width: 8px; height: 16px; border-radius: 4px; background: var(--primary);
+    opacity: 0.5;
+  }
+  .circle-person.p2 .head { background: var(--accent); }
+  .circle-person.p2 .body { background: rgba(6,182,212,0.5); }
+  .circle-person.p2 .leg { background: var(--accent); opacity: 0.4; }
+  .circle-person.p3 .head { background: #b45309; }
+  .circle-person.p3 .body { background: rgba(180,83,9,0.4); }
+  .circle-person.p3 .leg { background: #b45309; opacity: 0.35; }
+  .circle-person.p3 .body { height: 26px; }
+
+  /* B: Silhouette Assembly */
+  .silhouettes {
+    display: flex; gap: 20px; align-items: center;
+  }
+  .silhouette {
+    position: relative; width: 50px; height: 80px;
+  }
+  .silhouette .head {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 24px; border-radius: 50%;
+  }
+  .silhouette .torso {
+    position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 32px; height: 36px; border-radius: 16px 16px 8px 8px;
+  }
+  .silhouette.s1 .head { background: rgba(109,40,217,0.7); }
+  .silhouette.s1 .torso { background: rgba(109,40,217,0.3); }
+  .silhouette.s2 .head { background: rgba(6,182,212,0.7); }
+  .silhouette.s2 .torso { background: rgba(6,182,212,0.3); }
+  .silhouette.s3 .head { background: rgba(180,83,9,0.7); }
+  .silhouette.s3 .torso { background: rgba(180,83,9,0.3); }
+  .silhouette.s4 .head { background: rgba(139,92,246,0.7); }
+  .silhouette.s4 .torso { background: rgba(139,92,246,0.3); }
+
+  /* C: Posture Glyphs */
+  .glyphs {
+    display: flex; gap: 28px; align-items: flex-end;
+  }
+  .glyph {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .glyph .g-head {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--primary);
+  }
+  .glyph svg { width: 30px; height: 40px; margin-top: -2px; }
+  .glyph svg line { stroke: var(--primary); stroke-width: 2.5; stroke-linecap: round; }
+  .glyph svg .arm { stroke-width: 2; }
+  .glyph.g2 .g-head { background: var(--accent); }
+  .glyph.g2 svg line { stroke: var(--accent); }
+  .glyph.g3 .g-head { background: #b45309; }
+  .glyph.g3 svg line { stroke: #b45309; }
+
+  /* D: Gradient Figures */
+  .gradient-figs {
+    display: flex; gap: 16px; align-items: center;
+  }
+  .g-fig {
+    position: relative; width: 50px; height: 80px;
+  }
+  .g-fig .g-circle {
+    position: absolute; border-radius: 50%;
+  }
+  .g-fig .g-circle.head {
+    width: 22px; height: 22px;
+    top: 0; left: 50%; transform: translateX(-50%);
+  }
+  .g-fig .g-circle.chest {
+    width: 30px; height: 30px;
+    top: 18px; left: 50%; transform: translateX(-50%);
+  }
+  .g-fig .g-circle.hips {
+    width: 26px; height: 26px;
+    top: 38px; left: 50%; transform: translateX(-50%);
+  }
+  .g-fig.f1 .g-circle.head { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+  .g-fig.f1 .g-circle.chest { background: linear-gradient(135deg, rgba(109,40,217,0.5), rgba(139,92,246,0.3)); }
+  .g-fig.f1 .g-circle.hips { background: linear-gradient(135deg, rgba(109,40,217,0.25), rgba(139,92,246,0.1)); }
+  .g-fig.f2 .g-circle.head { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+  .g-fig.f2 .g-circle.chest { background: linear-gradient(135deg, rgba(6,182,212,0.5), rgba(34,211,238,0.3)); }
+  .g-fig.f2 .g-circle.hips { background: linear-gradient(135deg, rgba(6,182,212,0.25), rgba(34,211,238,0.1)); }
+  .g-fig.f3 .g-circle.head { background: linear-gradient(135deg, #b45309, #d97706); }
+  .g-fig.f3 .g-circle.chest { background: linear-gradient(135deg, rgba(180,83,9,0.5), rgba(217,119,6,0.3)); }
+  .g-fig.f3 .g-circle.hips { background: linear-gradient(135deg, rgba(180,83,9,0.25), rgba(217,119,6,0.1)); }
+
+  .footer {
+    max-width: 960px; margin: 3rem auto 0; text-align: center;
+    color: var(--fg-muted); font-size: 0.8rem;
+  }
+  .footer strong { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="stage">Stage 3 — Visual DNA</div>
+  <h1>Illustration Language — Human Figures</h1>
+  <p>How should people appear in OpenEdu illustrations? The style must be built from the same geometric primitive (circle), celebrate diversity with dignity, and never reduce learners to caricatures.</p>
+</div>
+
+<div class="context">
+  <strong>Philosophy:</strong> "Built from the same geometric language. Human-centered, celebrating learners with diversity and dignity." Pipili communicates through posture and orientation, not facial expressions.
+</div>
+
+<div class="grid">
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="a">
+    <div class="card-label">Option A</div>
+    <h3>Circle People</h3>
+    <p>Figures built from stacked circles and rounded rectangles. Head (circle), body (rounded rect), legs (small rounded rects). Pure geometric assembly. Each person is a composition of the primitive — no lines, no sharp edges.</p>
+    <div class="visual">
+      <div class="circle-people">
+        <div class="circle-person">
+          <div class="head"></div>
+          <div class="body"></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+        <div class="circle-person p2">
+          <div class="head"></div>
+          <div class="body"></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+        <div class="circle-person p3">
+          <div class="head"></div>
+          <div class="body"></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+      </div>
+      <div class="visual-label">Assembly of primitives</div>
+    </div>
+    <div class="tags">
+      <span class="tag">pure geometry</span>
+      <span class="tag green">on-brand</span>
+      <span class="tag amber">abstract</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="b">
+    <div class="card-label">Option B</div>
+    <h3>Silhouette Assembly</h3>
+    <p>Overlapping translucent shapes form a human silhouette. A circle head sits atop a rounded torso. The transparency creates depth where shapes overlap. Dignified, minimal, no facial features — posture and proportion convey identity.</p>
+    <div class="visual">
+      <div class="silhouettes">
+        <div class="silhouette s1">
+          <div class="head"></div>
+          <div class="torso"></div>
+        </div>
+        <div class="silhouette s2">
+          <div class="head"></div>
+          <div class="torso"></div>
+        </div>
+        <div class="silhouette s3">
+          <div class="head"></div>
+          <div class="torso"></div>
+        </div>
+        <div class="silhouette s4">
+          <div class="head"></div>
+          <div class="torso"></div>
+        </div>
+      </div>
+      <div class="visual-label">Translucent layering</div>
+    </div>
+    <div class="tags">
+      <span class="tag">dignified</span>
+      <span class="tag">diverse</span>
+      <span class="tag green">scalable</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="c">
+    <div class="card-label">Option C</div>
+    <h3>Posture Glyphs</h3>
+    <p>Minimalist stick figures with circle heads. Body is a single line, arms and legs are simple strokes. Emotion comes entirely from posture — leaning forward (curious), arms raised (celebrating), relaxed stance (calm). No faces needed.</p>
+    <div class="visual">
+      <div class="glyphs">
+        <!-- Standing curious -->
+        <div class="glyph">
+          <div class="g-head"></div>
+          <svg viewBox="0 0 30 40">
+            <line x1="15" y1="20" x2="15" y2="34"/>
+            <line class="arm" x1="15" y1="24" x2="8" y2="30"/>
+            <line class="arm" x1="15" y1="24" x2="22" y2="28"/>
+            <line x1="15" y1="34" x2="9" y2="40"/>
+            <line x1="15" y1="34" x2="21" y2="40"/>
+          </svg>
+        </div>
+        <!-- Arms up celebrating -->
+        <div class="glyph g2">
+          <div class="g-head"></div>
+          <svg viewBox="0 0 30 40">
+            <line x1="15" y1="20" x2="15" y2="34"/>
+            <line class="arm" x1="15" y1="24" x2="6" y2="18"/>
+            <line class="arm" x1="15" y1="24" x2="24" y2="18"/>
+            <line x1="15" y1="34" x2="9" y2="40"/>
+            <line x1="15" y1="34" x2="21" y2="40"/>
+          </svg>
+        </div>
+        <!-- Reading/leaning forward -->
+        <div class="glyph g3">
+          <div class="g-head"></div>
+          <svg viewBox="0 0 30 40">
+            <line x1="15" y1="20" x2="13" y2="34"/>
+            <line class="arm" x1="14" y1="24" x2="6" y2="28"/>
+            <line class="arm" x1="14" y1="24" x2="22" y2="26"/>
+            <line x1="13" y1="34" x2="7" y2="40"/>
+            <line x1="13" y1="34" x2="19" y2="40"/>
+          </svg>
+        </div>
+        <!-- Relaxed -->
+        <div class="glyph">
+          <div class="g-head"></div>
+          <svg viewBox="0 0 30 40">
+            <line x1="15" y1="20" x2="15" y2="34"/>
+            <line class="arm" x1="15" y1="24" x2="8" y2="32"/>
+            <line class="arm" x1="15" y1="24" x2="22" y2="32"/>
+            <line x1="15" y1="34" x2="9" y2="40"/>
+            <line x1="15" y1="34" x2="21" y2="40"/>
+          </svg>
+        </div>
+      </div>
+      <div class="visual-label">Posture = emotion</div>
+    </div>
+    <div class="tags">
+      <span class="tag">expressive</span>
+      <span class="tag green">simplest</span>
+      <span class="tag">motion-ready</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="d">
+    <div class="card-label">Option D</div>
+    <h3>Gradient Figures</h3>
+    <p>Overlapping circles with vertical gradients — dark at top (head), fading to transparent at bottom. Creates an ethereal, weightless feeling. The gradient suggests energy flowing downward, grounding the figure. Multiple figures in different palettes show diversity.</p>
+    <div class="visual">
+      <div class="gradient-figs">
+        <div class="g-fig f1">
+          <div class="g-circle head"></div>
+          <div class="g-circle chest"></div>
+          <div class="g-circle hips"></div>
+        </div>
+        <div class="g-fig f2">
+          <div class="g-circle head"></div>
+          <div class="g-circle chest"></div>
+          <div class="g-circle hips"></div>
+        </div>
+        <div class="g-fig f3">
+          <div class="g-circle head"></div>
+          <div class="g-circle chest"></div>
+          <div class="g-circle hips"></div>
+        </div>
+      </div>
+      <div class="visual-label">Gradient energy</div>
+    </div>
+    <div class="tags">
+      <span class="tag">ethereal</span>
+      <span class="tag">warm</span>
+      <span class="tag amber">complex</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Click a card to select your preferred option.</p>
+  <p style="margin-top:0.5rem"><strong>Philosophy check:</strong> Does it celebrate learners? Is it dignified? Does it use the geometric primitive? Can posture convey emotion without faces?</p>
+</div>
+
+<script>
+function toggleSelect(el) {
+  el.classList.toggle('selected');
+}
+</script>
+
+</body>
+</html>

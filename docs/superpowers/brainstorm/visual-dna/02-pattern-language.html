@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual DNA — Pattern Language Options</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --fg: #1c1917;
+    --fg-muted: #78716c;
+    --primary: #6d28d9;
+    --primary-light: #8b5cf6;
+    --accent: #06b6d4;
+    --border: #e7e5e4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .header {
+    max-width: 960px;
+    margin: 0 auto 3rem;
+    text-align: center;
+  }
+  .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .header .stage {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--primary);
+    background: rgba(109,40,217,0.08);
+    padding: 0.25rem 0.75rem; border-radius: 999px;
+    margin-bottom: 1rem;
+  }
+  .header p { color: var(--fg-muted); font-size: 0.95rem; max-width: 620px; margin: 0 auto; }
+  .context {
+    max-width: 960px; margin: 0 auto 2.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.5rem;
+    font-size: 0.85rem; color: var(--fg-muted); line-height: 1.7;
+  }
+  .context strong { color: var(--fg); }
+  .use-cases {
+    max-width: 960px; margin: 0 auto 2rem;
+    display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;
+  }
+  .use-case {
+    font-size: 0.75rem; font-weight: 500;
+    padding: 0.35rem 0.75rem; border-radius: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--fg-muted);
+  }
+  .use-case strong { color: var(--fg); }
+  .grid {
+    max-width: 960px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  .card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    cursor: pointer; transition: all 0.2s ease; position: relative;
+  }
+  .card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(139,92,246,0.1);
+    transform: translateY(-2px);
+  }
+  .card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(109,40,217,0.15);
+  }
+  .card.selected::after {
+    content: '✓'; position: absolute; top: 12px; right: 12px;
+    width: 24px; height: 24px; background: var(--primary); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .card-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 0.75rem;
+  }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.8rem; color: var(--fg-muted); margin-bottom: 1rem; line-height: 1.5; }
+  .visual {
+    width: 100%; aspect-ratio: 16/9;
+    background: #f5f5f4; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem; overflow: hidden; position: relative;
+  }
+  .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.65rem; font-weight: 500;
+    padding: 0.2rem 0.5rem; border-radius: 999px;
+    background: rgba(109,40,217,0.06); color: var(--primary);
+  }
+  .tag.green { background: rgba(5,150,105,0.08); color: #059669; }
+  .tag.amber { background: rgba(217,119,6,0.08); color: #b45309; }
+
+  /* === PATTERN VISUALS === */
+
+  /* A: Dot Grid */
+  .dot-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 6px;
+    width: 80%;
+    aspect-ratio: 12/7;
+  }
+  .dot-grid .dot {
+    width: 100%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .dot-grid .dot:nth-child(3n) { opacity: 0.15; }
+  .dot-grid .dot:nth-child(5n) { opacity: 0.35; }
+  .dot-grid .dot:nth-child(7n) { opacity: 0.6; }
+  .dot-grid .dot:nth-child(11n) { opacity: 0.9; }
+  .dot-grid .dot:nth-child(13n) { background: var(--accent); opacity: 0.4; }
+  .dot-grid .dot:nth-child(17n) { background: var(--primary-light); opacity: 0.25; }
+
+  /* B: Organic Scatter */
+  .scatter {
+    position: relative;
+    width: 90%; height: 80%;
+  }
+  .scatter .dot {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .scatter .dot:nth-child(1)  { width:18px; height:18px; top:10%; left:8%;  opacity:0.3; }
+  .scatter .dot:nth-child(2)  { width:12px; height:12px; top:25%; left:22%; opacity:0.5; }
+  .scatter .dot:nth-child(3)  { width:22px; height:22px; top:15%; left:45%; opacity:0.15; }
+  .scatter .dot:nth-child(4)  { width:10px; height:10px; top:40%; left:12%; opacity:0.6; }
+  .scatter .dot:nth-child(5)  { width:16px; height:16px; top:50%; left:35%; opacity:0.25; background:var(--accent); }
+  .scatter .dot:nth-child(6)  { width:14px; height:14px; top:30%; left:65%; opacity:0.4; }
+  .scatter .dot:nth-child(7)  { width:20px; height:20px; top:60%; left:55%; opacity:0.2; }
+  .scatter .dot:nth-child(8)  { width:8px;  height:8px;  top:70%; left:20%; opacity:0.55; }
+  .scatter .dot:nth-child(9)  { width:15px; height:15px; top:45%; left:78%; opacity:0.35; background:var(--primary-light); }
+  .scatter .dot:nth-child(10) { width:11px; height:11px; top:75%; left:70%; opacity:0.45; }
+  .scatter .dot:nth-child(11) { width:17px; height:17px; top:20%; left:80%; opacity:0.2; }
+  .scatter .dot:nth-child(12) { width:9px;  height:9px;  top:80%; left:45%; opacity:0.5; }
+  .scatter .dot:nth-child(13) { width:13px; height:13px; top:55%; left:88%; opacity:0.3; background:var(--accent); }
+  .scatter .dot:nth-child(14) { width:7px;  height:7px;  top:10%; left:62%; opacity:0.6; }
+  .scatter .dot:nth-child(15) { width:19px; height:19px; top:85%; left:10%; opacity:0.15; }
+  .scatter .dot:nth-child(16) { width:10px; height:10px; top:35%; left:92%; opacity:0.4; }
+  .scatter .dot:nth-child(17) { width:14px; height:14px; top:65%; left:5%;  opacity:0.35; background:var(--primary-light); }
+  .scatter .dot:nth-child(18) { width:11px; height:11px; top:5%;  left:35%; opacity:0.45; }
+
+  /* C: Concentric Waves */
+  .waves { position: relative; width: 200px; height: 140px; }
+  .waves .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid var(--primary);
+  }
+  .waves .ring:nth-child(1) { width:30px; height:30px; top:55px; left:85px; opacity:0.7; border-width:2px; }
+  .waves .ring:nth-child(2) { width:60px; height:60px; top:40px; left:70px; opacity:0.4; }
+  .waves .ring:nth-child(3) { width:90px; height:90px; top:25px; left:55px; opacity:0.25; }
+  .waves .ring:nth-child(4) { width:120px; height:120px; top:10px; left:40px; opacity:0.15; }
+  .waves .ring:nth-child(5) { width:150px; height:150px; top:-5px; left:25px; opacity:0.08; }
+  .waves .dot2 {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .waves .dot2:nth-child(6) { top:68px; left:130px; }
+  .waves .ring2 {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+  }
+  .waves .ring2:nth-child(7) { width:24px; height:24px; top:64px; left:126px; opacity:0.5; }
+  .waves .ring2:nth-child(8) { width:44px; height:44px; top:54px; left:116px; opacity:0.25; }
+  .waves .ring2:nth-child(9) { width:64px; height:64px; top:44px; left:106px; opacity:0.12; }
+
+  /* D: Assembly Flow */
+  .flow { position: relative; width: 90%; height: 80%; }
+  .flow svg { width: 100%; height: 100%; }
+  .flow svg .path {
+    fill: none;
+    stroke: rgba(109,40,217,0.15);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+  .flow svg .node-circle {
+    fill: var(--primary);
+    opacity: 0.6;
+  }
+  .flow svg .node-circle.accent {
+    fill: var(--accent);
+    opacity: 0.4;
+  }
+  .flow svg .node-circle.light {
+    fill: var(--primary-light);
+    opacity: 0.3;
+  }
+
+  .footer {
+    max-width: 960px; margin: 3rem auto 0; text-align: center;
+    color: var(--fg-muted); font-size: 0.8rem;
+  }
+  .footer strong { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="stage">Stage 3 — Visual DNA</div>
+  <h1>Pattern Language — Visual Textures</h1>
+  <p>How should repeated modules create background textures, empty states, loading animations, and reward visuals? The pattern must emerge naturally from the Open Module.</p>
+</div>
+
+<div class="context">
+  <strong>Philosophy:</strong> "One module is simple; many modules create beauty." Patterns should feel calm, not busy. They should reduce cognitive load, not increase it. Silence is part of the interface.
+</div>
+
+<div class="use-cases">
+  <div class="use-case"><strong>Use cases:</strong></div>
+  <div class="use-case">Background textures</div>
+  <div class="use-case">Empty states</div>
+  <div class="use-case">Loading animations</div>
+  <div class="use-case">Reward celebrations</div>
+  <div class="use-case">Section dividers</div>
+</div>
+
+<div class="grid">
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="a">
+    <div class="card-label">Option A</div>
+    <h3>Dot Grid</h3>
+    <p>Regular grid of circles with varying opacity. Creates a calm, structured texture. The uniform spacing conveys order; the opacity variation adds depth without noise. Feels like graph paper made of light.</p>
+    <div class="visual">
+      <div class="dot-grid">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">structured</span>
+      <span class="tag">calm</span>
+      <span class="tag green">easy to animate</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="b">
+    <div class="card-label">Option B</div>
+    <h3>Organic Scatter</h3>
+    <p>Circles scattered with slight random offsets in position and size. Feels natural, like particles floating in space. The randomness is constrained — never chaotic, always calm. Good for empty states and loading.</p>
+    <div class="visual">
+      <div class="scatter">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">organic</span>
+      <span class="tag">gentle</span>
+      <span class="tag amber">harder to grid</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="c">
+    <div class="card-label">Option C</div>
+    <h3>Concentric Waves</h3>
+    <p>Ripple patterns expanding from points. A core circle emits rings that fade outward. Multiple ripple sources can overlap. Directly expresses growth and discovery — knowledge radiating outward.</p>
+    <div class="visual">
+      <div class="waves">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="ring"></div><div class="ring"></div>
+        <div class="dot2"></div>
+        <div class="ring2"></div><div class="ring2"></div><div class="ring2"></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">growth</span>
+      <span class="tag">discovery</span>
+      <span class="tag green">natural animation</span>
+    </div>
+  </div>
+
+  <div class="card" onclick="toggleSelect(this)" data-choice="d">
+    <div class="card-label">Option D</div>
+    <h3>Assembly Flow</h3>
+    <p>Circles connected by flowing dashed paths. Shows the journey of assembly — ideas connecting along a path. The paths are never straight; they curve gently, suggesting exploration over rigid structure.</p>
+    <div class="visual">
+      <div class="flow">
+        <svg viewBox="0 0 320 160">
+          <path class="path" d="M30,80 C80,30 120,120 180,70 S260,100 300,60"/>
+          <path class="path" d="M20,120 C70,60 130,140 200,90 S270,130 310,100" style="opacity:0.5"/>
+          <circle class="node-circle" cx="30" cy="80" r="8"/>
+          <circle class="node-circle accent" cx="100" cy="65" r="6"/>
+          <circle class="node-circle" cx="180" cy="70" r="9"/>
+          <circle class="node-circle light" cx="240" cy="85" r="5"/>
+          <circle class="node-circle accent" cx="300" cy="60" r="7"/>
+          <circle class="node-circle light" cx="60" cy="95" r="4"/>
+          <circle class="node-circle" cx="150" cy="105" r="5"/>
+          <circle class="node-circle accent" cx="220" cy="55" r="4"/>
+          <circle class="node-circle light" cx="280" cy="100" r="6"/>
+        </svg>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag">journey</span>
+      <span class="tag">connection</span>
+      <span class="tag green">storytelling</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Click a card to select your preferred option.</p>
+  <p style="margin-top:0.5rem"><strong>Philosophy check:</strong> Is it calm? Does it reduce cognitive load? Does silence feel like part of it?</p>
+</div>
+
+<script>
+function toggleSelect(el) {
+  el.classList.toggle('selected');
+}
+</script>
+
+</body>
+</html>

@@ -10,13 +10,13 @@
 ```
 Stage 1: Philosophy           ██████████████████████████  COMPLETE
 Stage 2: Design Language      ██████████████████████████  COMPLETE
-Stage 3: Visual DNA           ████████████░░░░░░░░░░░░░  IN PROGRESS
+Stage 3: Visual DNA           ██████████████████████████  COMPLETE
 Stage 4: Design System        ████████░░░░░░░░░░░░░░░░░  IN PROGRESS
 Stage 5: Product Design       ░░░░░░░░░░░░░░░░░░░░░░░░░  NOT STARTED
 Stage 6: Engineering          ████████████░░░░░░░░░░░░░  IN PROGRESS
 ```
 
-**Current focus:** Visual DNA finalization + Design System token/wiring completion
+**Current focus:** Design System token wiring + styling standardization
 
 ---
 
@@ -59,27 +59,24 @@ All 14 Volume II documents are written and finalized.
 
 ---
 
-## Stage 3 — Visual DNA 🟡 IN PROGRESS
+## Stage 3 — Visual DNA ✅ COMPLETE
 
 > "Before designing a screen, ensure these exist: Geometric Primitive, Open Module, Pipili, Logo, Pattern Language, Illustration Language, Color System, Typography."
+
+**Design spec:** `docs/superpowers/specs/2026-07-03-visual-dna-design.md`
 
 ### Finalized Decisions
 
 | Visual DNA Element | Status | Decision |
 |--------------------|--------|----------|
-| **Geometric Primitive** | ✅ FINALIZED | Circle-based primitive — simple, connectable, scalable, animatable, recognizable without color. Component exists at `packages/design-system/src/primitives/geo-primitive.tsx` |
-| **Pipili** | ✅ FINALIZED | Quiet companion character, built from same geometric language. Component exists at `packages/design-system/src/primitives/pipili.tsx` |
-| **Logo** | ✅ FINALIZED | Assembled from primitives, not drawn. Works in monochrome, high contrast, light/dark themes, favicon sizes. Component exists at `packages/design-system/src/primitives/openedu-logo.tsx` |
-
-### Still TODO
-
-| Visual DNA Element | Status | Next Step |
-|--------------------|--------|-----------|
-| **Open Module** (visual) | 🔲 TODO | Define the visual expression of a learning module — how primitives compose into the fundamental learning unit |
-| **Pattern Language** | 🔲 TODO | Visual patterns from repeated modules (backgrounds, illustrations, empty states, loading, rewards) |
-| **Illustration Language** | 🔲 TODO | Human-centered illustrations built from geometric primitives |
-| **Color System** | 🔲 TODO (concrete palette) | Principles exist (Volume II), but no finalized color palette. Token values exist in `colors.ts` but need validation against Visual DNA |
-| **Typography** | 🔲 TODO (final selection) | Inter + Source Serif 4 are in tokens, need final approval against Visual DNA |
+| **Geometric Primitive** | ✅ FINALIZED | Circle-based primitive — simple, connectable, scalable, animatable, recognizable without color. Component at `packages/design-system/src/primitives/geo-primitive.tsx` |
+| **Open Module** | ✅ FINALIZED | Orbital Cluster — circle core + 2–6 satellite circles on dashed orbit, clustered with intentional gaps. Spec: `docs/superpowers/specs/2026-07-03-visual-dna-design.md` §1 |
+| **Pipili** | ✅ FINALIZED | Quiet companion character, built from same geometric language. Component at `packages/design-system/src/primitives/pipili.tsx` |
+| **Logo** | ✅ FINALIZED | Assembled from primitives, not drawn. Works in monochrome, high contrast, light/dark themes, favicon sizes. Component at `packages/design-system/src/primitives/openedu-logo.tsx` |
+| **Pattern Language** | ✅ FINALIZED | Assembly Flow — single dashed path connecting circle nodes, 3 density variants (dense/medium/minimal). Spec: `docs/superpowers/specs/2026-07-03-visual-dna-design.md` §2 |
+| **Illustration Language** | ✅ FINALIZED | Silhouette Assembly — circle head + rounded torso, 5 proportions × 5 palettes for diversity. Spec: `docs/superpowers/specs/2026-07-03-visual-dna-design.md` §3 |
+| **Color System** | ✅ FINALIZED | 80+ swatches, 59 semantic roles defined in `colors.ts`. Token values validated against Visual DNA palettes. |
+| **Typography** | ✅ FINALIZED | Inter (productive) + Source Serif 4 (expressive), 11 roles each. Defined in `typography.ts`. |
 
 ---
 
@@ -213,7 +210,7 @@ Mapped from `docs/superpowers/plans/2026-07-03-design-system-implementation.md`
 
 ## Remaining Work — Priority Order
 
-### High Priority (blocks Visual DNA completion)
+### High Priority (Design System completion)
 
 1. **Task 7: Wire new tokens into Tailwind + ThemeDefinition**
    - Import `tailwindSizingExtensions`, `tailwindOpacityExtensions`, `tailwindBorderWidthExtensions`, `tailwindIconSizeExtensions`, `tailwindLayoutExtensions` into `tailwind.ts`
@@ -232,16 +229,13 @@ Mapped from `docs/superpowers/plans/2026-07-03-design-system-implementation.md`
 
 ### Medium Priority (polish)
 
-5. **Open Module visual definition** — Define how the geometric primitive composes into a learning module
-6. **Color palette validation** — Validate token values in `colors.ts` against finalized Visual DNA
-7. **Typography final selection** — Confirm Inter + Source Serif 4 or alternatives
+5. **Color palette validation** — Validate token values in `colors.ts` against finalized Visual DNA
+6. **Typography final selection** — Confirm Inter + Source Serif 4 or alternatives
 
 ### Low Priority (future)
 
-8. **Pattern Language** — Define visual patterns from repeated modules
-9. **Illustration Language** — Define illustration style from geometric primitives
-10. **Full axe-core audit** — Run accessibility audit on all components
-11. **Full test suite verification** — `pnpm test && pnpm lint && pnpm typecheck`
+7. **Full axe-core audit** — Run accessibility audit on all components
+8. **Full test suite verification** — `pnpm test && pnpm lint && pnpm typecheck`
 
 ---
 
@@ -254,9 +248,9 @@ Mapped from `docs/superpowers/plans/2026-07-03-design-system-implementation.md`
 | Token categories flattened to CSS vars | 6/14 |
 | Components needing style migration | 3 (ThemeSelector, SkillSummary, ReadingRuler) |
 | Components already properly themed | 4 (ConfettiBurst, GlowPulse, Module, CourseTree) |
-| Visual DNA elements finalized | 3/6 (GeoPrimitive, Pipili, Logo) |
-| Visual DNA elements TODO | 3 (Open Module, Pattern Language, Illustration Language) |
-| Design Pyramid stages complete | 2/6 (Philosophy, Design Language) |
+| Visual DNA elements finalized | 6/6 (GeoPrimitive, Open Module, Pipili, Logo, Pattern Language, Illustration Language) |
+| Visual DNA elements TODO | 0 |
+| Design Pyramid stages complete | 3/6 (Philosophy, Design Language, Visual DNA) |
 | Implementation plan tasks done | 10/18 |
 | Implementation plan tasks remaining | 8 |
 
@@ -267,6 +261,9 @@ Mapped from `docs/superpowers/plans/2026-07-03-design-system-implementation.md`
 | Date | Decision | Rationale |
 |------|----------|-----------|
 | 2026-07-03 | Visual DNA finalized: Geometric Primitive (circle), Pipili, Logo | Aligns with openedu-way philosophy — simplicity, assembly, calm technology |
+| 2026-07-03 | Visual DNA finalized: Open Module (Orbital Cluster) | Variable satellites (2–6) with intentional gaps express "never complete" |
+| 2026-07-03 | Visual DNA finalized: Pattern Language (Assembly Flow) | Single dashed path with circle nodes — calm, scales from backgrounds to dividers |
+| 2026-07-03 | Visual DNA finalized: Illustration Language (Silhouette Assembly) | 5 proportions × 5 palettes — dignity through variation, no facial features |
 | 2026-07-03 | ThemedButton deleted, all widgets migrated to design-system Button | Eliminates duplication, consolidates component library |
 | 2026-07-03 | Duplicate `cn()` removed from learner app | Single source of truth in design-system |
 | 2026-07-03 | Reduced motion support added to CompletionScreen | Accessibility requirement per Volume II §12 |
