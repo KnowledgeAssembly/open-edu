@@ -306,6 +306,7 @@ export function AppShell({
     return (
       <AppSidebar
         logo={<OpenEduLogo variant="lockup" size="sm" />}
+        logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
         items={navItems}
         currentItemId={currentNavId}
         onNavigate={handleNavAction}
@@ -358,6 +359,7 @@ export function AppShell({
               sidebar={
                 <AppSidebar
                   logo={<OpenEduLogo variant="lockup" size="sm" />}
+                  logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
                   items={navItems}
                   currentItemId={currentNavId}
                   onNavigate={handleNavAction}

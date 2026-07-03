@@ -174,7 +174,7 @@ describe('AppSidebar', () => {
       expect(screen.queryByText('OpenEdu')).toBeNull();
     });
 
-    it('hides logo when collapsed', () => {
+    it('hides expanded logo when collapsed', () => {
       render(
         <AppSidebar
           items={navItems}
@@ -187,11 +187,41 @@ describe('AppSidebar', () => {
       expect(screen.queryByTestId('sidebar-logo')).toBeNull();
     });
 
-    it('shows OE text when collapsed without logo', () => {
+    it('shows collapsed logo when collapsed and logoCollapsed provided', () => {
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          logo={<span data-testid="sidebar-logo">Expanded</span>}
+          logoCollapsed={<span data-testid="sidebar-logo-collapsed">Collapsed</span>}
+          defaultCollapsed
+        />,
+      );
+      expect(screen.queryByTestId('sidebar-logo')).toBeNull();
+      expect(screen.getByTestId('sidebar-logo-collapsed')).toBeInTheDocument();
+      expect(screen.getByText('Collapsed')).toBeInTheDocument();
+    });
+
+    it('shows OE text when collapsed without logo or logoCollapsed', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
       expect(screen.getByText('OE')).toBeInTheDocument();
+    });
+
+    it('shows expanded logo when not collapsed', () => {
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          logo={<span data-testid="sidebar-logo">Expanded</span>}
+          logoCollapsed={<span data-testid="sidebar-logo-collapsed">Collapsed</span>}
+        />,
+      );
+      expect(screen.getByTestId('sidebar-logo')).toBeInTheDocument();
+      expect(screen.queryByTestId('sidebar-logo-collapsed')).toBeNull();
     });
   });
 });

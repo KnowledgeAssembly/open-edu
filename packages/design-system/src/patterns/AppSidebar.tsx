@@ -25,6 +25,7 @@ export interface AppSidebarProps {
   title?: string;
   subtitle?: string;
   logo?: ReactNode;
+  logoCollapsed?: ReactNode;
   items: AppSidebarItem[];
   currentItemId: string;
   onNavigate: (id: string) => void;
@@ -39,6 +40,7 @@ export function AppSidebar({
   title = 'OpenEdu',
   subtitle = 'Interactive learning platform',
   logo,
+  logoCollapsed,
   items,
   currentItemId,
   onNavigate,
@@ -87,8 +89,10 @@ export function AppSidebar({
       aria-label="Main navigation"
     >
       <div className="px-4 pt-5 pb-3 border-b border-outline-variant truncate">
-        {logo && !collapsed ? (
+        {!collapsed && logo ? (
           logo
+        ) : collapsed && logoCollapsed ? (
+          logoCollapsed
         ) : (
           <>
             <h1 className="text-lg font-bold m-0 text-on-surface leading-tight">
