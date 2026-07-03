@@ -1,8 +1,8 @@
 # Illustration
 
-> *"Illustrations should illuminate ideas, not compete with them."*
+> _"Illustrations should illuminate ideas, not compete with them."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -15,35 +15,35 @@ Illustrations should always support understanding.
 
 They are never decorative distractions.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The illustration system exists to:
 
--   explain ideas
--   reduce anxiety
--   create emotional warmth
--   reinforce the OpenEdu philosophy
--   provide visual continuity across the ecosystem
+- explain ideas
+- reduce anxiety
+- create emotional warmth
+- reinforce the OpenEdu philosophy
+- provide visual continuity across the ecosystem
 
 Every illustration should have a clear purpose.
 
-------------------------------------------------------------------------
+---
 
 # Simplicity
 
 Illustrations should be:
 
--   clean
--   modular
--   approachable
--   timeless
--   uncluttered
+- clean
+- modular
+- approachable
+- timeless
+- uncluttered
 
 Prefer simple compositions over excessive detail.
 
-------------------------------------------------------------------------
+---
 
 # Built From Geometry
 
@@ -56,7 +56,7 @@ understanding is assembled.
 The visual language should remain consistent from icons to large
 illustrations.
 
-------------------------------------------------------------------------
+---
 
 # Human-Centered
 
@@ -68,7 +68,7 @@ Avoid stereotypes or exaggerated expressions.
 
 The learner should always feel welcomed.
 
-------------------------------------------------------------------------
+---
 
 # Pipili
 
@@ -79,21 +79,21 @@ Pipili supports the story.
 
 The learner remains the central character.
 
-------------------------------------------------------------------------
+---
 
 # Calm Expression
 
 Illustrations should evoke:
 
--   curiosity
--   confidence
--   focus
--   hope
--   discovery
+- curiosity
+- confidence
+- focus
+- hope
+- discovery
 
 Avoid visuals that create unnecessary excitement or sensory overload.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
@@ -105,7 +105,7 @@ or interaction.
 
 Illustrations should enhance understanding, not replace it.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -115,21 +115,21 @@ artistic style or rendering technique.
 Vector, hand-drawn, 2D, or future visual styles may be used if they
 remain faithful to the OpenEdu philosophy.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before creating a new illustration, ask:
 
--   Does it support learning?
--   Does it reduce anxiety?
--   Does it reflect the OpenEdu geometry?
--   Does it remain calm and approachable?
--   Would removing it reduce understanding?
+- Does it support learning?
+- Does it reduce anxiety?
+- Does it reflect the OpenEdu geometry?
+- Does it remain calm and approachable?
+- Would removing it reduce understanding?
 
 If the answer to the last question is no, reconsider its purpose.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

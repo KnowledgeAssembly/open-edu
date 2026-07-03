@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 type SelfAssessment = 'well' | 'learning' | 'practice' | null;
@@ -106,13 +106,13 @@ function RealWorldComponent(props: {
           </p>
         )}
         {showAcknowledgeButton && (
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleObserveAcknowledge}
             data-testid="acknowledge-button"
           >
             Acknowledge
-          </ThemedButton>
+          </Button>
         )}
         {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
@@ -181,9 +181,9 @@ function RealWorldComponent(props: {
         />
       </div>
       {!showSelfAssess && (
-        <ThemedButton variant="primary" onClick={handleComplete} data-testid="complete-task-button">
+        <Button variant="default" onClick={handleComplete} data-testid="complete-task-button">
           I Completed This Task
-        </ThemedButton>
+        </Button>
       )}
       {showSelfAssess && (
         <div
@@ -194,27 +194,27 @@ function RealWorldComponent(props: {
         >
           <p className="font-semibold mb-sm">Reflect on your work:</p>
           <div className="flex flex-col gap-sm">
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={() => handleSelfAssess('well')}
               data-testid="self-assess-well"
             >
               I understand this well
-            </ThemedButton>
-            <ThemedButton
+            </Button>
+            <Button
               variant="outline"
               onClick={() => handleSelfAssess('learning')}
               data-testid="self-assess-learning"
             >
               I'm still learning
-            </ThemedButton>
-            <ThemedButton
+            </Button>
+            <Button
               variant="outline"
               onClick={() => handleSelfAssess('practice')}
               data-testid="self-assess-practice"
             >
               I need more practice
-            </ThemedButton>
+            </Button>
           </div>
         </div>
       )}

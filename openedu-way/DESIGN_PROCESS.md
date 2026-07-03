@@ -1,6 +1,6 @@
 # Design Process
 
-> *"Good design is not discovered by accident. It is assembled through thoughtful iteration."*
+> _"Good design is not discovered by accident. It is assembled through thoughtful iteration."_
 
 ---
 

@@ -1,6 +1,6 @@
 # Open Modules
 
-> *"Complex understanding emerges from simple pieces."*
+> _"Complex understanding emerges from simple pieces."_
 
 ---
 
@@ -356,4 +356,4 @@ That is the purpose of Open Modules.
 
 ---
 
-*"Simple pieces. Infinite possibilities."*
+_"Simple pieces. Infinite possibilities."_

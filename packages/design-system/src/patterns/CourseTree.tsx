@@ -72,7 +72,7 @@ export function CourseTree({ modules, onLessonClick }: CourseTreeProps): JSX.Ele
                         className={cn(
                           'flex items-center gap-2 px-3 py-1.5 rounded-[var(--oe-radius,8px)] cursor-pointer border-none bg-transparent w-full text-left text-sm font-body-md text-on-surface-variant leading-tight',
                           isActive &&
-                            'border-l-[3px] border-solid border-[var(--oe-color-primary,#6750a4)] pl-[9px] text-primary font-medium bg-surface-variant',
+                            'border-l-[3px] border-solid border-[var(--oe-color-primary)] pl-[9px] text-primary font-medium bg-surface-variant',
                         )}
                       >
                         {lesson.title}

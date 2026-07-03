@@ -1,6 +1,6 @@
 # Temporal Design
 
-> *"Learning happens in time. Design should respect that."*
+> _"Learning happens in time. Design should respect that."_
 
 ---
 
@@ -298,4 +298,4 @@ Those quiet moments often become the ones that matter most.
 
 ---
 
-*"Good design respects time. Great design respects the learner's rhythm."*
+_"Good design respects time. Great design respects the learner's rhythm."_

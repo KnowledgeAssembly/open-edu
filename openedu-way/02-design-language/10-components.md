@@ -1,9 +1,9 @@
 # Components
 
-> *"Components are reusable conversations between the learner and the
-> interface."*
+> _"Components are reusable conversations between the learner and the
+> interface."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -17,22 +17,22 @@ A component is not merely a UI element.
 
 It is a reusable expression of the OpenEdu philosophy.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The component language exists to:
 
--   create consistency
--   reduce cognitive load
--   improve accessibility
--   simplify implementation
--   make interfaces predictable
+- create consistency
+- reduce cognitive load
+- improve accessibility
+- simplify implementation
+- make interfaces predictable
 
 Learners should recognize components through familiarity rather than
 instruction.
 
-------------------------------------------------------------------------
+---
 
 # Consistency
 
@@ -43,7 +43,7 @@ Visual consistency creates behavioral consistency.
 
 Behavioral consistency creates confidence.
 
-------------------------------------------------------------------------
+---
 
 # Purpose Before Variety
 
@@ -54,21 +54,21 @@ Prefer extending existing patterns over creating new ones.
 
 A smaller component library is easier to learn and maintain.
 
-------------------------------------------------------------------------
+---
 
 # Calm Interaction
 
 Components should feel:
 
--   approachable
--   predictable
--   forgiving
--   responsive
--   unobtrusive
+- approachable
+- predictable
+- forgiving
+- responsive
+- unobtrusive
 
 Interactions should never compete with learning.
 
-------------------------------------------------------------------------
+---
 
 # Composition
 
@@ -80,22 +80,22 @@ others.
 Composition reflects the OpenEdu philosophy of assembling understanding
 from meaningful pieces.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
 Every component should support:
 
--   keyboard navigation
--   screen readers
--   sufficient contrast
--   clear focus indicators
--   touch accessibility
--   predictable interaction
+- keyboard navigation
+- screen readers
+- sufficient contrast
+- clear focus indicators
+- touch accessibility
+- predictable interaction
 
 Accessibility is a core characteristic of every component.
 
-------------------------------------------------------------------------
+---
 
 # States
 
@@ -104,18 +104,18 @@ clearly.
 
 Examples include:
 
--   default
--   hover
--   focus
--   active
--   disabled
--   loading
--   success
--   error
+- default
+- hover
+- focus
+- active
+- disabled
+- loading
+- success
+- error
 
 State changes should be obvious without relying solely on color.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -125,21 +125,21 @@ implementation.
 Individual applications may build components using different frameworks
 while preserving the same user experience.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before creating a new component, ask:
 
--   Can an existing component solve this problem?
--   Does it reduce cognitive effort?
--   Is it accessible?
--   Will learners recognize it immediately?
--   Does it strengthen the overall design language?
+- Can an existing component solve this problem?
+- Does it reduce cognitive effort?
+- Is it accessible?
+- Will learners recognize it immediately?
+- Does it strengthen the overall design language?
 
 If not, refine the interaction instead of adding another component.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

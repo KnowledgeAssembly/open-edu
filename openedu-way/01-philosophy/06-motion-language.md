@@ -1,6 +1,6 @@
 # Motion Language
 
-> *"Motion should communicate understanding, never demand attention."*
+> _"Motion should communicate understanding, never demand attention."_
 
 ---
 
@@ -428,4 +428,4 @@ Motion succeeds when it quietly disappears into understanding.
 
 ---
 
-*"Good motion attracts attention. Great motion supports attention."*
+_"Good motion attracts attention. Great motion supports attention."_

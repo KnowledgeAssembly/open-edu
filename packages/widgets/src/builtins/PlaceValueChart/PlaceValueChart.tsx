@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const CRORE_COLUMNS = ['Cr', 'TL', 'L', 'TTh', 'Th', 'H', 'T', 'O'] as const;
@@ -279,13 +279,13 @@ function PlaceValueChartComponent(props: {
 
       {showAcknowledgeButton && (
         <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleObserveAcknowledge}
             data-testid="observe-acknowledge"
           >
             Acknowledge
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -369,9 +369,9 @@ function PlaceValueChartComponent(props: {
 
           <div style={{ marginTop: '12px' }}>
             {!submitted ? (
-              <ThemedButton variant="primary" onClick={handleSubmit} disabled={isAllNull}>
+              <Button variant="default" onClick={handleSubmit} disabled={isAllNull}>
                 Submit
-              </ThemedButton>
+              </Button>
             ) : null}
           </div>
 

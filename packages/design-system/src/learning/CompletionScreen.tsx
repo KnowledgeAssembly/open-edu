@@ -3,6 +3,7 @@ import { Button } from '../primitives/button.js';
 import { StaggerReveal } from '../effects/StaggerReveal.js';
 import { GlowPulse } from '../effects/GlowPulse.js';
 import { ConfettiBurst } from '../effects/ConfettiBurst.js';
+import { useReducedMotion } from '../tokens/motion.js';
 
 interface PackageManifest {
   id: string;
@@ -59,6 +60,7 @@ export function CompletionScreen({
   onNavigateToCourse,
   skillSummary,
 }: CompletionScreenProps): JSX.Element {
+  const prefersReducedMotion = useReducedMotion();
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export function CompletionScreen({
       className={`flex flex-col items-center justify-center min-h-full p-xl text-center font-body-md ${className ?? ''}`}
       data-testid="completion-screen"
     >
-      {showConfetti && <ConfettiBurst variant="fall" particleCount={30} />}
+      {showConfetti && !prefersReducedMotion && <ConfettiBurst variant="fall" particleCount={30} />}
 
       <h1 className="text-[1.75rem] font-bold text-on-surface m-0 mb-2">You finished {title}!</h1>
       <p className="text-body-ui text-on-surface-variant m-0 mb-lg">

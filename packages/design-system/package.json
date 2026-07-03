@@ -14,7 +14,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "export:tokens": "tsx scripts/export-tokens.ts"
   },
   "peerDependencies": {
     "react": "^18.0.0",
@@ -40,6 +41,8 @@
     "vaul": "^1.1.0"
   },
   "devDependencies": {
+    "esbuild": "^0.28.0",
+    "tsx": "^4.19.0",
     "@storybook/addon-a11y": "^8.6.18",
     "@storybook/addon-essentials": "^8.6.18",
     "@storybook/addon-themes": "^8.6.18",

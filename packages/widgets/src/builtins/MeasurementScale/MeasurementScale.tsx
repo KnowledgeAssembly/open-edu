@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 export const configSchema = z.object({
@@ -552,9 +552,9 @@ function MeasurementScaleComponent(props: {
 
       {isInteractive && !submitted && (
         <div style={{ marginTop: '0.75rem' }}>
-          <ThemedButton variant="primary" onClick={handleSubmit} data-testid="submit-btn">
+          <Button variant="default" onClick={handleSubmit} data-testid="submit-btn">
             Submit
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -575,13 +575,13 @@ function MeasurementScaleComponent(props: {
           data-testid="observe-acknowledge-container"
           className="mt-4 text-center"
         >
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleObserveAcknowledge}
             data-testid="observe-acknowledge"
           >
             Acknowledge
-          </ThemedButton>
+          </Button>
         </div>
       )}
 

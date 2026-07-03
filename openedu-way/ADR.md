@@ -1,6 +1,6 @@
 # Architectural & Design Decision Records (ADR)
 
-> *"Good decisions are preserved. Great decisions are explained."*
+> _"Good decisions are preserved. Great decisions are explained."_
 
 ---
 

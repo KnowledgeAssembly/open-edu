@@ -1,3 +1,4 @@
+import { cn } from '@open-edu/design-system';
 import { useRuntime } from '../context/RuntimeContext';
 import { getMasteryLabel, getMasteryColor } from '../context/skills';
 
@@ -15,13 +16,10 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
       role="region"
       aria-label="Skill mastery summary"
       data-testid="skill-summary"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: compact ? '4px' : '8px',
-        padding: compact ? '4px 8px' : '8px 12px',
-        fontSize: compact ? '12px' : '14px',
-      }}
+      className={cn(
+        'flex flex-col',
+        compact ? 'gap-1 px-2 py-1 text-xs' : 'gap-2 px-3 py-2 text-sm',
+      )}
     >
       {skillGraph.skills.map((skill) => {
         const score = skillScores[skill.id] ?? 0;
@@ -34,27 +32,19 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
                 ? 'in_progress'
                 : 'not_attempted';
         return (
-          <div
-            key={skill.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
+          <div key={skill.id} className="flex items-center gap-2">
             <span
+              className="shrink-0 rounded-full"
               style={{
                 width: compact ? '6px' : '8px',
                 height: compact ? '6px' : '8px',
-                borderRadius: '50%',
                 backgroundColor: getMasteryColor(mastery),
-                flexShrink: 0,
               }}
               data-testid={`skill-dot-${skill.id}`}
             />
-            <span style={{ fontWeight: 500 }}>{skill.name}</span>
+            <span className="font-medium">{skill.name}</span>
             {!compact && (
-              <span style={{ color: '#6b7280', fontSize: '12px' }}>
+              <span className="text-xs text-muted-foreground">
                 {score}% &middot; {getMasteryLabel(mastery)}
               </span>
             )}

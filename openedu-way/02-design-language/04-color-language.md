@@ -1,8 +1,8 @@
 # Color Language
 
-> *"Color should communicate meaning before identity."*
+> _"Color should communicate meaning before identity."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -15,21 +15,21 @@ Color is never used purely for decoration or branding.
 
 Every color should help learners think, navigate, or understand.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The OpenEdu color language is designed to:
 
--   support learning
--   reduce cognitive load
--   improve accessibility
--   create visual consistency
--   communicate meaning
+- support learning
+- reduce cognitive load
+- improve accessibility
+- create visual consistency
+- communicate meaning
 
 Meaning always comes before aesthetics.
 
-------------------------------------------------------------------------
+---
 
 # Calm Before Contrast
 
@@ -40,7 +40,7 @@ Strong colors should be reserved for moments that require attention.
 The default interface should feel spacious and comfortable rather than
 visually intense.
 
-------------------------------------------------------------------------
+---
 
 # Semantic Color
 
@@ -48,16 +48,16 @@ Colors represent meaning rather than categories or brands.
 
 Examples include:
 
--   primary actions
--   progress
--   information
--   caution
--   error
--   success
+- primary actions
+- progress
+- information
+- caution
+- error
+- success
 
 A color should communicate the same meaning wherever it appears.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
@@ -65,15 +65,15 @@ Color must never be the only way information is communicated.
 
 Every important state should also be expressed through:
 
--   text
--   icons
--   shape
--   position
--   contrast
+- text
+- icons
+- shape
+- position
+- contrast
 
 The interface should remain understandable for every learner.
 
-------------------------------------------------------------------------
+---
 
 # Consistency
 
@@ -84,7 +84,7 @@ of the product.
 
 Consistency builds confidence.
 
-------------------------------------------------------------------------
+---
 
 # Emotion
 
@@ -92,26 +92,26 @@ Color should create emotional comfort.
 
 Prefer colors that feel:
 
--   calm
--   trustworthy
--   welcoming
--   focused
+- calm
+- trustworthy
+- welcoming
+- focused
 
 Avoid palettes that feel aggressive, distracting, or overwhelming.
 
-------------------------------------------------------------------------
+---
 
 # Themes
 
 The color language should support:
 
--   light mode
--   dark mode
--   high contrast themes
+- light mode
+- dark mode
+- high contrast themes
 
 The meaning of each color should remain consistent across every theme.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -124,21 +124,21 @@ component library, or platform.
 
 The philosophy remains constant even when the implementation changes.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before introducing a new color, ask:
 
--   Does it communicate meaning?
--   Is it accessible?
--   Is an existing semantic color sufficient?
--   Will it remain consistent across themes?
--   Does it reduce or increase cognitive load?
+- Does it communicate meaning?
+- Is it accessible?
+- Is an existing semantic color sufficient?
+- Will it remain consistent across themes?
+- Does it reduce or increase cognitive load?
 
 If the answer is uncertain, prefer simplicity.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

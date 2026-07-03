@@ -1,8 +1,8 @@
 # Logo Philosophy
 
-> *"A logo should express an idea, not merely identify a product."*
+> _"A logo should express an idea, not merely identify a product."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -14,20 +14,20 @@ through simple geometry rather than decorative styling.
 The logo is a symbol of how understanding is built---one meaningful
 piece at a time.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The logo exists to:
 
--   represent OpenEdu
--   communicate its philosophy
--   remain timeless
--   work across digital and physical media
+- represent OpenEdu
+- communicate its philosophy
+- remain timeless
+- work across digital and physical media
 
 It should be recognizable because of its structure, not visual effects.
 
-------------------------------------------------------------------------
+---
 
 # Assembly
 
@@ -38,20 +38,20 @@ emerges from meaningful connections.
 
 Assembly is the defining visual characteristic.
 
-------------------------------------------------------------------------
+---
 
 # Simplicity
 
 The logo should remain:
 
--   simple
--   balanced
--   memorable
--   reproducible
+- simple
+- balanced
+- memorable
+- reproducible
 
 Avoid unnecessary detail that does not strengthen recognition.
 
-------------------------------------------------------------------------
+---
 
 # Openness
 
@@ -62,7 +62,7 @@ are always possible.
 
 Completeness should never imply finality.
 
-------------------------------------------------------------------------
+---
 
 # Craftsmanship
 
@@ -72,35 +72,35 @@ The logo should reflect care rather than complexity.
 
 Quality emerges from precision.
 
-------------------------------------------------------------------------
+---
 
 # Scalability
 
 The logo must remain recognizable at:
 
--   favicon sizes
--   application icons
--   websites
--   presentations
--   print
--   large displays
+- favicon sizes
+- application icons
+- websites
+- presentations
+- print
+- large displays
 
 Recognition should come from form rather than decoration.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
 The logo should work in:
 
--   monochrome
--   high contrast
--   light themes
--   dark themes
+- monochrome
+- high contrast
+- light themes
+- dark themes
 
 Meaning should never depend solely on color.
 
-------------------------------------------------------------------------
+---
 
 # Evolution
 
@@ -111,21 +111,21 @@ Implementation may evolve.
 
 The underlying idea should not.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before changing the logo, ask:
 
--   Does it express assembly?
--   Is it visually simple?
--   Is it timeless?
--   Does it remain accessible?
--   Does it reflect craftsmanship?
+- Does it express assembly?
+- Is it visually simple?
+- Is it timeless?
+- Does it remain accessible?
+- Does it reflect craftsmanship?
 
 If not, reconsider the change.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

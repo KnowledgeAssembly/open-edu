@@ -1,6 +1,6 @@
 # The OpenEdu Way
 
-> *"Learning is assembled, not delivered."*
+> _"Learning is assembled, not delivered."_
 
 ---
 

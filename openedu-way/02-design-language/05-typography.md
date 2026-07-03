@@ -1,8 +1,8 @@
 # Typography
 
-> *"Typography gives ideas a calm and readable voice."*
+> _"Typography gives ideas a calm and readable voice."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -16,21 +16,21 @@ create confidence.
 
 It is a tool for understanding, not decoration.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The OpenEdu typography system exists to:
 
--   improve readability
--   support comprehension
--   establish hierarchy
--   reduce cognitive load
--   remain accessible across devices
+- improve readability
+- support comprehension
+- establish hierarchy
+- reduce cognitive load
+- remain accessible across devices
 
 Good typography should feel almost invisible.
 
-------------------------------------------------------------------------
+---
 
 # Readability First
 
@@ -38,14 +38,14 @@ Every typographic decision should prioritize reading comfort.
 
 Prefer:
 
--   generous line spacing
--   comfortable line lengths
--   clear hierarchy
--   consistent spacing
+- generous line spacing
+- comfortable line lengths
+- clear hierarchy
+- consistent spacing
 
 Avoid styles that make reading harder than necessary.
 
-------------------------------------------------------------------------
+---
 
 # Hierarchy
 
@@ -53,17 +53,17 @@ Hierarchy should communicate structure naturally.
 
 Learners should immediately recognize:
 
--   page titles
--   section headings
--   lesson content
--   supporting information
--   captions
--   metadata
+- page titles
+- section headings
+- lesson content
+- supporting information
+- captions
+- metadata
 
 Hierarchy should emerge through scale and spacing rather than excessive
 styling.
 
-------------------------------------------------------------------------
+---
 
 # Consistency
 
@@ -74,36 +74,36 @@ interface.
 
 Predictability builds confidence.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
 Typography should support:
 
--   scalable text
--   high contrast
--   dyslexia-friendly layouts
--   screen readers
--   responsive interfaces
+- scalable text
+- high contrast
+- dyslexia-friendly layouts
+- screen readers
+- responsive interfaces
 
 No learner should struggle because text is difficult to read.
 
-------------------------------------------------------------------------
+---
 
 # Calm Expression
 
 Typography should feel:
 
--   calm
--   thoughtful
--   approachable
--   timeless
+- calm
+- thoughtful
+- approachable
+- timeless
 
 Avoid styles that feel loud, decorative, or distracting.
 
 Learning should remain the focus.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -113,21 +113,21 @@ or framework styles.
 Font families, scales, and tokens may vary across implementations while
 preserving the same reading experience.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before introducing a new text style, ask:
 
--   Does it improve readability?
--   Is it necessary?
--   Does it strengthen hierarchy?
--   Will learners recognize it consistently?
--   Does it reduce cognitive effort?
+- Does it improve readability?
+- Is it necessary?
+- Does it strengthen hierarchy?
+- Will learners recognize it consistently?
+- Does it reduce cognitive effort?
 
 If not, simplify.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

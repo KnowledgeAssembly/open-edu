@@ -1,8 +1,8 @@
 # Iconography
 
-> *"An icon should clarify before it attracts attention."*
+> _"An icon should clarify before it attracts attention."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -14,35 +14,35 @@ They never replace clear language.
 
 They never become decoration.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The OpenEdu icon system exists to:
 
--   improve recognition
--   reduce cognitive effort
--   support accessibility
--   create consistency
--   complement written language
+- improve recognition
+- reduce cognitive effort
+- support accessibility
+- create consistency
+- complement written language
 
 Icons should simplify decisions, not create ambiguity.
 
-------------------------------------------------------------------------
+---
 
 # Simplicity
 
 Icons should be:
 
--   simple
--   balanced
--   recognizable
--   scalable
--   timeless
+- simple
+- balanced
+- recognizable
+- scalable
+- timeless
 
 Avoid unnecessary detail or stylistic flourishes.
 
-------------------------------------------------------------------------
+---
 
 # Meaning Before Style
 
@@ -52,7 +52,7 @@ If an icon requires explanation, prefer text.
 
 Clarity always takes priority over visual novelty.
 
-------------------------------------------------------------------------
+---
 
 # Consistency
 
@@ -60,15 +60,15 @@ Icons should share a common visual language.
 
 They should use consistent:
 
--   proportions
--   stroke weight
--   corner treatment
--   spacing
--   optical balance
+- proportions
+- stroke weight
+- corner treatment
+- spacing
+- optical balance
 
 Consistency builds familiarity.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
@@ -76,26 +76,26 @@ Icons should never be the only way to communicate important information.
 
 Whenever appropriate, pair icons with:
 
--   labels
--   tooltips
--   accessible names
+- labels
+- tooltips
+- accessible names
 
 Icons should remain distinguishable at small sizes and across themes.
 
-------------------------------------------------------------------------
+---
 
 # Calm Expression
 
 Icons should feel:
 
--   approachable
--   quiet
--   purposeful
--   supportive
+- approachable
+- quiet
+- purposeful
+- supportive
 
 Avoid icons that appear aggressive, overly playful, or visually noisy.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -105,21 +105,21 @@ library.
 Implementations may use different icon sets or custom icons, provided
 they remain faithful to the OpenEdu design language.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before adding a new icon, ask:
 
--   Does it communicate one clear meaning?
--   Is an existing icon sufficient?
--   Will it remain recognizable at small sizes?
--   Does it support accessibility?
--   Does it strengthen the visual language?
+- Does it communicate one clear meaning?
+- Is an existing icon sufficient?
+- Will it remain recognizable at small sizes?
+- Does it support accessibility?
+- Does it strengthen the visual language?
 
 If not, simplify.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

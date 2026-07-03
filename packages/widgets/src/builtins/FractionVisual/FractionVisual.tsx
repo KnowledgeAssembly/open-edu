@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const compareSchema = z.object({
@@ -341,13 +341,13 @@ function FractionVisualComponent(props: {
         </div>
         {isInteractive && !submitted && (
           <div style={{ width: '100%', textAlign: 'center' }}>
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleSubmit}
               disabled={shadedCount === 0 && shadedMask === null}
             >
               Submit
-            </ThemedButton>
+            </Button>
           </div>
         )}
         {submitted && (
@@ -377,13 +377,13 @@ function FractionVisualComponent(props: {
 
       {isInteractive && !submitted && (
         <div style={{ marginTop: '1rem' }}>
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleSubmit}
             disabled={shadedCount === 0 && shadedMask === null}
           >
             Submit
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -406,13 +406,13 @@ function FractionVisualComponent(props: {
           data-testid="observe-complete"
           style={{ marginTop: '1rem' }}
         >
-          <ThemedButton
+          <Button
             variant="secondary"
             onClick={handleObserveAcknowledge}
             data-testid="observe-acknowledge"
           >
             Acknowledge
-          </ThemedButton>
+          </Button>
         </div>
       )}
 

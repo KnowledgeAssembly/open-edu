@@ -1,6 +1,6 @@
 # OpenEdu Design Principles
 
-> *"Good design quietly helps people learn."*
+> _"Good design quietly helps people learn."_
 
 ---
 
@@ -307,4 +307,4 @@ allowing curiosity to take its place.
 
 ---
 
-*"The best interface is the one learners stop noticing because they have become absorbed in learning."*
+_"The best interface is the one learners stop noticing because they have become absorbed in learning."_

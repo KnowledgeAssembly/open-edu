@@ -12,7 +12,7 @@ export interface GlowPulseProps {
 
 export function GlowPulse({
   children,
-  color = 'var(--oe-color-primary, #6750a4)',
+  color = 'var(--oe-color-primary)',
   duration = 1.2,
   intensity = 1,
   className,

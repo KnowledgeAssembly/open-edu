@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const blankItemSchema = z.object({
@@ -276,13 +276,13 @@ function FillBlankComponent(props: {
         </div>
         {showAcknowledgeButton && (
           <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleObserveAcknowledge}
               data-testid="observe-acknowledge"
             >
               Mark as seen ✓
-            </ThemedButton>
+            </Button>
           </div>
         )}
         {!showAcknowledgeButton && (
@@ -317,9 +317,9 @@ function FillBlankComponent(props: {
         >
           <p>{c.hints[hintIndex]}</p>
           {hintIndex < c.hints.length - 1 && (
-            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
+            <Button variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </ThemedButton>
+            </Button>
           )}
         </div>
       )}
@@ -336,18 +336,18 @@ function FillBlankComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allBlanksAnswered}>
+          <Button variant="default" onClick={handleSubmit} disabled={!allBlanksAnswered}>
             Submit
-          </ThemedButton>
+          </Button>
         ) : (
-          <ThemedButton variant="outline" disabled data-testid="result-display">
+          <Button variant="outline" disabled data-testid="result-display">
             {(() => {
               const correct = sortedBlanks.every(
                 (b) => String(userAnswers[b.id]) === String(b.correctAnswer),
               );
               return correct ? 'Correct!' : 'Incorrect';
             })()}
-          </ThemedButton>
+          </Button>
         )}
       </div>
 

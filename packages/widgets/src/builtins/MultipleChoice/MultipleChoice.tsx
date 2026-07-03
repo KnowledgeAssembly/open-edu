@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const optionSchema = z.object({
@@ -189,13 +189,9 @@ function MultipleChoiceComponent(props: {
             {opt.text}
           </label>
         ))}
-        <ThemedButton
-          variant="primary"
-          onClick={handleLegacySubmit}
-          disabled={!selectedId || submitted}
-        >
+        <Button variant="default" onClick={handleLegacySubmit} disabled={!selectedId || submitted}>
           {submitted ? 'Submitted' : 'Submit'}
-        </ThemedButton>
+        </Button>
         {submitted && (
           <div role="status" aria-live="assertive" data-testid="feedback" className="mt-2">
             {isCorrect ? (
@@ -243,13 +239,13 @@ function MultipleChoiceComponent(props: {
           </fieldset>
           {showAcknowledgeButton && (
             <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-              <ThemedButton
-                variant="primary"
+              <Button
+                variant="default"
                 onClick={handleObserveAcknowledge}
                 data-testid="observe-acknowledge"
               >
                 Mark as seen ✓
-              </ThemedButton>
+              </Button>
             </div>
           )}
         </div>
@@ -377,21 +373,21 @@ function MultipleChoiceComponent(props: {
 
         <div className="mt-md">
           {hasFeedback ? (
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleAdvanceAfterFeedback}
               data-testid="feedback-next"
             >
               {isLastQuestion ? 'See Results' : 'Next'}
-            </ThemedButton>
+            </Button>
           ) : (
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleMultiNext}
               disabled={currentSelection === null || currentSelection === undefined}
             >
               {isLastQuestion ? 'Submit' : 'Next'}
-            </ThemedButton>
+            </Button>
           )}
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 export const gridAreaSchema = z.object({
@@ -296,21 +296,21 @@ function GridAreaComponent(props: {
 
       {config.interactive && !submitted && (
         <div style={{ marginTop: '0.5rem' }}>
-          <ThemedButton variant="primary" onClick={handleSubmit} data-testid="submit-button">
+          <Button variant="default" onClick={handleSubmit} data-testid="submit-button">
             Submit
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
       {showAcknowledgeButton && (
         <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleObserveAcknowledge}
             data-testid="observe-acknowledge"
           >
             Acknowledge
-          </ThemedButton>
+          </Button>
         </div>
       )}
 

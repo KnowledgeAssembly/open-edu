@@ -1,8 +1,8 @@
 # Layout
 
-> *"A good layout helps learners know where to look next."*
+> _"A good layout helps learners know where to look next."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -14,21 +14,21 @@ clear relationships.
 
 Learners should spend their attention on ideas, not on finding them.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The OpenEdu layout language exists to:
 
--   organize information
--   establish visual hierarchy
--   support focus
--   create consistency
--   adapt gracefully across devices
+- organize information
+- establish visual hierarchy
+- support focus
+- create consistency
+- adapt gracefully across devices
 
 Structure should always serve understanding.
 
-------------------------------------------------------------------------
+---
 
 # Predictability
 
@@ -38,7 +38,7 @@ Consistent layouts reduce the time required to understand new screens.
 
 Predictability creates confidence.
 
-------------------------------------------------------------------------
+---
 
 # Space
 
@@ -48,19 +48,19 @@ It separates ideas, creates rhythm, and gives learners room to think.
 
 Avoid filling every available space.
 
-------------------------------------------------------------------------
+---
 
 # Hierarchy
 
 Every screen should naturally answer:
 
--   Where am I?
--   What is most important?
--   What can I do next?
+- Where am I?
+- What is most important?
+- What can I do next?
 
 Hierarchy should emerge through layout before color or decoration.
 
-------------------------------------------------------------------------
+---
 
 # Progressive Disclosure
 
@@ -70,7 +70,7 @@ Reveal additional complexity as learners need it.
 
 Interfaces should feel welcoming rather than overwhelming.
 
-------------------------------------------------------------------------
+---
 
 # Responsive Design
 
@@ -80,21 +80,21 @@ relationships and meaning.
 Content should remain comfortable to read and interact with on every
 device.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
 Layouts should support:
 
--   keyboard navigation
--   screen readers
--   zoom and text scaling
--   predictable reading order
--   generous touch targets
+- keyboard navigation
+- screen readers
+- zoom and text scaling
+- predictable reading order
+- generous touch targets
 
 Accessibility begins with structure.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -104,21 +104,21 @@ or framework-specific implementations.
 Individual applications may implement these principles using
 technologies appropriate to their platform.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before introducing a new layout, ask:
 
--   Does it reduce cognitive effort?
--   Is the hierarchy immediately clear?
--   Does it provide enough breathing room?
--   Will it adapt across devices?
--   Can anything be removed?
+- Does it reduce cognitive effort?
+- Is the hierarchy immediately clear?
+- Does it provide enough breathing room?
+- Will it adapt across devices?
+- Can anything be removed?
 
 If simplifying improves understanding, choose the simpler layout.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

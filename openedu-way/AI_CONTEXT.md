@@ -1,6 +1,6 @@
 # AI_CONTEXT.md
 
-> *"Learning is assembled, not delivered."*
+> _"Learning is assembled, not delivered."_
 
 ## Purpose
 

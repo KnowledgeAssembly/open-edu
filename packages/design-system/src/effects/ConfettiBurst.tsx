@@ -3,11 +3,11 @@ import { motionSafe, useReducedMotion } from '../tokens/motion.js';
 import { cn } from '../lib/utils.js';
 
 const DEFAULT_COLORS = [
-  'var(--oe-color-primary, #6750a4)',
-  'var(--oe-color-success, #16a34a)',
-  'var(--oe-color-warning, #e7c365)',
-  'var(--oe-color-error, #dc2626)',
-  'var(--oe-color-info, #003eb3)',
+  'var(--oe-color-primary)',
+  'var(--oe-color-success)',
+  'var(--oe-color-warning)',
+  'var(--oe-color-error)',
+  'var(--oe-color-info)',
 ];
 
 export interface ConfettiBurstProps {
@@ -26,7 +26,7 @@ function useConfettiParticles(particleCount: number, colors: string[], variant: 
       const distance = variant === 'fall' ? 100 : 40 + Math.random() * 60;
       return {
         id: i,
-        color: colors.length > 0 ? colors[i % colors.length] : '#6750a4',
+        color: colors.length > 0 ? colors[i % colors.length] : 'var(--oe-color-primary)',
         translateX:
           variant === 'fall'
             ? (Math.random() - 0.5) * 80

@@ -65,7 +65,7 @@ export function Module({
                     'flex w-full items-center gap-3 border-none bg-transparent px-5 py-2.5 text-left cursor-pointer',
                     'text-sm text-on-surface-variant font-body-md transition-colors duration-200 hover:bg-surface-container-higher',
                     isActive &&
-                      'border-l-[3px] border-solid border-[var(--oe-color-primary,#6750a4)] bg-surface-variant pl-[17px] font-medium text-primary',
+                      'border-l-[3px] border-solid border-[var(--oe-color-primary)] bg-surface-variant pl-[17px] font-medium text-primary',
                   )}
                 >
                   {lesson.title}

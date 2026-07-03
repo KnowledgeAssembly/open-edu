@@ -1,6 +1,6 @@
 # OpenEdu Philosophy
 
-> *"Learning is assembled, not delivered."*
+> _"Learning is assembled, not delivered."_
 
 ---
 
@@ -191,4 +191,4 @@ These principles guide our software, our community, our design system, and our f
 
 ---
 
-*"Learning is assembled, not delivered."*
+_"Learning is assembled, not delivered."_
