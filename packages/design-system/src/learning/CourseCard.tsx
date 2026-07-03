@@ -94,7 +94,7 @@ export function CourseCard({
 
   return (
     <article
-      className="border border-outline-variant rounded-lg bg-surface-container-lowest shadow-sm font-body-md overflow-hidden"
+      className="border border-outline-variant rounded-lg bg-surface-container-lowest shadow-elevation-raised font-body-md overflow-hidden"
       data-testid="course-card"
     >
       <div className="h-2 w-full" style={{ background: gradient }} aria-hidden="true" />
