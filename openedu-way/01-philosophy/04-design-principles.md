@@ -280,23 +280,18 @@ another discovery.
 
 # The OpenEdu Test
 
-Before introducing a new feature, ask:
+Before introducing a new feature, verify:
 
-Does it reduce cognitive load?
+- Is it consistent with Volume I?
+- Is it consistent with Volume II?
+- Does it improve learning?
+- Does it reduce cognitive effort?
+- Is it accessible?
+- Is it reusable?
+- Is it implementation-independent?
+- Is it appropriate for the MVP?
 
-Does it respect attention?
-
-Does it improve understanding?
-
-Does it remain accessible?
-
-Does it encourage curiosity?
-
-Would removing it improve the experience?
-
-If removing it makes the product better,
-
-it probably did not belong.
+If any answer is "no", reconsider the proposal.
 
 ---
 

@@ -1,7 +1,5 @@
 # AI_CONTEXT.md
 
-> *"Learning is assembled, not delivered."*
-
 ## Purpose
 
 This document provides persistent context for AI collaborators working on OpenEdu.
