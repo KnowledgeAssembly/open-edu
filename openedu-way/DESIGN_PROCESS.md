@@ -275,25 +275,14 @@ Humans make the final decisions.
 
 Every review should evaluate designs using the same questions.
 
-## Philosophy
-
-- Does it align with Volume I?
-
-## Consistency
-
-- Does it align with Volume II?
-
-## Accessibility
-
-- Can everyone use it?
-
-## Simplicity
-
-- Can anything be removed?
-
-## MVP
-
-- Is this necessary today?
+- Is it consistent with Volume I?
+- Is it consistent with Volume II?
+- Does it improve learning?
+- Does it reduce cognitive effort?
+- Is it accessible?
+- Is it reusable?
+- Is it implementation-independent?
+- Is it appropriate for the MVP?
 
 If a design fails one of these questions, refine before continuing.
 

@@ -1,8 +1,6 @@
 # OpenEdu Philosophy
 
-> Knowledge is not consumed.
->
-> Knowledge is assembled.
+> *"Learning is assembled, not delivered."*
 
 ---
 
@@ -193,4 +191,4 @@ These principles guide our software, our community, our design system, and our f
 
 ---
 
-*"Knowledge is assembled, one piece at a time."*
+*"Learning is assembled, not delivered."*

@@ -176,16 +176,18 @@ They do not define it.
 
 # Decision Framework
 
-Before introducing any feature, component, or design, ask:
+Before introducing any feature, component, or design, verify:
 
-- Does it support the philosophy?
-- Does it simplify learning?
+- Is it consistent with Volume I?
+- Is it consistent with Volume II?
+- Does it improve learning?
 - Does it reduce cognitive effort?
 - Is it accessible?
 - Is it reusable?
-- Is it necessary for the MVP?
+- Is it implementation-independent?
+- Is it appropriate for the MVP?
 
-If the answer is uncertain, simplify.
+If any answer is "no", reconsider the proposal.
 
 ---
 

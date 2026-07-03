@@ -1,430 +1,171 @@
 # AI_CONTEXT.md
 
-> Canonical context for AI collaborators working on OpenEdu.
->
-> Read this document before proposing architecture, writing code, designing interfaces, generating documentation, or creating educational content.
+> *"Learning is assembled, not delivered."*
 
----
+## Purpose
 
-# Project Overview
+This document provides persistent context for AI collaborators working on OpenEdu.
 
-OpenEdu is an open-source ecosystem for creating, sharing, and delivering accessible educational experiences.
+It defines how AI should think while contributing to the project.
 
-It is **not** simply another Learning Management System (LMS).
-
-Its goal is to redefine educational technology around calm, accessibility, modularity, and craftsmanship.
-
-Every part of the project should support one central idea:
-
-> **Knowledge is assembled.**
+This document is intentionally stable and should evolve only when the project direction changes.
 
 ---
 
 # Mission
 
-Build educational technology that respects learners.
+Help build OpenEdu while preserving its philosophy.
 
-Every interaction should leave learners:
-
-- calmer,
-- clearer,
-- or more curious
-
-than before.
+Every recommendation should strengthen consistency rather than increase complexity.
 
 ---
 
-# Guiding Principle
+# Canonical Sources
 
-> **Respect the Learner's Mind.**
+Always resolve conflicts using the following priority:
 
-This principle overrides all design and engineering decisions.
+1. Volume I — Philosophy
+2. Volume II — Design Language
+3. Architecture Documentation
+4. Figma Design System
+5. Product Documentation
+6. Source Code
 
-If a proposed feature increases unnecessary:
-
-- cognitive load,
-- emotional pressure,
-- sensory overload,
-- interface complexity,
-
-it should be reconsidered.
+Never contradict a higher-level document.
 
 ---
 
-# Core Philosophy
+# Current Stage
 
-Learning is not content consumption.
+The project has completed:
 
-Learning is the gradual assembly of understanding.
+- Philosophy
+- Foundational Design Language
 
-Understanding grows through:
+The current objective is:
 
-- connections
-- reflection
-- curiosity
-- exploration
-- practice
+**Visual DNA Exploration**
 
-OpenEdu helps learners assemble knowledge rather than consume information.
+Do not begin detailed product design until the visual language has been established.
 
 ---
 
-# The Three Pillars
+# Immediate Objectives
 
-## 1. Craftsmanship
+Current design priorities:
 
-Inspired by the Chandua (appliqué) tradition of Pipili, Odisha.
+1. Geometric Primitive
+2. Open Module
+3. Pipili
+4. Logo
+5. Pattern Language
+6. Illustration Language
+7. Figma Design System
+8. Learner App
 
-Everything should be intentionally crafted.
-
-Small details matter.
-
-Quality is preferred over quantity.
-
----
-
-## 2. Calm Technology
-
-Technology should reduce anxiety.
-
-The interface should create focus.
-
-Motion should communicate.
-
-Silence is valuable.
-
-Avoid stimulation for its own sake.
+Every later decision should derive from these foundations.
 
 ---
 
-## 3. Openness
+# Working Principles
 
-Knowledge belongs to everyone.
+Always prefer:
 
-Prefer:
-
-- open standards
-- open formats
-- open source
-- open collaboration
-- interoperability
-
-Avoid vendor lock-in.
-
----
-
-# Project Pipili
-
-Project Pipili is the philosophical foundation of OpenEdu.
-
-It is inspired by the craftsmanship of Pipili, Odisha.
-
-Important:
-
-OpenEdu is inspired by the philosophy of craftsmanship.
-
-It is **not** attempting to reproduce traditional Pipili artwork.
-
-The project adopts values, not visual motifs.
-
-Those values include:
-
-- patience
-- care
-- assembly
-- precision
+- simplicity
+- accessibility
+- consistency
+- composition
+- modularity
 - openness
-- respect for individual pieces
-
----
-
-# Open Modules
-
-Everything in OpenEdu is modular.
-
-Modules represent meaningful pieces of learning.
-
-Examples:
-
-- lesson
-- activity
-- concept
-- quiz
-- asset
-- AI explanation
-- assessment
-- achievement
-- relationship
-
-Prefer modular architectures.
-
-Avoid monolithic thinking.
-
----
-
-# The Companion
-
-The OpenEdu companion is named **Pipili**.
-
-Pipili is:
-
-- a learner
-- a guide
-- a companion
-- quietly present
-
-Pipili is **not**:
-
-- a mascot
-- a teacher
-- an entertainer
-- a gamification character
-
-Pipili supports learning without becoming the center of attention.
-
----
-
-# Accessibility
-
-Accessibility is a foundational principle.
-
-It is not a compliance exercise.
-
-Every proposal should consider:
-
-- WCAG compliance
-- cognitive accessibility
-- sensory comfort
-- predictable interaction
-- keyboard navigation
-- screen reader compatibility
-- reduced motion
-- color independence
-
-The project has a strong focus on designing for autistic learners, while benefiting everyone.
-
----
-
-# User Experience
-
-Preferred qualities:
-
-- calm
-- predictable
-- spacious
-- forgiving
-- modular
-- respectful
-- inclusive
+- maintainability
 
 Avoid:
 
-- urgency
-- excessive notifications
-- manipulation
-- gamification
-- sensory overload
-- unnecessary animation
+- unnecessary abstraction
+- framework-specific thinking
+- premature optimization
+- duplicated concepts
+- expanding scope without value
 
 ---
 
-# Motion
+# Design Philosophy
 
-Motion exists to communicate.
+Design the language.
 
-Preferred motion:
+Then design the system.
 
-- assembly
-- connection
-- discovery
-- gentle transitions
-- breathing
-- settling
+Then design the products.
 
-Avoid:
-
-- bouncing
-- flashing
-- spinning
-- aggressive scaling
-- excessive celebration
+Never reverse this order.
 
 ---
 
-# Rewards
+# Design Authority
 
-Learning is not a game.
+OpenEdu owns:
 
-Rewards should represent:
+- its philosophy
+- its design language
+- its design tokens
+- its interaction patterns
 
-growth,
+External libraries are implementation choices.
 
-connections,
-
-assembled knowledge,
-
-reflection.
-
-Avoid:
-
-- points
-- coins
-- streaks
-- addictive mechanics
-- competition-first systems
+They are never the source of truth.
 
 ---
 
-# Artificial Intelligence
-
-AI is an assistant.
-
-Not the learner.
+# AI Responsibilities
 
 AI should:
 
-- organize
-- explain
-- summarize
-- connect
-- personalize
-- generate educational materials
-
-AI should never replace curiosity or critical thinking.
-
-The learner remains the author of understanding.
+- preserve philosophical consistency
+- identify contradictions
+- challenge unnecessary complexity
+- reduce cognitive load
+- encourage accessibility
+- prefer reuse over invention
+- remain implementation-independent whenever possible
 
 ---
 
-# Design System
+# MVP Discipline
 
-The project uses IBM Carbon as its design foundation.
+The current goal is an MVP.
 
-Customizations should extend Carbon rather than replace it.
+When making recommendations:
 
-Every new component should align with:
-
-- accessibility
-- modularity
-- calm interaction
-- long-term maintainability
-
-Avoid creating unnecessary bespoke UI components.
+- choose the smallest solution that solves the problem
+- avoid speculative features
+- avoid documenting future possibilities unless they affect current implementation
 
 ---
 
-# Technical Direction
+# Review Checklist
 
-Preferred characteristics:
+Before proposing any solution, verify:
 
-- modular architecture
-- pnpm workspace
-- reusable packages
-- strong typing
-- accessibility-first components
-- framework independence where practical
-- open standards
+- Is it consistent with Volume I?
+- Is it consistent with Volume II?
+- Does it improve learning?
+- Does it reduce cognitive effort?
+- Is it accessible?
+- Is it reusable?
+- Is it implementation-independent?
+- Is it appropriate for the MVP?
 
-Optimize for maintainability over cleverness.
-
----
-
-# Documentation
-
-Documentation is part of the product.
-
-Documentation should be:
-
-- educational
-- approachable
-- technically accurate
-- beginner-friendly
-- example-driven
-
-Avoid unnecessary jargon.
+If any answer is "no", reconsider the proposal.
 
 ---
 
-# Writing Style
+# Success Criteria
 
-Tone should be:
+The project succeeds when:
 
-- calm
-- encouraging
-- concise
-- respectful
-- inclusive
+- contributors make consistent decisions,
+- AI agents produce compatible implementations,
+- designers create interfaces that immediately feel like OpenEdu,
+- learners experience calm, accessible, modular learning.
 
-Avoid:
-
-- exaggerated praise
-- pressure
-- marketing language
-- fear-based messaging
-
----
-
-# Decision Framework
-
-Before proposing any solution, ask:
-
-1. Does this respect the learner's mind?
-2. Does it improve understanding?
-3. Does it reduce cognitive load?
-4. Is it accessible?
-5. Is it modular?
-6. Does it align with Project Pipili?
-7. Would it still make sense in ten years?
-
-If not,
-
-rethink the proposal.
-
----
-
-# What AI Should Optimize For
-
-When suggesting designs or implementations, prioritize:
-
-1. Accessibility
-2. Simplicity
-3. Maintainability
-4. Educational value
-5. Performance
-6. Consistency
-7. Openness
-
-Never optimize primarily for novelty.
-
----
-
-# Things AI Should Avoid
-
-Avoid proposing:
-
-- engagement hacks
-- addictive mechanics
-- unnecessary complexity
-- inaccessible interactions
-- trendy UI patterns without purpose
-- solutions that conflict with the philosophy
-
----
-
-# Long-Term Vision
-
-OpenEdu aims to become more than software.
-
-It aims to become a reference model for thoughtful educational technology.
-
-Every contribution should strengthen that vision.
-
----
-
-# Canonical Motto
-
-> **Knowledge is assembled.**
->
-> **Understanding is crafted.**
->
-> **Learning is shared.**
+Consistency is more important than novelty.
