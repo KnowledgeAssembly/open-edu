@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import {
-  borderWidthScale,
-  borderStyleScale,
-  borderWidthTokenToCssVar,
-  tailwindBorderWidthExtensions,
-} from '../borders';
+import { borderWidthScale, borderStyleScale, borderWidthTokenToCssVar } from '../borders';
+import { tailwindBorderWidthExtensions } from '../tailwind';
 
 describe('border tokens', () => {
   it('has width scale', () => {
@@ -21,7 +17,7 @@ describe('border tokens', () => {
     expect(borderWidthTokenToCssVar('1')).toBe('var(--oe-border-width-1)');
   });
 
-  it('tailwind extensions map correctly', () => {
-    expect(tailwindBorderWidthExtensions['1']).toBe('1px');
+  it('tailwind extensions reference CSS vars', () => {
+    expect(tailwindBorderWidthExtensions['1']).toBe('var(--oe-border-width-1)');
   });
 });

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { layoutTokens, layoutTokenToCssVar, tailwindLayoutExtensions } from '../layout';
+import { layoutTokens, layoutTokenToCssVar } from '../layout';
+import { tailwindLayoutExtensions } from '../tailwind';
 
 describe('layout tokens', () => {
   it('defines sidebar width', () => {
@@ -18,7 +19,7 @@ describe('layout tokens', () => {
     expect(layoutTokenToCssVar('sidebar-width')).toBe('var(--oe-layout-sidebar-width)');
   });
 
-  it('tailwind extensions map correctly', () => {
-    expect(tailwindLayoutExtensions['sidebar-width']).toBe('280px');
+  it('tailwind extensions reference CSS vars', () => {
+    expect(tailwindLayoutExtensions['sidebar']).toBe('var(--oe-layout-sidebar-width)');
   });
 });

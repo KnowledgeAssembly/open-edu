@@ -116,10 +116,10 @@ describe('getMasteryLabel', () => {
 });
 
 describe('getMasteryColor', () => {
-  it('returns hex color strings', () => {
-    expect(getMasteryColor('not_attempted')).toMatch(/^#[0-9a-f]{6}$/);
-    expect(getMasteryColor('in_progress')).toMatch(/^#[0-9a-f]{6}$/);
-    expect(getMasteryColor('achieved')).toMatch(/^#[0-9a-f]{6}$/);
-    expect(getMasteryColor('mastered')).toMatch(/^#[0-9a-f]{6}$/);
+  it('returns CSS variable references', () => {
+    expect(getMasteryColor('not_attempted')).toBe('var(--oe-color-outline)');
+    expect(getMasteryColor('in_progress')).toBe('var(--oe-color-primary)');
+    expect(getMasteryColor('achieved')).toBe('var(--oe-color-tertiary)');
+    expect(getMasteryColor('mastered')).toBe('var(--oe-color-success)');
   });
 });

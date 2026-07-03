@@ -17,7 +17,3 @@ export type LayoutToken = keyof typeof layoutTokens;
 export function layoutTokenToCssVar(token: LayoutToken): string {
   return `var(--oe-layout-${token})`;
 }
-
-export const tailwindLayoutExtensions = Object.fromEntries(
-  Object.entries(layoutTokens).map(([key, value]) => [key, value]),
-);

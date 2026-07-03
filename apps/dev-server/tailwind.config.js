@@ -6,6 +6,14 @@ import {
   tailwindRadiusExtensions,
   tailwindTransitionDurationExtensions,
   tailwindTransitionTimingExtensions,
+  tailwindSizingExtensions,
+  tailwindComponentHeightExtensions,
+  tailwindMinWidthExtensions,
+  tailwindOpacityExtensions,
+  tailwindBorderWidthExtensions,
+  tailwindFocusExtensions,
+  tailwindIconSizeExtensions,
+  tailwindLayoutExtensions,
 } from '@open-edu/design-system/tokens';
 
 /** @type {import('tailwindcss').Config} */
@@ -25,9 +33,25 @@ export default {
       borderRadius: tailwindRadiusExtensions,
       transitionDuration: tailwindTransitionDurationExtensions,
       transitionTimingFunction: tailwindTransitionTimingExtensions,
+      width: {
+        ...tailwindSizingExtensions,
+        ...tailwindLayoutExtensions,
+      },
+      height: {
+        ...tailwindComponentHeightExtensions,
+        header: 'var(--oe-layout-header-height)',
+      },
+      minWidth: tailwindMinWidthExtensions,
       maxWidth: {
+        ...tailwindLayoutExtensions,
         reading: 'var(--oe-reading-width)',
       },
+      opacity: tailwindOpacityExtensions,
+      borderWidth: tailwindBorderWidthExtensions,
+      ringWidth: { DEFAULT: tailwindFocusExtensions['width'] },
+      ringOffset: { DEFAULT: tailwindFocusExtensions['offset'] },
+      ringColor: { DEFAULT: tailwindFocusExtensions['color'] },
+      gap: tailwindLayoutExtensions,
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

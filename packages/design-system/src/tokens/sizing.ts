@@ -20,7 +20,3 @@ export type SizingToken = keyof typeof sizingScale;
 export function sizingTokenToCssVar(token: SizingToken): string {
   return `var(--oe-size-${token})`;
 }
-
-export const tailwindSizingExtensions = Object.fromEntries(
-  Object.entries(sizingScale).map(([key, value]) => [key, value]),
-);

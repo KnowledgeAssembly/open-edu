@@ -18,7 +18,3 @@ export type OpacityToken = keyof typeof opacityScale;
 export function opacityTokenToCssVar(token: OpacityToken): string {
   return `var(--oe-opacity-${token})`;
 }
-
-export const tailwindOpacityExtensions = Object.fromEntries(
-  Object.entries(opacityScale).map(([key, value]) => [key, value]),
-);

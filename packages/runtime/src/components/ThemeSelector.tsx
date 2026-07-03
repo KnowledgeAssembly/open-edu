@@ -150,8 +150,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
           role="dialog"
           aria-label="Theme selector"
           onKeyDown={handleKeyDown}
-          className="absolute left-0 z-50 w-80 p-3 rounded-lg border border-outline-variant bg-surface-container-highest shadow-md"
-          style={{ top: 'calc(100% + 8px)' }}
+          className="absolute left-0 top-full mt-2 z-50 w-80 p-3 rounded-lg border border-outline-variant bg-surface-container-highest shadow-md"
           data-testid="theme-selector-popover"
         >
           <div className="grid grid-cols-2 gap-2" role="listbox" aria-label="Select a theme">
@@ -168,11 +167,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(theme.id)}
-                  className="flex flex-col gap-1.5 p-2.5 rounded-md bg-surface-container cursor-pointer text-left text-foreground transition-colors duration-200 border-2"
-                  style={{
-                    borderColor:
-                      isSelected || isHovered ? 'var(--oe-color-primary)' : 'transparent',
-                  }}
+                  className={`flex flex-col gap-1.5 p-2.5 rounded-md bg-surface-container cursor-pointer text-left text-foreground transition-colors duration-200 border-2 ${isSelected || isHovered ? 'border-primary' : 'border-transparent'}`}
                   onMouseEnter={() => setHoveredId(theme.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   data-testid={`theme-card-${theme.id}`}

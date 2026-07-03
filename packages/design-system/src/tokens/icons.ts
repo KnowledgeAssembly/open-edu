@@ -19,7 +19,3 @@ export type IconStrokeToken = keyof typeof iconStrokeScale;
 export function iconSizeTokenToCssVar(token: IconSizeToken): string {
   return `var(--oe-icon-size-${token})`;
 }
-
-export const tailwindIconSizeExtensions = Object.fromEntries(
-  Object.entries(iconSizeScale).map(([key, value]) => [key, value]),
-);
