@@ -63,7 +63,6 @@ export type {
 } from './themes/types.js';
 export { AICallout } from './components/AICallout.js';
 export type { AICalloutProps } from './components/AICallout.js';
-export { FontLoader } from './components/FontLoader.js';
 export { ReadingRuler } from './components/ReadingRuler.js';
 export type { ReadingRulerProps } from './components/ReadingRuler.js';
 export { useThemePreference } from './components/useThemePreference.js';
