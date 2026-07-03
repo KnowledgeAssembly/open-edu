@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const dataItemSchema = z.object({
@@ -120,13 +120,13 @@ function ChartReaderComponent(props: {
 
       {showAcknowledgeButton && (
         <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleObserveAcknowledge}
             data-testid="observe-acknowledge"
           >
             Mark as seen ✓
-          </ThemedButton>
+          </Button>
         </div>
       )}
       {!showAcknowledgeButton && (submitted || isObserve) && (

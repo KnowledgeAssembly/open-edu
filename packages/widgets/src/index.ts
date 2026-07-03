@@ -13,8 +13,8 @@ export { RemoteWidgetLoader } from './remote-loader';
 export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader';
 export { useRemoteWidget } from './use-remote-widget';
 export type { UseRemoteWidgetResult } from './use-remote-widget';
-export { ThemedButton } from './themed-button';
-export type { ThemedButtonProps } from './themed-button';
+export { Button } from '@open-edu/design-system';
+export type { ButtonProps } from '@open-edu/design-system';
 export { useObserveMode } from './use-observe-mode';
 export type { ObserveModeOptions } from './use-observe-mode';
 export {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const questionSchema = z.object({
@@ -190,9 +190,9 @@ function StoryQuestionComponent(props: {
           ))}
         </fieldset>
         {showAcknowledgeButton && (
-          <ThemedButton variant="primary" onClick={handleObserveAcknowledge}>
+          <Button variant="default" onClick={handleObserveAcknowledge}>
             Acknowledge
-          </ThemedButton>
+          </Button>
         )}
         {!showAcknowledgeButton && (
           <div role="status" aria-live="assertive" data-testid="observe-complete">
@@ -339,17 +339,17 @@ function StoryQuestionComponent(props: {
 
       <div className="mt-md">
         {hasFeedback ? (
-          <ThemedButton
-            variant="primary"
+          <Button
+            variant="default"
             onClick={handleAdvanceAfterFeedback}
             data-testid="feedback-next"
           >
             {isLastQuestion ? 'See Results' : 'Next'}
-          </ThemedButton>
+          </Button>
         ) : (
-          <ThemedButton variant="primary" onClick={handleNext} disabled={!canAdvance}>
+          <Button variant="default" onClick={handleNext} disabled={!canAdvance}>
             {isLastQuestion ? 'Submit' : 'Next'}
-          </ThemedButton>
+          </Button>
         )}
       </div>
     </div>

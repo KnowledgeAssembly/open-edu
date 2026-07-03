@@ -118,6 +118,9 @@ export type { EmptyStateProps } from './primitives/empty-state.js';
 
 export { Toaster } from './primitives/notification.js';
 
+export { GeoPrimitive } from './primitives/geo-primitive.js';
+export type { GeoPrimitiveProps } from './primitives/geo-primitive.js';
+
 // Contexts
 export { FontSizeProvider, useFontSize } from './font-size-context.js';
 

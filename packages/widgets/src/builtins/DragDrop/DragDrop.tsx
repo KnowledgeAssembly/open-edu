@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const itemSchema = z.object({
@@ -197,13 +197,13 @@ function DragDropComponent(props: {
         </div>
         {showAcknowledgeButton && (
           <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
-            <ThemedButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleObserveAcknowledge}
               data-testid="observe-acknowledge"
             >
               Mark as seen ✓
-            </ThemedButton>
+            </Button>
           </div>
         )}
         {!showAcknowledgeButton && (
@@ -345,7 +345,7 @@ function DragDropComponent(props: {
                 >
                   {item.emoji && <span>{item.emoji}</span>}
                   <span>{item.label}</span>
-                  <ThemedButton
+                  <Button
                     variant="ghost"
                     size="sm"
                     onClick={(e) => {
@@ -371,7 +371,7 @@ function DragDropComponent(props: {
                     aria-label={`Remove ${item.label} from ${target.label}`}
                   >
                     ✕
-                  </ThemedButton>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -395,9 +395,9 @@ function DragDropComponent(props: {
         >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
+            <Button variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </ThemedButton>
+            </Button>
           )}
         </div>
       )}
@@ -414,9 +414,9 @@ function DragDropComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
+          <Button variant="default" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
-          </ThemedButton>
+          </Button>
         ) : null}
       </div>
 

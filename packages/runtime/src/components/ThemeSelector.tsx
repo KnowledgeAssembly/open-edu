@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { ThemeId } from '../themes/types.js';
 
 const themeInfo: Array<{ id: ThemeId; name: string; description: string; swatches: string[] }> = [
@@ -44,94 +44,6 @@ export interface ThemeSelectorProps {
   currentThemeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
 }
-
-const triggerStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '40px',
-  height: '40px',
-  border: '1px solid var(--oe-color-border, #e5e7eb)',
-  borderRadius: 'var(--oe-radius, 8px)',
-  backgroundColor: 'var(--oe-color-surface-container, #f0edee)',
-  color: 'var(--oe-color-fg, #1a1a1a)',
-  cursor: 'pointer',
-  transition: 'background-color 200ms ease',
-};
-
-const popoverStyle: CSSProperties = {
-  position: 'absolute',
-  top: 'calc(100% + 8px)',
-  left: 0,
-  zIndex: 50,
-  width: '320px',
-  padding: '12px',
-  backgroundColor: 'var(--oe-color-surface-container-highest, #e5e2e3)',
-  border: '1px solid var(--oe-color-outline-variant, #c4c5d6)',
-  borderRadius: 'var(--oe-radius-lg, 12px)',
-  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-  fontFamily: 'var(--oe-font-sans, system-ui, sans-serif)',
-};
-
-const gridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: '8px',
-};
-
-const cardBaseStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '6px',
-  padding: '10px',
-  border: '2px solid transparent',
-  borderRadius: 'var(--oe-radius, 8px)',
-  backgroundColor: 'var(--oe-color-surface-container, #f0edee)',
-  cursor: 'pointer',
-  textAlign: 'left',
-  transition: 'border-color 200ms ease, background-color 200ms ease',
-  fontFamily: 'inherit',
-  color: 'var(--oe-color-fg, #1a1a1a)',
-};
-
-const swatchRowStyle: CSSProperties = {
-  display: 'flex',
-  gap: '4px',
-};
-
-const swatchStyle = (color: string): CSSProperties => ({
-  width: '16px',
-  height: '16px',
-  borderRadius: '3px',
-  backgroundColor: color,
-  border: '1px solid rgba(0,0,0,0.1)',
-});
-
-const cardNameStyle: CSSProperties = {
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  lineHeight: 1.2,
-};
-
-const cardDescStyle: CSSProperties = {
-  fontSize: '0.6875rem',
-  color: 'var(--oe-color-on-surface-variant, #434653)',
-  lineHeight: 1.3,
-};
-
-const checkmarkStyle: CSSProperties = {
-  position: 'absolute',
-  top: '4px',
-  right: '4px',
-  width: '16px',
-  height: '16px',
-  borderRadius: '50%',
-  backgroundColor: 'var(--oe-color-primary, #2563eb)',
-  color: 'var(--oe-color-on-primary, #ffffff)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
 
 export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
@@ -203,7 +115,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
   };
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }} data-testid="theme-selector">
+    <div className="relative inline-block" data-testid="theme-selector">
       <button
         ref={triggerRef}
         type="button"
@@ -211,7 +123,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
         aria-label="Select theme"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        style={triggerStyle}
+        className="flex items-center justify-center w-10 h-10 rounded-md border border-input bg-surface-container text-foreground cursor-pointer transition-colors duration-200"
         data-testid="theme-selector-trigger"
       >
         <svg
@@ -238,18 +150,14 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
           role="dialog"
           aria-label="Theme selector"
           onKeyDown={handleKeyDown}
-          style={popoverStyle}
+          className="absolute left-0 z-50 w-80 p-3 rounded-lg border border-outline-variant bg-surface-container-highest shadow-md"
+          style={{ top: 'calc(100% + 8px)' }}
           data-testid="theme-selector-popover"
         >
-          <div style={gridStyle} role="listbox" aria-label="Select a theme">
+          <div className="grid grid-cols-2 gap-2" role="listbox" aria-label="Select a theme">
             {themeInfo.map((theme, idx) => {
               const isSelected = currentThemeId === theme.id;
               const isHovered = hoveredId === theme.id;
-              const cardStyle: CSSProperties = {
-                ...cardBaseStyle,
-                borderColor:
-                  isSelected || isHovered ? 'var(--oe-color-primary, #2563eb)' : 'transparent',
-              };
               return (
                 <button
                   key={theme.id}
@@ -260,19 +168,27 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(theme.id)}
-                  style={cardStyle}
+                  className="flex flex-col gap-1.5 p-2.5 rounded-md bg-surface-container cursor-pointer text-left text-foreground transition-colors duration-200 border-2"
+                  style={{
+                    borderColor:
+                      isSelected || isHovered ? 'var(--oe-color-primary)' : 'transparent',
+                  }}
                   onMouseEnter={() => setHoveredId(theme.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   data-testid={`theme-card-${theme.id}`}
                 >
-                  <div style={{ position: 'relative' }}>
-                    <div style={swatchRowStyle}>
+                  <div className="relative">
+                    <div className="flex gap-1">
                       {theme.swatches.map((color, ci) => (
-                        <div key={ci} style={swatchStyle(color)} />
+                        <div
+                          key={ci}
+                          className="w-4 h-4 rounded-sm border border-black/10"
+                          style={{ backgroundColor: color }}
+                        />
                       ))}
                     </div>
                     {isSelected && (
-                      <div style={checkmarkStyle}>
+                      <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                         <svg
                           width="10"
                           height="10"
@@ -288,8 +204,10 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                       </div>
                     )}
                   </div>
-                  <div style={cardNameStyle}>{theme.name}</div>
-                  <div style={cardDescStyle}>{theme.description}</div>
+                  <div className="text-sm font-semibold leading-tight">{theme.name}</div>
+                  <div className="text-xs text-muted-foreground leading-tight">
+                    {theme.description}
+                  </div>
                 </button>
               );
             })}

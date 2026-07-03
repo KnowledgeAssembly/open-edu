@@ -1,6 +1,6 @@
 # The Companion
 
-> *"A companion walks beside you, never ahead of you."*
+> _"A companion walks beside you, never ahead of you."_
 
 ---
 
@@ -290,7 +290,7 @@ Not currency.
 
 When AI is active, Pipili becomes visible.
 
-Not because Pipili *is* the AI.
+Not because Pipili _is_ the AI.
 
 But because Pipili represents exploration.
 
@@ -376,4 +376,4 @@ one piece at a time.
 
 ---
 
-*"Good companions guide without leading."*
+_"Good companions guide without leading."_

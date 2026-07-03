@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 const sequencingItemSchema = z.object({
@@ -176,9 +176,9 @@ function SequencingComponent(props: {
         )}
         {showAcknowledgeButton && !submitted && (
           <div style={{ marginTop: '1rem' }}>
-            <ThemedButton variant="primary" onClick={handleObserveAcknowledge}>
+            <Button variant="default" onClick={handleObserveAcknowledge}>
               Acknowledge
-            </ThemedButton>
+            </Button>
           </div>
         )}
       </div>
@@ -315,7 +315,7 @@ function SequencingComponent(props: {
                           marginLeft: 'auto',
                         }}
                       >
-                        <ThemedButton
+                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => moveItem(slotIndex, slotIndex - 1)}
@@ -331,8 +331,8 @@ function SequencingComponent(props: {
                           aria-label={`Move ${placedItem.label} up`}
                         >
                           ↑
-                        </ThemedButton>
-                        <ThemedButton
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => moveItem(slotIndex, slotIndex + 1)}
@@ -348,8 +348,8 @@ function SequencingComponent(props: {
                           aria-label={`Move ${placedItem.label} down`}
                         >
                           ↓
-                        </ThemedButton>
-                        <ThemedButton
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveItem(placedItem.id)}
@@ -372,7 +372,7 @@ function SequencingComponent(props: {
                           aria-label="Remove from sequence"
                         >
                           ✕
-                        </ThemedButton>
+                        </Button>
                       </div>
                     )}
                   </>
@@ -430,9 +430,9 @@ function SequencingComponent(props: {
         >
           <p>{content.hints[hintIndex]}</p>
           {hintIndex < content.hints.length - 1 && (
-            <ThemedButton variant="ghost" size="sm" onClick={handleHintClick}>
+            <Button variant="ghost" size="sm" onClick={handleHintClick}>
               More help
-            </ThemedButton>
+            </Button>
           )}
         </div>
       )}
@@ -449,9 +449,9 @@ function SequencingComponent(props: {
 
       <div style={{ marginTop: '1rem' }}>
         {!submitted ? (
-          <ThemedButton variant="primary" onClick={handleSubmit} disabled={!allItemsPlaced}>
+          <Button variant="default" onClick={handleSubmit} disabled={!allItemsPlaced}>
             Submit
-          </ThemedButton>
+          </Button>
         ) : null}
       </div>
 

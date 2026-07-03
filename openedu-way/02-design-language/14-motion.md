@@ -1,8 +1,8 @@
 # Motion
 
-> *"Motion should communicate change, never compete for attention."*
+> _"Motion should communicate change, never compete for attention."_
 
-------------------------------------------------------------------------
+---
 
 # Introduction
 
@@ -15,21 +15,21 @@ Motion exists to communicate.
 
 Never to entertain.
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
 The OpenEdu motion language exists to:
 
--   explain transitions
--   communicate state changes
--   reduce cognitive load
--   create emotional comfort
--   reinforce the feeling of assembly
+- explain transitions
+- communicate state changes
+- reduce cognitive load
+- create emotional comfort
+- reinforce the feeling of assembly
 
 Every animation should have a reason to exist.
 
-------------------------------------------------------------------------
+---
 
 # Calm Before Speed
 
@@ -40,22 +40,22 @@ speed.
 
 Gentle, predictable movement builds confidence.
 
-------------------------------------------------------------------------
+---
 
 # Meaningful Motion
 
 Motion should communicate:
 
--   assembly
--   connection
--   discovery
--   transition
--   confirmation
--   orientation
+- assembly
+- connection
+- discovery
+- transition
+- confirmation
+- orientation
 
 Avoid motion that exists only because it looks impressive.
 
-------------------------------------------------------------------------
+---
 
 # Continuity
 
@@ -64,28 +64,28 @@ changed, and where they are now.
 
 Motion should reduce disorientation rather than increase it.
 
-------------------------------------------------------------------------
+---
 
 # Subtlety
 
 Animations should feel:
 
--   calm
--   smooth
--   intentional
--   restrained
+- calm
+- smooth
+- intentional
+- restrained
 
 Avoid:
 
--   bouncing
--   flashing
--   shaking
--   rapid spinning
--   exaggerated effects
+- bouncing
+- flashing
+- shaking
+- rapid spinning
+- exaggerated effects
 
 Learning always has priority over spectacle.
 
-------------------------------------------------------------------------
+---
 
 # Accessibility
 
@@ -93,14 +93,14 @@ Motion must always respect learner preferences.
 
 Support:
 
--   reduced motion
--   paused animations
--   predictable timing
--   sufficient interaction time
+- reduced motion
+- paused animations
+- predictable timing
+- sufficient interaction time
 
 No essential information should depend solely on animation.
 
-------------------------------------------------------------------------
+---
 
 # Implementation Independence
 
@@ -110,22 +110,22 @@ libraries or timing values.
 Individual implementations may use different technologies while
 preserving the same experience.
 
-------------------------------------------------------------------------
+---
 
 # Design Questions
 
 Before adding animation, ask:
 
--   Does it communicate something meaningful?
--   Does it reduce uncertainty?
--   Does it respect attention?
--   Is it accessible?
--   Would removing it improve the experience?
+- Does it communicate something meaningful?
+- Does it reduce uncertainty?
+- Does it respect attention?
+- Is it accessible?
+- Would removing it improve the experience?
 
 If removing it makes the interface clearer, the animation does not
 belong.
 
-------------------------------------------------------------------------
+---
 
 # Closing Thought
 

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
-import { ThemedButton } from '../../themed-button';
+import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
 export const configSchema = z.object({
@@ -388,24 +388,24 @@ function ClockTimeComponent(props: {
           role="group"
           aria-label="Time adjustment mode"
         >
-          <ThemedButton
-            variant={mode === 'hour' ? 'primary' : 'outline'}
+          <Button
+            variant={mode === 'hour' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setMode('hour')}
             aria-pressed={mode === 'hour'}
             data-testid="mode-hour"
           >
             Hour
-          </ThemedButton>
-          <ThemedButton
-            variant={mode === 'minute' ? 'primary' : 'outline'}
+          </Button>
+          <Button
+            variant={mode === 'minute' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setMode('minute')}
             aria-pressed={mode === 'minute'}
             data-testid="mode-minute"
           >
             Minute
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -425,7 +425,7 @@ function ClockTimeComponent(props: {
             <div style={{ fontSize: '0.8rem', fontWeight: mode === 'hour' ? 'bold' : 'normal' }}>
               Hour
             </div>
-            <ThemedButton
+            <Button
               variant="outline"
               size="sm"
               onClick={() => cycleHour(1)}
@@ -433,11 +433,11 @@ function ClockTimeComponent(props: {
               aria-label="Increase hour"
             >
               ▲
-            </ThemedButton>
+            </Button>
             <div data-testid="set-hour-display" style={{ fontSize: '1.2rem' }}>
               {displayHour12}
             </div>
-            <ThemedButton
+            <Button
               variant="outline"
               size="sm"
               onClick={() => cycleHour(-1)}
@@ -445,13 +445,13 @@ function ClockTimeComponent(props: {
               aria-label="Decrease hour"
             >
               ▼
-            </ThemedButton>
+            </Button>
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', fontWeight: mode === 'minute' ? 'bold' : 'normal' }}>
               Minute
             </div>
-            <ThemedButton
+            <Button
               variant="outline"
               size="sm"
               onClick={() => cycleMinute(1)}
@@ -459,11 +459,11 @@ function ClockTimeComponent(props: {
               aria-label="Increase minute"
             >
               ▲
-            </ThemedButton>
+            </Button>
             <div data-testid="set-minute-display" style={{ fontSize: '1.2rem' }}>
               {String(currentMinute).padStart(2, '0')}
             </div>
-            <ThemedButton
+            <Button
               variant="outline"
               size="sm"
               onClick={() => cycleMinute(-1)}
@@ -471,16 +471,16 @@ function ClockTimeComponent(props: {
               aria-label="Decrease minute"
             >
               ▼
-            </ThemedButton>
+            </Button>
           </div>
         </div>
       )}
 
       {isSetMode && isInteractive && !submitted && (
         <div style={{ marginTop: '0.75rem' }}>
-          <ThemedButton variant="primary" onClick={handleSetSubmit} data-testid="submit-btn">
+          <Button variant="default" onClick={handleSetSubmit} data-testid="submit-btn">
             Submit
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -501,9 +501,9 @@ function ClockTimeComponent(props: {
       {isReadMode && isInteractive && !submitted && awaitingConfirm && selectedHour !== null && (
         <div style={{ marginTop: '0.75rem' }} role="status" aria-live="polite">
           <p className="mb-xs">You selected {selectedHour} o&apos;clock</p>
-          <ThemedButton variant="primary" onClick={handleReadConfirm} data-testid="confirm-btn">
+          <Button variant="default" onClick={handleReadConfirm} data-testid="confirm-btn">
             Confirm
-          </ThemedButton>
+          </Button>
         </div>
       )}
 
@@ -519,13 +519,13 @@ function ClockTimeComponent(props: {
         <div role="status" aria-live="assertive" data-testid="observe-complete">
           {showAcknowledgeButton ? (
             <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
-              <ThemedButton
-                variant="primary"
+              <Button
+                variant="default"
                 onClick={handleObserveAcknowledge}
                 data-testid="observe-acknowledge-btn"
               >
                 Acknowledge
-              </ThemedButton>
+              </Button>
             </div>
           ) : (
             <p>Content acknowledged.</p>
