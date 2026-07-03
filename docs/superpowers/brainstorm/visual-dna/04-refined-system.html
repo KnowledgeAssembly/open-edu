@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual DNA — Refined System</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --fg: #1c1917;
+    --fg-muted: #78716c;
+    --primary: #6d28d9;
+    --primary-light: #8b5cf6;
+    --accent: #06b6d4;
+    --border: #e7e5e4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--fg);
+    line-height: 1.6; padding: 2rem;
+  }
+  .header { max-width: 1000px; margin: 0 auto 2.5rem; text-align: center; }
+  .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .header .stage {
+    display: inline-block; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--primary); background: rgba(109,40,217,0.08);
+    padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 1rem;
+  }
+  .header p { color: var(--fg-muted); font-size: 0.95rem; max-width: 640px; margin: 0 auto; }
+
+  .section {
+    max-width: 1000px; margin: 0 auto 3rem;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .section-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--primary); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.15rem; font-weight: 600; }
+  .section-desc {
+    font-size: 0.85rem; color: var(--fg-muted);
+    margin-bottom: 1.5rem; max-width: 700px; line-height: 1.7;
+  }
+  .section-desc strong { color: var(--fg); }
+
+  .showcase {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem;
+  }
+  .showcase-title {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 1rem;
+  }
+
+  /* === OPEN MODULE — ORBITAL CLUSTER === */
+  .module-row {
+    display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .module-demo {
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  }
+  .module-label {
+    font-size: 0.7rem; font-weight: 600; color: var(--fg-muted);
+  }
+
+  .orbital {
+    position: relative;
+  }
+  .orbital .core {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .orbital .sat {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--primary-light);
+  }
+  .orbital .ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1.5px dashed rgba(109,40,217,0.18);
+    border-radius: 50%;
+  }
+
+  /* Sizes */
+  .orbital.s-sm { width: 80px; height: 80px; }
+  .orbital.s-sm .core { width: 18px; height: 18px; }
+  .orbital.s-sm .ring { width: 56px; height: 56px; }
+  .orbital.s-sm .sat { width: 9px; height: 9px; }
+
+  .orbital.s-md { width: 120px; height: 120px; }
+  .orbital.s-md .core { width: 26px; height: 26px; }
+  .orbital.s-md .ring { width: 84px; height: 84px; }
+  .orbital.s-md .sat { width: 12px; height: 12px; }
+
+  .orbital.s-lg { width: 180px; height: 180px; }
+  .orbital.s-lg .core { width: 38px; height: 38px; }
+  .orbital.s-lg .ring { width: 128px; height: 128px; }
+  .orbital.s-lg .sat { width: 16px; height: 16px; }
+
+  /* Satellite positions — clustered with gaps (intentional incompleteness) */
+  /* SM: 2 sats — top-right, right */
+  .orbital.s-sm .sat:nth-child(2) { top: 6px; right: 10px; }
+  .orbital.s-sm .sat:nth-child(3) { top: 50%; right: 2px; transform: translateY(-50%); }
+
+  /* MD: 3 sats — top-right cluster */
+  .orbital.s-md .sat:nth-child(2) { top: 8px; right: 18px; }
+  .orbital.s-md .sat:nth-child(3) { top: 28%; right: 4px; }
+  .orbital.s-md .sat:nth-child(4) { bottom: 18px; right: 14px; }
+
+  /* LG: 5 sats — right-side cluster with gap on left */
+  .orbital.s-lg .sat:nth-child(2) { top: 12px; right: 28px; }
+  .orbital.s-lg .sat:nth-child(3) { top: 22%; right: 6px; }
+  .orbital.s-lg .sat:nth-child(4) { top: 50%; right: 2px; transform: translateY(-50%); }
+  .orbital.s-lg .sat:nth-child(5) { bottom: 22%; right: 8px; }
+  .orbital.s-lg .sat:nth-child(6) { bottom: 14px; right: 24px; }
+
+  /* === ASSEMBLY FLOW — PATTERN === */
+  .pattern-showcase {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+  .pattern-row {
+    display: flex; gap: 1.5rem; align-items: stretch;
+  }
+  .pattern-box {
+    flex: 1;
+    background: #f5f5f4; border-radius: 12px;
+    padding: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+    min-height: 120px;
+  }
+  .pattern-box .label {
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    font-size: 0.6rem; font-weight: 600; color: var(--fg-muted);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    background: rgba(250,250,249,0.9); padding: 0.1rem 0.4rem; border-radius: 3px;
+  }
+  .pattern-box svg { width: 100%; height: 100%; }
+
+  .flow-path {
+    fill: none;
+    stroke: rgba(109,40,217,0.15);
+    stroke-width: 1.5;
+    stroke-dasharray: 8 5;
+  }
+  .flow-node {
+    fill: var(--primary);
+    opacity: 0.5;
+  }
+  .flow-node.accent { fill: var(--accent); opacity: 0.35; }
+  .flow-node.light { fill: var(--primary-light); opacity: 0.25; }
+  .flow-node.faint { fill: var(--primary); opacity: 0.12; }
+
+  /* === ILLUSTRATION — SILHOUETTE ASSEMBLY === */
+  .illust-showcase {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+  .illust-row {
+    display: flex; gap: 1.5rem; align-items: flex-end; justify-content: center;
+  }
+  .figure-group {
+    display: flex; gap: 1.25rem; align-items: flex-end;
+  }
+  .figure {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .figure .f-head {
+    border-radius: 50%;
+    margin-bottom: -4px;
+    position: relative;
+    z-index: 1;
+  }
+  .figure .f-torso {
+    border-radius: 50% 50% 30% 30%;
+    position: relative;
+    z-index: 0;
+  }
+
+  /* Proportions — tall/short, wide/narrow */
+  .figure.tall .f-head { width: 22px; height: 22px; }
+  .figure.tall .f-torso { width: 28px; height: 40px; }
+  .figure.med .f-head { width: 20px; height: 20px; }
+  .figure.med .f-torso { width: 26px; height: 34px; }
+  .figure.short .f-head { width: 18px; height: 18px; }
+  .figure.short .f-torso { width: 24px; height: 28px; }
+  .figure.wide .f-head { width: 22px; height: 22px; }
+  .figure.wide .f-torso { width: 34px; height: 32px; }
+  .figure.narrow .f-head { width: 16px; height: 16px; }
+  .figure.narrow .f-torso { width: 20px; height: 36px; }
+
+  /* Colors — diversity via palette */
+  .figure.c1 .f-head { background: rgba(109,40,217,0.7); }
+  .figure.c1 .f-torso { background: rgba(109,40,217,0.25); }
+  .figure.c2 .f-head { background: rgba(6,182,212,0.7); }
+  .figure.c2 .f-torso { background: rgba(6,182,212,0.25); }
+  .figure.c3 .f-head { background: rgba(180,83,9,0.7); }
+  .figure.c3 .f-torso { background: rgba(180,83,9,0.25); }
+  .figure.c4 .f-head { background: rgba(139,92,246,0.7); }
+  .figure.c4 .f-torso { background: rgba(139,92,246,0.25); }
+  .figure.c5 .f-head { background: rgba(5,150,105,0.7); }
+  .figure.c5 .f-torso { background: rgba(5,150,105,0.25); }
+
+  /* Composition scene */
+  .scene {
+    width: 100%; aspect-ratio: 16/7;
+    background: #f5f5f4; border-radius: 12px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 1.5rem; gap: 1rem; position: relative; overflow: hidden;
+  }
+  .scene .ground {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 30px; background: rgba(109,40,217,0.03);
+    border-radius: 0 0 12px 12px;
+  }
+  .scene .figure { z-index: 1; }
+
+  .divider {
+    max-width: 1000px; margin: 0 auto;
+    border: none; border-top: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .specs {
+    max-width: 1000px; margin: 0 auto 2rem;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;
+  }
+  .spec-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem;
+  }
+  .spec-card h4 {
+    font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem;
+    color: var(--primary);
+  }
+  .spec-card ul {
+    list-style: none; padding: 0;
+  }
+  .spec-card li {
+    font-size: 0.78rem; color: var(--fg-muted);
+    padding: 0.2rem 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .spec-card li:last-child { border-bottom: none; }
+  .spec-card li strong { color: var(--fg); }
+
+  .footer {
+    max-width: 1000px; margin: 2rem auto 0; text-align: center;
+    color: var(--fg-muted); font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="stage">Stage 3 — Visual DNA — Finalized Directions</div>
+  <h1>Refined Visual DNA System</h1>
+  <p>Three directions refined from your selections. Each element uses the circle primitive and expresses assembly, openness, and calm.</p>
+</div>
+
+<!-- ═══════════════ OPEN MODULE ═══════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>Open Module — Orbital Cluster</h2>
+  </div>
+  <div class="section-desc">
+    <strong>Variable satellites (2–6)</strong> clustered on one side of a dashed orbit ring. The empty space on the orbit is intentional — it says "this module is not full, there is room for more." Satellite count scales with context: 2 for badges, 3 for cards, 5 for illustrations.
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-title">Size variants — compact to illustration</div>
+    <div class="module-row">
+      <div class="module-demo">
+        <div class="orbital s-sm">
+          <div class="ring"></div>
+          <div class="core"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+        </div>
+        <div class="module-label">Badge — 2 sats</div>
+      </div>
+      <div class="module-demo">
+        <div class="orbital s-md">
+          <div class="ring"></div>
+          <div class="core"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+        </div>
+        <div class="module-label">Card — 3 sats</div>
+      </div>
+      <div class="module-demo">
+        <div class="orbital s-lg">
+          <div class="ring"></div>
+          <div class="core"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+          <div class="sat"></div>
+        </div>
+        <div class="module-label">Illustration — 5 sats</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════ PATTERN LANGUAGE ═══════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>Pattern Language — Assembly Flow</h2>
+  </div>
+  <div class="section-desc">
+    <strong>Single flowing dashed path</strong> connecting circle nodes. The path curves gently — never straight, suggesting exploration. Nodes vary in size and opacity to create depth. Works at any scale: dense for backgrounds, sparse for section dividers.
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-title">Density variants — background to divider</div>
+    <div class="pattern-showcase">
+      <div class="pattern-row">
+        <div class="pattern-box">
+          <svg viewBox="0 0 300 100">
+            <path class="flow-path" d="M10,50 C50,20 80,80 130,45 S200,70 250,35 S290,55 300,50"/>
+            <circle class="flow-node" cx="10" cy="50" r="6"/>
+            <circle class="flow-node accent" cx="55" cy="32" r="4"/>
+            <circle class="flow-node" cx="100" cy="62" r="5"/>
+            <circle class="flow-node light" cx="155" cy="42" r="7"/>
+            <circle class="flow-node accent" cx="200" cy="58" r="4"/>
+            <circle class="flow-node" cx="245" cy="38" r="5"/>
+            <circle class="flow-node faint" cx="280" cy="50" r="3"/>
+          </svg>
+          <div class="label">Background — dense</div>
+        </div>
+        <div class="pattern-box">
+          <svg viewBox="0 0 300 100">
+            <path class="flow-path" d="M20,55 C80,25 140,80 200,40 S270,60 300,45"/>
+            <circle class="flow-node" cx="20" cy="55" r="6"/>
+            <circle class="flow-node" cx="110" cy="52" r="7"/>
+            <circle class="flow-node accent" cx="200" cy="40" r="5"/>
+            <circle class="flow-node" cx="300" cy="45" r="4"/>
+          </svg>
+          <div class="label">Card accent — medium</div>
+        </div>
+      </div>
+      <div class="pattern-row">
+        <div class="pattern-box" style="min-height: 60px;">
+          <svg viewBox="0 0 400 40">
+            <path class="flow-path" d="M0,20 C60,8 120,32 200,18 S340,28 400,20"/>
+            <circle class="flow-node" cx="60" cy="14" r="4"/>
+            <circle class="flow-node accent" cx="200" cy="18" r="5"/>
+            <circle class="flow-node" cx="340" cy="24" r="4"/>
+          </svg>
+          <div class="label">Section divider — minimal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════ ILLUSTRATION ═══════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>Illustration Language — Silhouette Assembly</h2>
+  </div>
+  <div class="section-desc">
+    <strong>Proportion variation</strong> creates diversity. Each figure is a circle head atop a rounded torso — translucent, layered. Different heights, widths, and head-to-body ratios suggest different people without specifying features. No faces, no limbs — posture and proportion carry the meaning.
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-title">Figure proportions — the diversity system</div>
+    <div class="illust-row">
+      <div class="figure-group">
+        <div class="figure tall c1">
+          <div class="f-head"></div>
+          <div class="f-torso"></div>
+        </div>
+        <div class="figure med c2">
+          <div class="f-head"></div>
+          <div class="f-torso"></div>
+        </div>
+        <div class="figure short c3">
+          <div class="f-head"></div>
+          <div class="f-torso"></div>
+        </div>
+        <div class="figure wide c4">
+          <div class="f-head"></div>
+          <div class="f-torso"></div>
+        </div>
+        <div class="figure narrow c5">
+          <div class="f-head"></div>
+          <div class="f-torso"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-title">Composition — a learning scene</div>
+    <div class="scene">
+      <div class="ground"></div>
+      <div class="figure narrow c5" style="margin-bottom: 30px;">
+        <div class="f-head"></div>
+        <div class="f-torso"></div>
+      </div>
+      <div class="figure tall c1" style="margin-bottom: 30px;">
+        <div class="f-head"></div>
+        <div class="f-torso"></div>
+      </div>
+      <div class="figure med c2" style="margin-bottom: 30px;">
+        <div class="f-head"></div>
+        <div class="f-torso"></div>
+      </div>
+      <div class="figure wide c4" style="margin-bottom: 30px;">
+        <div class="f-head"></div>
+        <div class="f-torso"></div>
+      </div>
+      <div class="figure short c3" style="margin-bottom: 30px;">
+        <div class="f-head"></div>
+        <div class="f-torso"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════ SPEC SUMMARY ═══════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">✦</div>
+    <h2>Specification Summary</h2>
+  </div>
+
+  <div class="specs">
+    <div class="spec-card">
+      <h4>Open Module</h4>
+      <ul>
+        <li><strong>Shape:</strong> Circle core + circle satellites</li>
+        <li><strong>Orbit:</strong> Dashed ring, always visible</li>
+        <li><strong>Satellites:</strong> 2–6, clustered with gaps</li>
+        <li><strong>Incompleteness:</strong> Empty orbit space</li>
+        <li><strong>Colors:</strong> primary core, primary-light sats</li>
+        <li><strong>Sizes:</strong> sm (80px), md (120px), lg (180px)</li>
+      </ul>
+    </div>
+    <div class="spec-card">
+      <h4>Assembly Flow</h4>
+      <ul>
+        <li><strong>Path:</strong> Single dashed curve</li>
+        <li><strong>Nodes:</strong> Circles, varied size/opacity</li>
+        <li><strong>Density:</strong> Dense (bg), medium, minimal</li>
+        <li><strong>Colors:</strong> primary nodes, accent accents</li>
+        <li><strong>Stroke:</strong> 1.5px, dashed 8/5</li>
+        <li><strong>Use:</strong> Backgrounds, dividers, cards</li>
+      </ul>
+    </div>
+    <div class="spec-card">
+      <h4>Silhouette Assembly</h4>
+      <ul>
+        <li><strong>Parts:</strong> Circle head + rounded torso</li>
+        <li><strong>Diversity:</strong> Proportion variation</li>
+        <li><strong>Heights:</strong> Tall, medium, short</li>
+        <li><strong>Widths:</strong> Standard, wide, narrow</li>
+        <li><strong>Colors:</strong> 5 palettes (primary→green)</li>
+        <li><strong>Transparency:</strong> Head 70%, torso 25%</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>These three elements form the Visual DNA of OpenEdu. They share the circle primitive and express assembly, openness, and calm.</p>
+</div>
+
+</body>
+</html>
