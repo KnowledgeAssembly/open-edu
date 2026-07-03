@@ -24,6 +24,7 @@ import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
+import { Pipili } from './components/Pipili';
 import { getBundleProgress } from './bundleProgressStorage';
 
 export type AppView =
@@ -406,6 +407,12 @@ export function AppShell({
               {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
             </main>
           </AppLayout>
+        )}
+        {!isCourseView && (
+          <Pipili
+            mood={view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content'}
+            visible
+          />
         )}
         <CourseExitWarningDialog
           open={showExitWarning}

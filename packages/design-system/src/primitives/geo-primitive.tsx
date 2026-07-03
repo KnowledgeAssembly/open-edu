@@ -14,6 +14,12 @@ const sizeMap = {
   xl: 32,
 };
 
+const variantClasses: Record<string, string> = {
+  default: '',
+  muted: 'text-muted-foreground',
+  accent: 'text-primary',
+};
+
 export const GeoPrimitive = React.forwardRef<SVGSVGElement, GeoPrimitiveProps>(
   ({ size = 'md', variant = 'default', className, ...props }, ref) => {
     const px = sizeMap[size];
@@ -23,10 +29,11 @@ export const GeoPrimitive = React.forwardRef<SVGSVGElement, GeoPrimitiveProps>(
         width={px}
         height={px}
         viewBox="0 0 20 20"
-        className={cn('fill-current', className)}
+        className={cn('fill-current', variantClasses[variant], className)}
+        aria-hidden="true"
         {...props}
       >
-        <rect x="2" y="2" width="16" height="16" rx="3" />
+        <circle cx="10" cy="10" r="8" />
       </svg>
     );
   },
