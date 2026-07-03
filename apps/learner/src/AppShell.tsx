@@ -24,6 +24,7 @@ import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
+import { Pipili } from './components/Pipili';
 import { getBundleProgress } from './bundleProgressStorage';
 
 export type AppView =
@@ -317,102 +318,108 @@ export function AppShell({
     <RuntimeThemeProvider themeId={themeId}>
       <FontLoader />
       <FontSizeProvider>
-      <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
-        {isCourseView && coursePkg ? (
-          <div className="flex-1 flex flex-col min-w-0">
-            <TopAppBar
-              breadcrumbs={getBreadcrumbs()}
-              isCourseView
-              courseTitle={coursePkg.manifest.title}
-              showA11yControls
-              progressCurrent={courseProgressCurrent}
-              progressTotal={courseProgressTotal}
-            />
-            <CourseRuntime
-              pkg={coursePkg}
-              onBackToCatalog={handleBackToCatalog}
-              hideLayoutShellHeader
-              onProgressUpdate={handleProgressUpdate}
-              bundleContext={
-                courseBundle
-                  ? {
-                      bundleId: courseBundle.manifest.id,
-                      bundle: courseBundle,
-                      onBundleSnapshot: (snapshot) => {
-                        setBundleProgress((prev) => ({
-                          ...prev,
-                          [courseBundle.manifest.id]: snapshot,
-                        }));
-                      },
-                    }
-                  : undefined
-              }
-            >
-              <CourseStepWrapper />
-            </CourseRuntime>
-          </div>
-        ) : (
-          <AppLayout
-            sidebar={
-              <AppSidebar
-                items={navItems}
-                currentItemId={currentNavId}
-                onNavigate={handleNavAction}
+        <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
+          {isCourseView && coursePkg ? (
+            <div className="flex-1 flex flex-col min-w-0">
+              <TopAppBar
+                breadcrumbs={getBreadcrumbs()}
+                isCourseView
+                courseTitle={coursePkg.manifest.title}
+                showA11yControls
+                progressCurrent={courseProgressCurrent}
+                progressTotal={courseProgressTotal}
               />
-            }
-            topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
-          >
-            <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
-              {view.view === 'catalog' && (
-                <CatalogPage
-                  packages={catalogPackages}
-                  bundleSummaries={catalogBundles}
-                  bundleProgress={bundleProgress}
-                  onStartCourse={handleStartCourse}
-                  onStartBundle={handleStartBundle}
-                  onNavigate={handleNavigate}
+              <CourseRuntime
+                pkg={coursePkg}
+                onBackToCatalog={handleBackToCatalog}
+                hideLayoutShellHeader
+                onProgressUpdate={handleProgressUpdate}
+                bundleContext={
+                  courseBundle
+                    ? {
+                        bundleId: courseBundle.manifest.id,
+                        bundle: courseBundle,
+                        onBundleSnapshot: (snapshot) => {
+                          setBundleProgress((prev) => ({
+                            ...prev,
+                            [courseBundle.manifest.id]: snapshot,
+                          }));
+                        },
+                      }
+                    : undefined
+                }
+              >
+                <CourseStepWrapper />
+              </CourseRuntime>
+            </div>
+          ) : (
+            <AppLayout
+              sidebar={
+                <AppSidebar
+                  items={navItems}
+                  currentItemId={currentNavId}
+                  onNavigate={handleNavAction}
                 />
-              )}
-              {view.view === 'home' && (
-                <HomePage
-                  onNavigate={handleNavigate}
-                  catalogPackages={catalogPackages}
-                  bundleEntries={bundleEntries}
-                />
-              )}
-              {(() => {
-                if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                const bundle = bundleEntries[view.bundleId];
-                if (!bundle) return null;
-                return (
-                  <BundleOverviewPage
-                    bundle={bundle}
-                    bundleProgress={bundleProgress[view.bundleId] ?? null}
-                    onStartModule={handleStartBundleModule}
-                    onBackToCatalog={handleBackToCatalog}
+              }
+              topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
+            >
+              <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
+                {view.view === 'catalog' && (
+                  <CatalogPage
+                    packages={catalogPackages}
+                    bundleSummaries={catalogBundles}
+                    bundleProgress={bundleProgress}
+                    onStartCourse={handleStartCourse}
+                    onStartBundle={handleStartBundle}
+                    onNavigate={handleNavigate}
                   />
-                );
-              })()}
-              {view.view === 'progress' && (
-                <ProgressDashboard
-                  onNavigate={handleNavigate}
-                  catalogPackages={catalogPackages}
-                  packageEntries={packageEntries}
-                />
-              )}
-              {view.view === 'settings' && (
-                <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
-              )}
-              {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
-            </main>
-          </AppLayout>
-        )}
-        <CourseExitWarningDialog
-          open={showExitWarning}
-          onStay={handleExitStay}
-          onLeave={handleExitLeave}
-        />
-      </div>
+                )}
+                {view.view === 'home' && (
+                  <HomePage
+                    onNavigate={handleNavigate}
+                    catalogPackages={catalogPackages}
+                    bundleEntries={bundleEntries}
+                  />
+                )}
+                {(() => {
+                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                  const bundle = bundleEntries[view.bundleId];
+                  if (!bundle) return null;
+                  return (
+                    <BundleOverviewPage
+                      bundle={bundle}
+                      bundleProgress={bundleProgress[view.bundleId] ?? null}
+                      onStartModule={handleStartBundleModule}
+                      onBackToCatalog={handleBackToCatalog}
+                    />
+                  );
+                })()}
+                {view.view === 'progress' && (
+                  <ProgressDashboard
+                    onNavigate={handleNavigate}
+                    catalogPackages={catalogPackages}
+                    packageEntries={packageEntries}
+                  />
+                )}
+                {view.view === 'settings' && (
+                  <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
+                )}
+                {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+              </main>
+            </AppLayout>
+          )}
+          {!isCourseView && (
+            <Pipili
+              mood={view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content'}
+              visible
+            />
+          )}
+          <CourseExitWarningDialog
+            open={showExitWarning}
+            onStay={handleExitStay}
+            onLeave={handleExitLeave}
+          />
+        </div>
       </FontSizeProvider>
     </RuntimeThemeProvider>
   );

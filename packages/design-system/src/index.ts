@@ -121,6 +121,12 @@ export { Toaster } from './primitives/notification.js';
 export { GeoPrimitive } from './primitives/geo-primitive.js';
 export type { GeoPrimitiveProps } from './primitives/geo-primitive.js';
 
+export { Pipili } from './primitives/pipili.js';
+export type { PipiliProps, PipiliMood } from './primitives/pipili.js';
+
+export { OpenEduLogo } from './primitives/openedu-logo.js';
+export type { OpenEduLogoProps } from './primitives/openedu-logo.js';
+
 // Contexts
 export { FontSizeProvider, useFontSize } from './font-size-context.js';
 
