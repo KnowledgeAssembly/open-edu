@@ -14,7 +14,7 @@ const sizeMap = {
   xl: 32,
 };
 
-const variantClasses: Record<string, string> = {
+const variantClasses: Record<NonNullable<GeoPrimitiveProps['variant']>, string> = {
   default: '',
   muted: 'text-muted-foreground',
   accent: 'text-primary',

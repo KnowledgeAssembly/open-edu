@@ -16,7 +16,7 @@ const sizeMap = {
   xl: 80,
 };
 
-const moodAnimations: Record<PipiliMood, string> = {
+const moodClasses: Record<PipiliMood, string> = {
   idle: '',
   thinking: 'animate-pulse',
   curious: 'animate-bounce',
@@ -36,7 +36,12 @@ export const Pipili = React.forwardRef<HTMLDivElement, PipiliProps>(
         aria-label={`Pipili — ${mood}`}
         {...props}
       >
-        <div className={cn('w-full h-full', moodAnimations[mood])}>
+        <div
+          className={cn(
+            'relative w-full h-full motion-reduce:animate-none motion-reduce:transform-none',
+            moodClasses[mood],
+          )}
+        >
           {/* Head — tilted circle */}
           <svg
             width={px}

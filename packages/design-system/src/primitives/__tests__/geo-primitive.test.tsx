@@ -101,11 +101,7 @@ describe('GeoPrimitive', () => {
       await checkAccessibility(
         <div role="img" aria-label="Learning path with 5 steps">
           {Array.from({ length: 5 }).map((_, i) => (
-            <GeoPrimitive
-              key={i}
-              size="md"
-              variant={i === 2 ? 'accent' : 'muted'}
-            />
+            <GeoPrimitive key={i} size="md" variant={i === 2 ? 'accent' : 'muted'} />
           ))}
         </div>,
       );

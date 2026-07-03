@@ -84,10 +84,7 @@ export const Linear: Story = {
     <div className="flex items-center gap-1">
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-center">
-          <GeoPrimitive
-            size="md"
-            variant={i === 2 ? 'accent' : 'muted'}
-          />
+          <GeoPrimitive size="md" variant={i === 2 ? 'accent' : 'muted'} />
           {i < 4 && (
             <svg width="16" height="2" className="mx-1">
               <line

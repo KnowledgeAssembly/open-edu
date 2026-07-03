@@ -81,3 +81,8 @@ export const Content: Story = {
   name: 'Mood: Content',
   args: { size: 'lg', mood: 'content' },
 };
+
+export const Idle: Story = {
+  name: 'Mood: Idle',
+  args: { size: 'lg', mood: 'idle' },
+};

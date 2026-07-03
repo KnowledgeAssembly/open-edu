@@ -54,6 +54,12 @@ describe('Pipili', () => {
     expect(svg).toHaveStyle({ transform: 'rotate(0deg)' });
   });
 
+  it('includes motion-reduce classes for accessibility', () => {
+    render(<Pipili data-testid="pipili" />);
+    const innerDiv = screen.getByTestId('pipili').querySelector('[class*="motion-reduce"]');
+    expect(innerDiv).toBeInTheDocument();
+  });
+
   it('applies custom className', () => {
     render(<Pipili className="ml-4" data-testid="pipili" />);
     expect(screen.getByTestId('pipili')).toHaveClass('ml-4');

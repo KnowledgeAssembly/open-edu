@@ -17,6 +17,8 @@ describe('OpenEduLogo', () => {
     const el = screen.getByTestId('logo');
     expect(el).toBeInTheDocument();
     expect(el.querySelector('svg')).toBeInTheDocument();
+    expect(el).toHaveAttribute('role', 'img');
+    expect(el).toHaveAttribute('aria-label', 'OpenEdu');
   });
 
   it('renders wordmark variant', () => {
@@ -25,6 +27,8 @@ describe('OpenEduLogo', () => {
     expect(el).toBeInTheDocument();
     expect(el.textContent).toContain('open');
     expect(el.textContent).toContain('edu');
+    const dotSvg = el.querySelector('svg[aria-hidden="true"]');
+    expect(dotSvg).toBeInTheDocument();
   });
 
   it('renders with sm size', () => {
@@ -35,6 +39,12 @@ describe('OpenEduLogo', () => {
   it('renders with lg size', () => {
     render(<OpenEduLogo size="lg" data-testid="logo" />);
     expect(screen.getByTestId('logo')).toBeInTheDocument();
+  });
+
+  it('hides interior symbol SVG with aria-hidden in lockup variant', () => {
+    render(<OpenEduLogo variant="lockup" data-testid="logo" />);
+    const svgs = screen.getByTestId('logo').querySelectorAll('svg[aria-hidden="true"]');
+    expect(svgs.length).toBeGreaterThanOrEqual(1);
   });
 
   it('applies custom className', () => {
