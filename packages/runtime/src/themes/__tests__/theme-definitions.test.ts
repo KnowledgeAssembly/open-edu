@@ -69,6 +69,8 @@ const requiredColorKeys = [
   'border',
   'success',
   'success-container',
+  'accent',
+  'primary-light',
 ];
 
 const hexRegex = /^#[0-9a-fA-F]{6}$/;
