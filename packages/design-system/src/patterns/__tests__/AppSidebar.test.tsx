@@ -158,4 +158,40 @@ describe('AppSidebar', () => {
       <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />,
     );
   });
+
+  describe('logo', () => {
+    it('renders logo instead of title when provided', () => {
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          logo={<span data-testid="sidebar-logo">Custom Logo</span>}
+        />,
+      );
+      expect(screen.getByTestId('sidebar-logo')).toBeInTheDocument();
+      expect(screen.getByText('Custom Logo')).toBeInTheDocument();
+      expect(screen.queryByText('OpenEdu')).toBeNull();
+    });
+
+    it('hides logo when collapsed', () => {
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          logo={<span data-testid="sidebar-logo">Custom Logo</span>}
+          defaultCollapsed
+        />,
+      );
+      expect(screen.queryByTestId('sidebar-logo')).toBeNull();
+    });
+
+    it('shows OE text when collapsed without logo', () => {
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      expect(screen.getByText('OE')).toBeInTheDocument();
+    });
+  });
 });

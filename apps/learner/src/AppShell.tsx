@@ -10,7 +10,7 @@ import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from 
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
-import { AppSidebar, AppLayout, FontSizeProvider } from '@open-edu/design-system';
+import { AppSidebar, AppLayout, FontSizeProvider, OpenEduLogo } from '@open-edu/design-system';
 import type {
   AppSidebarItem,
   AppSidebarSection,
@@ -305,6 +305,7 @@ export function AppShell({
     const section: AppSidebarSection = { title: 'Course Steps', items };
     return (
       <AppSidebar
+        logo={<OpenEduLogo variant="lockup" size="sm" />}
         items={navItems}
         currentItemId={currentNavId}
         onNavigate={handleNavAction}
@@ -356,6 +357,7 @@ export function AppShell({
             <AppLayout
               sidebar={
                 <AppSidebar
+                  logo={<OpenEduLogo variant="lockup" size="sm" />}
                   items={navItems}
                   currentItemId={currentNavId}
                   onNavigate={handleNavAction}
