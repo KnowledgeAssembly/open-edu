@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { focusTokens, focusRingClass, tailwindFocusExtensions } from '../focus';
+import { focusTokens, focusRingClass } from '../focus';
+import { tailwindFocusExtensions } from '../tailwind';
 
 describe('focus tokens', () => {
   it('defines ring width', () => {
@@ -10,7 +11,7 @@ describe('focus tokens', () => {
     expect(focusRingClass()).toContain('ring-2');
   });
 
-  it('tailwind extensions map correctly', () => {
-    expect(tailwindFocusExtensions['ring-width']).toBe('2px');
+  it('tailwind extensions reference CSS vars', () => {
+    expect(tailwindFocusExtensions['width']).toBe('var(--oe-focus-ring-width)');
   });
 });

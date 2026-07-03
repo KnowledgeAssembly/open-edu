@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { sizingScale, sizingTokenToCssVar, tailwindSizingExtensions } from '../sizing';
+import { sizingScale, sizingTokenToCssVar } from '../sizing';
+import { tailwindSizingExtensions } from '../tailwind';
 
 describe('sizing tokens', () => {
   it('has icon sizes', () => {
@@ -15,7 +16,7 @@ describe('sizing tokens', () => {
     expect(sizingTokenToCssVar('icon-sm')).toBe('var(--oe-size-icon-sm)');
   });
 
-  it('tailwind extensions map correctly', () => {
-    expect(tailwindSizingExtensions['icon-sm']).toBe('16px');
+  it('tailwind extensions reference CSS vars', () => {
+    expect(tailwindSizingExtensions['icon-sm']).toBe('var(--oe-size-icon-sm)');
   });
 });

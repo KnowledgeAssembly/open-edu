@@ -1,5 +1,11 @@
 import type { ThemeDefinition, TypographySet, TypographyToken } from './types.js';
 import { motionTokens } from '../tokens/motion.js';
+import { sizingScale } from '../tokens/sizing.js';
+import { opacityScale } from '../tokens/opacity.js';
+import { borderWidthScale, borderStyleScale } from '../tokens/borders.js';
+import { focusTokens } from '../tokens/focus.js';
+import { iconSizeScale, iconStrokeScale } from '../tokens/icons.js';
+import { layoutTokens } from '../tokens/layout.js';
 
 export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -36,6 +42,36 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
     if (typeof value === 'string') {
       vars[`--oe-motion-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] = value;
     }
+  }
+
+  for (const [key, value] of Object.entries(sizingScale)) {
+    vars[`--oe-size-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(opacityScale)) {
+    vars[`--oe-opacity-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(borderWidthScale)) {
+    vars[`--oe-border-width-${key}`] = value;
+  }
+  for (const [key, value] of Object.entries(borderStyleScale)) {
+    vars[`--oe-border-style-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(focusTokens)) {
+    vars[`--oe-focus-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(iconSizeScale)) {
+    vars[`--oe-icon-size-${key}`] = value;
+  }
+  for (const [key, value] of Object.entries(iconStrokeScale)) {
+    vars[`--oe-icon-stroke-${key}`] = value;
+  }
+
+  for (const [key, value] of Object.entries(layoutTokens)) {
+    vars[`--oe-layout-${key}`] = value;
   }
 
   vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';

@@ -53,10 +53,10 @@ export function getMasteryLabel(mastery: MasteryLevel): string {
 
 export function getMasteryColor(mastery: MasteryLevel): string {
   const colors: Record<MasteryLevel, string> = {
-    not_attempted: '#9ca3af',
-    in_progress: '#3b82f6',
-    achieved: '#8b5cf6',
-    mastered: '#10b981',
+    not_attempted: 'var(--oe-color-outline)',
+    in_progress: 'var(--oe-color-primary)',
+    achieved: 'var(--oe-color-tertiary)',
+    mastered: 'var(--oe-color-success)',
   };
   return colors[mastery];
 }

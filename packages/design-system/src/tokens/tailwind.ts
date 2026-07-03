@@ -240,3 +240,78 @@ export const tailwindTransitionTimingExtensions: Record<string, string> = {
   out: 'var(--oe-motion-easing-ease-out)',
   'in-out': 'var(--oe-motion-easing-ease-in-out)',
 };
+
+export const tailwindSizingExtensions: Record<string, string> = {
+  'icon-xs': 'var(--oe-size-icon-xs)',
+  'icon-sm': 'var(--oe-size-icon-sm)',
+  'icon-md': 'var(--oe-size-icon-md)',
+  'icon-lg': 'var(--oe-size-icon-lg)',
+  'icon-xl': 'var(--oe-size-icon-xl)',
+};
+
+export const tailwindComponentHeightExtensions: Record<string, string> = {
+  xs: 'var(--oe-size-height-xs)',
+  sm: 'var(--oe-size-height-sm)',
+  md: 'var(--oe-size-height-md)',
+  lg: 'var(--oe-size-height-lg)',
+  xl: 'var(--oe-size-height-xl)',
+};
+
+export const tailwindMinWidthExtensions: Record<string, string> = {
+  xs: 'var(--oe-size-min-width-xs)',
+  sm: 'var(--oe-size-min-width-sm)',
+  md: 'var(--oe-size-min-width-md)',
+  lg: 'var(--oe-size-min-width-lg)',
+};
+
+export const tailwindOpacityExtensions: Record<string, string> = {
+  '0': 'var(--oe-opacity-0)',
+  '5': 'var(--oe-opacity-5)',
+  '10': 'var(--oe-opacity-10)',
+  '20': 'var(--oe-opacity-20)',
+  '30': 'var(--oe-opacity-30)',
+  '40': 'var(--oe-opacity-40)',
+  '50': 'var(--oe-opacity-50)',
+  '60': 'var(--oe-opacity-60)',
+  '70': 'var(--oe-opacity-70)',
+  '80': 'var(--oe-opacity-80)',
+  '90': 'var(--oe-opacity-90)',
+  '100': 'var(--oe-opacity-100)',
+};
+
+export const tailwindBorderWidthExtensions: Record<string, string> = {
+  '0': 'var(--oe-border-width-0)',
+  '1': 'var(--oe-border-width-1)',
+  '2': 'var(--oe-border-width-2)',
+  '4': 'var(--oe-border-width-4)',
+  '8': 'var(--oe-border-width-8)',
+};
+
+export const tailwindFocusExtensions: Record<string, string> = {
+  width: 'var(--oe-focus-ring-width)',
+  offset: 'var(--oe-focus-ring-offset)',
+  color: 'var(--oe-focus-ring-color)',
+};
+
+export const tailwindIconSizeExtensions: Record<string, string> = {
+  xs: 'var(--oe-icon-size-xs)',
+  sm: 'var(--oe-icon-size-sm)',
+  md: 'var(--oe-icon-size-md)',
+  lg: 'var(--oe-icon-size-lg)',
+  xl: 'var(--oe-icon-size-xl)',
+  '2xl': 'var(--oe-icon-size-2xl)',
+};
+
+export const tailwindLayoutExtensions: Record<string, string> = {
+  sidebar: 'var(--oe-layout-sidebar-width)',
+  'sidebar-collapsed': 'var(--oe-layout-sidebar-collapsed-width)',
+  header: 'var(--oe-layout-header-height)',
+  'panel-nav': 'var(--oe-layout-panel-nav-width)',
+  'panel-explorer': 'var(--oe-layout-panel-explorer-width)',
+  content: 'var(--oe-layout-content-max-width)',
+  reading: 'var(--oe-layout-reading-width)',
+  'grid-sm': 'var(--oe-layout-grid-gap-sm)',
+  'grid-md': 'var(--oe-layout-grid-gap-md)',
+  'grid-lg': 'var(--oe-layout-grid-gap-lg)',
+  'grid-xl': 'var(--oe-layout-grid-gap-xl)',
+};

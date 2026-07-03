@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { opacityScale, opacityTokenToCssVar, tailwindOpacityExtensions } from '../opacity';
+import { opacityScale, opacityTokenToCssVar } from '../opacity';
+import { tailwindOpacityExtensions } from '../tailwind';
 
 describe('opacity tokens', () => {
   it('has full scale from 0 to 100', () => {
@@ -12,7 +13,7 @@ describe('opacity tokens', () => {
     expect(opacityTokenToCssVar('50')).toBe('var(--oe-opacity-50)');
   });
 
-  it('tailwind extensions map correctly', () => {
-    expect(tailwindOpacityExtensions['50']).toBe('0.50');
+  it('tailwind extensions reference CSS vars', () => {
+    expect(tailwindOpacityExtensions['50']).toBe('var(--oe-opacity-50)');
   });
 });

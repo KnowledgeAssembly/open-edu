@@ -10,7 +10,3 @@ export type FocusToken = keyof typeof focusTokens;
 export function focusRingClass(): string {
   return 'outline-none ring-2 ring-offset-2';
 }
-
-export const tailwindFocusExtensions = Object.fromEntries(
-  Object.entries(focusTokens).map(([key, value]) => [key, value]),
-);

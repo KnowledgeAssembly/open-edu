@@ -19,7 +19,3 @@ export type BorderStyleToken = keyof typeof borderStyleScale;
 export function borderWidthTokenToCssVar(token: BorderWidthToken): string {
   return `var(--oe-border-width-${token})`;
 }
-
-export const tailwindBorderWidthExtensions = Object.fromEntries(
-  Object.entries(borderWidthScale).map(([key, value]) => [key, value]),
-);

@@ -199,4 +199,46 @@ describe('flattenTheme', () => {
     expect(vars['--oe-motion-easing-ease-out']).toContain('cubic-bezier');
     expect(vars['--oe-motion-easing-ease-in']).toContain('cubic-bezier');
   });
+
+  it('emits sizing CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-size-icon-sm']).toBe('16px');
+    expect(vars['--oe-size-icon-lg']).toBe('24px');
+    expect(vars['--oe-size-height-md']).toBe('40px');
+    expect(vars['--oe-size-min-width-xs']).toBe('48px');
+  });
+
+  it('emits opacity CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-opacity-0']).toBe('0');
+    expect(vars['--oe-opacity-50']).toBe('0.50');
+    expect(vars['--oe-opacity-100']).toBe('1');
+  });
+
+  it('emits border CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-border-width-1']).toBe('1px');
+    expect(vars['--oe-border-width-2']).toBe('2px');
+    expect(vars['--oe-border-style-solid']).toBe('solid');
+  });
+
+  it('emits focus CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-focus-ring-width']).toBe('2px');
+    expect(vars['--oe-focus-ring-offset']).toBe('2px');
+  });
+
+  it('emits icon CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-icon-size-sm']).toBe('16px');
+    expect(vars['--oe-icon-size-lg']).toBe('24px');
+    expect(vars['--oe-icon-stroke-regular']).toBe('1.5');
+  });
+
+  it('emits layout CSS vars', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-layout-sidebar-width']).toBe('280px');
+    expect(vars['--oe-layout-header-height']).toBe('56px');
+    expect(vars['--oe-layout-reading-width']).toBe('680px');
+  });
 });
