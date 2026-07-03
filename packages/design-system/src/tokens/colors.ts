@@ -158,6 +158,8 @@ export interface SemanticColorTokens {
   bg: string;
   fg: string;
   border: string;
+  'primary-light': string;
+  accent: string;
   success: string;
 }
 

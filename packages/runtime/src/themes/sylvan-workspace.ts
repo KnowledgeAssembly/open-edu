@@ -57,7 +57,9 @@ export const sylvanWorkspace: ThemeDefinition = {
     fg: '#1c1b17',
     border: '#c6c2bc',
     success: '#16a34a',
-    'success-container': '#dafbe3',
+    ['success-container']: '#dafbe3',
+    accent: '#5e6e5a',
+    ['primary-light']: '#c4dcc4',
   },
   typography: {
     productive: {

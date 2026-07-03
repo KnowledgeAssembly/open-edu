@@ -58,6 +58,8 @@ export const luminaScholastica: ThemeDefinition = {
     border: '#ccc6c0',
     success: '#16a34a',
     ['success-container']: '#dafbe3',
+    accent: '#665e77',
+    ['primary-light']: '#7c6bb0',
   },
   typography: {
     productive: {

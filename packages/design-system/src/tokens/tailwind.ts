@@ -64,6 +64,7 @@ export const tailwindColorExtensions: Record<string, string> = {
   'on-background': 'var(--oe-color-on-background)',
 
   // Misc
+  'primary-light': 'var(--oe-color-primary-light)',
   success: 'var(--oe-color-success)',
 
   // Shadcn/ui semantic aliases — map to design-system tokens
@@ -86,8 +87,8 @@ export const tailwindColorExtensions: Record<string, string> = {
   'muted-foreground': 'var(--oe-color-on-surface-variant)',
 
   // Accent
-  accent: 'var(--oe-color-secondary-container)',
-  'accent-foreground': 'var(--oe-color-on-secondary-container)',
+  accent: 'var(--oe-color-accent)',
+  'accent-foreground': 'var(--oe-color-on-secondary)',
 
   // Primary foreground
   'primary-foreground': 'var(--oe-color-on-primary)',

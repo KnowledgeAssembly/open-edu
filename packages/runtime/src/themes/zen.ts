@@ -57,6 +57,8 @@ export const zen: ThemeDefinition = {
     border: '#c6c3bd',
     success: '#16a34a',
     'success-container': '#dafbe3',
+    accent: '#726e68',
+    'primary-light': '#c6c2bc',
   },
   typography: {
     productive: {

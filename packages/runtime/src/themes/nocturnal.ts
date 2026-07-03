@@ -58,6 +58,8 @@ export const nocturnal: ThemeDefinition = {
     border: '#4b4452',
     success: '#16a34a',
     ['success-container']: '#dafbe3',
+    accent: '#5adfd0',
+    ['primary-light']: '#bb86fc',
   },
   typography: {
     productive: {

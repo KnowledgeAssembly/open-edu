@@ -56,7 +56,9 @@ export const forest: ThemeDefinition = {
     fg: '#1c1a17',
     border: '#cbc6be',
     success: '#16a34a',
-    'success-container': '#dafbe3',
+    ['success-container']: '#dafbe3',
+    accent: '#5e6d56',
+    ['primary-light']: '#b8d4b4',
   },
   typography: {
     productive: {

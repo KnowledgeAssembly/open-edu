@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { palette } from '../colors.js';
+import {
+  tailwindColorExtensions,
+} from '../tailwind.js';
 
 describe('color palette validation against Visual DNA', () => {
   it('includes all 5 Silhouette Assembly palette color families', () => {
@@ -39,5 +42,13 @@ describe('color palette validation against Visual DNA', () => {
       const hasFamily = colorKeys.some((key) => key.startsWith(family));
       expect(hasFamily).toBe(true);
     }
+  });
+
+  it('includes silhouette assembly palette mappings matching Visual DNA spec', () => {
+    expect(tailwindColorExtensions.accent).toBe('var(--oe-color-accent)');
+    expect(tailwindColorExtensions.primary).toBe('var(--oe-color-primary)');
+    expect(tailwindColorExtensions['primary-light']).toBe('var(--oe-color-primary-light)');
+    expect(tailwindColorExtensions.tertiary).toBe('var(--oe-color-tertiary)');
+    expect(tailwindColorExtensions.success).toBe('var(--oe-color-success)');
   });
 });

@@ -57,7 +57,9 @@ export const highFocus: ThemeDefinition = {
     fg: '#1c1b1a',
     border: '#c6c3be',
     success: '#16a34a',
-    'success-container': '#dafbe3',
+    ['success-container']: '#dafbe3',
+    accent: '#1a7a50',
+    ['primary-light']: '#1a5acc',
   },
   typography: {
     productive: {

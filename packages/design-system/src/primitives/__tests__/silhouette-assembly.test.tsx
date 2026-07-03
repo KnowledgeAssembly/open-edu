@@ -1,10 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { SilhouetteAssembly } from '../silhouette-assembly.js';
+import { SilhouetteAssembly, paletteColors } from '../silhouette-assembly.js';
 
 describe('SilhouetteAssembly', () => {
   const palettes = [1, 2, 3, 4, 5] as const;
   const proportions = ['tall', 'med', 'short', 'wide', 'narrow'] as const;
+
+  it('palette colors match Visual DNA spec', () => {
+    expect(paletteColors[1]).toBe('var(--oe-color-primary)');
+    expect(paletteColors[2]).toBe('var(--oe-color-accent)');
+    expect(paletteColors[3]).toBe('var(--oe-color-tertiary)');
+    expect(paletteColors[4]).toBe('var(--oe-color-primary-light)');
+    expect(paletteColors[5]).toBe('var(--oe-color-success)');
+  });
 
   it('renders all 5 palettes without error', () => {
     for (const palette of palettes) {
