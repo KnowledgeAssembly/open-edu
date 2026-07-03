@@ -302,6 +302,14 @@ export const tailwindIconSizeExtensions: Record<string, string> = {
   '2xl': 'var(--oe-icon-size-2xl)',
 };
 
+export const tailwindElevationExtensions: Record<string, string> = {
+  'elevation-flat': 'var(--oe-elevation-flat)',
+  'elevation-raised': 'var(--oe-elevation-raised)',
+  'elevation-overlay': 'var(--oe-elevation-overlay)',
+  'elevation-modal': 'var(--oe-elevation-modal)',
+  'elevation-sticky': 'var(--oe-elevation-sticky)',
+};
+
 export const tailwindLayoutExtensions: Record<string, string> = {
   sidebar: 'var(--oe-layout-sidebar-width)',
   'sidebar-collapsed': 'var(--oe-layout-sidebar-collapsed-width)',

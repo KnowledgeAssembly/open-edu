@@ -61,44 +61,44 @@ export const forest: ThemeDefinition = {
   typography: {
     productive: {
       display: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '44px',
         fontWeight: '700',
         lineHeight: '1.15',
         letterSpacing: '-0.01em',
       },
       heading: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '28px',
         fontWeight: '650',
         lineHeight: '1.3',
       },
       subheading: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '24px',
         fontWeight: '600',
         lineHeight: '1.3',
       },
       heading3: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '20px',
         fontWeight: '600',
         lineHeight: '1.4',
       },
       heading4: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '18px',
         fontWeight: '600',
         lineHeight: '1.4',
       },
       heading5: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '16px',
         fontWeight: '600',
         lineHeight: '1.5',
       },
       heading6: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '14px',
         fontWeight: '600',
         lineHeight: '1.5',
@@ -123,7 +123,7 @@ export const forest: ThemeDefinition = {
         lineHeight: '1.5',
       },
       code: {
-        fontFamily: 'JetBrains Mono',
+        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
         fontSize: '13px',
         fontWeight: '400',
         lineHeight: '1.6',
@@ -131,7 +131,7 @@ export const forest: ThemeDefinition = {
     },
     expressive: {
       display: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '44px',
         fontWeight: '700',
         lineHeight: '1.15',
@@ -144,7 +144,7 @@ export const forest: ThemeDefinition = {
         lineHeight: '1.3',
       },
       subheading: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '24px',
         fontWeight: '600',
         lineHeight: '1.3',
@@ -174,7 +174,7 @@ export const forest: ThemeDefinition = {
         lineHeight: '1.6',
       },
       body: {
-        fontFamily: 'Source Serif 4',
+        fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '18px',
         fontWeight: '420',
         lineHeight: '1.7',
@@ -194,7 +194,7 @@ export const forest: ThemeDefinition = {
         lineHeight: '1.5',
       },
       code: {
-        fontFamily: 'JetBrains Mono',
+        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
         fontSize: '13px',
         fontWeight: '400',
         lineHeight: '1.6',

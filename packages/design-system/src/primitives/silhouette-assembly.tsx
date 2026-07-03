@@ -24,7 +24,7 @@ const proportionConfig: Record<
 const paletteColors: Record<SilhouettePalette, string> = {
   1: 'var(--oe-color-primary)',
   2: 'var(--oe-color-secondary-container)',
-  3: '#b45309',
+  3: 'var(--oe-color-tertiary)',
   4: 'var(--oe-color-primary-fixed)',
   5: 'var(--oe-color-success)',
 };

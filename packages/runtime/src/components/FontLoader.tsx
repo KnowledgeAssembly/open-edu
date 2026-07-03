@@ -9,13 +9,18 @@ function familyToUrl(family: string): string {
   return `${GOOGLE_FONTS_BASE}?family=${encoded}:wght@100;200;300;400;500;600;700;800;900&display=swap`;
 }
 
+function extractPrimaryFont(fontFamily: string): string {
+  const primary = fontFamily.split(',')[0];
+  return primary ? primary.trim().replace(/^["']|["']$/g, '') : '';
+}
+
 function getUniqueFontFamilies(theme: ReturnType<typeof useTheme>): string[] {
   const families = new Set<string>();
   for (const set of Object.values(theme.typography)) {
     for (const token of Object.values(set)) {
       const t = token as { fontFamily?: string };
       if (t.fontFamily) {
-        families.add(t.fontFamily);
+        families.add(extractPrimaryFont(t.fontFamily));
       }
     }
   }
