@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CourseCardWithModule Pattern — OpenEdu Visual DNA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', system-ui, sans-serif; 
+      background: #f8f6f3;
+      padding: 40px;
+      color: #1d1b20;
+    }
+    h1 { font-size: 28px; font-weight: 650; margin-bottom: 8px; }
+    .subtitle { color: #6750a4; font-size: 14px; margin-bottom: 40px; }
+    .section { margin-bottom: 60px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #49454f; }
+    .cards-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 24px;
+    }
+    
+    /* CourseCard base */
+    .course-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      padding-right: 70px; /* Space for Open Module */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      position: relative;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .course-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    .course-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .course-card p { font-size: 14px; color: #49454f; line-height: 1.5; margin-bottom: 16px; }
+    .course-card .meta { 
+      display: flex; 
+      gap: 16px; 
+      font-size: 12px; 
+      color: #79747e;
+    }
+    .course-card .progress-bar {
+      height: 4px;
+      background: #e8e5e0;
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .course-card .progress-fill {
+      height: 100%;
+      background: #6d28d9;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    
+    /* Open Module */
+    .open-module {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+    }
+    .open-module svg {
+      display: block;
+    }
+    
+    /* States */
+    .state-label {
+      font-size: 12px;
+      color: #79747e;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <h1>CourseCardWithModule Pattern</h1>
+  <p class="subtitle">Open Module indicator wrapping CourseCard — Phase 1 of Visual DNA Alignment</p>
+
+  <div class="section">
+    <h2 class="section-title">Course Card States</h2>
+    <p style="color: #49454f; margin-bottom: 20px;">
+      Each state shows a different number of satellites on the orbital cluster, 
+      indicating learning progress visually.
+    </p>
+    
+    <div class="cards-grid">
+      <!-- Not Started -->
+      <div>
+        <p class="state-label">Not Started</p>
+        <div class="course-card">
+          <div class="open-module">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <!-- Orbit -->
+              <circle cx="24" cy="24" r="18" fill="none" stroke="#6d28d9" stroke-width="1" stroke-dasharray="4 3" opacity="0.18"/>
+              <!-- Core -->
+              <circle cx="24" cy="24" r="6" fill="#6d28d9"/>
+              <!-- Satellites - 2 for not started -->
+              <circle cx="38" cy="18" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="36" cy="32" r="3" fill="#6d28d9" opacity="0.7"/>
+            </svg>
+          </div>
+          <h3>Introduction to JavaScript</h3>
+          <p>Learn the fundamentals of JavaScript programming.</p>
+          <div class="meta">
+            <span>8 lessons</span>
+            <span>~2 hours</span>
+          </div>
+          <button style="margin-top: 16px; background: #6d28d9; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+            Start Course
+          </button>
+        </div>
+      </div>
+
+      <!-- In Progress -->
+      <div>
+        <p class="state-label">In Progress</p>
+        <div class="course-card">
+          <div class="open-module">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <!-- Orbit -->
+              <circle cx="24" cy="24" r="18" fill="none" stroke="#6d28d9" stroke-width="1" stroke-dasharray="4 3" opacity="0.18"/>
+              <!-- Core -->
+              <circle cx="24" cy="24" r="6" fill="#6d28d9"/>
+              <!-- Satellites - 4 for in progress -->
+              <circle cx="38" cy="16" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="40" cy="24" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="38" cy="32" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="34" cy="38" r="3" fill="#b47aff" opacity="0.7"/>
+            </svg>
+          </div>
+          <h3>React Fundamentals</h3>
+          <p>Build modern user interfaces with React.</p>
+          <div class="meta">
+            <span>3 of 12 lessons</span>
+            <span>25% complete</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 25%;"></div>
+          </div>
+          <button style="margin-top: 12px; background: #6d28d9; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+            Continue
+          </button>
+        </div>
+      </div>
+
+      <!-- Complete -->
+      <div>
+        <p class="state-label">Complete</p>
+        <div class="course-card">
+          <div class="open-module">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <!-- Orbit -->
+              <circle cx="24" cy="24" r="18" fill="none" stroke="#6d28d9" stroke-width="1" stroke-dasharray="4 3" opacity="0.18"/>
+              <!-- Core -->
+              <circle cx="24" cy="24" r="6" fill="#6d28d9"/>
+              <!-- Satellites - 5 for complete -->
+              <circle cx="38" cy="14" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="40" cy="22" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="40" cy="30" r="3" fill="#6d28d9" opacity="0.7"/>
+              <circle cx="36" cy="36" r="3" fill="#b47aff" opacity="0.7"/>
+              <circle cx="30" cy="40" r="3" fill="#6d28d9" opacity="0.7"/>
+            </svg>
+          </div>
+          <h3>HTML & CSS Basics</h3>
+          <p>Master the building blocks of web development.</p>
+          <div class="meta">
+            <span>10 of 10 lessons</span>
+            <span>100% complete</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%;"></div>
+          </div>
+          <div style="margin-top: 12px; color: #059669; font-size: 14px; font-weight: 500;">
+            ✓ Completed
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge Earned -->
+      <div>
+        <p class="state-label">Badge Earned</p>
+        <div class="course-card" style="border: 2px solid #6d28d9;">
+          <div class="open-module">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <!-- Glow -->
+              <circle cx="24" cy="24" r="22" fill="#6d28d9" opacity="0.1"/>
+              <!-- Orbit -->
+              <circle cx="24" cy="24" r="18" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.3"/>
+              <!-- Core -->
+              <circle cx="24" cy="24" r="6" fill="#6d28d9"/>
+              <!-- Satellites - 6 for badge earned -->
+              <circle cx="38" cy="12" r="3.5" fill="#6d28d9" opacity="0.8"/>
+              <circle cx="42" cy="20" r="3.5" fill="#b47aff" opacity="0.8"/>
+              <circle cx="42" cy="28" r="3.5" fill="#6d28d9" opacity="0.8"/>
+              <circle cx="38" cy="36" r="3.5" fill="#b47aff" opacity="0.8"/>
+              <circle cx="32" cy="40" r="3.5" fill="#6d28d9" opacity="0.8"/>
+              <circle cx="26" cy="42" r="3.5" fill="#b47aff" opacity="0.8"/>
+            </svg>
+          </div>
+          <h3>Python Masterclass</h3>
+          <p>Complete Python course with certification.</p>
+          <div class="meta">
+            <span>15 of 15 lessons</span>
+            <span style="color: #6d28d9; font-weight: 500;">🏆 Badge earned</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Satellite Count Logic</h2>
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+      <thead style="background: #f5f3f0;">
+        <tr>
+          <th style="padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600;">State</th>
+          <th style="padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600;">Satellites</th>
+          <th style="padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600;">Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid #e8e5e0;">
+          <td style="padding: 12px 16px; font-size: 14px;">Not started</td>
+          <td style="padding: 12px 16px; font-size: 14px;">2</td>
+          <td style="padding: 12px 16px; font-size: 14px; color: #49454f;">Room to grow, journey ahead</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e8e5e0;">
+          <td style="padding: 12px 16px; font-size: 14px;">In progress</td>
+          <td style="padding: 12px 16px; font-size: 14px;">3–4</td>
+          <td style="padding: 12px 16px; font-size: 14px; color: #49454f;">Building momentum</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e8e5e0;">
+          <td style="padding: 12px 16px; font-size: 14px;">Complete</td>
+          <td style="padding: 12px 16px; font-size: 14px;">5</td>
+          <td style="padding: 12px 16px; font-size: 14px; color: #49454f;">Filled but orbit still has gaps</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 16px; font-size: 14px;">Badge earned</td>
+          <td style="padding: 12px 16px; font-size: 14px;">6</td>
+          <td style="padding: 12px 16px; font-size: 14px; color: #49454f;">Celebration, achievement unlocked</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background: white; border-radius: 12px; padding: 24px; margin-top: 40px;">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Component Composition</h3>
+    <pre style="background: #f5f3f0; padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto;">
+&lt;CourseCardWithModule progress={progress} badgeCount={badgeCount}&gt;
+  &lt;CourseCard manifest={manifest} onStart={onStart} /&gt;
+&lt;/CourseCardWithModule&gt;</pre>
+    <p style="font-size: 14px; color: #49454f; margin-top: 12px;">
+      The pattern component wraps the runtime CourseCard and adds the Open Module indicator 
+      based on progress state. The runtime component stays generic.
+    </p>
+  </div>
+</body>
+</html>

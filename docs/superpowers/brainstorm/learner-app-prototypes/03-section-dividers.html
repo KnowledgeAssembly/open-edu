@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section Dividers — OpenEdu Visual DNA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', system-ui, sans-serif; 
+      background: #f8f6f3;
+      padding: 40px;
+      color: #1d1b20;
+    }
+    h1 { font-size: 28px; font-weight: 650; margin-bottom: 8px; }
+    .subtitle { color: #6750a4; font-size: 14px; margin-bottom: 40px; }
+    .section { margin-bottom: 60px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #49454f; }
+    
+    /* Demo containers */
+    .demo-container {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .demo-label {
+      font-size: 12px;
+      color: #79747e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    
+    /* Assembly Flow patterns */
+    .assembly-flow {
+      width: 100%;
+      height: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .assembly-flow svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Hero background */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, #f5f3f0 0%, #ede9e3 100%);
+      border-radius: 16px;
+      padding: 48px 32px;
+      overflow: hidden;
+    }
+    .hero-section h2 { 
+      font-size: 24px; 
+      font-weight: 650; 
+      position: relative;
+      z-index: 1;
+      margin-bottom: 8px;
+    }
+    .hero-section p { 
+      font-size: 16px; 
+      color: #49454f; 
+      position: relative;
+      z-index: 1;
+      max-width: 500px;
+    }
+    
+    /* Sidebar */
+    .sidebar-demo {
+      display: flex;
+      gap: 24px;
+    }
+    .sidebar {
+      width: 240px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sidebar h4 { 
+      font-size: 14px; 
+      font-weight: 600; 
+      position: relative;
+      z-index: 1;
+      margin-bottom: 16px;
+    }
+    .sidebar-nav {
+      position: relative;
+      z-index: 1;
+    }
+    .sidebar-nav a {
+      display: block;
+      padding: 8px 12px;
+      color: #49454f;
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+    .sidebar-nav a:hover { background: #f5f3f0; }
+    .sidebar-nav a.active { background: #e8def8; color: #6d28d9; }
+    .main-content {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Section Dividers</h1>
+  <p class="subtitle">AssemblyFlow patterns for backgrounds, dividers, and decorative textures</p>
+
+  <div class="section">
+    <h2 class="section-title">Divider Variations</h2>
+    
+    <!-- Minimal divider -->
+    <div class="demo-container">
+      <p class="demo-label">Minimal — Section Divider</p>
+      <div style="padding: 16px 0; border-bottom: none;">
+        <svg width="100%" height="32" viewBox="0 0 800 32">
+          <!-- Path -->
+          <path d="M0,16 C100,16 150,8 250,16 C350,24 400,16 500,16 C600,16 650,24 750,16 L800,16" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+          <!-- Nodes - minimal (3) -->
+          <circle cx="150" cy="12" r="5" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="400" cy="16" r="6" fill="#6d28d9" opacity="0.6"/>
+          <circle cx="650" cy="20" r="5" fill="#b47aff" opacity="0.5"/>
+        </svg>
+      </div>
+      <p style="font-size: 14px; color: #49454f;">Use between major sections. 2–3 nodes, minimal visual weight.</p>
+    </div>
+
+    <!-- Medium divider -->
+    <div class="demo-container">
+      <p class="demo-label">Medium — Card Decoration</p>
+      <div style="padding: 16px 0;">
+        <svg width="100%" height="40" viewBox="0 0 800 40">
+          <!-- Path -->
+          <path d="M0,20 C80,20 120,10 200,20 C280,30 320,15 400,20 C480,25 520,10 600,20 C680,30 720,20 800,20" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+          <!-- Nodes - medium (5) -->
+          <circle cx="100" cy="16" r="5" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="250" cy="24" r="6" fill="#b47aff" opacity="0.5"/>
+          <circle cx="400" cy="18" r="7" fill="#6d28d9" opacity="0.6"/>
+          <circle cx="550" cy="22" r="6" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="700" cy="16" r="5" fill="#b47aff" opacity="0.5"/>
+        </svg>
+      </div>
+      <p style="font-size: 14px; color: #49454f;">Use in cards or sidebars. 4–5 nodes, moderate visual interest.</p>
+    </div>
+
+    <!-- Dense divider -->
+    <div class="demo-container">
+      <p class="demo-label">Dense — Hero Background</p>
+      <div style="padding: 16px 0;">
+        <svg width="100%" height="48" viewBox="0 0 800 48">
+          <!-- Path -->
+          <path d="M0,24 C60,24 90,12 150,24 C210,36 240,18 300,24 C360,30 390,12 450,24 C510,36 540,18 600,24 C660,30 690,12 750,24 L800,24" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+          <!-- Nodes - dense (10) -->
+          <circle cx="75" cy="20" r="5" fill="#6d28d9" opacity="0.4"/>
+          <circle cx="150" cy="28" r="6" fill="#b47aff" opacity="0.4"/>
+          <circle cx="225" cy="18" r="5" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="300" cy="26" r="7" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="375" cy="20" r="6" fill="#b47aff" opacity="0.4"/>
+          <circle cx="450" cy="28" r="5" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="525" cy="18" r="6" fill="#6d28d9" opacity="0.4"/>
+          <circle cx="600" cy="24" r="5" fill="#b47aff" opacity="0.5"/>
+          <circle cx="675" cy="20" r="7" fill="#6d28d9" opacity="0.4"/>
+          <circle cx="750" cy="28" r="5" fill="#6d28d9" opacity="0.5"/>
+        </svg>
+      </div>
+      <p style="font-size: 14px; color: #49454f;">Use for hero sections or full backgrounds. 7–9 nodes, rich texture.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Usage Examples</h2>
+    
+    <!-- Hero with background -->
+    <div class="demo-container" style="padding: 0; overflow: hidden;">
+      <div class="hero-section">
+        <!-- Assembly Flow background -->
+        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.08;" viewBox="0 0 800 200">
+          <!-- Multiple paths for dense texture -->
+          <path d="M0,50 C100,50 150,30 250,50 C350,70 400,40 500,50 C600,60 650,30 750,50 L800,50" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+          <path d="M0,100 C100,100 150,80 250,100 C350,120 400,90 500,100 C600,110 650,80 750,100 L800,100" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+          <path d="M0,150 C100,150 150,130 250,150 C350,170 400,140 500,150 C600,160 650,130 750,150 L800,150" 
+                fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+          <!-- Scattered nodes -->
+          <circle cx="100" cy="45" r="4" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="300" cy="95" r="5" fill="#b47aff" opacity="0.5"/>
+          <circle cx="500" cy="145" r="4" fill="#6d28d9" opacity="0.5"/>
+          <circle cx="700" cy="45" r="5" fill="#6d28d9" opacity="0.5"/>
+        </svg>
+        
+        <h2>Welcome back, Learner</h2>
+        <p>Continue where you left off, or explore new courses in the catalog.</p>
+      </div>
+    </div>
+
+    <!-- Sidebar with texture -->
+    <div class="demo-container" style="background: #f5f3f0;">
+      <p class="demo-label">Sidebar with Texture</p>
+      <div class="sidebar-demo">
+        <div class="sidebar">
+          <!-- Assembly Flow texture -->
+          <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05;" viewBox="0 0 240 300">
+            <path d="M0,50 C60,50 90,30 150,50 C210,70 240,40 240,50" 
+                  fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+            <path d="M0,100 C60,100 90,80 150,100 C210,120 240,90 240,100" 
+                  fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+            <path d="M0,150 C60,150 90,130 150,150 C210,170 240,140 240,150" 
+                  fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+            <path d="M0,200 C60,200 90,180 150,200 C210,220 240,190 240,200" 
+                  fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+            <path d="M0,250 C60,250 90,230 150,250 C210,270 240,240 240,250" 
+                  fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="8 5"/>
+          </svg>
+          
+          <h4>Navigation</h4>
+          <div class="sidebar-nav">
+            <a href="#" class="active">Home</a>
+            <a href="#">Courses</a>
+            <a href="#">Progress</a>
+            <a href="#">Settings</a>
+          </div>
+        </div>
+        <div class="main-content">
+          <p>Main content area</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: white; border-radius: 12px; padding: 24px; margin-top: 40px;">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Design Principles</h3>
+    <ul style="font-size: 14px; color: #49454f; line-height: 1.8; padding-left: 20px;">
+      <li><strong>Left-to-right flow</strong> — paths always flow in reading direction</li>
+      <li><strong>Never cross</strong> — paths never intersect or overlap</li>
+      <li><strong>Cubic beziers</strong> — smooth, organic curves, never angular</li>
+      <li><strong>Low opacity</strong> — decorative, not distracting (8–15% opacity)</li>
+      <li><strong>Dashed stroke</strong> — 8px dash, 5px gap — never solid</li>
+    </ul>
+  </div>
+</body>
+</html>

@@ -3,7 +3,7 @@ import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
-import { Button } from '@open-edu/design-system';
+import { Button, HeroSection, SectionDivider } from '@open-edu/design-system';
 import { BookOpen, TrendingUp, Trophy, Sparkles, PlayCircle } from 'lucide-react';
 
 export interface HomePageProps {
@@ -32,10 +32,12 @@ export function HomePage({
 
   return (
     <div className="p-xl max-w-4xl mx-auto" data-testid="home-page">
-      <h1 className="text-h1 font-display text-on-surface font-bold mb-sm">Welcome to OpenEdu</h1>
-      <p className="text-body-reading text-on-surface-variant mb-xl">
-        Your interactive learning platform. Explore courses, track progress, and earn badges.
-      </p>
+      <HeroSection className="mb-xl">
+        <h1 className="text-h1 font-display text-on-surface font-bold mb-sm">Welcome to OpenEdu</h1>
+        <p className="text-body-reading text-on-surface-variant mb-xl">
+          Your interactive learning platform. Explore courses, track progress, and earn badges.
+        </p>
+      </HeroSection>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-on-surface-variant mb-xl">
         <span className="flex items-center gap-1.5">
@@ -51,6 +53,8 @@ export function HomePage({
           <strong className="text-on-surface font-semibold">{badgeCount}</strong> badges earned
         </span>
       </div>
+
+      <SectionDivider density="minimal" className="mb-xl" />
 
       <div className="flex flex-col gap-md">
         <div className="p-md border border-outline-variant rounded-lg">

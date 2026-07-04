@@ -41,6 +41,40 @@ const animationStyles = (
   `}</style>
 );
 
+export interface SilhouetteFigureProps {
+  proportion?: SilhouetteProportion;
+  palette?: SilhouettePalette;
+}
+
+export interface SilhouetteGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  figures: SilhouetteFigureProps[];
+  animated?: boolean;
+}
+
+export function SilhouetteGroup({
+  figures,
+  animated = false,
+  className,
+  ...props
+}: SilhouetteGroupProps): JSX.Element {
+  return (
+    <div
+      className={cn('flex items-end justify-center gap-md', className)}
+      aria-hidden="true"
+      {...props}
+    >
+      {figures.map((fig, i) => (
+        <SilhouetteAssembly
+          key={i}
+          proportion={fig.proportion ?? 'med'}
+          palette={fig.palette ?? 1}
+          animated={animated}
+        />
+      ))}
+    </div>
+  );
+}
+
 export const SilhouetteAssembly = React.forwardRef<HTMLDivElement, SilhouetteAssemblyProps>(
   ({ proportion = 'med', palette = 1, animated = false, className, ...props }, ref) => {
     const prop = proportionConfig[proportion];

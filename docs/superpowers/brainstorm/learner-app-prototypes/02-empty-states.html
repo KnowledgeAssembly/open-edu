@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empty States — OpenEdu Visual DNA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', system-ui, sans-serif; 
+      background: #f8f6f3;
+      padding: 40px;
+      color: #1d1b20;
+    }
+    h1 { font-size: 28px; font-weight: 650; margin-bottom: 8px; }
+    .subtitle { color: #6750a4; font-size: 14px; margin-bottom: 40px; }
+    .section { margin-bottom: 60px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #49454f; }
+    .states-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 24px;
+    }
+    
+    /* Empty state container */
+    .empty-state {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 320px;
+    }
+    .empty-state h3 { 
+      font-size: 18px; 
+      font-weight: 600; 
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    .empty-state p { 
+      font-size: 14px; 
+      color: #49454f; 
+      line-height: 1.5;
+      max-width: 280px;
+    }
+    .empty-state button {
+      margin-top: 20px;
+      background: #6d28d9;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .empty-state button:hover {
+      background: #5b21b6;
+    }
+    .empty-state button.outline {
+      background: transparent;
+      border: 1px solid #cac4d0;
+      color: #49454f;
+    }
+    .empty-state button.outline:hover {
+      background: #f5f3f0;
+    }
+    
+    /* Silhouette figures */
+    .silhouette-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .figure-head {
+      border-radius: 50%;
+      margin-bottom: -4px;
+    }
+    .figure-torso {
+      border-radius: 50% 50% 30% 30%;
+    }
+    
+    /* State label */
+    .state-label {
+      font-size: 12px;
+      color: #79747e;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Empty State Patterns</h1>
+  <p class="subtitle">Open Module + SilhouetteGroup combination for empty content areas</p>
+
+  <div class="section">
+    <h2 class="section-title">Empty State Variations</h2>
+    <p style="color: #49454f; margin-bottom: 20px;">
+      Each empty state combines a large Open Module (indicating potential) with 
+      SilhouetteGroup figures (humanizing the experience).
+    </p>
+    
+    <div class="states-grid">
+      <!-- No Courses -->
+      <div>
+        <p class="state-label">No Courses Available</p>
+        <div class="empty-state">
+          <!-- Open Module - large, incomplete -->
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <!-- Orbit -->
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.18"/>
+            <!-- Core -->
+            <circle cx="60" cy="60" r="14" fill="#6d28d9"/>
+            <!-- Satellites - 2 for incomplete -->
+            <circle cx="98" cy="42" r="7" fill="#6d28d9" opacity="0.7"/>
+            <circle cx="92" cy="78" r="7" fill="#b47aff" opacity="0.7"/>
+          </svg>
+          
+          <!-- Silhouette figures -->
+          <div class="silhouette-group">
+            <div class="figure">
+              <div class="figure-head" style="width: 16px; height: 16px; background: rgba(109, 40, 217, 0.7);"></div>
+              <div class="figure-torso" style="width: 20px; height: 28px; background: rgba(109, 40, 217, 0.25);"></div>
+            </div>
+            <div class="figure">
+              <div class="figure-head" style="width: 18px; height: 18px; background: rgba(6, 182, 212, 0.7);"></div>
+              <div class="figure-torso" style="width: 24px; height: 32px; background: rgba(6, 182, 212, 0.25);"></div>
+            </div>
+            <div class="figure">
+              <div class="figure-head" style="width: 14px; height: 14px; background: rgba(180, 83, 9, 0.7);"></div>
+              <div class="figure-torso" style="width: 18px; height: 24px; background: rgba(180, 83, 9, 0.25);"></div>
+            </div>
+          </div>
+          
+          <h3>No courses yet</h3>
+          <p>Start exploring to build your learning path. Courses will appear here as you discover them.</p>
+          <button>Browse Catalog</button>
+        </div>
+      </div>
+
+      <!-- No Progress -->
+      <div>
+        <p class="state-label">No Learning Progress</p>
+        <div class="empty-state">
+          <!-- Open Module - medium, starting -->
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <!-- Orbit -->
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.18"/>
+            <!-- Core -->
+            <circle cx="60" cy="60" r="14" fill="#6d28d9"/>
+            <!-- Satellites - 2 for beginning -->
+            <circle cx="98" cy="48" r="7" fill="#6d28d9" opacity="0.7"/>
+            <circle cx="90" cy="84" r="7" fill="#6d28d9" opacity="0.7"/>
+          </svg>
+          
+          <!-- Silhouette figures - walking forward -->
+          <div class="silhouette-group">
+            <div class="figure">
+              <div class="figure-head" style="width: 18px; height: 18px; background: rgba(109, 40, 217, 0.7);"></div>
+              <div class="figure-torso" style="width: 22px; height: 30px; background: rgba(109, 40, 217, 0.25);"></div>
+            </div>
+            <div class="figure" style="margin-left: -8px;">
+              <div class="figure-head" style="width: 16px; height: 16px; background: rgba(139, 92, 246, 0.7);"></div>
+              <div class="figure-torso" style="width: 20px; height: 26px; background: rgba(139, 92, 246, 0.25);"></div>
+            </div>
+          </div>
+          
+          <h3>Begin your journey</h3>
+          <p>Start a course to begin tracking your progress. Your learning story starts here.</p>
+          <button>Start Learning</button>
+        </div>
+      </div>
+
+      <!-- No Badges -->
+      <div>
+        <p class="state-label">No Badges Earned</p>
+        <div class="empty-state">
+          <!-- Open Module - with empty slot for badge -->
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <!-- Glow hint -->
+            <circle cx="60" cy="60" r="50" fill="#6d28d9" opacity="0.05"/>
+            <!-- Orbit -->
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.18"/>
+            <!-- Core -->
+            <circle cx="60" cy="60" r="14" fill="#6d28d9"/>
+            <!-- Satellites - 2 with empty space for badge -->
+            <circle cx="98" cy="42" r="7" fill="#6d28d9" opacity="0.7"/>
+            <circle cx="92" cy="78" r="7" fill="#6d28d9" opacity="0.7"/>
+            <!-- Dashed outline for future badge -->
+            <circle cx="74" cy="24" r="7" fill="none" stroke="#6d28d9" stroke-width="1" stroke-dasharray="3 2" opacity="0.3"/>
+          </svg>
+          
+          <!-- Silhouette figures - reaching gesture -->
+          <div class="silhouette-group">
+            <div class="figure">
+              <div class="figure-head" style="width: 16px; height: 16px; background: rgba(6, 182, 212, 0.7);"></div>
+              <div class="figure-torso" style="width: 20px; height: 28px; background: rgba(6, 182, 212, 0.25);"></div>
+            </div>
+            <div class="figure">
+              <div class="figure-head" style="width: 20px; height: 20px; background: rgba(109, 40, 217, 0.7);"></div>
+              <div class="figure-torso" style="width: 26px; height: 34px; background: rgba(109, 40, 217, 0.25);"></div>
+            </div>
+            <div class="figure">
+              <div class="figure-head" style="width: 16px; height: 16px; background: rgba(5, 150, 105, 0.7);"></div>
+              <div class="figure-torso" style="width: 20px; height: 28px; background: rgba(5, 150, 105, 0.25);"></div>
+            </div>
+          </div>
+          
+          <h3>Earn your first badge</h3>
+          <p>Complete courses to unlock achievements. Badges celebrate your learning milestones.</p>
+          <button class="outline">View Available Badges</button>
+        </div>
+      </div>
+
+      <!-- No Search Results -->
+      <div>
+        <p class="state-label">No Search Results</p>
+        <div class="empty-state">
+          <!-- Open Module - scattered satellites -->
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <!-- Orbit -->
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.18"/>
+            <!-- Core -->
+            <circle cx="60" cy="60" r="14" fill="#6d28d9"/>
+            <!-- Satellites - scattered, disconnected -->
+            <circle cx="95" cy="30" r="6" fill="#6d28d9" opacity="0.4"/>
+            <circle cx="100" cy="70" r="5" fill="#b47aff" opacity="0.3"/>
+            <circle cx="25" cy="40" r="5" fill="#6d28d9" opacity="0.3"/>
+          </svg>
+          
+          <!-- Single silhouette figure -->
+          <div class="silhouette-group" style="margin-top: 16px;">
+            <div class="figure">
+              <div class="figure-head" style="width: 18px; height: 18px; background: rgba(180, 83, 9, 0.7);"></div>
+              <div class="figure-torso" style="width: 24px; height: 32px; background: rgba(180, 83, 9, 0.25);"></div>
+            </div>
+          </div>
+          
+          <h3>No matches found</h3>
+          <p>Try different keywords or browse the full catalog to discover new content.</p>
+          <button class="outline">Clear Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: white; border-radius: 12px; padding: 24px; margin-top: 40px;">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Design Principles</h3>
+    <ul style="font-size: 14px; color: #49454f; line-height: 1.8; padding-left: 20px;">
+      <li><strong>Open Module</strong> always shows 2 satellites (incomplete state) — room for more</li>
+      <li><strong>SilhouetteGroup</strong> humanizes the empty experience — not alone, but together</li>
+      <li><strong>Action button</strong> provides clear next step — don't leave users stranded</li>
+      <li><strong>Translucent colors</strong> create calm, non-aggressive visual tone</li>
+    </ul>
+  </div>
+</body>
+</html>
