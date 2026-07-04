@@ -17,7 +17,10 @@
       "title": "Identify the definition of a family",
       "objectives": ["Identify family types"],
       "coreIdea": "A family is the smallest unit of society.",
-      "examples": ["Joint families have multiple generations", "Nuclear families have parents and children"],
+      "examples": [
+        "Joint families have multiple generations",
+        "Nuclear families have parents and children"
+      ],
       "misconceptions": ["All families are nuclear"],
       "estimatedMinutes": 15,
       "activities": [

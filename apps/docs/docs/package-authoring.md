@@ -288,13 +288,13 @@ Cards are unlockable achievements that persist across sessions, displayed in the
 
 ### Card Types
 
-| Type          | Color    | Description              |
-| ------------- | -------- | ------------------------ |
-| `knowledge`   | Emerald  | Conceptual understanding |
-| `skill`       | Indigo   | Practiced ability        |
-| `achievement` | Amber    | Milestone completion     |
-| `exploration` | Teal     | Discovery and curiosity  |
-| `mentor`      | Rose     | Teaching others          |
+| Type          | Color   | Description              |
+| ------------- | ------- | ------------------------ |
+| `knowledge`   | Emerald | Conceptual understanding |
+| `skill`       | Indigo  | Practiced ability        |
+| `achievement` | Amber   | Milestone completion     |
+| `exploration` | Teal    | Discovery and curiosity  |
+| `mentor`      | Rose    | Teaching others          |
 
 ### Unlock Conditions
 
@@ -442,7 +442,7 @@ Each patch is validated atomically — if the result doesn't pass `loadPackage()
 8. The terminal route is always `COMPLETED`.
 9. Rewards should use `badge.award` action only unless webhooks or scripts are explicitly requested.
 10. Cards use the same condition types as rewards (`score`, `chain`, `and`, `or`). `bundleCompleted` and `moduleCompleted` are for bundle-level use only.
-10. Keep content short and deterministic.
+11. Keep content short and deterministic.
 
 ### Validation Checklist
 

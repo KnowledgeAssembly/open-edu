@@ -19,7 +19,8 @@ export const Default: Story = {
 export const WithLongText: Story = {
   args: {
     source: 'Nature Journal, Vol. 421',
-    children: 'The process of photosynthesis can be divided into two main stages: the light-dependent reactions and the Calvin cycle. The light-dependent reactions occur in the thylakoid membrane, while the Calvin cycle takes place in the stroma.',
+    children:
+      'The process of photosynthesis can be divided into two main stages: the light-dependent reactions and the Calvin cycle. The light-dependent reactions occur in the thylakoid membrane, while the Calvin cycle takes place in the stroma.',
   },
 };
 

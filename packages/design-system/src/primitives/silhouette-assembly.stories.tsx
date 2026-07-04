@@ -62,7 +62,11 @@ export const GroupPortrait: Story = {
 export const LearningMoment: Story = {
   name: 'Scene: Learning Moment',
   render: () => (
-    <div className="flex items-end gap-4" role="img" aria-label="Two people learning together, one slightly ahead">
+    <div
+      className="flex items-end gap-4"
+      role="img"
+      aria-label="Two people learning together, one slightly ahead"
+    >
       <SilhouetteAssembly proportion="wide" palette={1} className="translate-y-[-4px]" />
       <SilhouetteAssembly proportion="med" palette={2} />
       <SilhouetteAssembly proportion="short" palette={4} />

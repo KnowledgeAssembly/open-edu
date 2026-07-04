@@ -178,12 +178,12 @@ broker.updateContext({
 
 ### Card Progress API
 
-| Method                    | Description                                         |
-| ------------------------- | --------------------------------------------------- |
-| `getCardLevel(cardId)`    | Returns current level (0 if not unlocked)           |
-| `getUnlockedCards()`      | Returns `Map<string, number>` of unlocked card IDs  |
-| `setCardLevel(cardId, n)` | Manually set/clear a card's level (clamped to max)  |
-| `updateContext(snapshot)` | Merge partial progress into the evaluation context  |
+| Method                    | Description                                        |
+| ------------------------- | -------------------------------------------------- |
+| `getCardLevel(cardId)`    | Returns current level (0 if not unlocked)          |
+| `getUnlockedCards()`      | Returns `Map<string, number>` of unlocked card IDs |
+| `setCardLevel(cardId, n)` | Manually set/clear a card's level (clamped to max) |
+| `updateContext(snapshot)` | Merge partial progress into the evaluation context |
 
 ### Cards JSON Format
 
@@ -209,35 +209,35 @@ Cards are defined in `cards.json` using the same object-wrapper format as reward
 
 ### Card Fields
 
-| Field              | Type                  | Required | Description                                   |
-| ------------------ | --------------------- | -------- | --------------------------------------------- |
-| `id`               | `string`              | yes      | Unique card identifier                        |
-| `title`            | `string`              | yes      | Display name                                  |
-| `category`         | `string`              | yes      | Category grouping (e.g. "Biology")            |
-| `type`             | `CardType`            | yes      | Enum: knowledge, skill, achievement, ...      |
-| `summary`          | `string`              | yes      | Short description                             |
-| `unlock`           | `RewardCondition`     | yes      | Condition that unlocks the card               |
-| `slug`             | `string`              | no       | URL-friendly identifier                       |
-| `subtitle`         | `string`              | no       | Secondary heading                             |
-| `detailedExplanation` | `string`           | no       | Long-form description                         |
-| `tags`             | `string[]`            | no       | Keywords for filtering                        |
-| `difficulty`       | `CardDifficulty`      | no       | Enum: easy, medium, hard                      |
-| `level`            | `number` (1-5)        | no       | Starting level (default 1)                    |
-| `maximumLevel`     | `number` (1-5)        | no       | Max level (default 1, must be >= level)       |
-| `nextLevel`        | `RewardCondition`     | no       | Condition to advance to next level            |
-| `relatedLessons`   | `string[]`            | no       | Related node paths                            |
-| `relatedQuizzes`   | `string[]`            | no       | Related quiz node paths                       |
+| Field                 | Type              | Required | Description                              |
+| --------------------- | ----------------- | -------- | ---------------------------------------- |
+| `id`                  | `string`          | yes      | Unique card identifier                   |
+| `title`               | `string`          | yes      | Display name                             |
+| `category`            | `string`          | yes      | Category grouping (e.g. "Biology")       |
+| `type`                | `CardType`        | yes      | Enum: knowledge, skill, achievement, ... |
+| `summary`             | `string`          | yes      | Short description                        |
+| `unlock`              | `RewardCondition` | yes      | Condition that unlocks the card          |
+| `slug`                | `string`          | no       | URL-friendly identifier                  |
+| `subtitle`            | `string`          | no       | Secondary heading                        |
+| `detailedExplanation` | `string`          | no       | Long-form description                    |
+| `tags`                | `string[]`        | no       | Keywords for filtering                   |
+| `difficulty`          | `CardDifficulty`  | no       | Enum: easy, medium, hard                 |
+| `level`               | `number` (1-5)    | no       | Starting level (default 1)               |
+| `maximumLevel`        | `number` (1-5)    | no       | Max level (default 1, must be >= level)  |
+| `nextLevel`           | `RewardCondition` | no       | Condition to advance to next level       |
+| `relatedLessons`      | `string[]`        | no       | Related node paths                       |
+| `relatedQuizzes`      | `string[]`        | no       | Related quiz node paths                  |
 
 ### Unlock/Level-Up Conditions
 
 Cards reuse the same `RewardCondition` types as rewards:
 
-| Type    | Description                                   |
-| ------- | --------------------------------------------- |
-| `score` | Minimum score on a specific node              |
-| `chain` | All specified nodes must be completed         |
-| `and`   | All sub-conditions must be met                |
-| `or`    | Any sub-condition must be met                 |
+| Type    | Description                           |
+| ------- | ------------------------------------- |
+| `score` | Minimum score on a specific node      |
+| `chain` | All specified nodes must be completed |
+| `and`   | All sub-conditions must be met        |
+| `or`    | Any sub-condition must be met         |
 
 ## Error Types
 

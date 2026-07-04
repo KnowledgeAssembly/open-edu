@@ -27,12 +27,42 @@ const testTheme: ThemeDefinition = {
         lineHeight: '1.3',
         letterSpacing: '-0.01em',
       },
-      subheading: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '24px', fontWeight: '600', lineHeight: '1.3' },
-      heading3: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '20px', fontWeight: '600', lineHeight: '1.4' },
-      heading4: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '18px', fontWeight: '600', lineHeight: '1.4' },
-      heading5: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '16px', fontWeight: '600', lineHeight: '1.5' },
-      heading6: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '14px', fontWeight: '600', lineHeight: '1.5' },
-      body: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '14px', fontWeight: '420', lineHeight: '1.6' },
+      subheading: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '24px',
+        fontWeight: '600',
+        lineHeight: '1.3',
+      },
+      heading3: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '20px',
+        fontWeight: '600',
+        lineHeight: '1.4',
+      },
+      heading4: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '18px',
+        fontWeight: '600',
+        lineHeight: '1.4',
+      },
+      heading5: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '16px',
+        fontWeight: '600',
+        lineHeight: '1.5',
+      },
+      heading6: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '14px',
+        fontWeight: '600',
+        lineHeight: '1.5',
+      },
+      body: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '14px',
+        fontWeight: '420',
+        lineHeight: '1.6',
+      },
       label: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '11px',
@@ -40,7 +70,12 @@ const testTheme: ThemeDefinition = {
         lineHeight: '1.0',
         letterSpacing: '0.08em',
       },
-      caption: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '13px', fontWeight: '420', lineHeight: '1.5' },
+      caption: {
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontSize: '13px',
+        fontWeight: '420',
+        lineHeight: '1.5',
+      },
       code: {
         fontFamily: '"JetBrains Mono", ui-monospace, monospace',
         fontSize: '13px',
@@ -152,7 +187,9 @@ describe('flattenTheme', () => {
 
   it('emits productive typography CSS vars', () => {
     const vars = flattenTheme(testTheme);
-    expect(vars['--oe-font-productive-body-family']).toBe('Inter, system-ui, -apple-system, sans-serif');
+    expect(vars['--oe-font-productive-body-family']).toBe(
+      'Inter, system-ui, -apple-system, sans-serif',
+    );
     expect(vars['--oe-font-productive-body-size']).toBe('14px');
     expect(vars['--oe-font-productive-body-weight']).toBe('420');
     expect(vars['--oe-font-productive-body-lineHeight']).toBe('1.6');
@@ -160,7 +197,9 @@ describe('flattenTheme', () => {
 
   it('emits expressive typography CSS vars', () => {
     const vars = flattenTheme(testTheme);
-    expect(vars['--oe-font-expressive-body-family']).toBe('"Source Serif 4", Georgia, ui-serif, serif');
+    expect(vars['--oe-font-expressive-body-family']).toBe(
+      '"Source Serif 4", Georgia, ui-serif, serif',
+    );
     expect(vars['--oe-font-expressive-body-size']).toBe('18px');
     expect(vars['--oe-font-expressive-body-weight']).toBe('420');
     expect(vars['--oe-font-expressive-body-lineHeight']).toBe('1.7');

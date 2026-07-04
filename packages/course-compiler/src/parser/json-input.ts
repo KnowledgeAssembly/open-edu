@@ -15,7 +15,13 @@ const MCQQuestionSchema = z.object({
 });
 
 const ActivityJSONSchema = z.object({
-  step: z.enum(['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion']),
+  step: z.enum([
+    'observe',
+    'guided_practice',
+    'independent_practice',
+    'mastery_check',
+    'positive_completion',
+  ]),
   order: z.number(),
   type: z.enum(['reading', 'exercise', 'quiz', 'reflection', 'widget']),
   description: z.string(),
@@ -178,11 +184,11 @@ export function parseCourseSpecJSON(jsonStr: string): {
     estimatedHours: parsed.metadata.estimatedHours,
   };
 
-  const moduleId = parsed.metadata.title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    || 'untitled';
+  const moduleId =
+    parsed.metadata.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'untitled';
 
   const mod: CourseModule = {
     id: moduleId,

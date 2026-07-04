@@ -10,7 +10,9 @@ function renderWithProvider(ui: React.ReactElement) {
 
 describe('TopAppBar', () => {
   it('renders breadcrumbs when provided', () => {
-    renderWithProvider(<TopAppBar breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]} />);
+    renderWithProvider(
+      <TopAppBar breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]} />,
+    );
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Courses')).toBeInTheDocument();
   });
@@ -94,6 +96,10 @@ describe('TopAppBar', () => {
   });
 
   it('has no accessibility violations', async () => {
-    await checkAccessibility(<FontSizeProvider><TopAppBar /></FontSizeProvider>);
+    await checkAccessibility(
+      <FontSizeProvider>
+        <TopAppBar />
+      </FontSizeProvider>,
+    );
   });
 });

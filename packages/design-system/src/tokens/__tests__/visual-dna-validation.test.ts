@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { palette } from '../colors.js';
-import {
-  tailwindColorExtensions,
-} from '../tailwind.js';
+import { tailwindColorExtensions } from '../tailwind.js';
 
 describe('color palette validation against Visual DNA', () => {
   it('includes all 5 Silhouette Assembly palette color families', () => {

@@ -52,10 +52,7 @@ async function generateSingleModule(
   function displayTitle(slug: string, fallback: string): string {
     const cleaned = slug.replace(/^activity-/, '').replace(/^quiz-/, '');
     if (!cleaned) return fallback;
-    return cleaned
-      .split('-')
-      .map(capitalize)
-      .join(' ');
+    return cleaned.split('-').map(capitalize).join(' ');
   }
 
   await mkdir(join(outputDir, 'nodes'), { recursive: true });
@@ -79,10 +76,7 @@ async function generateSingleModule(
             title: displayTitle(activity.id, activity.type),
             path: `nodes/${slug}.json`,
           });
-          await writeJson(
-            join(outputDir, `nodes/${slug}.json`),
-            generateReflectionNode(activity),
-          );
+          await writeJson(join(outputDir, `nodes/${slug}.json`), generateReflectionNode(activity));
         } else if (activity.type === 'widget') {
           const widgetContent = {
             type: 'exercise' as const,

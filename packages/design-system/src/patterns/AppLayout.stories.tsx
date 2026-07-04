@@ -11,7 +11,9 @@ const PlaceholderSidebar = () => (
   <div className="w-64 h-full bg-surface-container border-r border-outline-variant p-4 text-sm text-on-surface-variant">
     <p className="font-semibold mb-2">Sidebar</p>
     <ul className="list-none p-0 m-0 space-y-1">
-      <li className="px-2 py-1 rounded bg-primary-container text-on-primary-container">Dashboard</li>
+      <li className="px-2 py-1 rounded bg-primary-container text-on-primary-container">
+        Dashboard
+      </li>
       <li className="px-2 py-1">Courses</li>
       <li className="px-2 py-1">Settings</li>
     </ul>

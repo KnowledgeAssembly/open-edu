@@ -42,8 +42,8 @@ export const Default: Story = {
         <div className="p-6">
           <h1 className="text-2xl font-bold text-on-surface mb-4">Lesson: Variables & Types</h1>
           <p className="text-on-surface-variant leading-relaxed">
-            In JavaScript, variables are containers for storing data values. A variable can be declared
-            using var, let, or const keywords.
+            In JavaScript, variables are containers for storing data values. A variable can be
+            declared using var, let, or const keywords.
           </p>
         </div>
       }

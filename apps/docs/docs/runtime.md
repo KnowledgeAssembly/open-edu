@@ -12,14 +12,14 @@ The framework ships with **6 built-in themes** that provide full color palettes,
 
 ### Available Themes
 
-| Theme              | ID                   | Description                              | Font Stack                                  |
-| ------------------ | -------------------- | ---------------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)              | Inter + Source Serif 4 + JetBrains Mono     |
-| Forest             | `forest`             | Warm nature-inspired earthy greens       | Source Serif 4 + Hanken Grotesk             |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast       | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                                | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary                 | Source Serif 4 + Literata + Hanken Grotesk  |
-| Zen                | `zen`                | Minimalist light with reduced noise      | Inter                                       |
+| Theme              | ID                   | Description                         | Font Stack                                  |
+| ------------------ | -------------------- | ----------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)         | Inter + Source Serif 4 + JetBrains Mono     |
+| Forest             | `forest`             | Warm nature-inspired earthy greens  | Source Serif 4 + Hanken Grotesk             |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast  | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                           | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary            | Source Serif 4 + Literata + Hanken Grotesk  |
+| Zen                | `zen`                | Minimalist light with reduced noise | Inter                                       |
 
 ### RuntimeThemeProvider
 

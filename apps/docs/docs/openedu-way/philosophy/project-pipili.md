@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Project Pipili
 
-> *"Every masterpiece begins with a single piece."*
+> _"Every masterpiece begins with a single piece."_
 
 ---
 
@@ -288,4 +288,4 @@ That is Project Pipili.
 
 Project Pipili is named in honor of the town of Pipili in Odisha, India, whose centuries-old appliqué tradition inspired the philosophy of assembling many meaningful pieces into a harmonious whole. OpenEdu does not seek to replicate this art form, but to carry forward its enduring values of craftsmanship, patience, and thoughtful creation.
 
-*"Knowledge is assembled. Understanding is crafted."*
+_"Knowledge is assembled. Understanding is crafted."_

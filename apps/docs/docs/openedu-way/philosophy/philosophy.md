@@ -199,4 +199,4 @@ These principles guide our software, our community, our design system, and our f
 
 ---
 
-*"Knowledge is assembled, one piece at a time."*
+_"Knowledge is assembled, one piece at a time."_

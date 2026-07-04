@@ -9,7 +9,9 @@ function renderWithProvider(ui: React.ReactElement) {
 
 describe('TopAppBar', () => {
   it('renders breadcrumbs when provided', () => {
-    renderWithProvider(<TopAppBar breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]} />);
+    renderWithProvider(
+      <TopAppBar breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]} />,
+    );
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Courses')).toBeInTheDocument();
   });

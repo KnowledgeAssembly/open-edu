@@ -7,7 +7,7 @@ slug: /openedu-way
 
 # The OpenEdu Way
 
-> *"Knowledge is assembled, one piece at a time."*
+> _"Knowledge is assembled, one piece at a time."_
 
 ---
 
@@ -365,4 +365,4 @@ Together, we assemble understanding.
 
 ---
 
-> *"Knowledge is assembled. Understanding is crafted. Learning is shared."*
+> _"Knowledge is assembled. Understanding is crafted. Learning is shared."_

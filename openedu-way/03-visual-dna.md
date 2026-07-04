@@ -14,14 +14,14 @@ Visual DNA sits at **Stage 3** of the Design Pyramid, between Design Language (p
 
 ## The Six Elements
 
-| # | Element | Decision | Spec |
-|---|---------|----------|------|
-| 1 | **Geometric Primitive** | Circle | Component: `packages/design-system/src/primitives/geo-primitive.tsx` |
-| 2 | **Open Module** | Orbital Cluster | §1 of design spec |
-| 3 | **Pipili** | Quiet Companion | Component: `packages/design-system/src/primitives/pipili.tsx` |
-| 4 | **Logo** | Assembled from Primitives | Component: `packages/design-system/src/primitives/openedu-logo.tsx` |
-| 5 | **Pattern Language** | Assembly Flow | §2 of design spec |
-| 6 | **Illustration Language** | Silhouette Assembly | §3 of design spec |
+| #   | Element                   | Decision                  | Spec                                                                 |
+| --- | ------------------------- | ------------------------- | -------------------------------------------------------------------- |
+| 1   | **Geometric Primitive**   | Circle                    | Component: `packages/design-system/src/primitives/geo-primitive.tsx` |
+| 2   | **Open Module**           | Orbital Cluster           | §1 of design spec                                                    |
+| 3   | **Pipili**                | Quiet Companion           | Component: `packages/design-system/src/primitives/pipili.tsx`        |
+| 4   | **Logo**                  | Assembled from Primitives | Component: `packages/design-system/src/primitives/openedu-logo.tsx`  |
+| 5   | **Pattern Language**      | Assembly Flow             | §2 of design spec                                                    |
+| 6   | **Illustration Language** | Silhouette Assembly       | §3 of design spec                                                    |
 
 **Design spec:** `docs/superpowers/specs/2026-07-03-visual-dna-design.md`
 
@@ -68,17 +68,17 @@ The fundamental learning unit expressed visually. A central circle (core) surrou
    │    └─ satellite (primary-light, 70% opacity)
    │
    └── core (primary, 100%)
-   
+
    ◌ ─── dashed orbit ring (primary, 18% opacity, 1.5px stroke)
 ```
 
 ### Size Variants
 
-| Variant | Size | Core | Satellites | Use Case |
-|---------|------|------|------------|----------|
-| **sm** | 80px | 18px | 2 | Badges, inline indicators |
-| **md** | 120px | 26px | 3 | Cards, list items |
-| **lg** | 180px | 38px | 5 | Illustrations, empty states |
+| Variant | Size  | Core | Satellites | Use Case                    |
+| ------- | ----- | ---- | ---------- | --------------------------- |
+| **sm**  | 80px  | 18px | 2          | Badges, inline indicators   |
+| **md**  | 120px | 26px | 3          | Cards, list items           |
+| **lg**  | 180px | 38px | 5          | Illustrations, empty states |
 
 ### Key Properties
 
@@ -157,11 +157,11 @@ small     medium    large    medium     small
 
 ### Density Variants
 
-| Variant | Nodes/300px | Use Case |
-|---------|-------------|----------|
-| **Dense** | 7–9 | Background textures, hero sections |
-| **Medium** | 4–5 | Card decorations, sidebar patterns |
-| **Minimal** | 2–3 | Section dividers, inline accents |
+| Variant     | Nodes/300px | Use Case                           |
+| ----------- | ----------- | ---------------------------------- |
+| **Dense**   | 7–9         | Background textures, hero sections |
+| **Medium**  | 4–5         | Card decorations, sidebar patterns |
+| **Minimal** | 2–3         | Section dividers, inline accents   |
 
 ### Rules
 
@@ -196,23 +196,23 @@ How people appear in OpenEdu illustrations. Built from circles, expressing diver
 
 ### Proportion System (5 variants)
 
-| Proportion | Head | Torso | Silhouette |
-|------------|------|-------|------------|
-| **tall** | 22px | 28×40px | Narrow, tall |
-| **med** | 20px | 26×34px | Balanced |
-| **short** | 18px | 24×28px | Compact |
-| **wide** | 22px | 34×32px | Broad |
-| **narrow** | 16px | 20×36px | Slim |
+| Proportion | Head | Torso   | Silhouette   |
+| ---------- | ---- | ------- | ------------ |
+| **tall**   | 22px | 28×40px | Narrow, tall |
+| **med**    | 20px | 26×34px | Balanced     |
+| **short**  | 18px | 24×28px | Compact      |
+| **wide**   | 22px | 34×32px | Broad        |
+| **narrow** | 16px | 20×36px | Slim         |
 
 ### Color Palettes (5 diversity palettes)
 
-| Palette | Color | CSS Variable |
-|---------|-------|--------------|
-| c1 | Purple | `--oe-color-primary` |
-| c2 | Teal | `--oe-color-accent` |
-| c3 | Amber | warm tone |
-| c4 | Light Purple | `--oe-color-primary-light` |
-| c5 | Green | `--oe-color-success` |
+| Palette | Color        | CSS Variable               |
+| ------- | ------------ | -------------------------- |
+| c1      | Purple       | `--oe-color-primary`       |
+| c2      | Teal         | `--oe-color-accent`        |
+| c3      | Amber        | warm tone                  |
+| c4      | Light Purple | `--oe-color-primary-light` |
+| c5      | Green        | `--oe-color-success`       |
 
 ### Composition Rules
 
@@ -241,12 +241,12 @@ All six elements share the circle primitive:
 
 ## Token References
 
-| Token | Used By |
-|-------|---------|
-| `--oe-color-primary` | Open Module core, Assembly Flow nodes, Silhouette c1, Logo |
-| `--oe-color-primary-light` | Open Module satellites, Silhouette c4 |
-| `--oe-color-accent` | Assembly Flow accent nodes, Silhouette c2 |
-| `--oe-color-success` | Silhouette c5 |
+| Token                      | Used By                                                    |
+| -------------------------- | ---------------------------------------------------------- |
+| `--oe-color-primary`       | Open Module core, Assembly Flow nodes, Silhouette c1, Logo |
+| `--oe-color-primary-light` | Open Module satellites, Silhouette c4                      |
+| `--oe-color-accent`        | Assembly Flow accent nodes, Silhouette c2                  |
+| `--oe-color-success`       | Silhouette c5                                              |
 
 ---
 
