@@ -9,11 +9,11 @@ export interface BundleModuleIndicatorProps extends React.HTMLAttributes<HTMLDiv
   completionPercent?: number;
 }
 
-const statusConfig: Record<BundleModuleStatus, { satellites: number; opacity: number }> = {
-  locked: { satellites: 2, opacity: 0.3 },
-  unlocked: { satellites: 3, opacity: 0.5 },
-  'in-progress': { satellites: 4, opacity: 0.7 },
-  completed: { satellites: 5, opacity: 1 },
+const statusConfig: Record<BundleModuleStatus, { satellites: number; opacityClass: string }> = {
+  locked: { satellites: 2, opacityClass: 'opacity-30' },
+  unlocked: { satellites: 3, opacityClass: 'opacity-50' },
+  'in-progress': { satellites: 4, opacityClass: 'opacity-70' },
+  completed: { satellites: 5, opacityClass: 'opacity-100' },
 };
 
 export function BundleModuleIndicator({
@@ -29,8 +29,7 @@ export function BundleModuleIndicator({
       <OpenModule
         size="sm"
         satellites={config.satellites}
-        className="transition-opacity duration-200"
-        style={{ opacity: config.opacity }}
+        className={cn('transition-opacity duration-200', config.opacityClass)}
         aria-hidden="true"
       />
       {status === 'in-progress' && completionPercent > 0 && (

@@ -83,7 +83,7 @@ export function CourseCard({
 
   return (
     <article
-      className="relative rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] font-body-md transition-shadow duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
+      className="relative rounded-2xl bg-surface-container-low shadow-elevation-raised font-body-md transition-shadow duration-200 hover:shadow-elevation-overlay"
       data-testid="course-card"
     >
       {indicator && (

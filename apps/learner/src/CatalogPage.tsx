@@ -124,7 +124,7 @@ export function CatalogPage({
               </Button>
             )}
           </div>
-          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+          <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
             {continueList.map((pkg) => (
               <CourseCardWithModule
                 key={pkg.manifest.id}
@@ -254,7 +254,7 @@ export function CatalogPage({
           }
         />
       ) : (
-        <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+        <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
           {sorted.map((pkg) => (
             <CourseCardWithModule
               key={pkg.manifest.id}
