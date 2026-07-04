@@ -38,7 +38,7 @@ export const Pipili = React.forwardRef<HTMLDivElement, PipiliProps>(
       >
         <div
           className={cn(
-            'relative w-full h-full motion-reduce:animate-none motion-reduce:transform-none',
+            'relative h-full w-full motion-reduce:transform-none motion-reduce:animate-none',
             moodClasses[mood],
           )}
         >

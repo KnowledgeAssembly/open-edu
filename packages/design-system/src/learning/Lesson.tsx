@@ -14,11 +14,11 @@ export function Lesson({ title, children, icon, className }: LessonProps): JSX.E
     <Card data-testid="lesson" className={cn('w-full', className)}>
       <CardHeader className="flex flex-row items-center gap-3 pb-4">
         {icon && (
-          <span className="text-2xl shrink-0" aria-hidden="true">
+          <span className="shrink-0 text-2xl" aria-hidden="true">
             {icon}
           </span>
         )}
-        <CardTitle className="text-xl font-bold text-on-surface">{title}</CardTitle>
+        <CardTitle className="text-on-surface text-xl font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent className="text-on-surface font-body-md">{children}</CardContent>
     </Card>

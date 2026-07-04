@@ -40,24 +40,24 @@ export function CourseTree({ modules, onLessonClick }: CourseTreeProps): JSX.Ele
               type="button"
               onClick={() => toggleModule(idx)}
               aria-expanded={isExpanded}
-              className="flex items-center gap-2 px-3 py-2 rounded-[var(--oe-radius,8px)] border-none bg-transparent w-full text-left text-sm font-body-md font-semibold text-fg cursor-pointer"
+              className="font-body-md text-fg flex w-full cursor-pointer items-center gap-2 rounded-[var(--oe-radius,8px)] border-none bg-transparent px-3 py-2 text-left text-sm font-semibold"
             >
               <span
-                className="transition-transform duration-200 text-lg leading-none shrink-0"
+                className="shrink-0 text-lg leading-none transition-transform duration-200"
                 style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
               >
                 {'\u25B6'}
               </span>
-              <span className="flex-1 min-w-0">{mod.title}</span>
+              <span className="min-w-0 flex-1">{mod.title}</span>
               {mod.isLocked && (
-                <span className="opacity-40 ml-auto shrink-0" aria-label="Locked">
+                <span className="ml-auto shrink-0 opacity-40" aria-label="Locked">
                   {'\uD83D\uDD12'}
                 </span>
               )}
             </button>
             {isExpanded && !mod.isLocked && (
               <ul
-                className="list-none p-0 m-1 ml-7"
+                className="m-1 ml-7 list-none p-0"
                 data-testid={`course-tree-module-${idx}-lessons`}
               >
                 {mod.lessons.map((lesson) => {
@@ -70,9 +70,9 @@ export function CourseTree({ modules, onLessonClick }: CourseTreeProps): JSX.Ele
                         aria-current={isActive ? 'page' : undefined}
                         data-testid={`course-tree-lesson-${lesson.id}`}
                         className={cn(
-                          'flex items-center gap-2 px-3 py-1.5 rounded-[var(--oe-radius,8px)] cursor-pointer border-none bg-transparent w-full text-left text-sm font-body-md text-on-surface-variant leading-tight',
+                          'font-body-md text-on-surface-variant flex w-full cursor-pointer items-center gap-2 rounded-[var(--oe-radius,8px)] border-none bg-transparent px-3 py-1.5 text-left text-sm leading-tight',
                           isActive &&
-                            'border-l-[3px] border-solid border-[var(--oe-color-primary)] pl-[9px] text-primary font-medium bg-surface-variant',
+                            'text-primary bg-surface-variant border-l-[3px] border-solid border-[var(--oe-color-primary)] pl-[9px] font-medium',
                         )}
                       >
                         {lesson.title}

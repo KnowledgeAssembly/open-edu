@@ -69,7 +69,7 @@ export function EmptyState({
 
   return (
     <div
-      className={cn('flex flex-col items-center text-center py-xl px-md', className)}
+      className={cn('py-xl px-md flex flex-col items-center text-center', className)}
       data-testid="empty-state"
       {...props}
     >
@@ -77,8 +77,8 @@ export function EmptyState({
 
       <SilhouetteGroup figures={activeFigures} className="mb-md" aria-hidden="true" />
 
-      <h2 className="text-lg font-semibold text-on-surface mb-sm">{heading}</h2>
-      <p className="text-sm text-on-surface-variant max-w-[280px] mb-md">{description}</p>
+      <h2 className="text-on-surface mb-sm text-lg font-semibold">{heading}</h2>
+      <p className="text-on-surface-variant mb-md max-w-[280px] text-sm">{description}</p>
 
       {action && <div>{action}</div>}
     </div>

@@ -416,17 +416,17 @@ Epic 32 (Design Token Refresh v2)
     - New layout (replace the grid of Cards):
 
       ```tsx
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-on-surface-variant mb-xl">
+      <div className="text-on-surface-variant mb-xl flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         <span className="flex items-center gap-1.5">
-          <BookOpen className="h-4 w-4 text-primary" />
+          <BookOpen className="text-primary h-4 w-4" />
           <strong className="text-on-surface font-semibold">{totalUnits}</strong> learning units
         </span>
         <span className="flex items-center gap-1.5">
-          <TrendingUp className="h-4 w-4 text-primary" />
+          <TrendingUp className="text-primary h-4 w-4" />
           <strong className="text-on-surface font-semibold">{inProgressCount}</strong> in progress
         </span>
         <span className="flex items-center gap-1.5">
-          <Trophy className="h-4 w-4 text-primary" />
+          <Trophy className="text-primary h-4 w-4" />
           <strong className="text-on-surface font-semibold">{badgeCount}</strong> badges earned
         </span>
       </div>

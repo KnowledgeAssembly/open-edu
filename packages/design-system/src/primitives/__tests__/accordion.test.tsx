@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../accordion.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('Accordion', () => {
   it('has no accessibility violations', async () => {

@@ -23,15 +23,15 @@ export const AllSizes: Story = {
     <div className="flex items-end gap-8">
       <div className="text-center">
         <OpenModule size="sm" satellites={2} />
-        <p className="text-xs text-gray-500 mt-1">sm (2)</p>
+        <p className="mt-1 text-xs text-gray-500">sm (2)</p>
       </div>
       <div className="text-center">
         <OpenModule size="md" satellites={3} />
-        <p className="text-xs text-gray-500 mt-1">md (3)</p>
+        <p className="mt-1 text-xs text-gray-500">md (3)</p>
       </div>
       <div className="text-center">
         <OpenModule size="lg" satellites={5} />
-        <p className="text-xs text-gray-500 mt-1">lg (5)</p>
+        <p className="mt-1 text-xs text-gray-500">lg (5)</p>
       </div>
     </div>
   ),
@@ -44,7 +44,7 @@ export const SatelliteCounts: Story = {
       {[2, 3, 4, 5, 6].map((count) => (
         <div key={count} className="text-center">
           <OpenModule size="md" satellites={count} />
-          <p className="text-xs text-gray-500 mt-1">{count}</p>
+          <p className="mt-1 text-xs text-gray-500">{count}</p>
         </div>
       ))}
     </div>
@@ -57,7 +57,7 @@ export const Active: Story = {
     <div className="flex gap-8">
       <div className="text-center">
         <OpenModule size="md" satellites={5} state="active" />
-        <p className="text-xs text-gray-500 mt-1">active</p>
+        <p className="mt-1 text-xs text-gray-500">active</p>
       </div>
     </div>
   ),

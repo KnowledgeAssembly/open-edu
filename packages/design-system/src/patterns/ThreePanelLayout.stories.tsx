@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ThreePanelLayout } from './ThreePanelLayout';
 
 const PanelContent = ({ label, className = '' }: { label: string; className?: string }) => (
-  <div className={`p-4 h-full ${className}`}>
-    <p className="text-sm font-semibold text-on-surface mb-2">{label}</p>
-    <p className="text-xs text-on-surface-variant leading-relaxed">
+  <div className={`h-full p-4 ${className}`}>
+    <p className="text-on-surface mb-2 text-sm font-semibold">{label}</p>
+    <p className="text-on-surface-variant text-xs leading-relaxed">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
       labore.
     </p>
@@ -21,7 +21,7 @@ type Story = StoryObj<typeof ThreePanelLayout>;
 
 export const Default: Story = {
   render: () => (
-    <div className="h-[400px] border border-outline-variant rounded-lg overflow-hidden">
+    <div className="border-outline-variant h-[400px] overflow-hidden rounded-lg border">
       <ThreePanelLayout
         leftNav={<PanelContent label="Left Nav" className="bg-surface-container" />}
         content={<PanelContent label="Main Content" className="bg-surface" />}
@@ -33,7 +33,7 @@ export const Default: Story = {
 
 export const ContentOnly: Story = {
   render: () => (
-    <div className="h-[400px] border border-outline-variant rounded-lg overflow-hidden">
+    <div className="border-outline-variant h-[400px] overflow-hidden rounded-lg border">
       <ThreePanelLayout content={<PanelContent label="Main Content" className="bg-surface" />} />
     </div>
   ),
@@ -41,7 +41,7 @@ export const ContentOnly: Story = {
 
 export const TwoPanel: Story = {
   render: () => (
-    <div className="h-[400px] border border-outline-variant rounded-lg overflow-hidden">
+    <div className="border-outline-variant h-[400px] overflow-hidden rounded-lg border">
       <ThreePanelLayout
         leftNav={<PanelContent label="Navigation" className="bg-surface-container" />}
         content={<PanelContent label="Content Area" className="bg-surface" />}

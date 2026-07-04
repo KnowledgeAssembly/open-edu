@@ -7,13 +7,13 @@ export interface SettingsLayoutProps {
 
 export function SettingsLayout({ sidebar, children }: SettingsLayoutProps): JSX.Element {
   return (
-    <div className="flex h-full max-w-5xl mx-auto">
+    <div className="mx-auto flex h-full max-w-5xl">
       {sidebar && (
-        <nav className="w-60 shrink-0 border-r border-outline-variant p-4 overflow-y-auto">
+        <nav className="border-outline-variant w-60 shrink-0 overflow-y-auto border-r p-4">
           {sidebar}
         </nav>
       )}
-      <main className="flex-1 min-w-0 p-6 overflow-y-auto">{children}</main>
+      <main className="min-w-0 flex-1 overflow-y-auto p-6">{children}</main>
     </div>
   );
 }

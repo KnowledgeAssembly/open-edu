@@ -2,16 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AppLayout } from './AppLayout';
 
 const PlaceholderBar = ({ label }: { label: string }) => (
-  <div className="bg-surface-container h-16 flex items-center px-4 border-b border-outline-variant text-sm text-on-surface-variant font-medium">
+  <div className="bg-surface-container border-outline-variant text-on-surface-variant flex h-16 items-center border-b px-4 text-sm font-medium">
     {label}
   </div>
 );
 
 const PlaceholderSidebar = () => (
-  <div className="w-64 h-full bg-surface-container border-r border-outline-variant p-4 text-sm text-on-surface-variant">
-    <p className="font-semibold mb-2">Sidebar</p>
-    <ul className="list-none p-0 m-0 space-y-1">
-      <li className="px-2 py-1 rounded bg-primary-container text-on-primary-container">
+  <div className="bg-surface-container border-outline-variant text-on-surface-variant h-full w-64 border-r p-4 text-sm">
+    <p className="mb-2 font-semibold">Sidebar</p>
+    <ul className="m-0 list-none space-y-1 p-0">
+      <li className="bg-primary-container text-on-primary-container rounded px-2 py-1">
         Dashboard
       </li>
       <li className="px-2 py-1">Courses</li>
@@ -22,7 +22,7 @@ const PlaceholderSidebar = () => (
 
 const PlaceholderContent = () => (
   <div className="p-6">
-    <h2 className="text-xl font-bold text-on-surface mb-4">Main Content</h2>
+    <h2 className="text-on-surface mb-4 text-xl font-bold">Main Content</h2>
     <p className="text-on-surface-variant text-sm leading-relaxed">
       This is the main content area. It scrolls independently of the sidebar and top bar.
     </p>

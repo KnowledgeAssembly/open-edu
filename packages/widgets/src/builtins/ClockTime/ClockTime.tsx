@@ -217,7 +217,7 @@ function ClockTimeComponent(props: {
         className="p-lg bg-error-container text-on-error-container rounded-lg text-center"
       >
         <p className="text-sm font-medium">Clock configuration is missing or invalid.</p>
-        <p className="text-xs mt-xs opacity-75">Please check the widget settings.</p>
+        <p className="mt-xs text-xs opacity-75">Please check the widget settings.</p>
       </div>
     );
   }
@@ -363,7 +363,7 @@ function ClockTimeComponent(props: {
       style={{ textAlign: 'center' }}
     >
       {isSetMode && isInteractive && !submitted && (
-        <div className="text-sm text-on-surface-variant bg-surface-container-high p-xs rounded mb-sm">
+        <div className="text-on-surface-variant bg-surface-container-high p-xs mb-sm rounded text-sm">
           Use arrow keys to adjust, Enter to submit
         </div>
       )}
@@ -375,7 +375,7 @@ function ClockTimeComponent(props: {
       {showDigitalReadout && isSetMode && (
         <div
           data-testid="digital-readout"
-          className="font-mono text-xl my-sm"
+          className="my-sm font-mono text-xl"
           aria-label={`Digital time: ${timeAnnouncement}`}
         >
           {timeAnnouncement}
@@ -384,7 +384,7 @@ function ClockTimeComponent(props: {
 
       {isSetMode && isInteractive && !submitted && (
         <div
-          className="flex gap-sm mb-sm justify-center"
+          className="gap-sm mb-sm flex justify-center"
           role="group"
           aria-label="Time adjustment mode"
         >

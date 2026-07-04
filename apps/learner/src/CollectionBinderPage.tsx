@@ -50,13 +50,13 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   if (allCardItems.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center py-16 px-4"
+        className="flex flex-col items-center justify-center px-4 py-16"
         data-testid="collection-binder"
       >
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-6 opacity-30">
+        <div className="max-w-md text-center">
+          <div className="mb-6 text-6xl opacity-30">
             <svg
-              className="w-24 h-24 mx-auto text-muted-foreground"
+              className="text-muted-foreground mx-auto h-24 w-24"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -79,7 +79,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6" data-testid="collection-binder">
+    <div className="mx-auto max-w-6xl p-6" data-testid="collection-binder">
       <div className="mb-8">
         <h1 className="text-h1 font-display text-on-surface">Collection Binder</h1>
         <p className="text-on-surface-variant mt-1">
@@ -106,7 +106,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
                 />
                 <div className="flex flex-col">
                   <h2 className="text-h3 font-display text-on-surface">{shelf.category}</h2>
-                  <span className="text-sm text-on-surface-variant">
+                  <span className="text-on-surface-variant text-sm">
                     {unlockedCount} / {shelf.cards.length} cards
                   </span>
                 </div>

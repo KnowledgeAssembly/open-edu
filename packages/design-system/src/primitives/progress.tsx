@@ -30,7 +30,7 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
       <ProgressPrimitive.Root
         ref={ref}
         className={cn(
-          'relative overflow-hidden rounded-full bg-secondary w-full',
+          'bg-secondary relative w-full overflow-hidden rounded-full',
           sizeClass,
           className,
         )}
@@ -41,7 +41,7 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
         {...props}
       >
         <ProgressPrimitive.Indicator
-          className="h-full w-full flex-1 bg-primary transition-all"
+          className="bg-primary h-full w-full flex-1 transition-all"
           style={{ transform: `translateX(-${100 - pct}%)` }}
         />
       </ProgressPrimitive.Root>
@@ -49,9 +49,9 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
 
     if (showLabel) {
       return (
-        <div className="flex items-center gap-sm w-full">
+        <div className="gap-sm flex w-full items-center">
           {bar}
-          <span className="text-sm text-muted-foreground whitespace-nowrap">
+          <span className="text-muted-foreground whitespace-nowrap text-sm">
             {current != null ? `${clampedCurrent} / ${safeTotal}` : `${pct}%`}
           </span>
         </div>

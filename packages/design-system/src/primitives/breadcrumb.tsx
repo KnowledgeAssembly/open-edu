@@ -18,7 +18,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(({ items, clas
       {items.map((item, idx) => (
         <li
           key={`${item.label}-${item.href ?? idx}`}
-          className="flex items-center gap-1 text-sm text-muted-foreground"
+          className="text-muted-foreground flex items-center gap-1 text-sm"
         >
           {idx > 0 && <ChevronRight className="h-4 w-4" />}
           {item.href ? (

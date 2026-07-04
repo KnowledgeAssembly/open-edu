@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CourseCard } from '../CourseCard.js';
 import type { CourseCardProps } from '../CourseCard.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 function makeProps(overrides: Partial<CourseCardProps> = {}): CourseCardProps {
   return {

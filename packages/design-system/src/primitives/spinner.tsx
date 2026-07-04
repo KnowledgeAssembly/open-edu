@@ -18,7 +18,7 @@ const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
       ref={ref}
       role="status"
       aria-label="Loading"
-      className={cn('motion-safe:animate-spin text-muted-foreground', sizeClasses[size], className)}
+      className={cn('text-muted-foreground motion-safe:animate-spin', sizeClasses[size], className)}
     >
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle

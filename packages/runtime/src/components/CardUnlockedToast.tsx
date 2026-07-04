@@ -89,50 +89,50 @@ export function CardUnlockedToast({
     >
       <div className="relative">
         {type === 'unlock' && (
-          <div className="absolute -top-6 left-0 pointer-events-none">
+          <div className="pointer-events-none absolute -top-6 left-0">
             <ConfettiBurst particleCount={8} duration={1} />
           </div>
         )}
         <div
           className={cn(
-            'flex items-start gap-3 p-4 rounded-xl shadow-lg',
-            'bg-surface border border-outline-variant',
+            'flex items-start gap-3 rounded-xl p-4 shadow-lg',
+            'bg-surface border-outline-variant border',
           )}
         >
           <GlowPulse duration={1.2}>
             <div
               className={cn(
-                'flex items-center justify-center w-10 h-10 rounded-lg shrink-0',
-                'bg-gradient-to-br from-primary/20 to-primary/10',
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                'from-primary/20 to-primary/10 bg-gradient-to-br',
               )}
             >
-              <IconComponent className="w-5 h-5 text-primary" />
+              <IconComponent className="text-primary size-5" />
             </div>
           </GlowPulse>
 
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <span className="text-sm font-semibold text-on-surface">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-on-surface text-sm font-semibold">
               {type === 'levelUp' ? (
                 <span className="flex items-center gap-1">
-                  Level Up! <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Level{' '}
+                  Level Up! <Star className="size-3.5 fill-amber-400 text-amber-400" /> Level{' '}
                   {newLevel}
                 </span>
               ) : (
                 'Card Unlocked!'
               )}
             </span>
-            <span className="text-sm font-medium text-on-surface-variant truncate">
+            <span className="text-on-surface-variant truncate text-sm font-medium">
               {card.title}
             </span>
-            <span className="text-xs text-on-surface-variant line-clamp-1">{card.summary}</span>
+            <span className="text-on-surface-variant line-clamp-1 text-xs">{card.summary}</span>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex shrink-0 items-center gap-1">
             {onView && (
               <button
                 onClick={onView}
                 className={cn(
-                  'text-xs font-medium px-2.5 py-1.5 rounded-lg',
+                  'rounded-lg px-2.5 py-1.5 text-xs font-medium',
                   'bg-primary text-on-primary hover:bg-primary/90',
                   'transition-colors',
                 )}
@@ -143,13 +143,13 @@ export function CardUnlockedToast({
             <button
               onClick={handleDismiss}
               className={cn(
-                'flex items-center justify-center w-7 h-7 rounded-lg',
+                'flex h-7 w-7 items-center justify-center rounded-lg',
                 'text-muted-foreground hover:text-on-surface hover:bg-muted/50',
                 'transition-colors',
               )}
               aria-label="Dismiss"
             >
-              <X className="w-4 h-4" />
+              <X className="size-4" />
             </button>
           </div>
         </div>

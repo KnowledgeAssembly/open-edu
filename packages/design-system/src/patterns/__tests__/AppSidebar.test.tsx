@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppSidebar } from '../AppSidebar.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 const navItems = [
   { id: 'home', label: 'Home', icon: <span data-testid="icon-home">🏠</span> },

@@ -82,24 +82,24 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        'h-full flex flex-col bg-surface-container border-r border-outline-variant overflow-hidden transition-[width] duration-200',
+        'bg-surface-container border-outline-variant flex h-full flex-col overflow-hidden border-r transition-[width] duration-200',
         collapsed ? 'w-16' : 'w-[var(--oe-space-panelNav,260px)]',
       )}
       data-testid="app-sidebar"
       aria-label="Main navigation"
     >
-      <div className="px-4 pt-5 pb-3 border-b border-outline-variant truncate">
+      <div className="border-outline-variant truncate border-b px-4 pb-3 pt-5">
         {!collapsed && logo ? (
           logo
         ) : collapsed && logoCollapsed ? (
           logoCollapsed
         ) : (
           <>
-            <h1 className="text-lg font-bold m-0 text-on-surface leading-tight">
+            <h1 className="text-on-surface m-0 text-lg font-bold leading-tight">
               {collapsed ? 'OE' : title}
             </h1>
             {!collapsed && subtitle && (
-              <p className="text-xs text-on-surface-variant mt-0.5 leading-tight truncate">
+              <p className="text-on-surface-variant mt-0.5 truncate text-xs leading-tight">
                 {subtitle}
               </p>
             )}
@@ -107,7 +107,7 @@ export function AppSidebar({
         )}
       </div>
 
-      <nav className="p-2 flex flex-col gap-0.5" aria-label="App navigation">
+      <nav className="flex flex-col gap-0.5 p-2" aria-label="App navigation">
         {items.map((item) => {
           const isActive = item.id === currentItemId;
           return (
@@ -115,7 +115,7 @@ export function AppSidebar({
               key={item.id}
               variant={isActive ? 'secondary' : 'ghost'}
               size={collapsed ? 'icon' : 'sm'}
-              className={cn('gap-2', collapsed ? 'justify-center w-full' : 'justify-start w-full')}
+              className={cn('gap-2', collapsed ? 'w-full justify-center' : 'w-full justify-start')}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`appsidebar-nav-${item.id}`}
@@ -130,19 +130,19 @@ export function AppSidebar({
 
       {sections && sections.length > 0 && (
         <>
-          <hr className="h-px bg-outline-variant mx-4 my-2 border-none" aria-hidden="true" />
+          <hr className="bg-outline-variant mx-4 my-2 h-px border-none" aria-hidden="true" />
           <div className="flex-1 overflow-y-auto px-2 py-1">
             {sections.map((section) => (
               <div key={section.title}>
                 {!collapsed && (
                   <div className="px-3 py-1.5">
-                    <h2 className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant m-0">
+                    <h2 className="text-on-surface-variant m-0 text-xs font-semibold uppercase tracking-wider">
                       {section.title}
                     </h2>
                   </div>
                 )}
                 <ol
-                  className="list-none p-0 m-0"
+                  className="m-0 list-none p-0"
                   role="list"
                   aria-label={section.title}
                   data-testid="course-step-list"
@@ -175,17 +175,17 @@ export function AppSidebar({
                         >
                           <span className="shrink-0">
                             {isCurrent && (
-                              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-on-primary text-xs font-bold flex-shrink-0">
+                              <span className="bg-primary text-on-primary flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">
                                 {section.items.indexOf(step) + 1}
                               </span>
                             )}
                             {isCompleted && (
-                              <Badge className="flex items-center justify-center w-5 h-5 rounded-full p-0">
+                              <Badge className="flex h-5 w-5 items-center justify-center rounded-full p-0">
                                 {CheckIcon}
                               </Badge>
                             )}
                             {isFuture && (
-                              <span className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-outline-variant flex-shrink-0" />
+                              <span className="border-outline-variant flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2" />
                             )}
                           </span>
                           {!collapsed && <span className="truncate text-sm">{step.label}</span>}
@@ -201,7 +201,7 @@ export function AppSidebar({
       )}
 
       {onBack && !collapsed && (
-        <div className="px-2 pt-2 pb-3 border-t border-outline-variant">
+        <div className="border-outline-variant border-t px-2 pb-3 pt-2">
           <Button
             variant="outline"
             size="sm"
@@ -219,7 +219,7 @@ export function AppSidebar({
         type="button"
         onClick={handleToggleCollapse}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="flex items-center justify-center w-full py-2 border-t border-outline-variant bg-transparent text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
+        className="border-outline-variant text-on-surface-variant hover:bg-surface-container-high flex w-full cursor-pointer items-center justify-center border-t bg-transparent py-2 transition-colors"
       >
         <span className={cn('transition-transform duration-200', collapsed && 'rotate-180')}>
           {ChevronLeft}

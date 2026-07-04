@@ -68,7 +68,7 @@ function FractionNotation({ numerator, denominator }: { numerator: number; denom
       className="inline-flex flex-col items-center leading-none"
       aria-label={`${numerator} over ${denominator}`}
     >
-      <span className="border-b-2 border-on-surface px-1 text-lg font-semibold">{numerator}</span>
+      <span className="border-on-surface border-b-2 px-1 text-lg font-semibold">{numerator}</span>
       <span className="px-1 text-lg font-semibold">{denominator}</span>
     </span>
   );
@@ -138,10 +138,10 @@ function FractionVisualComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-lg bg-error/10 border border-error/30 p-md text-on-surface"
+        className="bg-error/10 border-error/30 p-md text-on-surface rounded-lg border"
       >
-        <p className="font-semibold text-error">Invalid widget configuration.</p>
-        <p className="text-sm text-on-surface/70 mt-xs">
+        <p className="text-error font-semibold">Invalid widget configuration.</p>
+        <p className="text-on-surface/70 mt-xs text-sm">
           Please check the fraction settings and try again.
         </p>
       </div>
@@ -151,7 +151,7 @@ function FractionVisualComponent(props: {
   if (content.denominator > 12) {
     return (
       <div data-testid="fraction-too-many">
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center">
+        <div className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
           <p className="text-on-surface-variant">
             This fraction has too many parts to display visually.
           </p>

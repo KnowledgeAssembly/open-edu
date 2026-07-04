@@ -40,7 +40,7 @@ export const Default: Story = {
       }
       content={
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-on-surface mb-4">Lesson: Variables & Types</h1>
+          <h1 className="text-on-surface mb-4 text-2xl font-bold">Lesson: Variables & Types</h1>
           <p className="text-on-surface-variant leading-relaxed">
             In JavaScript, variables are containers for storing data values. A variable can be
             declared using var, let, or const keywords.
@@ -48,9 +48,9 @@ export const Default: Story = {
         </div>
       }
       rightPanel={
-        <div className="p-4 bg-surface-container h-full">
-          <h3 className="text-sm font-semibold text-on-surface mb-2">Table of Contents</h3>
-          <ul className="list-none p-0 m-0 text-xs space-y-1 text-on-surface-variant">
+        <div className="bg-surface-container h-full p-4">
+          <h3 className="text-on-surface mb-2 text-sm font-semibold">Table of Contents</h3>
+          <ul className="text-on-surface-variant m-0 list-none space-y-1 p-0 text-xs">
             <li className="text-primary font-medium">Variables</li>
             <li>Data Types</li>
             <li>Type Coercion</li>
@@ -67,7 +67,7 @@ export const Minimal: Story = {
     <CourseViewerLayout
       content={
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-on-surface">Simple Course View</h1>
+          <h1 className="text-on-surface text-2xl font-bold">Simple Course View</h1>
         </div>
       }
     />

@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '../dropdown-menu.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('DropdownMenu', () => {
   it('has no accessibility violations in closed state', async () => {

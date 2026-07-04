@@ -30,7 +30,7 @@ const accessibleComponents: ComponentMap = {
   h1: ({ children, className, ...props }: ComponentProps<'h1'>) => (
     <h1
       id={slugify(String(children ?? ''))}
-      className={`text-h1 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h1 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -39,7 +39,7 @@ const accessibleComponents: ComponentMap = {
   h2: ({ children, className, ...props }: ComponentProps<'h2'>) => (
     <h2
       id={slugify(String(children ?? ''))}
-      className={`text-h2 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h2 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -48,7 +48,7 @@ const accessibleComponents: ComponentMap = {
   h3: ({ children, className, ...props }: ComponentProps<'h3'>) => (
     <h3
       id={slugify(String(children ?? ''))}
-      className={`text-h3 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h3 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -57,7 +57,7 @@ const accessibleComponents: ComponentMap = {
   h4: ({ children, className, ...props }: ComponentProps<'h4'>) => (
     <h4
       id={slugify(String(children ?? ''))}
-      className={`text-h4 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h4 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -66,7 +66,7 @@ const accessibleComponents: ComponentMap = {
   h5: ({ children, className, ...props }: ComponentProps<'h5'>) => (
     <h5
       id={slugify(String(children ?? ''))}
-      className={`text-h5 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h5 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -75,7 +75,7 @@ const accessibleComponents: ComponentMap = {
   h6: ({ children, className, ...props }: ComponentProps<'h6'>) => (
     <h6
       id={slugify(String(children ?? ''))}
-      className={`text-h6 font-display font-bold mt-0 mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`text-h6 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -112,7 +112,7 @@ const accessibleComponents: ComponentMap = {
   ),
   blockquote: ({ children, className, ...props }: ComponentProps<'blockquote'>) => (
     <blockquote
-      className={`font-body-reading mb-paragraph-spacing border-l-4 border-outline pl-4 italic${className ? ` ${className}` : ''}`}
+      className={`font-body-reading mb-paragraph-spacing border-outline border-l-4 pl-4 italic${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -120,7 +120,7 @@ const accessibleComponents: ComponentMap = {
   ),
   pre: ({ children, className, ...props }: ComponentProps<'pre'>) => (
     <pre
-      className={`font-mono mb-paragraph-spacing overflow-x-auto rounded-md bg-surface-container p-4 text-sm${className ? ` ${className}` : ''}`}
+      className={`mb-paragraph-spacing bg-surface-container overflow-x-auto rounded-md p-4 font-mono text-sm${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -131,7 +131,7 @@ const accessibleComponents: ComponentMap = {
     if (isInline) {
       return (
         <code
-          className={`font-mono rounded-sm bg-surface-container px-1.5 py-0.5 text-sm${className ? ` ${className}` : ''}`}
+          className={`bg-surface-container rounded-sm px-1.5 py-0.5 font-mono text-sm${className ? ` ${className}` : ''}`}
           {...props}
         >
           {children}
@@ -147,7 +147,7 @@ const accessibleComponents: ComponentMap = {
   table: ({ children, className, ...props }: ComponentProps<'table'>) => (
     <div className="mb-paragraph-spacing overflow-x-auto">
       <table
-        className={`w-full border-collapse text-body-ui${className ? ` ${className}` : ''}`}
+        className={`text-body-ui w-full border-collapse${className ? ` ${className}` : ''}`}
         {...props}
       >
         {children}
@@ -156,7 +156,7 @@ const accessibleComponents: ComponentMap = {
   ),
   th: ({ children, className, ...props }: ComponentProps<'th'>) => (
     <th
-      className={`border-b border-outline-variant bg-surface-container px-3 py-2 text-left font-semibold${className ? ` ${className}` : ''}`}
+      className={`border-outline-variant bg-surface-container border-b px-3 py-2 text-left font-semibold${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -164,7 +164,7 @@ const accessibleComponents: ComponentMap = {
   ),
   td: ({ children, className, ...props }: ComponentProps<'td'>) => (
     <td
-      className={`border-b border-outline-variant px-3 py-2${className ? ` ${className}` : ''}`}
+      className={`border-outline-variant border-b px-3 py-2${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}

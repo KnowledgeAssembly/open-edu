@@ -10,11 +10,11 @@ export function CourseOutline(): JSX.Element {
   const total = nodes.length;
 
   return (
-    <div className="flex flex-col h-full font-body-md" data-testid="course-outline">
+    <div className="font-body-md flex h-full flex-col" data-testid="course-outline">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="bg-transparent border border-outline-variant rounded-lg px-2 py-1 cursor-pointer text-base self-end mb-1"
+        className="border-outline-variant mb-1 cursor-pointer self-end rounded-lg border bg-transparent px-2 py-1 text-base"
         aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         data-testid="outline-toggle"
       >
@@ -23,7 +23,7 @@ export function CourseOutline(): JSX.Element {
       {isOpen && (
         <>
           <Sidebar nodes={nodes} />
-          <p className="text-on-surface-variant text-xs px-md py-2 border-t border-outline-variant">
+          <p className="text-on-surface-variant px-md border-outline-variant border-t py-2 text-xs">
             {current} of {total} complete
           </p>
         </>

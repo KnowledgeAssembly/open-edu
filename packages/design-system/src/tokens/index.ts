@@ -13,3 +13,4 @@ export * from './focus.js';
 export * from './icons.js';
 export * from './layout.js';
 export * from './tailwind.js';
+export { token, tokenVar } from './resolver.js';

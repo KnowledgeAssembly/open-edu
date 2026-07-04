@@ -44,7 +44,7 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
             />
             <span className="font-medium">{skill.name}</span>
             {!compact && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {score}% &middot; {getMasteryLabel(mastery)}
               </span>
             )}

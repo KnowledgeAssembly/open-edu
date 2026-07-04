@@ -34,10 +34,10 @@ export function WidgetCanvas({
         role="region"
         aria-label={displayName}
         data-testid="widget-canvas"
-        className={`rounded-xl border border-outline-variant bg-surface-container-lowest p-md ${className}`}
+        className={`border-outline-variant bg-surface-container-lowest p-md rounded-xl border ${className}`}
         style={{ minHeight: `${minHeight}px` }}
       >
-        <div className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-sm">
+        <div className="text-on-surface-variant mb-sm text-xs font-medium uppercase tracking-wider">
           {displayName}
         </div>
         {children}

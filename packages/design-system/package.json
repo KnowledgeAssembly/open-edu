@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens": "./src/tokens/index.ts",
-    "./tokens/tailwind": "./src/tokens/tailwind.ts"
+    "./tokens/tailwind": "./src/tokens/tailwind.ts",
+    "./test-utils": "./src/test-utils/a11y.tsx"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006",

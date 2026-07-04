@@ -22,23 +22,23 @@ export const AllSizes: Story = {
     <div className="flex items-end gap-6">
       <div className="text-center">
         <Pipili size="xs" />
-        <p className="text-xs text-gray-500 mt-1">xs</p>
+        <p className="mt-1 text-xs text-gray-500">xs</p>
       </div>
       <div className="text-center">
         <Pipili size="sm" />
-        <p className="text-xs text-gray-500 mt-1">sm</p>
+        <p className="mt-1 text-xs text-gray-500">sm</p>
       </div>
       <div className="text-center">
         <Pipili size="md" />
-        <p className="text-xs text-gray-500 mt-1">md</p>
+        <p className="mt-1 text-xs text-gray-500">md</p>
       </div>
       <div className="text-center">
         <Pipili size="lg" />
-        <p className="text-xs text-gray-500 mt-1">lg</p>
+        <p className="mt-1 text-xs text-gray-500">lg</p>
       </div>
       <div className="text-center">
         <Pipili size="xl" />
-        <p className="text-xs text-gray-500 mt-1">xl</p>
+        <p className="mt-1 text-xs text-gray-500">xl</p>
       </div>
     </div>
   ),
@@ -49,19 +49,19 @@ export const AllMoods: Story = {
     <div className="flex items-end gap-6">
       <div className="text-center">
         <Pipili size="lg" mood="idle" />
-        <p className="text-xs text-gray-500 mt-1">idle</p>
+        <p className="mt-1 text-xs text-gray-500">idle</p>
       </div>
       <div className="text-center">
         <Pipili size="lg" mood="thinking" />
-        <p className="text-xs text-gray-500 mt-1">thinking</p>
+        <p className="mt-1 text-xs text-gray-500">thinking</p>
       </div>
       <div className="text-center">
         <Pipili size="lg" mood="curious" />
-        <p className="text-xs text-gray-500 mt-1">curious</p>
+        <p className="mt-1 text-xs text-gray-500">curious</p>
       </div>
       <div className="text-center">
         <Pipili size="lg" mood="content" />
-        <p className="text-xs text-gray-500 mt-1">content</p>
+        <p className="mt-1 text-xs text-gray-500">content</p>
       </div>
     </div>
   ),

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AIChat } from '../AIChat.jsx';
 import type { ChatMessage } from '../AIChat.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('AIChat', () => {
   const messages: ChatMessage[] = [

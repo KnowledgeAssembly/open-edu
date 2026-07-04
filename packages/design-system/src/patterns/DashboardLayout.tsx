@@ -8,11 +8,11 @@ export interface DashboardLayoutProps {
 
 export function DashboardLayout({ header, sidebar, children }: DashboardLayoutProps): JSX.Element {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       {header && <div className="shrink-0">{header}</div>}
       <div className="flex flex-1 overflow-hidden">
         {sidebar && (
-          <div className="w-64 shrink-0 border-r border-outline-variant p-4 overflow-y-auto">
+          <div className="border-outline-variant w-64 shrink-0 overflow-y-auto border-r p-4">
             {sidebar}
           </div>
         )}

@@ -14,7 +14,7 @@ export function ThreePanelLayout({
   return (
     <div className="flex h-full">
       {leftNav && <div className="shrink-0">{leftNav}</div>}
-      <div className="flex-1 min-w-0">{content}</div>
+      <div className="min-w-0 flex-1">{content}</div>
       {rightPanel && <div className="shrink-0">{rightPanel}</div>}
     </div>
   );

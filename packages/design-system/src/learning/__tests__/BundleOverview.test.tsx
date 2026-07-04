@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BundleOverview } from '../BundleOverview.js';
 import type { BundleOverviewModule } from '../BundleOverview.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 const sampleModules: BundleOverviewModule[] = [
   {

@@ -16,17 +16,17 @@ export function WidgetErrorFallback({
   return (
     <div
       role="alert"
-      className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+      className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       data-testid="widget-error-fallback"
     >
-      <div className="text-3xl mb-sm" aria-hidden="true">
+      <div className="mb-sm text-3xl" aria-hidden="true">
         ⚠
       </div>
-      <p className="text-on-surface font-semibold mb-sm">{message}</p>
+      <p className="text-on-surface mb-sm font-semibold">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="bg-primary text-on-primary px-lg py-sm rounded-lg font-semibold text-sm mt-sm"
+          className="bg-primary text-on-primary px-lg py-sm mt-sm rounded-lg text-sm font-semibold"
           data-testid="widget-retry-button"
         >
           Retry Activity
@@ -34,11 +34,11 @@ export function WidgetErrorFallback({
       )}
       {isDevMode && devDetails && (
         <details className="mt-sm text-left">
-          <summary className="text-xs text-on-surface-variant cursor-pointer">
+          <summary className="text-on-surface-variant cursor-pointer text-xs">
             Technical details
           </summary>
           <pre
-            className="text-xs text-on-surface-variant mt-xs p-xs bg-surface-variant rounded overflow-auto"
+            className="text-on-surface-variant mt-xs p-xs bg-surface-variant overflow-auto rounded text-xs"
             data-testid="widget-error-details"
           >
             {devDetails}

@@ -51,7 +51,7 @@ export function CourseCardWithModule({
       <OpenModule
         size="sm"
         satellites={satellites}
-        className="absolute top-2 right-2"
+        className="absolute right-2 top-2"
         aria-hidden="true"
       />
       {children}
@@ -230,7 +230,7 @@ import { AssemblyFlow } from '@open-edu/design-system';
 
 ```tsx
 <div className="my-xl">
-  <AssemblyFlow density="minimal" className="w-full h-8 opacity-15" aria-hidden="true" />
+  <AssemblyFlow density="minimal" className="h-8 w-full opacity-15" aria-hidden="true" />
 </div>
 ```
 
@@ -274,7 +274,7 @@ import { AssemblyFlow } from '@open-edu/design-system';
 ```tsx
 import { SilhouetteGroup } from '@open-edu/design-system';
 
-<div className="flex flex-col items-center py-xl">
+<div className="py-xl flex flex-col items-center">
   <SilhouetteGroup
     figures={[
       { proportion: 'tall', palette: 1 },

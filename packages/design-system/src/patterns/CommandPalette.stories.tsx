@@ -16,7 +16,7 @@ const CommandPaletteWrapper = (props: Partial<React.ComponentProps<typeof Comman
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold"
+        className="bg-primary text-on-primary rounded-lg px-4 py-2 text-sm font-semibold"
       >
         Open Command Palette
       </button>
@@ -63,7 +63,7 @@ export const WithEmptyState: Story = {
       <>
         <button
           onClick={() => setOpen(true)}
-          className="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold"
+          className="bg-primary text-on-primary rounded-lg px-4 py-2 text-sm font-semibold"
         >
           Open Command Palette
         </button>

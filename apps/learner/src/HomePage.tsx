@@ -30,43 +30,49 @@ export function HomePage({
   const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
-    <div className="p-xl max-w-4xl mx-auto" data-testid="home-page">
+    <div className="p-xl mx-auto max-w-4xl" data-testid="home-page">
       <HeroSection className="mb-xl">
-        <h1 className="text-h1 font-display text-on-surface font-bold mb-sm">Welcome back, Learner</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-sm font-bold">
+          Welcome back, Learner
+        </h1>
         <p className="text-body-reading text-on-surface-variant">
           Continue where you left off, or explore new courses in the catalog.
         </p>
       </HeroSection>
 
-      <div className="flex items-center gap-8 mb-xl">
-        <div className="flex items-center gap-2 text-sm text-on-surface">
+      <div className="mb-xl flex items-center gap-8">
+        <div className="text-on-surface flex items-center gap-2 text-sm">
           <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
             <circle cx="10" cy="10" r="8" />
           </svg>
-          <span><strong>{totalUnits}</strong> courses</span>
+          <span>
+            <strong>{totalUnits}</strong> courses
+          </span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-on-surface">
+        <div className="text-on-surface flex items-center gap-2 text-sm">
           <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
             <circle cx="10" cy="10" r="8" />
           </svg>
-          <span><strong>{inProgressCount}</strong> in progress</span>
+          <span>
+            <strong>{inProgressCount}</strong> in progress
+          </span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-on-surface">
+        <div className="text-on-surface flex items-center gap-2 text-sm">
           <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
             <circle cx="10" cy="10" r="8" />
           </svg>
-          <span><strong>{badgeCount}</strong> badges</span>
+          <span>
+            <strong>{badgeCount}</strong> badges
+          </span>
         </div>
       </div>
 
       <SectionDivider density="minimal" className="mb-xl" />
 
-      <div className="flex flex-col gap-md">
-        <div className="p-md border border-outline-variant rounded-lg">
+      <div className="gap-md flex flex-col">
+        <div className="p-md border-outline-variant rounded-lg border">
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => onNavigate({ view: 'catalog' })}>
-              Browse Courses
-            </Button>
+            <Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
               View Progress
             </Button>

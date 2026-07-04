@@ -141,10 +141,10 @@ function StoryQuestionComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-lg border border-error bg-error/10 p-lg text-on-surface"
+        className="border-error bg-error/10 p-lg text-on-surface rounded-lg border"
       >
-        <p className="font-semibold text-error">Invalid story question configuration.</p>
-        <p className="mt-xs text-sm text-on-surface/70">
+        <p className="text-error font-semibold">Invalid story question configuration.</p>
+        <p className="mt-xs text-on-surface/70 text-sm">
           Please check that your story has a scenario or story field and at least one question.
         </p>
       </div>
@@ -154,9 +154,9 @@ function StoryQuestionComponent(props: {
   const { questions } = parsed.data;
 
   const storyCallout = (
-    <div className="bg-primary-container/20 rounded-lg p-md border-l-4 border-primary mb-lg">
+    <div className="bg-primary-container/20 p-md border-primary mb-lg rounded-lg border-l-4">
       {visual && (
-        <span className="text-3xl mr-sm" aria-hidden="true">
+        <span className="mr-sm text-3xl" aria-hidden="true">
           {visual}
         </span>
       )}
@@ -214,9 +214,9 @@ function StoryQuestionComponent(props: {
           role="status"
           aria-live="assertive"
           data-testid="story-result"
-          className="mb-lg p-md rounded-lg bg-surface-container border border-outline-variant"
+          className="mb-lg p-md bg-surface-container border-outline-variant rounded-lg border"
         >
-          <p className="font-semibold text-lg">
+          <p className="text-lg font-semibold">
             You got {correctCount} of {totalQuestions} correct.
           </p>
         </div>
@@ -225,7 +225,7 @@ function StoryQuestionComponent(props: {
           if (!response) return null;
           return (
             <div key={qIdx} className="mb-lg">
-              <p className="font-semibold mb-xs">
+              <p className="mb-xs font-semibold">
                 Question {qIdx + 1}: {q.question}
               </p>
               {q.options.map((opt, optIdx) => {
@@ -238,9 +238,9 @@ function StoryQuestionComponent(props: {
                     key={optIdx}
                     className={`my-xs p-sm rounded-lg ${
                       isCorrectOption
-                        ? 'opacity-100 border-2 border-success'
+                        ? 'border-success border-2 opacity-100'
                         : isWrongSelected
-                          ? 'opacity-60 border-2 border-error'
+                          ? 'border-error border-2 opacity-60'
                           : 'opacity-60'
                     }`}
                   >
@@ -267,7 +267,7 @@ function StoryQuestionComponent(props: {
     <div data-testid="story-question">
       {storyCallout}
       {questions.length > 1 && (
-        <p className="text-sm text-on-surface/70 mb-sm" data-testid="question-progress">
+        <p className="text-on-surface/70 mb-sm text-sm" data-testid="question-progress">
           Question {currentIndex + 1} of {questions.length}
         </p>
       )}
@@ -294,7 +294,7 @@ function StoryQuestionComponent(props: {
           return (
             <label
               key={idx}
-              className={`block my-xs ${optionClasses}`}
+              className={`my-xs block ${optionClasses}`}
               data-testid={isCorrectShown ? 'correct-option' : undefined}
             >
               <input
@@ -319,7 +319,7 @@ function StoryQuestionComponent(props: {
           role="status"
           aria-live="assertive"
           data-testid="question-feedback"
-          className="mt-md p-md rounded-lg border border-outline-variant bg-surface-container"
+          className="mt-md p-md border-outline-variant bg-surface-container rounded-lg border"
         >
           {feedback.isCorrect ? (
             <p className="text-success font-semibold">✓ Correct!</p>

@@ -142,25 +142,25 @@ Stages 3–4 are complete. Product design has begun with the Learner App.
 
 ### Learner App Visual DNA Alignment
 
-| Component/Feature | Status | Notes |
-| ----------------- | ------ | ----- |
-| HeroSection | ✅ DONE | Background gradient, AssemblyFlow at 8% opacity, padding 48px 40px |
-| OpenModule (xs size) | ✅ DONE | Added 48×48 size for card indicators |
-| CourseCardWithModule | ✅ DONE | Uses xs OpenModule, pr-16 for satellite space |
-| CourseCard grid layout | ✅ DONE | CSS grid `minmax(280px, 1fr)` matching prototype |
-| SectionDivider | ✅ DONE | AssemblyFlow at 15% opacity |
-| Stats section | ✅ DONE | Circle SVG icons matching prototype |
-| EmptyState | ✅ DONE | OpenModule + SilhouetteGroup pattern |
+| Component/Feature      | Status  | Notes                                                              |
+| ---------------------- | ------- | ------------------------------------------------------------------ |
+| HeroSection            | ✅ DONE | Background gradient, AssemblyFlow at 8% opacity, padding 48px 40px |
+| OpenModule (xs size)   | ✅ DONE | Added 48×48 size for card indicators                               |
+| CourseCardWithModule   | ✅ DONE | Uses xs OpenModule, pr-16 for satellite space                      |
+| CourseCard grid layout | ✅ DONE | CSS grid `minmax(280px, 1fr)` matching prototype                   |
+| SectionDivider         | ✅ DONE | AssemblyFlow at 15% opacity                                        |
+| Stats section          | ✅ DONE | Circle SVG icons matching prototype                                |
+| EmptyState             | ✅ DONE | OpenModule + SilhouetteGroup pattern                               |
 
 ### Remaining Work
 
-| Product        | Status | Notes                                              |
-| -------------- | ------ | -------------------------------------------------- |
-| Learner App    | 🟡     | Core layout aligned, hero, stats, cards, dividers   |
-| Authoring App  | 🔲     |                                                    |
-| Website        | 🔲     |                                                    |
-| AI Experiences | 🔲     |                                                    |
-| Reward Engine  | 🔲     |                                                    |
+| Product        | Status | Notes                                             |
+| -------------- | ------ | ------------------------------------------------- |
+| Learner App    | 🟡     | Core layout aligned, hero, stats, cards, dividers |
+| Authoring App  | 🔲     |                                                   |
+| Website        | 🔲     |                                                   |
+| AI Experiences | 🔲     |                                                   |
+| Reward Engine  | 🔲     |                                                   |
 
 ---
 
@@ -283,5 +283,5 @@ All high-priority tasks are complete. Remaining work is Stage 5 (Product Design)
 | 2026-07-03 | Epic #327 complete: All Visual DNA components implemented          | Open Module, Assembly Flow, Silhouette Assembly built with stories and tests                                           |
 | 2026-07-03 | Epic #332 complete: Stage 4 Design System finalized                | Elevation tokens wired, color palette validated, typography confirmed, axe-core audit passed, full test suite verified |
 | 2026-07-03 | Stage 4 Design System marked COMPLETE                              | All 14 token categories wired, 28 components pass accessibility, 0 axe-core violations                                 |
-| 2026-07-04 | OpenModule xs size (48×48) added                                   | Matches prototype card indicators — smaller footprint for inline Visual DNA                                             |
-| 2026-07-04 | Learner App layout aligned to prototype                            | Grid layout, hero, stats, cards, dividers now match 04-full-page-mockup.html                                          |
+| 2026-07-04 | OpenModule xs size (48×48) added                                   | Matches prototype card indicators — smaller footprint for inline Visual DNA                                            |
+| 2026-07-04 | Learner App layout aligned to prototype                            | Grid layout, hero, stats, cards, dividers now match 04-full-page-mockup.html                                           |

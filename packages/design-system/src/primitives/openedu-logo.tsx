@@ -57,7 +57,7 @@ export const OpenEduLogo = React.forwardRef<HTMLDivElement, OpenEduLogoProps>(
             width={s.symbol * 0.3}
             height={s.symbol * 0.3}
             viewBox="0 0 20 20"
-            className="text-primary fill-current self-start mt-0.5"
+            className="text-primary mt-0.5 self-start fill-current"
             aria-hidden="true"
           >
             <circle cx="10" cy="10" r="8" />
@@ -72,7 +72,7 @@ export const OpenEduLogo = React.forwardRef<HTMLDivElement, OpenEduLogoProps>(
       <div ref={ref} className={cn('inline-flex items-center gap-2', className)} {...props}>
         <LogoSymbol size={s.symbol} />
         <div className="flex flex-col">
-          <span className={cn('font-semibold leading-tight text-foreground', s.text)}>OpenEdu</span>
+          <span className={cn('text-foreground font-semibold leading-tight', s.text)}>OpenEdu</span>
           <span className={cn('text-muted-foreground leading-tight', s.tagline)}>
             Knowledge assembled
           </span>

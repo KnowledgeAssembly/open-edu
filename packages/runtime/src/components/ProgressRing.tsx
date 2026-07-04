@@ -62,7 +62,7 @@ export function ProgressRing({
           )}
         />
       </svg>
-      <span className="absolute text-xs font-semibold text-on-surface">{clampedProgress}%</span>
+      <span className="text-on-surface absolute text-xs font-semibold">{clampedProgress}%</span>
     </div>
   );
 }

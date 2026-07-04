@@ -50,42 +50,42 @@ export function LayoutShell({
 
   const shellContent = (
     <section
-      className="font-body-md text-on-surface bg-surface min-h-full flex flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
+      className="font-body-md text-on-surface bg-surface flex min-h-full flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
       data-testid="layout-shell"
     >
       {!hideHeader && (
-        <header className="flex flex-col gap-sm border-b border-outline-variant pb-4">
+        <header className="gap-sm border-outline-variant flex flex-col border-b pb-4">
           <h1 className="m-0 text-[1.5rem] font-bold">{title}</h1>
           <ProgressBar current={current} total={total} />
         </header>
       )}
 
-      <main aria-live="polite" className="flex-1 min-h-0">
+      <main aria-live="polite" className="min-h-0 flex-1">
         {children ?? <NodeRenderer node={currentNode} onComplete={completeNode} />}
       </main>
 
-      <footer className="flex justify-between items-center gap-4 border-t border-outline-variant pt-4">
+      <footer className="border-outline-variant flex items-center justify-between gap-4 border-t pt-4">
         <div className="flex gap-2">
           {onBack && (
             <button
               type="button"
               onClick={handleBack}
               disabled={!canGoBack}
-              className="bg-surface-container-high text-on-surface border border-outline-variant rounded-lg px-4 py-2.5 text-base font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-surface-container-high text-on-surface border-outline-variant cursor-pointer rounded-lg border px-4 py-2.5 text-base font-semibold disabled:cursor-not-allowed disabled:opacity-40"
               data-testid="layout-shell-back"
             >
               {backLabel}
             </button>
           )}
           {isCompleted ? (
-            <p role="status" className="text-secondary font-semibold py-2.5">
+            <p role="status" className="text-secondary py-2.5 font-semibold">
               {completedLabel}
             </p>
           ) : showNextButton && !nextDisabled ? (
             <button
               type="button"
               onClick={() => completeNode()}
-              className="bg-primary text-on-primary border-none rounded-lg px-5 py-2.5 text-base font-semibold cursor-pointer"
+              className="bg-primary text-on-primary cursor-pointer rounded-lg border-none px-5 py-2.5 text-base font-semibold"
               data-testid="layout-shell-next"
             >
               {nextLabel}
@@ -106,10 +106,10 @@ export function LayoutShell({
   if (sidebar) {
     return (
       <div className="flex h-full">
-        <div className="flex-[0_0_280px] overflow-y-auto border-r border-outline-variant">
+        <div className="border-outline-variant flex-[0_0_280px] overflow-y-auto border-r">
           {sidebar}
         </div>
-        <div className="flex-1 min-w-0">{shellContent}</div>
+        <div className="min-w-0 flex-1">{shellContent}</div>
       </div>
     );
   }

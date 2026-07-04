@@ -39,18 +39,18 @@ export function SideNav({
 
   return (
     <aside
-      className="w-[var(--oe-space-panel-nav,260px)] h-screen flex flex-col bg-surface-container border-r border-outline-variant font-body-md overflow-hidden"
+      className="bg-surface-container border-outline-variant font-body-md flex h-screen w-[var(--oe-space-panel-nav,260px)] flex-col overflow-hidden border-r"
       data-testid="side-nav"
       aria-label="Course navigation"
     >
-      <div className="px-4 pb-3 pt-5 border-b border-outline-variant">
-        <h1 className="text-lg font-bold m-0 text-fg leading-tight">OpenEdu</h1>
-        <p className="text-xs text-on-surface-variant m-0 mt-0.5 leading-tight">
+      <div className="border-outline-variant border-b px-4 pb-3 pt-5">
+        <h1 className="text-fg m-0 text-lg font-bold leading-tight">OpenEdu</h1>
+        <p className="text-on-surface-variant m-0 mt-0.5 text-xs leading-tight">
           Interactive learning platform
         </p>
       </div>
 
-      <nav className="p-2 flex flex-col gap-0.5" aria-label="Main navigation">
+      <nav className="flex flex-col gap-0.5 p-2" aria-label="Main navigation">
         {navTabs.map((tab) => (
           <button
             key={tab.id}
@@ -59,13 +59,13 @@ export function SideNav({
             aria-current={activeTab === tab.id ? 'page' : undefined}
             data-testid={`sidenav-tab-${tab.id}`}
             className={cn(
-              'flex items-center gap-2.5 px-3 py-2 border-none border-l-2 border-transparent rounded-r-md rounded-l-none bg-transparent cursor-pointer text-left text-sm font-body-md text-on-surface-variant transition-[background-color,color,border-color] duration-200',
+              'font-body-md text-on-surface-variant flex cursor-pointer items-center gap-2.5 rounded-l-none rounded-r-md border-l-2 border-none border-transparent bg-transparent px-3 py-2 text-left text-sm transition-[background-color,color,border-color] duration-200',
               activeTab === tab.id &&
                 'border-l-primary bg-primary-container text-on-primary-container font-medium',
             )}
           >
             <span
-              className="flex items-center justify-center shrink-0 text-base w-5 h-5"
+              className="flex h-5 w-5 shrink-0 items-center justify-center text-base"
               aria-hidden="true"
             >
               {tab.icon}
@@ -75,23 +75,23 @@ export function SideNav({
         ))}
       </nav>
 
-      <hr className="h-px bg-outline-variant mx-4 my-2 border-none" aria-hidden="true" />
+      <hr className="bg-outline-variant mx-4 my-2 h-px border-none" aria-hidden="true" />
 
       {courseTitle && (
         <div className="flex-1 overflow-y-auto py-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant px-4 py-2 m-0">
+          <h2 className="text-on-surface-variant m-0 px-4 py-2 text-xs font-semibold uppercase tracking-wider">
             {courseTitle}
           </h2>
           {children}
         </div>
       )}
 
-      <div className="px-4 py-3 border-t border-outline-variant">
+      <div className="border-outline-variant border-t px-4 py-3">
         <button
           type="button"
           onClick={onResumeLesson}
           data-testid="sidenav-resume"
-          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border-none rounded-[var(--oe-radius,8px)] bg-primary text-on-primary text-sm font-semibold cursor-pointer font-body-md leading-tight"
+          className="bg-primary text-on-primary font-body-md flex w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--oe-radius,8px)] border-none px-4 py-2.5 text-sm font-semibold leading-tight"
         >
           {'\u25B6'} Resume Last Lesson
         </button>

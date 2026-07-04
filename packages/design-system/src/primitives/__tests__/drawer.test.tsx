@@ -8,7 +8,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from '../drawer.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('Drawer', () => {
   it('has no accessibility violations in closed state', async () => {

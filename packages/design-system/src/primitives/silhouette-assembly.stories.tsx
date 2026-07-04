@@ -25,7 +25,7 @@ export const AllProportions: Story = {
       {(['tall', 'med', 'short', 'wide', 'narrow'] as const).map((prop) => (
         <div key={prop} className="text-center">
           <SilhouetteAssembly proportion={prop} palette={1} />
-          <p className="text-xs text-gray-500 mt-2">{prop}</p>
+          <p className="mt-2 text-xs text-gray-500">{prop}</p>
         </div>
       ))}
     </div>
@@ -39,7 +39,7 @@ export const AllPalettes: Story = {
       {([1, 2, 3, 4, 5] as const).map((pal) => (
         <div key={pal} className="text-center">
           <SilhouetteAssembly proportion="med" palette={pal} />
-          <p className="text-xs text-gray-500 mt-2">c{pal}</p>
+          <p className="mt-2 text-xs text-gray-500">c{pal}</p>
         </div>
       ))}
     </div>

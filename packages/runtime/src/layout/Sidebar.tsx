@@ -13,14 +13,14 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
   return (
     <nav
       aria-label="Course outline"
-      className="w-[280px] border-r border-outline-variant p-md overflow-y-auto font-body-md h-full box-border"
+      className="border-outline-variant p-md font-body-md box-border h-full w-[280px] overflow-y-auto border-r"
       data-testid="sidebar"
     >
-      <h2 className="text-lg font-bold m-0 mb-4 text-on-surface">{title}</h2>
+      <h2 className="text-on-surface m-0 mb-4 text-lg font-bold">{title}</h2>
       {nodes.length === 0 ? (
-        <p className="text-on-surface-variant text-xs mt-4">No lessons</p>
+        <p className="text-on-surface-variant mt-4 text-xs">No lessons</p>
       ) : (
-        <ol className="list-none p-0 m-0">
+        <ol className="m-0 list-none p-0">
           {nodes.map((node) => {
             const nodeTitle =
               node.node.title ?? node.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
@@ -43,7 +43,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
             return (
               <li
                 key={node.relativePath}
-                className={`p-2 rounded-lg flex items-center gap-sm cursor-default ${isCurrent ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface'}`}
+                className={`gap-sm flex cursor-default items-center rounded-lg p-2 ${isCurrent ? 'bg-primary text-on-primary' : 'text-on-surface bg-transparent'}`}
                 aria-current={isCurrent ? 'step' : undefined}
                 data-testid={`sidebar-node-${node.relativePath}`}
               >
@@ -54,7 +54,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
           })}
         </ol>
       )}
-      <p className="text-on-surface-variant text-xs mt-4">
+      <p className="text-on-surface-variant mt-4 text-xs">
         {visitedNodes.length} of {total} complete
       </p>
     </nav>

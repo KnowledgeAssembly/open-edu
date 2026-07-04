@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TopAppBar } from '../TopAppBar.js';
 import { FontSizeProvider } from '../../font-size-context.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 function renderWithProvider(ui: React.ReactElement) {
   return render(<FontSizeProvider>{ui}</FontSizeProvider>);

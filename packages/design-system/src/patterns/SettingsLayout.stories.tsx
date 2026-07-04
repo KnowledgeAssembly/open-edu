@@ -3,18 +3,18 @@ import { SettingsLayout } from './SettingsLayout';
 
 const SettingsSidebar = () => (
   <nav>
-    <h3 className="text-sm font-semibold text-on-surface mb-3">Settings</h3>
-    <ul className="list-none p-0 m-0 space-y-1 text-sm">
-      <li className="px-3 py-2 rounded bg-primary-container text-on-primary-container font-medium cursor-pointer">
+    <h3 className="text-on-surface mb-3 text-sm font-semibold">Settings</h3>
+    <ul className="m-0 list-none space-y-1 p-0 text-sm">
+      <li className="bg-primary-container text-on-primary-container cursor-pointer rounded px-3 py-2 font-medium">
         Profile
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         Notifications
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         Appearance
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         Accessibility
       </li>
     </ul>
@@ -23,25 +23,25 @@ const SettingsSidebar = () => (
 
 const SettingsContent = () => (
   <div>
-    <h2 className="text-xl font-bold text-on-surface mb-4">Profile Settings</h2>
-    <div className="space-y-4 max-w-md">
+    <h2 className="text-on-surface mb-4 text-xl font-bold">Profile Settings</h2>
+    <div className="max-w-md space-y-4">
       <div>
-        <label className="block text-sm font-medium text-on-surface mb-1">Display Name</label>
+        <label className="text-on-surface mb-1 block text-sm font-medium">Display Name</label>
         <input
           type="text"
           defaultValue="Sarthak"
-          className="w-full px-3 py-2 border border-outline-variant rounded-lg text-sm bg-surface text-on-surface"
+          className="border-outline-variant bg-surface text-on-surface w-full rounded-lg border px-3 py-2 text-sm"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-on-surface mb-1">Email</label>
+        <label className="text-on-surface mb-1 block text-sm font-medium">Email</label>
         <input
           type="email"
           defaultValue="sarthak@example.com"
-          className="w-full px-3 py-2 border border-outline-variant rounded-lg text-sm bg-surface text-on-surface"
+          className="border-outline-variant bg-surface text-on-surface w-full rounded-lg border px-3 py-2 text-sm"
         />
       </div>
-      <button className="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold">
+      <button className="bg-primary text-on-primary rounded-lg px-4 py-2 text-sm font-semibold">
         Save Changes
       </button>
     </div>

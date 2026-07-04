@@ -99,7 +99,7 @@ export function CatalogPage({
   if (packages.length === 0) {
     return (
       <div className="p-xl">
-        <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Courses</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Courses</h1>
         <EmptyState
           variant="no-courses"
           heading="No courses yet"
@@ -111,20 +111,20 @@ export function CatalogPage({
   }
 
   return (
-    <div className="p-xl max-w-7xl mx-auto" data-testid="catalog-page">
-      <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Course Catalog</h1>
+    <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
+      <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Course Catalog</h1>
 
       {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">
-          <div className="flex items-center justify-between mb-md">
-            <h2 className="text-h2 font-display font-bold text-on-surface">Continue Learning</h2>
+          <div className="mb-md flex items-center justify-between">
+            <h2 className="text-h2 font-display text-on-surface font-bold">Continue Learning</h2>
             {onNavigate && (
               <Button variant="link" size="sm" onClick={() => onNavigate({ view: 'progress' })}>
                 View all
               </Button>
             )}
           </div>
-          <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {continueList.map((pkg) => (
               <CourseCardWithModule
                 key={pkg.manifest.id}
@@ -151,8 +151,8 @@ export function CatalogPage({
 
       {bundleSummaries && bundleSummaries.length > 0 && (
         <section className="mb-xl" data-testid="bundle-list-section">
-          <h2 className="text-h2 font-display font-bold text-on-surface mb-md">Learning Bundles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+          <h2 className="text-h2 font-display text-on-surface mb-md font-bold">Learning Bundles</h2>
+          <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {bundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
               const completedModules = prog
@@ -161,22 +161,22 @@ export function CatalogPage({
               return (
                 <Card
                   key={bundle.manifest.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => onStartBundle?.(bundle.manifest.id)}
                   data-testid="bundle-card"
                   data-bundle-id={bundle.manifest.id}
                 >
                   <CardHeader>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <Badge variant="secondary">Bundle</Badge>
-                      <CardTitle className="text-lg truncate">{bundle.manifest.title}</CardTitle>
+                      <CardTitle className="truncate text-lg">{bundle.manifest.title}</CardTitle>
                     </div>
                     <CardDescription>
                       {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex gap-4 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex gap-4 text-xs">
                       <span>{bundle.moduleCount} modules</span>
                       <span>{bundle.totalNodeCount} activities</span>
                     </div>
@@ -186,7 +186,7 @@ export function CatalogPage({
                           value={Math.round((completedModules / bundle.moduleCount) * 100)}
                           className="h-2"
                         />
-                        <span className="text-xs text-muted-foreground mt-1 block">
+                        <span className="text-muted-foreground mt-1 block text-xs">
                           {completedModules} of {bundle.moduleCount} complete
                         </span>
                       </div>
@@ -202,7 +202,7 @@ export function CatalogPage({
       <SectionDivider density="minimal" className="mb-xl" />
 
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-sm mb-md" data-testid="filter-chips">
+        <div className="gap-sm mb-md flex flex-wrap" data-testid="filter-chips">
           <Button
             variant={activeTag === null ? 'default' : 'outline'}
             size="sm"
@@ -225,8 +225,8 @@ export function CatalogPage({
         </div>
       )}
 
-      <div className="flex items-center gap-md mb-md" data-testid="sort-controls">
-        <span className="text-sm text-on-surface-variant font-semibold">Sort:</span>
+      <div className="gap-md mb-md flex items-center" data-testid="sort-controls">
+        <span className="text-on-surface-variant text-sm font-semibold">Sort:</span>
         <Select
           value={sortBy}
           onValueChange={(v) => setSortBy(v as 'newest' | 'inProgress' | 'alphabetical')}
@@ -254,7 +254,7 @@ export function CatalogPage({
           }
         />
       ) : (
-        <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
           {sorted.map((pkg) => (
             <CourseCardWithModule
               key={pkg.manifest.id}

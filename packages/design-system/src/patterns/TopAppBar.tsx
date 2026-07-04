@@ -75,21 +75,21 @@ export function TopAppBar({
 
   return (
     <header
-      className="sticky top-0 z-[50] w-full h-[var(--oe-space-xl,64px)] flex items-center justify-between px-4 box-border bg-surface border-b border-outline-variant font-body-md gap-3"
+      className="bg-surface border-outline-variant font-body-md sticky top-0 z-[50] box-border flex h-[var(--oe-space-xl,64px)] w-full items-center justify-between gap-3 border-b px-4"
       data-testid="top-app-bar"
     >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         {isCourseView ? (
-          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span
-              className="text-lg font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis"
+              className="text-on-surface overflow-hidden text-ellipsis whitespace-nowrap text-lg font-bold leading-tight"
               title={courseTitle ?? 'Course'}
             >
               {courseTitle ?? 'Course'}
             </span>
             {progressTotal != null && progressTotal > 0 && (
               <div
-                className="w-full max-w-[200px] h-1 rounded-sm bg-outline-variant overflow-hidden"
+                className="bg-outline-variant h-1 w-full max-w-[200px] overflow-hidden rounded-sm"
                 role="progressbar"
                 aria-valuenow={progressCurrent ?? 0}
                 aria-valuemin={0}
@@ -97,7 +97,7 @@ export function TopAppBar({
                 aria-label={`Progress: ${progressCurrent ?? 0} of ${progressTotal}`}
               >
                 <div
-                  className="h-full rounded-sm bg-primary transition-[width] duration-200"
+                  className="bg-primary h-full rounded-sm transition-[width] duration-200"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -108,16 +108,16 @@ export function TopAppBar({
           breadcrumbs &&
           breadcrumbs.length > 0 && (
             <nav aria-label="Breadcrumbs">
-              <ol className="flex items-center gap-1 list-none p-0 m-0 flex-wrap">
+              <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0">
                 {breadcrumbs.map((crumb, idx) => (
-                  <li key={idx} className="flex items-center gap-1 text-sm text-on-surface-variant">
+                  <li key={idx} className="text-on-surface-variant flex items-center gap-1 text-sm">
                     {idx > 0 && (
-                      <span className="text-xs text-on-surface-variant" aria-hidden="true">
+                      <span className="text-on-surface-variant text-xs" aria-hidden="true">
                         /
                       </span>
                     )}
                     {crumb.href ? (
-                      <a href={crumb.href} className="text-primary no-underline cursor-pointer">
+                      <a href={crumb.href} className="text-primary cursor-pointer no-underline">
                         {crumb.label}
                       </a>
                     ) : (
@@ -131,7 +131,7 @@ export function TopAppBar({
         )}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex shrink-0 items-center gap-2">
         {showA11yControls && (
           <div className="relative">
             <button
@@ -142,7 +142,7 @@ export function TopAppBar({
               title="Accessibility settings"
               aria-expanded={a11yOpen}
               data-testid="top-appbar-a11y"
-              className="flex items-center justify-center w-9 h-9 border-none rounded-[var(--oe-radius,8px)] bg-transparent text-on-surface-variant cursor-pointer text-lg transition-colors duration-200 hover:bg-surface-container-high"
+              className="text-on-surface-variant hover:bg-surface-container-high flex h-9 w-9 cursor-pointer items-center justify-center rounded-[var(--oe-radius,8px)] border-none bg-transparent text-lg transition-colors duration-200"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -159,13 +159,13 @@ export function TopAppBar({
             {a11yOpen && (
               <div
                 ref={panelRef}
-                className="absolute top-full right-0 z-[60] w-[200px] p-3 bg-surface-container-highest border border-outline-variant rounded-lg shadow-elevation-overlay flex flex-col gap-2"
+                className="bg-surface-container-highest border-outline-variant shadow-elevation-overlay absolute right-0 top-full z-[60] flex w-[200px] flex-col gap-2 rounded-lg border p-3"
                 data-testid="top-appbar-a11y-panel"
                 role="region"
                 aria-label="Accessibility controls"
                 onKeyDown={handlePanelKeyDown}
               >
-                <label className="text-xs flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
                   <input
                     type="checkbox"
                     checked={breadcrumbsEnabled}
@@ -173,7 +173,7 @@ export function TopAppBar({
                   />
                   Breadcrumbs
                 </label>
-                <label className="text-xs flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
                   <input
                     type="checkbox"
                     checked={readingRulerEnabled}
@@ -184,22 +184,22 @@ export function TopAppBar({
                   />
                   Reading Ruler
                 </label>
-                <div className="text-xs flex items-center gap-2">
+                <div className="flex items-center gap-2 text-xs">
                   <span>Font:</span>
                   <button
                     type="button"
                     onClick={decreaseFontSize}
                     aria-label="Decrease font size"
-                    className="px-2 py-0.5 text-xs border border-outline-variant rounded bg-transparent cursor-pointer"
+                    className="border-outline-variant cursor-pointer rounded border bg-transparent px-2 py-0.5 text-xs"
                   >
                     A-
                   </button>
-                  <span className="text-xs min-w-[2em] text-center">{fontSize}%</span>
+                  <span className="min-w-[2em] text-center text-xs">{fontSize}%</span>
                   <button
                     type="button"
                     onClick={increaseFontSize}
                     aria-label="Increase font size"
-                    className="px-2 py-0.5 text-xs border border-outline-variant rounded bg-transparent cursor-pointer"
+                    className="border-outline-variant cursor-pointer rounded border bg-transparent px-2 py-0.5 text-xs"
                   >
                     A+
                   </button>
@@ -213,12 +213,12 @@ export function TopAppBar({
           <img
             src={userAvatar}
             alt="User avatar"
-            className="w-8 h-8 rounded-full object-cover border-2 border-outline-variant"
+            className="border-outline-variant h-8 w-8 rounded-full border-2 object-cover"
             data-testid="top-appbar-avatar"
           />
         ) : (
           <div
-            className="w-8 h-8 rounded-full border-2 border-outline-variant bg-primary-container flex items-center justify-center"
+            className="border-outline-variant bg-primary-container flex h-8 w-8 items-center justify-center rounded-full border-2"
             role="img"
             aria-label="User avatar placeholder"
             data-testid="top-appbar-avatar"

@@ -169,7 +169,7 @@ function PlaceValueChartComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       >
         <p className="text-on-surface font-semibold">
           Invalid widget configuration. Please check your settings.

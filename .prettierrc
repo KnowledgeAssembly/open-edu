@@ -6,5 +6,8 @@
   "tabWidth": 2,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "bracketSpacing": true
+  "bracketSpacing": true,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["cn", "cva", "clsx"],
+  "tailwindAttributes": ["className"]
 }

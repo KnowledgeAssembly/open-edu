@@ -11,7 +11,7 @@ export function AICallout({ icon, title, children }: AICalloutProps): JSX.Elemen
   return (
     <div
       className={cn(
-        'flex items-start gap-3 p-md bg-tertiary-container border border-tertiary-container rounded-lg font-sans',
+        'p-md bg-tertiary-container border-tertiary-container flex items-start gap-3 rounded-lg border font-sans',
       )}
       data-testid="ai-callout"
       role="complementary"
@@ -19,17 +19,17 @@ export function AICallout({ icon, title, children }: AICalloutProps): JSX.Elemen
     >
       {icon && (
         <span
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-lg text-on-tertiary-container"
+          className="text-on-tertiary-container flex h-6 w-6 shrink-0 items-center justify-center text-lg"
           aria-hidden="true"
         >
           {icon}
         </span>
       )}
-      <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold m-0 mb-1 text-on-tertiary-container leading-tight">
+      <div className="min-w-0 flex-1">
+        <h3 className="text-on-tertiary-container m-0 mb-1 text-sm font-semibold leading-tight">
           {title}
         </h3>
-        <div className="text-sm text-on-tertiary-container leading-normal m-0">{children}</div>
+        <div className="text-on-tertiary-container m-0 text-sm leading-normal">{children}</div>
       </div>
     </div>
   );

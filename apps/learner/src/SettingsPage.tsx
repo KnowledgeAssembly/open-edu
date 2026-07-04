@@ -32,13 +32,13 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
   }, [highContrast]);
 
   return (
-    <div className="p-xl max-w-3xl mx-auto" data-testid="settings-page">
-      <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Settings</h1>
+    <div className="p-xl mx-auto max-w-3xl" data-testid="settings-page">
+      <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Settings</h1>
 
-      <div className="flex flex-col gap-lg">
+      <div className="gap-lg flex flex-col">
         <Card>
           <CardHeader>
-            <h2 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold leading-none tracking-tight">
               <Sun className="h-5 w-5" /> Theme
             </h2>
           </CardHeader>
@@ -49,17 +49,17 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
 
         <Card>
           <CardHeader>
-            <h2 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold leading-none tracking-tight">
               <Eye className="h-5 w-5" /> Accessibility
             </h2>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Type className="h-4 w-4 text-muted-foreground" />
+                <Type className="text-muted-foreground h-4 w-4" />
                 <div>
-                  <p className="font-medium text-sm">Font Size</p>
-                  <p className="text-xs text-muted-foreground">Adjust text size</p>
+                  <p className="text-sm font-medium">Font Size</p>
+                  <p className="text-muted-foreground text-xs">Adjust text size</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-12 text-center text-sm font-mono">{fontSize}%</span>
+                <span className="w-12 text-center font-mono text-sm">{fontSize}%</span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -86,8 +86,8 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="font-medium text-sm">Reduced Motion</p>
-                  <p className="text-xs text-muted-foreground">Minimize animations</p>
+                  <p className="text-sm font-medium">Reduced Motion</p>
+                  <p className="text-muted-foreground text-xs">Minimize animations</p>
                 </div>
               </div>
               <Switch
@@ -100,8 +100,8 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="font-medium text-sm">High Contrast</p>
-                  <p className="text-xs text-muted-foreground">Increase color contrast</p>
+                  <p className="text-sm font-medium">High Contrast</p>
+                  <p className="text-muted-foreground text-xs">Increase color contrast</p>
                 </div>
               </div>
               <Switch
