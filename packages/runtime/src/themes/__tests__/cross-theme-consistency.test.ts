@@ -65,13 +65,16 @@ describe('cross-theme consistency', () => {
     }
   });
 
-  it('all themes have primary-light defined and non-empty', () => {
+  it('all themes have primary-light defined and within same purple hue family', () => {
     const themes = [luminaScholastica, nocturnal, zen];
+    const targetHue = 258;
     for (const theme of themes) {
       const light = theme.colors['primary-light'];
       expect(light).toBeDefined();
       if (light) {
         expect(light).not.toBe('');
+        const { h } = hexToHsl(light);
+        expect(Math.abs(h - targetHue)).toBeLessThanOrEqual(20);
       }
     }
   });

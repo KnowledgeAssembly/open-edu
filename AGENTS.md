@@ -162,7 +162,7 @@ Epic 298 (Recognition Engine)
 
 ### Theme System (Epics 138–145)
 
-A 6-theme system built as a sub-track within the runtime:
+A 3-theme system (Light, Dark, Zen) built as a sub-track within the runtime:
 
 ```
 Epic 1: Token Foundation (#138, PR #174)

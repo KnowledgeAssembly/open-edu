@@ -1,6 +1,6 @@
 export const a11yOverridesCss = `
-.open-edu-runtime {
-  @media (prefers-contrast: more) {
+@media (prefers-contrast: more) {
+  .open-edu-runtime {
     --oe-color-outline: #000000;
     --oe-color-outline-variant: #1a1a1a;
     --oe-border-width-sm: 2px;
@@ -9,8 +9,10 @@ export const a11yOverridesCss = `
     --oe-focus-ring-width: 3px;
     --oe-focus-ring-offset: 3px;
   }
+}
 
-  @media (forced-colors: active) {
+@media (forced-colors: active) {
+  .open-edu-runtime {
     --oe-color-primary: Highlight;
     --oe-color-on-primary: HighlightText;
     --oe-color-surface: Canvas;
