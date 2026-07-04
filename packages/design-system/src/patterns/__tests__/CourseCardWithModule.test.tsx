@@ -70,13 +70,4 @@ describe('CourseCardWithModule', () => {
     const hidden = container.querySelector('[aria-hidden="true"]');
     expect(hidden).toBeInTheDocument();
   });
-
-  it('accepts className prop', () => {
-    render(
-      <CourseCardWithModule progress={null} className="custom-class">
-        <div data-testid="child">Child</div>
-      </CourseCardWithModule>,
-    );
-    expect(screen.getByTestId('child').parentElement).toHaveClass('custom-class');
-  });
 });

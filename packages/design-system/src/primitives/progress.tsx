@@ -11,7 +11,7 @@ export interface ProgressProps extends Omit<
   total?: number;
   showLabel?: boolean;
   label?: string;
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
 }
 
 const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root>, ProgressProps>(
@@ -24,7 +24,7 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
         : Math.min(100, Math.max(0, value ?? 0));
     const ariaLabel =
       label ?? (current != null ? `Progress: ${clampedCurrent} of ${safeTotal}` : undefined);
-    const sizeClass = size === 'sm' ? 'h-2' : 'h-4';
+    const sizeClass = size === 'xs' ? 'h-1' : size === 'sm' ? 'h-2' : 'h-4';
 
     const bar = (
       <ProgressPrimitive.Root

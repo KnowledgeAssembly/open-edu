@@ -1,6 +1,6 @@
 import { Button } from '../primitives/button.js';
 import { Progress } from '../primitives/progress.js';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 interface PackageManifest {
   id: string;
@@ -28,16 +28,7 @@ export interface CourseCardProps {
   earnedBadgeCount: number;
   progress: ProgressSnapshot | null;
   onStart: () => void;
-}
-
-function simpleHash(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
+  indicator?: ReactNode;
 }
 
 function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.Element {
@@ -75,12 +66,10 @@ export function CourseCard({
   earnedBadgeCount,
   progress,
   onStart,
+  indicator,
 }: CourseCardProps): JSX.Element {
   const isCompleted = progress?.isCompleted ?? false;
   const isStarted = !!progress;
-
-  const hue = simpleHash(manifest.title ?? manifest.id) % 360;
-  const gradient = `linear-gradient(90deg, hsl(${hue}, 60%, 50%), hsl(${(hue + 40) % 360}, 60%, 50%))`;
 
   let buttonLabel: string;
 
@@ -94,16 +83,18 @@ export function CourseCard({
 
   return (
     <article
-      className="border border-outline-variant rounded-lg bg-surface-container-lowest shadow-elevation-raised font-body-md overflow-hidden"
+      className="relative rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] font-body-md transition-shadow duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
       data-testid="course-card"
     >
-      <div className="h-2 w-full" style={{ background: gradient }} aria-hidden="true" />
-      <div className="p-md">
-        <h2 className="text-xl font-bold m-0 mb-1 text-on-surface">{manifest.title}</h2>
+      {indicator && (
+        <div className="absolute top-4 right-4 z-10">{indicator}</div>
+      )}
+      <div className="p-5 pr-16">
+        <h2 className="text-base font-semibold m-0 mb-2 text-on-surface">{manifest.title}</h2>
         {manifest.author && (
-          <p className="text-body-ui text-on-surface-variant m-0 mb-2">by {manifest.author}</p>
+          <p className="text-sm text-on-surface-variant m-0 mb-3 leading-relaxed">by {manifest.author}</p>
         )}
-        <div className="flex items-center gap-md text-sm text-on-surface-variant mb-2">
+        <div className="flex items-center gap-3 text-xs text-on-surface-variant mb-3">
           <span>{nodeCount} lessons</span>
           {badgeCount > 0 && <BadgeIcons total={badgeCount} earned={earnedBadgeCount} />}
         </div>
@@ -112,12 +103,14 @@ export function CourseCard({
             current={progress.visitedNodes.length}
             total={nodeCount}
             showLabel={false}
-            size="sm"
+            size="xs"
+            className="mt-3"
           />
         )}
         <Button
           variant={isCompleted ? 'secondary' : 'default'}
-          className="w-full mt-3"
+          size="sm"
+          className="w-full mt-3 h-8 px-4 text-sm"
           aria-label={`${buttonLabel} ${manifest.title}`}
           onClick={() => onStart()}
         >

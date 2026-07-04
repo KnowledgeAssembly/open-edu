@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { cn } from '../lib/utils.js';
 import { OpenModule } from '../primitives/open-module.js';
+import type { CourseCardProps } from '../learning/CourseCard.js';
 
-export interface CourseCardWithModuleProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CourseCardWithModuleProps {
   progress: {
     visitedNodes: string[];
     isCompleted: boolean;
@@ -24,23 +25,47 @@ export function getProgressSatellites(
   return 2;
 }
 
+function isCourseCard(child: React.ReactNode): boolean {
+  return (
+    React.isValidElement(child) &&
+    typeof child.type === 'function' &&
+    'manifest' in (child.props as Record<string, unknown>)
+  );
+}
+
 export function CourseCardWithModule({
   progress,
   badgeCount = 0,
   children,
-  className,
-  ...props
 }: CourseCardWithModuleProps): JSX.Element {
   const satellites = getProgressSatellites(progress, badgeCount);
 
+  const indicator = (
+    <OpenModule
+      size="xs"
+      satellites={satellites}
+      aria-hidden="true"
+    />
+  );
+
+  const mapped = React.Children.map(children, (child) => {
+    if (isCourseCard(child)) {
+      return React.cloneElement(child as React.ReactElement<CourseCardProps>, {
+        indicator,
+      });
+    }
+    return child;
+  });
+
+  const hasCourseCard = React.Children.toArray(children).some(isCourseCard);
+
+  if (hasCourseCard) {
+    return <>{mapped}</>;
+  }
+
   return (
-    <div className={cn('relative', className)} {...props}>
-      <OpenModule
-        size="sm"
-        satellites={satellites}
-        className="absolute top-2 right-2 z-10"
-        aria-hidden="true"
-      />
+    <div className="relative pr-16">
+      <div className="absolute top-4 right-4 z-10">{indicator}</div>
       {children}
     </div>
   );

@@ -124,23 +124,22 @@ export function CatalogPage({
               </Button>
             )}
           </div>
-          <div className="flex gap-md overflow-x-auto pb-sm">
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {continueList.map((pkg) => (
-              <div key={pkg.manifest.id} className="min-w-[260px] max-w-[300px] flex-shrink-0">
-                <CourseCardWithModule
+              <CourseCardWithModule
+                key={pkg.manifest.id}
+                progress={progress[pkg.manifest.id] ?? null}
+                badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+              >
+                <CourseCard
+                  manifest={pkg.manifest}
+                  nodeCount={pkg.nodeCount}
+                  badgeCount={pkg.availableBadges}
+                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                   progress={progress[pkg.manifest.id] ?? null}
-                  badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                >
-                  <CourseCard
-                    manifest={pkg.manifest}
-                    nodeCount={pkg.nodeCount}
-                    badgeCount={pkg.availableBadges}
-                    earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                    progress={progress[pkg.manifest.id] ?? null}
-                    onStart={() => onStartCourse(pkg.rootDir)}
-                  />
-                </CourseCardWithModule>
-              </div>
+                  onStart={() => onStartCourse(pkg.rootDir)}
+                />
+              </CourseCardWithModule>
             ))}
           </div>
         </section>
@@ -255,7 +254,7 @@ export function CatalogPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {sorted.map((pkg) => (
             <CourseCardWithModule
               key={pkg.manifest.id}

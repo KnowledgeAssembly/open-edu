@@ -4,7 +4,6 @@ import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
 import { Button, HeroSection, SectionDivider } from '@open-edu/design-system';
-import { BookOpen, TrendingUp, Trophy, Sparkles, PlayCircle } from 'lucide-react';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
@@ -33,37 +32,40 @@ export function HomePage({
   return (
     <div className="p-xl max-w-4xl mx-auto" data-testid="home-page">
       <HeroSection className="mb-xl">
-        <h1 className="text-h1 font-display text-on-surface font-bold mb-sm">Welcome to OpenEdu</h1>
-        <p className="text-body-reading text-on-surface-variant mb-xl">
-          Your interactive learning platform. Explore courses, track progress, and earn badges.
+        <h1 className="text-h1 font-display text-on-surface font-bold mb-sm">Welcome back, Learner</h1>
+        <p className="text-body-reading text-on-surface-variant">
+          Continue where you left off, or explore new courses in the catalog.
         </p>
       </HeroSection>
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-on-surface-variant mb-xl">
-        <span className="flex items-center gap-1.5">
-          <BookOpen className="h-4 w-4 text-primary" />
-          <strong className="text-on-surface font-semibold">{totalUnits}</strong> learning units
-        </span>
-        <span className="flex items-center gap-1.5">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          <strong className="text-on-surface font-semibold">{inProgressCount}</strong> in progress
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Trophy className="h-4 w-4 text-primary" />
-          <strong className="text-on-surface font-semibold">{badgeCount}</strong> badges earned
-        </span>
+      <div className="flex items-center gap-8 mb-xl">
+        <div className="flex items-center gap-2 text-sm text-on-surface">
+          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <span><strong>{totalUnits}</strong> courses</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-on-surface">
+          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <span><strong>{inProgressCount}</strong> in progress</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-on-surface">
+          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <span><strong>{badgeCount}</strong> badges</span>
+        </div>
       </div>
 
       <SectionDivider density="minimal" className="mb-xl" />
 
       <div className="flex flex-col gap-md">
         <div className="p-md border border-outline-variant rounded-lg">
-          <h2 className="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" /> Quick Links
-          </h2>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => onNavigate({ view: 'catalog' })}>
-              <PlayCircle className="h-4 w-4 mr-2" /> Browse Courses
+              Browse Courses
             </Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
               View Progress

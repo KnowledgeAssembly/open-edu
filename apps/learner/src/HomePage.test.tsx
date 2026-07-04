@@ -17,15 +17,15 @@ vi.mock('../bundleProgressStorage', () => ({
 describe('HomePage', () => {
   it('renders welcome heading', () => {
     render(<HomePage onNavigate={vi.fn()} />);
-    expect(screen.getByText('Welcome to OpenEdu')).toBeInTheDocument();
+    expect(screen.getByText('Welcome back, Learner')).toBeInTheDocument();
   });
 
   it('renders inline stats with default zero counts', () => {
     const { container } = render(<HomePage onNavigate={vi.fn()} />);
-    const statsContainer = container.querySelector('.flex-wrap');
-    expect(statsContainer?.textContent).toMatch(/0.*learning units/);
+    const statsContainer = container.querySelector('.flex.items-center.gap-8');
+    expect(statsContainer?.textContent).toMatch(/0.*courses/);
     expect(statsContainer?.textContent).toMatch(/0.*in progress/);
-    expect(statsContainer?.textContent).toMatch(/0.*badges earned/);
+    expect(statsContainer?.textContent).toMatch(/0.*badges/);
   });
 
   it('renders quick link buttons', () => {
