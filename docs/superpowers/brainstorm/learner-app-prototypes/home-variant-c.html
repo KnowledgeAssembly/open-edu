@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Home — Variant C: Editorial Canvas — OpenEdu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;420;600;650;700&family=JetBrains+Mono:wght@400&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#5d4a8a",
+        "primary-container": "#7c6bb0",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#ede2ff",
+        surface: "#fcfaf8",
+        "surface-dim": "#e3dfda",
+        "surface-bright": "#fefcf9",
+        "surface-container": "#f2eee9",
+        "surface-container-high": "#ebe7e2",
+        "surface-container-low": "#f7f4f0",
+        "surface-container-lowest": "#ffffff",
+        "on-surface": "#1f1c18",
+        "on-surface-variant": "#48443f",
+        outline: "#76706b",
+        "outline-variant": "#ccc6c0",
+        accent: "#665e77",
+        tertiary: "#b8862d",
+        "tertiary-container": "#f0d68a",
+        error: "#ba1a1a",
+        success: "#16a34a",
+        "primary-light": "#7c6bb0",
+      },
+      borderRadius: {
+        sm: "0.125rem",
+        DEFAULT: "0.375rem",
+        md: "0.5rem",
+        lg: "0.625rem",
+        xl: "0.75rem",
+        full: "9999px",
+      },
+      spacing: {
+        xs: "4px",
+        sm: "12px",
+        md: "24px",
+        lg: "40px",
+        xl: "64px",
+        gutter: "24px",
+        "container-max": "900px",
+      },
+      fontFamily: {
+        display: ["Inter", "system-ui", "sans-serif"],
+        "body-ui": ["Inter", "system-ui", "sans-serif"],
+        "body-reading": ['"Source Serif 4"', "Georgia", "serif"],
+        mono: ['"JetBrains Mono"', "monospace"],
+      },
+      fontSize: {
+        "display-lg": ["40px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+        h1: ["28px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "650" }],
+        h2: ["24px", { lineHeight: "1.3", fontWeight: "600" }],
+        "body-ui": ["14px", { lineHeight: "1.6", fontWeight: "420" }],
+        "body-reading": ["18px", { lineHeight: "1.7", fontWeight: "420", letterSpacing: "0.01em" }],
+        caption: ["13px", { lineHeight: "1.5", fontWeight: "420" }],
+        label: ["11px", { lineHeight: "1.0", letterSpacing: "0.08em", fontWeight: "600" }],
+      },
+    },
+  },
+};
+</script>
+<style>
+  body { background: #fcfaf8; color: #1f1c18; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  @keyframes dash-flow {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: -13; }
+  }
+  @keyframes silhouette-breath {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.30; }
+  }
+  @keyframes orbit-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes pipili-wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animated-dash { animation: none !important; }
+    .silhouette-breath { animation: none !important; }
+    .orbit-float { animation: none !important; }
+    .pipili-wave { animation: none !important; }
+  }
+</style>
+</head>
+<body class="font-body-ui text-body-ui">
+  <main class="mx-auto max-w-[900px] px-md py-lg flex flex-col gap-xl">
+    <!-- Hero Section — asymmetric editorial layout -->
+    <section class="relative overflow-hidden rounded-xl px-10 py-16" style="background: linear-gradient(135deg, #f7f4f0 0%, #ede9e3 100%);">
+      <!-- Assembly Flow background -->
+      <svg viewBox="0 0 300 100" class="absolute inset-0 h-full w-full opacity-[0.06]" aria-hidden="true">
+        <path d="M 15 55 C 20.83 48.33 36.67 31.67 50 35 C 63.33 38.33 73.33 53.33 90 65 C 106.67 76.67 116.67 55 130 30 C 143.33 5 150 45 170 60 C 190 75 196.67 55 210 40 C 223.33 25 236.67 55 250 65 C 263.33 75 276.67 55 285 45" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="15" cy="55" r="3" fill="#5d4a8a" opacity="0.12"/>
+        <circle cx="50" cy="35" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="90" cy="65" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="130" cy="30" r="7" fill="#665e77" opacity="0.5"/>
+        <circle cx="170" cy="60" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="210" cy="40" r="5" fill="#665e77" opacity="0.5"/>
+        <circle cx="250" cy="65" r="8" fill="#5d4a8a" opacity="0.6"/>
+        <circle cx="285" cy="45" r="3" fill="#7c6bb0" opacity="0.12"/>
+      </svg>
+
+      <div class="relative z-10 flex flex-col md:flex-row items-center gap-xl">
+        <!-- Left: Text block — offset upward -->
+        <div class="flex-1">
+          <span class="font-label text-label uppercase tracking-wider text-primary mb-3 block">OpenEdu</span>
+          <h1 class="font-display text-display-lg text-on-surface mb-sm leading-[1.1]">Welcome back,<br/>Learner</h1>
+          <p class="font-body-reading text-body-reading text-on-surface-variant max-w-sm">Continue where you left off, or discover something new in the catalog.</p>
+          <div class="mt-md flex items-center gap-4">
+            <button class="bg-primary text-on-primary font-semibold px-lg py-sm rounded-full transition-opacity hover:opacity-90">Begin Learning</button>
+            <div class="pipili-wave relative flex items-center justify-center" style="width:40px;height:40px;animation:pipili-wave 4s ease-in-out infinite 1s;">
+              <svg width="40" height="40" viewBox="0 0 20 20" fill="#5d4a8a" aria-hidden="true">
+                <circle cx="10" cy="10" r="8"/>
+              </svg>
+              <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;left:38%;">
+                <circle cx="10" cy="10" r="8"/>
+              </svg>
+              <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;right:38%;">
+                <circle cx="10" cy="10" r="8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Large Open Module visual focal point (lg, 5 satellites) -->
+        <div class="flex-shrink-0" aria-hidden="true">
+          <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+            <circle cx="90" cy="90" r="64" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="90" cy="26" r="8" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="135" cy="45" r="8" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="154" cy="90" r="8" fill="#5d4a8a" opacity="0.7"/>
+            <circle cx="135" cy="135" r="8" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="90" cy="154" r="8" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="90" cy="90" r="19" fill="#5d4a8a"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Subtle label connecting Pipili to the module -->
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 text-caption text-on-surface-variant opacity-50" aria-hidden="true">
+        — assembled from parts —
+      </div>
+    </section>
+
+    <!-- Stats — arranged as orbital "floating" cards -->
+    <div class="grid grid-cols-3 gap-md relative">
+      <!-- Decorative connecting Assembly Flow above stats -->
+      <div class="absolute -top-6 left-0 right-0 overflow-hidden opacity-[0.08]" aria-hidden="true">
+        <svg viewBox="0 0 600 20" class="h-5 w-full">
+          <path d="M 0 10 C 100 5 200 15 300 10 C 400 5 500 15 600 10" fill="none" stroke="#5d4a8a" stroke-width="1" stroke-dasharray="6 4"/>
+          <circle cx="100" cy="8" r="3" fill="#5d4a8a"/>
+          <circle cx="300" cy="10" r="4" fill="#5d4a8a"/>
+          <circle cx="500" cy="12" r="3" fill="#665e77"/>
+        </svg>
+      </div>
+
+      <!-- Stat 1 -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center orbit-float" style="animation: orbit-float 4s ease-in-out infinite 0s;">
+        <div class="flex justify-center mb-2" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <span class="font-display text-h1 text-on-surface block">12</span>
+        <span class="text-caption text-on-surface-variant">courses</span>
+      </div>
+
+      <!-- Stat 2 — delayed float -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center orbit-float" style="animation: orbit-float 4s ease-in-out infinite 0.5s;">
+        <div class="flex justify-center mb-2" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <span class="font-display text-h1 text-on-surface block">3</span>
+        <span class="text-caption text-on-surface-variant">in progress</span>
+      </div>
+
+      <!-- Stat 3 — more delayed float -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center orbit-float" style="animation: orbit-float 4s ease-in-out infinite 1s;">
+        <div class="flex justify-center mb-2" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <span class="font-display text-h1 text-on-surface block">5</span>
+        <span class="text-caption text-on-surface-variant">badges</span>
+      </div>
+    </div>
+
+    <!-- Section break — Silhouette Assembly figures as markers -->
+    <div class="relative flex items-center justify-center gap-4 py-md" aria-hidden="true">
+      <div class="h-px flex-1 bg-outline-variant opacity-30"></div>
+      <div class="flex items-end gap-3">
+        <div class="flex flex-col items-center silhouette-breath" style="animation:silhouette-breath 4s ease-in-out infinite 0s;">
+          <div class="rounded-full" style="width:20px;height:20px;background:#5d4a8a;opacity:0.7;margin-bottom:-4px;"></div>
+          <div class="rounded-[50%_50%_30%_30%]" style="width:26px;height:34px;background:#5d4a8a;opacity:0.25;"></div>
+        </div>
+        <div class="flex flex-col items-center silhouette-breath" style="animation:silhouette-breath 4s ease-in-out infinite 1s;">
+          <div class="rounded-full" style="width:22px;height:22px;background:#b8862d;opacity:0.7;margin-bottom:-4px;"></div>
+          <div class="rounded-[50%_50%_30%_30%]" style="width:34px;height:32px;background:#b8862d;opacity:0.25;"></div>
+        </div>
+        <div class="flex flex-col items-center silhouette-breath" style="animation:silhouette-breath 4s ease-in-out infinite 0.5s;">
+          <div class="rounded-full" style="width:16px;height:16px;background:#7c6bb0;opacity:0.7;margin-bottom:-4px;"></div>
+          <div class="rounded-[50%_50%_30%_30%]" style="width:20px;height:36px;background:#7c6bb0;opacity:0.25;"></div>
+        </div>
+      </div>
+      <div class="h-px flex-1 bg-outline-variant opacity-30"></div>
+    </div>
+
+    <!-- CTA section with Assembly Flow card border (from Variant B) -->
+    <div class="relative rounded-xl p-md" style="border:2px solid;border-color:color-mix(in srgb, #5d4a8a 12%, transparent);">
+      <div class="absolute inset-0 rounded-xl overflow-hidden opacity-[0.04]" aria-hidden="true">
+        <svg viewBox="0 0 300 100" class="h-full w-full">
+          <path d="M 15 55 C 50 35 130 30 170 60 C 210 90 260 40 285 45" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5"/>
+          <circle cx="50" cy="35" r="5" fill="#5d4a8a"/>
+          <circle cx="170" cy="60" r="6" fill="#5d4a8a"/>
+          <circle cx="285" cy="45" r="3" fill="#665e77"/>
+        </svg>
+      </div>
+      <div class="relative z-10">
+        <p class="font-body-reading text-body-reading text-on-surface-variant mb-md">Ready to continue your learning journey?</p>
+        <div class="flex flex-wrap gap-3">
+          <button class="bg-primary text-on-primary font-semibold px-md py-sm rounded transition-opacity hover:opacity-90">Browse Courses</button>
+          <button class="bg-surface-container text-on-surface font-semibold px-md py-sm rounded transition-opacity hover:bg-surface-container-high">View Progress</button>
+          <button class="bg-surface-container text-on-surface font-semibold px-md py-sm rounded transition-opacity hover:bg-surface-container-high">Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom finish — Assembly Flow closure -->
+    <div class="w-full overflow-hidden opacity-[0.06]" aria-hidden="true">
+      <svg viewBox="0 0 600 80" class="h-8 w-full">
+        <path d="M 40 40 C 200 20 400 60 560 40" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" class="animated-dash" style="animation: dash-flow 3s linear infinite;"/>
+        <circle cx="100" cy="35" r="5" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="300" cy="45" r="7" fill="#665e77" opacity="0.5"/>
+        <circle cx="500" cy="38" r="5" fill="#5d4a8a" opacity="0.3"/>
+      </svg>
+    </div>
+  </main>
+</body>
+</html>

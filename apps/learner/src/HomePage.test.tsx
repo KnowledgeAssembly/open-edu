@@ -20,12 +20,12 @@ describe('HomePage', () => {
     expect(screen.getByText('Welcome back, Learner')).toBeInTheDocument();
   });
 
-  it('renders inline stats with default zero counts', () => {
-    const { container } = render(<HomePage onNavigate={vi.fn()} />);
-    const statsContainer = container.querySelector('.flex.items-center.gap-8');
-    expect(statsContainer?.textContent).toMatch(/0.*courses/);
-    expect(statsContainer?.textContent).toMatch(/0.*in progress/);
-    expect(statsContainer?.textContent).toMatch(/0.*badges/);
+  it('renders summary stats with default zero counts', () => {
+    render(<HomePage onNavigate={vi.fn()} />);
+    expect(screen.getAllByText('0')).toHaveLength(3);
+    expect(screen.getByText('learning units')).toBeInTheDocument();
+    expect(screen.getByText('in progress')).toBeInTheDocument();
+    expect(screen.getByText('badges earned')).toBeInTheDocument();
   });
 
   it('renders quick link buttons', () => {

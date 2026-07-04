@@ -6,6 +6,7 @@ import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import {
   Badge,
+  BundleCardWithModule,
   Button,
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import {
   CardTitle,
   CourseCardWithModule,
   EmptyState,
+  PageHeader,
   Progress,
   SectionDivider,
   Select,
@@ -99,7 +101,7 @@ export function CatalogPage({
   if (packages.length === 0) {
     return (
       <div className="p-xl">
-        <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Courses</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-lg">Courses</h1>
         <EmptyState
           variant="no-courses"
           heading="No courses yet"
@@ -112,12 +114,12 @@ export function CatalogPage({
 
   return (
     <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
-      <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Course Catalog</h1>
+      <PageHeader eyebrow="Catalog" title="Course Catalog" className="mb-xl" />
 
       {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">
           <div className="mb-md flex items-center justify-between">
-            <h2 className="text-h2 font-display text-on-surface font-bold">Continue Learning</h2>
+            <h2 className="text-h2 font-display text-on-surface">Continue Learning</h2>
             {onNavigate && (
               <Button variant="link" size="sm" onClick={() => onNavigate({ view: 'progress' })}>
                 View all
@@ -151,7 +153,7 @@ export function CatalogPage({
 
       {bundleSummaries && bundleSummaries.length > 0 && (
         <section className="mb-xl" data-testid="bundle-list-section">
-          <h2 className="text-h2 font-display text-on-surface mb-md font-bold">Learning Bundles</h2>
+          <h2 className="text-h2 font-display text-on-surface mb-md">Learning Bundles</h2>
           <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {bundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
@@ -159,40 +161,47 @@ export function CatalogPage({
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
                 : 0;
               return (
-                <Card
+                <BundleCardWithModule
                   key={bundle.manifest.id}
-                  className="cursor-pointer transition-shadow hover:shadow-md"
-                  onClick={() => onStartBundle?.(bundle.manifest.id)}
-                  data-testid="bundle-card"
-                  data-bundle-id={bundle.manifest.id}
+                  completedModules={completedModules}
+                  totalModules={bundle.moduleCount}
                 >
-                  <CardHeader>
-                    <div className="mb-1 flex items-center gap-2">
-                      <Badge variant="secondary">Bundle</Badge>
-                      <CardTitle className="truncate text-lg">{bundle.manifest.title}</CardTitle>
-                    </div>
-                    <CardDescription>
-                      {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-muted-foreground flex gap-4 text-xs">
-                      <span>{bundle.moduleCount} modules</span>
-                      <span>{bundle.totalNodeCount} activities</span>
-                    </div>
-                    {prog && (
-                      <div className="mt-2">
-                        <Progress
-                          value={Math.round((completedModules / bundle.moduleCount) * 100)}
-                          className="h-2"
-                        />
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                          {completedModules} of {bundle.moduleCount} complete
-                        </span>
+                  <Card
+                    className="cursor-pointer transition-shadow hover:shadow-md"
+                    onClick={() => onStartBundle?.(bundle.manifest.id)}
+                    data-testid="bundle-card"
+                    data-bundle-id={bundle.manifest.id}
+                  >
+                    <CardHeader>
+                      <div className="mb-1 flex items-center gap-2">
+                        <Badge variant="secondary">Bundle</Badge>
+                        <CardTitle className="text-h4 font-display truncate">
+                          {bundle.manifest.title}
+                        </CardTitle>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      <CardDescription>
+                        {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-on-surface-variant flex gap-4 text-xs">
+                        <span>{bundle.moduleCount} modules</span>
+                        <span>{bundle.totalNodeCount} activities</span>
+                      </div>
+                      {prog && (
+                        <div className="mt-2">
+                          <Progress
+                            value={Math.round((completedModules / bundle.moduleCount) * 100)}
+                            className="h-2"
+                          />
+                          <span className="text-on-surface-variant mt-1 block text-xs">
+                            {completedModules} of {bundle.moduleCount} complete
+                          </span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </BundleCardWithModule>
               );
             })}
           </div>

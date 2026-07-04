@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Catalog — Visual DNA Alignment — OpenEdu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;420;600;650;700&family=JetBrains+Mono:wght@400&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#5d4a8a",
+        "primary-container": "#7c6bb0",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#ede2ff",
+        surface: "#fcfaf8",
+        "surface-dim": "#e3dfda",
+        "surface-bright": "#fefcf9",
+        "surface-container": "#f2eee9",
+        "surface-container-high": "#ebe7e2",
+        "surface-container-low": "#f7f4f0",
+        "surface-container-lowest": "#ffffff",
+        "on-surface": "#1f1c18",
+        "on-surface-variant": "#48443f",
+        outline: "#76706b",
+        "outline-variant": "#ccc6c0",
+        accent: "#665e77",
+        tertiary: "#b8862d",
+        "tertiary-container": "#f0d68a",
+        error: "#ba1a1a",
+        success: "#16a34a",
+        "primary-light": "#7c6bb0",
+      },
+      borderRadius: {
+        sm: "0.125rem",
+        DEFAULT: "0.375rem",
+        md: "0.5rem",
+        lg: "0.625rem",
+        xl: "0.75rem",
+        full: "9999px",
+      },
+      spacing: {
+        xs: "4px",
+        sm: "12px",
+        md: "24px",
+        lg: "40px",
+        xl: "64px",
+        gutter: "24px",
+        "container-max": "1200px",
+      },
+      fontFamily: {
+        display: ["Inter", "system-ui", "sans-serif"],
+        "body-ui": ["Inter", "system-ui", "sans-serif"],
+        "body-reading": ['"Source Serif 4"', "Georgia", "serif"],
+        mono: ['"JetBrains Mono"', "monospace"],
+      },
+      fontSize: {
+        "display-lg": ["40px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+        h1: ["28px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "650" }],
+        h2: ["24px", { lineHeight: "1.3", fontWeight: "600" }],
+        "body-ui": ["14px", { lineHeight: "1.6", fontWeight: "420" }],
+        "body-reading": ["18px", { lineHeight: "1.7", fontWeight: "420", letterSpacing: "0.01em" }],
+        caption: ["13px", { lineHeight: "1.5", fontWeight: "420" }],
+        label: ["11px", { lineHeight: "1.0", letterSpacing: "0.08em", fontWeight: "600" }],
+      },
+    },
+  },
+};
+</script>
+<style>
+  body { background: #fcfaf8; color: #1f1c18; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="font-body-ui text-body-ui">
+  <main class="mx-auto max-w-7xl px-xl py-lg flex flex-col gap-lg">
+
+    <!-- Page Header -->
+    <div class="relative overflow-hidden rounded-xl px-8 py-8" style="background: linear-gradient(135deg, #f7f4f0 0%, #f2eee9 100%);">
+      <svg viewBox="0 0 300 100" class="absolute inset-0 h-full w-full opacity-[0.06]" aria-hidden="true">
+        <path d="M 15 55 C 20.83 48.33 36.67 31.67 50 35 C 63.33 38.33 73.33 53.33 90 65 C 106.67 76.67 116.67 55 130 30 C 143.33 5 150 45 170 60 C 190 75 196.67 55 210 40 C 223.33 25 236.67 55 250 65 C 263.33 75 276.67 55 285 45" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="15" cy="55" r="3" fill="#5d4a8a" opacity="0.12"/>
+        <circle cx="50" cy="35" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="90" cy="65" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="130" cy="30" r="7" fill="#665e77" opacity="0.5"/>
+        <circle cx="170" cy="60" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="210" cy="40" r="5" fill="#665e77" opacity="0.5"/>
+        <circle cx="250" cy="65" r="8" fill="#5d4a8a" opacity="0.6"/>
+        <circle cx="285" cy="45" r="3" fill="#7c6bb0" opacity="0.12"/>
+      </svg>
+      <div class="relative z-10">
+        <span class="font-label text-label uppercase tracking-wider text-primary mb-1 block">Catalog</span>
+        <h1 class="font-display text-h1 text-on-surface">Course Catalog</h1>
+        <p class="text-body-reading text-body-reading text-on-surface-variant mt-1 max-w-lg">Discover courses and learning bundles assembled for you.</p>
+      </div>
+    </div>
+
+    <!-- Continue Learning shelf -->
+    <section>
+      <div class="flex items-center justify-between mb-md">
+        <div class="flex items-center gap-3">
+          <h2 class="font-display text-h2 text-on-surface">Continue Learning</h2>
+          <span class="bg-surface-container text-caption text-on-surface-variant px-2 py-0.5 rounded-full">3 in progress</span>
+        </div>
+        <a href="#" class="text-caption text-primary font-semibold hover:underline">View all →</a>
+      </div>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+        <!-- Course 1 — in progress, 2 satellites + 1 (3 total) -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+          <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="27.8" cy="20.5" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+          </div>
+          <div class="p-5 pr-16">
+            <h3 class="font-display text-base font-semibold text-on-surface mb-1">React Fundamentals</h3>
+            <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Build modern user interfaces with React hooks and components.</p>
+            <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+              <span>12 lessons</span>
+              <span class="flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                2/3 badges
+              </span>
+            </div>
+            <div class="h-[3px] w-full bg-surface-variant rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width:42%;"></div>
+            </div>
+            <button class="mt-3 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Continue</button>
+          </div>
+        </div>
+        <!-- Course 2 — in progress, 3 satellites -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+          <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="27.8" cy="20.5" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+          </div>
+          <div class="p-5 pr-16">
+            <h3 class="font-display text-base font-semibold text-on-surface mb-1">JavaScript Basics</h3>
+            <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Master the fundamentals of JavaScript programming.</p>
+            <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+              <span>10 lessons</span>
+            </div>
+            <div class="h-[3px] w-full bg-surface-variant rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width:30%;"></div>
+            </div>
+            <button class="mt-3 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Continue</button>
+          </div>
+        </div>
+        <!-- Course 3 — not started, 2 satellites -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+          <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+          </div>
+          <div class="p-5 pr-16">
+            <h3 class="font-display text-base font-semibold text-on-surface mb-1">Introduction to Python</h3>
+            <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Learn Python programming from scratch.</p>
+            <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+              <span>8 lessons</span>
+              <span>~3 hours</span>
+            </div>
+            <button class="mt-3 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Start</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider — Assembly Flow -->
+    <div class="w-full overflow-hidden" role="separator" aria-hidden="true">
+      <svg viewBox="0 0 300 100" class="h-8 w-full opacity-15">
+        <path d="M 30 55 C 70 48.33 110 36.67 150 40 C 190 43.33 210 53.33 270 50" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="30" cy="55" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="150" cy="40" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="270" cy="50" r="5" fill="#665e77" opacity="0.25"/>
+      </svg>
+    </div>
+
+    <!-- Learning Bundles section -->
+    <section>
+      <h2 class="font-display text-h2 text-on-surface mb-md">Learning Bundles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+        <!-- Bundle 1 -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md cursor-pointer hover:border-primary transition-colors relative overflow-hidden group">
+          <div class="absolute top-3 right-3" aria-hidden="true">
+            <span class="bg-primary-container text-on-primary-container text-caption font-semibold px-2 py-0.5 rounded-full text-[10px]">Bundle</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+            <h3 class="font-display text-base font-semibold text-on-surface truncate">Level B Mathematics</h3>
+          </div>
+          <p class="text-caption text-on-surface-variant mb-3">A comprehensive mathematics curriculum covering algebra, geometry, and statistics.</p>
+          <div class="text-caption text-on-surface-variant flex gap-4">
+            <span>3 modules</span>
+            <span>45 activities</span>
+          </div>
+        </div>
+        <!-- Bundle 2 -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md cursor-pointer hover:border-primary transition-colors relative overflow-hidden group">
+          <div class="absolute top-3 right-3" aria-hidden="true">
+            <span class="bg-primary-container text-on-primary-container text-caption font-semibold px-2 py-0.5 rounded-full text-[10px]">Bundle</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+            <h3 class="font-display text-base font-semibold text-on-surface truncate">Web Development</h3>
+          </div>
+          <p class="text-caption text-on-surface-variant mb-3">From HTML to full-stack — a complete web development learning path.</p>
+          <div class="text-caption text-on-surface-variant flex gap-4">
+            <span>5 modules</span>
+            <span>60 activities</span>
+          </div>
+        </div>
+        <!-- Bundle 3 — with progress -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md cursor-pointer hover:border-primary transition-colors relative overflow-hidden group">
+          <div class="absolute top-3 right-3" aria-hidden="true">
+            <span class="bg-primary-container text-on-primary-container text-caption font-semibold px-2 py-0.5 rounded-full text-[10px]">Bundle</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+              <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="27.8" cy="20.5" r="3" fill="#7c6bb0" opacity="0.7"/>
+              <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+            </svg>
+            <h3 class="font-display text-base font-semibold text-on-surface truncate">Data Science</h3>
+          </div>
+          <p class="text-caption text-on-surface-variant mb-3">Learn data analysis, visualization, and machine learning fundamentals.</p>
+          <div class="text-caption text-on-surface-variant flex gap-4 mb-2">
+            <span>4 modules</span>
+            <span>32 activities</span>
+          </div>
+          <div class="h-[3px] w-full bg-surface-variant rounded-full overflow-hidden">
+            <div class="h-full bg-primary rounded-full" style="width:25%;"></div>
+          </div>
+          <span class="text-caption text-primary mt-1 block">1 of 4 modules complete</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider — Assembly Flow -->
+    <div class="w-full overflow-hidden" role="separator" aria-hidden="true">
+      <svg viewBox="0 0 300 100" class="h-8 w-full opacity-15">
+        <path d="M 30 55 C 70 48.33 110 36.67 150 40 C 190 43.33 210 53.33 270 50" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="30" cy="55" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="150" cy="40" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="270" cy="50" r="5" fill="#665e77" opacity="0.25"/>
+      </svg>
+    </div>
+
+    <!-- Filter chips + Sort -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-md">
+      <div class="flex flex-wrap gap-2 flex-1">
+        <button class="bg-primary text-on-primary text-sm font-semibold px-3 py-1.5 rounded-full transition-opacity hover:opacity-90">All</button>
+        <button class="bg-surface-container text-on-surface-variant text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-surface-container-high">JavaScript</button>
+        <button class="bg-surface-container text-on-surface-variant text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-surface-container-high">React</button>
+        <button class="bg-surface-container text-on-surface-variant text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-surface-container-high">Python</button>
+        <button class="bg-surface-container text-on-surface-variant text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-surface-container-high">Data Science</button>
+        <button class="bg-surface-container text-on-surface-variant text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-surface-container-high">Web</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-caption text-on-surface-variant font-semibold">Sort:</span>
+        <select class="bg-surface-container-lowest border border-outline-variant text-sm text-on-surface rounded-md px-3 py-1.5 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Sort by">
+          <option>Newest</option>
+          <option>In Progress First</option>
+          <option>Alphabetical</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Course Grid -->
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+      <!-- Course 4 — not started -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+        <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <div class="p-5 pr-16">
+          <h3 class="font-display text-base font-semibold text-on-surface mb-1">Data Structures</h3>
+          <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Understanding arrays, objects, and algorithms.</p>
+          <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+            <span>12 lessons</span>
+            <span>~4 hours</span>
+          </div>
+          <button class="mt-1 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Start</button>
+        </div>
+      </div>
+
+      <!-- Course 5 — completed -->
+      <div class="bg-surface-container-lowest border-2 border-primary rounded-xl overflow-hidden relative group transition-colors">
+        <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="27.8" cy="20.5" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <div class="p-5 pr-16">
+          <h3 class="font-display text-base font-semibold text-on-surface mb-1">HTML & CSS Basics</h3>
+          <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Master the building blocks of web development.</p>
+          <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+            <span>10 of 10 lessons</span>
+            <span class="text-success flex items-center gap-0.5">
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Completed
+            </span>
+          </div>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-tertiary text-xs font-semibold">🏆 Badge earned</span>
+          </div>
+          <button class="mt-2 w-full bg-surface-container text-on-surface text-sm font-semibold py-2 rounded transition-colors hover:bg-surface-container-high">Review</button>
+        </div>
+      </div>
+
+      <!-- Course 6 — not started -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+        <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <div class="p-5 pr-16">
+          <h3 class="font-display text-base font-semibold text-on-surface mb-1">Algorithms</h3>
+          <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Master sorting, searching, and graph algorithms.</p>
+          <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+            <span>15 lessons</span>
+            <span>~6 hours</span>
+          </div>
+          <button class="mt-1 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Start</button>
+        </div>
+      </div>
+
+      <!-- Course 7 — not started -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+        <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <div class="p-5 pr-16">
+          <h3 class="font-display text-base font-semibold text-on-surface mb-1">TypeScript</h3>
+          <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Type-safe JavaScript for scalable applications.</p>
+          <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+            <span>10 lessons</span>
+            <span>~4 hours</span>
+          </div>
+          <button class="mt-1 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Start</button>
+        </div>
+      </div>
+
+      <!-- Course 8 — not started -->
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative group hover:border-primary transition-colors">
+        <div class="absolute top-4 right-4 z-10" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.18"/>
+            <circle cx="30.2" cy="7.1" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="30.2" cy="40.9" r="3" fill="#7c6bb0" opacity="0.7"/>
+            <circle cx="24" cy="24" r="6" fill="#5d4a8a"/>
+          </svg>
+        </div>
+        <div class="p-5 pr-16">
+          <h3 class="font-display text-base font-semibold text-on-surface mb-1">Node.js</h3>
+          <p class="text-caption text-on-surface-variant mb-3 leading-relaxed">Server-side JavaScript runtime and ecosystem.</p>
+          <div class="text-caption text-on-surface-variant flex items-center gap-3 mb-3">
+            <span>8 lessons</span>
+            <span>~3 hours</span>
+          </div>
+          <button class="mt-1 w-full bg-primary text-on-primary text-sm font-semibold py-2 rounded transition-opacity hover:opacity-90">Start</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipili — fixed bottom-right -->
+    <div class="fixed bottom-6 right-6 z-50" aria-label="Pipili — idle" style="animation:pipili-breathe 4s ease-in-out infinite;">
+      <div class="relative flex items-center justify-center" style="width:40px;height:40px;">
+        <svg width="40" height="40" viewBox="0 0 20 20" fill="#5d4a8a" aria-hidden="true">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+        <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;left:38%;">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+        <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;right:38%;">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+      </div>
+    </div>
+
+    <style>
+      @keyframes pipili-breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+    </style>
+  </main>
+</body>
+</html>

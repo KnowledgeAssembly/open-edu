@@ -16,7 +16,8 @@
     "build-storybook": "storybook build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "export:tokens": "tsx scripts/export-tokens.ts"
+    "export:tokens": "tsx scripts/export-tokens.ts",
+    "export:tokens:penpot": "tsx scripts/export-tokens.ts --penpot"
   },
   "peerDependencies": {
     "react": "^18.0.0",

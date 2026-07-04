@@ -311,6 +311,11 @@ export const tailwindElevationExtensions: Record<string, string> = {
   'elevation-sticky': 'var(--oe-elevation-sticky)',
 };
 
+export const tailwindAnimationExtensions: Record<string, string> = {
+  'orbit-float': 'orbit-float 3s ease-in-out infinite',
+  'pipili-wave': 'pipili-wave 2s ease-in-out infinite',
+};
+
 export const tailwindLayoutExtensions: Record<string, string> = {
   sidebar: 'var(--oe-layout-sidebar-width)',
   'sidebar-collapsed': 'var(--oe-layout-sidebar-collapsed-width)',

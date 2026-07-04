@@ -7,7 +7,17 @@ export type OpenModuleState = 'default' | 'hover' | 'active';
 export interface OpenModuleProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: OpenModuleSize;
   satellites?: number;
+  progress?: number;
   state?: OpenModuleState;
+}
+
+export function progressToSatellites(progress: number): number {
+  const clamped = Math.max(0, Math.min(100, progress));
+  if (clamped === 0) return 2;
+  if (clamped <= 33) return 3;
+  if (clamped <= 66) return 4;
+  if (clamped <= 99) return 5;
+  return 6;
 }
 
 const sizeConfig: Record<
@@ -42,11 +52,12 @@ function getSatellitePositions(
 }
 
 export const OpenModule = React.forwardRef<HTMLDivElement, OpenModuleProps>(
-  ({ size = 'md', satellites = 3, state = 'default', className, ...props }, ref) => {
+  ({ size = 'md', satellites, progress, state = 'default', className, ...props }, ref) => {
     const config = sizeConfig[size];
     const center = config.total / 2;
     const orbitRadius = config.orbit / 2;
-    const positions = getSatellitePositions(satellites, orbitRadius, center);
+    const satCount = satellites ?? (progress !== undefined ? progressToSatellites(progress) : 3);
+    const positions = getSatellitePositions(satCount, orbitRadius, center);
     const satelliteOpacity = state === 'hover' ? 0.85 : 0.7;
 
     return (

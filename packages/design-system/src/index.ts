@@ -136,7 +136,7 @@ export type {
 export { AssemblyFlow } from './primitives/assembly-flow.js';
 export type { AssemblyFlowProps, AssemblyFlowDensity } from './primitives/assembly-flow.js';
 
-export { OpenModule } from './primitives/open-module.js';
+export { OpenModule, progressToSatellites } from './primitives/open-module.js';
 export type { OpenModuleProps, OpenModuleSize, OpenModuleState } from './primitives/open-module.js';
 
 // Contexts
@@ -163,11 +163,20 @@ export type { CourseTreeProps, CourseTreeModule } from './patterns/CourseTree.js
 export { CourseCardWithModule, getProgressSatellites } from './patterns/CourseCardWithModule.js';
 export type { CourseCardWithModuleProps } from './patterns/CourseCardWithModule.js';
 
+export { BundleCardWithModule, getBundleSatellites } from './patterns/BundleCardWithModule.js';
+export type { BundleCardWithModuleProps } from './patterns/BundleCardWithModule.js';
+
+export { StatsSummary } from './patterns/StatsSummary.js';
+export type { StatsSummaryProps, StatsSummaryItem } from './patterns/StatsSummary.js';
+
 export { EmptyState } from './patterns/EmptyState.js';
 export type { EmptyStateProps } from './patterns/EmptyState.js';
 
 export { SectionDivider } from './patterns/SectionDivider.js';
 export type { SectionDividerProps } from './patterns/SectionDivider.js';
+
+export { PageHeader } from './patterns/PageHeader.js';
+export type { PageHeaderProps } from './patterns/PageHeader.js';
 
 export { HeroSection } from './patterns/HeroSection.js';
 export type { HeroSectionProps } from './patterns/HeroSection.js';

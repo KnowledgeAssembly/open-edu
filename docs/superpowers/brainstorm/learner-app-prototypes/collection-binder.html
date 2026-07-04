@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Collection Binder — Visual DNA Alignment — OpenEdu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;420;600;650;700&family=JetBrains+Mono:wght@400&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#5d4a8a", "primary-container": "#7c6bb0", "on-primary": "#ffffff", "on-primary-container": "#ede2ff",
+        surface: "#fcfaf8", "surface-dim": "#e3dfda", "surface-bright": "#fefcf9",
+        "surface-container": "#f2eee9", "surface-container-high": "#ebe7e2", "surface-container-low": "#f7f4f0",
+        "surface-container-lowest": "#ffffff", "on-surface": "#1f1c18", "on-surface-variant": "#48443f",
+        outline: "#76706b", "outline-variant": "#ccc6c0", accent: "#665e77", tertiary: "#b8862d", success: "#16a34a",
+      },
+      borderRadius: { sm: "0.125rem", DEFAULT: "0.375rem", md: "0.5rem", lg: "0.625rem", xl: "0.75rem", full: "9999px" },
+      spacing: { xs: "4px", sm: "12px", md: "24px", lg: "40px", xl: "64px" },
+      fontFamily: { display: ["Inter", "system-ui", "sans-serif"], "body-ui": ["Inter", "system-ui", "sans-serif"], "body-reading": ['"Source Serif 4"', "Georgia", "serif"], mono: ['"JetBrains Mono"', "monospace"] },
+      fontSize: { h1: ["28px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "650" }], h2: ["24px", { lineHeight: "1.3", fontWeight: "600" }], h3: ["20px", { lineHeight: "1.3", fontWeight: "600" }], "body-ui": ["14px", { lineHeight: "1.6", fontWeight: "420" }], caption: ["13px", { lineHeight: "1.5", fontWeight: "420" }], label: ["11px", { lineHeight: "1.0", letterSpacing: "0.08em", fontWeight: "600" }] },
+    },
+  },
+};
+</script>
+<style>
+  body { background: #fcfaf8; color: #1f1c18; }
+  @keyframes pipili-breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .card-animate { animation: fadeIn 0.4s ease-out both; }
+  .card-animate:nth-child(1) { animation-delay: 0ms; }
+  .card-animate:nth-child(2) { animation-delay: 80ms; }
+  .card-animate:nth-child(3) { animation-delay: 160ms; }
+  .card-animate:nth-child(4) { animation-delay: 240ms; }
+</style>
+</head>
+<body class="font-body-ui text-body-ui">
+  <main class="mx-auto max-w-[800px] px-xl py-lg flex flex-col gap-lg">
+
+    <!-- Page Header -->
+    <div class="relative overflow-hidden rounded-xl px-8 py-8" style="background: linear-gradient(135deg, #f7f4f0 0%, #f2eee9 100%);">
+      <svg viewBox="0 0 300 100" class="absolute inset-0 h-full w-full opacity-[0.06]" aria-hidden="true">
+        <path d="M 15 55 C 20.83 48.33 36.67 31.67 50 35 C 63.33 38.33 73.33 53.33 90 65 C 106.67 76.67 116.67 55 130 30 C 143.33 5 150 45 170 60 C 190 75 196.67 55 210 40 C 223.33 25 236.67 55 250 65 C 263.33 75 276.67 55 285 45" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="15" cy="55" r="3" fill="#5d4a8a" opacity="0.12"/>
+        <circle cx="50" cy="35" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="90" cy="65" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="130" cy="30" r="7" fill="#665e77" opacity="0.5"/>
+        <circle cx="170" cy="60" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="210" cy="40" r="5" fill="#665e77" opacity="0.5"/>
+        <circle cx="250" cy="65" r="8" fill="#5d4a8a" opacity="0.6"/>
+        <circle cx="285" cy="45" r="3" fill="#7c6bb0" opacity="0.12"/>
+      </svg>
+      <div class="relative z-10">
+        <span class="font-label text-label uppercase tracking-wider text-primary mb-1 block">Collection</span>
+        <h1 class="font-display text-h1 text-on-surface">Collection Binder</h1>
+        <p class="text-caption text-on-surface-variant mt-1 max-w-lg">Your museum of knowledge — 6 / 10 cards collected</p>
+      </div>
+    </div>
+
+    <!-- Collection Stats Row -->
+    <div class="grid grid-cols-3 gap-md">
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
+        <span class="font-display text-h1 text-primary block">6</span>
+        <span class="text-caption text-on-surface-variant">unlocked</span>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
+        <span class="font-display text-h1 text-on-surface block">10</span>
+        <span class="text-caption text-on-surface-variant">total cards</span>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md text-center">
+        <span class="font-display text-h1 text-tertiary block">3</span>
+        <span class="text-caption text-on-surface-variant">categories</span>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="w-full overflow-hidden" role="separator" aria-hidden="true">
+      <svg viewBox="0 0 300 100" class="h-8 w-full opacity-15">
+        <path d="M 30 55 C 70 48.33 110 36.67 150 40 C 190 43.33 210 53.33 270 50" fill="none" stroke="#5d4a8a" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.15"/>
+        <circle cx="30" cy="55" r="5" fill="#5d4a8a" opacity="0.25"/>
+        <circle cx="150" cy="40" r="6" fill="#5d4a8a" opacity="0.5"/>
+        <circle cx="270" cy="50" r="5" fill="#665e77" opacity="0.25"/>
+      </svg>
+    </div>
+
+    <!-- Shelf: JavaScript -->
+    <section class="flex flex-col gap-4" role="region" aria-label="JavaScript collection">
+      <div class="flex items-center gap-4">
+        <!-- ProgressRing -->
+        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#e3dfda" stroke-width="3"/>
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#5d4a8a" stroke-width="3" stroke-dasharray="125.6" stroke-dashoffset="31.4" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" fill="#5d4a8a" font-size="11" font-weight="700" font-family="Inter">75%</text>
+        </svg>
+        <div class="flex flex-col">
+          <h2 class="font-display text-h3 text-on-surface">JavaScript</h2>
+          <span class="text-caption text-on-surface-variant">3 / 4 cards</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="list">
+        <!-- Card: Scope & Closures (knowledge, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#f0fdf4 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Scope & Closures</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">Understanding lexical scope, hoisting, and closure patterns in JavaScript.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">JavaScript</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Promises & Async (knowledge, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#f0fdf4 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Promises & Async</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">Mastering async/await, Promise chaining, and error handling patterns.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">JavaScript</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Array Methods (skill, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#eff6ff 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M12 6v12m-6-6h12"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Skill</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Array Methods</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">Map, filter, reduce, sort, and chaining functional array operations.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">JavaScript</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Event Loop (knowledge, locked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden opacity-50 grayscale card-animate relative" tabindex="-1" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#76706b" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-outline uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Event Loop</h3>
+            <p class="text-xs text-outline line-clamp-2 leading-relaxed">Unlock to discover</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-outline px-2 py-0.5 rounded-full">JavaScript</span>
+              <span class="text-[10px] font-semibold text-outline">Locked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shelf: React -->
+    <section class="flex flex-col gap-4" role="region" aria-label="React collection">
+      <div class="flex items-center gap-4">
+        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#e3dfda" stroke-width="3"/>
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#5d4a8a" stroke-width="3" stroke-dasharray="125.6" stroke-dashoffset="62.8" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" fill="#5d4a8a" font-size="11" font-weight="700" font-family="Inter">50%</text>
+        </svg>
+        <div class="flex flex-col">
+          <h2 class="font-display text-h3 text-on-surface">React</h2>
+          <span class="text-caption text-on-surface-variant">1 / 2 cards</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="list">
+        <!-- Card: Hooks (knowledge, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#f0fdf4 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">React Hooks</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">useState, useEffect, useContext, and custom hooks patterns.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">React</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Component Patterns (achievement, locked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden opacity-50 grayscale card-animate relative" tabindex="-1" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#76706b" stroke-width="1.5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-outline uppercase">Achievement</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Component Patterns</h3>
+            <p class="text-xs text-outline line-clamp-2 leading-relaxed">Unlock to discover</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-outline px-2 py-0.5 rounded-full">React</span>
+              <span class="text-[10px] font-semibold text-outline">Locked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shelf: Python -->
+    <section class="flex flex-col gap-4" role="region" aria-label="Python collection">
+      <div class="flex items-center gap-4">
+        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#e3dfda" stroke-width="3"/>
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#5d4a8a" stroke-width="3" stroke-dasharray="125.6" stroke-dashoffset="94.2" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" fill="#5d4a8a" font-size="11" font-weight="700" font-family="Inter">25%</text>
+        </svg>
+        <div class="flex flex-col">
+          <h2 class="font-display text-h3 text-on-surface">Python</h2>
+          <span class="text-caption text-on-surface-variant">2 / 4 cards</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="list">
+        <!-- Card: Data Classes (knowledge, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#f0fdf4 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Data Classes</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">Using @dataclass decorator, field defaults, and frozen instances.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">Python</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Decorators (exploration, unlocked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-md transition-all cursor-pointer focus-visible:ring-2 ring-primary card-animate relative" style="background: linear-gradient(135deg,#fcfaf8 0%,#faf5ff 100%);" tabindex="0" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #a855f7, #9333ea);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              </div>
+              <div class="flex gap-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8862d" stroke="#b8862d" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc6c0" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-on-surface-variant uppercase">Exploration</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Decorators</h3>
+            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">Writing and chaining Python decorators for metaprogramming.</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">Python</span>
+              <span class="text-[10px] font-semibold text-primary">Lv.1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Generators (knowledge, locked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden opacity-50 grayscale card-animate relative" tabindex="-1" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#76706b" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-outline uppercase">Knowledge</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Generators</h3>
+            <p class="text-xs text-outline line-clamp-2 leading-relaxed">Unlock to discover</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-outline px-2 py-0.5 rounded-full">Python</span>
+              <span class="text-[10px] font-semibold text-outline">Locked</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Pythonista (achievement, locked) -->
+        <div class="bg-surface/60 backdrop-blur-sm border border-outline-variant rounded-xl overflow-hidden opacity-50 grayscale card-animate relative" tabindex="-1" role="listitem">
+          <div class="p-3 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#76706b" stroke-width="1.5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold tracking-widest text-outline uppercase">Achievement</span>
+            <h3 class="text-sm font-semibold text-on-surface leading-tight">Pythonista</h3>
+            <p class="text-xs text-outline line-clamp-2 leading-relaxed">Unlock to discover</p>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] font-semibold bg-surface-container text-outline px-2 py-0.5 rounded-full">Python</span>
+              <span class="text-[10px] font-semibold text-outline">Locked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty state (shown when no cards exist) -->
+    <div class="py-xl px-md flex flex-col items-center text-center hidden">
+      <div class="mb-6 opacity-30">
+        <svg class="w-24 h-24 mx-auto text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+      </div>
+      <h2 class="text-on-surface text-lg font-semibold">Collection Binder</h2>
+      <p class="text-on-surface-variant mt-1 max-w-xs text-sm">No cards yet. Complete lessons to unlock your first Knowledge Card.</p>
+    </div>
+
+    <!-- Pipili — fixed bottom-right -->
+    <div class="fixed bottom-6 right-6 z-50" aria-label="Pipili — content" style="animation:pipili-breathe 4s ease-in-out infinite;">
+      <div class="relative flex items-center justify-center" style="width:40px;height:40px;">
+        <svg width="40" height="40" viewBox="0 0 20 20" fill="#5d4a8a" aria-hidden="true">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+        <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;left:38%;">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+        <svg width="6" height="6" viewBox="0 0 20 20" fill="white" class="absolute" style="top:28%;right:38%;">
+          <circle cx="10" cy="10" r="8"/>
+        </svg>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

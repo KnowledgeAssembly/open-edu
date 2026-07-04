@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  PageHeader,
   Switch,
   useFontSize,
 } from '@open-edu/design-system';
@@ -33,12 +34,12 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
 
   return (
     <div className="p-xl mx-auto max-w-3xl" data-testid="settings-page">
-      <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">Settings</h1>
+      <PageHeader eyebrow="Settings" title="Settings" className="mb-xl" />
 
       <div className="gap-lg flex flex-col">
         <Card>
           <CardHeader>
-            <h2 className="flex items-center gap-2 text-2xl font-semibold leading-none tracking-tight">
+            <h2 className="text-h2 font-display flex items-center gap-2">
               <Sun className="h-5 w-5" /> Theme
             </h2>
           </CardHeader>
@@ -49,17 +50,17 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
 
         <Card>
           <CardHeader>
-            <h2 className="flex items-center gap-2 text-2xl font-semibold leading-none tracking-tight">
+            <h2 className="text-h2 font-display flex items-center gap-2">
               <Eye className="h-5 w-5" /> Accessibility
             </h2>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Type className="text-muted-foreground h-4 w-4" />
+                <Type className="text-on-surface-variant h-4 w-4" />
                 <div>
                   <p className="text-sm font-medium">Font Size</p>
-                  <p className="text-muted-foreground text-xs">Adjust text size</p>
+                  <p className="text-on-surface-variant text-xs">Adjust text size</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -87,7 +88,7 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
               <div className="flex items-center gap-2">
                 <div>
                   <p className="text-sm font-medium">Reduced Motion</p>
-                  <p className="text-muted-foreground text-xs">Minimize animations</p>
+                  <p className="text-on-surface-variant text-xs">Minimize animations</p>
                 </div>
               </div>
               <Switch
@@ -101,7 +102,7 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
               <div className="flex items-center gap-2">
                 <div>
                   <p className="text-sm font-medium">High Contrast</p>
-                  <p className="text-muted-foreground text-xs">Increase color contrast</p>
+                  <p className="text-on-surface-variant text-xs">Increase color contrast</p>
                 </div>
               </div>
               <Switch

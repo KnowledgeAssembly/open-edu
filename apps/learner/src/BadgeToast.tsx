@@ -77,12 +77,12 @@ export function BadgeToast({
         </div>
         <div className="bg-surface border-outline-variant flex items-start gap-3 rounded-xl border p-4 shadow-lg">
           <GlowPulse duration={1.5}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/20 to-amber-500/10">
-              <Award className="h-5 w-5 text-amber-500" />
+            <div className="from-tertiary/20 to-tertiary/10 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br">
+              <Award className="text-tertiary h-5 w-5" />
             </div>
           </GlowPulse>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-sm font-semibold text-amber-600">Achievement Unlocked!</span>
+            <span className="text-tertiary text-sm font-semibold">Achievement Unlocked!</span>
             <span className="text-on-surface truncate text-sm">{badgeName}</span>
           </div>
         </div>
