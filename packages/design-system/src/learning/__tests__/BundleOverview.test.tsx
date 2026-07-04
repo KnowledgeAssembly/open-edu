@@ -100,7 +100,7 @@ describe('BundleOverview', () => {
   it('shows locked state with prerequisite label', () => {
     renderDefault();
     expect(screen.getByText('Complete Module 3 first')).toBeInTheDocument();
-    expect(screen.getByTestId('module-status-locked')).toHaveTextContent('Locked');
+    expect(screen.getByTestId('module-status-locked')).toBeInTheDocument();
   });
 
   it('shows empty state when no modules', () => {

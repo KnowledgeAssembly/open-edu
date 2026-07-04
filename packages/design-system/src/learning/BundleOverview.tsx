@@ -1,7 +1,7 @@
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
-import { Badge } from '../primitives/badge.js';
 import { Progress } from '../primitives/progress.js';
+import { BundleModuleIndicator } from '../patterns/BundleModuleIndicator.js';
 import type { JSX } from 'react';
 
 export type ModuleStatus = 'locked' | 'unlocked' | 'in_progress' | 'completed';
@@ -27,15 +27,12 @@ export interface BundleOverviewProps {
   onBackToCatalog: () => void;
 }
 
-const statusBadgeConfig: Record<
-  ModuleStatus,
-  { label: string; variant: 'default' | 'secondary' | 'outline' }
-> = {
-  locked: { label: 'Locked', variant: 'outline' },
-  unlocked: { label: 'Ready', variant: 'default' },
-  in_progress: { label: 'In Progress', variant: 'secondary' },
-  completed: { label: 'Completed', variant: 'default' },
-};
+function moduleStatusToIndicatorStatus(
+  status: ModuleStatus,
+): 'locked' | 'unlocked' | 'in-progress' | 'completed' {
+  if (status === 'in_progress') return 'in-progress';
+  return status;
+}
 
 function OverallProgressBar({ modules }: { modules: BundleOverviewModule[] }): JSX.Element {
   const totalNodes = modules.reduce((sum, m) => sum + m.nodeCount, 0);
@@ -109,8 +106,6 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
         data-testid="module-list"
       >
         {modules.map((mod) => {
-          const badgeCfg = statusBadgeConfig[mod.status];
-
           return (
             <li
               key={mod.id}
@@ -141,9 +136,15 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                     <p className="text-sm text-on-surface-variant mt-xs">{mod.prerequisiteLabel}</p>
                   )}
                 </div>
-                <Badge variant={badgeCfg.variant} data-testid={`module-status-${mod.status}`}>
-                  {badgeCfg.label}
-                </Badge>
+                <BundleModuleIndicator
+                  status={moduleStatusToIndicatorStatus(mod.status)}
+                  completionPercent={
+                    mod.nodeCount > 0
+                      ? Math.round((mod.completedNodeCount / mod.nodeCount) * 100)
+                      : 0
+                  }
+                  data-testid={`module-status-${mod.status}`}
+                />
               </div>
 
               {mod.nodeCount > 0 && mod.status !== 'locked' && (
