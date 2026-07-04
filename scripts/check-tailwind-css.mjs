@@ -60,10 +60,20 @@ function extractSourceClasses(content) {
       i++;
     }
     const cnBody = content.slice(start, i - 1);
+    // Extract single/double-quoted string literals
     const strRegex = /['"]([^'"]*)['"]/g;
     let sm;
     while ((sm = strRegex.exec(cnBody)) !== null) {
       for (const cls of sm[1].split(/\s+/)) {
+        if (cls) classes.add(cls);
+      }
+    }
+    // Extract template literal strings (backtick), stripping interpolations
+    const tmplRegex = /`([^`]*)`/g;
+    let tm;
+    while ((tm = tmplRegex.exec(cnBody)) !== null) {
+      const cleaned = tm[1].replace(/\$\{[^}]*\}/g, '').trim();
+      for (const cls of cleaned.split(/\s+/)) {
         if (cls) classes.add(cls);
       }
     }
