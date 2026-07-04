@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../lib/utils.js';
 
-export type OpenModuleSize = 'sm' | 'md' | 'lg';
+export type OpenModuleSize = 'xs' | 'sm' | 'md' | 'lg';
 export type OpenModuleState = 'default' | 'hover' | 'active';
 
 export interface OpenModuleProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,7 +10,11 @@ export interface OpenModuleProps extends React.HTMLAttributes<HTMLDivElement> {
   state?: OpenModuleState;
 }
 
-const sizeConfig: Record<OpenModuleSize, { total: number; core: number; orbit: number; satellite: number }> = {
+const sizeConfig: Record<
+  OpenModuleSize,
+  { total: number; core: number; orbit: number; satellite: number }
+> = {
+  xs: { total: 48, core: 12, orbit: 36, satellite: 6 },
   sm: { total: 80, core: 18, orbit: 56, satellite: 9 },
   md: { total: 120, core: 26, orbit: 84, satellite: 12 },
   lg: { total: 180, core: 38, orbit: 128, satellite: 16 },
@@ -28,7 +32,7 @@ function getSatellitePositions(
   const startAngle = -spread / 2;
   const positions: Array<{ x: number; y: number }> = [];
   for (let i = 0; i < clamped; i++) {
-    const angle = (startAngle + (i / (Math.max(clamped - 1, 1))) * spread) * (Math.PI / 180);
+    const angle = (startAngle + (i / Math.max(clamped - 1, 1)) * spread) * (Math.PI / 180);
     positions.push({
       x: center + orbitRadius * Math.cos(angle),
       y: center + orbitRadius * Math.sin(angle),

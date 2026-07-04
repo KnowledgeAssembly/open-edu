@@ -9,7 +9,7 @@ import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from 
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
-import { AppSidebar, AppLayout, FontSizeProvider, OpenEduLogo } from '@open-edu/design-system';
+import { AppSidebar, AppLayout, FontSizeProvider, OpenEduLogo, AssemblyFlow } from '@open-edu/design-system';
 import type {
   AppSidebarItem,
   AppSidebarSection,
@@ -303,15 +303,22 @@ export function AppShell({
 
     const section: AppSidebarSection = { title: 'Course Steps', items };
     return (
-      <AppSidebar
-        logo={<OpenEduLogo variant="lockup" size="sm" />}
-        logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
-        items={navItems}
-        currentItemId={currentNavId}
-        onNavigate={handleNavAction}
-        sections={[section]}
-        onBack={{ label: 'Back to Catalog', onClick: handleBackToCatalog }}
-      />
+      <div className="relative overflow-hidden h-full">
+        <AssemblyFlow
+          density="dense"
+          className="absolute inset-0 pointer-events-none opacity-5"
+          aria-hidden="true"
+        />
+        <AppSidebar
+          logo={<OpenEduLogo variant="lockup" size="sm" />}
+          logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
+          items={navItems}
+          currentItemId={currentNavId}
+          onNavigate={handleNavAction}
+          sections={[section]}
+          onBack={{ label: 'Back to Catalog', onClick: handleBackToCatalog }}
+        />
+      </div>
     );
   }
 
@@ -355,13 +362,20 @@ export function AppShell({
           ) : (
             <AppLayout
               sidebar={
-                <AppSidebar
-                  logo={<OpenEduLogo variant="lockup" size="sm" />}
-                  logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
-                  items={navItems}
-                  currentItemId={currentNavId}
-                  onNavigate={handleNavAction}
-                />
+                <div className="relative overflow-hidden h-full">
+                  <AssemblyFlow
+                    density="dense"
+                    className="absolute inset-0 pointer-events-none opacity-5"
+                    aria-hidden="true"
+                  />
+                  <AppSidebar
+                    logo={<OpenEduLogo variant="lockup" size="sm" />}
+                    logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
+                    items={navItems}
+                    currentItemId={currentNavId}
+                    onNavigate={handleNavAction}
+                  />
+                </div>
               }
               topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
             >

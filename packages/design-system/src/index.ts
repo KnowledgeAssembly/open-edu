@@ -113,9 +113,6 @@ export { Skeleton } from './primitives/skeleton.js';
 export { Spinner } from './primitives/spinner.js';
 export type { SpinnerProps } from './primitives/spinner.js';
 
-export { EmptyState } from './primitives/empty-state.js';
-export type { EmptyStateProps } from './primitives/empty-state.js';
-
 export { Toaster } from './primitives/notification.js';
 
 export { GeoPrimitive } from './primitives/geo-primitive.js';
@@ -126,6 +123,21 @@ export type { PipiliProps, PipiliMood } from './primitives/pipili.js';
 
 export { OpenEduLogo } from './primitives/openedu-logo.js';
 export type { OpenEduLogoProps } from './primitives/openedu-logo.js';
+
+export { SilhouetteAssembly, SilhouetteGroup } from './primitives/silhouette-assembly.js';
+export type {
+  SilhouetteAssemblyProps,
+  SilhouetteGroupProps,
+  SilhouetteFigureProps,
+  SilhouetteProportion,
+  SilhouettePalette,
+} from './primitives/silhouette-assembly.js';
+
+export { AssemblyFlow } from './primitives/assembly-flow.js';
+export type { AssemblyFlowProps, AssemblyFlowDensity } from './primitives/assembly-flow.js';
+
+export { OpenModule } from './primitives/open-module.js';
+export type { OpenModuleProps, OpenModuleSize, OpenModuleState } from './primitives/open-module.js';
 
 // Contexts
 export { FontSizeProvider, useFontSize } from './font-size-context.js';
@@ -147,6 +159,24 @@ export type { TopAppBarProps, TopAppBarBreadcrumb } from './patterns/TopAppBar.j
 
 export { CourseTree } from './patterns/CourseTree.js';
 export type { CourseTreeProps, CourseTreeModule } from './patterns/CourseTree.js';
+
+export { CourseCardWithModule, getProgressSatellites } from './patterns/CourseCardWithModule.js';
+export type { CourseCardWithModuleProps } from './patterns/CourseCardWithModule.js';
+
+export { EmptyState } from './patterns/EmptyState.js';
+export type { EmptyStateProps } from './patterns/EmptyState.js';
+
+export { SectionDivider } from './patterns/SectionDivider.js';
+export type { SectionDividerProps } from './patterns/SectionDivider.js';
+
+export { HeroSection } from './patterns/HeroSection.js';
+export type { HeroSectionProps } from './patterns/HeroSection.js';
+
+export { BundleModuleIndicator } from './patterns/BundleModuleIndicator.js';
+export type {
+  BundleModuleIndicatorProps,
+  BundleModuleStatus,
+} from './patterns/BundleModuleIndicator.js';
 
 export { AppLayout } from './patterns/AppLayout.js';
 export type { AppLayoutProps } from './patterns/AppLayout.js';

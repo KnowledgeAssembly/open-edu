@@ -47,7 +47,7 @@ describe('CatalogPage', () => {
 
   it('renders empty state when no packages', () => {
     render(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
-    expect(screen.getByText('No courses found.')).toBeInTheDocument();
+    expect(screen.getByText('No courses yet')).toBeInTheDocument();
   });
 
   it('renders package titles', () => {

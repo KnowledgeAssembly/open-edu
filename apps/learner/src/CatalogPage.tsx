@@ -12,7 +12,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CourseCardWithModule,
+  EmptyState,
   Progress,
+  SectionDivider,
   Select,
   SelectContent,
   SelectItem,
@@ -97,7 +100,12 @@ export function CatalogPage({
     return (
       <div className="p-xl">
         <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">Courses</h1>
-        <p className="text-on-surface-variant">No courses found.</p>
+        <EmptyState
+          variant="no-courses"
+          heading="No courses yet"
+          description="Start exploring to build your learning path."
+          action={<Button onClick={() => onNavigate?.({ view: 'catalog' })}>Browse Catalog</Button>}
+        />
       </div>
     );
   }
@@ -116,9 +124,13 @@ export function CatalogPage({
               </Button>
             )}
           </div>
-          <div className="flex gap-md overflow-x-auto pb-sm">
+          <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
             {continueList.map((pkg) => (
-              <div key={pkg.manifest.id} className="min-w-[260px] max-w-[300px] flex-shrink-0">
+              <CourseCardWithModule
+                key={pkg.manifest.id}
+                progress={progress[pkg.manifest.id] ?? null}
+                badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+              >
                 <CourseCard
                   manifest={pkg.manifest}
                   nodeCount={pkg.nodeCount}
@@ -127,10 +139,14 @@ export function CatalogPage({
                   progress={progress[pkg.manifest.id] ?? null}
                   onStart={() => onStartCourse(pkg.rootDir)}
                 />
-              </div>
+              </CourseCardWithModule>
             ))}
           </div>
         </section>
+      )}
+
+      {continueList.length > 0 && bundleSummaries && bundleSummaries.length > 0 && (
+        <SectionDivider density="minimal" className="mb-xl" />
       )}
 
       {bundleSummaries && bundleSummaries.length > 0 && (
@@ -183,6 +199,8 @@ export function CatalogPage({
         </section>
       )}
 
+      <SectionDivider density="minimal" className="mb-xl" />
+
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-sm mb-md" data-testid="filter-chips">
           <Button
@@ -225,19 +243,33 @@ export function CatalogPage({
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-on-surface-variant py-lg text-center">No courses match this filter.</p>
+        <EmptyState
+          variant="no-results"
+          heading="No matches found"
+          description="Try different keywords or browse the full catalog."
+          action={
+            <Button variant="outline" onClick={() => setActiveTag(null)}>
+              Clear Filter
+            </Button>
+          }
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
           {sorted.map((pkg) => (
-            <CourseCard
+            <CourseCardWithModule
               key={pkg.manifest.id}
-              manifest={pkg.manifest}
-              nodeCount={pkg.nodeCount}
-              badgeCount={pkg.availableBadges}
-              earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
               progress={progress[pkg.manifest.id] ?? null}
-              onStart={() => onStartCourse(pkg.rootDir)}
-            />
+              badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+            >
+              <CourseCard
+                manifest={pkg.manifest}
+                nodeCount={pkg.nodeCount}
+                badgeCount={pkg.availableBadges}
+                earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                progress={progress[pkg.manifest.id] ?? null}
+                onStart={() => onStartCourse(pkg.rootDir)}
+              />
+            </CourseCardWithModule>
           ))}
         </div>
       )}

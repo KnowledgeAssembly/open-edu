@@ -4,15 +4,8 @@ import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  Progress,
-} from '@open-edu/design-system';
-import { BookOpen, CheckCircle2 } from 'lucide-react';
+import { Badge, Button, Card, CardContent, EmptyState, Progress } from '@open-edu/design-system';
+import { CheckCircle2 } from 'lucide-react';
 
 export interface ProgressDashboardProps {
   onNavigate: (view: AppView) => void;
@@ -73,18 +66,12 @@ export function ProgressDashboard({
     return (
       <div className="p-xl max-w-4xl mx-auto" data-testid="progress-dashboard">
         <h1 className="text-h1 font-display text-on-surface font-bold mb-lg">My Progress</h1>
-        <Card className="text-center p-8">
-          <CardContent>
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-semibold leading-none tracking-tight mb-2">
-              Your learning journey starts here!
-            </h2>
-            <CardDescription className="mb-6">
-              Begin a course and your progress will appear here.
-            </CardDescription>
-            <Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          variant="no-progress"
+          heading="Your learning journey starts here!"
+          description="Begin a course and your progress will appear here."
+          action={<Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>}
+        />
       </div>
     );
   }
