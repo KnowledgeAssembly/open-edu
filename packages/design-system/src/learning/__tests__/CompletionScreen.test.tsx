@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CompletionScreen } from '../CompletionScreen.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 const mockCourse = {
   manifest: { id: 'test', title: 'Test Course', version: '1.0', author: 'Test', entry: 'test.md' },

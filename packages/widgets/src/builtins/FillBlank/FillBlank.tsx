@@ -132,7 +132,7 @@ function FillBlankComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
@@ -275,7 +275,7 @@ function FillBlankComponent(props: {
           </p>
         </div>
         {showAcknowledgeButton && (
-          <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+          <div className="p-md border-outline-variant mt-md flex items-center justify-center border-t">
             <Button
               variant="default"
               onClick={handleObserveAcknowledge}

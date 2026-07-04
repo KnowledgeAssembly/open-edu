@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { DashboardLayout } from './DashboardLayout';
 
 const DashboardHeader = () => (
-  <div className="bg-surface h-16 flex items-center justify-between px-6 border-b border-outline-variant">
-    <h1 className="text-lg font-bold text-on-surface">Dashboard</h1>
+  <div className="bg-surface border-outline-variant flex h-16 items-center justify-between border-b px-6">
+    <h1 className="text-on-surface text-lg font-bold">Dashboard</h1>
     <div className="flex items-center gap-3">
-      <span className="text-sm text-on-surface-variant">Welcome, Sarthak</span>
-      <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary-container">
+      <span className="text-on-surface-variant text-sm">Welcome, Sarthak</span>
+      <div className="bg-primary-container text-on-primary-container flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
         S
       </div>
     </div>
@@ -15,20 +15,20 @@ const DashboardHeader = () => (
 
 const DashboardSidebar = () => (
   <div>
-    <h3 className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-3">
+    <h3 className="text-on-surface-variant mb-3 text-xs font-semibold uppercase tracking-wider">
       Navigation
     </h3>
-    <ul className="list-none p-0 m-0 space-y-1 text-sm">
-      <li className="px-3 py-2 rounded bg-primary-container text-on-primary-container font-medium cursor-pointer">
+    <ul className="m-0 list-none space-y-1 p-0 text-sm">
+      <li className="bg-primary-container text-on-primary-container cursor-pointer rounded px-3 py-2 font-medium">
         Overview
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         My Courses
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         Achievements
       </li>
-      <li className="px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-high cursor-pointer">
+      <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-3 py-2">
         Certificates
       </li>
     </ul>
@@ -37,7 +37,7 @@ const DashboardSidebar = () => (
 
 const DashboardContent = () => (
   <div className="space-y-6">
-    <h2 className="text-xl font-bold text-on-surface">Welcome back!</h2>
+    <h2 className="text-on-surface text-xl font-bold">Welcome back!</h2>
     <div className="grid grid-cols-3 gap-4">
       {[
         { title: 'Courses In Progress', value: '3', color: 'bg-primary-container' },
@@ -45,8 +45,8 @@ const DashboardContent = () => (
         { title: 'Hours Learned', value: '47', color: 'bg-secondary-container' },
       ].map((card) => (
         <div key={card.title} className={`${card.color} rounded-lg p-4`}>
-          <p className="text-xs text-on-surface-variant">{card.title}</p>
-          <p className="text-2xl font-bold text-on-surface mt-1">{card.value}</p>
+          <p className="text-on-surface-variant text-xs">{card.title}</p>
+          <p className="text-on-surface mt-1 text-2xl font-bold">{card.value}</p>
         </div>
       ))}
     </div>

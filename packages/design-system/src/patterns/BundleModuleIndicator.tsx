@@ -25,7 +25,7 @@ export function BundleModuleIndicator({
   const config = statusConfig[status];
 
   return (
-    <div className={cn('flex items-center gap-sm', className)} {...props}>
+    <div className={cn('gap-sm flex items-center', className)} {...props}>
       <OpenModule
         size="sm"
         satellites={config.satellites}
@@ -33,7 +33,7 @@ export function BundleModuleIndicator({
         aria-hidden="true"
       />
       {status === 'in-progress' && completionPercent > 0 && (
-        <span className="text-xs text-on-surface-variant">{completionPercent}%</span>
+        <span className="text-on-surface-variant text-xs">{completionPercent}%</span>
       )}
     </div>
   );

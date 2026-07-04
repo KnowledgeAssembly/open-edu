@@ -206,7 +206,7 @@ function GridAreaComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       >
         <p className="text-on-surface font-semibold">Unable to load grid configuration</p>
         <p className="text-sm opacity-80">Please check the widget settings and try again.</p>
@@ -233,12 +233,7 @@ function GridAreaComponent(props: {
             onFocus={() => setFocusedCell({ row: r, col: c })}
             disabled={isObserve || submitted}
             data-highlighted={isHighlighted}
-            className={`
-              border border-outline-variant
-              ${isHighlighted ? 'bg-primary' : 'bg-surface hover:bg-primary-container/30'}
-              focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-              transition-colors
-            `}
+            className={`border-outline-variant border ${isHighlighted ? 'bg-primary' : 'bg-surface hover:bg-primary-container/30'} focus-visible:ring-primary transition-colors focus-visible:ring-2 focus-visible:ring-offset-2`}
             style={{
               width: cellSizePx,
               height: cellSizePx,
@@ -288,7 +283,7 @@ function GridAreaComponent(props: {
           role="status"
           aria-live="polite"
           data-testid="max-highlights-message"
-          className="text-sm text-on-surface-variant bg-surface-container-high p-xs rounded mt-xs"
+          className="text-on-surface-variant bg-surface-container-high p-xs mt-xs rounded text-sm"
         >
           {statusMessage}
         </div>

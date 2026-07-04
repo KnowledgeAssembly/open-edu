@@ -30,15 +30,15 @@ export const AllVariants: Story = {
     <div className="flex items-center gap-8">
       <div className="text-center">
         <OpenEduLogo variant="symbol" size="lg" />
-        <p className="text-xs text-gray-500 mt-2">Symbol</p>
+        <p className="mt-2 text-xs text-gray-500">Symbol</p>
       </div>
       <div className="text-center">
         <OpenEduLogo variant="wordmark" size="lg" />
-        <p className="text-xs text-gray-500 mt-2">Wordmark</p>
+        <p className="mt-2 text-xs text-gray-500">Wordmark</p>
       </div>
       <div className="text-center">
         <OpenEduLogo variant="lockup" size="lg" />
-        <p className="text-xs text-gray-500 mt-2">Lockup</p>
+        <p className="mt-2 text-xs text-gray-500">Lockup</p>
       </div>
     </div>
   ),
@@ -49,15 +49,15 @@ export const AllSizes: Story = {
     <div className="flex items-center gap-8">
       <div className="text-center">
         <OpenEduLogo variant="lockup" size="sm" />
-        <p className="text-xs text-gray-500 mt-2">Small</p>
+        <p className="mt-2 text-xs text-gray-500">Small</p>
       </div>
       <div className="text-center">
         <OpenEduLogo variant="lockup" size="md" />
-        <p className="text-xs text-gray-500 mt-2">Medium</p>
+        <p className="mt-2 text-xs text-gray-500">Medium</p>
       </div>
       <div className="text-center">
         <OpenEduLogo variant="lockup" size="lg" />
-        <p className="text-xs text-gray-500 mt-2">Large</p>
+        <p className="mt-2 text-xs text-gray-500">Large</p>
       </div>
     </div>
   ),
@@ -65,7 +65,7 @@ export const AllSizes: Story = {
 
 export const OnDarkBackground: Story = {
   render: () => (
-    <div className="bg-gray-900 p-8 rounded-lg">
+    <div className="rounded-lg bg-gray-900 p-8">
       <OpenEduLogo variant="lockup" size="lg" className="text-white" />
     </div>
   ),

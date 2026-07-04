@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GeoPrimitive } from '../geo-primitive';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('GeoPrimitive', () => {
   it('renders a circle with default size', () => {

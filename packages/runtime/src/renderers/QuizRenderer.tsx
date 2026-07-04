@@ -49,17 +49,17 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
   return (
     <FocusTrap active={!submitted}>
       <fieldset
-        className={`border border-outline-variant rounded-lg p-[calc(var(--oe-space-md)*1.5)] m-0 ${className ?? ''}`}
+        className={`border-outline-variant m-0 rounded-lg border p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
         data-testid="quiz-renderer"
         disabled={submitted}
       >
-        <legend className="font-bold text-lg px-2">{node.question}</legend>
+        <legend className="px-2 text-lg font-bold">{node.question}</legend>
 
         <div role="radiogroup" aria-label="Answer options" className="mt-3">
           {options.map((option) => (
             <label
               key={option.id}
-              className={`flex items-start gap-sm px-3 py-2 rounded-[calc(var(--oe-radius-lg)-2px)] ${
+              className={`gap-sm flex items-start rounded-[calc(var(--oe-radius-lg)-2px)] px-3 py-2 ${
                 submitted ? 'cursor-default' : 'cursor-pointer'
               } ${optionBgClass(option)}`}
             >
@@ -83,7 +83,7 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
             type="button"
             onClick={handleSubmit}
             disabled={selectedOptionId === null}
-            className="bg-primary text-on-primary border-none rounded-lg px-5 py-2.5 text-base cursor-pointer font-semibold disabled:cursor-default mt-3"
+            className="bg-primary text-on-primary mt-3 cursor-pointer rounded-lg border-none px-5 py-2.5 text-base font-semibold disabled:cursor-default"
           >
             Submit
           </button>
@@ -91,7 +91,7 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
           <div
             aria-live="polite"
             role="status"
-            className={`mt-3 px-4 py-3 rounded-lg font-semibold ${
+            className={`mt-3 rounded-lg px-4 py-3 font-semibold ${
               score === 100 ? 'text-secondary bg-secondary/15' : 'text-error bg-error/15'
             }`}
           >

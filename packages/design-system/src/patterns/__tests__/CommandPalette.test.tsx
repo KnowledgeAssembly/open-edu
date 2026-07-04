@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CommandPalette, CommandGroup, CommandItem, CommandEmpty } from '../CommandPalette.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('CommandPalette', () => {
   it('does not render when closed', () => {

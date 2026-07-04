@@ -123,7 +123,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
         aria-label="Select theme"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="flex items-center justify-center w-10 h-10 rounded-md border border-input bg-surface-container text-foreground cursor-pointer transition-colors duration-200"
+        className="border-input bg-surface-container text-foreground flex size-10 cursor-pointer items-center justify-center rounded-md border transition-colors duration-200"
         data-testid="theme-selector-trigger"
       >
         <svg
@@ -150,7 +150,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
           role="dialog"
           aria-label="Theme selector"
           onKeyDown={handleKeyDown}
-          className="absolute left-0 top-full mt-2 z-50 w-80 p-3 rounded-lg border border-outline-variant bg-surface-container-highest shadow-md"
+          className="border-outline-variant bg-surface-container-highest absolute left-0 top-full z-50 mt-2 w-80 rounded-lg border p-3 shadow-md"
           data-testid="theme-selector-popover"
         >
           <div className="grid grid-cols-2 gap-2" role="listbox" aria-label="Select a theme">
@@ -167,7 +167,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(theme.id)}
-                  className={`flex flex-col gap-1.5 p-2.5 rounded-md bg-surface-container cursor-pointer text-left text-foreground transition-colors duration-200 border-2 ${isSelected || isHovered ? 'border-primary' : 'border-transparent'}`}
+                  className={`bg-surface-container text-foreground flex cursor-pointer flex-col gap-1.5 rounded-md border-2 p-2.5 text-left transition-colors duration-200 ${isSelected || isHovered ? 'border-primary' : 'border-transparent'}`}
                   onMouseEnter={() => setHoveredId(theme.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   data-testid={`theme-card-${theme.id}`}
@@ -177,13 +177,13 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                       {theme.swatches.map((color, ci) => (
                         <div
                           key={ci}
-                          className="w-4 h-4 rounded-sm border border-black/10"
+                          className="size-4 rounded-sm border border-black/10"
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
                     {isSelected && (
-                      <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                      <div className="bg-primary text-primary-foreground absolute right-1 top-1 flex size-4 items-center justify-center rounded-full">
                         <svg
                           width="10"
                           height="10"
@@ -200,7 +200,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                     )}
                   </div>
                   <div className="text-sm font-semibold leading-tight">{theme.name}</div>
-                  <div className="text-xs text-muted-foreground leading-tight">
+                  <div className="text-muted-foreground text-xs leading-tight">
                     {theme.description}
                   </div>
                 </button>

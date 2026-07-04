@@ -46,17 +46,17 @@ export function CommandPalette({
       aria-label="Global command palette"
     >
       <div
-        className="fixed inset-0 bg-inverse-surface/50"
+        className="bg-inverse-surface/50 fixed inset-0"
         onClick={() => onOpenChange(false)}
         aria-hidden="true"
       />
       <div
         className={cn(
-          'relative w-full max-w-[560px] max-h-[400px] flex flex-col overflow-hidden rounded-xl',
-          'bg-surface shadow-elevation-modal border border-outline-variant',
+          'relative flex max-h-[400px] w-full max-w-[560px] flex-col overflow-hidden rounded-xl',
+          'bg-surface shadow-elevation-modal border-outline-variant border',
         )}
       >
-        <div className="flex items-center border-b border-outline-variant px-4">
+        <div className="border-outline-variant flex items-center border-b px-4">
           <svg
             viewBox="0 0 24 24"
             width="16"
@@ -78,9 +78,9 @@ export function CommandPalette({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             aria-label="Search commands"
-            className="flex-1 h-12 bg-transparent border-none outline-none text-sm text-on-surface placeholder:text-on-surface-variant"
+            className="text-on-surface placeholder:text-on-surface-variant h-12 flex-1 border-none bg-transparent text-sm outline-none"
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-outline-variant px-1.5 py-0.5 text-xs text-on-surface-variant">
+          <kbd className="border-outline-variant text-on-surface-variant hidden items-center gap-1 rounded border px-1.5 py-0.5 text-xs sm:inline-flex">
             ESC
           </kbd>
         </div>
@@ -99,7 +99,7 @@ export function CommandGroup({ heading, children }: CommandGroupProps): JSX.Elem
   return (
     <div className="py-1" role="group" aria-label={heading}>
       {heading && (
-        <div className="px-4 py-1.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+        <div className="text-on-surface-variant px-4 py-1.5 text-xs font-semibold uppercase tracking-wider">
           {heading}
         </div>
       )}
@@ -121,7 +121,7 @@ export function CommandItem({ onSelect, disabled, children }: CommandItemProps):
       onClick={onSelect}
       disabled={disabled}
       role="option"
-      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface bg-transparent border-none text-left cursor-pointer aria-selected:bg-surface-container-high hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed"
+      className="text-on-surface aria-selected:bg-surface-container-high hover:bg-surface-container-high flex w-full cursor-pointer items-center gap-3 border-none bg-transparent px-4 py-2.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-40"
     >
       {children}
     </button>
@@ -134,7 +134,7 @@ export interface CommandEmptyProps {
 
 export function CommandEmpty({ children }: CommandEmptyProps): JSX.Element {
   return (
-    <div className="py-6 text-center text-sm text-on-surface-variant">
+    <div className="text-on-surface-variant py-6 text-center text-sm">
       {children ?? 'No results found.'}
     </div>
   );

@@ -32,14 +32,14 @@ export const WithChildren: Story = {
   },
   render: (args) => (
     <SideNav {...args}>
-      <ul className="list-none p-0 m-0 text-sm">
-        <li className="px-4 py-1.5 text-on-surface-variant hover:bg-surface-container-high rounded cursor-pointer">
+      <ul className="m-0 list-none p-0 text-sm">
+        <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-4 py-1.5">
           Module 1: HTML Basics
         </li>
-        <li className="px-4 py-1.5 text-on-surface-variant hover:bg-surface-container-high rounded cursor-pointer">
+        <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-4 py-1.5">
           Module 2: CSS Fundamentals
         </li>
-        <li className="px-4 py-1.5 text-on-surface-variant hover:bg-surface-container-high rounded cursor-pointer">
+        <li className="text-on-surface-variant hover:bg-surface-container-high cursor-pointer rounded px-4 py-1.5">
           Module 3: JavaScript Intro
         </li>
       </ul>

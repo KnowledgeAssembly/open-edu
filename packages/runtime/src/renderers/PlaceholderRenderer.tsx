@@ -9,9 +9,9 @@ export function PlaceholderRenderer({ nodeType, reason }: PlaceholderRendererPro
       role="status"
       aria-live="polite"
       data-testid="placeholder-renderer"
-      className="border border-dashed border-outline-variant rounded-lg p-[calc(var(--oe-space-md)*1.5)] text-on-surface-variant bg-outline-variant/30"
+      className="border-outline-variant text-on-surface-variant bg-outline-variant/30 rounded-lg border border-dashed p-[calc(var(--oe-space-md)*1.5)]"
     >
-      <p className="font-semibold mt-0">
+      <p className="mt-0 font-semibold">
         Unsupported node type: <code>{nodeType}</code>
       </p>
       <p className="mb-0">

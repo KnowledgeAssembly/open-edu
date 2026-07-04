@@ -9,10 +9,13 @@
   },
   "packageManager": "pnpm@9.0.0",
   "scripts": {
+    "prepare": "husky",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
-    "lint": "pnpm -r run lint",
+    "lint": "pnpm -r run lint && node scripts/lint-no-inline-styles.mjs && node scripts/check-tailwind-css.mjs",
     "lint:css": "stylelint \"**/*.css\" --allow-empty-input",
+    "lint:inline-styles": "node scripts/lint-no-inline-styles.mjs",
+    "lint:tailwind-staleness": "node scripts/check-tailwind-css.mjs",
     "typecheck": "pnpm -r run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
@@ -37,13 +40,29 @@
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-tailwindcss": "^3.17.0",
+    "husky": "^9.1.0",
     "jsdom": "^24.1.0",
+    "lint-staged": "^15.2.0",
     "prettier": "^3.2.0",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "stylelint": "^16.8.0",
     "stylelint-config-standard": "^36.0.0",
     "stylelint-config-tailwindcss": "^0.0.7",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.3.0",
     "vitest": "^1.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

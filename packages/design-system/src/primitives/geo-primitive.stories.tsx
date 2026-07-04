@@ -57,8 +57,8 @@ export const Grid: Story = {
 export const Orbital: Story = {
   name: 'Assembly: Orbital',
   render: () => (
-    <div className="relative w-36 h-36">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div className="relative h-36 w-36">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <GeoPrimitive size="xl" variant="accent" />
       </div>
       {[0, 60, 120, 180, 240, 300].map((angle) => (

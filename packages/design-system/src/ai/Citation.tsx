@@ -11,12 +11,12 @@ export function Citation({ source, children, className }: CitationProps): JSX.El
   return (
     <div
       className={cn(
-        'border-l-2 border-tertiary bg-surface-container-low px-4 py-2 text-sm',
+        'border-tertiary bg-surface-container-low border-l-2 px-4 py-2 text-sm',
         className,
       )}
       data-testid="citation"
     >
-      <div className="mb-1 text-xs font-medium text-on-surface-muted">{source}</div>
+      <div className="text-on-surface-muted mb-1 text-xs font-medium">{source}</div>
       <div>{children}</div>
     </div>
   );

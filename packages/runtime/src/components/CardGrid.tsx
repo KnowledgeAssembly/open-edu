@@ -59,7 +59,7 @@ export function CardGrid({ cards, onCardClick, className }: CardGridProps): JSX.
 
   if (cards.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 text-on-surface-variant" role="status">
+      <div className="text-on-surface-variant flex items-center justify-center py-12" role="status">
         <p className="text-sm">No cards yet. Complete lessons to unlock your first card.</p>
       </div>
     );
@@ -72,7 +72,7 @@ export function CardGrid({ cards, onCardClick, className }: CardGridProps): JSX.
       aria-label="Card collection"
       onKeyDown={handleKeyDown}
       className={cn(
-        'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4',
+        'grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
         className,
       )}
     >

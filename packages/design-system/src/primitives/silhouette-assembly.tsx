@@ -59,7 +59,7 @@ export function SilhouetteGroup({
 }: SilhouetteGroupProps): JSX.Element {
   return (
     <div
-      className={cn('flex items-end justify-center gap-md', className)}
+      className={cn('gap-md flex items-end justify-center', className)}
       aria-hidden="true"
       {...props}
     >

@@ -93,7 +93,7 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
             aria-labelledby={activeTool}
             className="flex-1 overflow-hidden"
           >
-            <div className="text-center px-4 py-6 text-sm text-on-surface-variant leading-relaxed">
+            <div className="text-on-surface-variant px-4 py-6 text-center text-sm leading-relaxed">
               Your notes will appear here.
             </div>
           </div>
@@ -106,7 +106,7 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
             aria-labelledby={activeTool}
             className="flex-1 overflow-hidden"
           >
-            <div className="text-center px-4 py-6 text-sm text-on-surface-variant leading-relaxed">
+            <div className="text-on-surface-variant px-4 py-6 text-center text-sm leading-relaxed">
               Your highlights will appear here.
             </div>
           </div>
@@ -118,49 +118,49 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
             id={panelId}
             role="tabpanel"
             aria-labelledby={activeTool}
-            className="flex flex-col flex-1 overflow-hidden"
+            className="flex flex-1 flex-col overflow-hidden"
           >
             <div
-              className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
+              className="flex flex-1 flex-col gap-3 overflow-y-auto p-4"
               data-testid="ai-tutor-chat"
               aria-live="polite"
             >
               {messages.map((msg, idx) =>
                 msg.role === 'ai' ? (
-                  <div key={idx} className="flex gap-2 items-start">
+                  <div key={idx} className="flex items-start gap-2">
                     <span
-                      className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-sm shrink-0"
+                      className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
                       aria-hidden="true"
                     >
                       {'🤖'}
                     </span>
-                    <div className="max-w-[80%] px-3.5 py-2.5 text-xs leading-relaxed bg-surface-container text-on-surface rounded-[12px_12px_12px_4px]">
+                    <div className="bg-surface-container text-on-surface max-w-[80%] rounded-[12px_12px_12px_4px] px-3.5 py-2.5 text-xs leading-relaxed">
                       {msg.text}
                     </div>
                   </div>
                 ) : (
-                  <div key={idx} className="flex gap-2 items-start justify-end">
-                    <div className="max-w-[80%] px-3.5 py-2.5 text-xs leading-relaxed bg-primary text-on-primary rounded-[12px_12px_4px_12px]">
+                  <div key={idx} className="flex items-start justify-end gap-2">
+                    <div className="bg-primary text-on-primary max-w-[80%] rounded-[12px_12px_4px_12px] px-3.5 py-2.5 text-xs leading-relaxed">
                       {msg.text}
                     </div>
                   </div>
                 ),
               )}
             </div>
-            <div className="px-4 py-3 border-t border-outline-variant flex gap-2 items-end">
+            <div className="border-outline-variant flex items-end gap-2 border-t px-4 py-3">
               <Textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a question..."
                 rows={1}
-                className="min-h-9 max-h-30 resize-none"
+                className="max-h-30 min-h-9 resize-none"
                 aria-label="Ask a question"
                 data-testid="ai-tutor-input"
               />
               <button
                 type="button"
-                className="bg-primary text-on-primary w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 hover:opacity-90 transition-opacity"
+                className="bg-primary text-on-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base transition-opacity hover:opacity-90"
                 onClick={handleSend}
                 aria-label="Send message"
                 data-testid="ai-tutor-send"
@@ -175,19 +175,19 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
 
   return (
     <aside
-      className="w-panel-explorer h-full flex flex-col bg-surface-container-low border-l border-outline-variant font-sans overflow-hidden"
+      className="w-panel-explorer bg-surface-container-low border-outline-variant flex h-full flex-col overflow-hidden border-l font-sans"
       data-testid="ai-tutor-panel"
       aria-label="AI Tutor panel"
     >
-      <div className="px-4 pt-4 pb-2 border-b border-outline-variant">
-        <h2 className="text-base font-bold m-0 text-on-surface leading-tight">AI Tutor</h2>
-        <p className="text-xs text-on-surface-variant mt-0.5 mb-0 leading-tight">
+      <div className="border-outline-variant border-b px-4 pb-2 pt-4">
+        <h2 className="text-on-surface m-0 text-base font-bold leading-tight">AI Tutor</h2>
+        <p className="text-on-surface-variant mb-0 mt-0.5 text-xs leading-tight">
           Context-aware assistant
         </p>
       </div>
 
       <div
-        className="flex gap-1 px-4 py-2 border-b border-outline-variant"
+        className="border-outline-variant flex gap-1 border-b px-4 py-2"
         role="tablist"
         aria-label="AI Tutor tools"
         onKeyDown={handleTabKeyDown}
@@ -201,7 +201,7 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
             aria-selected={activeTool === tab.id}
             aria-controls={tab.id + '-panel'}
             className={cn(
-              'flex-1 px-3 py-1.5 border-none rounded-md bg-transparent cursor-pointer text-xs font-medium font-sans whitespace-nowrap transition-[background-color,color] duration-200',
+              'flex-1 cursor-pointer whitespace-nowrap rounded-md border-none bg-transparent px-3 py-1.5 font-sans text-xs font-medium transition-[background-color,color] duration-200',
               activeTool === tab.id
                 ? 'bg-secondary-container text-on-secondary-container'
                 : 'text-on-surface-variant',

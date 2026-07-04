@@ -40,11 +40,11 @@ export interface CompletionScreenProps {
 
 function StatCard({ icon, value, label }: { icon: string; value: number; label: string }) {
   return (
-    <div className="bg-surface-container-low border border-outline-variant rounded-lg p-md text-center">
+    <div className="bg-surface-container-low border-outline-variant p-md rounded-lg border text-center">
       <span className="text-2xl" aria-hidden="true">
         {icon}
       </span>
-      <p className="text-h2 font-display font-bold text-on-surface m-0 mt-1">{value}</p>
+      <p className="text-h2 font-display text-on-surface m-0 mt-1 font-bold">{value}</p>
       <p className="text-body-ui text-on-surface-variant m-0">{label}</p>
     </div>
   );
@@ -78,31 +78,31 @@ export function CompletionScreen({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-full p-xl text-center font-body-md ${className ?? ''}`}
+      className={`p-xl font-body-md flex min-h-full flex-col items-center justify-center text-center ${className ?? ''}`}
       data-testid="completion-screen"
     >
       {showConfetti && !prefersReducedMotion && <ConfettiBurst variant="fall" particleCount={30} />}
 
-      <h1 className="text-[1.75rem] font-bold text-on-surface m-0 mb-2">You finished {title}!</h1>
-      <p className="text-body-ui text-on-surface-variant m-0 mb-lg">
+      <h1 className="text-on-surface m-0 mb-2 text-[1.75rem] font-bold">You finished {title}!</h1>
+      <p className="text-body-ui text-on-surface-variant mb-lg m-0">
         Great work on completing this course.
       </p>
 
       {skillSummary && (
         <div className="mb-6 w-full max-w-[400px]">
-          <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Skills achieved</h2>
+          <h2 className="text-on-surface m-0 mb-3 text-lg font-semibold">Skills achieved</h2>
           {skillSummary}
         </div>
       )}
 
       {badges && badges.length > 0 && (
         <div className="mb-6 w-full max-w-[400px]">
-          <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Badges earned</h2>
-          <StaggerReveal delayMs={200} className="grid grid-cols-2 gap-md">
+          <h2 className="text-on-surface m-0 mb-3 text-lg font-semibold">Badges earned</h2>
+          <StaggerReveal delayMs={200} className="gap-md grid grid-cols-2">
             {badges.map((badge) => (
               <div
                 key={badge}
-                className="bg-primary-container/30 border border-primary-container rounded-xl p-md text-center"
+                className="bg-primary-container/30 border-primary-container p-md rounded-xl border text-center"
                 data-testid={`badge-${badge}`}
               >
                 <GlowPulse duration={0.8}>
@@ -110,7 +110,7 @@ export function CompletionScreen({
                     🏆
                   </span>
                 </GlowPulse>
-                <h3 className="font-semibold mt-sm text-on-surface text-sm">{badge}</h3>
+                <h3 className="mt-sm text-on-surface text-sm font-semibold">{badge}</h3>
               </div>
             ))}
           </StaggerReveal>
@@ -119,8 +119,8 @@ export function CompletionScreen({
 
       {hasStats && (
         <div className="mb-6 w-full max-w-[400px]">
-          <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">Your progress</h2>
-          <StaggerReveal delayMs={150} className="grid grid-cols-2 gap-md">
+          <h2 className="text-on-surface m-0 mb-3 text-lg font-semibold">Your progress</h2>
+          <StaggerReveal delayMs={150} className="gap-md grid grid-cols-2">
             <StatCard icon="📝" value={displayStats.stepsCompleted} label="Steps completed" />
             <StatCard icon="✅" value={displayStats.quizzesAnswered} label="Quizzes answered" />
             <StatCard
@@ -135,15 +135,15 @@ export function CompletionScreen({
 
       {recommendedCourses && recommendedCourses.length > 0 && (
         <div className="mb-6 w-full max-w-[400px]">
-          <h2 className="text-lg font-semibold text-on-surface m-0 mb-3">You might also like</h2>
-          <div className="flex flex-col gap-sm">
+          <h2 className="text-on-surface m-0 mb-3 text-lg font-semibold">You might also like</h2>
+          <div className="gap-sm flex flex-col">
             {recommendedCourses.slice(0, 2).map((course) => (
               <div
                 key={course.manifest.id}
-                className="flex items-center justify-between bg-surface-container-low border border-outline-variant rounded-lg p-md"
+                className="bg-surface-container-low border-outline-variant p-md flex items-center justify-between rounded-lg border"
               >
                 <div className="text-left">
-                  <h3 className="font-semibold text-on-surface text-sm m-0">
+                  <h3 className="text-on-surface m-0 text-sm font-semibold">
                     {course.manifest.title}
                   </h3>
                   <p className="text-body-ui text-on-surface-variant m-0">

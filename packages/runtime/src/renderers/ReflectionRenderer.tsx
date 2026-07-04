@@ -33,10 +33,10 @@ export function ReflectionRenderer({
 
   return (
     <div
-      className={`border border-outline-variant rounded-lg p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
+      className={`border-outline-variant rounded-lg border p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
       data-testid="reflection-renderer"
     >
-      <label htmlFor={hintId} className="block font-semibold text-lg mb-2">
+      <label htmlFor={hintId} className="mb-2 block text-lg font-semibold">
         {node.prompt}
       </label>
 
@@ -48,16 +48,16 @@ export function ReflectionRenderer({
         placeholder="Type your reflection here…"
         aria-label={node.prompt}
         aria-describedby={showCharCount ? `${hintId}-count` : undefined}
-        className="w-full min-h-[8rem] p-2.5 rounded-[calc(var(--oe-radius-lg)-2px)] border border-outline-variant font-body-md text-base resize-y bg-surface text-on-surface"
+        className="border-outline-variant font-body-md bg-surface text-on-surface min-h-[8rem] w-full resize-y rounded-[calc(var(--oe-radius-lg)-2px)] border p-2.5 text-base"
       />
 
-      <div className="flex items-center justify-between mt-3 gap-sm">
+      <div className="gap-sm mt-3 flex items-center justify-between">
         {!submitted ? (
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!isValid}
-            className="bg-primary text-on-primary border-none rounded-lg px-5 py-2.5 text-base font-semibold disabled:cursor-default enabled:cursor-pointer"
+            className="bg-primary text-on-primary rounded-lg border-none px-5 py-2.5 text-base font-semibold enabled:cursor-pointer disabled:cursor-default"
           >
             Submit
           </button>
@@ -65,7 +65,7 @@ export function ReflectionRenderer({
           <div
             aria-live="polite"
             role="status"
-            className="mt-3 px-4 py-2.5 rounded-lg font-semibold text-secondary bg-secondary/15"
+            className="text-secondary bg-secondary/15 mt-3 rounded-lg px-4 py-2.5 font-semibold"
           >
             Saved — thank you for your reflection.
           </div>

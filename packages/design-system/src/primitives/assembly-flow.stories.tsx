@@ -21,15 +21,15 @@ export const AllDensities: Story = {
   render: () => (
     <div className="flex flex-col gap-8">
       <div>
-        <p className="text-sm font-medium text-gray-500 mb-2">Dense</p>
+        <p className="mb-2 text-sm font-medium text-gray-500">Dense</p>
         <AssemblyFlow density="dense" />
       </div>
       <div>
-        <p className="text-sm font-medium text-gray-500 mb-2">Medium</p>
+        <p className="mb-2 text-sm font-medium text-gray-500">Medium</p>
         <AssemblyFlow density="medium" />
       </div>
       <div>
-        <p className="text-sm font-medium text-gray-500 mb-2">Minimal</p>
+        <p className="mb-2 text-sm font-medium text-gray-500">Minimal</p>
         <AssemblyFlow density="minimal" />
       </div>
     </div>

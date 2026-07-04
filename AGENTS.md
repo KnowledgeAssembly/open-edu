@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **4-theme system** with Tailwind CSS styling.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **6-theme system** with Tailwind CSS styling.
 
 ## Technology Stack
 
@@ -95,6 +95,19 @@ open-edu/
 5. **Commits should be scoped.** Use conventional commits: `feat(schemas): add workflow schema`
 6. **One story per PR.** Each story gets its own branch and PR.
 
+## UI Coding Standards
+
+1. **Styling:** Use Tailwind utility classes + `cn()` from `@open-edu/design-system`. Never use inline `style={{}}` except for dynamic sizing props.
+2. **Tokens:** All colors via `--oe-*` tokens through Tailwind classes. Never hardcode hex/rgb values or use non-token Tailwind palette colors (e.g., `text-amber-400`).
+3. **Components:** Follow shadcn/ui pattern — `forwardRef`, `displayName`, `cva` for variants, named exports.
+4. **Primitives:** Use Radix UI primitives from `@open-edu/design-system` (Button, Dialog, Select, etc.).
+5. **Class ordering:** Tailwind classes in recommended order (automated by `prettier-plugin-tailwindcss`).
+6. **Responsive:** Use Tailwind responsive prefixes (`sm:`, `md:`, `lg:`) with mobile-first approach.
+7. **Accessibility:** Every component must pass axe-core. Use semantic HTML, ARIA attributes, keyboard navigation.
+8. **Testing:** Every component needs rendering + interaction + a11y tests.
+9. **Dev-server CSS:** After adding/changing Tailwind classes in `packages/runtime/src/`, regenerate: `pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css`
+10. **Exceptions:** Inline styles are allowed only for: dynamic sizing from props, CSS variable references (`var(--oe-*)`), and the RuntimeThemeProvider.
+
 ## Package Naming
 
 All packages use the `@open-edu/` scope:
@@ -149,7 +162,7 @@ Epic 298 (Recognition Engine)
 
 ### Theme System (Epics 138–145)
 
-A 4-theme system built as a sub-track within the runtime:
+A 6-theme system built as a sub-track within the runtime:
 
 ```
 Epic 1: Token Foundation (#138, PR #174)

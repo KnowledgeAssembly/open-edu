@@ -34,18 +34,18 @@ export function Module({
         onClick={() => setIsExpanded((prev) => !prev)}
         aria-expanded={isExpanded}
         className={cn(
-          'flex w-full items-center gap-3 border-none bg-surface px-5 py-4 text-left cursor-pointer',
-          'transition-colors duration-200 hover:bg-surface-container-high',
+          'bg-surface flex w-full cursor-pointer items-center gap-3 border-none px-5 py-4 text-left',
+          'hover:bg-surface-container-high transition-colors duration-200',
         )}
       >
         <span
-          className="text-sm leading-none text-on-surface-variant transition-transform duration-200 shrink-0"
+          className="text-on-surface-variant shrink-0 text-sm leading-none transition-transform duration-200"
           style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
         >
           {'\u25B6'}
         </span>
-        <span className="flex-1 text-base font-semibold text-on-surface">{title}</span>
-        <span className="text-xs text-on-surface-variant whitespace-nowrap">
+        <span className="text-on-surface flex-1 text-base font-semibold">{title}</span>
+        <span className="text-on-surface-variant whitespace-nowrap text-xs">
           {completedLessons} of {totalLessons} lessons
         </span>
       </button>
@@ -62,10 +62,10 @@ export function Module({
                   aria-current={isActive ? 'page' : undefined}
                   data-testid={`module-lesson-${lesson.id}`}
                   className={cn(
-                    'flex w-full items-center gap-3 border-none bg-transparent px-5 py-2.5 text-left cursor-pointer',
-                    'text-sm text-on-surface-variant font-body-md transition-colors duration-200 hover:bg-surface-container-higher',
+                    'flex w-full cursor-pointer items-center gap-3 border-none bg-transparent px-5 py-2.5 text-left',
+                    'text-on-surface-variant font-body-md hover:bg-surface-container-higher text-sm transition-colors duration-200',
                     isActive &&
-                      'border-l-[3px] border-solid border-[var(--oe-color-primary)] bg-surface-variant pl-[17px] font-medium text-primary',
+                      'bg-surface-variant text-primary border-l-[3px] border-solid border-[var(--oe-color-primary)] pl-[17px] font-medium',
                   )}
                 >
                   {lesson.title}

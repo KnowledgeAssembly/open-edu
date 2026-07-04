@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CourseTree } from '../CourseTree.js';
 import type { CourseTreeModule } from '../CourseTree.js';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 const sampleModules: CourseTreeModule[] = [
   {

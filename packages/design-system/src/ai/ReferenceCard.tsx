@@ -26,7 +26,7 @@ export function ReferenceCard({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-primary hover:underline"
+            className="text-primary text-sm font-medium hover:underline"
           >
             View reference &rarr;
           </a>

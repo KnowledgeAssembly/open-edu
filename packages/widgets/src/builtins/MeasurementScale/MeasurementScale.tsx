@@ -164,7 +164,7 @@ function MeasurementScaleComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       >
         <p className="text-on-surface font-semibold">Unable to load measurement scale</p>
         <p className="text-on-surface-variant mt-1 text-sm">

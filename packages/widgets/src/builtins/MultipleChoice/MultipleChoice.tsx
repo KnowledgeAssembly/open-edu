@@ -160,7 +160,7 @@ function MultipleChoiceComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md text-center"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
@@ -238,7 +238,7 @@ function MultipleChoiceComponent(props: {
             ))}
           </fieldset>
           {showAcknowledgeButton && (
-            <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+            <div className="p-md border-outline-variant mt-md flex items-center justify-center border-t">
               <Button
                 variant="default"
                 onClick={handleObserveAcknowledge}
@@ -301,7 +301,7 @@ function MultipleChoiceComponent(props: {
     return (
       <div role="group" aria-label="Multiple choice activity" data-testid="multiple-choice">
         {cfg.questions.length > 1 && (
-          <p className="text-sm text-on-surface/70 mb-sm" data-testid="question-progress">
+          <p className="text-on-surface/70 mb-sm text-sm" data-testid="question-progress">
             Question {currentIndex + 1} of {cfg.questions.length}
           </p>
         )}
@@ -328,7 +328,7 @@ function MultipleChoiceComponent(props: {
             return (
               <label
                 key={idx}
-                className={`block my-xs ${optionClasses}`}
+                className={`my-xs block ${optionClasses}`}
                 data-testid={isCorrectShown ? 'correct-option' : undefined}
               >
                 <input
@@ -353,7 +353,7 @@ function MultipleChoiceComponent(props: {
             role="status"
             aria-live="assertive"
             data-testid="question-feedback"
-            className="mt-md p-md rounded-lg border border-outline-variant bg-surface-container"
+            className="mt-md p-md border-outline-variant bg-surface-container rounded-lg border"
           >
             {feedback.isCorrect ? (
               <p className="text-success font-semibold">✓ Correct!</p>

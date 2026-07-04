@@ -80,10 +80,10 @@ function RealWorldComponent(props: {
       <div
         role="alert"
         data-testid="widget-config-error"
-        className="rounded-lg border border-error bg-error/10 p-md text-on-surface"
+        className="border-error bg-error/10 p-md text-on-surface rounded-lg border"
       >
-        <p className="font-semibold text-error">Configuration Error</p>
-        <p className="mt-xs text-sm text-on-surface/70">
+        <p className="text-error font-semibold">Configuration Error</p>
+        <p className="mt-xs text-on-surface/70 text-sm">
           Invalid real world configuration. Please check the scenario data.
         </p>
       </div>
@@ -133,8 +133,8 @@ function RealWorldComponent(props: {
         {taskDescription && <p>{taskDescription}</p>}
         {prompt && <p>{prompt}</p>}
         <div role="status" aria-live="assertive" data-testid="real-world-result">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md mt-md">
-            <h3 className="font-semibold mb-sm">Your response:</h3>
+          <div className="bg-surface-container-lowest border-outline-variant p-md mt-md rounded-xl border">
+            <h3 className="mb-sm font-semibold">Your response:</h3>
             <p className="text-on-surface whitespace-pre-wrap">{response}</p>
           </div>
           {selfAssessment && (
@@ -192,8 +192,8 @@ function RealWorldComponent(props: {
           data-testid="self-assessment-container"
           className="mt-md"
         >
-          <p className="font-semibold mb-sm">Reflect on your work:</p>
-          <div className="flex flex-col gap-sm">
+          <p className="mb-sm font-semibold">Reflect on your work:</p>
+          <div className="gap-sm flex flex-col">
             <Button
               variant="default"
               onClick={() => handleSelfAssess('well')}

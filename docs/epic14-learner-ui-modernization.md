@@ -362,11 +362,11 @@ const Progress = React.forwardRef<
 >(({ className, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
-    className={cn('relative h-4 w-full overflow-hidden rounded-full bg-secondary', className)}
+    className={cn('bg-secondary relative h-4 w-full overflow-hidden rounded-full', className)}
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className="h-full w-full flex-1 bg-primary transition-all"
+      className="bg-primary h-full w-full flex-1 transition-all"
       style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
     />
   </ProgressPrimitive.Root>
@@ -393,7 +393,7 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
-      'peer inline-flex h-[24px] w-[44px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
+      'focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-primary data-[state=unchecked]:bg-input peer inline-flex h-[24px] w-[44px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       className,
     )}
     {...props}
@@ -401,7 +401,7 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitives.Thumb
       className={cn(
-        'pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
+        'bg-background pointer-events-none block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
       )}
     />
   </SwitchPrimitives.Root>
@@ -517,9 +517,9 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
    ```tsx
    <Card>
      <CardContent className="flex flex-col items-center p-6 text-center">
-       <BookOpen className="h-8 w-8 text-primary mb-2" />
-       <div className="text-3xl font-bold text-primary">{totalUnits}</div>
-       <p className="text-sm text-muted-foreground">Learning Units Available</p>
+       <BookOpen className="text-primary mb-2 h-8 w-8" />
+       <div className="text-primary text-3xl font-bold">{totalUnits}</div>
+       <p className="text-muted-foreground text-sm">Learning Units Available</p>
      </CardContent>
    </Card>
    ```
@@ -531,12 +531,12 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
    ```tsx
    <Card className="border-primary/20 bg-primary/5">
      <CardContent className="p-6">
-       <h2 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
+       <h2 className="text-primary mb-3 flex items-center gap-2 text-lg font-semibold">
          <Sparkles className="h-5 w-5" /> Quick Links
        </h2>
        <div className="flex flex-wrap gap-3">
          <Button onClick={() => onNavigate({ view: 'catalog' })}>
-           <PlayCircle className="h-4 w-4 mr-2" /> Browse Courses
+           <PlayCircle className="mr-2 h-4 w-4" /> Browse Courses
          </Button>
          <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
            View Progress
@@ -617,10 +617,10 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
        {/* Font Size row */}
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-2">
-           <Type className="h-4 w-4 text-muted-foreground" />
+           <Type className="text-muted-foreground h-4 w-4" />
            <div>
-             <p className="font-medium text-sm">Font Size</p>
-             <p className="text-xs text-muted-foreground">Adjust text size</p>
+             <p className="text-sm font-medium">Font Size</p>
+             <p className="text-muted-foreground text-xs">Adjust text size</p>
            </div>
          </div>
          <div className="flex items-center gap-2">
@@ -632,7 +632,7 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
            >
              <Minus className="h-4 w-4" />
            </Button>
-           <span className="w-12 text-center text-sm font-mono">{fontSize}%</span>
+           <span className="w-12 text-center font-mono text-sm">{fontSize}%</span>
            <Button
              variant="outline"
              size="sm"
@@ -648,8 +648,8 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-2">
            <div>
-             <p className="font-medium text-sm">Reduced Motion</p>
-             <p className="text-xs text-muted-foreground">Minimize animations</p>
+             <p className="text-sm font-medium">Reduced Motion</p>
+             <p className="text-muted-foreground text-xs">Minimize animations</p>
            </div>
          </div>
          <Switch
@@ -663,8 +663,8 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-2">
            <div>
-             <p className="font-medium text-sm">High Contrast</p>
-             <p className="text-xs text-muted-foreground">Increase color contrast</p>
+             <p className="text-sm font-medium">High Contrast</p>
+             <p className="text-muted-foreground text-xs">Increase color contrast</p>
            </div>
          </div>
          <Switch
@@ -741,22 +741,22 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
    ```tsx
    <Card
      key={bundle.manifest.id}
-     className="cursor-pointer hover:shadow-md transition-shadow"
+     className="cursor-pointer transition-shadow hover:shadow-md"
      onClick={() => onStartBundle?.(bundle.manifest.id)}
      data-testid="bundle-card"
      data-bundle-id={bundle.manifest.id}
    >
      <CardHeader>
-       <div className="flex items-center gap-2 mb-1">
+       <div className="mb-1 flex items-center gap-2">
          <Badge variant="secondary">Bundle</Badge>
-         <CardTitle className="text-lg truncate">{bundle.manifest.title}</CardTitle>
+         <CardTitle className="truncate text-lg">{bundle.manifest.title}</CardTitle>
        </div>
        <CardDescription>
          {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
        </CardDescription>
      </CardHeader>
      <CardContent>
-       <div className="flex gap-4 text-xs text-muted-foreground">
+       <div className="text-muted-foreground flex gap-4 text-xs">
          <span>{bundle.moduleCount} modules</span>
          <span>{bundle.totalNodeCount} activities</span>
        </div>
@@ -766,7 +766,7 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
              value={Math.round((completedModules / bundle.moduleCount) * 100)}
              className="h-2"
            />
-           <span className="text-xs text-muted-foreground mt-1 block">
+           <span className="text-muted-foreground mt-1 block text-xs">
              {completedModules} of {bundle.moduleCount} complete
            </span>
          </div>
@@ -865,9 +865,9 @@ Radix Tooltip using `@radix-ui/react-tooltip`.
 3. **Empty state** — Wrap in `Card` and use Lucide `BookOpen` icon:
 
    ```tsx
-   <Card className="text-center p-8">
+   <Card className="p-8 text-center">
      <CardContent>
-       <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+       <BookOpen className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
        <CardTitle className="mb-2">Your learning journey starts here!</CardTitle>
        <CardDescription className="mb-6">
          Begin a course and your progress will appear here.
@@ -1035,7 +1035,7 @@ export function CourseExitWarningDialog({
      data-testid="badge-toast"
    >
      <CardContent className="p-3">
-       <div className="font-semibold text-sm text-success flex items-center gap-1">
+       <div className="text-success flex items-center gap-1 text-sm font-semibold">
          <Award className="h-4 w-4" /> Badge earned!
        </div>
        <div className="text-base">{toastBadgeName}</div>

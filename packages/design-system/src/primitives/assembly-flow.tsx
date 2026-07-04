@@ -121,7 +121,7 @@ export const AssemblyFlow = React.forwardRef<SVGSVGElement, AssemblyFlowProps>(
       <svg
         ref={ref}
         viewBox="0 0 300 100"
-        className={cn('w-full h-auto', className)}
+        className={cn('h-auto w-full', className)}
         aria-hidden="true"
         {...props}
       >

@@ -32,7 +32,7 @@ export const Empty: Story = {
   render: () => (
     <Card className="w-[350px]">
       <CardContent>
-        <p className="text-sm text-muted-foreground">No content to display.</p>
+        <p className="text-muted-foreground text-sm">No content to display.</p>
       </CardContent>
     </Card>
   ),

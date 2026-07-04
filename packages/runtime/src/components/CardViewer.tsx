@@ -48,40 +48,40 @@ export function CardViewer({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <div
               className={cn(
-                'flex items-center justify-center w-12 h-12 rounded-xl',
-                'bg-gradient-to-br from-primary/20 to-primary/10',
+                'flex h-12 w-12 items-center justify-center rounded-xl',
+                'from-primary/20 to-primary/10 bg-gradient-to-br',
               )}
             >
-              <IconComponent className="w-6 h-6 text-primary" />
+              <IconComponent className="text-primary size-6" />
             </div>
             <div className="flex flex-col">
               <DialogTitle className="text-h3 font-display text-on-surface">
                 {card.title}
               </DialogTitle>
               {card.subtitle && (
-                <span className="text-sm text-on-surface-variant">{card.subtitle}</span>
+                <span className="text-on-surface-variant text-sm">{card.subtitle}</span>
               )}
             </div>
           </div>
-          <DialogDescription className="text-sm text-on-surface-variant leading-relaxed">
+          <DialogDescription className="text-on-surface-variant text-sm leading-relaxed">
             {card.summary}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-wrap gap-2 px-6">
-          <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full capitalize">
+          <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium capitalize">
             {card.type}
           </span>
-          <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+          <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
             {card.category}
           </span>
           {card.difficulty && (
-            <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+            <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
               {card.difficulty}
             </span>
           )}
@@ -89,7 +89,7 @@ export function CardViewer({
 
         {card.detailedExplanation && (
           <div className="px-6">
-            <p className="text-sm text-on-surface leading-relaxed">{card.detailedExplanation}</p>
+            <p className="text-on-surface text-sm leading-relaxed">{card.detailedExplanation}</p>
           </div>
         )}
 
@@ -99,7 +99,7 @@ export function CardViewer({
               {card.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[10px] font-medium bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded"
+                  className="bg-surface-container-high text-on-surface-variant rounded px-2 py-0.5 text-[10px] font-medium"
                 >
                   #{tag}
                 </span>
@@ -109,7 +109,7 @@ export function CardViewer({
         )}
 
         <div className="px-6">
-          <h4 className="text-sm font-semibold text-on-surface mb-3">Mastery Levels</h4>
+          <h4 className="text-on-surface mb-3 text-sm font-semibold">Mastery Levels</h4>
           <div className="flex flex-col gap-2">
             {Array.from({ length: maxLevel }, (_, i) => {
               const lvl = i + 1;
@@ -120,7 +120,7 @@ export function CardViewer({
                 <div
                   key={lvl}
                   className={cn(
-                    'flex items-start gap-3 p-3 rounded-lg border transition-colors',
+                    'flex items-start gap-3 rounded-lg border p-3 transition-colors',
                     isCurrent
                       ? 'border-primary bg-primary/5'
                       : isUnlocked
@@ -130,13 +130,13 @@ export function CardViewer({
                 >
                   <div
                     className={cn(
-                      'flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-xs font-bold',
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
                       isUnlocked ? 'bg-primary text-on-primary' : 'bg-muted text-muted-foreground',
                     )}
                   >
                     {lvl}
                   </div>
-                  <div className="flex flex-col gap-0.5 min-w-0">
+                  <div className="flex min-w-0 flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
@@ -147,12 +147,12 @@ export function CardViewer({
                         {isUnlocked ? 'Unlocked' : 'Locked'}
                       </span>
                       {isCurrent && (
-                        <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        <span className="text-primary bg-primary/10 rounded-full px-2 py-0.5 text-[10px] font-medium">
                           Current
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-on-surface-variant">{defaults[0]}</p>
+                    <p className="text-on-surface-variant text-xs">{defaults[0]}</p>
                   </div>
                 </div>
               );
@@ -162,18 +162,18 @@ export function CardViewer({
 
         {card.relatedLessons && card.relatedLessons.length > 0 && (
           <div className="px-6">
-            <h4 className="text-sm font-semibold text-on-surface mb-2">Related Lessons</h4>
+            <h4 className="text-on-surface mb-2 text-sm font-semibold">Related Lessons</h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedLessons.map((lessonId) => (
                 <button
                   key={lessonId}
                   onClick={() => onRelatedLessonClick?.(lessonId)}
                   className={cn(
-                    'flex items-center gap-2 text-sm text-primary hover:text-primary/80',
-                    'transition-colors text-left',
+                    'text-primary hover:text-primary/80 flex items-center gap-2 text-sm',
+                    'text-left transition-colors',
                   )}
                 >
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  <ExternalLink className="size-3.5 shrink-0" />
                   <span className="truncate">
                     {lessonId
                       .replace(/^.*[/\\]/, '')
@@ -188,18 +188,18 @@ export function CardViewer({
 
         {card.relatedQuizzes && card.relatedQuizzes.length > 0 && (
           <div className="px-6 pb-6">
-            <h4 className="text-sm font-semibold text-on-surface mb-2">Related Quizzes</h4>
+            <h4 className="text-on-surface mb-2 text-sm font-semibold">Related Quizzes</h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedQuizzes.map((quizId) => (
                 <button
                   key={quizId}
                   onClick={() => onRelatedLessonClick?.(quizId)}
                   className={cn(
-                    'flex items-center gap-2 text-sm text-primary hover:text-primary/80',
-                    'transition-colors text-left',
+                    'text-primary hover:text-primary/80 flex items-center gap-2 text-sm',
+                    'text-left transition-colors',
                   )}
                 >
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  <ExternalLink className="size-3.5 shrink-0" />
                   <span className="truncate">
                     {quizId
                       .replace(/^.*[/\\]/, '')

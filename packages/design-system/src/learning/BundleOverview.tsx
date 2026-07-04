@@ -40,7 +40,7 @@ function OverallProgressBar({ modules }: { modules: BundleOverviewModule[] }): J
 
   if (totalNodes === 0) {
     return (
-      <div className="w-full h-2 rounded-full bg-outline-variant" data-testid="overall-progress" />
+      <div className="bg-outline-variant h-2 w-full rounded-full" data-testid="overall-progress" />
     );
   }
 
@@ -54,14 +54,14 @@ function OverallProgressBar({ modules }: { modules: BundleOverviewModule[] }): J
         aria-valuemin={0}
         aria-valuemax={totalNodes}
         aria-label={`Overall progress: ${completedNodes} of ${totalNodes}`}
-        className="h-2.5 rounded-full bg-outline-variant overflow-hidden"
+        className="bg-outline-variant h-2.5 overflow-hidden rounded-full"
       >
         <div
-          className="h-full rounded-full bg-primary transition-all duration-500"
+          className="bg-primary h-full rounded-full transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>
-      <p className="text-sm text-on-surface-variant mt-1">
+      <p className="text-on-surface-variant mt-1 text-sm">
         {completedNodes} of {totalNodes} activities completed
       </p>
     </div>
@@ -73,7 +73,7 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
     props;
 
   return (
-    <div className="p-xl max-w-4xl mx-auto" data-testid="bundle-overview">
+    <div className="p-xl mx-auto max-w-4xl" data-testid="bundle-overview">
       <Button
         variant="link"
         onClick={onBackToCatalog}
@@ -84,7 +84,7 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
       </Button>
 
       <h1
-        className="text-h1 font-display text-on-surface font-bold mb-sm"
+        className="text-h1 font-display text-on-surface mb-sm font-bold"
         data-testid="bundle-title"
       >
         {bundleTitle}
@@ -95,12 +95,12 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
       )}
 
       <div className="mb-xl">
-        <h2 className="text-h3 font-display font-bold text-on-surface mb-md">Overall Progress</h2>
+        <h2 className="text-h3 font-display text-on-surface mb-md font-bold">Overall Progress</h2>
         <OverallProgressBar modules={modules} />
       </div>
 
       <ul
-        className="flex flex-col gap-md list-none m-0 p-0"
+        className="gap-md m-0 flex list-none flex-col p-0"
         role="list"
         aria-label="Bundle modules"
         data-testid="module-list"
@@ -111,29 +111,29 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
               key={mod.id}
               aria-labelledby={`module-title-${mod.id}`}
               className={cn(
-                'border border-outline-variant rounded-xl p-md transition-colors list-none',
+                'border-outline-variant p-md list-none rounded-xl border transition-colors',
                 mod.status === 'locked' && 'opacity-60',
               )}
               data-testid="module-card"
               data-status={mod.status}
             >
-              <div className="flex items-start justify-between mb-sm">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-sm mb-xs">
+              <div className="mb-sm flex items-start justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="gap-sm mb-xs flex items-center">
                     {mod.chapterCode && (
-                      <span className="text-xs font-bold text-primary bg-primary-container px-2 py-0.5 rounded">
+                      <span className="text-primary bg-primary-container rounded px-2 py-0.5 text-xs font-bold">
                         {mod.chapterCode}
                       </span>
                     )}
                     <h3
                       id={`module-title-${mod.id}`}
-                      className="text-h3 font-title text-on-surface font-bold truncate m-0"
+                      className="text-h3 font-title text-on-surface m-0 truncate font-bold"
                     >
                       {mod.title}
                     </h3>
                   </div>
                   {mod.status === 'locked' && mod.prerequisiteLabel && (
-                    <p className="text-sm text-on-surface-variant mt-xs">{mod.prerequisiteLabel}</p>
+                    <p className="text-on-surface-variant mt-xs text-sm">{mod.prerequisiteLabel}</p>
                   )}
                 </div>
                 <BundleModuleIndicator
@@ -150,23 +150,23 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
               {mod.nodeCount > 0 && mod.status !== 'locked' && (
                 <div className="mb-sm">
                   <Progress current={mod.completedNodeCount} total={mod.nodeCount} size="sm" />
-                  <span className="text-xs text-on-surface-variant mt-0.5 block">
+                  <span className="text-on-surface-variant mt-0.5 block text-xs">
                     {mod.completedNodeCount} of {mod.nodeCount} activities completed
                   </span>
                 </div>
               )}
 
               {mod.nodeCount === 0 && mod.status !== 'locked' && (
-                <p className="text-xs text-on-surface-variant mb-sm">No activities</p>
+                <p className="text-on-surface-variant mb-sm text-xs">No activities</p>
               )}
 
               {mod.estimatedDuration && mod.status !== 'completed' && (
-                <p className="text-xs text-on-surface-variant mb-sm">
+                <p className="text-on-surface-variant mb-sm text-xs">
                   ~{mod.estimatedDuration} min
                 </p>
               )}
 
-              <div className="flex gap-sm">
+              <div className="gap-sm flex">
                 {mod.status === 'unlocked' && (
                   <Button
                     variant="default"
@@ -189,11 +189,11 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                 )}
                 {mod.status === 'completed' && (
                   <span
-                    className="text-success font-semibold text-sm flex items-center gap-xs"
+                    className="text-success gap-xs flex items-center text-sm font-semibold"
                     data-testid={`completed-module-${mod.id}`}
                   >
                     <svg
-                      className="w-4 h-4"
+                      className="h-4 w-4"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"

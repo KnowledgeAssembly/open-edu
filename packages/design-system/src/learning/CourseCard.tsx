@@ -54,7 +54,7 @@ function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.E
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ))}
-      {total > 5 && <span className="text-xs text-on-surface-variant ml-0.5">+{total - 5}</span>}
+      {total > 5 && <span className="text-on-surface-variant ml-0.5 text-xs">+{total - 5}</span>}
     </div>
   );
 }
@@ -83,18 +83,18 @@ export function CourseCard({
 
   return (
     <article
-      className="relative rounded-2xl bg-surface-container-low shadow-elevation-raised font-body-md transition-shadow duration-200 hover:shadow-elevation-overlay"
+      className="bg-surface-container-low shadow-elevation-raised font-body-md hover:shadow-elevation-overlay relative rounded-2xl transition-shadow duration-200"
       data-testid="course-card"
     >
-      {indicator && (
-        <div className="absolute top-4 right-4 z-10">{indicator}</div>
-      )}
+      {indicator && <div className="absolute right-4 top-4 z-10">{indicator}</div>}
       <div className="p-5 pr-16">
-        <h2 className="text-base font-semibold m-0 mb-2 text-on-surface">{manifest.title}</h2>
+        <h2 className="text-on-surface m-0 mb-2 text-base font-semibold">{manifest.title}</h2>
         {manifest.author && (
-          <p className="text-sm text-on-surface-variant m-0 mb-3 leading-relaxed">by {manifest.author}</p>
+          <p className="text-on-surface-variant m-0 mb-3 text-sm leading-relaxed">
+            by {manifest.author}
+          </p>
         )}
-        <div className="flex items-center gap-3 text-xs text-on-surface-variant mb-3">
+        <div className="text-on-surface-variant mb-3 flex items-center gap-3 text-xs">
           <span>{nodeCount} lessons</span>
           {badgeCount > 0 && <BadgeIcons total={badgeCount} earned={earnedBadgeCount} />}
         </div>
@@ -110,7 +110,7 @@ export function CourseCard({
         <Button
           variant={isCompleted ? 'secondary' : 'default'}
           size="sm"
-          className="w-full mt-3 h-8 px-4 text-sm"
+          className="mt-3 h-8 w-full px-4 text-sm"
           aria-label={`${buttonLabel} ${manifest.title}`}
           onClick={() => onStart()}
         >

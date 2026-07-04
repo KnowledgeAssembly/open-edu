@@ -86,7 +86,7 @@ function ChartReaderComponent(props: {
         className="bg-error-container text-on-error-container p-md rounded-lg"
       >
         <p className="font-semibold">Chart configuration is invalid</p>
-        <p className="text-sm mt-xs opacity-80">
+        <p className="mt-xs text-sm opacity-80">
           {parsed.error.issues.map((i) => i.message).join('; ')}
         </p>
       </div>
@@ -119,7 +119,7 @@ function ChartReaderComponent(props: {
       )}
 
       {showAcknowledgeButton && (
-        <div className="flex items-center justify-center p-md border-t border-outline-variant mt-md">
+        <div className="p-md border-outline-variant mt-md flex items-center justify-center border-t">
           <Button
             variant="default"
             onClick={handleObserveAcknowledge}

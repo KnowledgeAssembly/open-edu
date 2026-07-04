@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { Toaster } from '../notification.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('Toaster', () => {
   it('has no accessibility violations', async () => {

@@ -61,12 +61,12 @@ export function Card({
       onClick={isLocked ? undefined : onClick}
       onKeyDown={isLocked ? undefined : handleKeyDown}
       className={cn(
-        'group relative rounded-xl border border-outline-variant/50 p-4 cursor-pointer',
+        'border-outline-variant/50 group relative cursor-pointer rounded-xl border p-4',
         'bg-surface/60 backdrop-blur-sm transition-all duration-300',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'focus-visible:ring-primary focus-visible:outline-none focus-visible:ring-2',
         isLocked
-          ? 'opacity-50 grayscale cursor-default'
-          : 'hover:scale-[1.02] hover:shadow-md hover:border-outline-variant',
+          ? 'cursor-default opacity-50 grayscale'
+          : 'hover:border-outline-variant hover:scale-[1.02] hover:shadow-md',
         'motion-safe:transition-all motion-safe:duration-300',
         className,
       )}
@@ -85,16 +85,16 @@ export function Card({
         <div className="flex items-start justify-between">
           <div
             className={cn(
-              'flex items-center justify-center w-10 h-10 rounded-lg',
+              'flex h-10 w-10 items-center justify-center rounded-lg',
               'bg-gradient-to-br shadow-sm',
               isLocked ? 'from-muted/50 to-muted/30' : config.gradient,
               !isLocked && config.ring,
             )}
           >
             {isLocked ? (
-              <Lock className="w-5 h-5 text-muted-foreground" />
+              <Lock className="text-muted-foreground size-5" />
             ) : (
-              <IconComponent className="w-5 h-5 text-on-surface" />
+              <IconComponent className="text-on-surface size-5" />
             )}
           </div>
 
@@ -104,8 +104,8 @@ export function Card({
                 <Star
                   key={i}
                   className={cn(
-                    'w-3.5 h-3.5',
-                    i < level ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30',
+                    'h-3.5 w-3.5',
+                    i < level ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30',
                   )}
                 />
               ))}
@@ -114,12 +114,12 @@ export function Card({
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
             {card.type}
           </span>
           <h3
             className={cn(
-              'font-semibold text-sm leading-tight text-on-surface',
+              'text-on-surface text-sm font-semibold leading-tight',
               isLocked && 'text-muted-foreground',
             )}
           >
@@ -127,7 +127,7 @@ export function Card({
           </h3>
           <p
             className={cn(
-              'text-xs text-on-surface-variant line-clamp-2',
+              'text-on-surface-variant line-clamp-2 text-xs',
               isLocked && 'text-muted-foreground/60',
             )}
           >
@@ -135,16 +135,16 @@ export function Card({
           </p>
         </div>
 
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+        <div className="mt-1 flex items-center justify-between">
+          <span className="text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5 text-[10px] font-medium">
             {card.category}
           </span>
           {isLocked && level === 0 ? (
-            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <Lock className="w-3 h-3" /> Locked
+            <span className="text-muted-foreground flex items-center gap-1 text-[10px]">
+              <Lock className="size-3" /> Locked
             </span>
           ) : (
-            <span className="text-[10px] font-medium text-muted-foreground">Lv.{level}</span>
+            <span className="text-muted-foreground text-[10px] font-medium">Lv.{level}</span>
           )}
         </div>
       </div>

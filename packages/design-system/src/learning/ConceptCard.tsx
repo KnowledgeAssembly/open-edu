@@ -13,20 +13,20 @@ export function ConceptCard({ title, children, icon, className }: ConceptCardPro
   return (
     <Card
       data-testid="concept-card"
-      className={cn('w-full bg-surface-container-low border-outline-variant', className)}
+      className={cn('bg-surface-container-low border-outline-variant w-full', className)}
     >
       <div className="flex items-start gap-4 p-5">
         {icon && (
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-container text-xl text-primary"
+            className="bg-primary-container text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl"
             aria-hidden="true"
           >
             {icon}
           </span>
         )}
         <div className="flex-1 space-y-2">
-          <h3 className="m-0 text-base font-semibold text-on-surface">{title}</h3>
-          <div className="text-sm text-on-surface-variant font-body-md leading-relaxed">
+          <h3 className="text-on-surface m-0 text-base font-semibold">{title}</h3>
+          <div className="text-on-surface-variant font-body-md text-sm leading-relaxed">
             {children}
           </div>
         </div>

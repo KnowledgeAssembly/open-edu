@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../select.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};

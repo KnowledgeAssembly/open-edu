@@ -11,7 +11,7 @@ export function TutorMessage({ role, children, className }: TutorMessageProps): 
   return (
     <div
       className={cn(
-        'flex gap-2 items-start',
+        'flex items-start gap-2',
         role === 'user' ? 'justify-end' : 'justify-start',
         className,
       )}
@@ -19,7 +19,7 @@ export function TutorMessage({ role, children, className }: TutorMessageProps): 
     >
       {role === 'ai' && (
         <span
-          className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-sm shrink-0"
+          className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
           aria-hidden="true"
         >
           {'🤖'}

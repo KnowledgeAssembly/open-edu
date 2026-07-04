@@ -55,7 +55,7 @@ export function Pipili({
     >
       <div
         className={cn(
-          'flex items-center justify-center w-14 h-14 rounded-full',
+          'flex h-14 w-14 items-center justify-center rounded-full',
           'bg-surface-container shadow-md',
           'transition-all duration-300',
         )}

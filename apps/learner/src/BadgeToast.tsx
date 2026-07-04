@@ -64,7 +64,7 @@ export function BadgeToast({
         'max-w-xs',
         'motion-safe:transition-all motion-safe:duration-300',
         isAnimatingOut
-          ? 'translate-y-4 opacity-0 pointer-events-none'
+          ? 'pointer-events-none translate-y-4 opacity-0'
           : isAnimatingIn
             ? 'translate-y-0 opacity-100'
             : 'translate-y-4 opacity-0',
@@ -72,18 +72,18 @@ export function BadgeToast({
       data-testid="badge-toast"
     >
       <div className="relative">
-        <div className="absolute -top-4 -left-4 pointer-events-none">
+        <div className="pointer-events-none absolute -left-4 -top-4">
           <ConfettiBurst particleCount={12} duration={1.2} />
         </div>
-        <div className="flex items-start gap-3 p-4 rounded-xl shadow-lg bg-surface border border-outline-variant">
+        <div className="bg-surface border-outline-variant flex items-start gap-3 rounded-xl border p-4 shadow-lg">
           <GlowPulse duration={1.5}>
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400/20 to-amber-500/10">
-              <Award className="w-5 h-5 text-amber-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/20 to-amber-500/10">
+              <Award className="h-5 w-5 text-amber-500" />
             </div>
           </GlowPulse>
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="text-sm font-semibold text-amber-600">Achievement Unlocked!</span>
-            <span className="text-sm text-on-surface truncate">{badgeName}</span>
+            <span className="text-on-surface truncate text-sm">{badgeName}</span>
           </div>
         </div>
       </div>

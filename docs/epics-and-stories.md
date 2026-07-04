@@ -1218,14 +1218,14 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'text-foreground ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        outline: 'border-input bg-background hover:bg-accent hover:text-accent-foreground border',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -1411,7 +1411,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {
     return (
       <textarea
-        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         ref={ref}
         {...props}
       />
@@ -1477,7 +1477,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(({ items, clas
   <nav ref={ref} aria-label="Breadcrumb" className={className}>
     <ol className="flex items-center gap-1">
       {items.map((item, idx) => (
-        <li key={idx} className="flex items-center gap-1 text-sm text-muted-foreground">
+        <li key={idx} className="text-muted-foreground flex items-center gap-1 text-sm">
           {idx > 0 && <ChevronRight className="h-4 w-4" />}
           {item.href ? (
             <a href={item.href} className="text-primary hover:underline">
@@ -1513,7 +1513,7 @@ const tagVariants = cva(
         success: 'bg-success/10 text-success-foreground',
         warning: 'bg-warning/10 text-warning-foreground',
         danger: 'bg-destructive/10 text-destructive-foreground',
-        outline: 'border border-border text-foreground',
+        outline: 'border-border text-foreground border',
       },
     },
     defaultVariants: { variant: 'default' },
@@ -1533,7 +1533,7 @@ const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
         <button
           type="button"
           onClick={onRemove}
-          className="ml-0.5 rounded-full hover:bg-foreground/10 p-0.5"
+          className="hover:bg-foreground/10 ml-0.5 rounded-full p-0.5"
           aria-label="Remove"
         >
           <X className="h-3 w-3" />
@@ -1556,7 +1556,7 @@ export { Tag, tagVariants };
 ```tsx
 const Skeleton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={`animate-pulse rounded-md bg-muted ${className ?? ''}`} {...props} />
+    <div ref={ref} className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} {...props} />
   ),
 );
 ```
@@ -1568,7 +1568,7 @@ const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
   ({ size = 'md', className }, ref) => (
     <div
       ref={ref}
-      className={`animate-spin text-muted-foreground ${sizeClasses[size]} ${className ?? ''}`}
+      className={`text-muted-foreground animate-spin ${sizeClasses[size]} ${className ?? ''}`}
     >
       <svg viewBox="0 0 24 24" fill="none">
         <circle
@@ -1668,13 +1668,13 @@ export { Button as ThemedButton } from '@open-edu/design-system';
 export function SideNav({ courseTitle, children, onResumeLesson }: SideNavProps): JSX.Element {
   return (
     <aside
-      className="w-[var(--oe-space-panel-nav)] h-screen flex flex-col bg-surface-container border-r border-outline-variant font-body-md overflow-hidden"
+      className="bg-surface-container border-outline-variant font-body-md flex h-screen w-[var(--oe-space-panel-nav)] flex-col overflow-hidden border-r"
       data-testid="side-nav"
       aria-label="Course navigation"
     >
-      <div className="px-4 pb-3 pt-5 border-b border-outline-variant">
-        <h1 className="text-lg font-bold m-0 text-fg">OpenEdu</h1>
-        <p className="text-xs text-on-surface-variant m-0 mt-0.5">Interactive learning platform</p>
+      <div className="border-outline-variant border-b px-4 pb-3 pt-5">
+        <h1 className="text-fg m-0 text-lg font-bold">OpenEdu</h1>
+        <p className="text-on-surface-variant m-0 mt-0.5 text-xs">Interactive learning platform</p>
       </div>
       ...
     </aside>
@@ -1703,7 +1703,7 @@ export interface AppLayoutProps {
 
 export function AppLayout({ topBar, sidebar, children }: AppLayoutProps): JSX.Element {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       {topBar && <div className="flex-shrink-0">{topBar}</div>}
       <div className="flex flex-1 overflow-hidden">
         {sidebar && <div className="flex-shrink-0">{sidebar}</div>}
@@ -1731,7 +1731,7 @@ export function ThreePanelLayout({
   return (
     <div className="flex h-full">
       {leftNav && <div className="flex-shrink-0">{leftNav}</div>}
-      <div className="flex-1 min-w-0">{content}</div>
+      <div className="min-w-0 flex-1">{content}</div>
       {rightPanel && <div className="flex-shrink-0">{rightPanel}</div>}
     </div>
   );

@@ -75,7 +75,7 @@ export function AIChat({
           <SuggestedQuestions questions={suggestedQuestions} onSelect={onSuggestedQuestionSelect} />
         )}
       </div>
-      <div className="flex items-end gap-2 border-t border-outline-variant p-4">
+      <div className="border-outline-variant flex items-end gap-2 border-t p-4">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -89,8 +89,8 @@ export function AIChat({
           onClick={handleSend}
           disabled={!input.trim()}
           className={cn(
-            'flex h-10 items-center gap-1 rounded-md bg-primary px-4 text-sm font-medium text-on-primary',
-            'transition-colors hover:bg-primary-hover disabled:opacity-50',
+            'bg-primary text-on-primary flex h-10 items-center gap-1 rounded-md px-4 text-sm font-medium',
+            'hover:bg-primary-hover transition-colors disabled:opacity-50',
           )}
           data-testid="ai-chat-send"
         >

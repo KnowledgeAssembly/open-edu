@@ -20,7 +20,7 @@ export function SectionDivider({
       aria-hidden="true"
       {...props}
     >
-      <AssemblyFlow density={density} animated={animated} className="w-full h-8 opacity-15" />
+      <AssemblyFlow density={density} animated={animated} className="h-8 w-full opacity-15" />
     </div>
   );
 }

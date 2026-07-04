@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AITutorPanel } from '../AITutorPanel.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('AITutorPanel', () => {
   it('renders AI Tutor heading', () => {

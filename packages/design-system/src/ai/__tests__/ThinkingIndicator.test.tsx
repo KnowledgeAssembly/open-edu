@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThinkingIndicator } from '../ThinkingIndicator.jsx';
-import { checkAccessibility } from '../../test-utils/a11y.js';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('ThinkingIndicator', () => {
   it('shows default label', () => {

@@ -13,7 +13,7 @@ const tagVariants = cva(
         success: 'bg-success/10 text-success',
         warning: 'bg-secondary/10 text-secondary-foreground',
         danger: 'bg-destructive/10 text-destructive-foreground',
-        outline: 'border border-border text-foreground',
+        outline: 'border-border text-foreground border',
       },
     },
     defaultVariants: { variant: 'default' },
@@ -33,7 +33,7 @@ const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
         <button
           type="button"
           onClick={onRemove}
-          className="ml-0.5 rounded-full hover:bg-foreground/10 p-0.5"
+          className="hover:bg-foreground/10 ml-0.5 rounded-full p-0.5"
           aria-label="Remove"
         >
           <X className="h-3 w-3" />

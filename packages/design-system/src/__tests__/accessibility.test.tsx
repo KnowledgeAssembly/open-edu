@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import { checkAccessibility } from '../test-utils/a11y.jsx';
+import { checkAccessibility } from '@open-edu/design-system/test-utils';
 import { Button } from '../primitives/button.jsx';
 import { Badge } from '../primitives/badge.jsx';
 import { Card, CardContent } from '../primitives/card.jsx';
@@ -70,7 +70,7 @@ describe('accessibility audit — #336', () => {
   });
 
   it('Skeleton has no violations', async () => {
-    await checkAccessibility(<Skeleton className="w-20 h-4" />);
+    await checkAccessibility(<Skeleton className="h-4 w-20" />);
   });
 
   it('Progress has no violations', async () => {

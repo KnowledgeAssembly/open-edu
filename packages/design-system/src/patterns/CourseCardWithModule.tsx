@@ -39,13 +39,7 @@ export function CourseCardWithModule({
 }: CourseCardWithModuleProps): JSX.Element {
   const satellites = getProgressSatellites(progress, badgeCount);
 
-  const indicator = (
-    <OpenModule
-      size="xs"
-      satellites={satellites}
-      aria-hidden="true"
-    />
-  );
+  const indicator = <OpenModule size="xs" satellites={satellites} aria-hidden="true" />;
 
   const mapped = React.Children.map(children, (child) => {
     if (isCourseCard(child)) {
@@ -64,7 +58,7 @@ export function CourseCardWithModule({
 
   return (
     <div className="relative pr-16">
-      <div className="absolute top-4 right-4 z-10">{indicator}</div>
+      <div className="absolute right-4 top-4 z-10">{indicator}</div>
       {children}
     </div>
   );

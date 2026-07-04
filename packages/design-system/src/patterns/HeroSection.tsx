@@ -9,18 +9,18 @@ export interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
 export function HeroSection({ children, className, ...props }: HeroSectionProps): JSX.Element {
   return (
     <div
-      className={cn(
-        'relative overflow-hidden',
-        'py-12 px-10',
-        className,
-      )}
+      className={cn('relative overflow-hidden', 'px-10 py-12', className)}
       style={{
         background: 'linear-gradient(135deg, #f5f3f0 0%, #ede9e3 100%)',
       }}
       data-testid="hero-section"
       {...props}
     >
-      <AssemblyFlow density="dense" className="absolute inset-0 opacity-[0.08]" aria-hidden="true" />
+      <AssemblyFlow
+        density="dense"
+        className="absolute inset-0 opacity-[0.08]"
+        aria-hidden="true"
+      />
       <div className="relative z-10">{children}</div>
     </div>
   );

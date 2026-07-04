@@ -9,7 +9,13 @@ import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from 
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
-import { AppSidebar, AppLayout, FontSizeProvider, OpenEduLogo, AssemblyFlow } from '@open-edu/design-system';
+import {
+  AppSidebar,
+  AppLayout,
+  FontSizeProvider,
+  OpenEduLogo,
+  AssemblyFlow,
+} from '@open-edu/design-system';
 import type {
   AppSidebarItem,
   AppSidebarSection,
@@ -303,10 +309,10 @@ export function AppShell({
 
     const section: AppSidebarSection = { title: 'Course Steps', items };
     return (
-      <div className="relative overflow-hidden h-full">
+      <div className="relative h-full overflow-hidden">
         <AssemblyFlow
           density="dense"
-          className="absolute inset-0 pointer-events-none opacity-5"
+          className="pointer-events-none absolute inset-0 opacity-5"
           aria-hidden="true"
         />
         <AppSidebar
@@ -325,9 +331,9 @@ export function AppShell({
   return (
     <RuntimeThemeProvider themeId={themeId}>
       <FontSizeProvider>
-        <div className="flex h-screen overflow-hidden bg-surface text-on-surface">
+        <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
           {isCourseView && coursePkg ? (
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex min-w-0 flex-1 flex-col">
               <TopAppBar
                 breadcrumbs={getBreadcrumbs()}
                 isCourseView
@@ -362,10 +368,10 @@ export function AppShell({
           ) : (
             <AppLayout
               sidebar={
-                <div className="relative overflow-hidden h-full">
+                <div className="relative h-full overflow-hidden">
                   <AssemblyFlow
                     density="dense"
-                    className="absolute inset-0 pointer-events-none opacity-5"
+                    className="pointer-events-none absolute inset-0 opacity-5"
                     aria-hidden="true"
                   />
                   <AppSidebar
@@ -379,7 +385,7 @@ export function AppShell({
               }
               topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
             >
-              <main className="flex-1 overflow-y-auto bg-surface" data-testid="app-main">
+              <main className="bg-surface flex-1 overflow-y-auto" data-testid="app-main">
                 {view.view === 'catalog' && (
                   <CatalogPage
                     packages={catalogPackages}

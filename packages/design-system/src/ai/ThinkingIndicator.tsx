@@ -14,7 +14,7 @@ export function ThinkingIndicator({ label = 'Thinking...' }: ThinkingIndicatorPr
         <span className={cn(dotClassName)} style={{ animationDelay: '150ms' }} />
         <span className={cn(dotClassName)} style={{ animationDelay: '300ms' }} />
       </div>
-      <span className="text-xs text-on-surface-variant">{label}</span>
+      <span className="text-on-surface-variant text-xs">{label}</span>
     </div>
   );
 }
