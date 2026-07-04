@@ -21,12 +21,12 @@ describe('RuntimeThemeProvider', () => {
 
   it('sets data-theme attribute to the themeId', () => {
     const { container } = render(
-      <RuntimeThemeProvider themeId="high-focus">
+      <RuntimeThemeProvider themeId="zen">
         <div>child</div>
       </RuntimeThemeProvider>,
     );
     const wrapper = container.querySelector('.open-edu-runtime');
-    expect(wrapper?.getAttribute('data-theme')).toBe('high-focus');
+    expect(wrapper?.getAttribute('data-theme')).toBe('zen');
   });
 
   it('defaults to lumina-scholastica theme', () => {
@@ -41,28 +41,30 @@ describe('RuntimeThemeProvider', () => {
 
   it('injects CSS variables as inline styles', () => {
     const { container } = render(
-      <RuntimeThemeProvider themeId="high-focus">
+      <RuntimeThemeProvider themeId="nocturnal">
         <div>child</div>
       </RuntimeThemeProvider>,
     );
     const wrapper = container.querySelector('.open-edu-runtime') as HTMLElement;
-    expect(wrapper?.style.getPropertyValue('--oe-color-primary')).toBe('#003d8a');
-    expect(wrapper?.style.getPropertyValue('--oe-color-surface')).toBe('#fcfaf7');
-    expect(wrapper?.style.getPropertyValue('--oe-space-md')).toBe('24px');
-    expect(wrapper?.style.getPropertyValue('--oe-radius-DEFAULT')).toBe('0.375rem');
+    expect(wrapper?.style.getPropertyValue('--oe-color-primary')).toBe('#d4c4ff');
+    expect(wrapper?.style.getPropertyValue('--oe-color-surface')).toBe('#151219');
+    expect(wrapper?.style.getPropertyValue('--oe-radius-DEFAULT')).toBe('0.625rem');
+    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-family')).toBe(
+      'Inter, system-ui, -apple-system, sans-serif',
+    );
   });
 
   it('injects typography CSS variables', () => {
     const { container } = render(
-      <RuntimeThemeProvider themeId="high-focus">
+      <RuntimeThemeProvider themeId="nocturnal">
         <div>child</div>
       </RuntimeThemeProvider>,
     );
     const wrapper = container.querySelector('.open-edu-runtime') as HTMLElement;
     expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-family')).toBe(
-      '"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, sans-serif',
+      'Inter, system-ui, -apple-system, sans-serif',
     );
-    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-size')).toBe('32px');
+    expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-size')).toBe('48px');
     expect(wrapper?.style.getPropertyValue('--oe-font-productive-display-weight')).toBe('700');
   });
 
@@ -72,6 +74,29 @@ describe('RuntimeThemeProvider', () => {
         <ThemeConsumer />
       </RuntimeThemeProvider>,
     );
-    expect(screen.getByTestId('theme-name')).toHaveTextContent('OpenEdu Nocturnal');
+    expect(screen.getByTestId('theme-name')).toHaveTextContent('OpenEdu Dark');
+  });
+
+  it('injects a11y overrides style tag', () => {
+    const { container } = render(
+      <RuntimeThemeProvider>
+        <div>child</div>
+      </RuntimeThemeProvider>,
+    );
+    const styleTag = container.querySelector('style');
+    expect(styleTag).toBeTruthy();
+    expect(styleTag?.innerHTML).toContain('@media (prefers-contrast: more)');
+    expect(styleTag?.innerHTML).toContain('forced-colors');
+    expect(styleTag?.innerHTML).toContain('CanvasText');
+  });
+
+  it('style tag is rendered only once', () => {
+    const { container } = render(
+      <RuntimeThemeProvider>
+        <div>child</div>
+      </RuntimeThemeProvider>,
+    );
+    const styleTags = container.querySelectorAll('style');
+    expect(styleTags.length).toBe(1);
   });
 });
