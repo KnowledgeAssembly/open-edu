@@ -21,7 +21,7 @@ describe('GeoPrimitive', () => {
 
   it('applies muted variant class', () => {
     render(<GeoPrimitive variant="muted" data-testid="primitive" />);
-    expect(screen.getByTestId('primitive')).toHaveClass('text-muted-foreground');
+    expect(screen.getByTestId('primitive')).toHaveClass('text-on-surface-variant');
   });
 
   it('applies accent variant class', () => {

@@ -2,6 +2,71 @@
 
 Authoritative reference for building UI components in the Open-Edu design system.
 
+---
+
+## Two-Tier Architecture: Primitives vs. Visual DNA
+
+The design system is organized into two structural tiers that reflect different levels of abstraction and visual identity.
+
+### Tier 1: Primitives
+
+**Location:** `packages/design-system/src/primitives/`
+
+Primitives are atomic, reusable UI components that follow the shadcn/ui pattern. They are:
+
+- **Generic** — usable in any context, not tied to educational domain concepts
+- **Headless-friendly** — build on Radix UI primitives where interaction is needed
+- **Semantic token-based** — use `--oe-*` CSS variables through Tailwind theme classes
+- **self-contained** — no dependency on other design-system components
+
+Examples: `Button`, `Card`, `Dialog`, `Input`, `Select`, `Tabs`, `Progress`, `Badge`
+
+These components define the **structural vocabulary** of the design system: how text inputs look, how modals behave, how progress bars animate. They carry OpenEdu tokens but remain unstyled enough to compose into any pattern.
+
+### Tier 2: Visual DNA (Patterns, Learning, AI)
+
+**Location:** `packages/design-system/src/patterns/`, `packages/design-system/src/learning/`, `packages/design-system/src/ai/`
+
+Visual DNA components are higher-order compositions that encode the **visual identity** of OpenEdu. They are:
+
+- **Domain-aware** — designed for specific educational contexts (bundle overviews, course cards, AI tutor panels)
+- **Composed from primitives** — built using primitives as building blocks
+- **Visual-signature-bearing** — carry distinctive OpenEdu visual elements (AssemblyFlow watermark, OpenModule clusters, GeoPrimitive assemblies, gradient surfaces)
+- **Opinionated** — enforce spacing, typography, and layout conventions
+
+Examples: `PageHeader`, `HeroSection`, `BundleOverview`, `CourseCardWithModule`, `StatsSummary`, `AITutorPanel`, `SideNav`
+
+### Architecture Flow
+
+```
+Primitives (generic, reusable atoms)
+    │
+    ├── composed into ──► Patterns (layout/organism components)
+    ├── composed into ──► Learning (domain-specific educational components)
+    └── composed into ──► AI (tutor/interaction components)
+                              │
+                              ▼
+                    Learner App pages consume
+                    Visual DNA components
+```
+
+### When to Use Which
+
+| Scenario                                         | Tier       | Example                                   |
+| ------------------------------------------------ | ---------- | ----------------------------------------- |
+| Need a generic button                            | Primitive  | `<Button variant="primary">`              |
+| Need a page gradient header with watermark       | Visual DNA | `<PageHeader title="..." />`              |
+| Need a semantic card with icon, gradient, badge  | Primitive  | `<Card><CardTitle>...</CardTitle></Card>` |
+| Need an educational bundle overview with modules | Visual DNA | `<BundleOverview modules={...} />`        |
+| Need an AI chat interface                        | Visual DNA | `<AIChat messages={...} />`               |
+
+### Rules of Thumb
+
+1. **Primitives never import Visual DNA components.** The dependency graph flows one way: Patterns/Learning/AI → Primitives.
+2. **Visual DNA components may import other Visual DNA components** when composing larger surfaces (e.g., `BundleOverview` imports `BundleModuleIndicator`).
+3. **Visual DNA components should use the PageHeader pattern** for top-of-page title sections — rounded gradient card with AssemblyFlow watermark.
+4. **No hardcoded color values in either tier.** All styling must go through `--oe-*` CSS variable tokens.
+
 ## Pattern A — shadcn/ui Standard
 
 All new primitives in `@open-edu/design-system` follow the shadcn/ui pattern:

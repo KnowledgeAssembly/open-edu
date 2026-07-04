@@ -130,7 +130,7 @@ describe('BundleOverview', () => {
   it('renders with data-testid attributes', () => {
     render(<BundleOverview {...baseProps} />);
     expect(screen.getByTestId('bundle-overview')).toBeDefined();
-    expect(screen.getByTestId('bundle-title')).toBeDefined();
+    expect(screen.getByTestId('page-header')).toBeDefined();
     expect(screen.getByTestId('overall-progress')).toBeDefined();
     expect(screen.getByTestId('module-list')).toBeDefined();
     expect(screen.getByTestId('back-to-catalog')).toBeDefined();

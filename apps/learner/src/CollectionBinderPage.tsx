@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
+import { PageHeader } from '@open-edu/design-system';
 import { CardGrid, CardViewer, ProgressRing } from '@open-edu/runtime';
 import type { CardGridItem } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
@@ -56,7 +57,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
         <div className="max-w-md text-center">
           <div className="mb-6 text-6xl opacity-30">
             <svg
-              className="text-muted-foreground mx-auto h-24 w-24"
+              className="text-on-surface-variant mx-auto h-24 w-24"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -80,13 +81,11 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
 
   return (
     <div className="mx-auto max-w-6xl p-6" data-testid="collection-binder">
-      <div className="mb-8">
-        <h1 className="text-h1 font-display text-on-surface">Collection Binder</h1>
-        <p className="text-on-surface-variant mt-1">
-          Your museum of knowledge — {allCardItems.filter((c) => !c.isLocked).length} /{' '}
-          {allCardItems.length} cards collected
-        </p>
-      </div>
+      <PageHeader
+        title="Collection Binder"
+        subtitle={`Your museum of knowledge — ${allCardItems.filter((c) => !c.isLocked).length} / ${allCardItems.length} cards collected`}
+        className="mb-8"
+      />
 
       <div className="flex flex-col gap-8">
         {shelves.map((shelf) => {

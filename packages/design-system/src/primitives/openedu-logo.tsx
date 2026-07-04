@@ -73,7 +73,7 @@ export const OpenEduLogo = React.forwardRef<HTMLDivElement, OpenEduLogoProps>(
         <LogoSymbol size={s.symbol} />
         <div className="flex flex-col">
           <span className={cn('text-foreground font-semibold leading-tight', s.text)}>OpenEdu</span>
-          <span className={cn('text-muted-foreground leading-tight', s.tagline)}>
+          <span className={cn('text-on-surface-variant leading-tight', s.tagline)}>
             Knowledge assembled
           </span>
         </div>

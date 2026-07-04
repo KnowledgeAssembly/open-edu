@@ -17,11 +17,11 @@ export function PageHeader({
 }: PageHeaderProps): JSX.Element {
   return (
     <div
-      className={cn('relative overflow-hidden rounded-xl px-10 py-12', className)}
-      style={{
-        background:
-          'linear-gradient(135deg, var(--oe-color-surface-container-low) 0%, var(--oe-color-surface-container) 100%)',
-      }}
+      className={cn(
+        'relative overflow-hidden rounded-xl px-10 py-12',
+        'bg-gradient-to-br from-[var(--oe-color-surface-container-low)] to-[var(--oe-color-surface-container)]',
+        className,
+      )}
       data-testid="page-header"
       {...props}
     >

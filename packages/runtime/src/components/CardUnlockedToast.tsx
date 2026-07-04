@@ -144,7 +144,7 @@ export function CardUnlockedToast({
               onClick={handleDismiss}
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-lg',
-                'text-muted-foreground hover:text-on-surface hover:bg-muted/50',
+                'text-on-surface-variant hover:text-on-surface hover:bg-muted/50',
                 'transition-colors',
               )}
               aria-label="Dismiss"

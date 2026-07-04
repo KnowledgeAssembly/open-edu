@@ -1,6 +1,7 @@
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
 import { Progress } from '../primitives/progress.js';
+import { PageHeader } from '../patterns/PageHeader.js';
 import { BundleModuleIndicator } from '../patterns/BundleModuleIndicator.js';
 import type { JSX } from 'react';
 
@@ -83,16 +84,7 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
         ← Back to Catalog
       </Button>
 
-      <h1
-        className="text-h1 font-display text-on-surface mb-sm font-bold"
-        data-testid="bundle-title"
-      >
-        {bundleTitle}
-      </h1>
-
-      {description && (
-        <p className="text-body-reading text-on-surface-variant mb-lg">{description}</p>
-      )}
+      <PageHeader title={bundleTitle} subtitle={description} className="mb-lg" />
 
       <div className="mb-xl">
         <h2 className="text-h3 font-display text-on-surface mb-md font-bold">Overall Progress</h2>

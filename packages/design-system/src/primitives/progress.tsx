@@ -51,7 +51,7 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
       return (
         <div className="gap-sm flex w-full items-center">
           {bar}
-          <span className="text-muted-foreground whitespace-nowrap text-sm">
+          <span className="text-on-surface-variant whitespace-nowrap text-sm">
             {current != null ? `${clampedCurrent} / ${safeTotal}` : `${pct}%`}
           </span>
         </div>
