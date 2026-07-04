@@ -3,7 +3,8 @@ import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
-import { Button, HeroSection, SectionDivider } from '@open-edu/design-system';
+import { BookOpen, TrendingUp, Trophy } from 'lucide-react';
+import { Button, HeroSection, SectionDivider, StatsSummary } from '@open-edu/design-system';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
@@ -31,41 +32,24 @@ export function HomePage({
 
   return (
     <div className="p-xl mx-auto max-w-4xl" data-testid="home-page">
-      <HeroSection className="mb-xl">
-        <h1 className="text-h1 font-display text-on-surface mb-sm font-bold">
-          Welcome back, Learner
-        </h1>
-        <p className="text-body-reading text-on-surface-variant">
+      <HeroSection variant="editorial" showIllustration className="mb-xl">
+        <h1 className="text-display-lg font-display text-on-surface">Welcome back, Learner</h1>
+        <p className="text-body-reading text-on-surface-variant mt-md max-w-prose">
           Continue where you left off, or explore new courses in the catalog.
         </p>
       </HeroSection>
 
-      <div className="mb-xl flex items-center gap-8">
-        <div className="text-on-surface flex items-center gap-2 text-sm">
-          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
-            <circle cx="10" cy="10" r="8" />
-          </svg>
-          <span>
-            <strong>{totalUnits}</strong> courses
-          </span>
-        </div>
-        <div className="text-on-surface flex items-center gap-2 text-sm">
-          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
-            <circle cx="10" cy="10" r="8" />
-          </svg>
-          <span>
-            <strong>{inProgressCount}</strong> in progress
-          </span>
-        </div>
-        <div className="text-on-surface flex items-center gap-2 text-sm">
-          <svg width="20" height="20" viewBox="0 0 20 20" className="text-primary fill-current">
-            <circle cx="10" cy="10" r="8" />
-          </svg>
-          <span>
-            <strong>{badgeCount}</strong> badges
-          </span>
-        </div>
-      </div>
+      <StatsSummary
+        items={[
+          { value: totalUnits, label: 'learning units', icon: <BookOpen className="h-4 w-4" /> },
+          {
+            value: inProgressCount,
+            label: 'in progress',
+            icon: <TrendingUp className="h-4 w-4" />,
+          },
+          { value: badgeCount, label: 'badges earned', icon: <Trophy className="h-4 w-4" /> },
+        ]}
+      />
 
       <SectionDivider density="minimal" className="mb-xl" />
 

@@ -208,7 +208,7 @@ export function CourseRuntime({
   if (!engine) {
     return (
       <div className="p-lg max-w-2xl" data-testid="course-runtime">
-        <h1 className="text-h1 font-display text-error mb-md font-bold">Course not available</h1>
+        <h1 className="text-h1 font-display text-error mb-md">Course not available</h1>
         <p className="text-on-surface-variant mb-lg">This course has no workflow defined.</p>
         <Button onClick={onBackToCatalog}>
           <ArrowLeft className="mr-2 h-4 w-4" />

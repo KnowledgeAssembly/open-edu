@@ -83,7 +83,7 @@ const accessibleComponents: ComponentMap = {
   ),
   p: ({ children, className, ...props }: ComponentProps<'p'>) => (
     <p
-      className={`font-body-reading mb-paragraph-spacing${className ? ` ${className}` : ''}`}
+      className={`font-body-reading text-body-reading mb-paragraph-spacing${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -91,7 +91,7 @@ const accessibleComponents: ComponentMap = {
   ),
   ul: ({ children, className, ...props }: ComponentProps<'ul'>) => (
     <ul
-      className={`font-body-reading mb-paragraph-spacing list-disc pl-6${className ? ` ${className}` : ''}`}
+      className={`font-body-reading text-body-reading mb-paragraph-spacing list-disc pl-6${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -99,20 +99,23 @@ const accessibleComponents: ComponentMap = {
   ),
   ol: ({ children, className, ...props }: ComponentProps<'ol'>) => (
     <ol
-      className={`font-body-reading mb-paragraph-spacing list-decimal pl-6${className ? ` ${className}` : ''}`}
+      className={`font-body-reading text-body-reading mb-paragraph-spacing list-decimal pl-6${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
     </ol>
   ),
   li: ({ children, className, ...props }: ComponentProps<'li'>) => (
-    <li className={`font-body-reading${className ? ` ${className}` : ''}`} {...props}>
+    <li
+      className={`font-body-reading text-body-reading${className ? ` ${className}` : ''}`}
+      {...props}
+    >
       {children}
     </li>
   ),
   blockquote: ({ children, className, ...props }: ComponentProps<'blockquote'>) => (
     <blockquote
-      className={`font-body-reading mb-paragraph-spacing border-outline border-l-4 pl-4 italic${className ? ` ${className}` : ''}`}
+      className={`font-body-reading text-body-reading mb-paragraph-spacing border-outline border-l-4 pl-4 italic${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}

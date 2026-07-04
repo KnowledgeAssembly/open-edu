@@ -6,6 +6,7 @@ export type PipiliMood = 'idle' | 'thinking' | 'curious' | 'content';
 export interface PipiliProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   mood?: PipiliMood;
+  animated?: boolean;
 }
 
 const sizeMap = {
@@ -24,7 +25,7 @@ const moodClasses: Record<PipiliMood, string> = {
 };
 
 export const Pipili = React.forwardRef<HTMLDivElement, PipiliProps>(
-  ({ size = 'md', mood = 'idle', className, ...props }, ref) => {
+  ({ size = 'md', mood = 'idle', animated = false, className, ...props }, ref) => {
     const px = sizeMap[size];
 
     return (
@@ -40,6 +41,7 @@ export const Pipili = React.forwardRef<HTMLDivElement, PipiliProps>(
           className={cn(
             'relative h-full w-full motion-reduce:transform-none motion-reduce:animate-none',
             moodClasses[mood],
+            animated && 'animate-pipili-wave',
           )}
         >
           {/* Head — tilted circle */}

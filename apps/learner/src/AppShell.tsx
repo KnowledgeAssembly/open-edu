@@ -312,7 +312,7 @@ export function AppShell({
       <div className="relative h-full overflow-hidden">
         <AssemblyFlow
           density="dense"
-          className="pointer-events-none absolute inset-0 opacity-5"
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
           aria-hidden="true"
         />
         <AppSidebar
@@ -371,7 +371,7 @@ export function AppShell({
                 <div className="relative h-full overflow-hidden">
                   <AssemblyFlow
                     density="dense"
-                    className="pointer-events-none absolute inset-0 opacity-5"
+                    className="pointer-events-none absolute inset-0 opacity-[0.08]"
                     aria-hidden="true"
                   />
                   <AppSidebar

@@ -776,6 +776,10 @@
   max-width: 28rem;
 }
 
+.max-w-prose {
+  max-width: 65ch;
+}
+
 .max-w-sm {
   max-width: 24rem;
 }
@@ -899,6 +903,14 @@
 
 .animate-bounce {
   animation: bounce 1s infinite;
+}
+
+.animate-orbit-float {
+  animation: orbit-float 3s ease-in-out infinite;
+}
+
+.animate-pipili-wave {
+  animation: pipili-wave 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -1530,6 +1542,11 @@
   padding-right: 2.5rem;
 }
 
+.px-12 {
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -1598,6 +1615,11 @@
 .py-12 {
   padding-top: 3rem;
   padding-bottom: 3rem;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
 }
 
 .py-2 {
@@ -1815,6 +1837,13 @@
   font-size: var(--oe-font-productive-heading6-size);
   line-height: var(--oe-font-productive-heading6-lineHeight);
   font-weight: var(--oe-font-productive-heading6-weight);
+}
+
+.text-label-caps {
+  font-size: var(--oe-font-productive-label-size);
+  line-height: var(--oe-font-productive-label-lineHeight);
+  letter-spacing: var(--oe-font-productive-label-letterSpacing);
+  font-weight: var(--oe-font-productive-label-weight);
 }
 
 .text-lg {
@@ -2067,6 +2096,10 @@
 
 .opacity-70 {
   opacity: var(--oe-opacity-70);
+}
+
+.opacity-\[0\.06\] {
+  opacity: 0.06;
 }
 
 .opacity-\[0\.08\] {
@@ -2679,6 +2712,10 @@
 }
 
 @media (min-width: 768px) {
+  .md\:block {
+    display: block;
+  }
+
   .md\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

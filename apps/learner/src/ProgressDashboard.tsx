@@ -4,8 +4,17 @@ import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
-import { Badge, Button, Card, CardContent, EmptyState, Progress } from '@open-edu/design-system';
-import { CheckCircle2 } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  PageHeader,
+  Progress,
+  StatsSummary,
+} from '@open-edu/design-system';
+import { CheckCircle2, BookOpen, TrendingUp, Award } from 'lucide-react';
 
 export interface ProgressDashboardProps {
   onNavigate: (view: AppView) => void;
@@ -65,7 +74,7 @@ export function ProgressDashboard({
   if (entries.length === 0) {
     return (
       <div className="p-xl mx-auto max-w-4xl" data-testid="progress-dashboard">
-        <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">My Progress</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-lg">My Progress</h1>
         <EmptyState
           variant="no-progress"
           heading="Your learning journey starts here!"
@@ -78,7 +87,28 @@ export function ProgressDashboard({
 
   return (
     <div className="p-xl mx-auto max-w-5xl" data-testid="progress-dashboard">
-      <h1 className="text-h1 font-display text-on-surface mb-lg font-bold">My Progress</h1>
+      <PageHeader eyebrow="Progress" title="My Progress" className="mb-xl" />
+
+      <StatsSummary
+        className="mb-xl"
+        items={[
+          {
+            value: entries.filter(([, s]) => s.isCompleted).length,
+            label: 'completed',
+            icon: <BookOpen className="h-4 w-4" />,
+          },
+          {
+            value: entries.filter(([, s]) => !s.isCompleted && s.visitedNodes.length > 0).length,
+            label: 'in progress',
+            icon: <TrendingUp className="h-4 w-4" />,
+          },
+          {
+            value: Object.values(allBadges).reduce((sum, badges) => sum + badges.length, 0),
+            label: 'badges earned',
+            icon: <Award className="h-4 w-4" />,
+          },
+        ]}
+      />
 
       <div className="gap-md flex flex-col">
         {sortedEntries.map(([packageId, snap]) => {
@@ -109,7 +139,7 @@ export function ProgressDashboard({
             >
               <CardContent className="p-md gap-md flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <div className="w-full flex-1">
-                  <h2 className="text-h2 font-title text-on-surface">{title}</h2>
+                  <h2 className="text-h2 font-display text-on-surface">{title}</h2>
                   <div className="gap-md mt-sm text-on-surface-variant flex flex-wrap items-center text-sm">
                     <span>
                       {snap.visitedNodes.length} of {totalNodes} steps
@@ -130,7 +160,7 @@ export function ProgressDashboard({
                 </div>
 
                 <div className="gap-md flex flex-shrink-0 items-center">
-                  <span className="text-h2 font-display text-primary font-bold">{percent}%</span>
+                  <span className="text-h2 font-display text-primary">{percent}%</span>
                   {snap.isCompleted ? (
                     <Badge variant="secondary">
                       Completed <CheckCircle2 className="ml-1 inline h-3 w-3" />
