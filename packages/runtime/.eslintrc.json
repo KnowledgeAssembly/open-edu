@@ -1,6 +1,6 @@
 {
   "extends": ["../../.eslintrc.json"],
-  "plugins": ["react", "react-hooks"],
+  "plugins": ["react", "react-hooks", "tailwindcss", "jsx-a11y"],
   "env": {
     "browser": true
   },
@@ -13,6 +13,15 @@
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+
+    "tailwindcss/classnames-order": "warn",
+    "tailwindcss/enforces-shorthand": "warn",
+    "tailwindcss/no-contradicting-classname": "error",
+    "tailwindcss/no-custom-classname": "warn",
+    "tailwindcss/migration-from-tailwind-2": "error",
+    "tailwindcss/no-arbitrary-value": "off",
+    "jsx-a11y/no-autofocus": "warn",
+    "jsx-a11y/rule-no-unsafe-query-selector": "off"
   }
 }

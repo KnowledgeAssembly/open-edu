@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-tailwindcss"
+  ],
+  "ignoreFiles": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/tailwind.css",
+    "apps/learner/src/index.css",
+    "apps/docs/src/css/custom.css"
+  ],
+  "rules": {
+    "declaration-property-value-disallowed-list": {
+      "color": ["/^#[0-9a-fA-F]{3,8}$/"],
+      "background-color": ["/^#[0-9a-fA-F]{3,8}$/"],
+      "border-color": ["/^#[0-9a-fA-F]{3,8}$/"]
+    },
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "custom-property-pattern": "^oe-"
+  }
+}
