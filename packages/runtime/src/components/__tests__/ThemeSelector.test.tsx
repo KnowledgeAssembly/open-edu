@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeSelector } from '../ThemeSelector.js';
 
-const themes = ['high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace'] as const;
+const themes = ['lumina-scholastica', 'nocturnal', 'zen'] as const;
 
 describe('ThemeSelector', () => {
   it('renders trigger button', () => {
@@ -21,7 +21,7 @@ describe('ThemeSelector', () => {
     expect(screen.getByTestId('theme-selector-popover')).toBeInTheDocument();
   });
 
-  it('renders all 4 theme cards', () => {
+  it('renders all 3 theme cards', () => {
     render(<ThemeSelector currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />);
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
 
@@ -34,8 +34,8 @@ describe('ThemeSelector', () => {
     const onThemeChange = vi.fn();
     render(<ThemeSelector currentThemeId="lumina-scholastica" onThemeChange={onThemeChange} />);
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
-    fireEvent.click(screen.getByTestId('theme-card-high-focus'));
-    expect(onThemeChange).toHaveBeenCalledWith('high-focus');
+    fireEvent.click(screen.getByTestId('theme-card-zen'));
+    expect(onThemeChange).toHaveBeenCalledWith('zen');
   });
 
   it('closes popover after selecting a theme', () => {
@@ -43,7 +43,7 @@ describe('ThemeSelector', () => {
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
     expect(screen.getByTestId('theme-selector-popover')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('theme-card-high-focus'));
+    fireEvent.click(screen.getByTestId('theme-card-zen'));
     expect(screen.queryByTestId('theme-selector-popover')).toBeNull();
   });
 
@@ -108,14 +108,14 @@ describe('ThemeSelector', () => {
   });
 
   it('cards have role="option" and aria-selected reflects currentThemeId', () => {
-    render(<ThemeSelector currentThemeId="high-focus" onThemeChange={vi.fn()} />);
+    render(<ThemeSelector currentThemeId="nocturnal" onThemeChange={vi.fn()} />);
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
 
-    const selected = screen.getByTestId('theme-card-high-focus');
+    const selected = screen.getByTestId('theme-card-nocturnal');
     expect(selected.getAttribute('role')).toBe('option');
     expect(selected.getAttribute('aria-selected')).toBe('true');
 
-    const unselected = screen.getByTestId('theme-card-nocturnal');
+    const unselected = screen.getByTestId('theme-card-zen');
     expect(unselected.getAttribute('aria-selected')).toBe('false');
   });
 });

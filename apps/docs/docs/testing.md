@@ -162,7 +162,7 @@ E2E tests live in `tests/e2e/` and use Playwright with Chromium (single worker, 
 | `rewards.spec.ts`             | DevTools rewards inspector panel                                                    |
 | `telemetry.spec.ts`           | Telemetry event capture after lesson completion                                     |
 | `hot-reload.spec.ts`          | HMR state preservation after markdown/JSON edits                                    |
-| `theme-switching.spec.ts`     | Theme switching across all 6 themes, popover behavior, persistence                  |
+| `theme-switching.spec.ts`     | Theme switching across all 3 themes, popover behavior, persistence                  |
 | `bundle-navigation.spec.ts`   | Bundle catalog cards, bundle overview, module cards, module launch, backward compat |
 
 ### Web Server Config
@@ -192,14 +192,14 @@ pnpm test:e2e          # E2E tests
 
 ### Accessibility Theme Audits
 
-Each learner app page is tested with axe-core in all 6 themes to catch theme-specific accessibility regressions:
+Each learner app page is tested with axe-core in all 3 themes to catch theme-specific accessibility regressions:
 
 ```typescript
 import { render } from '@testing-library/react';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
 import axe from 'axe-core';
 
-const THEMES = ['forest', 'lumina-scholastica', 'high-focus', 'nocturnal', 'sylvan-workspace', 'zen'];
+const THEMES = ['lumina-scholastica', 'nocturnal', 'zen'];
 
 it.each(THEMES)('passes axe audit in %s theme', async (themeId) => {
   const { container } = render(

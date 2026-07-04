@@ -25,15 +25,21 @@ describe('useThemePreference', () => {
     expect(result.current[0]).toBe('lumina-scholastica');
 
     act(() => {
-      result.current[1]('high-focus');
+      result.current[1]('zen');
     });
 
-    expect(result.current[0]).toBe('high-focus');
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('high-focus');
+    expect(result.current[0]).toBe('zen');
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('zen');
   });
 
   it('falls back to default for invalid stored values', () => {
     localStorage.setItem(STORAGE_KEY, 'invalid-theme');
+    const { result } = renderHook(() => useThemePreference());
+    expect(result.current[0]).toBe('lumina-scholastica');
+  });
+
+  it('falls back to default for deleted theme IDs', () => {
+    localStorage.setItem(STORAGE_KEY, 'forest');
     const { result } = renderHook(() => useThemePreference());
     expect(result.current[0]).toBe('lumina-scholastica');
   });

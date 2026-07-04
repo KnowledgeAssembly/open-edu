@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **6-theme system** with Tailwind CSS styling.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
 
 ## Technology Stack
 
@@ -60,7 +60,7 @@ open-edu/
 │   ├── schemas/             # Zod schemas + type generation
 │   ├── core/                # Package loader + validator + scanner + patcher + lint + generator
 │   ├── workflow/            # XState workflow engine + skill tracking + topology
-│   ├── runtime/             # React runtime + 6 layout components + 4 themes + 7 renderers
+│   ├── runtime/             # React runtime + 6 layout components + 3 themes + 7 renderers
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry + JSONL reader + summary
 │   ├── rewards/             # Reward broker + CardBroker + conditions + verification + replay
@@ -162,7 +162,7 @@ Epic 298 (Recognition Engine)
 
 ### Theme System (Epics 138–145)
 
-A 6-theme system built as a sub-track within the runtime:
+A 3-theme system (Light, Dark, Zen) built as a sub-track within the runtime:
 
 ```
 Epic 1: Token Foundation (#138, PR #174)

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'r
 import { flattenTheme } from '@open-edu/design-system';
 import { getTheme, defaultThemeId, DEFAULT_THEME } from './themes/index.js';
 import type { ThemeId, ThemeDefinition } from './themes/types.js';
+import { a11yOverridesCss } from './theme/a11y-overrides.css.js';
 
 const defaultFlattened = flattenTheme(DEFAULT_THEME);
 
@@ -31,12 +32,20 @@ export function RuntimeThemeProvider({
     }
   }, [vars]);
 
+  const a11yStyle = useMemo(
+    () => <style dangerouslySetInnerHTML={{ __html: a11yOverridesCss }} />,
+    [],
+  );
+
   return (
-    <ThemeContext.Provider value={definition}>
-      <div className="open-edu-runtime" data-theme={themeId} style={style}>
-        {children}
-      </div>
-    </ThemeContext.Provider>
+    <>
+      {a11yStyle}
+      <ThemeContext.Provider value={definition}>
+        <div className="open-edu-runtime" data-theme={themeId} style={style}>
+          {children}
+        </div>
+      </ThemeContext.Provider>
+    </>
   );
 }
 

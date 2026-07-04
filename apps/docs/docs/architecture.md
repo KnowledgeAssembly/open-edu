@@ -29,7 +29,7 @@ Educational Package / Bundle (Markdown + JSON)
          ▼
   ┌──────────────────────────┐
   │        Runtime           │  React renderer — lessons, quizzes, widgets
-  │                          │  6 themes, Tailwind-styled (--oe-* tokens)
+  │                          │  3 themes, Tailwind-styled (--oe-* tokens)
   ├──────────────────────────┤
   │ Layout Components:       │
   │  SideNav     TopAppBar   │
@@ -134,16 +134,13 @@ Accessibility is a core subsystem, not a plugin. It manages:
 
 ## Theming System
 
-The framework ships with 6 built-in themes that control colors, typography, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS custom properties on a wrapper `<div>`.
+The framework ships with 3 built-in themes that control colors, typography, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS custom properties on a wrapper `<div>`.
 
-| Theme              | ID                   | Description                         | Font Stack                                  |
-| ------------------ | -------------------- | ----------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)         | Inter + Source Serif 4 + JetBrains Mono     |
-| Forest             | `forest`             | Warm nature-inspired earthy greens  | Source Serif 4 + Hanken Grotesk             |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast  | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                           | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary            | Source Serif 4 + Literata + Hanken Grotesk  |
-| Zen                | `zen`                | Minimalist light with reduced noise | Inter                                       |
+| Name          | ID                   | Type  | Description                       | Font Stack                              |
+| ------------- | -------------------- | ----- | --------------------------------- | --------------------------------------- |
+| OpenEdu Light | `lumina-scholastica` | Light | Default calm everyday learning    | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Dark  | `nocturnal`          | Dark  | Calm dark for deep focus          | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Zen   | `zen`                | Light | Reduced-stimulation quiet reading | Inter + Source Serif 4 + JetBrains Mono |
 
 The `RuntimeThemeProvider` accepts a `themeId` prop and flattens the corresponding definition. `FontLoader` injects Google Font `<link>` tags based on active font families. `useThemePreference()` persists the selected theme to `localStorage`. `ThemeSelector` provides a popover UI for switching themes at runtime.
 

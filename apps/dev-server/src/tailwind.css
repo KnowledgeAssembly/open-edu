@@ -137,20 +137,12 @@
   right: 0px;
 }
 
-.right-1 {
-  right: 0.25rem;
-}
-
 .right-4 {
   right: 1rem;
 }
 
 .top-0 {
   top: 0px;
-}
-
-.top-1 {
-  top: 0.25rem;
 }
 
 .top-1\/2 {
@@ -1249,10 +1241,6 @@
 
 .border-\[var\(--oe-color-primary\)\] {
   border-color: var(--oe-color-primary);
-}
-
-.border-black\/10 {
-  border-color: rgb(0 0 0 / var(--oe-opacity-10));
 }
 
 .border-border {

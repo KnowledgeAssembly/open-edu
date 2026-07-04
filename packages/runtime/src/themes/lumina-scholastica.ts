@@ -2,9 +2,8 @@ import type { ThemeDefinition } from '@open-edu/design-system';
 
 export const luminaScholastica: ThemeDefinition = {
   id: 'lumina-scholastica',
-  name: 'Lumina Scholastica',
-  description:
-    'Modern minimalist learning environment with a content-first three-panel architecture. v2 — warm greige palette, muted purple primary, gold tertiary.',
+  name: 'OpenEdu Light',
+  description: 'Default calm theme for everyday learning.',
   colors: {
     surface: '#fcfaf8',
     ['surface-dim']: '#e3dfda',

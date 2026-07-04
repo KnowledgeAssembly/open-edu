@@ -283,6 +283,15 @@ AI acts as a collaborative contributor while humans remain responsible for final
 
 ---
 
+### ADR-0008
+
+The theme system is reduced from six themes to three — OpenEdu Light, OpenEdu Dark, OpenEdu Zen — each with a semantic job mapped to the learner's rhythm. Accessibility moves from a pickable theme to automatic CSS media-query overrides.
+
+Decision record: `ADR-0008-three-theme-system.md`
+Implementation plan: `docs/superpowers/plans/2026-07-04-three-theme-cutover.md`
+
+---
+
 # Success Criteria
 
 An ADR is successful when a contributor can understand:

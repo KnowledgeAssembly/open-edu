@@ -32,7 +32,7 @@ describe('SettingsPage', () => {
       <SettingsPage currentThemeId="lumina-scholastica" onThemeChange={onThemeChange} />,
     );
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
-    fireEvent.click(screen.getByTestId('theme-card-high-focus'));
-    expect(onThemeChange).toHaveBeenCalledWith('high-focus');
+    fireEvent.click(screen.getByTestId('theme-card-zen'));
+    expect(onThemeChange).toHaveBeenCalledWith('zen');
   });
 });
