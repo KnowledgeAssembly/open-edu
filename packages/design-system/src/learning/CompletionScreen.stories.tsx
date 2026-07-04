@@ -42,12 +42,24 @@ export const WithRecommendedCourses: Story = {
     title: 'Introduction to Mathematics',
     recommendedCourses: [
       {
-        manifest: { id: 'course-2', title: 'Algebra Essentials', version: '1.0.0', author: 'John Smith', entry: 'index.json' },
+        manifest: {
+          id: 'course-2',
+          title: 'Algebra Essentials',
+          version: '1.0.0',
+          author: 'John Smith',
+          entry: 'index.json',
+        },
         nodeCount: 8,
         rootDir: 'algebra-essentials',
       },
       {
-        manifest: { id: 'course-3', title: 'Geometry Basics', version: '1.0.0', author: 'Jane Doe', entry: 'index.json' },
+        manifest: {
+          id: 'course-3',
+          title: 'Geometry Basics',
+          version: '1.0.0',
+          author: 'Jane Doe',
+          entry: 'index.json',
+        },
         nodeCount: 10,
         rootDir: 'geometry-basics',
       },
@@ -69,13 +81,23 @@ export const FullFeatured: Story = {
     },
     recommendedCourses: [
       {
-        manifest: { id: 'course-2', title: 'Algebra Essentials', version: '1.0.0', author: 'John Smith', entry: 'index.json' },
+        manifest: {
+          id: 'course-2',
+          title: 'Algebra Essentials',
+          version: '1.0.0',
+          author: 'John Smith',
+          entry: 'index.json',
+        },
         nodeCount: 8,
         rootDir: 'algebra-essentials',
       },
     ],
     onBack: () => console.log('Back to catalog'),
     onNavigateToCourse: (dir) => console.log('Navigate to:', dir),
-    skillSummary: <p className="text-on-surface-variant">You learned basic arithmetic, fractions, and introductory algebra.</p>,
+    skillSummary: (
+      <p className="text-on-surface-variant">
+        You learned basic arithmetic, fractions, and introductory algebra.
+      </p>
+    ),
   },
 };

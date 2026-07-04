@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderCourseSpec, renderCourseSpecJSON } from '../index.js';
 import type { ConceptActivityPair, GeneratedConcept, GeneratedActivity } from '../../types.js';
 
-function makeMockPair(
-  overrides?: Partial<GeneratedActivity>,
-): ConceptActivityPair {
+function makeMockPair(overrides?: Partial<GeneratedActivity>): ConceptActivityPair {
   const concept: GeneratedConcept = {
     conceptId: 'family_types',
     chapterCode: 'CH1',

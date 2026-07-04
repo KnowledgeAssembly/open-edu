@@ -21,11 +21,11 @@ export function loadConfig(): LlmConfig {
     provider: process.env.LLM_PROVIDER || 'openai',
     model: process.env.LLM_MODEL || 'gpt-4o-mini',
     apiKey:
-      process.env.LLM_API_KEY
-      || process.env.OPENAI_API_KEY
-      || process.env.ANTHROPIC_API_KEY
-      || process.env.OPENROUTER_API_KEY
-      || '',
+      process.env.LLM_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      process.env.ANTHROPIC_API_KEY ||
+      process.env.OPENROUTER_API_KEY ||
+      '',
     maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '4096', 10),
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
   };

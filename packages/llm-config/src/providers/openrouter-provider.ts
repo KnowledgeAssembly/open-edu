@@ -48,9 +48,7 @@ export class OpenRouterProvider implements LlmProvider {
       if (!parsed) {
         const refusal = response.choices[0]?.message?.refusal;
         throw new Error(
-          refusal
-            ? `LLM refused to generate: ${refusal}`
-            : 'LLM returned no parsed content',
+          refusal ? `LLM refused to generate: ${refusal}` : 'LLM returned no parsed content',
         );
       }
       return schema.parse(parsed);

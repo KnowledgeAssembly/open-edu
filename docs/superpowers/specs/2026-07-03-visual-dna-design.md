@@ -21,13 +21,13 @@ All three elements share the same geometric primitive (circle) and express the c
 
 ## Design Principles Applied
 
-| Principle | Application |
-|-----------|-------------|
-| **Assembly over hierarchy** | Modules are assembled from primitives, not drawn as monolithic shapes |
-| **Never complete** | The Open Module always has empty orbit space — room for more connections |
-| **Silence is part of the interface** | Patterns are calm textures, not busy decorations |
-| **Consistency builds confidence** | All three elements use the same circle primitive and color palette |
-| **Accessibility is beautiful** | Figures use proportion, not facial features, for recognition |
+| Principle                            | Application                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| **Assembly over hierarchy**          | Modules are assembled from primitives, not drawn as monolithic shapes    |
+| **Never complete**                   | The Open Module always has empty orbit space — room for more connections |
+| **Silence is part of the interface** | Patterns are calm textures, not busy decorations                         |
+| **Consistency builds confidence**    | All three elements use the same circle primitive and color palette       |
+| **Accessibility is beautiful**       | Figures use proportion, not facial features, for recognition             |
 
 ---
 
@@ -47,30 +47,30 @@ A central circle (core) surrounded by satellite circles on a dashed orbit path. 
    │    └─ satellite (primary-light, 70% opacity)
    │
    └── core (primary, 100%)
-   
+
    ◌ ─── dashed orbit ring (primary, 18% opacity, 1.5px stroke)
 ```
 
 ### Specifications
 
-| Property | Value |
-|----------|-------|
-| **Core shape** | Circle (`border-radius: 50%`) |
-| **Satellite shape** | Circle (`border-radius: 50%`) |
-| **Orbit shape** | Circle (`border-radius: 50%`, dashed stroke) |
-| **Core color** | `var(--oe-color-primary)` |
-| **Satellite color** | `var(--oe-color-primary-light)` at 70% opacity |
-| **Orbit color** | `var(--oe-color-primary)` at 18% opacity |
-| **Orbit stroke** | 1.5px dashed |
-| **Orbit dash pattern** | 4px dash, 3px gap |
+| Property               | Value                                          |
+| ---------------------- | ---------------------------------------------- |
+| **Core shape**         | Circle (`border-radius: 50%`)                  |
+| **Satellite shape**    | Circle (`border-radius: 50%`)                  |
+| **Orbit shape**        | Circle (`border-radius: 50%`, dashed stroke)   |
+| **Core color**         | `var(--oe-color-primary)`                      |
+| **Satellite color**    | `var(--oe-color-primary-light)` at 70% opacity |
+| **Orbit color**        | `var(--oe-color-primary)` at 18% opacity       |
+| **Orbit stroke**       | 1.5px dashed                                   |
+| **Orbit dash pattern** | 4px dash, 3px gap                              |
 
 ### Size Variants
 
-| Variant | Total Size | Core | Orbit Ø | Satellite Ø | Satellite Count | Use Case |
-|---------|-----------|------|---------|-------------|----------------|----------|
-| **sm** | 80 × 80px | 18px | 56px | 9px | 2 | Badges, inline indicators |
-| **md** | 120 × 120px | 26px | 84px | 12px | 3 | Cards, list items |
-| **lg** | 180 × 180px | 38px | 128px | 16px | 5 | Illustrations, empty states |
+| Variant | Total Size  | Core | Orbit Ø | Satellite Ø | Satellite Count | Use Case                    |
+| ------- | ----------- | ---- | ------- | ----------- | --------------- | --------------------------- |
+| **sm**  | 80 × 80px   | 18px | 56px    | 9px         | 2               | Badges, inline indicators   |
+| **md**  | 120 × 120px | 26px | 84px    | 12px        | 3               | Cards, list items           |
+| **lg**  | 180 × 180px | 38px | 128px   | 16px        | 5               | Illustrations, empty states |
 
 ### Satellite Placement Rules
 
@@ -82,13 +82,13 @@ A central circle (core) surrounded by satellite circles on a dashed orbit path. 
 
 ### States
 
-| State | Visual Change |
-|-------|---------------|
-| **Default** | Standard opacity (70% satellites) |
-| **Hover** | Satellites pulse to 85% opacity (CSS transition: 200ms ease) |
-| **Active/Selected** | Core gets a 2px ring offset in `--oe-color-primary` |
-| **Incomplete** | 2 satellites only, orbit clearly has empty space |
-| **Complete** | 5–6 satellites, but orbit still has visible gaps |
+| State               | Visual Change                                                |
+| ------------------- | ------------------------------------------------------------ |
+| **Default**         | Standard opacity (70% satellites)                            |
+| **Hover**           | Satellites pulse to 85% opacity (CSS transition: 200ms ease) |
+| **Active/Selected** | Core gets a 2px ring offset in `--oe-color-primary`          |
+| **Incomplete**      | 2 satellites only, orbit clearly has empty space             |
+| **Complete**        | 5–6 satellites, but orbit still has visible gaps             |
 
 ### Implementation Notes
 
@@ -116,32 +116,32 @@ small     medium    large    medium     small
 
 ### Specifications
 
-| Property | Value |
-|----------|-------|
-| **Path type** | SVG `<path>` with cubic bezier curves |
-| **Path stroke** | 1.5px, `var(--oe-color-primary)` at 15% opacity |
-| **Path dash** | 8px dash, 5px gap |
-| **Node shape** | Circle |
-| **Node base color** | `var(--oe-color-primary)` |
-| **Node accent color** | `var(--oe-color-accent)` |
+| Property              | Value                                           |
+| --------------------- | ----------------------------------------------- |
+| **Path type**         | SVG `<path>` with cubic bezier curves           |
+| **Path stroke**       | 1.5px, `var(--oe-color-primary)` at 15% opacity |
+| **Path dash**         | 8px dash, 5px gap                               |
+| **Node shape**        | Circle                                          |
+| **Node base color**   | `var(--oe-color-primary)`                       |
+| **Node accent color** | `var(--oe-color-accent)`                        |
 
 ### Node Size Scale
 
-| Size | Diameter | Opacity | Use |
-|------|----------|---------|-----|
-| **faint** | 6px | 12% | Background texture nodes |
-| **light** | 10px | 25% | Secondary depth nodes |
-| **default** | 12px | 50% | Standard path nodes |
-| **accent** | 14px | 50% | Emphasis nodes (uses accent color) |
-| **large** | 16px | 60% | Hero/focal nodes |
+| Size        | Diameter | Opacity | Use                                |
+| ----------- | -------- | ------- | ---------------------------------- |
+| **faint**   | 6px      | 12%     | Background texture nodes           |
+| **light**   | 10px     | 25%     | Secondary depth nodes              |
+| **default** | 12px     | 50%     | Standard path nodes                |
+| **accent**  | 14px     | 50%     | Emphasis nodes (uses accent color) |
+| **large**   | 16px     | 60%     | Hero/focal nodes                   |
 
 ### Density Variants
 
-| Variant | Nodes per 300px | Path complexity | Use Case |
-|---------|----------------|-----------------|----------|
-| **Dense** | 7–9 | Multi-curve, tight S-shapes | Background textures, hero sections |
-| **Medium** | 4–5 | Gentle curves | Card decorations, sidebar patterns |
-| **Minimal** | 2–3 | Single curve | Section dividers, inline accents |
+| Variant     | Nodes per 300px | Path complexity             | Use Case                           |
+| ----------- | --------------- | --------------------------- | ---------------------------------- |
+| **Dense**   | 7–9             | Multi-curve, tight S-shapes | Background textures, hero sections |
+| **Medium**  | 4–5             | Gentle curves               | Card decorations, sidebar patterns |
+| **Minimal** | 2–3             | Single curve                | Section dividers, inline accents   |
 
 ### Path Behavior
 
@@ -161,11 +161,13 @@ small     medium    large    medium     small
 ### Animation
 
 When used for **loading states**:
+
 - Path stroke animates via `stroke-dashoffset` (flowing effect, 3s loop)
 - Nodes fade in sequentially along the path (staggered 150ms)
 - Animation respects `prefers-reduced-motion`
 
 When used as **static decoration**:
+
 - No animation
 - Path and nodes are static SVG
 
@@ -197,37 +199,37 @@ Human figures built from two translucent shapes: a circle head and a rounded tor
 
 ### Specifications
 
-| Property | Value |
-|----------|-------|
-| **Head shape** | Circle (`border-radius: 50%`) |
-| **Torso shape** | Rounded rectangle (`border-radius: 50% 50% 30% 30%`) |
-| **Head opacity** | 70% |
-| **Torso opacity** | 25% |
-| **Overlap** | Head overlaps torso top by 4px (negative margin) |
-| **No limbs** | Figures never have arms, legs, or hands |
-| **No faces** | Figures never have eyes, mouth, or expressions |
+| Property          | Value                                                |
+| ----------------- | ---------------------------------------------------- |
+| **Head shape**    | Circle (`border-radius: 50%`)                        |
+| **Torso shape**   | Rounded rectangle (`border-radius: 50% 50% 30% 30%`) |
+| **Head opacity**  | 70%                                                  |
+| **Torso opacity** | 25%                                                  |
+| **Overlap**       | Head overlaps torso top by 4px (negative margin)     |
+| **No limbs**      | Figures never have arms, legs, or hands              |
+| **No faces**      | Figures never have eyes, mouth, or expressions       |
 
 ### Proportion System
 
 Five base proportions define the diversity system. Each figure uses one proportion + one color palette.
 
-| Proportion | Head Ø | Torso W | Torso H | Silhouette |
-|------------|--------|---------|---------|------------|
-| **tall** | 22px | 28px | 40px | Narrow, tall — suggests height |
-| **med** | 20px | 26px | 34px | Balanced, default |
-| **short** | 18px | 24px | 28px | Compact, suggests child/smaller frame |
-| **wide** | 22px | 34px | 32px | Broad, suggests wider build |
-| **narrow** | 16px | 20px | 36px | Slim, suggests lean build |
+| Proportion | Head Ø | Torso W | Torso H | Silhouette                            |
+| ---------- | ------ | ------- | ------- | ------------------------------------- |
+| **tall**   | 22px   | 28px    | 40px    | Narrow, tall — suggests height        |
+| **med**    | 20px   | 26px    | 34px    | Balanced, default                     |
+| **short**  | 18px   | 24px    | 28px    | Compact, suggests child/smaller frame |
+| **wide**   | 22px   | 34px    | 32px    | Broad, suggests wider build           |
+| **narrow** | 16px   | 20px    | 36px    | Slim, suggests lean build             |
 
 ### Color Palettes (5 diversity palettes)
 
-| Palette | Head Color | Torso Color | CSS Variable |
-|---------|-----------|-------------|--------------|
-| **c1** | `rgba(109,40,217,0.7)` | `rgba(109,40,217,0.25)` | `--oe-color-primary` |
-| **c2** | `rgba(6,182,212,0.7)` | `rgba(6,182,212,0.25)` | `--oe-color-accent` |
-| **c3** | `rgba(180,83,9,0.7)` | `rgba(180,83,9,0.25)` | warm amber |
-| **c4** | `rgba(139,92,246,0.7)` | `rgba(139,92,246,0.25)` | `--oe-color-primary-light` |
-| **c5** | `rgba(5,150,105,0.7)` | `rgba(5,150,105,0.25)` | `--oe-color-success` |
+| Palette | Head Color             | Torso Color             | CSS Variable               |
+| ------- | ---------------------- | ----------------------- | -------------------------- |
+| **c1**  | `rgba(109,40,217,0.7)` | `rgba(109,40,217,0.25)` | `--oe-color-primary`       |
+| **c2**  | `rgba(6,182,212,0.7)`  | `rgba(6,182,212,0.25)`  | `--oe-color-accent`        |
+| **c3**  | `rgba(180,83,9,0.7)`   | `rgba(180,83,9,0.25)`   | warm amber                 |
+| **c4**  | `rgba(139,92,246,0.7)` | `rgba(139,92,246,0.25)` | `--oe-color-primary-light` |
+| **c5**  | `rgba(5,150,105,0.7)`  | `rgba(5,150,105,0.25)`  | `--oe-color-success`       |
 
 ### Composition Rules
 
@@ -240,16 +242,17 @@ Five base proportions define the diversity system. Each figure uses one proporti
 
 ### Scene Types
 
-| Scene | Composition | Use |
-|-------|-------------|-----|
-| **Group portrait** | 3–5 figures side by side | About pages, community sections |
-| **Learning moment** | 2–3 figures, one slightly forward | Course intros, achievement screens |
-| **Community** | 5–7 figures, varied spacing | Landing pages, social features |
-| **Empty state** | 1–2 figures with Assembly Flow pattern | No-data screens, onboarding |
+| Scene               | Composition                            | Use                                |
+| ------------------- | -------------------------------------- | ---------------------------------- |
+| **Group portrait**  | 3–5 figures side by side               | About pages, community sections    |
+| **Learning moment** | 2–3 figures, one slightly forward      | Course intros, achievement screens |
+| **Community**       | 5–7 figures, varied spacing            | Landing pages, social features     |
+| **Empty state**     | 1–2 figures with Assembly Flow pattern | No-data screens, onboarding        |
 
 ### Animation
 
 Figures are static by default. When animated:
+
 - **Entrance:** Figures fade in and slide up (200ms stagger, 50ms delay between figures)
 - **Idle:** Subtle breathing effect on torso opacity (25% → 30% → 25%, 4s loop)
 - Animation respects `prefers-reduced-motion` — static when reduced motion is preferred
@@ -266,14 +269,14 @@ Figures are static by default. When animated:
 
 ## Integration with Existing Visual DNA
 
-| Element | Primitive | Relationship |
-|---------|-----------|--------------|
-| **Geometric Primitive** (circle) | — | The foundation. All three elements use circles. |
-| **Open Module** | Circle core + satellite circles | Direct composition of the primitive |
-| **Assembly Flow** | Circle nodes on dashed path | Repeated primitives connected by paths |
-| **Silhouette Assembly** | Circle head + rounded torso | Primitive adapted for human representation |
-| **Pipili** | Built from same proportions | The companion uses the same proportion system |
-| **Logo** | Assembled from primitives | Logo uses the same orbital/assembly language |
+| Element                          | Primitive                       | Relationship                                    |
+| -------------------------------- | ------------------------------- | ----------------------------------------------- |
+| **Geometric Primitive** (circle) | —                               | The foundation. All three elements use circles. |
+| **Open Module**                  | Circle core + satellite circles | Direct composition of the primitive             |
+| **Assembly Flow**                | Circle nodes on dashed path     | Repeated primitives connected by paths          |
+| **Silhouette Assembly**          | Circle head + rounded torso     | Primitive adapted for human representation      |
+| **Pipili**                       | Built from same proportions     | The companion uses the same proportion system   |
+| **Logo**                         | Assembled from primitives       | Logo uses the same orbital/assembly language    |
 
 ---
 
@@ -281,12 +284,12 @@ Figures are static by default. When animated:
 
 These Visual DNA elements reference existing design tokens:
 
-| Token | Used By | Value |
-|-------|---------|-------|
-| `--oe-color-primary` | Open Module core, Assembly Flow nodes, Silhouette c1 | Theme-dependent |
-| `--oe-color-primary-light` | Open Module satellites, Silhouette c4 | Theme-dependent |
-| `--oe-color-accent` | Assembly Flow accent nodes, Silhouette c2 | Theme-dependent |
-| `--oe-color-success` | Silhouette c5 | Theme-dependent |
+| Token                      | Used By                                              | Value           |
+| -------------------------- | ---------------------------------------------------- | --------------- |
+| `--oe-color-primary`       | Open Module core, Assembly Flow nodes, Silhouette c1 | Theme-dependent |
+| `--oe-color-primary-light` | Open Module satellites, Silhouette c4                | Theme-dependent |
+| `--oe-color-accent`        | Assembly Flow accent nodes, Silhouette c2            | Theme-dependent |
+| `--oe-color-success`       | Silhouette c5                                        | Theme-dependent |
 
 ---
 

@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
-import { registerWidgetSchema, getWidgetSchema, registerAllWidgetSchemas } from '../widget-schemas.js';
+import {
+  registerWidgetSchema,
+  getWidgetSchema,
+  registerAllWidgetSchemas,
+} from '../widget-schemas.js';
 import type { LlmProvider } from '@open-edu/llm-config';
 import type { GeneratedConcept } from '../../types.js';
 import { generateActivitiesForConcept } from '../index.js';

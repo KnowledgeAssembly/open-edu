@@ -19,13 +19,15 @@ export const Default: Story = {
 export const WithLongDefinition: Story = {
   args: {
     term: 'Photosynthesis',
-    children: 'The process by which green plants and certain other organisms use the energy of light to convert carbon dioxide and water into the simple sugar glucose. Oxygen is released as a byproduct.',
+    children:
+      'The process by which green plants and certain other organisms use the energy of light to convert carbon dioxide and water into the simple sugar glucose. Oxygen is released as a byproduct.',
   },
 };
 
 export const MathDefinition: Story = {
   args: {
     term: 'Pythagorean Theorem',
-    children: 'In a right-angled triangle, the square of the hypotenuse is equal to the sum of the squares of the other two sides: a² + b² = c².',
+    children:
+      'In a right-angled triangle, the square of the hypotenuse is equal to the sum of the squares of the other two sides: a² + b² = c².',
   },
 };

@@ -16,7 +16,9 @@ const RightContent = () => (
     <h2 className="text-lg font-bold text-on-surface mb-3">Preview</h2>
     <div className="prose text-sm text-on-surface-variant leading-relaxed">
       <h1 className="text-xl font-bold mb-2">Hello World</h1>
-      <p className="mb-2">This is a <strong>markdown</strong> document.</p>
+      <p className="mb-2">
+        This is a <strong>markdown</strong> document.
+      </p>
       <ul className="list-disc pl-5 space-y-1">
         <li>Item 1</li>
         <li>Item 2</li>

@@ -136,14 +136,14 @@ Accessibility is a core subsystem, not a plugin. It manages:
 
 The framework ships with 6 built-in themes that control colors, typography, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS custom properties on a wrapper `<div>`.
 
-| Theme              | ID                   | Description                              | Font Stack                                  |
-| ------------------ | -------------------- | ---------------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)              | Inter + Source Serif 4 + JetBrains Mono     |
-| Forest             | `forest`             | Warm nature-inspired earthy greens       | Source Serif 4 + Hanken Grotesk             |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast       | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                                | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary                 | Source Serif 4 + Literata + Hanken Grotesk  |
-| Zen                | `zen`                | Minimalist light with reduced noise      | Inter                                       |
+| Theme              | ID                   | Description                         | Font Stack                                  |
+| ------------------ | -------------------- | ----------------------------------- | ------------------------------------------- |
+| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)         | Inter + Source Serif 4 + JetBrains Mono     |
+| Forest             | `forest`             | Warm nature-inspired earthy greens  | Source Serif 4 + Hanken Grotesk             |
+| High Focus         | `high-focus`         | Accessibility-first, high-contrast  | Atkinson Hyperlegible Next + JetBrains Mono |
+| Nocturnal          | `nocturnal`          | Dark mode                           | Inter                                       |
+| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary            | Source Serif 4 + Literata + Hanken Grotesk  |
+| Zen                | `zen`                | Minimalist light with reduced noise | Inter                                       |
 
 The `RuntimeThemeProvider` accepts a `themeId` prop and flattens the corresponding definition. `FontLoader` injects Google Font `<link>` tags based on active font families. `useThemePreference()` persists the selected theme to `localStorage`. `ThemeSelector` provides a popover UI for switching themes at runtime.
 

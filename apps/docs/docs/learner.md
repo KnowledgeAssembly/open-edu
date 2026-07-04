@@ -108,6 +108,7 @@ The **Collection Binder** is a sidebar-accessible view that displays all unlocke
 **Access:** Click the "Collection Binder" link in the sidebar (`Library` icon) on any non-course page.
 
 **Features:**
+
 - Category shelves sorted alphabetically
 - Circular progress ring per shelf (`unlockedCount / totalCount`)
 - Card grid with glassmorphism cards showing type icon, level stars, and lock state
@@ -117,8 +118,8 @@ The **Collection Binder** is a sidebar-accessible view that displays all unlocke
 
 ### Persistence
 
-| Key | Format | Description |
-|---|---|---|
+| Key              | Format                                | Description                     |
+| ---------------- | ------------------------------------- | ------------------------------- |
 | `open-edu-cards` | `{ [cardId]: { level, unlockedAt } }` | Card level progress per card ID |
 
 ### Implementation
@@ -132,8 +133,12 @@ const cardBroker = pkg.cards?.cards
       cards: pkg.cards.cards,
       source: session.events$,
       initialLevels: fromEntries(/* saved progress */),
-      onCardUnlocked: (card) => { /* show toast, save progress */ },
-      onCardLeveledUp: (card, newLevel) => { /* show toast, save progress */ },
+      onCardUnlocked: (card) => {
+        /* show toast, save progress */
+      },
+      onCardLeveledUp: (card, newLevel) => {
+        /* show toast, save progress */
+      },
     })
   : null;
 ```

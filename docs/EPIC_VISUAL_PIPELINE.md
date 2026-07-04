@@ -27,42 +27,42 @@ Meanwhile, the OpenEdu runtime already supports 14 interactive widgets, Markdown
 
 ## Impact Map
 
-| Area | Impact | Action |
-|------|--------|--------|
-| `packages/pipeline/src/types.ts` | Low | Add `widget` type to `CourseSpecActivityType` + `widgetId`/`widgetConfig` to `GeneratedActivity` |
-| `packages/pipeline/src/generate-activities/prompts/observe.ts` | High | Add visual instructions + widget catalog |
-| `packages/pipeline/src/generate-activities/prompts/guided-practice.ts` | High | Same |
-| `packages/pipeline/src/generate-activities/prompts/independent-practice.ts` | High | Same |
-| `packages/pipeline/src/generate-activities/prompts/mastery-check.ts` | Medium | Add scenario-based questions format |
-| `packages/pipeline/src/generate-activities/prompts/positive-completion.ts` | Medium | Add real-world visual activity suggestions |
-| `packages/pipeline/src/generate-activities/exemplars.ts` | Medium | Add visual/widget exemplars |
-| `packages/pipeline/src/generate-activities/index.ts` | High | Add `widget` type handling + validation |
-| `packages/pipeline/src/generate-activities/type-selector.ts` | High | **Delete** this file |
-| `packages/pipeline/src/output/index.ts` | High | Add `renderCourseSpecJSON()` function |
-| `packages/pipeline/src/cli/index.ts` | Low | Add `--format` flag |
-| `packages/pipeline/src/graph/index.ts` | Low | Write JSON output, update report |
-| `packages/course-compiler/src/schemas/course-model.ts` | Medium | Add `WidgetActivitySchema` |
-| `packages/course-compiler/src/parser/json-input.ts` | High | **New file** — parse course-spec.json |
-| `packages/course-compiler/src/parser/index.ts` | Low | Export JSON parser |
-| `packages/course-compiler/src/cli/index.ts` | Low | Detect `.json` input |
-| `packages/course-compiler/src/generators/package-generator.ts` | Medium | Generate widget JSON node |
+| Area                                                                        | Impact | Action                                                                                           |
+| --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| `packages/pipeline/src/types.ts`                                            | Low    | Add `widget` type to `CourseSpecActivityType` + `widgetId`/`widgetConfig` to `GeneratedActivity` |
+| `packages/pipeline/src/generate-activities/prompts/observe.ts`              | High   | Add visual instructions + widget catalog                                                         |
+| `packages/pipeline/src/generate-activities/prompts/guided-practice.ts`      | High   | Same                                                                                             |
+| `packages/pipeline/src/generate-activities/prompts/independent-practice.ts` | High   | Same                                                                                             |
+| `packages/pipeline/src/generate-activities/prompts/mastery-check.ts`        | Medium | Add scenario-based questions format                                                              |
+| `packages/pipeline/src/generate-activities/prompts/positive-completion.ts`  | Medium | Add real-world visual activity suggestions                                                       |
+| `packages/pipeline/src/generate-activities/exemplars.ts`                    | Medium | Add visual/widget exemplars                                                                      |
+| `packages/pipeline/src/generate-activities/index.ts`                        | High   | Add `widget` type handling + validation                                                          |
+| `packages/pipeline/src/generate-activities/type-selector.ts`                | High   | **Delete** this file                                                                             |
+| `packages/pipeline/src/output/index.ts`                                     | High   | Add `renderCourseSpecJSON()` function                                                            |
+| `packages/pipeline/src/cli/index.ts`                                        | Low    | Add `--format` flag                                                                              |
+| `packages/pipeline/src/graph/index.ts`                                      | Low    | Write JSON output, update report                                                                 |
+| `packages/course-compiler/src/schemas/course-model.ts`                      | Medium | Add `WidgetActivitySchema`                                                                       |
+| `packages/course-compiler/src/parser/json-input.ts`                         | High   | **New file** — parse course-spec.json                                                            |
+| `packages/course-compiler/src/parser/index.ts`                              | Low    | Export JSON parser                                                                               |
+| `packages/course-compiler/src/cli/index.ts`                                 | Low    | Detect `.json` input                                                                             |
+| `packages/course-compiler/src/generators/package-generator.ts`              | Medium | Generate widget JSON node                                                                        |
 
 ## Dependent Stories
 
-| Story | Description | Depends On | Effort |
-|-------|-------------|------------|--------|
-| VIS-01 | Add `widget` type to pipeline types | — | Small |
-| VIS-02 | Update LLM prompts with widget catalog + visual instructions | VIS-01 | Medium |
-| VIS-03 | Add widget content schema + validation to activity generator | VIS-01 | Medium |
-| VIS-04 | Delete `type-selector.ts` (LLM now chooses type) | VIS-02, VIS-03 | Small |
-| VIS-05 | Add JSON output renderer to pipeline | VIS-01 | Medium |
-| VIS-06 | Wire JSON output into CLI + graph | VIS-05 | Small |
-| VIS-07 | Add WidgetActivitySchema to course-compiler | — | Small |
-| VIS-08 | Create JSON input parser for course-compiler | VIS-07 | Medium |
-| VIS-09 | Auto-detect `.json` input in course-compiler CLI | VIS-08 | Small |
-| VIS-10 | Generate widget JSON nodes in package-generator | VIS-08 | Small |
-| VIS-11 | Build exemplars + test the full pipeline | VIS-04, VIS-06, VIS-10 | Medium |
-| VIS-12 | Markdown output renders widget badge (instead of raw JSON) | VIS-05 | Small |
+| Story  | Description                                                  | Depends On             | Effort |
+| ------ | ------------------------------------------------------------ | ---------------------- | ------ |
+| VIS-01 | Add `widget` type to pipeline types                          | —                      | Small  |
+| VIS-02 | Update LLM prompts with widget catalog + visual instructions | VIS-01                 | Medium |
+| VIS-03 | Add widget content schema + validation to activity generator | VIS-01                 | Medium |
+| VIS-04 | Delete `type-selector.ts` (LLM now chooses type)             | VIS-02, VIS-03         | Small  |
+| VIS-05 | Add JSON output renderer to pipeline                         | VIS-01                 | Medium |
+| VIS-06 | Wire JSON output into CLI + graph                            | VIS-05                 | Small  |
+| VIS-07 | Add WidgetActivitySchema to course-compiler                  | —                      | Small  |
+| VIS-08 | Create JSON input parser for course-compiler                 | VIS-07                 | Medium |
+| VIS-09 | Auto-detect `.json` input in course-compiler CLI             | VIS-08                 | Small  |
+| VIS-10 | Generate widget JSON nodes in package-generator              | VIS-08                 | Small  |
+| VIS-11 | Build exemplars + test the full pipeline                     | VIS-04, VIS-06, VIS-10 | Medium |
+| VIS-12 | Markdown output renders widget badge (instead of raw JSON)   | VIS-05                 | Small  |
 
 ---
 
@@ -86,11 +86,13 @@ Currently `COURSE_SPEC_TYPES = ['reading', 'exercise', 'quiz', 'reflection']`. T
 In `packages/pipeline/src/types.ts`:
 
 1. Add `'widget'` to `COURSE_SPEC_TYPES`:
+
 ```typescript
 export const COURSE_SPEC_TYPES = ['reading', 'exercise', 'quiz', 'reflection', 'widget'] as const;
 ```
 
 2. Add optional fields to `GeneratedActivity`:
+
 ```typescript
 export interface GeneratedActivity {
   step: ActivityStep;
@@ -105,6 +107,7 @@ export interface GeneratedActivity {
 ```
 
 3. Add optional fields to `ActivityContent`:
+
 ```typescript
 export interface ActivityContent {
   description: string;
@@ -137,6 +140,7 @@ Add to `packages/pipeline/src/__tests__/types.test.ts` (create if not exists):
 
 **Package:** `@open-edu/pipeline`
 **Files:**
+
 - `packages/pipeline/src/generate-activities/prompts/observe.ts`
 - `packages/pipeline/src/generate-activities/prompts/guided-practice.ts`
 - `packages/pipeline/src/generate-activities/prompts/independent-practice.ts`
@@ -161,51 +165,60 @@ The current prompts hardcode the output type (e.g., `observe.ts` says `"type": "
 Each prompt should start with a shared section describing available widgets:
 
 > ## Available Widgets
+>
 > You may output `type: "reading"`, `type: "exercise"`, or `type: "widget"` with a `widgetId` + `widgetConfig`. Choose `widget` when the concept has visual or interactive potential.
 >
 > ### Widget List
-> | Widget ID | Best For | Key Config |
-> |-----------|----------|------------|
-> | `open-edu.matching` | Matching terms to definitions, concept pairs | `pairs[{itemA, itemB}]` |
-> | `open-edu.drag-drop` | Sorting items into categories | `items[{id,label}]`, `targets[{id,label}]`, `expectedPositions` |
-> | `open-edu.story-question` | Narrative/scenario-based comprehension | `scenario`, `questions[{question,options,correctIndex}]` |
-> | `open-edu.fraction-visual` | Parts of a whole, fractions | `numerator`, `denominator`, `mode: "bar"\|"circle"` |
-> | `open-edu.chart-reader` | Bar charts and pictographs | `type: "bar"\|"pictograph"`, `data[{label,value}]` |
-> | `open-edu.clock-time` | Reading/setting clocks | `hour`, `minute`, `mode: "read"\|"set"` |
-> | `open-edu.measurement-scale` | Measuring with ruler/thermometer/cylinder | `type`, `min`, `max`, `step`, `unit` |
-> | `open-edu.place-value-chart` | Place value (Indian system) | `maxPlaces: "lakh"\|"crore"`, `targetNumber` |
-> | `open-edu.grid-area` | Area/perimeter counting | `rows`, `cols`, `mode: "area"\|"perimeter"` |
-> | `open-edu.visual-counting` | Counting objects, simple addition | `count`, `emoji` or `items[]` |
-> | `open-edu.fill-blank` | Fill-in-the-blank exercises | `template` (with `___` blanks), `blanks[]` |
-> | `open-edu.sequencing` | Ordering steps or events | `items[{id,label}]`, `correctOrder[id]` |
-> | `open-edu.real-world` | Real-world scenario + self-assessment | `scenario`, `taskDescription` |
-> | `open-edu.multiple-choice` | Multiple choice quiz | `questions[{question,options[],correctIndex}]` |
+>
+> | Widget ID                    | Best For                                     | Key Config                                                      |
+> | ---------------------------- | -------------------------------------------- | --------------------------------------------------------------- |
+> | `open-edu.matching`          | Matching terms to definitions, concept pairs | `pairs[{itemA, itemB}]`                                         |
+> | `open-edu.drag-drop`         | Sorting items into categories                | `items[{id,label}]`, `targets[{id,label}]`, `expectedPositions` |
+> | `open-edu.story-question`    | Narrative/scenario-based comprehension       | `scenario`, `questions[{question,options,correctIndex}]`        |
+> | `open-edu.fraction-visual`   | Parts of a whole, fractions                  | `numerator`, `denominator`, `mode: "bar"\|"circle"`             |
+> | `open-edu.chart-reader`      | Bar charts and pictographs                   | `type: "bar"\|"pictograph"`, `data[{label,value}]`              |
+> | `open-edu.clock-time`        | Reading/setting clocks                       | `hour`, `minute`, `mode: "read"\|"set"`                         |
+> | `open-edu.measurement-scale` | Measuring with ruler/thermometer/cylinder    | `type`, `min`, `max`, `step`, `unit`                            |
+> | `open-edu.place-value-chart` | Place value (Indian system)                  | `maxPlaces: "lakh"\|"crore"`, `targetNumber`                    |
+> | `open-edu.grid-area`         | Area/perimeter counting                      | `rows`, `cols`, `mode: "area"\|"perimeter"`                     |
+> | `open-edu.visual-counting`   | Counting objects, simple addition            | `count`, `emoji` or `items[]`                                   |
+> | `open-edu.fill-blank`        | Fill-in-the-blank exercises                  | `template` (with `___` blanks), `blanks[]`                      |
+> | `open-edu.sequencing`        | Ordering steps or events                     | `items[{id,label}]`, `correctOrder[id]`                         |
+> | `open-edu.real-world`        | Real-world scenario + self-assessment        | `scenario`, `taskDescription`                                   |
+> | `open-edu.multiple-choice`   | Multiple choice quiz                         | `questions[{question,options[],correctIndex}]`                  |
 >
 > ### Widget Output Format
+>
 > When choosing a widget, output:
+>
 > ```json
 > { "type": "widget", "content": { "description": "...", "instructions": "..." },
 >   "widgetId": "open-edu.matching",
 >   "widgetConfig": { ... widget-specific config fields ... } }
+> ```
 
 #### Per-step customizations
 
 **`observe.ts`:**
+
 - Change the description: "The observe step is the first activity. Show, don't just tell."
 - Add: "Prefer `type: "widget"` with `interactive: false` for concepts with visual potential (fractions, charts, clocks, measurements, family structures). This lets learners see the visual before interacting."
 - Add: "If generating text output (`type: "reading"`), use tables for comparisons, `![Diagram description](concept-id)` for image references, **bold** for key terms, and bullet hierarchies for structured content."
 - Remove the hardcoded type/format constraint — replace with the flexible format.
 
 **`guided-practice.ts` & `independent-practice.ts`:**
+
 - Add: "Prefer `type: "widget"` with `interactive: true` for concepts where learners can practice by dragging, matching, sorting, sequencing, or filling blanks."
 - Add: "Include `interactive: true` and optional `hints[]` in the widgetConfig for guided practice. For independent practice, omit hints."
 - Add: "If generating text output, use tables for structured problems, `![Diagram](concept-id)` for visual references."
 
 **`mastery-check.ts`:**
+
 - Keep MCQ but add: "Include at least 1 scenario-based question (present a real-world situation, then ask a question about it)."
 - Add: "Each question can optionally include an `explanation` field shown after answering."
 
 **`positive-completion.ts`:**
+
 - Add: "Suggest a specific real-world visual activity the learner can do (e.g., 'Draw a family tree', 'Create a bar chart of your weekly schedule')."
 
 ### Output format per prompt
@@ -330,7 +343,9 @@ if (type === 'widget') {
     if (!parseResult.success) {
       // If it's the last attempt, fall back to reading type
       if (attempt < maxRetries) {
-        lastErrors = [`Widget '${result.widgetId}' config validation failed: ${parseResult.error.message}`];
+        lastErrors = [
+          `Widget '${result.widgetId}' config validation failed: ${parseResult.error.message}`,
+        ];
         lastAttempt = result;
         continue; // retry
       }
@@ -349,7 +364,12 @@ if (type === 'widget') {
 #### 4. Update `contentToActivityContent()` — handle widget type
 
 ```typescript
-function contentToActivityContent(type: string, content: Record<string, unknown>, widgetId?: string, widgetConfig?: Record<string, unknown>): ActivityContent {
+function contentToActivityContent(
+  type: string,
+  content: Record<string, unknown>,
+  widgetId?: string,
+  widgetConfig?: Record<string, unknown>,
+): ActivityContent {
   const base = {
     description: content.description as string,
     instructions: content.instructions as string,
@@ -377,10 +397,14 @@ const activity: GeneratedActivity = {
   step: step as GeneratedActivity['step'],
   courseSpecType: type as GeneratedActivity['courseSpecType'],
   order,
-  content: contentToActivityContent(type, result.content as Record<string, unknown>, 
-    result.widgetId as string | undefined, result.widgetConfig as Record<string, unknown> | undefined),
-  widgetId: type === 'widget' ? result.widgetId as string : undefined,
-  widgetConfig: type === 'widget' ? result.widgetConfig as Record<string, unknown> : undefined,
+  content: contentToActivityContent(
+    type,
+    result.content as Record<string, unknown>,
+    result.widgetId as string | undefined,
+    result.widgetConfig as Record<string, unknown> | undefined,
+  ),
+  widgetId: type === 'widget' ? (result.widgetId as string) : undefined,
+  widgetConfig: type === 'widget' ? (result.widgetConfig as Record<string, unknown>) : undefined,
 };
 ```
 
@@ -406,6 +430,7 @@ Create `packages/pipeline/src/generate-activities/__tests__/widget-schemas.test.
 
 **Package:** `@open-edu/pipeline`
 **Files:**
+
 - `packages/pipeline/src/generate-activities/type-selector.ts` — **DELETE**
 - `packages/pipeline/src/generate-activities/index.ts` — **EDIT** (remove imports and references)
 
@@ -419,6 +444,7 @@ Remove the hardcoded type-mapping logic now that the LLM selects types dynamical
 ### Context
 
 `type-selector.ts` maps each step to a single hardcoded type:
+
 - observe → reading
 - guided_practice → exercise
 - independent_practice → exercise
@@ -452,7 +478,8 @@ const DEFAULT_TYPES: Record<string, string> = {
 The `generateStep()` function should still accept a `type` parameter. The caller (`generateActivitiesForConcept`) now uses `DEFAULT_TYPES[step]` as the initial type, but the LLM can override it in its response.
 
 Wait — actually, the flow is:
-1. `generateActivitiesForConcept` calls `generateStep(step, type, concept, ...)` 
+
+1. `generateActivitiesForConcept` calls `generateStep(step, type, concept, ...)`
 2. `generateStep` passes the prompt which includes the widget catalog
 3. The LLM responds with its chosen type
 
@@ -463,7 +490,7 @@ So the `type` parameter passed to `generateStep` is the **initial type** but the
 for (let i = 0; i < STEP_ORDER.length; i++) {
   const step = STEP_ORDER[i]!;
   const type = DEFAULT_TYPES[step]!; // initial/default type
-  
+
   const result = await generateStep(llm, step, type, concept, i + 1, MAX_RETRIES, validationErrors);
   // result.activity.courseSpecType may differ from type if LLM chose differently
   // ...
@@ -510,6 +537,7 @@ Add a `renderCourseSpecJSON()` function that serializes `ConceptActivityPair[]` 
 ### Context
 
 The current `renderCourseSpec()` produces a markdown string. Widget configs are complex nested objects that don't render well in markdown. We need a JSON format that:
+
 - Carries all the same content as the markdown (metadata, lesson text, quiz questions)
 - Carries widget configs as native JSON objects
 - Can be read by the course-compiler's JSON input parser (VIS-08)
@@ -550,7 +578,12 @@ export interface CourseSpecLessonJSON {
 }
 
 export interface CourseSpecActivityJSON {
-  step: 'observe' | 'guided_practice' | 'independent_practice' | 'mastery_check' | 'positive_completion';
+  step:
+    | 'observe'
+    | 'guided_practice'
+    | 'independent_practice'
+    | 'mastery_check'
+    | 'positive_completion';
   order: number;
   type: 'reading' | 'exercise' | 'quiz' | 'reflection' | 'widget';
   description: string;
@@ -567,26 +600,27 @@ export interface CourseSpecActivityJSON {
 ```typescript
 export function renderCourseSpecJSON(pairs: ConceptActivityPair[]): CourseSpecJSON {
   const first = pairs[0]?.concept;
-  const estimatedHours = pairs.reduce((sum, p) => sum + (p.concept.estimatedDuration || 15), 0) / 60;
-  
+  const estimatedHours =
+    pairs.reduce((sum, p) => sum + (p.concept.estimatedDuration || 15), 0) / 60;
+
   const difficulty = pairs.some((p) => p.concept.difficulty === 'advanced')
     ? 'advanced'
     : pairs.some((p) => p.concept.difficulty === 'intermediate')
       ? 'intermediate'
       : 'beginner';
-  
+
   const title = first?.chapterName
     ? `${first.chapterName} — Auto-generated Course`
     : 'Auto-generated Course';
-  
+
   const lessons: CourseSpecLessonJSON[] = [];
-  
+
   // Each concept becomes a lesson
   for (let i = 0; i < pairs.length; i++) {
     const pair = pairs[i]!;
     const lessonNum = 101 + i; // sequential lesson numbering
     const lessonId = `lesson-${lessonNum}`;
-    
+
     lessons.push({
       id: lessonId,
       title: pair.concept.learningObjective,
@@ -608,7 +642,7 @@ export function renderCourseSpecJSON(pairs: ConceptActivityPair[]): CourseSpecJS
       })),
     });
   }
-  
+
   return {
     format: 'openedu-course-spec',
     version: 1,
@@ -670,6 +704,7 @@ Create `packages/pipeline/src/output/__tests__/json-output.test.ts`:
 
 **Package:** `@open-edu/pipeline`
 **Files:**
+
 - `packages/pipeline/src/cli/index.ts`
 - `packages/pipeline/src/graph/index.ts`
 
@@ -746,7 +781,7 @@ let filePaths: string[] = [];
 
 if (!options.dryRun) {
   log(options.verbose, '\n[6/6] Writing output...');
-  
+
   try {
     if (options.format === 'md' || options.format === 'both') {
       const result = writeCourseSpecOutput(
@@ -758,7 +793,7 @@ if (!options.dryRun) {
       filePaths.push(result.filePath);
       log(options.verbose, `  ✓ Markdown: ${result.concepts} concepts written`);
     }
-    
+
     if (options.format === 'json' || options.format === 'both') {
       const result = writeCourseSpecJSONOutput(
         options.outputDir,
@@ -823,13 +858,15 @@ In `packages/course-compiler/src/schemas/course-model.ts`:
 Add after the `VideoActivitySchema` block:
 
 ```typescript
-export const WidgetActivitySchema = z.object({
-  id: z.string(),
-  type: z.literal('widget'),
-  widgetId: z.string(),
-  config: z.record(z.unknown()),
-  description: z.string().optional(),
-}).strict();
+export const WidgetActivitySchema = z
+  .object({
+    id: z.string(),
+    type: z.literal('widget'),
+    widgetId: z.string(),
+    config: z.record(z.unknown()),
+    description: z.string().optional(),
+  })
+  .strict();
 
 export type WidgetActivity = z.infer<typeof WidgetActivitySchema>;
 ```
@@ -871,6 +908,7 @@ Create `packages/course-compiler/src/schemas/__tests__/widget-activity.test.ts`:
 
 **Package:** `@open-edu/course-compiler`
 **Files:**
+
 - `packages/course-compiler/src/parser/json-input.ts` — **NEW**
 - `packages/course-compiler/src/parser/index.ts` — **EDIT** (export new parser)
 
@@ -899,7 +937,14 @@ The JSON schema for `course-spec.json` should be a Zod schema defined in the cou
 
 ```typescript
 import { z } from 'zod';
-import type { CourseModel, CourseMetadata, CourseModule, Lesson, Activity, CompilerDiagnostic } from '../schemas/index.js';
+import type {
+  CourseModel,
+  CourseMetadata,
+  CourseModule,
+  Lesson,
+  Activity,
+  CompilerDiagnostic,
+} from '../schemas/index.js';
 
 // ---- JSON Input Schema ----
 
@@ -910,7 +955,13 @@ const MCQQuestionSchema = z.object({
 });
 
 const ActivityJSONSchema = z.object({
-  step: z.enum(['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion']),
+  step: z.enum([
+    'observe',
+    'guided_practice',
+    'independent_practice',
+    'mastery_check',
+    'positive_completion',
+  ]),
   order: z.number(),
   type: z.enum(['reading', 'exercise', 'quiz', 'reflection', 'widget']),
   description: z.string(),
@@ -953,7 +1004,12 @@ type CourseSpecJSON = z.infer<typeof CourseSpecJSONSchema>;
 // ---- Mapping functions ----
 
 function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'unnamed';
+  return (
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'unnamed'
+  );
 }
 
 function mapLesson(jsonLesson: z.infer<typeof LessonJSONSchema>): Lesson {
@@ -980,7 +1036,7 @@ function mapLesson(jsonLesson: z.infer<typeof LessonJSONSchema>): Lesson {
       // reading or exercise
       return {
         id: slugify(`${a.step}-${a.description}`),
-        type: a.type === 'reading' ? 'reading' as const : 'exercise' as const,
+        type: a.type === 'reading' ? ('reading' as const) : ('exercise' as const),
         content: a.instructions || '',
         instructions: a.instructions || '',
       };
@@ -988,21 +1044,24 @@ function mapLesson(jsonLesson: z.infer<typeof LessonJSONSchema>): Lesson {
 
   // Extract quiz if present
   const quizActivity = jsonLesson.activities.find((a) => a.type === 'quiz');
-  const quiz = quizActivity && quizActivity.questions ? {
-    id: slugify(`quiz-${jsonLesson.id}`),
-    title: quizActivity.description,
-    questions: quizActivity.questions.map((q, qi) => ({
-      id: `q-${qi + 1}`,
-      type: 'multiple-choice' as const,
-      prompt: q.question,
-      options: q.options.map((opt, oi) => ({
-        id: `opt-${oi + 1}`,
-        text: opt,
-        correct: oi === q.correctIndex,
-      })),
-    })),
-    shuffleQuestions: false,
-  } : undefined;
+  const quiz =
+    quizActivity && quizActivity.questions
+      ? {
+          id: slugify(`quiz-${jsonLesson.id}`),
+          title: quizActivity.description,
+          questions: quizActivity.questions.map((q, qi) => ({
+            id: `q-${qi + 1}`,
+            type: 'multiple-choice' as const,
+            prompt: q.question,
+            options: q.options.map((opt, oi) => ({
+              id: `opt-${oi + 1}`,
+              text: opt,
+              correct: oi === q.correctIndex,
+            })),
+          })),
+          shuffleQuestions: false,
+        }
+      : undefined;
 
   return {
     id: jsonLesson.id,
@@ -1023,7 +1082,7 @@ export function parseCourseSpecJSON(jsonStr: string): {
   diagnostics: CompilerDiagnostic[];
 } {
   const diagnostics: CompilerDiagnostic[] = [];
-  
+
   // Parse and validate JSON structure
   let parsed: CourseSpecJSON;
   try {
@@ -1046,10 +1105,10 @@ export function parseCourseSpecJSON(jsonStr: string): {
     });
     return { model: null, diagnostics };
   }
-  
+
   // Convert lessons
   const lessons = parsed.lessons.map(mapLesson);
-  
+
   // Group into modules (single module for auto-generated content)
   const metadata: CourseMetadata = {
     title: parsed.metadata.title,
@@ -1059,19 +1118,19 @@ export function parseCourseSpecJSON(jsonStr: string): {
     difficulty: parsed.metadata.difficulty,
     estimatedHours: parsed.metadata.estimatedHours,
   };
-  
+
   const module: CourseModule = {
     id: 'module-1',
     title: parsed.metadata.title,
     description: parsed.metadata.description,
     lessons,
   };
-  
+
   const model: CourseModel = {
     metadata,
     modules: [module],
   };
-  
+
   return { model, diagnostics };
 }
 ```
@@ -1125,12 +1184,37 @@ Create `packages/course-compiler/src/parser/__tests__/fixtures/sample-course-spe
       "examples": ["Joint families", "Nuclear families"],
       "misconceptions": [],
       "activities": [
-        { "step": "observe", "order": 1, "type": "widget", "description": "Family Matching",
-          "widgetId": "open-edu.matching", "widgetConfig": { "pairs": [{"itemA": "Joint", "itemB": "Multiple generations"}] } },
-        { "step": "guided_practice", "order": 2, "type": "reading", "description": "Examples", "instructions": "Read about families" },
-        { "step": "mastery_check", "order": 3, "type": "quiz", "description": "Quiz",
-          "questions": [{"question": "What is a family?", "options": ["A", "B", "C", "D"], "correctIndex": 0}] },
-        { "step": "positive_completion", "order": 4, "type": "reflection", "description": "Well done", "instructions": "Reflect" }
+        {
+          "step": "observe",
+          "order": 1,
+          "type": "widget",
+          "description": "Family Matching",
+          "widgetId": "open-edu.matching",
+          "widgetConfig": { "pairs": [{ "itemA": "Joint", "itemB": "Multiple generations" }] }
+        },
+        {
+          "step": "guided_practice",
+          "order": 2,
+          "type": "reading",
+          "description": "Examples",
+          "instructions": "Read about families"
+        },
+        {
+          "step": "mastery_check",
+          "order": 3,
+          "type": "quiz",
+          "description": "Quiz",
+          "questions": [
+            { "question": "What is a family?", "options": ["A", "B", "C", "D"], "correctIndex": 0 }
+          ]
+        },
+        {
+          "step": "positive_completion",
+          "order": 4,
+          "type": "reflection",
+          "description": "Well done",
+          "instructions": "Reflect"
+        }
       ]
     }
   ]
@@ -1175,18 +1259,20 @@ export async function compile(specPath: string, options: CompileOptions): Promis
   let content: string;
   try {
     content = await readFile(resolvedPath, 'utf-8');
-  } catch (error) { /* ... existing ... */ }
+  } catch (error) {
+    /* ... existing ... */
+  }
 
   // Detect format by extension
   const isJson = resolvedPath.toLowerCase().endsWith('.json');
-  
+
   let parsed: { model: CourseModel | null; diagnostics: CompilerDiagnostic[] };
   if (isJson) {
     parsed = parseCourseSpecJSON(content);
   } else {
     parsed = parseCourseSpec(content);
   }
-  
+
   diagnostics.push(...parsed.diagnostics);
   // ... rest of existing logic unchanged ...
 }
@@ -1197,7 +1283,7 @@ Also update the command description:
 ```typescript
 new Command('compile')
   .description('Compile a course-spec.md or course-spec.json into an OpenEdu educational package')
-  .argument('<file>', 'Path to course-spec.md or course-spec.json')
+  .argument('<file>', 'Path to course-spec.md or course-spec.json');
 ```
 
 ### Tests
@@ -1232,6 +1318,7 @@ When the package generator encounters a `type: 'widget'` activity, write it as a
 ### Context
 
 The package generator currently handles:
+
 - `reading` / `exercise` / `discussion` → `.md` files
 - `reflection` → `.json` files (ReflectionNode format)
 - `video` → `.md` files
@@ -1306,6 +1393,7 @@ Update `packages/course-compiler/src/generators/__tests__/package-generator.test
 
 **Package:** `@open-edu/pipeline`
 **Files:**
+
 - `packages/pipeline/src/generate-activities/exemplars.ts`
 - `packages/pipeline/src/output/__tests__/json-output.test.ts` (already created in VIS-05)
 
@@ -1430,7 +1518,7 @@ function makeMockPair(overrides?: Partial<GeneratedActivity>): ConceptActivityPa
     estimatedDuration: 15,
     dependencies: [],
   };
-  
+
   const activity: GeneratedActivity = {
     step: 'observe',
     courseSpecType: 'widget',
@@ -1444,7 +1532,7 @@ function makeMockPair(overrides?: Partial<GeneratedActivity>): ConceptActivityPa
     widgetConfig: { pairs: [{ itemA: 'Joint', itemB: 'Multiple generations' }] },
     ...overrides,
   };
-  
+
   return { concept, activities: [activity] };
 }
 
@@ -1457,7 +1545,7 @@ describe('pipeline output integration', () => {
     // Widget activities should NOT dump raw JSON in markdown
     expect(md).not.toContain('"widgetId"');
   });
-  
+
   it('generates JSON with preserved widget config', () => {
     const pair = makeMockPair();
     const json = renderCourseSpecJSON([pair]);
@@ -1465,7 +1553,7 @@ describe('pipeline output integration', () => {
     expect(json.lessons[0]?.activities[0]?.widgetConfig).toBeDefined();
     expect(json.lessons[0]?.activities[0]?.type).toBe('widget');
   });
-  
+
   it('handles mixed activity types in JSON output', () => {
     const pair = makeMockPair();
     pair.activities.push({
@@ -1481,13 +1569,13 @@ describe('pipeline output integration', () => {
     expect(json.lessons[0]?.activities).toHaveLength(2);
     expect(json.lessons[0]?.activities[1]?.type).toBe('quiz');
   });
-  
+
   it('round-trips through course-compiler JSON parser', async () => {
     // Generate JSON from pipeline
     const pair = makeMockPair();
     const json = renderCourseSpecJSON([pair]);
     const jsonStr = JSON.stringify(json);
-    
+
     // Parse with course-compiler JSON parser
     const { parseCourseSpecJSON } = await import('@open-edu/course-compiler/parser/json-input');
     const result = parseCourseSpecJSON(jsonStr);
@@ -1537,7 +1625,7 @@ function renderActivity(activity: GeneratedActivity, conceptId?: string): string
   if (activity.courseSpecType === 'widget') {
     const label = activity.content.description || 'Interactive Activity';
     const widgetName = activity.widgetId?.replace('open-edu.', '') || 'widget';
-    
+
     lines.push(`### Activity: ${label} [Widget]`);
     lines.push('');
     if (activity.content.instructions) {
@@ -1545,10 +1633,12 @@ function renderActivity(activity: GeneratedActivity, conceptId?: string): string
       lines.push('');
     }
     // Add a readable badge showing which widget is used
-    lines.push(`> 🧩 **Interactive ${widgetName} activity** — full configuration available in course-spec.json`);
+    lines.push(
+      `> 🧩 **Interactive ${widgetName} activity** — full configuration available in course-spec.json`,
+    );
     lines.push('');
   }
-  
+
   return lines;
 }
 ```
@@ -1572,14 +1662,14 @@ Add to existing output tests:
 
 ## Appendix A: Example widget configs for common EVS/social studies concepts
 
-| Concept | Suggested Widget | Config Sketch |
-|---------|-----------------|---------------|
-| Family types | `matching` | `pairs: [{itemA: "Joint", itemB: "Multiple generations"}, {itemA: "Nuclear", itemB: "Parents+children"}]` |
-| Parent responsibilities | `drag-drop` | `items: [{id:"r1", label:"Provide education"}], targets: [{id:"t1", label:"Parent"}, {id:"t2", label:"Teacher"}], expectedPositions: {r1: "t1"}` |
-| Issues affecting girls | `story-question` | `scenario: "In a village...", questions: [{question: "What issue does this show?", options: [...], correctIndex: 0}]` |
-| Respecting elders | `sequencing` | `items: [{id:"l", label:"Listen"}, {id:"a", label:"Acknowledge"}, {id:"t", label:"Thank"}], correctOrder: ["l","a","t"]` |
-| Support for disabled | `drag-drop` | `items: [labels of supports], targets: [categories], expectedPositions: {...}` |
-| Measures for women | `matching` | `pairs: [{itemA: "Reservation", itemB: "Political representation"}, {itemA: "Equal property law", itemB: "Economic rights"}]` |
+| Concept                 | Suggested Widget | Config Sketch                                                                                                                                    |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Family types            | `matching`       | `pairs: [{itemA: "Joint", itemB: "Multiple generations"}, {itemA: "Nuclear", itemB: "Parents+children"}]`                                        |
+| Parent responsibilities | `drag-drop`      | `items: [{id:"r1", label:"Provide education"}], targets: [{id:"t1", label:"Parent"}, {id:"t2", label:"Teacher"}], expectedPositions: {r1: "t1"}` |
+| Issues affecting girls  | `story-question` | `scenario: "In a village...", questions: [{question: "What issue does this show?", options: [...], correctIndex: 0}]`                            |
+| Respecting elders       | `sequencing`     | `items: [{id:"l", label:"Listen"}, {id:"a", label:"Acknowledge"}, {id:"t", label:"Thank"}], correctOrder: ["l","a","t"]`                         |
+| Support for disabled    | `drag-drop`      | `items: [labels of supports], targets: [categories], expectedPositions: {...}`                                                                   |
+| Measures for women      | `matching`       | `pairs: [{itemA: "Reservation", itemB: "Political representation"}, {itemA: "Equal property law", itemB: "Economic rights"}]`                    |
 
 ## Appendix B: File creation checklist
 

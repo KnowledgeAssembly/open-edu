@@ -9,13 +9,17 @@ function renderWithProvider(ui: React.ReactElement) {
 
 describe('SettingsPage', () => {
   it('renders the theme section', () => {
-    renderWithProvider(<SettingsPage currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />);
+    renderWithProvider(
+      <SettingsPage currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />,
+    );
     expect(screen.getByText('Theme')).toBeInTheDocument();
     expect(screen.getByTestId('theme-selector')).toBeInTheDocument();
   });
 
   it('renders accessibility controls', () => {
-    renderWithProvider(<SettingsPage currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />);
+    renderWithProvider(
+      <SettingsPage currentThemeId="lumina-scholastica" onThemeChange={vi.fn()} />,
+    );
     expect(screen.getByText('Accessibility')).toBeInTheDocument();
     expect(screen.getByText('Font Size')).toBeInTheDocument();
     expect(screen.getByText('Reduced Motion')).toBeInTheDocument();
@@ -24,7 +28,9 @@ describe('SettingsPage', () => {
 
   it('calls onThemeChange when theme is selected', () => {
     const onThemeChange = vi.fn();
-    renderWithProvider(<SettingsPage currentThemeId="lumina-scholastica" onThemeChange={onThemeChange} />);
+    renderWithProvider(
+      <SettingsPage currentThemeId="lumina-scholastica" onThemeChange={onThemeChange} />,
+    );
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
     fireEvent.click(screen.getByTestId('theme-card-high-focus'));
     expect(onThemeChange).toHaveBeenCalledWith('high-focus');

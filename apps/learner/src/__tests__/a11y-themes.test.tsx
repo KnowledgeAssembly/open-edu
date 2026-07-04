@@ -40,7 +40,11 @@ const samplePackages: PackageSummary[] = [
 ];
 
 function renderWithTheme(ui: React.ReactElement, themeId: ThemeId) {
-  return render(<RuntimeThemeProvider themeId={themeId}><FontSizeProvider>{ui}</FontSizeProvider></RuntimeThemeProvider>);
+  return render(
+    <RuntimeThemeProvider themeId={themeId}>
+      <FontSizeProvider>{ui}</FontSizeProvider>
+    </RuntimeThemeProvider>,
+  );
 }
 
 const themes = themeIds as readonly ThemeId[];

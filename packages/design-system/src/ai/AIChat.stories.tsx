@@ -41,7 +41,10 @@ export const WithCitations: Story = {
         role: 'ai',
         text: 'Plants use photosynthesis to convert light energy into chemical energy.',
         citations: [
-          { source: 'Biology Textbook, Ch. 6', text: 'Photosynthesis occurs in the chloroplasts of plant cells.' },
+          {
+            source: 'Biology Textbook, Ch. 6',
+            text: 'Photosynthesis occurs in the chloroplasts of plant cells.',
+          },
           { source: 'Nature Journal', text: 'The process requires sunlight, water, and CO₂.' },
         ],
       },
@@ -52,9 +55,7 @@ export const WithCitations: Story = {
 
 export const Thinking: Story = {
   args: {
-    messages: [
-      { role: 'user', text: 'Explain mitosis in detail.' },
-    ],
+    messages: [{ role: 'user', text: 'Explain mitosis in detail.' }],
     onSend: () => {},
     isThinking: true,
   },

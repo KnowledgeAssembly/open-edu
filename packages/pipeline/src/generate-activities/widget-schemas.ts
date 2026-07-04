@@ -16,13 +16,15 @@ export function getWidgetSchema(widgetId: string): z.ZodType | undefined {
 
 const matchingSchema = z.object({
   description: z.string().optional(),
-  pairs: z.array(
-    z.object({
-      id: z.string().optional(),
-      itemA: z.string(),
-      itemB: z.string(),
-    }),
-  ).min(1),
+  pairs: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        itemA: z.string(),
+        itemB: z.string(),
+      }),
+    )
+    .min(1),
   hints: z.array(z.string()).optional(),
   hint: z.string().optional(),
   interactive: z.boolean().optional(),
@@ -30,12 +32,10 @@ const matchingSchema = z.object({
 
 const dragDropSchema = z.object({
   description: z.string().optional(),
-  items: z.array(
-    z.object({ id: z.string(), label: z.string(), emoji: z.string().optional() }),
-  ).min(1),
-  targets: z.array(
-    z.object({ id: z.string(), label: z.string() }),
-  ).min(1),
+  items: z
+    .array(z.object({ id: z.string(), label: z.string(), emoji: z.string().optional() }))
+    .min(1),
+  targets: z.array(z.object({ id: z.string(), label: z.string() })).min(1),
   expectedPositions: z.record(z.string(), z.string()),
   hints: z.array(z.string()).optional(),
   hint: z.string().optional(),
@@ -44,9 +44,9 @@ const dragDropSchema = z.object({
 
 const sequencingSchema = z.object({
   description: z.string().optional(),
-  items: z.array(
-    z.object({ id: z.string(), label: z.string(), emoji: z.string().optional() }),
-  ).min(1),
+  items: z
+    .array(z.object({ id: z.string(), label: z.string(), emoji: z.string().optional() }))
+    .min(1),
   correctOrder: z.array(z.string()).min(1),
   hints: z.array(z.string()).optional(),
   hint: z.string().optional(),
@@ -57,14 +57,16 @@ const storyQuestionSchema = z.object({
   scenario: z.string().optional(),
   story: z.string().optional(),
   // at least one of scenario or story must be present
-  questions: z.array(
-    z.object({
-      question: z.string(),
-      options: z.array(z.string()).length(4),
-      correctIndex: z.number().min(0).max(3),
-      explanation: z.string().optional(),
-    }),
-  ).min(1),
+  questions: z
+    .array(
+      z.object({
+        question: z.string(),
+        options: z.array(z.string()).length(4),
+        correctIndex: z.number().min(0).max(3),
+        explanation: z.string().optional(),
+      }),
+    )
+    .min(1),
   visual: z.string().optional(),
   interactive: z.boolean().optional(),
 });
@@ -123,9 +125,9 @@ const fractionVisualSchema = z.object({
 
 const chartReaderSchema = z.object({
   type: z.enum(['bar', 'pictograph']),
-  data: z.array(
-    z.object({ label: z.string(), value: z.number(), emoji: z.string().optional() }),
-  ).min(1),
+  data: z
+    .array(z.object({ label: z.string(), value: z.number(), emoji: z.string().optional() }))
+    .min(1),
   title: z.string().optional(),
   showValues: z.boolean().optional(),
   correctLabel: z.string().optional(),

@@ -49,11 +49,12 @@ function assignColors(nodes: FlowNode[]): FlowNode[] {
 }
 
 function assignSizes(nodes: FlowNode[], density: AssemblyFlowDensity): FlowNode[] {
-  const sizeSequence: FlowNode['size'][] = density === 'dense'
-    ? ['faint', 'light', 'default', 'accent', 'default', 'light', 'accent', 'faint', 'light']
-    : density === 'medium'
-      ? ['faint', 'default', 'accent', 'default', 'faint']
-      : ['light', 'default', 'light'];
+  const sizeSequence: FlowNode['size'][] =
+    density === 'dense'
+      ? ['faint', 'light', 'default', 'accent', 'default', 'light', 'accent', 'faint', 'light']
+      : density === 'medium'
+        ? ['faint', 'default', 'accent', 'default', 'faint']
+        : ['light', 'default', 'light'];
   return nodes.map((node, i) => ({
     ...node,
     size: sizeSequence[i % sizeSequence.length]!,
@@ -81,16 +82,26 @@ function buildPath(nodes: FlowNode[]): string {
 function generateNodes(density: AssemblyFlowDensity): FlowNode[] {
   const configs: Record<AssemblyFlowDensity, Array<{ x: number; y: number }>> = {
     dense: [
-      { x: 15, y: 55 }, { x: 50, y: 35 }, { x: 90, y: 65 },
-      { x: 130, y: 30 }, { x: 170, y: 60 }, { x: 210, y: 40 },
-      { x: 250, y: 65 }, { x: 285, y: 45 },
+      { x: 15, y: 55 },
+      { x: 50, y: 35 },
+      { x: 90, y: 65 },
+      { x: 130, y: 30 },
+      { x: 170, y: 60 },
+      { x: 210, y: 40 },
+      { x: 250, y: 65 },
+      { x: 285, y: 45 },
     ],
     medium: [
-      { x: 20, y: 50 }, { x: 85, y: 35 }, { x: 150, y: 60 },
-      { x: 215, y: 40 }, { x: 280, y: 55 },
+      { x: 20, y: 50 },
+      { x: 85, y: 35 },
+      { x: 150, y: 60 },
+      { x: 215, y: 40 },
+      { x: 280, y: 55 },
     ],
     minimal: [
-      { x: 30, y: 55 }, { x: 150, y: 40 }, { x: 270, y: 50 },
+      { x: 30, y: 55 },
+      { x: 150, y: 40 },
+      { x: 270, y: 50 },
     ],
   };
   const raw = configs[density];
@@ -133,10 +144,7 @@ export const AssemblyFlow = React.forwardRef<SVGSVGElement, AssemblyFlowProps>(
           stroke="currentColor"
           strokeWidth="1.5"
           strokeDasharray="8 5"
-          className={cn(
-            'text-primary',
-            animated && 'assembly-flow-path',
-          )}
+          className={cn('text-primary', animated && 'assembly-flow-path')}
           style={{
             opacity: 0.15,
             ...(animated ? { animation: 'dash-flow 3s linear infinite' } : {}),

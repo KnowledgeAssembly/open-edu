@@ -20,7 +20,8 @@ export const WithIcon: Story = {
   args: {
     icon: '💡',
     title: 'Did you know?',
-    children: 'The mitochondria is often called the powerhouse of the cell because it generates most of the cell\'s supply of ATP.',
+    children:
+      "The mitochondria is often called the powerhouse of the cell because it generates most of the cell's supply of ATP.",
   },
 };
 
@@ -28,6 +29,7 @@ export const WithLongContent: Story = {
   args: {
     icon: '📝',
     title: 'Study Tip',
-    children: 'When learning about fractions, try visualizing them as parts of a pizza. This makes it easier to understand concepts like 1/4 + 1/4 = 1/2. You can also use a number line to see how fractions relate to each other.',
+    children:
+      'When learning about fractions, try visualizing them as parts of a pizza. This makes it easier to understand concepts like 1/4 + 1/4 = 1/2. You can also use a number line to see how fractions relate to each other.',
   },
 };

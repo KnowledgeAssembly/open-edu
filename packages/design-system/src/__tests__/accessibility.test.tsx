@@ -42,7 +42,11 @@ describe('accessibility audit — #336', () => {
   });
 
   it('Card has no violations', async () => {
-    await checkAccessibility(<Card><CardContent>Content</CardContent></Card>);
+    await checkAccessibility(
+      <Card>
+        <CardContent>Content</CardContent>
+      </Card>,
+    );
   });
 
   it('Input has no violations', async () => {

@@ -15,7 +15,10 @@ export const Default: Story = {
     icon: '💧',
     children: (
       <div>
-        <p>The water cycle describes how water is continuously recycled on Earth through evaporation, condensation, precipitation, and collection.</p>
+        <p>
+          The water cycle describes how water is continuously recycled on Earth through evaporation,
+          condensation, precipitation, and collection.
+        </p>
       </div>
     ),
   },
@@ -26,7 +29,10 @@ export const WithoutIcon: Story = {
     title: 'Introduction to Fractions',
     children: (
       <div>
-        <p>A fraction represents a part of a whole. It consists of a numerator (top number) and a denominator (bottom number).</p>
+        <p>
+          A fraction represents a part of a whole. It consists of a numerator (top number) and a
+          denominator (bottom number).
+        </p>
       </div>
     ),
   },
@@ -38,7 +44,10 @@ export const WithRichContent: Story = {
     icon: '⚗️',
     children: (
       <div>
-        <p>A chemical reaction occurs when substances interact and form new substances with different properties.</p>
+        <p>
+          A chemical reaction occurs when substances interact and form new substances with different
+          properties.
+        </p>
         <p>Key indicators of a chemical reaction include:</p>
         <ul>
           <li>Color change</li>

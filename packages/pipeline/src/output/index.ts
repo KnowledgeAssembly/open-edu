@@ -178,7 +178,9 @@ function renderActivity(activity: GeneratedActivity, conceptId?: string): string
       lines.push(activity.content.instructions);
       lines.push('');
     }
-    lines.push(`> 🧩 **Interactive ${widgetName} activity** — full configuration available in \`course-spec.json\``);
+    lines.push(
+      `> 🧩 **Interactive ${widgetName} activity** — full configuration available in \`course-spec.json\``,
+    );
     lines.push('');
   } else if (activity.courseSpecType === 'reading') {
     const label = activity.content.description || stepLabels[activity.step] || 'Reading';
@@ -289,7 +291,12 @@ export interface CourseSpecLessonJSON {
 }
 
 export interface CourseSpecActivityJSON {
-  step: 'observe' | 'guided_practice' | 'independent_practice' | 'mastery_check' | 'positive_completion';
+  step:
+    | 'observe'
+    | 'guided_practice'
+    | 'independent_practice'
+    | 'mastery_check'
+    | 'positive_completion';
   order: number;
   type: 'reading' | 'exercise' | 'quiz' | 'reflection' | 'widget';
   description: string;

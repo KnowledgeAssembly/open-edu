@@ -5,7 +5,8 @@ const PanelContent = ({ label, className = '' }: { label: string; className?: st
   <div className={`p-4 h-full ${className}`}>
     <p className="text-sm font-semibold text-on-surface mb-2">{label}</p>
     <p className="text-xs text-on-surface-variant leading-relaxed">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+      labore.
     </p>
   </div>
 );

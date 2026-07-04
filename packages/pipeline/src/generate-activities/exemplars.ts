@@ -223,7 +223,7 @@ export const EXEMPLARS: Exemplar[] = [
   {
     type: 'widget',
     step: 'guided_practice',
-    conceptDescription: 'girls_education — Issues affecting girls\' status',
+    conceptDescription: "girls_education — Issues affecting girls' status",
     content: {
       description: 'Issues Affecting Girls',
       instructions: 'Drag each issue to the correct category.',

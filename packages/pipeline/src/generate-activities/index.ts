@@ -186,7 +186,9 @@ async function generateStep(
           const parseResult = widgetSchema.safeParse(rawConfig);
           if (!parseResult.success) {
             if (attempt < maxRetries) {
-              lastErrors = [`Widget '${widgetId}' config validation failed: ${parseResult.error.message}`];
+              lastErrors = [
+                `Widget '${widgetId}' config validation failed: ${parseResult.error.message}`,
+              ];
               lastAttempt = result;
               continue;
             }
