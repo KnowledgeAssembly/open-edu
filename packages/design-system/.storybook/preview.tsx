@@ -7,7 +7,6 @@ const withThemeProvider: Decorator = (Story, context) => {
     'lumina-scholastica': 'light',
     nocturnal: 'dark',
     zen: 'light',
-    forest: 'light',
   };
   return (
     <div data-theme={theme} className={themeMap[theme] === 'dark' ? 'dark' : ''}>
@@ -24,10 +23,9 @@ const preview: Preview = {
       toolbar: {
         title: 'Theme',
         items: [
-          { value: 'lumina-scholastica', title: 'Lumina Scholastica' },
-          { value: 'nocturnal', title: 'Nocturnal' },
-          { value: 'zen', title: 'Zen' },
-          { value: 'forest', title: 'Forest' },
+          { value: 'lumina-scholastica', title: 'OpenEdu Light' },
+          { value: 'nocturnal', title: 'OpenEdu Dark' },
+          { value: 'zen', title: 'OpenEdu Zen' },
         ],
         dynamicTitle: true,
       },

@@ -1,10 +1,7 @@
 import type { ThemeDefinition, ThemeId } from '@open-edu/design-system';
-import { highFocus } from './high-focus.js';
 import { luminaScholastica } from './lumina-scholastica.js';
 import { nocturnal } from './nocturnal.js';
-import { sylvanWorkspace } from './sylvan-workspace.js';
 import { zen } from './zen.js';
-import { forest } from './forest.js';
 
 export type {
   ThemeDefinition,
@@ -17,22 +14,12 @@ export type {
 } from '@open-edu/design-system';
 
 export const themeRegistry: Record<ThemeId, ThemeDefinition> = {
-  'high-focus': highFocus,
   'lumina-scholastica': luminaScholastica,
   nocturnal: nocturnal,
-  'sylvan-workspace': sylvanWorkspace,
   zen: zen,
-  forest: forest,
 };
 
-export const themeIds: ThemeId[] = [
-  'high-focus',
-  'lumina-scholastica',
-  'nocturnal',
-  'sylvan-workspace',
-  'zen',
-  'forest',
-];
+export const themeIds: ThemeId[] = ['lumina-scholastica', 'nocturnal', 'zen'];
 
 export const defaultThemeId: ThemeId = 'lumina-scholastica';
 

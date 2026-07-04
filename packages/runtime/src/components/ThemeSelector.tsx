@@ -3,40 +3,22 @@ import type { ThemeId } from '../themes/types.js';
 
 const themeInfo: Array<{ id: ThemeId; name: string; description: string; swatches: string[] }> = [
   {
-    id: 'high-focus',
-    name: 'High Focus',
-    description: 'High contrast, minimal noise',
-    swatches: ['#fcf8f9', '#003eb3', '#1b1b1c', '#046d3f'],
-  },
-  {
     id: 'lumina-scholastica',
-    name: 'Lumina Scholastica',
-    description: 'Modern minimalist learning',
-    swatches: ['#fdf7ff', '#4f378a', '#1d1b20', '#63597c'],
+    name: 'OpenEdu Light',
+    description: 'Default calm learning',
+    swatches: ['#fcfaf8', '#5d4a8a', '#1f1c18', '#7c6bb0'],
   },
   {
     id: 'nocturnal',
-    name: 'Nocturnal',
-    description: 'Dark mode, deep focus',
-    swatches: ['#151219', '#dab9ff', '#e8e0ea', '#46f5e0'],
-  },
-  {
-    id: 'sylvan-workspace',
-    name: 'Sylvan Workspace',
-    description: 'Warm, organic reading',
-    swatches: ['#f9faf6', '#061b0e', '#1a1c1a', '#536253'],
+    name: 'OpenEdu Dark',
+    description: 'Calm dark for deep focus',
+    swatches: ['#151219', '#d4c4ff', '#221e25', '#5d4a8a'],
   },
   {
     id: 'zen',
-    name: 'Zen',
-    description: 'Minimalist light, reduced visual noise',
-    swatches: ['#fafaf9', '#57534e', '#1c1917', '#72706e'],
-  },
-  {
-    id: 'forest',
-    name: 'Forest',
-    description: 'Earthy greens and warm browns',
-    swatches: ['#f6f7f3', '#2d4a2c', '#1a1c1a', '#6b5b4a'],
+    name: 'OpenEdu Zen',
+    description: 'Reduced stimulation, quiet reading',
+    swatches: ['#fcfaf8', '#8a8294', '#1f1c1a', '#d4cfdc'],
   },
 ];
 
@@ -153,7 +135,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
           className="border-outline-variant bg-surface-container-highest absolute left-0 top-full z-50 mt-2 w-80 rounded-lg border p-3 shadow-md"
           data-testid="theme-selector-popover"
         >
-          <div className="grid grid-cols-2 gap-2" role="listbox" aria-label="Select a theme">
+          <div className="grid grid-cols-3 gap-2" role="listbox" aria-label="Select a theme">
             {themeInfo.map((theme, idx) => {
               const isSelected = currentThemeId === theme.id;
               const isHovered = hoveredId === theme.id;
@@ -172,37 +154,24 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                   onMouseLeave={() => setHoveredId(null)}
                   data-testid={`theme-card-${theme.id}`}
                 >
-                  <div className="relative">
-                    <div className="flex gap-1">
-                      {theme.swatches.map((color, ci) => (
-                        <div
-                          key={ci}
-                          className="size-4 rounded-sm border border-black/10"
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
-                    {isSelected && (
-                      <div className="bg-primary text-primary-foreground absolute right-1 top-1 flex size-4 items-center justify-center rounded-full">
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    )}
+                  <div className="flex gap-1">
+                    {theme.swatches.map((swatch, si) => (
+                      <span
+                        key={si}
+                        className="inline-block size-4 rounded-full"
+                        style={{ backgroundColor: swatch }}
+                      />
+                    ))}
                   </div>
-                  <div className="text-sm font-semibold leading-tight">{theme.name}</div>
-                  <div className="text-muted-foreground text-xs leading-tight">
+                  <span className="text-sm font-medium leading-tight">{theme.name}</span>
+                  <span className="text-surface-variant-foreground text-xs leading-tight">
                     {theme.description}
-                  </div>
+                  </span>
+                  {isSelected && (
+                    <span className="text-primary text-xs font-semibold" aria-label="Selected">
+                      ✓ Selected
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -212,5 +181,3 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
     </div>
   );
 }
-
-ThemeSelector.displayName = 'ThemeSelector';

@@ -1,19 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { highFocus } from '../high-focus';
 import { luminaScholastica } from '../lumina-scholastica';
 import { nocturnal } from '../nocturnal';
-import { sylvanWorkspace } from '../sylvan-workspace';
 import { zen } from '../zen';
-import { forest } from '../forest';
 import type { ThemeDefinition } from '../types';
 
 const themes: Record<string, ThemeDefinition> = {
-  'high-focus': highFocus,
   'lumina-scholastica': luminaScholastica,
   nocturnal: nocturnal,
-  'sylvan-workspace': sylvanWorkspace,
   zen: zen,
-  forest: forest,
 };
 
 const requiredColorKeys = [
@@ -102,6 +96,16 @@ const radiiKeys: Array<keyof ThemeDefinition['radii']> = [
 ];
 
 describe('theme definitions', () => {
+  it('lumina-scholastica uses v2 warm palette', () => {
+    const theme = luminaScholastica;
+    expect(theme.colors['surface']).toBe('#fcfaf8');
+    expect(theme.colors['primary']).toBe('#5d4a8a');
+    expect(theme.colors['tertiary']).toBe('#b8862d');
+    expect(theme.colors['on-surface']).toBe('#1f1c18');
+    expect(theme.colors['on-surface-variant']).toBe('#48443f');
+    expect(theme.colors['outline']).toBe('#76706b');
+    expect(theme.colors['outline-variant']).toBe('#ccc6c0');
+  });
   Object.entries(themes).forEach(([name, theme]) => {
     describe(name, () => {
       it('has all required color tokens', () => {
@@ -170,16 +174,5 @@ describe('theme definitions', () => {
         expect(theme.description?.length).toBeGreaterThan(0);
       });
     });
-  });
-
-  it('lumina-scholastica uses v2 warm palette', () => {
-    const theme = luminaScholastica;
-    expect(theme.colors['surface']).toBe('#fcfaf8');
-    expect(theme.colors['primary']).toBe('#5d4a8a');
-    expect(theme.colors['tertiary']).toBe('#b8862d');
-    expect(theme.colors['on-surface']).toBe('#1f1c18');
-    expect(theme.colors['on-surface-variant']).toBe('#48443f');
-    expect(theme.colors['outline']).toBe('#76706b');
-    expect(theme.colors['outline-variant']).toBe('#ccc6c0');
   });
 });

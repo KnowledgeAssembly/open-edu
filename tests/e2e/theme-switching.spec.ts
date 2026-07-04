@@ -49,21 +49,11 @@ test.describe('Theme Switching', () => {
     });
   });
 
-  test('switching to High Focus applies correct data-theme', async ({ page }) => {
+  test('switching to Zen applies correct data-theme', async ({ page }) => {
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
     await trigger.click();
-    await page.locator('[data-testid="theme-card-high-focus"]').click();
-    await expect(page.locator('.open-edu-runtime')).toHaveAttribute('data-theme', 'high-focus');
-  });
-
-  test('switching to Sylvan Workspace applies correct data-theme', async ({ page }) => {
-    const trigger = page.locator('[data-testid="theme-selector-trigger"]');
-    await trigger.click();
-    await page.locator('[data-testid="theme-card-sylvan-workspace"]').click();
-    await expect(page.locator('.open-edu-runtime')).toHaveAttribute(
-      'data-theme',
-      'sylvan-workspace',
-    );
+    await page.locator('[data-testid="theme-card-zen"]').click();
+    await expect(page.locator('.open-edu-runtime')).toHaveAttribute('data-theme', 'zen');
   });
 
   test('ThemeSelector popover can be opened and closed', async ({ page }) => {
@@ -80,12 +70,7 @@ test.describe('Theme Switching', () => {
     const trigger = page.locator('[data-testid="theme-selector-trigger"]');
     await trigger.click();
 
-    const expectedThemes = [
-      'lumina-scholastica',
-      'high-focus',
-      'nocturnal',
-      'sylvan-workspace',
-    ] as const;
+    const expectedThemes = ['lumina-scholastica', 'nocturnal', 'zen'] as const;
 
     for (const id of expectedThemes) {
       await expect(page.locator(`[data-testid="theme-card-${id}"]`)).toBeVisible();
