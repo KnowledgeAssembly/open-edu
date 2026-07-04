@@ -20,13 +20,10 @@ export function HeroSection({
     <div
       className={cn(
         'relative overflow-hidden',
+        'bg-gradient-to-br from-[var(--oe-color-surface-container-low)] to-[var(--oe-color-surface-container)]',
         variant === 'editorial' ? 'px-12 py-16' : 'px-10 py-12',
         className,
       )}
-      style={{
-        background:
-          'linear-gradient(135deg, var(--oe-color-surface-container-low) 0%, var(--oe-color-surface-container) 100%)',
-      }}
       data-testid="hero-section"
       {...props}
     >

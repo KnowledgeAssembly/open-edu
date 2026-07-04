@@ -92,7 +92,7 @@ export function Card({
             )}
           >
             {isLocked ? (
-              <Lock className="text-muted-foreground size-5" />
+              <Lock className="text-on-surface-variant size-5" />
             ) : (
               <IconComponent className="text-on-surface size-5" />
             )}
@@ -105,7 +105,9 @@ export function Card({
                   key={i}
                   className={cn(
                     'h-3.5 w-3.5',
-                    i < level ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30',
+                    i < level
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'text-on-surface-variant opacity-30',
                   )}
                 />
               ))}
@@ -114,13 +116,13 @@ export function Card({
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+          <span className="text-on-surface-variant text-xs font-medium uppercase tracking-wider">
             {card.type}
           </span>
           <h3
             className={cn(
               'text-on-surface text-sm font-semibold leading-tight',
-              isLocked && 'text-muted-foreground',
+              isLocked && 'text-on-surface-variant',
             )}
           >
             {card.title}
@@ -128,7 +130,7 @@ export function Card({
           <p
             className={cn(
               'text-on-surface-variant line-clamp-2 text-xs',
-              isLocked && 'text-muted-foreground/60',
+              isLocked && 'text-on-surface-variant opacity-60',
             )}
           >
             {isLocked ? 'Unlock to discover' : card.summary}
@@ -136,15 +138,15 @@ export function Card({
         </div>
 
         <div className="mt-1 flex items-center justify-between">
-          <span className="text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5 text-[10px] font-medium">
+          <span className="text-on-surface-variant bg-muted/50 rounded-full px-2 py-0.5 text-[10px] font-medium">
             {card.category}
           </span>
           {isLocked && level === 0 ? (
-            <span className="text-muted-foreground flex items-center gap-1 text-[10px]">
+            <span className="text-on-surface-variant flex items-center gap-1 text-[10px]">
               <Lock className="size-3" /> Locked
             </span>
           ) : (
-            <span className="text-muted-foreground text-[10px] font-medium">Lv.{level}</span>
+            <span className="text-on-surface-variant text-[10px] font-medium">Lv.{level}</span>
           )}
         </div>
       </div>

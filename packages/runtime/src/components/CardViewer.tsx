@@ -74,14 +74,14 @@ export function CardViewer({
         </DialogHeader>
 
         <div className="flex flex-wrap gap-2 px-6">
-          <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium capitalize">
+          <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium capitalize">
             {card.type}
           </span>
-          <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
+          <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium">
             {card.category}
           </span>
           {card.difficulty && (
-            <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
+            <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium">
               {card.difficulty}
             </span>
           )}
@@ -131,7 +131,9 @@ export function CardViewer({
                   <div
                     className={cn(
                       'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
-                      isUnlocked ? 'bg-primary text-on-primary' : 'bg-muted text-muted-foreground',
+                      isUnlocked
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-muted text-on-surface-variant',
                     )}
                   >
                     {lvl}
@@ -141,7 +143,7 @@ export function CardViewer({
                       <span
                         className={cn(
                           'text-sm font-medium',
-                          isUnlocked ? 'text-on-surface' : 'text-muted-foreground',
+                          isUnlocked ? 'text-on-surface' : 'text-on-surface-variant',
                         )}
                       >
                         {isUnlocked ? 'Unlocked' : 'Locked'}

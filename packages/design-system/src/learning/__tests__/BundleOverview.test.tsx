@@ -56,7 +56,7 @@ function renderDefault(overrides = {}) {
 describe('BundleOverview', () => {
   it('renders bundle title', () => {
     renderDefault();
-    expect(screen.getByTestId('bundle-title')).toHaveTextContent('Test Bundle');
+    expect(screen.getByText('Test Bundle')).toBeInTheDocument();
   });
 
   it('renders description when provided', () => {
