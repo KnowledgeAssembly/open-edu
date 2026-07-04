@@ -30,7 +30,7 @@ const accessibleComponents: ComponentMap = {
   h1: ({ children, className, ...props }: ComponentProps<'h1'>) => (
     <h1
       id={slugify(String(children ?? ''))}
-      className={`text-h1 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h1 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -39,7 +39,7 @@ const accessibleComponents: ComponentMap = {
   h2: ({ children, className, ...props }: ComponentProps<'h2'>) => (
     <h2
       id={slugify(String(children ?? ''))}
-      className={`text-h2 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h2 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -48,7 +48,7 @@ const accessibleComponents: ComponentMap = {
   h3: ({ children, className, ...props }: ComponentProps<'h3'>) => (
     <h3
       id={slugify(String(children ?? ''))}
-      className={`text-h3 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h3 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -57,7 +57,7 @@ const accessibleComponents: ComponentMap = {
   h4: ({ children, className, ...props }: ComponentProps<'h4'>) => (
     <h4
       id={slugify(String(children ?? ''))}
-      className={`text-h4 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h4 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -66,7 +66,7 @@ const accessibleComponents: ComponentMap = {
   h5: ({ children, className, ...props }: ComponentProps<'h5'>) => (
     <h5
       id={slugify(String(children ?? ''))}
-      className={`text-h5 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h5 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -75,7 +75,7 @@ const accessibleComponents: ComponentMap = {
   h6: ({ children, className, ...props }: ComponentProps<'h6'>) => (
     <h6
       id={slugify(String(children ?? ''))}
-      className={`text-h6 font-display mb-paragraph-spacing mt-0 font-bold${className ? ` ${className}` : ''}`}
+      className={`text-h6 font-display mb-paragraph-spacing mt-0${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}

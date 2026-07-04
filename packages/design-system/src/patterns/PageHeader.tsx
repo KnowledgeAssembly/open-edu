@@ -17,10 +17,7 @@ export function PageHeader({
 }: PageHeaderProps): JSX.Element {
   return (
     <div
-      className={cn(
-        'bg-surface-container relative overflow-hidden rounded-xl px-10 py-12',
-        className,
-      )}
+      className={cn('relative overflow-hidden rounded-xl px-10 py-12', className)}
       style={{
         background:
           'linear-gradient(135deg, var(--oe-color-surface-container-low) 0%, var(--oe-color-surface-container) 100%)',

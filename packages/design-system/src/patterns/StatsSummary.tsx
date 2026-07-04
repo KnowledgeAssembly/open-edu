@@ -53,7 +53,7 @@ export function StatsSummary({
             {item.icon && <span className={cn('shrink-0', colorClass)}>{item.icon}</span>}
             <div>
               <p className={cn('text-h2 font-display', colorClass)}>{item.value}</p>
-              <p className="text-on-surface-variant text-sm">{item.label}</p>
+              <p className="text-on-surface-variant text-caption">{item.label}</p>
             </div>
           </div>
         );
@@ -61,3 +61,4 @@ export function StatsSummary({
     </div>
   );
 }
+StatsSummary.displayName = 'StatsSummary';

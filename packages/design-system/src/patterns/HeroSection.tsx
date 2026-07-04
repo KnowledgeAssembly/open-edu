@@ -50,3 +50,4 @@ export function HeroSection({
     </div>
   );
 }
+HeroSection.displayName = 'HeroSection';

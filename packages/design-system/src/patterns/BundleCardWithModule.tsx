@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { cn } from '../lib/utils.js';
 import { OpenModule } from '../primitives/open-module.js';
 
-export interface BundleCardWithModuleProps {
+export interface BundleCardWithModuleProps extends React.HTMLAttributes<HTMLDivElement> {
   completedModules: number;
   totalModules: number;
-  children: React.ReactNode;
 }
 
 export function getBundleSatellites(completedModules: number, totalModules: number): number {
@@ -18,12 +18,14 @@ export function getBundleSatellites(completedModules: number, totalModules: numb
 export function BundleCardWithModule({
   completedModules,
   totalModules,
+  className,
   children,
+  ...props
 }: BundleCardWithModuleProps): JSX.Element {
   const satellites = getBundleSatellites(completedModules, totalModules);
 
   return (
-    <div className="relative">
+    <div className={cn('relative', className)} {...props}>
       <div className="absolute right-4 top-4 z-10">
         <OpenModule size="xs" satellites={satellites} aria-hidden="true" />
       </div>
@@ -31,3 +33,4 @@ export function BundleCardWithModule({
     </div>
   );
 }
+BundleCardWithModule.displayName = 'BundleCardWithModule';
