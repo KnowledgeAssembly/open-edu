@@ -12,7 +12,7 @@ The **learner app** (`@open-edu/learner`) is a standalone application that provi
 pnpm --filter @open-edu/learner dev
 ```
 
-Opens at `http://localhost:4001`. The app scans all example packages and bundles in the repository and presents them as a browsable catalog. You can switch between all 4 built-in themes using the palette icon in the TopAppBar.
+Opens at `http://localhost:4001`. The app scans all example packages and bundles in the repository and presents them as a browsable catalog. You can switch between all 3 built-in themes using the palette icon in the TopAppBar.
 
 ## Architecture
 
@@ -91,7 +91,7 @@ Clicking a course loads it via `loadPackage()` and renders:
 
 ## Theme Switching
 
-All course pages (Course Home, Lesson, Assessment, Code, Progress) include a `ThemeSelector` in the `TopAppBar`. The selected theme is persisted to `localStorage` via `useThemePreference()` and reapplied on return visits. 24 axe-core audits (6 pages × 4 themes) confirm every theme is accessible.
+All course pages (Course Home, Lesson, Assessment, Code, Progress) include a `ThemeSelector` in the `TopAppBar`. The selected theme is persisted to `localStorage` via `useThemePreference()` and reapplied on return visits. 18 axe-core audits (6 pages × 3 themes) confirm every theme is accessible.
 
 ## Progress Persistence
 

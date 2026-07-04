@@ -168,15 +168,15 @@ Stages 3–4 are complete. Product design has begun with the Learner App.
 
 Engineering is running in parallel with design (as it should for an MVP), but the Design Pyramid discipline says engineering should faithfully implement the design system, not redefine it.
 
-| Area                 | Status | Notes                                                                           |
-| -------------------- | ------ | ------------------------------------------------------------------------------- |
-| Token infrastructure | ✅     | All 14 token files exist, fully wired to Tailwind and CSS vars                  |
-| Component library    | ✅     | 28 primitives in `packages/design-system/src/primitives/` (includes Visual DNA) |
-| Theme system         | ✅     | 6 themes with `ThemeDefinition`, `RuntimeThemeProvider`, CSS var flattening     |
-| Tailwind integration | ✅     | All 14 token categories wired (elevation added in Epic #332)                    |
-| Widget system        | ✅     | 14 built-in widgets, ThemedButton migrated to design-system Button              |
-| Accessibility        | ✅     | axe-core audit passes on all 28 components (0 violations)                       |
-| Tests                | ✅     | Full test suite passes: `pnpm test && pnpm lint && pnpm typecheck`              |
+| Area                 | Status | Notes                                                                                          |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| Token infrastructure | ✅     | All 14 token files exist, fully wired to Tailwind and CSS vars                                 |
+| Component library    | ✅     | 28 primitives in `packages/design-system/src/primitives/` (includes Visual DNA)                |
+| Theme system         | ✅     | 3 themes (Light, Dark, Zen) with `ThemeDefinition`, `RuntimeThemeProvider`, CSS var flattening |
+| Tailwind integration | ✅     | All 14 token categories wired (elevation added in Epic #332)                                   |
+| Widget system        | ✅     | 14 built-in widgets, ThemedButton migrated to design-system Button                             |
+| Accessibility        | ✅     | axe-core audit passes on all 28 components (0 violations)                                      |
+| Tests                | ✅     | Full test suite passes: `pnpm test && pnpm lint && pnpm typecheck`                             |
 
 ---
 
@@ -265,6 +265,7 @@ All high-priority tasks are complete. Remaining work is Stage 5 (Product Design)
 | Implementation plan tasks done         | 25/25                                                        |
 | Implementation plan tasks remaining    | 0                                                            |
 | axe-core violations                    | 0                                                            |
+| Themes defined                         | 3/3 (Light, Dark, Zen)                                       |
 
 ---
 
@@ -285,3 +286,4 @@ All high-priority tasks are complete. Remaining work is Stage 5 (Product Design)
 | 2026-07-03 | Stage 4 Design System marked COMPLETE                              | All 14 token categories wired, 28 components pass accessibility, 0 axe-core violations                                 |
 | 2026-07-04 | OpenModule xs size (48×48) added                                   | Matches prototype card indicators — smaller footprint for inline Visual DNA                                            |
 | 2026-07-04 | Learner App layout aligned to prototype                            | Grid layout, hero, stats, cards, dividers now match 04-full-page-mockup.html                                           |
+| 2026-07-04 | Collapse 6 → 3 themes (ADR-0008)                                   | Aligns with Vol I §3 Simplicity, Vol II §04 color consistency, Vol I §10 learning rhythm                               |

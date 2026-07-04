@@ -39,14 +39,13 @@ edu curriculum:generate --pdf ./textbook.pdf --level B --subject math  # PDF →
 
 ## Theming System
 
-The framework ships with **4 built-in themes** that control colors, typography, spacing, and border radii via CSS custom properties (`--oe-*`). All runtime components use Tailwind utility classes mapped to these tokens.
+The framework ships with **3 built-in themes** that control colors, typography, spacing, and border radii via CSS custom properties (`--oe-*`). All runtime components use Tailwind utility classes mapped to these tokens.
 
-| Theme              | ID                   | Description                        | Font Stack                                  |
-| ------------------ | -------------------- | ---------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist — the default    | Inter + Source Serif 4 + JetBrains Mono     |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                          | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest aesthetic           | Source Serif 4 + Literata + Hanken Grotesk  |
+| Name          | ID                   | Type  | Description                       | Font Stack                              |
+| ------------- | -------------------- | ----- | --------------------------------- | --------------------------------------- |
+| OpenEdu Light | `lumina-scholastica` | Light | Default calm everyday learning    | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Dark  | `nocturnal`          | Dark  | Calm dark for deep focus          | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Zen   | `zen`                | Light | Reduced-stimulation quiet reading | Inter + Source Serif 4 + JetBrains Mono |
 
 ```tsx
 import {
@@ -71,7 +70,7 @@ function App() {
 - `useThemePreference()` — reads/writes `oe-theme-preference` in localStorage, defaults to `lumina-scholastica`
 - `RuntimeThemeProvider` — flattens `ThemeDefinition` into 60+ `--oe-*` CSS variables and wraps content in a themed `div`
 - `FontLoader` — injects Google Font `<link>` tags matching the active theme's typography
-- `ThemeSelector` — popover with 4 theme preview cards (color swatches + description), keyboard-navigable
+- `ThemeSelector` — popover with 3 theme preview cards (color swatches + description), keyboard-navigable
 
 The learner app (`@open-edu/learner`) uses a **shadcn/ui component library** (10 components: Button, Card, Badge, Input, Dialog, Select, Progress, Tabs, Switch, Tooltip) built on **Radix UI** primitives with **Lucide icons**, all styled via Tailwind utility classes. The `ThemeSelector` is accessible from the `TopAppBar` on every course page. The dev-server uses a pre-generated Tailwind CSS file; the learner app processes Tailwind through PostCSS.
 
@@ -189,7 +188,7 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/schemas`         | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress, **bundle manifests**, **bundle progress**                                                                                                                                                                                                              | Done   |
 | `@open-edu/core`            | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner, **bundle loader**, **bundle scanner (scanAll)**, **Learn-Easy importer**, bundle error classes                                                                                                                                               | Done   |
 | `@open-edu/workflow`        | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering, **BundleEngine** (orchestrates per-module WorkflowEngine instances with prerequisite unlock)                                                                                                                                                             | Done   |
-| `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **4 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                                                                                  | Done   |
+| `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **3 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                                                                                  | Done   |
 | `@open-edu/accessibility`   | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                                                                                                                                                                              | Done   |
 | `@open-edu/telemetry`       | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                                                                                   | Done   |
 | `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                               | Done   |
@@ -296,7 +295,7 @@ Educational Package (Markdown + JSON)
          ▼
   ┌──────────────────────────┐
   │        Runtime           │  React renderer — lessons, quizzes, widgets
-  │                          │  4 themes, Tailwind-styled (--oe-* tokens)
+  │                          │  3 themes, Tailwind-styled (--oe-* tokens)
   ├──────────────────────────┤
   │ Layout Components:       │
   │  SideNav     TopAppBar   │
@@ -363,7 +362,7 @@ E2E tests start the learner dev server on port 4001 and run against all example 
 | `hot-reload.spec.ts`          | HMR preserves node, progress, and telemetry session on Markdown/JSON edits                                                                      |
 | `skill-graph.spec.ts`         | Skill-tracking events, mastery-based branching, remediation path                                                                                |
 | `rewards.spec.ts`             | Reward receipt tracking in dev-server inspector panel (2 tests)                                                                                 |
-| `theme-switching.spec.ts`     | Theme switching between all 4 themes, popover behavior, persistence after reload (8 tests)                                                      |
+| `theme-switching.spec.ts`     | Theme switching between all 3 themes, popover behavior, persistence after reload                                                                |
 | `bundle-navigation.spec.ts`   | Bundle catalog cards, bundle overview, module cards, module launch, prerequisite status, backward compat (6 tests)                              |
 
 ## Project Structure
@@ -378,7 +377,7 @@ open-edu/
 │   ├── schemas/             # Zod schemas + type generation
 │   ├── core/                # Package loader, scanner, patcher, validator, lint, generator
 │   ├── workflow/            # XState workflow engine + skill tracking + topology
-│   ├── runtime/             # React runtime + layout components + 4 themes + theme selector
+│   ├── runtime/             # React runtime + layout components + 3 themes + theme selector
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry, JSONL reader + summary
 │   ├── rewards/             # Reward broker, CardBroker, conditions, verification

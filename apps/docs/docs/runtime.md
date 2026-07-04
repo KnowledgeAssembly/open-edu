@@ -8,18 +8,15 @@ The React-based runtime handles node rendering, widget loading, progress trackin
 
 ## Theming System
 
-The framework ships with **6 built-in themes** that provide full color palettes, typography stacks, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS variables on a wrapper `<div>`.
+The framework ships with **3 built-in themes** that provide full color palettes, typography stacks, spacing, and border radii. Each theme is a `ThemeDefinition` object that gets flattened into 60+ `--oe-*` CSS variables on a wrapper `<div>`.
 
 ### Available Themes
 
-| Theme              | ID                   | Description                         | Font Stack                                  |
-| ------------------ | -------------------- | ----------------------------------- | ------------------------------------------- |
-| Lumina Scholastica | `lumina-scholastica` | Modern minimalist (default)         | Inter + Source Serif 4 + JetBrains Mono     |
-| Forest             | `forest`             | Warm nature-inspired earthy greens  | Source Serif 4 + Hanken Grotesk             |
-| High Focus         | `high-focus`         | Accessibility-first, high-contrast  | Atkinson Hyperlegible Next + JetBrains Mono |
-| Nocturnal          | `nocturnal`          | Dark mode                           | Inter                                       |
-| Sylvan Workspace   | `sylvan-workspace`   | Organic forest sanctuary            | Source Serif 4 + Literata + Hanken Grotesk  |
-| Zen                | `zen`                | Minimalist light with reduced noise | Inter                                       |
+| Name          | ID                   | Type  | Description                       | Font Stack                              |
+| ------------- | -------------------- | ----- | --------------------------------- | --------------------------------------- |
+| OpenEdu Light | `lumina-scholastica` | Light | Default calm everyday learning    | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Dark  | `nocturnal`          | Dark  | Calm dark for deep focus          | Inter + Source Serif 4 + JetBrains Mono |
+| OpenEdu Zen   | `zen`                | Light | Reduced-stimulation quiet reading | Inter + Source Serif 4 + JetBrains Mono |
 
 ### RuntimeThemeProvider
 
@@ -30,7 +27,7 @@ import { RuntimeThemeProvider } from '@open-edu/runtime';
 
 function App() {
   return (
-    <RuntimeThemeProvider themeId="high-focus">
+    <RuntimeThemeProvider themeId="nocturnal">
       <YourContent />
     </RuntimeThemeProvider>
   );
@@ -78,7 +75,7 @@ const [themeId, setThemeId] = useThemePreference();
 
 ### ThemeSelector
 
-A popover component displaying all 6 themes as preview cards with color swatches, names, and descriptions. The active theme is highlighted with a primary border and checkmark badge. Supports keyboard navigation (Tab, Shift+Tab, Escape) and click-outside-to-close.
+A popover component displaying all 3 themes as preview cards with color swatches, names, and descriptions. The active theme is highlighted with a primary border and checkmark badge. Supports keyboard navigation (Tab, Shift+Tab, Escape) and click-outside-to-close.
 
 ```tsx
 import { ThemeSelector } from '@open-edu/runtime';
@@ -95,7 +92,7 @@ import { themeRegistry, getTheme, themeIds, defaultThemeId } from '@open-edu/run
 
 const theme = getTheme('nocturnal');
 // theme.colors, theme.typography, theme.spacing, theme.radii
-console.log(themeIds); // ['forest', 'high-focus', 'lumina-scholastica', 'nocturnal', 'sylvan-workspace', 'zen']
+console.log(themeIds); // ['lumina-scholastica', 'nocturnal', 'zen']
 ```
 
 ## Layout Components
