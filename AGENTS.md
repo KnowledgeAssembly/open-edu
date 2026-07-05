@@ -107,6 +107,7 @@ open-edu/
 8. **Testing:** Every component needs rendering + interaction + a11y tests.
 9. **Dev-server CSS:** After adding/changing Tailwind classes in `packages/runtime/src/`, regenerate: `pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css`
 10. **Exceptions:** Inline styles are allowed only for: dynamic sizing from props, CSS variable references (`var(--oe-*)`), and the RuntimeThemeProvider.
+11. **Component Guide:** Consult `@docs/COMPONENT_GUIDE.md` for the authoritative reference on building new UI components — two-tier architecture (primitives vs. visual DNA), file structure, prop conventions, token usage rules, and testing patterns.
 
 ## Package Naming
 
