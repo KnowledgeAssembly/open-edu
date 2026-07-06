@@ -1,0 +1,87 @@
+# OpenWiki Quickstart
+
+Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates content from delivery: courses and bundles are authored as Markdown + JSON packages, validated by schemas, executed through a workflow engine, and rendered by React-based runtime and learner apps.
+
+## Start here
+
+- [Architecture overview](architecture/overview.md)
+- [Content, workflows, and examples](domain/content-and-workflows.md)
+- [Learner app](domain/learner-app.md)
+- [Design system and UI architecture](domain/design-system.md)
+- [Operations, commands, and tests](operations/testing-and-changes.md)
+
+## Repository map
+
+### Apps
+
+- `apps/learner` — standalone learner experience. It is the main user-facing app and stitches together catalog, course runtime, progress, settings, bundle overview, and the collection binder.
+- `apps/dev-server` — local development server and inspector UI.
+- `apps/docs` — docs site that mirrors some of the framework guidance.
+
+### Core packages
+
+- `packages/schemas` — Zod schemas and generated types for package/workflow/progress/rewards/card data.
+- `packages/core` — loaders, validators, scanners, patchers, generators, and bundle loading utilities.
+- `packages/workflow` — workflow engine and node ordering logic.
+- `packages/runtime` — React runtime renderers, layout shells, theme system, progress helpers, and knowledge-card components.
+- `packages/design-system` — primitives, patterns, learning UI, tokens, themes, and visual-dna components.
+- `packages/accessibility` — accessibility helpers and validation.
+- `packages/telemetry` — event collection and JSONL persistence.
+- `packages/rewards` — reward broker and card unlock logic.
+- `packages/widgets` — widget registry and built-in widget support.
+- `packages/cli` — `edu` command-line interface.
+- `packages/course-compiler` — converts course-spec files into validated packages.
+- `packages/pipeline` and `packages/llm-config` — AI-assisted PDF-to-course-spec pipeline and model-provider abstraction.
+
+### Example content
+
+- `examples/hello-world` — minimal package.
+- `examples/intro-javascript`, `examples/fractions`, `examples/adaptive-study` — increasingly complex course workflows.
+- `examples/skill-graph` — mastery-based routing.
+- `examples/level-b-math` — multi-module bundle example.
+- `examples/widget-showcase`, `examples/widget-practice`, `examples/remote-widget-demo` — widget patterns.
+- `examples/autism-reading`, `examples/living-vs-nonliving` — accessibility and rewards/card-heavy flows.
+
+## What this repository is for
+
+The project exists to make educational experiences portable and agent-friendly. Authors define learning content in open formats, while runtime packages handle:
+
+- rendering and navigation
+- accessibility enforcement
+- telemetry and progress tracking
+- reward delivery and knowledge-card unlocks
+- theme selection and visual consistency
+- bundle/module progression
+
+## Key concepts
+
+### Learning packages
+
+A learning package is a directory containing a manifest, an entry node, workflow routing, optional rewards, optional cards, and content nodes. See [content and workflows](domain/content-and-workflows.md) for the canonical model.
+
+### Bundles
+
+Bundles are multi-module curricula. The learner app and runtime treat bundle modules as ordered units with prerequisite relationships and per-module progress state.
+
+### Knowledge cards
+
+The runtime and learner app support unlockable Knowledge Cards and the Collection Binder UI. These are driven by card definitions, progress persistence, and reward/card brokers in the runtime and rewards packages.
+
+### Design system layers
+
+The UI is intentionally split between low-level primitives and opinionated visual-dna components. See [design system and UI architecture](domain/design-system.md).
+
+## Common change paths
+
+- Change package parsing, validation, or bundle loading: start in `packages/core`, `packages/schemas`, and `packages/course-compiler`.
+- Change course progression or mastery rules: start in `packages/workflow` and the example packages that exercise the rule.
+- Change learner-facing UI: start in `apps/learner` and inspect the matching components in `packages/runtime` and `packages/design-system`.
+- Change themes or visual tokens: start in `packages/design-system/src/tokens` and `packages/runtime/src/themes`.
+- Change rewards/cards/progress persistence: inspect `packages/rewards`, `packages/runtime`, and learner app storage helpers.
+- Change CLI behavior: start in `packages/cli`.
+
+## Navigation notes for future agents
+
+- Read this page first, then follow the section pages that match the area you need to change.
+- Prefer `README.md`, `docs/ARCHITECTURE.md`, `docs/PACKAGE_AUTHORING.md`, and `docs/COMPONENT_GUIDE.md` as source-of-truth references when you need more detail.
+- Watch for the distinction between runtime packages and the learner app: many learner pages compose reusable runtime/design-system components rather than reimplementing them.
