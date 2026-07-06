@@ -30,7 +30,7 @@ const typeConfig: Record<CardType, { icon: typeof BookOpen; gradient: string; ri
   },
 };
 
-export interface CardProps {
+export interface KnowledgeCardProps {
   card: CardDefinition;
   level: number;
   isLocked?: boolean;
@@ -38,13 +38,13 @@ export interface CardProps {
   className?: string;
 }
 
-export function Card({
+export function KnowledgeCard({
   card,
   level,
   isLocked = false,
   onClick,
   className,
-}: CardProps): JSX.Element {
+}: KnowledgeCardProps): JSX.Element {
   const config = (typeConfig[card.type] ?? typeConfig.knowledge)!;
   const IconComponent = config.icon;
   const maxLevel = card.maximumLevel;

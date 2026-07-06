@@ -11,7 +11,7 @@ const typeIcons: Record<CardType, typeof BookOpen> = {
   mentor: Heart,
 };
 
-export interface CardUnlockedToastProps {
+export interface KnowledgeCardUnlockedToastProps {
   card: CardDefinition;
   newLevel: number;
   visible: boolean;
@@ -21,7 +21,7 @@ export interface CardUnlockedToastProps {
   type: 'unlock' | 'levelUp';
 }
 
-export function CardUnlockedToast({
+export function KnowledgeCardUnlockedToast({
   card,
   newLevel,
   visible,
@@ -29,7 +29,7 @@ export function CardUnlockedToast({
   onView,
   autoDismissMs = 4000,
   type,
-}: CardUnlockedToastProps): JSX.Element | null {
+}: KnowledgeCardUnlockedToastProps): JSX.Element | null {
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
@@ -158,4 +158,4 @@ export function CardUnlockedToast({
   );
 }
 
-CardUnlockedToast.displayName = 'CardUnlockedToast';
+KnowledgeCardUnlockedToast.displayName = 'KnowledgeCardUnlockedToast';
