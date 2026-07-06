@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CATALOG_DIR = resolve(__dirname, '../../examples');
+const CATALOG_DIR = process.env.EDU_CATALOG_DIR
+  ? resolve(process.env.EDU_CATALOG_DIR)
+  : resolve(__dirname, '../../examples');
 const PKGS_DIR = resolve(__dirname, '../../packages');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
