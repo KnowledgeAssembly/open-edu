@@ -54,6 +54,14 @@ function MatchingComponent(props: {
     Array<{ x1: number; y1: number; x2: number; y2: number; leftId: string; rightId: string }>
   >([]);
 
+  const [drawingLine, setDrawingLine] = useState<{
+    leftId: string;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
+
   const isObserve = content?.interactive !== true;
   const pairs = content?.pairs ?? [];
 
@@ -112,6 +120,30 @@ function MatchingComponent(props: {
     return () => window.removeEventListener('resize', handleResize);
   }, [updateConnectorPositions]);
 
+  const getContainerCoords = useCallback(
+    (clientX: number, clientY: number): { x: number; y: number } => {
+      if (!containerRef.current) return { x: 0, y: 0 };
+      const containerRect = containerRef.current.getBoundingClientRect();
+      return {
+        x: clientX - containerRect.left,
+        y: clientY - containerRect.top,
+      };
+    },
+    [],
+  );
+
+  const findRightItemAtPoint = useCallback(
+    (clientX: number, clientY: number): string | null => {
+      const elements = document.elementsFromPoint(clientX, clientY);
+      for (const el of elements) {
+        const rightId = (el as HTMLElement).getAttribute?.('data-connector-right');
+        if (rightId) return rightId;
+      }
+      return null;
+    },
+    [],
+  );
+
   const handleLeftItemClick = useCallback(
     (pairId: string) => {
       if (submitted) return;
@@ -140,6 +172,55 @@ function MatchingComponent(props: {
       setSelectedLeftId(null);
     },
     [submitted, selectedLeftId],
+  );
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent, leftPairId: string) => {
+      if (submitted || isObserve) return;
+      if (!containerRef.current) return;
+      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      const coords = getContainerCoords(e.clientX, e.clientY);
+      const leftEl = containerRef.current.querySelector(`[data-connector-left="${leftPairId}"]`);
+      if (!leftEl) return;
+      const leftRect = leftEl.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+      setDrawingLine({
+        leftId: leftPairId,
+        x1: leftRect.right - containerRect.left,
+        y1: leftRect.top + leftRect.height / 2 - containerRect.top,
+        x2: coords.x,
+        y2: coords.y,
+      });
+      setSelectedLeftId(null);
+    },
+    [submitted, isObserve, getContainerCoords],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!drawingLine) return;
+      const coords = getContainerCoords(e.clientX, e.clientY);
+      setDrawingLine((prev) =>
+        prev ? { ...prev, x2: coords.x, y2: coords.y } : null,
+      );
+    },
+    [drawingLine, getContainerCoords],
+  );
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (!drawingLine) return;
+      const rightId = findRightItemAtPoint(e.clientX, e.clientY);
+      if (rightId) {
+        setConnections((prev) => {
+          const next = new Map(prev);
+          next.set(drawingLine.leftId, rightId);
+          return next;
+        });
+      }
+      setDrawingLine(null);
+    },
+    [drawingLine, findRightItemAtPoint],
   );
 
   const handleRemoveConnection = useCallback(
@@ -204,6 +285,21 @@ function MatchingComponent(props: {
     const pairId = getPairId(pair, idx);
     return connections.has(pairId);
   });
+
+  const allDrawingLines = (() => {
+    const lines = [...connectorPositions];
+    if (drawingLine) {
+      lines.push({
+        x1: drawingLine.x1,
+        y1: drawingLine.y1,
+        x2: drawingLine.x2,
+        y2: drawingLine.y2,
+        leftId: drawingLine.leftId,
+        rightId: 'drawing',
+      });
+    }
+    return lines;
+  })();
 
   if (isObserve) {
     return (
@@ -323,7 +419,14 @@ function MatchingComponent(props: {
   }
 
   return (
-    <div data-testid="matching" aria-label="Matching activity" ref={containerRef}>
+    <div
+      data-testid="matching"
+      aria-label="Matching activity"
+      ref={containerRef}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      style={{ touchAction: 'none', position: 'relative' }}
+    >
       {content.description && <p>{content.description}</p>}
 
       <div style={{ position: 'relative' }}>
@@ -358,6 +461,7 @@ function MatchingComponent(props: {
                       handleLeftItemClick(pairId);
                     }
                   }}
+                  onPointerDown={(e) => handlePointerDown(e, pairId)}
                   style={{
                     padding: '0.5rem',
                     margin: '0.25rem 0',
@@ -376,6 +480,8 @@ function MatchingComponent(props: {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    touchAction: 'none',
+                    userSelect: 'none',
                   }}
                 >
                   <span>{pair.itemA}</span>
@@ -472,7 +578,9 @@ function MatchingComponent(props: {
                   }}
                 >
                   <span>{pair.itemB}</span>
-                  {isMatched && <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>}
+                  {isMatched && (
+                    <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>
+                  )}
                 </div>
               );
             })}
@@ -491,16 +599,21 @@ function MatchingComponent(props: {
           }}
           aria-hidden="true"
         >
-          {connectorPositions.map((conn, i) => (
+          {allDrawingLines.map((conn, i) => (
             <line
               key={`${conn.leftId}-${conn.rightId}-${i}`}
               x1={conn.x1}
               y1={conn.y1}
               x2={conn.x2}
               y2={conn.y2}
-              stroke="var(--oe-color-primary, #3b82f6)"
-              strokeWidth={2}
-              strokeDasharray={conn.leftId === conn.rightId ? 'none' : '4 2'}
+              stroke={
+                conn.rightId === 'drawing'
+                  ? 'var(--oe-color-primary, #3b82f6)'
+                  : 'var(--oe-color-primary, #3b82f6)'
+              }
+              strokeWidth={conn.rightId === 'drawing' ? 2 : 2}
+              strokeDasharray={conn.rightId === 'drawing' ? '4 3' : 'none'}
+              opacity={conn.rightId === 'drawing' ? 0.7 : 1}
             />
           ))}
         </svg>
@@ -514,26 +627,35 @@ function MatchingComponent(props: {
         )}
       </div>
 
-      {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
-        >
-          <p>{content.hints[hintIndex]}</p>
-          {hintIndex < content.hints.length - 1 && (
-            <Button variant="ghost" size="sm" onClick={handleHintClick}>
-              More help
-            </Button>
-          )}
-        </div>
-      )}
+      {!submitted &&
+        content.hints &&
+        content.hints.length > 0 &&
+        content.hints[hintIndex] && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              marginTop: '0.5rem',
+              color: 'var(--oe-color-on-surface-variant, #6b7280)',
+            }}
+          >
+            <p>{content.hints[hintIndex]}</p>
+            {hintIndex < content.hints.length - 1 && (
+              <Button variant="ghost" size="sm" onClick={handleHintClick}>
+                More help
+              </Button>
+            )}
+          </div>
+        )}
 
       {!submitted && content.hint && !content.hints && (
         <div
           role="status"
           aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
+          style={{
+            marginTop: '0.5rem',
+            color: 'var(--oe-color-on-surface-variant, #6b7280)',
+          }}
         >
           <p>{content.hint}</p>
         </div>
@@ -549,7 +671,9 @@ function MatchingComponent(props: {
 
       {submitted && (
         <div role="status" aria-live="assertive" data-testid="feedback">
-          {Array.from(connections.entries()).every(([leftId, rightId]) => leftId === rightId) ? (
+          {Array.from(connections.entries()).every(
+            ([leftId, rightId]) => leftId === rightId,
+          ) ? (
             <p>Correct! All pairs matched.</p>
           ) : (
             <p>Some pairs are not matched correctly.</p>
