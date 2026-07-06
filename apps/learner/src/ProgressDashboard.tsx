@@ -103,6 +103,7 @@ export function ProgressDashboard({
             value: entries.filter(([, s]) => s.isCompleted).length,
             label: 'completed',
             icon: <BookOpen className="h-4 w-4" />,
+            color: 'success',
           },
           {
             value: entries.filter(([, s]) => !s.isCompleted && s.visitedNodes.length > 0).length,
@@ -113,6 +114,7 @@ export function ProgressDashboard({
             value: Object.values(allBadges).reduce((sum, badges) => sum + badges.length, 0),
             label: 'badges earned',
             icon: <Award className="h-4 w-4" />,
+            color: 'tertiary',
           },
         ]}
       />

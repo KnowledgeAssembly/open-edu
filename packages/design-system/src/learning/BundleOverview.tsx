@@ -122,7 +122,7 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                 mod.status === 'in_progress'
                   ? 'border-primary border-2'
                   : 'border-outline-variant border',
-                mod.status === 'locked' && 'opacity-60',
+                mod.status === 'locked' && 'opacity-40',
                 mod.status === 'unlocked' && 'opacity-60',
               )}
               data-testid="module-card"
