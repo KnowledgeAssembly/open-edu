@@ -25,6 +25,19 @@ const defaultItems = [
 ];
 const defaultCorrectOrder = ['ignite', 'plan', 'execute'];
 
+function getItemIdsFromDom(): string[] {
+  const items = screen.getAllByTestId(/^sortable-item-/);
+  return items.map((el) => {
+    const testId = el.getAttribute('data-testid')!;
+    return testId.replace('sortable-item-', '');
+  });
+}
+
+function expectedScore(order: string[], correct: string[]): number {
+  const correctCount = order.filter((id, i) => id === correct[i]).length;
+  return Math.round((correctCount / correct.length) * 100);
+}
+
 describe('Sequencing schema', () => {
   it('has correct widget id', () => {
     expect(sequencing.id).toBe('open-edu.sequencing');
@@ -51,10 +64,9 @@ describe('Sequencing observe mode (interactive: false)', () => {
     expect(items[2]).toHaveTextContent('Execute');
   });
 
-  it('does not show available items or user sequence in observe mode', () => {
+  it('does not show sortable list in observe mode', () => {
     renderWidget(observeConfig);
-    expect(screen.queryByTestId('available-items')).toBeNull();
-    expect(screen.queryByTestId('user-sequence')).toBeNull();
+    expect(screen.queryByTestId('sortable-list')).toBeNull();
   });
 
   it('completes after clicking acknowledge in observe mode', () => {
@@ -97,131 +109,17 @@ describe('Sequencing interactive mode (interactive: true)', () => {
     interactive: true,
   };
 
-  it('renders all available items', () => {
+  it('renders sortable list with all items', () => {
     renderWidget(interactiveConfig);
-    expect(screen.getByTestId('available-items')).toBeTruthy();
-    expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
-    expect(screen.getByTestId('available-item-plan')).toBeTruthy();
-    expect(screen.getByTestId('available-item-execute')).toBeTruthy();
+    expect(screen.getByTestId('sortable-list')).toBeTruthy();
+    expect(screen.getByTestId('sortable-item-ignite')).toBeTruthy();
+    expect(screen.getByTestId('sortable-item-plan')).toBeTruthy();
+    expect(screen.getByTestId('sortable-item-execute')).toBeTruthy();
   });
 
-  it('renders user sequence area', () => {
+  it('submit button is always enabled because all items are in the list', () => {
     renderWidget(interactiveConfig);
-    expect(screen.getByTestId('user-sequence')).toBeTruthy();
-  });
-
-  it('clicking available item adds it to the sequence', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
-    expect(screen.queryByTestId('available-item-ignite')).toBeNull();
-  });
-
-  it('clicking remove button removes placed item from sequence', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
-    fireEvent.click(screen.getByLabelText('Remove from sequence'));
-    expect(screen.queryByTestId('placed-item-ignite')).toBeNull();
-    expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
-  });
-
-  it('items added in order appear in sequence', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    const placedItems = screen.getAllByTestId(/^placed-item-/);
-    expect(placedItems).toHaveLength(3);
-  });
-
-  it('shows "All items placed" when all items in sequence', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    expect(screen.getByText('All items placed')).toBeTruthy();
-  });
-
-  it('submit button enabled only when all items placed', () => {
-    renderWidget(interactiveConfig);
-    expect(screen.getByText('Submit')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByText('Submit')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    expect(screen.getByText('Submit')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('available-item-execute'));
     expect(screen.getByText('Submit')).toBeEnabled();
-  });
-
-  it('calls complete with 100 on correct answer', () => {
-    const { complete, emitInteraction } = renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(100);
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ correct: true, accuracy: 1 }),
-    );
-  });
-
-  it('calls complete with partial accuracy', () => {
-    const { complete, emitInteraction } = renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledTimes(1);
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ correct: false, accuracy: 1 / 3 }),
-    );
-  });
-
-  it('calls complete with 0 when all wrong', () => {
-    const { complete } = renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
-  });
-
-  it('submit button disabled after submission', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(screen.queryByText('Submit')).toBeNull();
-  });
-
-  it('shows feedback after submission', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('feedback')).toBeTruthy();
-  });
-
-  it('shows correct feedback when all items in right order', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByText('Correct! The sequence is in the right order.')).toBeTruthy();
-  });
-
-  it('shows partial feedback when some items in wrong position', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByText('1 of 3 items in the right position.')).toBeTruthy();
   });
 
   it('renders description in interactive mode', () => {
@@ -231,8 +129,59 @@ describe('Sequencing interactive mode (interactive: true)', () => {
 
   it('shows sequencing status live region', () => {
     renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    expect(screen.getByTestId('sequencing-status')).toHaveTextContent('1 of 3 items in sequence');
+    expect(screen.getByTestId('sequencing-status')).toHaveTextContent('3 of 3 items in sequence');
+  });
+});
+
+describe('Sequencing submit and scoring', () => {
+  const interactiveConfig = {
+    items: defaultItems,
+    correctOrder: defaultCorrectOrder,
+    interactive: true,
+  };
+
+  it('calls complete with correct score on submit', () => {
+    const { complete, emitInteraction } = renderWidget(interactiveConfig);
+    const order = getItemIdsFromDom();
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith(expectedScore(order, defaultCorrectOrder));
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
+    );
+  });
+
+  it('shows feedback after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('feedback')).toBeTruthy();
+  });
+
+  it('feedback message matches the actual order', () => {
+    renderWidget(interactiveConfig);
+    const order = getItemIdsFromDom();
+    fireEvent.click(screen.getByText('Submit'));
+    const correct = order.length === defaultCorrectOrder.length && order.every((id, i) => id === defaultCorrectOrder[i]);
+    const correctCount = order.filter((id, i) => id === defaultCorrectOrder[i]).length;
+    if (correct) {
+      expect(screen.getByText('Correct! The sequence is in the right order.')).toBeTruthy();
+    } else {
+      expect(screen.getByText(`${correctCount} of ${defaultCorrectOrder.length} items in the right position.`)).toBeTruthy();
+    }
+  });
+
+  it('submit button is removed after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.queryByText('Submit')).toBeNull();
+  });
+
+  it('emits interaction with widget ID on submit', () => {
+    const { emitInteraction } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
+    );
   });
 });
 
@@ -270,62 +219,38 @@ describe('Sequencing keyboard accessibility', () => {
     interactive: true,
   };
 
-  it('has proper aria labels on available items', () => {
+  it('sortable items have proper aria labels', () => {
     renderWidget(a11yConfig);
-    expect(screen.getByLabelText('Add Ignite to sequence')).toBeTruthy();
-    expect(screen.getByLabelText('Add Plan to sequence')).toBeTruthy();
-    expect(screen.getByLabelText('Add Execute to sequence')).toBeTruthy();
+    defaultItems.forEach((item) => {
+      const el = screen.getByTestId(`sortable-item-${item.id}`);
+      const label = el.getAttribute('aria-label');
+      expect(label).toMatch(new RegExp(`^Step \\d+: ${item.label}$`));
+    });
   });
 
-  it('supports Enter key on available items', () => {
+  it('has tabIndex 0 on sortable items', () => {
     renderWidget(a11yConfig);
-    const igniteItem = screen.getByTestId('available-item-ignite');
-    fireEvent.keyDown(igniteItem, { key: 'Enter' });
-    expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
+    expect(screen.getByTestId('sortable-item-ignite').getAttribute('tabindex')).toBe('0');
+    expect(screen.getByTestId('sortable-item-plan').getAttribute('tabindex')).toBe('0');
   });
 
-  it('supports Space key on available items', () => {
+  it('sortable items have role listitem', () => {
     renderWidget(a11yConfig);
-    const igniteItem = screen.getByTestId('available-item-ignite');
-    fireEvent.keyDown(igniteItem, { key: ' ' });
-    expect(screen.getByTestId('placed-item-ignite')).toBeTruthy();
-  });
-
-  it('supports Enter key on remove button to remove placed item', () => {
-    renderWidget(a11yConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    const removeButton = screen.getByLabelText('Remove from sequence');
-    fireEvent.click(removeButton);
-    expect(screen.queryByTestId('placed-item-ignite')).toBeNull();
-    expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
-  });
-
-  it('has tabIndex 0 on available items', () => {
-    renderWidget(a11yConfig);
-    expect(screen.getByTestId('available-item-ignite').getAttribute('tabindex')).toBe('0');
-    expect(screen.getByTestId('available-item-plan').getAttribute('tabindex')).toBe('0');
-  });
-
-  it('remove button for placed items is focusable', () => {
-    renderWidget(a11yConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    const removeButton = screen.getByLabelText('Remove from sequence');
-    expect(removeButton.tagName).toBe('BUTTON');
+    expect(screen.getByTestId('sortable-item-ignite').getAttribute('role')).toBe('listitem');
   });
 
   it('has live region for sequencing status', () => {
     renderWidget(a11yConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
     const status = screen.getByTestId('sequencing-status');
     expect(status.closest('[aria-live]')).toBeTruthy();
   });
 
-  it('has numbered step display on placed items', () => {
+  it('numbered step display appears on each item', () => {
     renderWidget(a11yConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    const placedItem = screen.getByTestId('placed-item-ignite');
-    expect(placedItem).toBeTruthy();
-    expect(placedItem).toHaveTextContent('1.');
+    defaultItems.forEach((item) => {
+      const el = screen.getByTestId(`sortable-item-${item.id}`);
+      expect(el.textContent).toMatch(/^\d+\./);
+    });
   });
 
   it('has proper emoji display in observe mode labels', () => {
@@ -338,7 +263,7 @@ describe('Sequencing edge cases', () => {
   it('defaults to observe mode when interactive not specified', () => {
     renderWidget({ items: defaultItems, correctOrder: defaultCorrectOrder });
     expect(screen.getByTestId('sequencing')).toBeTruthy();
-    expect(screen.queryByTestId('available-items')).toBeNull();
+    expect(screen.queryByTestId('sortable-list')).toBeNull();
   });
 
   it('does not call complete on mount', () => {
@@ -350,52 +275,26 @@ describe('Sequencing edge cases', () => {
     expect(complete).not.toHaveBeenCalled();
   });
 
-  it('emits interaction with widget ID on submit', () => {
-    const { emitInteraction } = renderWidget({
-      items: defaultItems,
-      correctOrder: defaultCorrectOrder,
-      interactive: true,
-    });
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
-    );
-  });
-
   it('handles single item', () => {
     const { complete } = renderWidget({
       items: [{ id: 'only', label: 'Only' }],
       correctOrder: ['only'],
       interactive: true,
     });
-    expect(screen.getByTestId('available-item-only')).toBeTruthy();
-    fireEvent.click(screen.getByTestId('available-item-only'));
-    expect(screen.getByTestId('placed-item-only')).toBeTruthy();
+    expect(screen.getByTestId('sortable-item-only')).toBeTruthy();
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledWith(100);
   });
 
-  it('shows empty sequence placeholder initially', () => {
-    renderWidget({
-      items: defaultItems,
-      correctOrder: defaultCorrectOrder,
-      interactive: true,
-    });
-    expect(screen.getByText('Click items above to build your sequence')).toBeTruthy();
-  });
-
-  it('shows config error for mismatched correctOrder and items', () => {
+  it('shows error for mismatched correctOrder and items', () => {
     renderWidget({
       items: defaultItems,
       correctOrder: ['nonexistent'],
       interactive: true,
     });
-    expect(screen.getByTestId('available-item-ignite')).toBeTruthy();
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    expect(screen.getByTestId('sortable-item-ignite')).toBeTruthy();
     fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('feedback')).toBeTruthy();
   });
 });
 
@@ -413,80 +312,46 @@ describe('Sequencing observe mode display', () => {
   });
 });
 
-describe('Sequencing new features', () => {
+describe('Sequencing sortable features', () => {
   const interactiveConfig = {
     items: defaultItems,
     correctOrder: defaultCorrectOrder,
     interactive: true,
   };
 
-  it('up arrow moves item up in sequence', () => {
+  it('all items are rendered in the sortable list', () => {
     renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    const moveDownButton = screen.getAllByLabelText(/Move .* down/)[0]!;
-    fireEvent.click(moveDownButton);
-    const placedItems = screen.getAllByTestId(/^placed-item-/);
-    expect(placedItems[0]).toHaveTextContent('Plan');
-    expect(placedItems[1]).toHaveTextContent('Ignite');
-  });
-
-  it('down arrow moves item down in sequence', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    const moveUpButton = screen.getAllByLabelText(/Move .* up/)[1]!;
-    fireEvent.click(moveUpButton);
-    const placedItems = screen.getAllByTestId(/^placed-item-/);
-    expect(placedItems[0]).toHaveTextContent('Plan');
-    expect(placedItems[1]).toHaveTextContent('Ignite');
-  });
-
-  it('numbered slots appear with placeholders', () => {
-    renderWidget(interactiveConfig);
-    expect(screen.getByText('1.')).toBeTruthy();
-    expect(screen.getByText('2.')).toBeTruthy();
-    expect(screen.getByText('3.')).toBeTruthy();
-    expect(screen.getAllByText('___')).toHaveLength(3);
+    const items = screen.getAllByTestId(/^sortable-item-/);
+    expect(items).toHaveLength(3);
   });
 
   it('shows correct color coding after submit for correct position', () => {
     renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-execute'));
+    const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
-    const firstItem = screen.getByTestId('placed-item-ignite');
-    expect(firstItem.style.backgroundColor).toContain('success-container');
-    expect(firstItem).toHaveTextContent('✓');
+    order.forEach((id, index) => {
+      const item = screen.getByTestId(`sortable-item-${id}`);
+      if (id === defaultCorrectOrder[index]) {
+        expect(item.style.backgroundColor).toContain('success-container');
+        expect(item).toHaveTextContent('✓');
+      } else {
+        expect(item.style.backgroundColor).toContain('error-container');
+        expect(item).toHaveTextContent('✗');
+      }
+    });
   });
 
-  it('shows incorrect color coding after submit for wrong position', () => {
+  it('shows corrected items below wrong positions after submit', () => {
     renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
+    const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
-    const firstItem = screen.getByTestId('placed-item-execute');
-    expect(firstItem.style.backgroundColor).toContain('error-container');
-    expect(firstItem).toHaveTextContent('✗');
-  });
-
-  it('shows correct item for wrong position below', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-execute'));
-    fireEvent.click(screen.getByTestId('available-item-plan'));
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByText(/Correct:.*Ignite/)).toBeTruthy();
-  });
-
-  it('remove is a distinct focusable button not clickable on container', () => {
-    renderWidget(interactiveConfig);
-    fireEvent.click(screen.getByTestId('available-item-ignite'));
-    const removeButton = screen.getByLabelText('Remove from sequence');
-    expect(removeButton.tagName).toBe('BUTTON');
-    const placedItem = screen.getByTestId('placed-item-ignite');
-    expect(placedItem.getAttribute('role')).not.toBe('button');
+    order.forEach((id, index) => {
+      if (id !== defaultCorrectOrder[index]) {
+        const correctItem = defaultItems.find((i) => i.id === defaultCorrectOrder[index]);
+        if (correctItem) {
+          expect(screen.getByText(new RegExp(`Correct:.*${correctItem.label}`))).toBeTruthy();
+        }
+      }
+    });
   });
 });
