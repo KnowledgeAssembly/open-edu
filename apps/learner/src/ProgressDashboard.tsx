@@ -7,13 +7,15 @@ import { getAllBadges } from './badgesStorage';
 import {
   Badge,
   Button,
-  Card,
-  CardContent,
   EmptyState,
   PageHeader,
   Progress,
   StatsSummary,
+  BundleModuleIndicator,
+  SectionDivider,
 } from '@open-edu/design-system';
+import type { BundleModuleStatus } from '@open-edu/design-system';
+import { cn } from '@open-edu/design-system';
 import { CheckCircle2, BookOpen, TrendingUp, Award } from 'lucide-react';
 
 export interface ProgressDashboardProps {
@@ -87,7 +89,12 @@ export function ProgressDashboard({
 
   return (
     <div className="p-xl mx-auto max-w-5xl" data-testid="progress-dashboard">
-      <PageHeader eyebrow="Progress" title="My Progress" className="mb-xl" />
+      <PageHeader
+        eyebrow="Progress"
+        title="My Progress"
+        subtitle="Track your learning journey across all courses."
+        className="mb-xl"
+      />
 
       <StatsSummary
         className="mb-xl"
@@ -96,6 +103,7 @@ export function ProgressDashboard({
             value: entries.filter(([, s]) => s.isCompleted).length,
             label: 'completed',
             icon: <BookOpen className="h-4 w-4" />,
+            color: 'success',
           },
           {
             value: entries.filter(([, s]) => !s.isCompleted && s.visitedNodes.length > 0).length,
@@ -106,9 +114,12 @@ export function ProgressDashboard({
             value: Object.values(allBadges).reduce((sum, badges) => sum + badges.length, 0),
             label: 'badges earned',
             icon: <Award className="h-4 w-4" />,
+            color: 'tertiary',
           },
         ]}
       />
+
+      <SectionDivider density="minimal" className="mb-xl" />
 
       <div className="gap-md flex flex-col">
         {sortedEntries.map(([packageId, snap]) => {
@@ -131,48 +142,68 @@ export function ProgressDashboard({
           const packageBadges = allBadges[packageId] ?? [];
           const badgeCount = packageBadges.length;
 
+          const isCompleted = snap.isCompleted;
+          const moduleStatus: BundleModuleStatus = isCompleted ? 'completed' : 'in-progress';
+
           return (
-            <Card
+            <div
               key={packageId}
-              className={`${snap.isCompleted ? 'border-l-success border-l-4 opacity-80' : ''}`}
+              className={cn(
+                'bg-surface-container-lowest p-md relative flex flex-col gap-4 rounded-xl sm:flex-row sm:items-start',
+                isCompleted
+                  ? 'border-outline-variant border opacity-80'
+                  : 'border-primary border-2',
+              )}
               data-testid={`progress-card-${packageId}`}
             >
-              <CardContent className="p-md gap-md flex flex-col items-start justify-between sm:flex-row sm:items-center">
-                <div className="w-full flex-1">
-                  <h2 className="text-h2 font-display text-on-surface">{title}</h2>
-                  <div className="gap-md mt-sm text-on-surface-variant flex flex-wrap items-center text-sm">
-                    <span>
-                      {snap.visitedNodes.length} of {totalNodes} steps
-                    </span>
-                    <span>Last: {lastTitle}</span>
-                    {lastStudied && (
-                      <span className="text-on-surface-variant/70">{lastStudied}</span>
-                    )}
-                    {badgeCount > 0 && (
-                      <span className="text-tertiary font-medium">
-                        {badgeCount} badge{badgeCount > 1 ? 's' : ''}
-                      </span>
-                    )}
+              <div className="flex flex-shrink-0 items-center gap-3" aria-hidden="true">
+                <BundleModuleIndicator status={moduleStatus} completionPercent={percent} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h2 className="text-h3 font-display text-on-surface">{title}</h2>
                   </div>
-                  <div className="mt-sm w-full">
-                    <Progress value={percent} className="h-2" />
+                  <div className="gap-md flex flex-shrink-0 items-center">
+                    {isCompleted ? (
+                      <Badge variant="secondary">
+                        Completed <CheckCircle2 className="ml-1 inline h-3 w-3" />
+                      </Badge>
+                    ) : (
+                      <Button size="sm" onClick={() => onNavigate({ view: 'course', packageId })}>
+                        Continue
+                      </Button>
+                    )}
                   </div>
                 </div>
-
-                <div className="gap-md flex flex-shrink-0 items-center">
-                  <span className="text-h2 font-display text-primary">{percent}%</span>
-                  {snap.isCompleted ? (
-                    <Badge variant="secondary">
-                      Completed <CheckCircle2 className="ml-1 inline h-3 w-3" />
-                    </Badge>
-                  ) : (
-                    <Button size="sm" onClick={() => onNavigate({ view: 'course', packageId })}>
-                      Continue
+                <div className="gap-md mt-sm text-on-surface-variant flex flex-wrap items-center text-sm">
+                  <span>
+                    {snap.visitedNodes.length} of {totalNodes} steps
+                  </span>
+                  <span>Last: {lastTitle}</span>
+                  {lastStudied && <span className="text-on-surface-variant/70">{lastStudied}</span>}
+                  {badgeCount > 0 && (
+                    <span className="text-tertiary font-medium">
+                      {badgeCount} badge{badgeCount > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-sm w-full">
+                  <Progress value={percent} className="h-2" />
+                </div>
+                <div className="mt-sm flex items-center gap-3">
+                  {isCompleted && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onNavigate({ view: 'course', packageId })}
+                    >
+                      Review
                     </Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         })}
       </div>

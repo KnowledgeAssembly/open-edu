@@ -45,7 +45,7 @@ export function StatsSummary({
           <div
             key={i}
             className={cn(
-              'bg-surface-container flex items-center gap-3 rounded-xl px-4 py-3',
+              'bg-surface-container-lowest border-outline-variant flex items-center gap-3 rounded-xl border px-4 py-3',
               animated && 'animate-orbit-float',
             )}
             data-testid={`stats-item-${i}`}

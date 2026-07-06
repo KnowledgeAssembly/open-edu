@@ -3,6 +3,7 @@ import { Button } from '../primitives/button.js';
 import { Progress } from '../primitives/progress.js';
 import { PageHeader } from '../patterns/PageHeader.js';
 import { BundleModuleIndicator } from '../patterns/BundleModuleIndicator.js';
+import { SectionDivider } from '../patterns/SectionDivider.js';
 import type { JSX } from 'react';
 
 export type ModuleStatus = 'locked' | 'unlocked' | 'in_progress' | 'completed';
@@ -84,12 +85,26 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
         ← Back to Catalog
       </Button>
 
-      <PageHeader title={bundleTitle} subtitle={description} className="mb-lg" />
+      <PageHeader
+        title={bundleTitle}
+        subtitle={description}
+        eyebrow={
+          <>
+            <span className="bg-primary-container text-on-primary-container text-caption mr-2 rounded-full px-2 py-0.5 font-semibold">
+              Bundle
+            </span>
+            Learning Path
+          </>
+        }
+        className="mb-lg"
+      />
 
       <div className="mb-xl">
         <h2 className="text-h3 font-display text-on-surface mb-md font-bold">Overall Progress</h2>
         <OverallProgressBar modules={modules} />
       </div>
+
+      <SectionDivider density="minimal" className="mb-xl" />
 
       <ul
         className="gap-md m-0 flex list-none flex-col p-0"
@@ -103,8 +118,12 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
               key={mod.id}
               aria-labelledby={`module-title-${mod.id}`}
               className={cn(
-                'border-outline-variant p-md list-none rounded-xl border transition-colors',
-                mod.status === 'locked' && 'opacity-60',
+                'p-md list-none rounded-xl transition-colors',
+                mod.status === 'in_progress'
+                  ? 'border-primary border-2'
+                  : 'border-outline-variant border',
+                mod.status === 'locked' && 'opacity-40',
+                mod.status === 'unlocked' && 'opacity-60',
               )}
               data-testid="module-card"
               data-status={mod.status}
@@ -152,9 +171,11 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                 <p className="text-on-surface-variant mb-sm text-xs">No activities</p>
               )}
 
-              {mod.estimatedDuration && mod.status !== 'completed' && (
-                <p className="text-on-surface-variant mb-sm text-xs">
-                  ~{mod.estimatedDuration} min
+              {mod.status === 'unlocked' && (
+                <p className="text-outline mb-sm text-xs">
+                  {mod.estimatedDuration && `~${mod.estimatedDuration} min`}
+                  {mod.estimatedDuration && mod.nodeCount > 0 && ' · '}
+                  {mod.nodeCount > 0 && `${mod.nodeCount} activities`}
                 </p>
               )}
 

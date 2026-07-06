@@ -129,9 +129,9 @@ describe('BundleOverview', () => {
     expect(onContinueModule).toHaveBeenCalledWith('mod-2');
   });
 
-  it('shows estimated duration for unlocked modules', () => {
+  it('shows estimated duration and activity count for unlocked modules', () => {
     renderDefault();
-    expect(screen.getByText('~15 min')).toBeInTheDocument();
+    expect(screen.getByText('~15 min · 5 activities')).toBeInTheDocument();
   });
 
   it('does not show estimated duration for completed modules', () => {

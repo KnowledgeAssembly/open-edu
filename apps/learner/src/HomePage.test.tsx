@@ -23,9 +23,14 @@ describe('HomePage', () => {
   it('renders summary stats with default zero counts', () => {
     render(<HomePage onNavigate={vi.fn()} />);
     expect(screen.getAllByText('0')).toHaveLength(3);
-    expect(screen.getByText('learning units')).toBeInTheDocument();
+    expect(screen.getByText('courses')).toBeInTheDocument();
     expect(screen.getByText('in progress')).toBeInTheDocument();
-    expect(screen.getByText('badges earned')).toBeInTheDocument();
+    expect(screen.getByText('badges')).toBeInTheDocument();
+  });
+
+  it('renders Begin Learning button', () => {
+    render(<HomePage onNavigate={vi.fn()} />);
+    expect(screen.getByText('Begin Learning')).toBeInTheDocument();
   });
 
   it('renders quick link buttons', () => {
