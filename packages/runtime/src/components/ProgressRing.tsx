@@ -19,12 +19,7 @@ export function ProgressRing({
   const offset = circumference - (clampedProgress / 100) * circumference;
   const center = size / 2;
 
-  const colorClass =
-    clampedProgress >= 70
-      ? 'stroke-success'
-      : clampedProgress >= 30
-        ? 'stroke-amber-400'
-        : 'stroke-destructive';
+  const colorClass = 'stroke-primary';
 
   return (
     <div

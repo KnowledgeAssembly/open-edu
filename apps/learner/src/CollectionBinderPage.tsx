@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
-import { PageHeader } from '@open-edu/design-system';
+import { PageHeader, StatsSummary, SectionDivider } from '@open-edu/design-system';
 import { CardGrid, CardViewer, ProgressRing } from '@open-edu/runtime';
 import type { CardGridItem } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
@@ -82,10 +82,26 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   return (
     <div className="mx-auto max-w-6xl p-6" data-testid="collection-binder">
       <PageHeader
+        eyebrow="Collection"
         title="Collection Binder"
         subtitle={`Your museum of knowledge — ${allCardItems.filter((c) => !c.isLocked).length} / ${allCardItems.length} cards collected`}
         className="mb-8"
       />
+
+      <StatsSummary
+        className="mb-xl"
+        items={[
+          {
+            value: allCardItems.filter((c) => !c.isLocked).length,
+            label: 'unlocked',
+            color: 'primary',
+          },
+          { value: allCardItems.length, label: 'total cards' },
+          { value: shelves.length, label: 'categories', color: 'tertiary' },
+        ]}
+      />
+
+      <SectionDivider density="minimal" className="mb-xl" />
 
       <div className="flex flex-col gap-8">
         {shelves.map((shelf) => {

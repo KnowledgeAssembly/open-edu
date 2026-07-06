@@ -3,8 +3,15 @@ import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
-import { BookOpen, TrendingUp, Trophy } from 'lucide-react';
-import { Button, HeroSection, SectionDivider, StatsSummary } from '@open-edu/design-system';
+import { OpenModule } from '@open-edu/design-system';
+import {
+  Button,
+  HeroSection,
+  StatsSummary,
+  SilhouetteGroup,
+  AssemblyFlow,
+  Pipili,
+} from '@open-edu/design-system';
 
 export interface HomePageProps {
   onNavigate: (view: AppView) => void;
@@ -37,24 +44,67 @@ export function HomePage({
         <p className="text-body-reading text-on-surface-variant mt-md max-w-prose">
           Continue where you left off, or explore new courses in the catalog.
         </p>
+        <div className="mt-md flex items-center gap-4">
+          <Button onClick={() => onNavigate({ view: 'catalog' })}>Begin Learning</Button>
+          <Pipili size="sm" mood="idle" animated />
+        </div>
       </HeroSection>
 
-      <StatsSummary
-        items={[
-          { value: totalUnits, label: 'learning units', icon: <BookOpen className="h-4 w-4" /> },
-          {
-            value: inProgressCount,
-            label: 'in progress',
-            icon: <TrendingUp className="h-4 w-4" />,
-          },
-          { value: badgeCount, label: 'badges earned', icon: <Trophy className="h-4 w-4" /> },
-        ]}
-      />
+      <div
+        className="pb-md text-caption text-on-surface-variant -mt-6 text-center opacity-50"
+        aria-hidden="true"
+      >
+        — assembled from parts —
+      </div>
 
-      <SectionDivider density="minimal" className="mb-xl" />
+      <div className="relative">
+        <div
+          className="absolute -top-6 left-0 right-0 overflow-hidden opacity-[0.08]"
+          aria-hidden="true"
+        >
+          <AssemblyFlow density="medium" className="h-5 w-full" />
+        </div>
 
-      <div className="gap-md flex flex-col">
-        <div className="p-md border-outline-variant rounded-lg border">
+        <StatsSummary
+          animated
+          items={[
+            { value: totalUnits, label: 'courses', icon: <OpenModule size="xs" satellites={3} /> },
+            {
+              value: inProgressCount,
+              label: 'in progress',
+              icon: <OpenModule size="xs" satellites={3} />,
+            },
+            { value: badgeCount, label: 'badges', icon: <OpenModule size="xs" satellites={3} /> },
+          ]}
+        />
+      </div>
+
+      <div className="py-md relative flex items-center justify-center gap-4" aria-hidden="true">
+        <div className="bg-outline-variant h-px flex-1 opacity-30" />
+        <SilhouetteGroup
+          figures={[
+            { proportion: 'tall', palette: 1 },
+            { proportion: 'wide', palette: 3 },
+            { proportion: 'narrow', palette: 4 },
+          ]}
+        />
+        <div className="bg-outline-variant h-px flex-1 opacity-30" />
+      </div>
+
+      <div
+        className="p-md relative rounded-xl"
+        style={{ border: '2px solid color-mix(in srgb, var(--oe-color-primary) 12%, transparent)' }}
+      >
+        <div
+          className="absolute inset-0 overflow-hidden rounded-xl opacity-[0.04]"
+          aria-hidden="true"
+        >
+          <AssemblyFlow density="dense" className="h-full w-full" />
+        </div>
+        <div className="relative z-10">
+          <p className="text-body-reading text-on-surface-variant mb-md">
+            Ready to continue your learning journey?
+          </p>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
@@ -65,6 +115,10 @@ export function HomePage({
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="w-full overflow-hidden opacity-[0.06]" aria-hidden="true">
+        <AssemblyFlow density="dense" animated className="h-8 w-full" />
       </div>
     </div>
   );

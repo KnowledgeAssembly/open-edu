@@ -122,9 +122,14 @@ describe('BundleOverview', () => {
     expect(screen.getByText('CH1')).toBeDefined();
   });
 
-  it('shows estimated duration for non-completed modules', () => {
+  it('shows estimated duration and activity count for unlocked modules', () => {
     render(<BundleOverview {...baseProps} />);
-    expect(screen.getByText('~25 min')).toBeDefined();
+    expect(screen.getByText('~25 min · 4 activities')).toBeDefined();
+  });
+
+  it('does not show estimated duration for in-progress modules', () => {
+    render(<BundleOverview {...baseProps} />);
+    expect(screen.queryByText('~45 min')).toBeNull();
   });
 
   it('renders with data-testid attributes', () => {

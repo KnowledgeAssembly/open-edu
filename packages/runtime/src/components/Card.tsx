@@ -5,25 +5,29 @@ import { BookOpen, Brain, Award, Compass, Heart, Star, Lock } from 'lucide-react
 const typeConfig: Record<CardType, { icon: typeof BookOpen; gradient: string; ring: string }> = {
   knowledge: {
     icon: BookOpen,
-    gradient: 'from-emerald-500/20 to-emerald-600/10',
-    ring: 'ring-emerald-500/30',
+    gradient: 'from-success/20 to-success/10',
+    ring: 'ring-success/30',
   },
   skill: {
     icon: Brain,
-    gradient: 'from-indigo-500/20 to-purple-600/10',
-    ring: 'ring-indigo-500/30',
+    gradient: 'from-primary/20 to-primary/10',
+    ring: 'ring-primary/30',
   },
   achievement: {
     icon: Award,
-    gradient: 'from-amber-500/20 to-orange-600/10',
-    ring: 'ring-amber-500/30',
+    gradient: 'from-tertiary/20 to-tertiary/10',
+    ring: 'ring-tertiary/30',
   },
   exploration: {
     icon: Compass,
-    gradient: 'from-teal-500/20 to-cyan-600/10',
-    ring: 'ring-teal-500/30',
+    gradient: 'from-accent/20 to-accent/10',
+    ring: 'ring-accent/30',
   },
-  mentor: { icon: Heart, gradient: 'from-rose-500/20 to-pink-600/10', ring: 'ring-rose-500/30' },
+  mentor: {
+    icon: Heart,
+    gradient: 'from-primary-container/20 to-primary-container/10',
+    ring: 'ring-primary-container/30',
+  },
 };
 
 export interface CardProps {
@@ -106,7 +110,7 @@ export function Card({
                   className={cn(
                     'h-3.5 w-3.5',
                     i < level
-                      ? 'fill-amber-400 text-amber-400'
+                      ? 'fill-tertiary text-tertiary'
                       : 'text-on-surface-variant opacity-30',
                   )}
                 />

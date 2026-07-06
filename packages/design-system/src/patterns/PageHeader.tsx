@@ -3,7 +3,7 @@ import { cn } from '../lib/utils.js';
 import { AssemblyFlow } from '../primitives/assembly-flow.js';
 
 export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  eyebrow?: string;
+  eyebrow?: React.ReactNode;
   title: string;
   subtitle?: string;
 }
