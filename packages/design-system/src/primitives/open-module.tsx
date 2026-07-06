@@ -91,7 +91,7 @@ export const OpenModule = React.forwardRef<HTMLDivElement, OpenModuleProps>(
               cy={pos.y}
               r={config.satellite / 2}
               fill="currentColor"
-              className="text-primary-container transition-opacity duration-200"
+              className="text-primary-light transition-opacity duration-200"
               style={{ opacity: satelliteOpacity }}
             />
           ))}

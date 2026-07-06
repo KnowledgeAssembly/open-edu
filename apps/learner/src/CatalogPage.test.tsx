@@ -73,8 +73,6 @@ describe('CatalogPage', () => {
     expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
   });
 
-
-
   describe('continue learning shelf', () => {
     beforeEach(() => {
       getAllProgressMock.mockReturnValue({

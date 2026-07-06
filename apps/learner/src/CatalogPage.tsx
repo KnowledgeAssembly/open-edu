@@ -115,13 +115,13 @@ export function CatalogPage({
           <div className="mb-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-h2 font-display text-on-surface">Continue Learning</h2>
-              <span className="bg-surface-container text-xs text-on-surface-variant rounded-full px-2 py-0.5">
+              <span className="bg-surface-container text-on-surface-variant rounded-full px-2 py-0.5 text-xs">
                 {inProgressCourses.length} in progress
               </span>
             </div>
             {onNavigate && (
               <button
-                className="text-xs text-primary font-semibold hover:underline"
+                className="text-primary text-xs font-semibold hover:underline"
                 onClick={() => onNavigate({ view: 'progress' })}
               >
                 View all →
