@@ -1,3 +1,4 @@
+import { cn } from '../lib/utils.js';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../primitives/card.js';
 import { Badge } from '../primitives/badge.js';
 import { Progress } from '../primitives/progress.js';
@@ -12,6 +13,7 @@ export interface BundleCardProps {
   totalModules: number;
   isStarted: boolean;
   onStart: () => void;
+  className?: string;
 }
 
 export function BundleCard({
@@ -22,12 +24,17 @@ export function BundleCard({
   completedModules,
   totalModules,
   isStarted,
-  onStart: _onStart,
+  onStart,
+  className,
 }: BundleCardProps): JSX.Element {
   const percent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
   return (
-    <Card data-testid="bundle-card" className="shadow-sm transition-shadow hover:shadow-md">
+    <Card
+      data-testid="bundle-card"
+      onClick={onStart}
+      className={cn('cursor-pointer shadow-sm transition-shadow hover:shadow-md', className)}
+    >
       <CardHeader>
         <div className="mb-1 flex items-center gap-2">
           <Badge variant="secondary">Bundle</Badge>
@@ -46,7 +53,7 @@ export function BundleCard({
             <Progress
               value={percent}
               className="h-2"
-              label={`${completedModules} of ${totalModules} modules complete`}
+              label={`${completedModules} of ${totalModules} complete`}
             />
             <span className="text-on-surface-variant mt-1 block text-xs">
               {completedModules} of {totalModules} complete

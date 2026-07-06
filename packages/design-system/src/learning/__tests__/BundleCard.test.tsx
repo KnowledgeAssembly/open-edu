@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BundleCard } from '../BundleCard.js';
 import type { BundleCardProps } from '../BundleCard.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
@@ -53,6 +53,19 @@ describe('BundleCard', () => {
   it('hides progress bar when not started', () => {
     render(<BundleCard {...makeProps({ isStarted: false })} />);
     expect(screen.queryByText('1 of 3 complete')).not.toBeInTheDocument();
+  });
+
+  it('calls onStart when card is clicked', () => {
+    const onStart = vi.fn();
+    render(<BundleCard {...makeProps({ onStart })} />);
+    const card = screen.getByTestId('bundle-card');
+    fireEvent.click(card);
+    expect(onStart).toHaveBeenCalledOnce();
+  });
+
+  it('handles zero total modules gracefully', () => {
+    render(<BundleCard {...makeProps({ totalModules: 0, completedModules: 0 })} />);
+    expect(screen.getByText('0 of 0 complete')).toBeInTheDocument();
   });
 
   it('has no accessibility violations', async () => {
