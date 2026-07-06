@@ -10,6 +10,8 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
+  useDraggable,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
@@ -36,6 +38,185 @@ export const dragDropSchema = z.object({
 });
 
 export type DragDropConfig = z.infer<typeof dragDropSchema>;
+
+function DraggableItem({
+  item,
+  isSelected,
+  onItemClick,
+}: {
+  item: { id: string; label: string; emoji?: string };
+  isSelected: boolean;
+  onItemClick: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: item.id,
+    data: { type: 'item' },
+  });
+
+  const style: React.CSSProperties = {
+    padding: '0.375rem 0.75rem',
+    border: isSelected
+      ? '2px solid var(--oe-color-primary, #3b82f6)'
+      : '1px solid var(--oe-color-outline-variant, #d1d5db)',
+    borderRadius: '1rem',
+    cursor: isDragging ? 'grabbing' : isSelected ? 'grabbing' : 'pointer',
+    backgroundColor: isSelected
+      ? 'var(--oe-color-primary-container, #eff6ff)'
+      : 'var(--oe-color-surface, #ffffff)',
+    userSelect: 'none',
+    boxShadow: isSelected
+      ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)'
+      : isDragging
+        ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)'
+        : 'none',
+    transform: isDragging ? undefined : isSelected ? 'translateY(-2px)' : 'none',
+    opacity: isDragging ? 0.4 : 1,
+    transition: 'all 0.2s ease',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      data-testid={`unplaced-item-${item.id}`}
+      style={style}
+      {...attributes}
+      {...listeners}
+      role="button"
+      tabIndex={0}
+      aria-label={`Item ${item.label}${item.emoji ? ` ${item.emoji}` : ''}`}
+      aria-selected={isSelected}
+      onClick={() => onItemClick(item.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onItemClick(item.id);
+        }
+      }}
+    >
+      {item.emoji && <span>{item.emoji} </span>}
+      {item.label}
+    </div>
+  );
+}
+
+function DroppableTarget({
+  target,
+  items,
+  placedItems,
+  selectedItemId,
+  hasItem,
+  shouldHighlight,
+  onTargetClick,
+  onRemoveItem,
+  submitted,
+}: {
+  target: { id: string; label: string };
+  items: Array<{ id: string; label: string; emoji?: string }>;
+  placedItems: Record<string, string>;
+  selectedItemId: string | null;
+  hasItem: boolean;
+  shouldHighlight: boolean;
+  onTargetClick: (id: string) => void;
+  onRemoveItem: (id: string) => void;
+  submitted: boolean;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: target.id,
+    data: { type: 'target' },
+  });
+
+  const itemsInTarget = items.filter((item) => placedItems[item.id] === target.id);
+
+  const style: React.CSSProperties = {
+    padding: '0.75rem',
+    border: isOver
+      ? '2px solid var(--oe-color-primary, #3b82f6)'
+      : shouldHighlight
+        ? '2px dashed var(--oe-color-primary, #3b82f6)'
+        : hasItem
+          ? '1px solid var(--oe-color-outline-variant, #d1d5db)'
+          : '1px solid var(--oe-color-outline-variant, #d1d5db)',
+    borderRadius: '0.375rem',
+    minHeight: '2.5rem',
+    backgroundColor: isOver
+      ? 'var(--oe-color-primary-container, #eff6ff)'
+      : shouldHighlight
+        ? 'var(--oe-color-primary-container, #eff6ff)'
+        : 'var(--oe-color-surface-container-lowest, #f9fafb)',
+    cursor: selectedItemId !== null && !hasItem ? 'pointer' : 'default',
+    transition: 'all 0.2s ease',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      key={target.id}
+      data-testid={`target-${target.id}`}
+      role="button"
+      tabIndex={selectedItemId !== null ? 0 : -1}
+      aria-label={`Drop zone: ${target.label}`}
+      onClick={() => onTargetClick(target.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onTargetClick(target.id);
+        }
+      }}
+      style={style}
+    >
+      <strong>{target.label}</strong>
+      {itemsInTarget.map((item) => (
+        <div
+          key={item.id}
+          data-testid={`placed-item-${item.id}`}
+          style={{
+            marginTop: '0.25rem',
+            padding: '0.25rem 0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
+            borderRadius: '0.25rem',
+            backgroundColor: 'var(--oe-color-surface, #ffffff)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {item.emoji && <span>{item.emoji}</span>}
+          <span>{item.label}</span>
+          {!submitted && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveItem(item.id);
+              }}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+                color: 'var(--oe-color-on-surface-variant, #6b7280)',
+                padding: '0 0.25rem',
+                borderRadius: '0.25rem',
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.backgroundColor =
+                  'var(--oe-color-surface-variant, #f3f4f6)';
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'transparent';
+              }}
+              aria-label={`Remove ${item.label} from ${target.label}`}
+            >
+              ✕
+            </Button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function DragDropComponent(props: {
   nodeId: string;
@@ -309,41 +490,12 @@ function DragDropComponent(props: {
             if (!item) return null;
             const isSelected = selectedItemId === itemId;
             return (
-              <div
+              <DraggableItem
                 key={itemId}
-                data-testid={`unplaced-item-${itemId}`}
-                role="button"
-                tabIndex={0}
-                aria-label={`Item ${item.label}${item.emoji ? ` ${item.emoji}` : ''}`}
-                aria-selected={isSelected}
-                onClick={() => handleItemClick(itemId)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleItemClick(itemId);
-                  }
-                }}
-                style={{
-                  padding: '0.375rem 0.75rem',
-                  border: isSelected
-                    ? '2px solid var(--oe-color-primary, #3b82f6)'
-                    : '1px solid var(--oe-color-outline-variant, #d1d5db)',
-                  borderRadius: '1rem',
-                  cursor: isSelected ? 'grabbing' : 'pointer',
-                  backgroundColor: isSelected
-                    ? 'var(--oe-color-primary-container, #eff6ff)'
-                    : 'var(--oe-color-surface, #ffffff)',
-                  userSelect: 'none',
-                  boxShadow: isSelected
-                    ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)'
-                    : 'none',
-                  transform: isSelected ? 'translateY(-2px)' : 'none',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {item.emoji && <span>{item.emoji} </span>}
-                {item.label}
-              </div>
+                item={item}
+                isSelected={isSelected}
+                onItemClick={handleItemClick}
+              />
             );
           })}
         </div>
@@ -360,84 +512,18 @@ function DragDropComponent(props: {
             const hasItem = itemsInTarget.length > 0;
             const shouldHighlight = selectedItemId !== null && !hasItem;
             return (
-              <div
+              <DroppableTarget
                 key={target.id}
-                data-testid={`target-${target.id}`}
-                role="button"
-                tabIndex={selectedItemId !== null ? 0 : -1}
-                aria-label={`Drop zone: ${target.label}`}
-                onClick={() => handleTargetClick(target.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleTargetClick(target.id);
-                  }
-                }}
-                style={{
-                  padding: '0.75rem',
-                  border: shouldHighlight
-                    ? '2px dashed var(--oe-color-primary, #3b82f6)'
-                    : hasItem
-                      ? '1px solid var(--oe-color-outline-variant, #d1d5db)'
-                      : '1px solid var(--oe-color-outline-variant, #d1d5db)',
-                  borderRadius: '0.375rem',
-                  minHeight: '2.5rem',
-                  backgroundColor: shouldHighlight
-                    ? 'var(--oe-color-primary-container, #eff6ff)'
-                    : 'var(--oe-color-surface-container-lowest, #f9fafb)',
-                  cursor: selectedItemId !== null && !hasItem ? 'pointer' : 'default',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <strong>{target.label}</strong>
-                {itemsInTarget.map((item) => (
-                  <div
-                    key={item.id}
-                    data-testid={`placed-item-${item.id}`}
-                    style={{
-                      marginTop: '0.25rem',
-                      padding: '0.25rem 0.5rem',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.375rem',
-                      border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
-                      borderRadius: '0.25rem',
-                      backgroundColor: 'var(--oe-color-surface, #ffffff)',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {item.emoji && <span>{item.emoji}</span>}
-                    <span>{item.label}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveItem(item.id);
-                      }}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        color: 'var(--oe-color-on-surface-variant, #6b7280)',
-                        padding: '0 0.25rem',
-                        borderRadius: '0.25rem',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.target as HTMLElement).style.backgroundColor =
-                          'var(--oe-color-surface-variant, #f3f4f6)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                      }}
-                      aria-label={`Remove ${item.label} from ${target.label}`}
-                    >
-                      ✕
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                target={target}
+                items={items}
+                placedItems={placedItems}
+                selectedItemId={selectedItemId}
+                hasItem={hasItem}
+                shouldHighlight={shouldHighlight}
+                onTargetClick={handleTargetClick}
+                onRemoveItem={handleRemoveItem}
+                submitted={submitted}
+              />
             );
           })}
         </div>

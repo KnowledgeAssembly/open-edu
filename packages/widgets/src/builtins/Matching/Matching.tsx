@@ -42,9 +42,11 @@ function MatchingComponent(props: {
   complete: (score?: number) => void;
 }) {
   const { config: rawConfig, emitInteraction, complete } = props;
-  const parsed = matchingSchema.safeParse(rawConfig);
-  const content = parsed.success ? parsed.data : null;
-  const hasValidContent = parsed.success && content && content.pairs.length > 0;
+  const content = useMemo(() => {
+    const parsed = matchingSchema.safeParse(rawConfig);
+    return parsed.success ? parsed.data : null;
+  }, [rawConfig]);
+  const hasValidContent = content && content.pairs.length > 0;
 
   const [submitted, setSubmitted] = useState(false);
   const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
@@ -178,7 +180,7 @@ function MatchingComponent(props: {
     (e: React.PointerEvent, leftPairId: string) => {
       if (submitted || isObserve) return;
       if (!containerRef.current) return;
-      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       const coords = getContainerCoords(e.clientX, e.clientY);
       const leftEl = containerRef.current.querySelector(`[data-connector-left="${leftPairId}"]`);
       if (!leftEl) return;
@@ -215,6 +217,23 @@ function MatchingComponent(props: {
         setConnections((prev) => {
           const next = new Map(prev);
           next.set(drawingLine.leftId, rightId);
+          return next;
+        });
+      }
+      setDrawingLine(null);
+    },
+    [drawingLine, findRightItemAtPoint],
+  );
+
+  const handlePointerUpForItem = useCallback(
+    (e: React.PointerEvent, leftPairId: string) => {
+      e.stopPropagation();
+      if (!drawingLine) return;
+      const rightId = findRightItemAtPoint(e.clientX, e.clientY);
+      if (rightId) {
+        setConnections((prev) => {
+          const next = new Map(prev);
+          next.set(leftPairId, rightId);
           return next;
         });
       }
@@ -429,7 +448,7 @@ function MatchingComponent(props: {
     >
       {content.description && <p>{content.description}</p>}
 
-      <div style={{ position: 'relative' }}>
+      <div>
         <div
           style={{
             display: 'grid',
@@ -462,6 +481,7 @@ function MatchingComponent(props: {
                     }
                   }}
                   onPointerDown={(e) => handlePointerDown(e, pairId)}
+                  onPointerUp={(e) => handlePointerUpForItem(e, pairId)}
                   style={{
                     padding: '0.5rem',
                     margin: '0.25rem 0',
@@ -588,7 +608,6 @@ function MatchingComponent(props: {
         </div>
 
         <svg
-          className="pointer-events-none absolute inset-0 size-full"
           style={{
             position: 'absolute',
             top: 0,
@@ -596,6 +615,7 @@ function MatchingComponent(props: {
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
+            zIndex: 10,
           }}
           aria-hidden="true"
         >
@@ -606,12 +626,8 @@ function MatchingComponent(props: {
               y1={conn.y1}
               x2={conn.x2}
               y2={conn.y2}
-              stroke={
-                conn.rightId === 'drawing'
-                  ? 'var(--oe-color-primary, #3b82f6)'
-                  : 'var(--oe-color-primary, #3b82f6)'
-              }
-              strokeWidth={conn.rightId === 'drawing' ? 2 : 2}
+              stroke="var(--oe-color-primary, #3b82f6)"
+              strokeWidth={2}
               strokeDasharray={conn.rightId === 'drawing' ? '4 3' : 'none'}
               opacity={conn.rightId === 'drawing' ? 0.7 : 1}
             />
