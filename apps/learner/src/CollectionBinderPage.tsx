@@ -1,8 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
 import { PageHeader, StatsSummary, SectionDivider } from '@open-edu/design-system';
-import { CardGrid, CardViewer, ProgressRing } from '@open-edu/runtime';
-import type { CardGridItem } from '@open-edu/runtime';
+import { KnowledgeCardGrid, KnowledgeCardViewer, ProgressRing } from '@open-edu/runtime';
+import type { KnowledgeCardGridItem } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
 import { getAllCardProgress } from './cardsStorage';
 
@@ -12,15 +12,15 @@ export interface CollectionBinderPageProps {
 
 interface ShelfData {
   category: string;
-  cards: CardGridItem[];
+  cards: KnowledgeCardGridItem[];
 }
 
 export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
   const savedProgress = useMemo(() => getAllCardProgress(), []);
 
-  const allCardItems = useMemo<CardGridItem[]>(() => {
-    const items: CardGridItem[] = [];
+  const allCardItems = useMemo<KnowledgeCardGridItem[]>(() => {
+    const items: KnowledgeCardGridItem[] = [];
     for (const pkg of Object.values(packages)) {
       if (!pkg.cards?.cards) continue;
       for (const card of pkg.cards.cards) {
@@ -33,7 +33,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   }, [packages, savedProgress]);
 
   const shelves = useMemo<ShelfData[]>(() => {
-    const grouped: Record<string, CardGridItem[]> = {};
+    const grouped: Record<string, KnowledgeCardGridItem[]> = {};
     for (const item of allCardItems) {
       const cat = item.card.category;
       if (!grouped[cat]) grouped[cat] = [];
@@ -126,14 +126,14 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
                   </span>
                 </div>
               </div>
-              <CardGrid cards={shelf.cards} onCardClick={setSelectedCard} />
+              <KnowledgeCardGrid cards={shelf.cards} onCardClick={setSelectedCard} />
             </section>
           );
         })}
       </div>
 
       {selectedCard && (
-        <CardViewer
+        <KnowledgeCardViewer
           card={selectedCard}
           level={savedProgress[selectedCard.id]?.level ?? 1}
           onClose={() => setSelectedCard(null)}

@@ -5,18 +5,12 @@ import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
 import { getAllBadges } from './badgesStorage';
 import {
-  Badge,
+  BundleCard,
   BundleCardWithModule,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   CourseCardWithModule,
   EmptyState,
   PageHeader,
-  Progress,
   SectionDivider,
   Select,
   SelectContent,
@@ -119,11 +113,19 @@ export function CatalogPage({
       {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">
           <div className="mb-md flex items-center justify-between">
-            <h2 className="text-h2 font-display text-on-surface">Continue Learning</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-h2 font-display text-on-surface">Continue Learning</h2>
+              <span className="bg-surface-container text-xs text-on-surface-variant rounded-full px-2 py-0.5">
+                {inProgressCourses.length} in progress
+              </span>
+            </div>
             {onNavigate && (
-              <Button variant="link" size="sm" onClick={() => onNavigate({ view: 'progress' })}>
-                View all
-              </Button>
+              <button
+                className="text-xs text-primary font-semibold hover:underline"
+                onClick={() => onNavigate({ view: 'progress' })}
+              >
+                View all →
+              </button>
             )}
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
@@ -166,41 +168,16 @@ export function CatalogPage({
                   completedModules={completedModules}
                   totalModules={bundle.moduleCount}
                 >
-                  <Card
-                    className="cursor-pointer transition-shadow hover:shadow-md"
-                    onClick={() => onStartBundle?.(bundle.manifest.id)}
-                    data-testid="bundle-card"
-                    data-bundle-id={bundle.manifest.id}
-                  >
-                    <CardHeader>
-                      <div className="mb-1 flex items-center gap-2">
-                        <Badge variant="secondary">Bundle</Badge>
-                        <CardTitle className="text-h4 font-display truncate">
-                          {bundle.manifest.title}
-                        </CardTitle>
-                      </div>
-                      <CardDescription>
-                        {bundle.manifest.description ?? `${bundle.moduleCount} modules`}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-on-surface-variant flex gap-4 text-xs">
-                        <span>{bundle.moduleCount} modules</span>
-                        <span>{bundle.totalNodeCount} activities</span>
-                      </div>
-                      {prog && (
-                        <div className="mt-2">
-                          <Progress
-                            value={Math.round((completedModules / bundle.moduleCount) * 100)}
-                            className="h-2"
-                          />
-                          <span className="text-on-surface-variant mt-1 block text-xs">
-                            {completedModules} of {bundle.moduleCount} complete
-                          </span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <BundleCard
+                    title={bundle.manifest.title}
+                    description={bundle.manifest.description}
+                    moduleCount={bundle.moduleCount}
+                    activityCount={bundle.totalNodeCount}
+                    completedModules={completedModules}
+                    totalModules={bundle.moduleCount}
+                    isStarted={prog !== undefined}
+                    onStart={() => onStartBundle?.(bundle.manifest.id)}
+                  />
                 </BundleCardWithModule>
               );
             })}
@@ -264,22 +241,25 @@ export function CatalogPage({
         />
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-          {sorted.map((pkg) => (
-            <CourseCardWithModule
-              key={pkg.manifest.id}
-              progress={progress[pkg.manifest.id] ?? null}
-              badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-            >
-              <CourseCard
-                manifest={pkg.manifest}
-                nodeCount={pkg.nodeCount}
-                badgeCount={pkg.availableBadges}
-                earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                progress={progress[pkg.manifest.id] ?? null}
-                onStart={() => onStartCourse(pkg.rootDir)}
-              />
-            </CourseCardWithModule>
-          ))}
+          {sorted.map((pkg) => {
+            const prog = progress[pkg.manifest.id] ?? null;
+            return (
+              <CourseCardWithModule
+                key={pkg.manifest.id}
+                progress={prog}
+                badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+              >
+                <CourseCard
+                  manifest={pkg.manifest}
+                  nodeCount={pkg.nodeCount}
+                  badgeCount={pkg.availableBadges}
+                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                  progress={prog}
+                  onStart={() => onStartCourse(pkg.rootDir)}
+                />
+              </CourseCardWithModule>
+            );
+          })}
         </div>
       )}
     </div>
