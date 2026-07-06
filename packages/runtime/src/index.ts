@@ -87,13 +87,16 @@ export type {
   BundleOverviewModule,
   ModuleStatus,
 } from './components/BundleOverview.js';
-export { Card } from './components/Card.js';
-export type { CardProps } from './components/Card.js';
-export { CardGrid } from './components/CardGrid.js';
-export type { CardGridProps, CardGridItem } from './components/CardGrid.js';
-export { CardViewer } from './components/CardViewer.js';
-export type { CardViewerProps } from './components/CardViewer.js';
+export { KnowledgeCard } from './components/KnowledgeCard.js';
+export type { KnowledgeCardProps } from './components/KnowledgeCard.js';
+export { KnowledgeCardGrid } from './components/KnowledgeCardGrid.js';
+export type {
+  KnowledgeCardGridProps,
+  KnowledgeCardGridItem,
+} from './components/KnowledgeCardGrid.js';
+export { KnowledgeCardViewer } from './components/KnowledgeCardViewer.js';
+export type { KnowledgeCardViewerProps } from './components/KnowledgeCardViewer.js';
 export { ProgressRing } from './components/ProgressRing.js';
 export type { ProgressRingProps } from './components/ProgressRing.js';
-export { CardUnlockedToast } from './components/CardUnlockedToast.js';
-export type { CardUnlockedToastProps } from './components/CardUnlockedToast.js';
+export { KnowledgeCardUnlockedToast } from './components/KnowledgeCardUnlockedToast.js';
+export type { KnowledgeCardUnlockedToastProps } from './components/KnowledgeCardUnlockedToast.js';

@@ -25,19 +25,19 @@ const levelDescriptions: Record<string, string[]> = {
   '5': ['Mastered — can teach others.'],
 };
 
-export interface CardViewerProps {
+export interface KnowledgeCardViewerProps {
   card: CardDefinition;
   level: number;
   onClose: () => void;
   onRelatedLessonClick?: (nodeId: string) => void;
 }
 
-export function CardViewer({
+export function KnowledgeCardViewer({
   card,
   level,
   onClose,
   onRelatedLessonClick,
-}: CardViewerProps): JSX.Element {
+}: KnowledgeCardViewerProps): JSX.Element {
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const maxLevel = card.maximumLevel;
 

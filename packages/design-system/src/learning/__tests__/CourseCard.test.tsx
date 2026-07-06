@@ -72,6 +72,67 @@ describe('CourseCard', () => {
     expect(screen.getByRole('button')).toHaveTextContent('Review');
   });
 
+  it('shows "N of N lessons" and checkmark when completed', () => {
+    render(
+      <CourseCard
+        {...makeProps({
+          progress: {
+            packageId: 'intro-js',
+            packageVersion: '1.0.0',
+            currentNodeId: 'lesson-10',
+            visitedNodes: Array.from({ length: 10 }, (_, i) => `lesson-${i + 1}`),
+            scores: {},
+            isCompleted: true,
+            updatedAt: '2025-01-01T00:00:00Z',
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText('10 of 10 lessons')).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.getByText('Review')).toBeInTheDocument();
+  });
+
+  it('shows "Badge earned" when completed with badges', () => {
+    render(
+      <CourseCard
+        {...makeProps({
+          earnedBadgeCount: 2,
+          progress: {
+            packageId: 'intro-js',
+            packageVersion: '1.0.0',
+            currentNodeId: 'lesson-10',
+            visitedNodes: Array.from({ length: 10 }, (_, i) => `lesson-${i + 1}`),
+            scores: {},
+            isCompleted: true,
+            updatedAt: '2025-01-01T00:00:00Z',
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText('Badge earned')).toBeInTheDocument();
+  });
+
+  it('does not show progress bar when completed', () => {
+    const { container } = render(
+      <CourseCard
+        {...makeProps({
+          progress: {
+            packageId: 'intro-js',
+            packageVersion: '1.0.0',
+            currentNodeId: 'lesson-10',
+            visitedNodes: Array.from({ length: 10 }, (_, i) => `lesson-${i + 1}`),
+            scores: {},
+            isCompleted: true,
+            updatedAt: '2025-01-01T00:00:00Z',
+          },
+        })}
+      />,
+    );
+    // Progress element should not be present when completed
+    expect(container.querySelector('[role="progressbar"]')).not.toBeInTheDocument();
+  });
+
   it('button has correct aria-label', () => {
     render(<CourseCard {...makeProps()} />);
     const btn = screen.getByRole('button');

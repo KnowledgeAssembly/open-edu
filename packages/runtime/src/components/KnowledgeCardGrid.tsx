@@ -1,21 +1,25 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { type CardDefinition } from '@open-edu/schemas';
 import { cn, StaggerReveal } from '@open-edu/design-system';
-import { Card } from './Card.js';
+import { KnowledgeCard } from './KnowledgeCard.js';
 
-export interface CardGridItem {
+export interface KnowledgeCardGridItem {
   card: CardDefinition;
   level: number;
   isLocked: boolean;
 }
 
-export interface CardGridProps {
-  cards: CardGridItem[];
+export interface KnowledgeCardGridProps {
+  cards: KnowledgeCardGridItem[];
   onCardClick?: (card: CardDefinition) => void;
   className?: string;
 }
 
-export function CardGrid({ cards, onCardClick, className }: CardGridProps): JSX.Element {
+export function KnowledgeCardGrid({
+  cards,
+  onCardClick,
+  className,
+}: KnowledgeCardGridProps): JSX.Element {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const focusCard = useCallback((index: number) => {
@@ -79,7 +83,7 @@ export function CardGrid({ cards, onCardClick, className }: CardGridProps): JSX.
       <StaggerReveal delayMs={80} className="contents">
         {cards.map((item, index) => (
           <div key={item.card.id} role="listitem" data-card-index={index}>
-            <Card
+            <KnowledgeCard
               card={item.card}
               level={item.level}
               isLocked={item.isLocked}

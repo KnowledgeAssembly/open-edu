@@ -16,7 +16,7 @@ import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
-import { CardUnlockedToast } from '@open-edu/runtime';
+import { KnowledgeCardUnlockedToast } from '@open-edu/runtime';
 import { BadgeToast } from './BadgeToast';
 
 export interface BundleCourseContext {
@@ -255,7 +255,7 @@ export function CourseRuntime({
               )}
               {toastCard && (
                 <div className="pointer-events-auto">
-                  <CardUnlockedToast
+                  <KnowledgeCardUnlockedToast
                     card={toastCard}
                     newLevel={toastCardLevel}
                     visible={toastCardVisible}

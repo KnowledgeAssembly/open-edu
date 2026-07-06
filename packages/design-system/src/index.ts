@@ -244,6 +244,12 @@ export type { ModuleProps, ModuleLesson } from './learning/Module.js';
 export { ConceptCard } from './learning/ConceptCard.js';
 export type { ConceptCardProps } from './learning/ConceptCard.js';
 
+export { BundleCard } from './learning/BundleCard.js';
+export type { BundleCardProps } from './learning/BundleCard.js';
+
+export { ProgressCard } from './learning/ProgressCard.js';
+export type { ProgressCardProps } from './learning/ProgressCard.js';
+
 export { DefinitionBlock } from './learning/DefinitionBlock.js';
 export type { DefinitionBlockProps } from './learning/DefinitionBlock.js';
 

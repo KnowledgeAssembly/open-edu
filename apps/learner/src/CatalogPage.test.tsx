@@ -1,14 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
 import type { PackageSummary } from '@open-edu/core';
 
-vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
+const { getAllProgressMock, getAllBadgesMock } = vi.hoisted(() => ({
+  getAllProgressMock: vi.fn().mockReturnValue({}),
+  getAllBadgesMock: vi.fn().mockReturnValue({}),
 }));
 
-vi.mock('../badgesStorage', () => ({
-  getAllBadges: vi.fn(() => ({})),
+vi.mock('./progressStorage', () => ({
+  getAllProgress: getAllProgressMock,
+}));
+
+vi.mock('./badgesStorage', () => ({
+  getAllBadges: getAllBadgesMock,
 }));
 
 const samplePackages: PackageSummary[] = [
@@ -39,6 +44,11 @@ const samplePackages: PackageSummary[] = [
 ];
 
 describe('CatalogPage', () => {
+  beforeEach(() => {
+    getAllProgressMock.mockReturnValue({});
+    getAllBadgesMock.mockReturnValue({});
+  });
+
   it('renders course cards', () => {
     render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     const cards = screen.getAllByTestId('course-card');
@@ -61,5 +71,69 @@ describe('CatalogPage', () => {
     render(<CatalogPage packages={samplePackages} onStartCourse={onStart} />);
     fireEvent.click(screen.getByRole('button', { name: /Start Course One/ }));
     expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
+  });
+
+  describe('continue learning shelf', () => {
+    beforeEach(() => {
+      getAllProgressMock.mockReturnValue({
+        'course-1': {
+          packageId: 'course-1',
+          packageVersion: '1.0.0',
+          currentNodeId: 'lesson-2',
+          visitedNodes: ['lesson-1', 'lesson-2'],
+          scores: {},
+          isCompleted: false,
+          updatedAt: '2025-01-01T00:00:00Z',
+        },
+      });
+    });
+
+    it('shows in-progress count badge', () => {
+      render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+      expect(screen.getByText('1 in progress')).toBeInTheDocument();
+    });
+
+    it('shows "View all →" button that navigates to progress', () => {
+      const onNavigate = vi.fn();
+      render(
+        <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} onNavigate={onNavigate} />,
+      );
+      const viewAll = screen.getByText('View all →');
+      expect(viewAll).toBeInTheDocument();
+      fireEvent.click(viewAll);
+      expect(onNavigate).toHaveBeenCalledWith({ view: 'progress' });
+    });
+  });
+
+  describe('completed course card', () => {
+    beforeEach(() => {
+      getAllProgressMock.mockReturnValue({
+        'course-1': {
+          packageId: 'course-1',
+          packageVersion: '1.0.0',
+          currentNodeId: 'lesson-3',
+          visitedNodes: ['lesson-1', 'lesson-2', 'lesson-3'],
+          scores: {},
+          isCompleted: true,
+          updatedAt: '2025-01-01T00:00:00Z',
+        },
+      });
+      getAllBadgesMock.mockReturnValue({
+        'course-1': ['badge-1'],
+      });
+    });
+
+    it('shows OpenModule indicator on completed card', () => {
+      const { container } = render(
+        <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />,
+      );
+      const svgs = container.querySelectorAll('[data-testid="course-card"] svg');
+      expect(svgs.length).toBeGreaterThan(0);
+    });
+
+    it('shows "Completed" text on completed course', () => {
+      render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+      expect(screen.getByText('Completed')).toBeInTheDocument();
+    });
   });
 });
