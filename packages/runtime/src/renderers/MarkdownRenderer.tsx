@@ -180,10 +180,19 @@ const accessibleComponents: ComponentMap = {
     />
   ),
   img: ({ alt, src, ...props }: ComponentProps<'img'>) => {
+    const resolvedSrc =
+      src &&
+      !src.startsWith('/') &&
+      !src.startsWith('http://') &&
+      !src.startsWith('https://') &&
+      !src.startsWith('data:') &&
+      !src.startsWith('#')
+        ? `/assets/${src.replace(/^\.\//, '')}`
+        : src;
     if (!alt || alt.trim() === '') {
-      return <img {...props} src={src} alt="" aria-hidden="true" role="presentation" />;
+      return <img {...props} src={resolvedSrc} alt="" aria-hidden="true" role="presentation" />;
     }
-    return <img {...props} src={src} alt={alt} />;
+    return <img {...props} src={resolvedSrc} alt={alt} />;
   },
   a: ({ href, children, className, ...props }: ComponentProps<'a'>) => {
     const isExternal =

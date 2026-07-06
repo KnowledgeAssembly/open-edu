@@ -74,6 +74,40 @@ describe('MarkdownRenderer', () => {
     expect(img?.getAttribute('aria-hidden')).toBeNull();
   });
 
+  it('resolves relative image src to /assets/ prefix', () => {
+    const { container } = render(<MarkdownRenderer content="![image](image.png)" />);
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('/assets/image.png');
+  });
+
+  it('resolves relative image src with ./ prefix', () => {
+    const { container } = render(<MarkdownRenderer content="![image](./image.png)" />);
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('/assets/image.png');
+  });
+
+  it('leaves absolute /assets/ paths unchanged', () => {
+    const { container } = render(<MarkdownRenderer content="![image](/assets/hero.svg)" />);
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('/assets/hero.svg');
+  });
+
+  it('leaves external URLs unchanged', () => {
+    const { container } = render(
+      <MarkdownRenderer content="![image](https://example.com/image.png)" />,
+    );
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('https://example.com/image.png');
+  });
+
+  it('leaves data URIs unchanged', () => {
+    const { container } = render(
+      <MarkdownRenderer content="![image](data:image/png;base64,iVBORw0KGgo)" />,
+    );
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('data:image/png;base64,iVBORw0KGgo');
+  });
+
   it('renders GFM strikethrough', () => {
     const { container } = render(<MarkdownRenderer content="~~deleted~~" />);
     const del = container.querySelector('del');
