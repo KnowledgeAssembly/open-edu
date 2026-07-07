@@ -24,6 +24,11 @@ vi.mock('../badgesStorage', () => ({
   getAllBadges: vi.fn(() => ({})),
 }));
 
+const mockBreakTimer = {
+  mode: 'off' as const,
+  setMode: vi.fn(),
+};
+
 const samplePackages: PackageSummary[] = [
   {
     manifest: {
@@ -81,7 +86,7 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
 
   it('SettingsPage has no axe violations', async () => {
     const { container } = renderWithTheme(
-      <SettingsPage currentThemeId={themeId} onThemeChange={vi.fn()} />,
+      <SettingsPage currentThemeId={themeId} onThemeChange={vi.fn()} breakTimer={mockBreakTimer} />,
       themeId,
     );
     await expectNoViolations(container);

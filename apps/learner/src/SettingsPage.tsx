@@ -13,16 +13,17 @@ import {
   Pipili,
 } from '@open-edu/design-system';
 import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
-import { useBreakTimer } from './useBreakTimer';
-
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
+  breakTimer: {
+    mode: 'off' | '15' | '30' | '60';
+    setMode: (mode: 'off' | '15' | '30' | '60') => void;
+  };
 }
 
-export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProps): JSX.Element {
+export function SettingsPage({ currentThemeId, onThemeChange, breakTimer }: SettingsPageProps): JSX.Element {
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
-  const breakTimer = useBreakTimer();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 

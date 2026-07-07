@@ -456,7 +456,14 @@ export function AppShell({
                   />
                 )}
                 {view.view === 'settings' && (
-                  <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
+                  <SettingsPage
+                    currentThemeId={themeId}
+                    onThemeChange={setThemeId}
+                    breakTimer={{
+                      mode: breakTimer.mode,
+                      setMode: breakTimer.setMode,
+                    }}
+                  />
                 )}
                 {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
                 {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
