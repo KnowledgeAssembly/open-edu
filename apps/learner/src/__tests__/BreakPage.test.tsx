@@ -5,7 +5,10 @@ import { BreakPage } from '../BreakPage';
 describe('BreakPage', () => {
   it('renders Pipili (content mood)', () => {
     render(<BreakPage onBackToLearning={vi.fn()} />);
-    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute('aria-label', 'Pipili — content');
+    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute(
+      'aria-label',
+      'Pipili — content',
+    );
   });
 
   it('renders Time to recharge heading', () => {

@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate, useLocation, useBlocker } from 'react-router-dom';
 import {
   RuntimeThemeProvider,
   TopAppBar,
@@ -45,6 +46,52 @@ export type AppView =
   | { view: 'collection' }
   | { view: 'break' };
 
+function viewToPath(view: AppView): string {
+  switch (view.view) {
+    case 'home':
+      return '/';
+    case 'catalog':
+      return '/catalog';
+    case 'progress':
+      return '/progress';
+    case 'settings':
+      return '/settings';
+    case 'collection':
+      return '/collection';
+    case 'break':
+      return '/break';
+    case 'bundleOverview':
+      return `/bundle/${view.bundleId}`;
+    case 'course': {
+      const base = `/course/${view.packageId}`;
+      if (view.bundleId && view.moduleId) return `${base}/${view.bundleId}/${view.moduleId}`;
+      return base;
+    }
+  }
+}
+
+function pathToView(pathname: string, packageEntries: Record<string, LoadedPackage>): AppView {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return { view: 'home' };
+  const main = segments[0];
+  if (main === 'catalog') return { view: 'catalog' };
+  if (main === 'progress') return { view: 'progress' };
+  if (main === 'settings') return { view: 'settings' };
+  if (main === 'collection') return { view: 'collection' };
+  if (main === 'break') return { view: 'break' };
+  if (main === 'bundle' && segments[1]) return { view: 'bundleOverview', bundleId: segments[1] };
+  if (main === 'course' && segments[1]) {
+    if (!packageEntries[segments[1]]) return { view: 'home' };
+    return {
+      view: 'course',
+      packageId: segments[1],
+      bundleId: segments[2],
+      moduleId: segments[3],
+    };
+  }
+  return { view: 'home' };
+}
+
 export interface AppShellProps {
   catalogPackages: PackageSummary[];
   packageEntries: Record<string, LoadedPackage>;
@@ -58,34 +105,32 @@ export function AppShell({
   catalogBundles,
   bundleEntries,
 }: AppShellProps): JSX.Element {
-  const [view, setView] = useState<AppView>({
-    view: 'home',
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const view = useMemo<AppView>(
+    () => pathToView(location.pathname, packageEntries),
+    [location.pathname, packageEntries],
+  );
+
   const [themeId, setThemeId] = useThemePreference();
-  const [showExitWarning, setShowExitWarning] = useState(false);
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
-  const pendingNavigation = useRef<AppView | null>(null);
-  const preCourseView = useRef<AppView>({ view: 'home' });
 
   const breakTimer = useBreakTimer();
 
-  const [previousView, setPreviousView] = useState<AppView | null>(null);
-
   const handleTakeBreak = useCallback(() => {
-    setPreviousView(view);
-    setView({ view: 'break' });
-  }, [view]);
+    navigate('/break');
+  }, [navigate]);
 
   const handleBackToLearning = useCallback(() => {
-    if (previousView) {
-      setView(previousView);
-      setPreviousView(null);
+    if (window.history.length > 1) {
+      navigate(-1);
     } else {
-      setView({ view: 'home' });
+      navigate('/');
     }
     breakTimer.dismiss();
-  }, [previousView, breakTimer]);
+  }, [navigate, breakTimer]);
 
   const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
     () => {
@@ -111,116 +156,69 @@ export function AppShell({
   }, [view, packageEntries]);
 
   useEffect(() => {
-    if (!isCourseInProgress || view.view !== 'course') return;
+    if (!isCourseInProgress) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
     };
 
-    const handlePopState = () => {
-      pendingNavigation.current = preCourseView.current;
-      setShowExitWarning(true);
-    };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isCourseInProgress]);
 
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [isCourseInProgress, view]);
+  const blocker = useBlocker(({ nextLocation }) => {
+    if (!isCourseInProgress) return false;
+    if (nextLocation.pathname.startsWith('/course/')) return false;
+    return true;
+  });
+
+  const showExitWarning = blocker.state === 'blocked';
 
   const handleNavigate = useCallback(
     (newView: AppView) => {
-      if (newView.view === 'course') {
-        if (!newView.packageId || !packageEntries[newView.packageId]) return;
-
-        // Bundle module-to-module navigation: no exit warning
-        const currentBundleId = view.view === 'course' ? view.bundleId : undefined;
-        if (newView.bundleId && currentBundleId === newView.bundleId) {
-          setView({
-            view: 'course',
-            packageId: newView.packageId,
-            bundleId: newView.bundleId,
-            moduleId: newView.moduleId,
-          });
-          return;
-        }
-
-        if (view.view === 'course' && view.packageId !== newView.packageId && isCourseInProgress) {
-          pendingNavigation.current = newView;
-          setShowExitWarning(true);
-        } else {
-          if (view.view !== 'course') {
-            preCourseView.current = view;
-          }
-          const nav = newView.bundleId
-            ? {
-                view: 'course' as const,
-                packageId: newView.packageId,
-                bundleId: newView.bundleId,
-                moduleId: newView.moduleId,
-              }
-            : { view: 'course' as const, packageId: newView.packageId };
-          setView(nav);
-        }
+      if (newView.view === 'course' && newView.packageId && !packageEntries[newView.packageId])
         return;
-      }
-
-      // Navigate to bundle overview while in a course
-      if (newView.view === 'bundleOverview' && isCourseInProgress) {
-        pendingNavigation.current = newView;
-        setShowExitWarning(true);
-        return;
-      }
-
-      if (isCourseInProgress) {
-        pendingNavigation.current = newView;
-        setShowExitWarning(true);
-      } else {
-        setView(newView);
-      }
+      navigate(viewToPath(newView));
     },
-    [packageEntries, isCourseInProgress, view],
+    [packageEntries, navigate],
   );
 
   const handleExitStay = useCallback(() => {
-    setShowExitWarning(false);
-    pendingNavigation.current = null;
-  }, []);
+    blocker.reset?.();
+  }, [blocker]);
 
   const handleExitLeave = useCallback(() => {
-    setShowExitWarning(false);
-    const pending = pendingNavigation.current;
-    pendingNavigation.current = null;
-    if (pending) {
-      setView(pending);
-    }
-  }, []);
+    blocker.proceed?.();
+  }, [blocker]);
 
   const handleStartCourse = useCallback(
     (packageDir: string) => {
       const pkg = Object.values(packageEntries).find((p) => p.rootDir === packageDir);
       if (pkg) {
-        setView({ view: 'course', packageId: pkg.manifest.id });
+        navigate(`/course/${pkg.manifest.id}`);
       }
     },
-    [packageEntries],
+    [packageEntries, navigate],
   );
 
-  const handleStartBundle = useCallback((bundleId: string) => {
-    setView({ view: 'bundleOverview', bundleId });
-  }, []);
+  const handleStartBundle = useCallback(
+    (bundleId: string) => {
+      navigate(`/bundle/${bundleId}`);
+    },
+    [navigate],
+  );
 
-  const handleStartBundleModule = useCallback((bundleId: string, moduleId: string) => {
-    setView({ view: 'course', packageId: moduleId, bundleId, moduleId });
-  }, []);
+  const handleStartBundleModule = useCallback(
+    (bundleId: string, moduleId: string) => {
+      navigate(`/course/${moduleId}/${bundleId}/${moduleId}`);
+    },
+    [navigate],
+  );
 
   const handleBackToCatalog = useCallback(() => {
-    setView({ view: 'catalog' });
-  }, []);
+    navigate('/catalog');
+  }, [navigate]);
 
   const coursePkg = useMemo<LoadedPackage | undefined>(() => {
     if (view.view !== 'course' || !view.packageId) return undefined;
