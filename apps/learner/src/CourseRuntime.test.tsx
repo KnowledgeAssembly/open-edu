@@ -9,6 +9,7 @@ function createMockEngine() {
     start: vi.fn(),
     stop: vi.fn(),
     completeNode: vi.fn(),
+    navigateTo: vi.fn(),
     getCurrentNodeId: vi.fn(() => ''),
   };
 }

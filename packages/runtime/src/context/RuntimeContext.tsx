@@ -124,9 +124,11 @@ export function RuntimeProvider({
     (nodeId: string) => {
       if (nodeMap[nodeId]) {
         setCurrentNodeId(nodeId);
+        setVisitedNodes((prev) => (prev[prev.length - 1] === nodeId ? prev : [...prev, nodeId]));
+        engine.navigateTo(nodeId);
       }
     },
-    [nodeMap],
+    [nodeMap, engine],
   );
 
   useEffect(() => {

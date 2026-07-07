@@ -40,6 +40,7 @@ interface StubEngine {
   stop: ReturnType<typeof vi.fn>;
   subscribe: ReturnType<typeof vi.fn>;
   completeNode: ReturnType<typeof vi.fn>;
+  navigateTo: ReturnType<typeof vi.fn>;
   __listener: ((e: WorkflowEvent) => void) | null;
 }
 
@@ -58,6 +59,7 @@ function makeEngine(initialNodeId: string): StubEngine & WorkflowEngine {
       };
     }),
     completeNode: vi.fn(),
+    navigateTo: vi.fn(),
     __listener: null as ((e: WorkflowEvent) => void) | null,
   };
   return stub as unknown as StubEngine & WorkflowEngine;
