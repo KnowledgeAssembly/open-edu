@@ -10,7 +10,10 @@ describe('BreakNagBar', () => {
 
   it('renders Pipili in the icon slot', () => {
     render(<BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
-    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute('aria-label', 'Pipili — curious');
+    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute(
+      'aria-label',
+      'Pipili — curious',
+    );
   });
 
   it('renders Take Break and Ignore buttons', () => {

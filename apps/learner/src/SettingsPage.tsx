@@ -22,7 +22,11 @@ export interface SettingsPageProps {
   };
 }
 
-export function SettingsPage({ currentThemeId, onThemeChange, breakTimer }: SettingsPageProps): JSX.Element {
+export function SettingsPage({
+  currentThemeId,
+  onThemeChange,
+  breakTimer,
+}: SettingsPageProps): JSX.Element {
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
