@@ -193,7 +193,7 @@ describe('StoryQuestion interactive mode', () => {
         accuracy: 1,
       }),
     );
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows aggregate score on completion with all correct', () => {
@@ -226,7 +226,7 @@ describe('StoryQuestion interactive mode', () => {
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(complete).toHaveBeenCalledWith(50);
+    expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 });
 

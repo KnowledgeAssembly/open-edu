@@ -35,23 +35,37 @@ function getPairId(pair: { id?: string }, index: number): string {
   return pair.id ?? `pair-${index}`;
 }
 
+const MatchingStateSchema = z.object({
+  submitted: z.boolean(),
+  connections: z.record(z.string(), z.string()),
+  hintIndex: z.number(),
+});
+
 function MatchingComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const content = useMemo(() => {
     const parsed = matchingSchema.safeParse(rawConfig);
     return parsed.success ? parsed.data : null;
   }, [rawConfig]);
   const hasValidContent = content && content.pairs.length > 0;
 
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = MatchingStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
-  const [connections, setConnections] = useState<Map<string, string>>(new Map());
-  const [hintIndex, setHintIndex] = useState(0);
+  const [connections, setConnections] = useState<Map<string, string>>(
+    () => parsedState?.connections ? new Map(Object.entries(parsedState.connections)) : new Map(),
+  );
+  const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
   const [connectorPositions, setConnectorPositions] = useState<
     Array<{ x1: number; y1: number; x2: number; y2: number; leftId: string; rightId: string }>
   >([]);
@@ -278,9 +292,13 @@ function MatchingComponent(props: {
       accuracy,
       widgetId: 'open-edu.matching',
     });
-    complete(score);
+    const connObj: Record<string, string> = {};
+    for (const [k, v] of connections.entries()) {
+      connObj[k] = v;
+    }
+    complete(score, { submitted: true, connections: connObj, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, connections, emitInteraction, complete]);
+  }, [submitted, content, connections, hintIndex, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {

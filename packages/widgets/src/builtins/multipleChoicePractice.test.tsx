@@ -46,7 +46,7 @@ describe('multipleChoicePractice', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('completes with score 0 on incorrect answer', () => {
@@ -64,7 +64,7 @@ describe('multipleChoicePractice', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(screen.getByTestId('feedback')).toHaveTextContent('Incorrect');
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows explanation after submission', () => {

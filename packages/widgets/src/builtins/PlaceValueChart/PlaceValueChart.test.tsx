@@ -203,7 +203,7 @@ describe('PlaceValueChart interactive mode', () => {
     fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('scores 0 when placed digits do not match target number', () => {
@@ -215,7 +215,7 @@ describe('PlaceValueChart interactive mode', () => {
     fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows feedback after submission with target number', () => {

@@ -156,7 +156,7 @@ describe('RealWorld interactive mode', () => {
         score: 100,
       }),
     );
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows completed state after self-assessment', () => {
@@ -244,21 +244,21 @@ describe('RealWorld self-assessment', () => {
     const { complete } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
     fireEvent.click(screen.getByTestId('self-assess-well'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('scores 50 for "I\'m still learning"', () => {
     const { complete } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
     fireEvent.click(screen.getByTestId('self-assess-learning'));
-    expect(complete).toHaveBeenCalledWith(50);
+    expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
   it('scores 0 for "I need more practice"', () => {
     const { complete } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByTestId('complete-task-button'));
     fireEvent.click(screen.getByTestId('self-assess-practice'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('emits self-assessment in interaction data', () => {
@@ -394,7 +394,7 @@ describe('RealWorld edge cases', () => {
     });
     fireEvent.click(screen.getByTestId('complete-task-button'));
     fireEvent.click(screen.getByTestId('self-assess-well'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('uses widgetId in interactions', () => {

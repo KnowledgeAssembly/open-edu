@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -41,19 +41,31 @@ function convertPipeline(
   return { template: statement, blanks };
 }
 
+const FillBlankStateSchema = z.object({
+  submitted: z.boolean(),
+  userAnswers: z.record(z.string(), z.union([z.string(), z.number()])),
+  hintIndex: z.number(),
+});
+
 function FillBlankComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = fillBlankSchema.safeParse(rawConfig);
 
-  const [submitted, setSubmitted] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string | number>>({});
+  const parsedState = useMemo(() => {
+    const result = FillBlankStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [userAnswers, setUserAnswers] = useState<Record<string, string | number>>(parsedState?.userAnswers ?? {});
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
 
   let config: ResolvedFillBlankConfig | null = null;
   if (parsed.success) {
@@ -117,9 +129,9 @@ function FillBlankComponent(props: {
       correctCount,
       totalBlanks: sortedBlanks.length,
     });
-    complete(score);
+    complete(score, { submitted: true, userAnswers, hintIndex });
     setSubmitted(true);
-  }, [submitted, config, sortedBlanks, userAnswers, emitInteraction, complete]);
+  }, [submitted, config, sortedBlanks, userAnswers, hintIndex, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (config?.hints && hintIndex < config.hints.length - 1) {

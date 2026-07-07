@@ -175,7 +175,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: true, accuracy: 1 }),
     );
@@ -188,7 +188,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(50);
+    expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
   it('calls complete with 0 on all wrong', () => {
@@ -198,7 +198,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-0'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows green border on correct answer after submission', () => {
@@ -339,7 +339,7 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'Paris' } });
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('calls complete with 0 on incorrect answer', () => {
@@ -347,7 +347,7 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'London' } });
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows green border on correct answer', () => {
@@ -417,7 +417,7 @@ describe('FillBlank pipeline variant', () => {
     const input = screen.getByTestId('blank-input-blank-0');
     fireEvent.change(input, { target: { value: 'Paris' } });
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('uses description from prompt in pipeline mode', () => {

@@ -31,13 +31,19 @@ function getEmojiLabel(emoji: string, position: number, total: number): string {
   return `${emoji} ${position} of ${total}`;
 }
 
+const VisualCountingStateSchema = z.object({
+  submitted: z.boolean(),
+  selectedCount: z.number().nullable(),
+});
+
 function VisualCountingComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = visualCountingSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : ({} as VisualCountingConfig);
   const isAddition = parsed.success && isAdditionMode(content);
@@ -47,9 +53,14 @@ function VisualCountingComponent(props: {
       ? content.left !== undefined || content.right !== undefined
       : content.items !== undefined || content.count !== undefined);
 
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = VisualCountingStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [hintIndex, setHintIndex] = useState(0);
-  const [selectedCount, setSelectedCount] = useState<number | null>(null);
+  const [selectedCount, setSelectedCount] = useState<number | null>(parsedState?.selectedCount ?? null);
 
   const displayItems = useMemo(() => {
     if (content.items && content.items.length > 0) return content.items;
@@ -110,7 +121,7 @@ function VisualCountingComponent(props: {
       accuracy,
       widgetId: 'open-edu.visual-counting',
     });
-    complete(accuracy * 100);
+    complete(accuracy * 100, { submitted: true, selectedCount });
     setSubmitted(true);
   }, [selectedCount, submitted, expected, emitInteraction, complete]);
 

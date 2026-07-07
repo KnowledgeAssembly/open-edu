@@ -193,14 +193,14 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('selecting correct label scores 100', () => {
     const { complete, emitInteraction } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Bananas', correct: true }),
     );
@@ -210,7 +210,7 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete, emitInteraction } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[0]!);
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Apples', correct: false }),
     );
@@ -256,14 +256,14 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[1]!);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('selecting correct label scores 100', () => {
     const { complete, emitInteraction } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[1]!);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Cats', correct: true }),
     );
@@ -273,7 +273,7 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[0]!);
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('cannot click after submission', () => {

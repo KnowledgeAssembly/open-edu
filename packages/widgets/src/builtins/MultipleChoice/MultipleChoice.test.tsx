@@ -60,7 +60,7 @@ describe('MultipleChoice legacy single-question mode', () => {
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('completes with score 0 on incorrect answer', () => {
@@ -68,7 +68,7 @@ describe('MultipleChoice legacy single-question mode', () => {
     fireEvent.click(screen.getByLabelText('3'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Incorrect');
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows explanation after submission', () => {
@@ -221,7 +221,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
         accuracy: 1,
       }),
     );
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows aggregate score on completion with all correct', () => {

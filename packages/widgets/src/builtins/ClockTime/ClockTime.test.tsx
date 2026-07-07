@@ -106,7 +106,7 @@ describe('ClockTime interactive read mode', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-10'));
     fireEvent.click(screen.getByTestId('confirm-btn'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 10, displayedHour: 10, correct: true }),
     );
@@ -116,7 +116,7 @@ describe('ClockTime interactive read mode', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-3'));
     fireEvent.click(screen.getByTestId('confirm-btn'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 3, displayedHour: 10, correct: false }),
     );
@@ -262,13 +262,13 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('scores 0 when hour does not match', () => {
     const { complete } = renderWidget(setConfig);
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('scores 0 when minutes exceed ±5 tolerance', () => {
@@ -278,7 +278,7 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('gives 50% credit when within 2 minutes', () => {
@@ -291,7 +291,7 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(50);
+    expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
   it('gives 25% credit when within 5 minutes', () => {
@@ -304,7 +304,7 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(25);
+    expect(complete).toHaveBeenCalledWith(25, expect.any(Object));
   });
 
   it('shows correct feedback on correct answer', () => {

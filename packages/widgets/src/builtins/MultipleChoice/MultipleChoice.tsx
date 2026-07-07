@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -35,20 +35,39 @@ type FeedbackState = {
   explanation?: string;
 } | null;
 
+const MultipleChoiceStateSchema = z.object({
+  submitted: z.boolean(),
+  currentIndex: z.number(),
+  selections: z.array(z.number().nullable()),
+  responses: z.array(z.object({ correct: z.boolean(), selectedIndex: z.number() })),
+  feedback: z.object({
+    selectedIndex: z.number(),
+    correctIndex: z.number(),
+    isCorrect: z.boolean(),
+    explanation: z.string().optional(),
+  }).nullable(),
+});
+
 function MultipleChoiceComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+
+  const parsedState = useMemo(() => {
+    const result = MultipleChoiceStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selections, setSelections] = useState<(number | null)[]>([]);
-  const [responses, setResponses] = useState<{ correct: boolean; selectedIndex: number }[]>([]);
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
+  const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
+  const [responses, setResponses] = useState<{ correct: boolean; selectedIndex: number }[]>(parsedState?.responses ?? []);
+  const [feedback, setFeedback] = useState<FeedbackState>(parsedState?.feedback ?? null);
 
   const config: Record<string, unknown> = rawConfig || {};
   const hasPrompt = typeof config.prompt === 'string' && config.prompt.length > 0;
@@ -80,6 +99,8 @@ function MultipleChoiceComponent(props: {
     const correctOption = legacyParsed.data.options.find((o) => o.correct);
     const isCorrect = selectedId === correctOption?.id;
     const score = isCorrect ? 100 : 0;
+    const selectedIdx = legacyParsed.data.options.findIndex((o) => o.id === selectedId);
+    const correctIdx = legacyParsed.data.options.findIndex((o) => o.correct);
     emitInteraction({
       type: 'widget.interaction',
       widgetId: 'open-edu.multiple-choice',
@@ -87,7 +108,13 @@ function MultipleChoiceComponent(props: {
       selectedId,
       score,
     });
-    complete(score);
+    complete(score, {
+      submitted: true,
+      currentIndex: 0,
+      selections: [selectedIdx],
+      responses: [{ correct: isCorrect, selectedIndex: selectedIdx }],
+      feedback: { selectedIndex: selectedIdx, correctIndex: correctIdx, isCorrect, explanation: legacyParsed.data.explanation },
+    });
   }, [selectedId, submitted, legacyParsed, emitInteraction, complete]);
 
   const handleMultiSelect = useCallback(
@@ -150,10 +177,10 @@ function MultipleChoiceComponent(props: {
         totalQuestions,
         accuracy,
       });
-      complete(accuracy * 100);
+      complete(accuracy * 100, { submitted: true, currentIndex, selections, responses, feedback: null });
       setSubmitted(true);
     }
-  }, [multiParsed, currentIndex, responses, emitInteraction, complete]);
+  }, [multiParsed, currentIndex, selections, responses, emitInteraction, complete]);
 
   if (!legacyParsed.success && !multiParsed.success) {
     return (

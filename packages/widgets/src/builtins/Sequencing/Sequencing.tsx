@@ -116,30 +116,44 @@ function SortableItem({
   );
 }
 
+const SequencingStateSchema = z.object({
+  submitted: z.boolean(),
+  itemOrder: z.array(z.string()),
+  hintIndex: z.number(),
+});
+
 function SequencingComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = sequencingSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent =
     parsed.success && content && content.items.length > 0 && content.correctOrder.length > 0;
 
-  const [submitted, setSubmitted] = useState(false);
-  const [hintIndex, setHintIndex] = useState(0);
+  const parsedState = useMemo(() => {
+    const result = SequencingStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const isObserve = content?.interactive !== true;
   const items = content?.items ?? [];
   const correctOrder = useMemo(() => content?.correctOrder ?? [], [content]);
 
-  const [itemOrder, setItemOrder] = useState<string[]>(() => {
+  const initOrder = useMemo(() => {
     if (!content) return [];
     return shuffleArray(content.items).map((item) => item.id);
-  });
+  }, [content]);
+
+  const [itemOrder, setItemOrder] = useState<string[]>(() => parsedState?.itemOrder ?? initOrder);
 
   const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
     isObserve: isObserve && hasValidContent,
@@ -202,9 +216,9 @@ function SequencingComponent(props: {
       accuracy,
       widgetId: 'open-edu.sequencing',
     });
-    complete(score);
+    complete(score, { submitted: true, itemOrder, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, itemOrder, correctOrder, emitInteraction, complete]);
+  }, [submitted, content, itemOrder, correctOrder, hintIndex, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {

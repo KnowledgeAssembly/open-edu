@@ -27,11 +27,19 @@ export {
   ProgressSnapshotSchema,
   ModuleProgressSnapshotSchema,
   BundleProgressSnapshotSchema,
+  QuizAnswerSchema,
+  ReflectionAnswerSchema,
+  WidgetAnswerSchema,
+  NodeAnswerSchema,
 } from './progress.js';
 export type {
   ProgressSnapshot,
   ModuleProgressSnapshot,
   BundleProgressSnapshot,
+  QuizAnswer,
+  ReflectionAnswer,
+  WidgetAnswer,
+  NodeAnswer,
 } from './progress.js';
 
 export {

@@ -57,17 +57,28 @@ function rightAlignDigits(
   return result;
 }
 
+const PlaceValueChartStateSchema = z.object({
+  submitted: z.boolean(),
+  placedDigits: z.array(z.number().nullable()),
+});
+
 function PlaceValueChartComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = useMemo(() => placeValueChartSchema.safeParse(rawConfig), [rawConfig]);
   const content = parsed.success ? parsed.data : null;
 
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = PlaceValueChartStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
 
   const columns = content?.maxPlaces === 'crore' ? CRORE_COLUMNS : LAKH_COLUMNS;
@@ -75,6 +86,7 @@ function PlaceValueChartComponent(props: {
   const colCount = columns.length;
 
   const [placedDigits, setPlacedDigits] = useState<(number | null)[]>(() => {
+    if (parsedState?.placedDigits) return parsedState.placedDigits;
     if (!content?.digits) return new Array(colCount).fill(null);
     return rightAlignDigits(content.digits, colCount);
   });
@@ -160,7 +172,7 @@ function PlaceValueChartComponent(props: {
       correct,
       widgetId: 'open-edu.place-value-chart',
     });
-    complete(score);
+    complete(score, { submitted: true, placedDigits });
     setSubmitted(true);
   }, [content, submitted, placedDigits, emitInteraction, complete]);
 

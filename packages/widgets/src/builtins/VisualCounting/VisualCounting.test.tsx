@@ -112,7 +112,7 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: true, accuracy: 1 }),
     );
@@ -127,7 +127,7 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(60);
+    expect(complete).toHaveBeenCalledWith(60, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: false, accuracy: 0.6 }),
     );
@@ -203,7 +203,7 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     const { complete } = renderWidget({ left: 3, right: 2, sum: 5, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 5'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows config error for invalid interactive config', () => {

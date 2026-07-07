@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -16,20 +16,32 @@ const realWorldSchema = z.object({
   interactive: z.boolean().optional().default(false),
 });
 
+const RealWorldStateSchema = z.object({
+  submitted: z.boolean(),
+  response: z.string(),
+  selfAssessment: z.enum(['well', 'learning', 'practice']).nullable(),
+});
+
 function RealWorldComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
 
   const parsed = realWorldSchema.safeParse(rawConfig);
 
-  const [submitted, setSubmitted] = useState(false);
-  const [response, setResponse] = useState('');
-  const [showSelfAssess, setShowSelfAssess] = useState(false);
-  const [selfAssessment, setSelfAssessment] = useState<SelfAssessment>(null);
+  const parsedState = useMemo(() => {
+    const result = RealWorldStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [response, setResponse] = useState(parsedState?.response ?? '');
+  const [showSelfAssess, setShowSelfAssess] = useState(parsedState?.submitted ?? false);
+  const [selfAssessment, setSelfAssessment] = useState<SelfAssessment>(parsedState?.selfAssessment ?? null);
 
   const content = parsed.success ? parsed.data : null;
   const isInteractive = content?.interactive ?? false;
@@ -71,7 +83,7 @@ function RealWorldComponent(props: {
     }
 
     emitInteraction(interactionData);
-    complete(score);
+    complete(score, { submitted: true, response, selfAssessment: assessment });
     setSubmitted(true);
   };
 

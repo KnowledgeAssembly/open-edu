@@ -135,7 +135,7 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-3'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows partial correctness when some are wrong', () => {
@@ -147,7 +147,7 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-3'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(67);
+    expect(complete).toHaveBeenCalledWith(67, expect.any(Object));
   });
 
   it('shows zero correct when all are wrong', () => {
@@ -159,7 +159,7 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-1'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('can undo a connection by clicking remove button', () => {
@@ -219,7 +219,7 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-1'));
     fireEvent.click(screen.getByTestId('right-item-1'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('renders description in interactive mode', () => {
