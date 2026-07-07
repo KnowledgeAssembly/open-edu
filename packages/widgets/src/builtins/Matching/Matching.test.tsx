@@ -332,6 +332,114 @@ describe('Matching keyboard accessibility', () => {
   });
 });
 
+describe('Matching persistence (storedState restoration)', () => {
+  const interactiveConfig = {
+    pairs: [
+      { id: '1', itemA: '🐶', itemB: 'Dog' },
+      { id: '2', itemA: '🐱', itemB: 'Cat' },
+    ],
+    interactive: true,
+  };
+
+  it('restores submitted state from storedState', () => {
+    const storedState = {
+      submitted: true,
+      connections: { '1': '1', '2': '2' },
+      hintIndex: 0,
+    };
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        storedState={storedState}
+      />,
+    );
+    expect(screen.getByTestId('feedback')).toBeTruthy();
+    expect(screen.queryByText('Submit')).toBeNull();
+    expect(screen.getByTestId('left-item-1')).toHaveTextContent('🐶');
+    expect(screen.getByTestId('right-item-1')).toHaveTextContent('Dog');
+  });
+
+  it('restores connections from storedState', () => {
+    const storedState = {
+      submitted: true,
+      connections: { '1': '1', '2': '2' },
+      hintIndex: 0,
+    };
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        storedState={storedState}
+      />,
+    );
+    expect(screen.getByTestId('connections-status')).toHaveTextContent('2 of 2 pairs connected');
+  });
+
+  it('shows partial connections from storedState', () => {
+    const storedState = {
+      submitted: true,
+      connections: { '1': '1' },
+      hintIndex: 0,
+    };
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        storedState={storedState}
+      />,
+    );
+    expect(screen.getByTestId('connections-status')).toHaveTextContent('1 of 2 pairs connected');
+  });
+
+  it('ignores clicks when restored from submitted storedState', () => {
+    const storedState = {
+      submitted: true,
+      connections: { '1': '1', '2': '2' },
+      hintIndex: 0,
+    };
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        storedState={storedState}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    expect(screen.getByTestId('connections-status')).toHaveTextContent('2 of 2 pairs connected');
+  });
+
+  it('passes state object as second argument to complete on submit', () => {
+    const complete = vi.fn();
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveConfig}
+        emitInteraction={vi.fn()}
+        complete={complete}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-1'));
+    fireEvent.click(screen.getByTestId('left-item-2'));
+    fireEvent.click(screen.getByTestId('right-item-2'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).toHaveBeenCalledWith(100, {
+      submitted: true,
+      connections: { '1': '1', '2': '2' },
+      hintIndex: 0,
+    });
+  });
+});
+
 describe('Matching edge cases', () => {
   it('defaults to observe mode when interactive not specified', () => {
     renderWidget({
