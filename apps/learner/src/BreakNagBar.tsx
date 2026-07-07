@@ -1,0 +1,38 @@
+import { AppBanner, Button, Pipili } from '@open-edu/design-system';
+import type { BreakTimerSettings } from './breakTimerStorage';
+
+export interface BreakNagBarProps {
+  minutes: BreakTimerSettings['mode'];
+  onTakeBreak: () => void;
+  onIgnore: () => void;
+}
+
+export function BreakNagBar({ minutes, onTakeBreak, onIgnore }: BreakNagBarProps): JSX.Element {
+  const minLabel = minutes === 'off' ? '' : `${minutes}`;
+
+  return (
+    <AppBanner
+      variant="break"
+      icon={<Pipili size="sm" mood="curious" />}
+      onDismiss={onIgnore}
+      actions={
+        <>
+          <Button variant="default" size="sm" onClick={onTakeBreak}>
+            Take Break
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onIgnore}>
+            Ignore
+          </Button>
+        </>
+      }
+    >
+      <p>
+        <strong className="font-semibold">Time for a break!</strong>{' '}
+        {minLabel && (
+          <>You've been learning for {minLabel} minutes. Stand up, stretch, and rest your eyes.</>
+        )}
+        {!minLabel && <>Stand up, stretch, and rest your eyes.</>}
+      </p>
+    </AppBanner>
+  );
+}

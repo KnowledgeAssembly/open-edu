@@ -314,6 +314,7 @@ export const tailwindElevationExtensions: Record<string, string> = {
 export const tailwindAnimationExtensions: Record<string, string> = {
   'orbit-float': 'orbit-float 3s ease-in-out infinite',
   'pipili-wave': 'pipili-wave 2s ease-in-out infinite',
+  'banner-slide-down': 'banner-slide-down 0.3s ease-out',
 };
 
 export const tailwindLayoutExtensions: Record<string, string> = {

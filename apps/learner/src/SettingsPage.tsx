@@ -8,8 +8,12 @@ import {
   PageHeader,
   Switch,
   useFontSize,
+  RadioGroup,
+  RadioGroupItem,
+  Pipili,
 } from '@open-edu/design-system';
 import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
+import { useBreakTimer } from './useBreakTimer';
 
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
@@ -18,6 +22,7 @@ export interface SettingsPageProps {
 
 export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProps): JSX.Element {
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
+  const breakTimer = useBreakTimer();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
@@ -111,6 +116,52 @@ export function SettingsPage({ currentThemeId, onThemeChange }: SettingsPageProp
                 aria-label="High Contrast"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-h2 font-display flex items-center gap-2">
+              <Pipili size="sm" mood="content" /> Break Reminder
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup
+              value={breakTimer.mode}
+              onValueChange={(value) => breakTimer.setMode(value as 'off' | '15' | '30' | '60')}
+              className="gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="off" id="break-off" />
+                <label htmlFor="break-off" className="text-sm">
+                  <span className="font-medium">Off</span>
+                  <p className="text-on-surface-variant text-xs">No break reminders</p>
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="15" id="break-15" />
+                <label htmlFor="break-15" className="text-sm">
+                  <span className="font-medium">15 min</span>
+                  <p className="text-on-surface-variant text-xs">Quick learning sprints</p>
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="30" id="break-30" />
+                <label htmlFor="break-30" className="text-sm">
+                  <span className="font-medium">30 min</span>
+                  <p className="text-on-surface-variant text-xs">
+                    Balanced sessions with regular breaks
+                  </p>
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="60" id="break-60" />
+                <label htmlFor="break-60" className="text-sm">
+                  <span className="font-medium">60 min</span>
+                  <p className="text-on-surface-variant text-xs">Deep work sessions</p>
+                </label>
+              </div>
+            </RadioGroup>
           </CardContent>
         </Card>
       </div>

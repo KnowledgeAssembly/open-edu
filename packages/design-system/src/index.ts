@@ -121,6 +121,9 @@ export type { GeoPrimitiveProps } from './primitives/geo-primitive.js';
 export { Pipili } from './primitives/pipili.js';
 export type { PipiliProps, PipiliMood } from './primitives/pipili.js';
 
+export { AppBanner, appBannerVariants } from './primitives/app-banner.js';
+export type { AppBannerProps, AppBannerVariant } from './primitives/app-banner.js';
+
 export { OpenEduLogo } from './primitives/openedu-logo.js';
 export type { OpenEduLogoProps } from './primitives/openedu-logo.js';
 
