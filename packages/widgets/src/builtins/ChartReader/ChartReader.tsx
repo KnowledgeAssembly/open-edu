@@ -75,16 +75,16 @@ function ChartReaderComponent(props: {
       if (submitted || !parsed.success || !parsed.data.correctLabel) return;
       const isCorrect = label === parsed.data.correctLabel;
       const score = isCorrect ? 100 : 0;
-    emitInteraction({
-      type: 'widget.interaction',
-      widgetId: 'open-edu.chart-reader',
-      action: 'select',
-      selectedLabel: label,
-      correct: isCorrect,
-    });
-    complete(score, { submitted: true });
-    setSubmitted(true);
-  },
+      emitInteraction({
+        type: 'widget.interaction',
+        widgetId: 'open-edu.chart-reader',
+        action: 'select',
+        selectedLabel: label,
+        correct: isCorrect,
+      });
+      complete(score, { submitted: true });
+      setSubmitted(true);
+    },
     [submitted, parsed, emitInteraction, complete],
   );
 
