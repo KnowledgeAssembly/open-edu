@@ -3,11 +3,12 @@ import { getAllProgress, getProgress, saveProgress } from './progressStorage';
 import type { ProgressSnapshot } from '@open-edu/schemas';
 
 const snapshot: ProgressSnapshot = {
-  packageId: 'pkg1',
+  packageId: 'test-pkg',
   packageVersion: '1.0.0',
-  currentNodeId: 'nodes/lesson-01.md',
-  visitedNodes: ['nodes/lesson-01.md'],
+  currentNodeId: 'node-1',
+  visitedNodes: ['node-1'],
   scores: {},
+  answers: {},
   isCompleted: false,
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -18,6 +19,7 @@ const snapshotV2: ProgressSnapshot = {
   currentNodeId: 'nodes/lesson-02.md',
   visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
   scores: {},
+  answers: {},
   isCompleted: false,
   updatedAt: '2024-01-02T00:00:00.000Z',
 };
@@ -28,6 +30,7 @@ const snapshotPkg2: ProgressSnapshot = {
   currentNodeId: 'nodes/chapter-01.md',
   visitedNodes: ['nodes/chapter-01.md'],
   scores: {},
+  answers: {},
   isCompleted: false,
   updatedAt: '2024-01-01T00:00:00.000Z',
 };

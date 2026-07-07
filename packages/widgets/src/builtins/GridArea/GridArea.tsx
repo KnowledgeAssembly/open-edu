@@ -46,13 +46,19 @@ function computePerimeter(highlighted: Set<CellKey>): Set<CellKey> {
   return perimeter;
 }
 
+const GridAreaStateSchema = z.object({
+  submitted: z.boolean(),
+  highlighted: z.array(z.string()),
+});
+
 function GridAreaComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = gridAreaSchema.safeParse(rawConfig);
   const config = parsed.success ? parsed.data : null;
 
@@ -61,8 +67,15 @@ function GridAreaComponent(props: {
     return new Set<CellKey>((config.highlighted ?? []).map((c) => toKey(c.row, c.col)));
   }, [config]);
 
-  const [highlighted, setHighlighted] = useState<Set<CellKey>>(new Set());
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = GridAreaStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [highlighted, setHighlighted] = useState<Set<CellKey>>(
+    () => new Set(parsedState?.highlighted as CellKey[] | undefined),
+  );
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
 
@@ -144,9 +157,9 @@ function GridAreaComponent(props: {
       mode: config.mode,
       widgetId: 'open-edu.grid-area',
     });
-    complete(correct ? 100 : 0);
+    complete(correct ? 100 : 0, { submitted: true, highlighted: Array.from(highlighted) });
     setSubmitted(true);
-  }, [submitted, config, count, expectedCount, emitInteraction, complete]);
+  }, [submitted, config, count, expectedCount, highlighted, emitInteraction, complete]);
 
   const handleGridKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

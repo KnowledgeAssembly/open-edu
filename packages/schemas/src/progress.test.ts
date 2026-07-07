@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ProgressSnapshotSchema } from './progress';
+import { ProgressSnapshotSchema, WidgetAnswerSchema } from './progress';
 
 describe('ProgressSnapshotSchema', () => {
   it('valid snapshot passes validation', () => {
@@ -60,5 +60,37 @@ describe('ProgressSnapshotSchema', () => {
       updatedAt: '2024-01-01T00:00:00.000Z',
     });
     expect(result.scores).toEqual({});
+  });
+});
+
+describe('WidgetAnswerSchema', () => {
+  it('validates a correct widget answer', () => {
+    const result = WidgetAnswerSchema.parse({
+      type: 'widget',
+      widgetId: 'open-edu.matching',
+      widgetVersion: '0.1.0',
+      data: { connections: { a: 'b' }, submitted: true },
+      score: 100,
+    });
+    expect(result.type).toBe('widget');
+    expect(result.widgetId).toBe('open-edu.matching');
+  });
+
+  it('rejects missing widgetId', () => {
+    expect(() => WidgetAnswerSchema.parse({ type: 'widget', data: {} })).toThrow();
+  });
+
+  it('accepts minimal answer (no score, no version)', () => {
+    const result = WidgetAnswerSchema.parse({
+      type: 'widget',
+      widgetId: 'open-edu.test',
+      data: 'just a string',
+    });
+    expect(result.data).toBe('just a string');
+    expect(result.score).toBeUndefined();
+  });
+
+  it('rejects wrong discriminator type', () => {
+    expect(() => WidgetAnswerSchema.parse({ type: 'quiz', widgetId: 'x', data: {} })).toThrow();
   });
 });

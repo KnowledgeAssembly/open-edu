@@ -145,7 +145,7 @@ describe('Sequencing submit and scoring', () => {
     const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(expectedScore(order, defaultCorrectOrder));
+    expect(complete).toHaveBeenCalledWith(expectedScore(order, defaultCorrectOrder), expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
     );
@@ -283,7 +283,7 @@ describe('Sequencing edge cases', () => {
     });
     expect(screen.getByTestId('sortable-item-only')).toBeTruthy();
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('shows error for mismatched correctOrder and items', () => {

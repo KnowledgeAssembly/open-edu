@@ -1,9 +1,11 @@
 import { useState, useId } from 'react';
-import type { ReflectionNode } from '@open-edu/schemas';
+import type { ReflectionNode, ReflectionAnswer } from '@open-edu/schemas';
 
 export interface ReflectionRendererProps {
   node: ReflectionNode;
   onSubmit: (text: string) => void;
+  storedAnswer?: ReflectionAnswer;
+  onAnswer?: (answer: ReflectionAnswer) => void;
   className?: string;
   minLength?: number;
   maxLength?: number;
@@ -13,13 +15,17 @@ export interface ReflectionRendererProps {
 export function ReflectionRenderer({
   node,
   onSubmit,
+  storedAnswer,
+  onAnswer,
   className,
   minLength = 1,
   maxLength = 4096,
   showCharCount = true,
 }: ReflectionRendererProps): JSX.Element {
-  const [text, setText] = useState<string>('');
-  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [text, setText] = useState<string>(
+    storedAnswer?.type === 'reflection' ? storedAnswer.text : '',
+  );
+  const [submitted, setSubmitted] = useState<boolean>(storedAnswer?.type === 'reflection');
   const hintId = useId();
 
   const trimmedLength = text.trim().length;
@@ -28,6 +34,8 @@ export function ReflectionRenderer({
   const handleSubmit = () => {
     if (!isValid || submitted) return;
     setSubmitted(true);
+    const answer: ReflectionAnswer = { type: 'reflection', text };
+    onAnswer?.(answer);
     onSubmit(text);
   };
 

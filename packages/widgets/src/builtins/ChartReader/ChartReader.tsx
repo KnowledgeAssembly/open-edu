@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -39,16 +39,26 @@ const configSchema = z
     { message: 'correctLabel is required when interactive is true' },
   );
 
+const ChartReaderStateSchema = z.object({
+  submitted: z.boolean(),
+});
+
 function ChartReaderComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = configSchema.safeParse(rawConfig);
 
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = ChartReaderStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
 
   const isObserve = parsed.success && !parsed.data.interactive && !parsed.data.correctLabel;
   const isInteractive = parsed.success && parsed.data.interactive && !!parsed.data.correctLabel;
@@ -72,7 +82,7 @@ function ChartReaderComponent(props: {
         selectedLabel: label,
         correct: isCorrect,
       });
-      complete(score);
+      complete(score, { submitted: true });
       setSubmitted(true);
     },
     [submitted, parsed, emitInteraction, complete],

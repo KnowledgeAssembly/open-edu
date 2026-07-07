@@ -155,7 +155,7 @@ describe('MeasurementScale interactive mode', () => {
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
 
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'submit', value: 5, targetValue: 5, correct: true }),
     );
@@ -167,7 +167,7 @@ describe('MeasurementScale interactive mode', () => {
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
 
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'submit', value: 1, targetValue: 5, correct: false }),
     );
@@ -198,7 +198,7 @@ describe('MeasurementScale interactive mode', () => {
       fireEvent.keyDown(svg, { key: 'ArrowRight' });
     }
     fireEvent.keyDown(svg, { key: 'Enter' });
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('allows Space key to submit', () => {
@@ -208,7 +208,7 @@ describe('MeasurementScale interactive mode', () => {
       fireEvent.keyDown(svg, { key: 'ArrowRight' });
     }
     fireEvent.keyDown(svg, { key: ' ' });
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('disables interaction after submit', () => {
@@ -408,7 +408,7 @@ describe('MeasurementScale scoring tolerance', () => {
       value: 6,
     });
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('scores incorrect when outside step tolerance', () => {
@@ -423,7 +423,7 @@ describe('MeasurementScale scoring tolerance', () => {
       value: 3,
     });
     fireEvent.click(screen.getByTestId('submit-btn'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 });
 

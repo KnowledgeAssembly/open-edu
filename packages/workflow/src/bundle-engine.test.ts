@@ -81,6 +81,7 @@ describe('BundleEngine', () => {
             currentNodeId: 'nodes/lesson.md',
             visitedNodes: ['nodes/lesson.md'],
             scores: {},
+            answers: {},
             isCompleted: false,
           },
         },
@@ -98,6 +99,7 @@ describe('BundleEngine', () => {
             currentNodeId: '',
             visitedNodes: ['nodes/lesson.md'],
             scores: {},
+            answers: {},
             isCompleted: true,
             completedAt: '2024-01-01T00:00:00.000Z',
           },
@@ -353,6 +355,7 @@ describe('BundleEngine', () => {
         currentNodeId: 'nodes/lesson.md',
         visitedNodes: ['nodes/lesson.md'],
         scores: {},
+        answers: {},
         isCompleted: false,
       };
       const engine = new BundleEngine(bundle, {

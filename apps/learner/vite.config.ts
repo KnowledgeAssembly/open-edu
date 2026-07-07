@@ -43,8 +43,10 @@ function findAssetsDirs(catalogDir: string): string[] {
         dirs.push(assetsDir);
       }
       // Also check for standalone package directories
-      if (existsSync(join(catalogDir, entry.name, 'package.json')) ||
-          existsSync(join(catalogDir, entry.name, 'bundle.json'))) {
+      if (
+        existsSync(join(catalogDir, entry.name, 'package.json')) ||
+        existsSync(join(catalogDir, entry.name, 'bundle.json'))
+      ) {
         // already added above if assets exists
       }
     }

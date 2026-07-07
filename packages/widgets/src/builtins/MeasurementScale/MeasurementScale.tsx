@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -24,18 +24,29 @@ const WIDTH = 320;
 const HEIGHT = 360;
 const PADDING = 40;
 
+const MeasurementScaleStateSchema = z.object({
+  submitted: z.boolean(),
+  value: z.number(),
+});
+
 function MeasurementScaleComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = configSchema.safeParse(rawConfig);
   const config = parsed.success ? parsed.data : (null as unknown as MeasurementScaleConfig);
 
-  const [submitted, setSubmitted] = useState(false);
-  const [value, setValue] = useState(config?.value ?? config?.min ?? 0);
+  const parsedState = useMemo(() => {
+    const result = MeasurementScaleStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [value, setValue] = useState(parsedState?.value ?? (config?.value ?? config?.min ?? 0));
 
   const isInteractive = config?.interactive ?? false;
   const isObserve = parsed.success && !isInteractive;
@@ -136,7 +147,7 @@ function MeasurementScaleComponent(props: {
       targetValue: target,
       correct,
     });
-    complete(score);
+    complete(score, { submitted: true, value });
     setSubmitted(true);
   }, [config, submitted, value, emitInteraction, complete]);
 

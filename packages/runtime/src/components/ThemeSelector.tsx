@@ -6,19 +6,19 @@ const themeInfo: Array<{ id: ThemeId; name: string; description: string; swatche
     id: 'lumina-scholastica',
     name: 'OpenEdu Light',
     description: 'Default calm learning',
-    swatches: ['#fcfaf8', '#5d4a8a', '#1f1c18', '#7c6bb0'],
+    swatches: ['surface', 'primary', 'on-surface', 'primary-container'],
   },
   {
     id: 'nocturnal',
     name: 'OpenEdu Dark',
     description: 'Calm dark for deep focus',
-    swatches: ['#151219', '#d4c4ff', '#221e25', '#5d4a8a'],
+    swatches: ['surface', 'primary', 'on-surface', 'primary-container'],
   },
   {
     id: 'zen',
     name: 'OpenEdu Zen',
     description: 'Reduced stimulation, quiet reading',
-    swatches: ['#fcfaf8', '#8a8294', '#1f1c1a', '#d4cfdc'],
+    swatches: ['surface', 'primary', 'on-surface', 'primary-container'],
   },
 ];
 
@@ -159,7 +159,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                       <span
                         key={si}
                         className="inline-block size-4 rounded-full"
-                        style={{ backgroundColor: swatch }}
+                        style={{ backgroundColor: `var(--oe-color-${swatch})` }}
                       />
                     ))}
                   </div>

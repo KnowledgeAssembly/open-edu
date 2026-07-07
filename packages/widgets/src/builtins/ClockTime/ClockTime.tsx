@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -42,20 +42,33 @@ function polarY(cx: number, r: number, angleDeg: number): number {
   return cx - r * Math.cos((angleDeg * Math.PI) / 180);
 }
 
+const ClockTimeStateSchema = z.object({
+  submitted: z.boolean(),
+  currentHour: z.number(),
+  currentMinute: z.number(),
+  selectedHour: z.number().nullable(),
+});
+
 function ClockTimeComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = configSchema.safeParse(rawConfig);
   const config = parsed.success ? parsed.data : null;
 
-  const [submitted, setSubmitted] = useState(false);
-  const [currentHour, setCurrentHour] = useState(config?.hour ?? 12);
-  const [currentMinute, setCurrentMinute] = useState(config?.minute ?? 0);
-  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const parsedState = useMemo(() => {
+    const result = ClockTimeStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [currentHour, setCurrentHour] = useState(parsedState?.currentHour ?? (config?.hour ?? 12));
+  const [currentMinute, setCurrentMinute] = useState(parsedState?.currentMinute ?? (config?.minute ?? 0));
+  const [selectedHour, setSelectedHour] = useState<number | null>(parsedState?.selectedHour ?? null);
   const [mode, setMode] = useState<'hour' | 'minute'>('hour');
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
@@ -121,7 +134,7 @@ function ClockTimeComponent(props: {
       displayedHour: displayHour,
       correct,
     });
-    complete(score);
+    complete(score, { submitted: true, currentHour, currentMinute, selectedHour });
   }, [
     config,
     isInteractive,
@@ -167,7 +180,7 @@ function ClockTimeComponent(props: {
       minuteCorrect,
       score,
     });
-    complete(score);
+    complete(score, { submitted: true, currentHour, currentMinute, selectedHour });
   }, [
     config,
     isInteractive,

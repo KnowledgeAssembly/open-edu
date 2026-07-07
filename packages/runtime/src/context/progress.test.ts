@@ -8,6 +8,7 @@ describe('buildProgressSnapshot', () => {
       currentNodeId: 'node-1',
       visitedNodes: ['node-1'],
       scores: { 'node-1': 90 },
+      answers: {},
       isCompleted: false,
     });
     expect(result.packageId).toBe('pkg-1');
@@ -23,6 +24,7 @@ describe('buildProgressSnapshot', () => {
       currentNodeId: 'node-1',
       visitedNodes: ['node-1'],
       scores: undefined as unknown as Record<string, number>,
+      answers: {},
       isCompleted: false,
     });
     expect(result.scores).toEqual({});

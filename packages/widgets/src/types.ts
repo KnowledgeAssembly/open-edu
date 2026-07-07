@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 
-export interface WidgetRenderProps {
+export interface WidgetRenderProps<TState = unknown> {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: TState) => void;
+  storedState?: TState;
 }
 
 export interface WidgetDefinition {

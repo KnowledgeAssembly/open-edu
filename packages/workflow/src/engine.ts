@@ -61,6 +61,22 @@ export class WorkflowEngine {
     return decodeStateName(String(this.actor.getSnapshot().value));
   }
 
+  /**
+   * Navigate to a specific node, syncing the engine's internal state.
+   * Restarts the XState machine from the given node without emitting events.
+   * Use when the UI navigates directly (e.g., sidebar) to keep the engine in sync.
+   */
+  navigateTo(nodeId: string): void {
+    if (!this.actor) return;
+    if (!(nodeId in this.workflow.routing)) {
+      throw new Error(`Cannot navigate to node "${nodeId}" — not in workflow routing.`);
+    }
+    this.actor.stop();
+    const config = buildMachineConfig(this.workflow, { entry: nodeId });
+    const machine = createMachine(config);
+    this.actor = interpret(machine).start();
+  }
+
   isCompleted(): boolean {
     if (!this.actor) return false;
     return this.actor.getSnapshot().status === 'done';

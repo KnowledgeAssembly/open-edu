@@ -37,6 +37,7 @@ class StubEngine {
     return false;
   }
   completeNode() {}
+  navigateTo(_nodeId: string) {}
 }
 
 const skillGraph: SkillGraph = {

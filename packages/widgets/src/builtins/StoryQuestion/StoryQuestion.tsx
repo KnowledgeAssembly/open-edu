@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -35,21 +35,40 @@ type ResponseRecord = {
   selectedIndex: number;
 };
 
+const StoryQuestionStateSchema = z.object({
+  submitted: z.boolean(),
+  currentIndex: z.number(),
+  selections: z.array(z.number().nullable()),
+  responses: z.array(z.object({ correct: z.boolean(), selectedIndex: z.number() })),
+  feedback: z.object({
+    selectedIndex: z.number(),
+    correctIndex: z.number(),
+    isCorrect: z.boolean(),
+    explanation: z.string().optional(),
+  }).nullable(),
+});
+
 function StoryQuestionComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
 
   const parsed = storyQuestionSchema.safeParse(rawConfig);
 
-  const [submitted, setSubmitted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selections, setSelections] = useState<(number | null)[]>([]);
-  const [responses, setResponses] = useState<ResponseRecord[]>([]);
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const parsedState = useMemo(() => {
+    const result = StoryQuestionStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
+  const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
+  const [responses, setResponses] = useState<ResponseRecord[]>(parsedState?.responses ?? []);
+  const [feedback, setFeedback] = useState<FeedbackState>(parsedState?.feedback ?? null);
 
   const content = parsed.success ? parsed.data : null;
   const questionCount = content?.questions.length ?? 0;
@@ -131,10 +150,10 @@ function StoryQuestionComponent(props: {
         totalQuestions,
         accuracy,
       });
-      complete(accuracy * 100);
+      complete(accuracy * 100, { submitted: true, currentIndex, selections, responses, feedback: null });
       setSubmitted(true);
     }
-  }, [content, currentIndex, responses, emitInteraction, complete]);
+  }, [content, currentIndex, selections, responses, emitInteraction, complete]);
 
   if (!parsed.success) {
     return (

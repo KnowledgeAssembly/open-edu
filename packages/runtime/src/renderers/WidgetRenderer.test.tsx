@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { WidgetRenderer } from './WidgetRenderer';
-import { RuntimeProvider } from '../context/RuntimeContext';
+import { RuntimeProvider, useRuntime } from '../context/RuntimeContext';
 import { createWidgetRegistry } from '@open-edu/widgets';
 import type { LoadedPackage } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
+import type { NodeAnswer } from '@open-edu/schemas';
 
 function makePackage(
   nodes: Array<{ relativePath: string; type: string; content: string }>,
@@ -37,6 +38,7 @@ interface StubEngine {
   stop: ReturnType<typeof vi.fn>;
   subscribe: ReturnType<typeof vi.fn>;
   completeNode: ReturnType<typeof vi.fn>;
+  navigateTo: ReturnType<typeof vi.fn>;
   __listener: ((e: WorkflowEvent) => void) | null;
 }
 
@@ -55,6 +57,7 @@ function makeEngine(initialNodeId: string): StubEngine & WorkflowEngine {
       };
     }),
     completeNode: vi.fn(),
+    navigateTo: vi.fn(),
     __listener: null as ((e: WorkflowEvent) => void) | null,
   };
   return stub as unknown as StubEngine & WorkflowEngine;
@@ -180,5 +183,131 @@ describe('WidgetRenderer', () => {
 
     expect(screen.getByTestId('config-output')).toBeInTheDocument();
     expect(screen.getByText('{}')).toBeInTheDocument();
+  });
+
+  it('saves answer in RuntimeContext when widget completes with state', () => {
+    let capturedAnswers: Record<string, NodeAnswer> = {};
+    function AnswersCapturer() {
+      const { answers } = useRuntime();
+      capturedAnswers = answers;
+      return <div data-testid="captured">{JSON.stringify(answers)}</div>;
+    }
+
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'answer-widget',
+      version: '1.0.0',
+      render: (props) => (
+        <button onClick={() => props.complete(85, { completed: true })}>Complete</button>
+      ),
+    });
+
+    const engine = makeEngine('nodes/ex-01.md');
+    render(
+      <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={registry}>
+        <AnswersCapturer />
+        <WidgetRenderer
+          node={{ type: 'exercise', widget: 'answer-widget' }}
+          nodeId="nodes/ex-01.md"
+        />
+      </RuntimeProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
+
+    const saved = capturedAnswers['nodes/ex-01.md'];
+    expect(saved).toBeDefined();
+    expect(saved?.type).toBe('widget');
+    expect((saved as { data: unknown }).data).toEqual({ completed: true });
+    expect((saved as { score?: number }).score).toBe(85);
+  });
+
+  it('passes storedState from answer saved before render', () => {
+    let capturer: { saveAnswer: (id: string, a: NodeAnswer) => void } | null = null;
+    function ContextAccessor() {
+      const { saveAnswer, answers } = useRuntime();
+      capturer = { saveAnswer };
+      return <div data-testid="ctx-answers">{JSON.stringify(answers)}</div>;
+    }
+
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'state-reader',
+      version: '1.0.0',
+      render: (props) => <div data-testid="stored">{JSON.stringify(props.storedState)}</div>,
+    });
+
+    const engine = makeEngine('nodes/ex-01.md');
+    render(
+      <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={registry}>
+        <ContextAccessor />
+        <WidgetRenderer
+          node={{ type: 'exercise', widget: 'state-reader' }}
+          nodeId="nodes/ex-01.md"
+        />
+      </RuntimeProvider>,
+    );
+
+    act(() => {
+      capturer!.saveAnswer('nodes/ex-01.md', {
+        type: 'widget',
+        widgetId: 'state-reader',
+        data: { persisted: true },
+      });
+    });
+
+    expect(screen.getByTestId('stored')).toHaveTextContent('{"persisted":true}');
+  });
+
+  it('passes storedState to widget on second render via initialProgress', () => {
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'state-reader',
+      version: '1.0.0',
+      render: (props) => <div data-testid="stored">{JSON.stringify(props.storedState)}</div>,
+    });
+
+    const engine = makeEngine('nodes/ex-01.md');
+    const { unmount } = render(
+      <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={registry}>
+        <WidgetRenderer
+          node={{ type: 'exercise', widget: 'state-reader' }}
+          nodeId="nodes/ex-01.md"
+        />
+      </RuntimeProvider>,
+    );
+    unmount();
+
+    const engine2 = makeEngine('nodes/ex-01.md');
+    render(
+      <RuntimeProvider
+        loadedPackage={pkg}
+        engine={engine2}
+        widgetRegistry={registry}
+        initialProgress={{
+          packageId: 'test',
+          packageVersion: '1.0.0',
+          currentNodeId: 'nodes/ex-01.md',
+          visitedNodes: ['nodes/ex-01.md'],
+          scores: {},
+          answers: {
+            'nodes/ex-01.md': {
+              type: 'widget',
+              widgetId: 'state-reader',
+              data: { persisted: true },
+            },
+          },
+          isCompleted: false,
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        }}
+      >
+        <WidgetRenderer
+          node={{ type: 'exercise', widget: 'state-reader' }}
+          nodeId="nodes/ex-01.md"
+        />
+      </RuntimeProvider>,
+    );
+
+    expect(screen.getByTestId('stored')).toHaveTextContent('{"persisted":true}');
   });
 });

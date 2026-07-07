@@ -191,6 +191,7 @@ export function CourseRuntime({
               currentNodeId: snapshot.currentNodeId,
               visitedNodes: snapshot.visitedNodes,
               scores: snapshot.scores,
+              answers: snapshot.answers,
               isCompleted: snapshot.isCompleted,
               completedAt: snapshot.isCompleted ? snapshot.updatedAt : undefined,
             },

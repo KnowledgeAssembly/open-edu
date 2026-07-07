@@ -14,6 +14,7 @@ describe('progressStorage', () => {
     currentNodeId: 'node-1',
     visitedNodes: ['node-1'],
     scores: {},
+    answers: {},
     isCompleted: false,
     updatedAt: '2024-01-01T00:00:00.000Z',
   };

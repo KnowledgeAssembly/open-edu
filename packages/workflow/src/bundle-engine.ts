@@ -300,6 +300,7 @@ export class BundleEngine {
       currentNodeId: '',
       visitedNodes: [],
       scores: {},
+      answers: {},
       isCompleted: true,
       completedAt: new Date().toISOString(),
     };
@@ -355,6 +356,7 @@ export class BundleEngine {
         ? [...new Set([...existingVisited, currentNodeId])]
         : existingVisited,
       scores: {},
+      answers: existing?.answers ?? {},
       isCompleted,
       completedAt: isCompleted ? new Date().toISOString() : undefined,
     };

@@ -4,6 +4,7 @@ import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets'
 import { useRemoteWidget } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
+import type { WidgetAnswer } from '@open-edu/schemas';
 
 interface WidgetErrorBoundaryState {
   hasError: boolean;
@@ -63,7 +64,7 @@ export interface WidgetRendererProps {
 }
 
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
-  const { widgetRegistry, completeNode } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
 
   if (node.remoteWidget) {
     return <RemoteWidgetRenderer node={node} nodeId={nodeId} />;
@@ -80,6 +81,9 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     );
   }
 
+  const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
+  const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
+
   const emitInteraction = (data: Record<string, unknown>) => {
     console.debug('[widget:interaction]', widgetId, data);
   };
@@ -89,7 +93,20 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     nodeId,
     config: node.config ?? {},
     emitInteraction,
-    complete: (score?: number) => completeNode(score),
+    complete: (score?: number, state?: unknown) => {
+      if (state !== undefined) {
+        const answer: WidgetAnswer = {
+          type: 'widget',
+          widgetId,
+          widgetVersion: definition.version,
+          data: state,
+          score,
+        };
+        saveAnswer(nodeId, answer);
+      }
+      completeNode(score);
+    },
+    storedState,
   };
 
   return (
@@ -102,7 +119,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 }
 
 function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
-  const { widgetRegistry, completeNode } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
   const manifest = node.remoteWidget!;
   const { widget, status, error } = useRemoteWidget(manifest, widgetRegistry);
 
@@ -118,6 +135,8 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     if (manifest.fallback) {
       const fallbackDef = widgetRegistry?.get(manifest.fallback);
       if (fallbackDef) {
+        const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
+        const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
         const WidgetComponent = fallbackDef.render;
         const widgetProps: WidgetRenderProps = {
           nodeId,
@@ -125,7 +144,18 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
           emitInteraction: (data: Record<string, unknown>) => {
             console.debug('[widget:interaction]', manifest.fallback, data);
           },
-          complete: (score?: number) => completeNode(score),
+          complete: (score?: number, state?: unknown) => {
+            if (state !== undefined) {
+              saveAnswer(nodeId, {
+                type: 'widget',
+                widgetId: manifest.fallback ?? 'unknown',
+                data: state,
+                score,
+              });
+            }
+            completeNode(score);
+          },
+          storedState,
         };
         return (
           <WidgetErrorBoundary widgetId={manifest.fallback}>
@@ -147,6 +177,8 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     );
   }
 
+  const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
+  const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
   const WidgetComponent = widget!.render;
   const widgetProps: WidgetRenderProps = {
     nodeId,
@@ -154,7 +186,18 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     emitInteraction: (data: Record<string, unknown>) => {
       console.debug('[widget:interaction]', manifest.id, data);
     },
-    complete: (score?: number) => completeNode(score),
+    complete: (score?: number, state?: unknown) => {
+      if (state !== undefined) {
+        saveAnswer(nodeId, {
+          type: 'widget',
+          widgetId: manifest.id,
+          data: state,
+          score,
+        });
+      }
+      completeNode(score);
+    },
+    storedState,
   };
 
   return (

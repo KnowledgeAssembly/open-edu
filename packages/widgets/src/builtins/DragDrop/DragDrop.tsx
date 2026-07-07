@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -218,22 +218,34 @@ function DroppableTarget({
   );
 }
 
+const DragDropStateSchema = z.object({
+  submitted: z.boolean(),
+  placedItems: z.record(z.string(), z.string()),
+  hintIndex: z.number(),
+});
+
 function DragDropComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = dragDropSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent =
     parsed.success && content && content.items.length > 0 && content.targets.length > 0;
 
-  const [submitted, setSubmitted] = useState(false);
+  const parsedState = useMemo(() => {
+    const result = DragDropStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [placedItems, setPlacedItems] = useState<Record<string, string>>({});
-  const [hintIndex, setHintIndex] = useState(0);
+  const [placedItems, setPlacedItems] = useState<Record<string, string>>(parsedState?.placedItems ?? {});
+  const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
   const [activeDragItem, setActiveDragItem] = useState<{ id: string } | null>(null);
 
   const isObserve = content?.interactive !== true;
@@ -341,9 +353,9 @@ function DragDropComponent(props: {
       accuracy,
       widgetId: 'open-edu.drag-drop',
     });
-    complete(score);
+    complete(score, { submitted: true, placedItems, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, placedItems, emitInteraction, complete]);
+  }, [submitted, content, placedItems, hintIndex, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {

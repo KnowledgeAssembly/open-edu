@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
@@ -74,17 +74,29 @@ function FractionNotation({ numerator, denominator }: { numerator: number; denom
   );
 }
 
+const FractionVisualStateSchema = z.object({
+  submitted: z.boolean(),
+  shadedMask: z.number().nullable(),
+});
+
 function FractionVisualComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction: (data: Record<string, unknown>) => void;
-  complete: (score?: number) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
 }) {
-  const { config: rawConfig, emitInteraction, complete } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
   const parsed = fractionVisualSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
-  const [submitted, setSubmitted] = useState(false);
-  const [shadedMask, setShadedMask] = useState<number | null>(null);
+
+  const parsedState = useMemo(() => {
+    const result = FractionVisualStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [shadedMask, setShadedMask] = useState<number | null>(parsedState?.shadedMask ?? null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const isObserve = content && !content.interactive;
@@ -129,9 +141,9 @@ function FractionVisualComponent(props: {
       correct,
       widgetId: 'open-edu.fraction-visual',
     });
-    complete(score);
+    complete(score, { submitted: true, shadedMask });
     setSubmitted(true);
-  }, [content, submitted, shadedCount, emitInteraction, complete]);
+  }, [content, submitted, shadedMask, shadedCount, emitInteraction, complete]);
 
   if (!parsed.success || !content) {
     return (

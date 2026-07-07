@@ -2,7 +2,15 @@ export { RUNTIME_VERSION } from './version.js';
 export { RuntimeProvider, useRuntime, useRuntimeOptional } from './context/RuntimeContext.js';
 export type { RuntimeContextValue, RuntimeProviderProps } from './context/RuntimeContext.js';
 export { buildProgressSnapshot, isValidSnapshot } from './context/progress.js';
-export type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
+export type {
+  ProgressSnapshot,
+  SkillGraph,
+  MasteryLevel,
+  NodeAnswer,
+  QuizAnswer,
+  ReflectionAnswer,
+  WidgetAnswer,
+} from '@open-edu/schemas';
 export { SkillSummary } from './components/SkillSummary.js';
 export type { SkillSummaryProps } from './components/SkillSummary.js';
 export {

@@ -187,7 +187,7 @@ describe('GridArea interactive mode - area', () => {
     fireEvent.click(cell(1));
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(100);
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: true, count: 2 }),
     );
@@ -203,7 +203,7 @@ describe('GridArea interactive mode - area', () => {
     fireEvent.click(cell(0));
     fireEvent.click(cell(1));
     fireEvent.click(screen.getByText('Submit'));
-    expect(complete).toHaveBeenCalledWith(0);
+    expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   it('shows feedback after submission', () => {
