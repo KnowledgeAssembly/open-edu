@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { AppShell } from './AppShell';
 import type { LoadedPackage, PackageSummary } from '@open-edu/core';
 
@@ -26,7 +26,8 @@ const emptyBundles: BundleSummary[] = [];
 const emptyBundleEntries: Record<string, LoadedBundle> = {};
 
 function renderWithRouter(ui: React.ReactElement, initialEntries = ['/']) {
-  return render(<MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>);
+  const router = createMemoryRouter([{ path: '*', element: ui }], { initialEntries });
+  return render(<RouterProvider router={router} />);
 }
 
 describe('AppShell', () => {

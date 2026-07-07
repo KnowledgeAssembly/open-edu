@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Routes, Route } from 'react-router-dom';
 import type { LoadedBundle } from '@open-edu/core';
 import { AppShell } from './AppShell';
 import { catalogPackages, packageEntries, catalogBundles, bundleEntries } from 'virtual:edu-data';
@@ -20,18 +19,11 @@ export function App(): JSX.Element {
   }, []);
 
   return (
-    <Routes>
-      <Route
-        path="/*"
-        element={
-          <AppShell
-            catalogPackages={catalogPackages}
-            packageEntries={packageEntries}
-            catalogBundles={catalogBundles}
-            bundleEntries={reconstructedBundleEntries}
-          />
-        }
-      />
-    </Routes>
+    <AppShell
+      catalogPackages={catalogPackages}
+      packageEntries={packageEntries}
+      catalogBundles={catalogBundles}
+      bundleEntries={reconstructedBundleEntries}
+    />
   );
 }

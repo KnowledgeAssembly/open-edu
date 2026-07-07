@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate, useLocation, useBlocker } from 'react-router-dom';
 import {
   RuntimeThemeProvider,
   TopAppBar,
@@ -114,10 +114,8 @@ export function AppShell({
   );
 
   const [themeId, setThemeId] = useThemePreference();
-  const [showExitWarning, setShowExitWarning] = useState(false);
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
-  const pendingNavPath = useRef<string | null>(null);
 
   const breakTimer = useBreakTimer();
 
@@ -126,7 +124,11 @@ export function AppShell({
   }, [navigate]);
 
   const handleBackToLearning = useCallback(() => {
-    navigate(-1);
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
     breakTimer.dismiss();
   }, [navigate, breakTimer]);
 
@@ -165,57 +167,30 @@ export function AppShell({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isCourseInProgress]);
 
+  const blocker = useBlocker(({ nextLocation }) => {
+    if (!isCourseInProgress) return false;
+    if (nextLocation.pathname.startsWith('/course/')) return false;
+    return true;
+  });
+
+  const showExitWarning = blocker.state === 'blocked';
+
   const handleNavigate = useCallback(
     (newView: AppView) => {
-      if (newView.view === 'course') {
-        if (!newView.packageId || !packageEntries[newView.packageId]) return;
-
-        const currentBundleId = view.view === 'course' ? view.bundleId : undefined;
-        const isSameBundle = newView.bundleId && currentBundleId === newView.bundleId;
-
-        if (isSameBundle) {
-          navigate(viewToPath(newView));
-          return;
-        }
-
-        if (view.view === 'course' && view.packageId !== newView.packageId && isCourseInProgress) {
-          pendingNavPath.current = viewToPath(newView);
-          setShowExitWarning(true);
-        } else {
-          navigate(viewToPath(newView));
-        }
+      if (newView.view === 'course' && newView.packageId && !packageEntries[newView.packageId])
         return;
-      }
-
-      if (newView.view === 'bundleOverview' && isCourseInProgress) {
-        pendingNavPath.current = viewToPath(newView);
-        setShowExitWarning(true);
-        return;
-      }
-
-      if (isCourseInProgress) {
-        pendingNavPath.current = viewToPath(newView);
-        setShowExitWarning(true);
-      } else {
-        navigate(viewToPath(newView));
-      }
+      navigate(viewToPath(newView));
     },
-    [packageEntries, isCourseInProgress, view, navigate, location.pathname],
+    [packageEntries, navigate],
   );
 
   const handleExitStay = useCallback(() => {
-    setShowExitWarning(false);
-    pendingNavPath.current = null;
-  }, []);
+    blocker.reset?.();
+  }, [blocker]);
 
   const handleExitLeave = useCallback(() => {
-    setShowExitWarning(false);
-    const pending = pendingNavPath.current;
-    pendingNavPath.current = null;
-    if (pending) {
-      navigate(pending);
-    }
-  }, [navigate]);
+    blocker.proceed?.();
+  }, [blocker]);
 
   const handleStartCourse = useCallback(
     (packageDir: string) => {
