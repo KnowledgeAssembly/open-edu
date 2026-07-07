@@ -115,7 +115,17 @@ test.describe('Learner Experience', () => {
 
     const progressAfter = await page.evaluate(() => localStorage.getItem('open-edu-progress'));
 
-    expect(progressAfter).toEqual(progressBefore);
+    // Compare progress data excluding updatedAt (which changes on re-mount)
+    const stripTimestamps = (raw: string | null) => {
+      if (!raw) return raw;
+      const parsed = JSON.parse(raw);
+      for (const id of Object.keys(parsed)) {
+        const { updatedAt, ...rest } = parsed[id];
+        parsed[id] = rest;
+      }
+      return JSON.stringify(parsed);
+    };
+    expect(stripTimestamps(progressAfter)).toEqual(stripTimestamps(progressBefore));
   });
 
   test('accessibility: catalog page passes basic checks', async ({ page }) => {
