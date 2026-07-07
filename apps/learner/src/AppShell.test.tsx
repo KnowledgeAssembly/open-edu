@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { AppShell } from './AppShell';
 import type { LoadedPackage, PackageSummary } from '@open-edu/core';
 
@@ -24,9 +25,13 @@ const emptyEntries: Record<string, LoadedPackage> = {};
 const emptyBundles: BundleSummary[] = [];
 const emptyBundleEntries: Record<string, LoadedBundle> = {};
 
+function renderWithRouter(ui: React.ReactElement, initialEntries = ['/']) {
+  return render(<MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>);
+}
+
 describe('AppShell', () => {
   it('renders without crashing', () => {
-    render(
+    renderWithRouter(
       <AppShell
         catalogPackages={emptyPackages}
         packageEntries={emptyEntries}
@@ -38,7 +43,7 @@ describe('AppShell', () => {
   });
 
   it('renders AppSidebar nav items', () => {
-    render(
+    renderWithRouter(
       <AppShell
         catalogPackages={emptyPackages}
         packageEntries={emptyEntries}
@@ -52,7 +57,7 @@ describe('AppShell', () => {
   });
 
   it('renders the TopAppBar', () => {
-    render(
+    renderWithRouter(
       <AppShell
         catalogPackages={emptyPackages}
         packageEntries={emptyEntries}
@@ -64,7 +69,7 @@ describe('AppShell', () => {
   });
 
   it('defaults to home view', () => {
-    render(
+    renderWithRouter(
       <AppShell
         catalogPackages={emptyPackages}
         packageEntries={emptyEntries}
@@ -73,5 +78,32 @@ describe('AppShell', () => {
       />,
     );
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
+  });
+
+  it('renders catalog heading at /catalog route', () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/catalog'],
+    );
+    // With no packages, the empty state shows
+    expect(screen.getByText('No courses yet')).toBeInTheDocument();
+  });
+
+  it('renders settings at /settings route', () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/settings'],
+    );
+    expect(screen.getByTestId('settings-page')).toBeInTheDocument();
   });
 });
