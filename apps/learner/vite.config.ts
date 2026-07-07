@@ -1,21 +1,94 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, extname, resolve, dirname } from 'node:path';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CATALOG_DIR = resolve(__dirname, '../../examples');
+const CATALOG_DIR = process.env.EDU_CATALOG_DIR
+  ? resolve(process.env.EDU_CATALOG_DIR)
+  : resolve(__dirname, '../../examples');
 const PKGS_DIR = resolve(__dirname, '../../packages');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
+
+const ASSET_MIME_TYPES: Record<string, string> = {
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.pdf': 'application/pdf',
+  '.json': 'application/json',
+  '.txt': 'text/plain',
+};
+
+function findAssetsDirs(catalogDir: string): string[] {
+  const dirs: string[] = [];
+  try {
+    const entries = readdirSync(catalogDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (entry.name.startsWith('.')) continue;
+      const assetsDir = join(catalogDir, entry.name, 'assets');
+      if (existsSync(assetsDir)) {
+        dirs.push(assetsDir);
+      }
+      // Also check for standalone package directories
+      if (existsSync(join(catalogDir, entry.name, 'package.json')) ||
+          existsSync(join(catalogDir, entry.name, 'bundle.json'))) {
+        // already added above if assets exists
+      }
+    }
+  } catch {
+    // catalog dir not accessible, skip
+  }
+  return dirs;
+}
 
 function eduDataPlugin(): Plugin {
   return {
     name: 'edu-data-loader',
     resolveId(id) {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
+    },
+    configureServer(server) {
+      const assetDirs = findAssetsDirs(CATALOG_DIR);
+      if (assetDirs.length === 0) return;
+
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const requestPath = decodeURIComponent(req.url ?? '');
+        if (!requestPath.startsWith('/assets/')) return next();
+
+        const relativePath = requestPath.slice('/assets/'.length);
+        for (const assetsDir of assetDirs) {
+          const filePath = join(assetsDir, relativePath);
+          if (!filePath.startsWith(assetsDir)) continue;
+          try {
+            const stat = statSync(filePath);
+            if (stat.isFile()) {
+              const ext = extname(filePath).toLowerCase();
+              res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.end(readFileSync(filePath));
+              return;
+            }
+          } catch {
+            continue;
+          }
+        }
+        next();
+      });
+
+      console.log(`[edu-data] Serving assets from ${assetDirs.length} package(s) (${CATALOG_DIR})`);
     },
     async load(id) {
       if (id !== RESOLVED_MODULE_ID) return;

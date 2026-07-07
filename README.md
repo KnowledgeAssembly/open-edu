@@ -17,6 +17,9 @@ pnpm build
 pnpm --filter @open-edu/learner dev
 # Opens at http://localhost:4001 — browse and launch example courses
 
+# Use a custom course directory (defaults to ../../examples)
+EDU_CATALOG_DIR=/path/to/my/courses pnpm --filter @open-edu/learner dev
+
 # Run the dev server for a specific package
 pnpm --filter @open-edu/cli build
 node packages/cli/dist/cli.js dev ./examples/hello-world

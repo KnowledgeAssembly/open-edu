@@ -3,6 +3,23 @@ import { z } from 'zod';
 import type { WidgetDefinition } from '../../types';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const sequencingItemSchema = z.object({
   id: z.string(),
@@ -32,6 +49,73 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+function SortableItem({
+  item,
+  index,
+  submitted,
+  correctOrder,
+}: {
+  item: { id: string; label: string; emoji?: string };
+  index: number;
+  submitted: boolean;
+  correctOrder: string[];
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+
+  const isCorrectPosition = submitted && correctOrder[index] === item.id;
+  const isIncorrectPosition = submitted && correctOrder[index] !== item.id;
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: `${transition || ''}`,
+    padding: '0.5rem',
+    border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
+    borderRadius: '0.25rem',
+    backgroundColor: isCorrectPosition
+      ? 'var(--oe-color-success-container, #dcfce7)'
+      : isIncorrectPosition
+        ? 'var(--oe-color-error-container, #fee2e2)'
+        : 'var(--oe-color-surface, #ffffff)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.375rem',
+    opacity: isDragging ? 0.5 : 1,
+    cursor: 'grab',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      role="listitem"
+      data-testid={`sortable-item-${item.id}`}
+      aria-label={`Step ${index + 1}: ${item.label}`}
+    >
+      <span
+        style={{
+          fontWeight: 'bold',
+          color: 'var(--oe-color-primary, #3b82f6)',
+          minWidth: '1.5rem',
+        }}
+      >
+        {index + 1}.
+      </span>
+      {item.emoji && <span>{item.emoji}</span>}
+      <span>{item.label}</span>
+      {isCorrectPosition && (
+        <span style={{ marginLeft: 'auto', color: 'var(--oe-success, #22c55e)' }}>✓</span>
+      )}
+      {isIncorrectPosition && (
+        <span style={{ marginLeft: 'auto', color: 'var(--oe-error, #ef4444)' }}>✗</span>
+      )}
+    </div>
+  );
+}
+
 function SequencingComponent(props: {
   nodeId: string;
   config: Record<string, unknown>;
@@ -45,17 +129,17 @@ function SequencingComponent(props: {
     parsed.success && content && content.items.length > 0 && content.correctOrder.length > 0;
 
   const [submitted, setSubmitted] = useState(false);
-  const [userOrder, setUserOrder] = useState<string[]>([]);
   const [hintIndex, setHintIndex] = useState(0);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const isObserve = content?.interactive !== true;
   const items = content?.items ?? [];
   const correctOrder = useMemo(() => content?.correctOrder ?? [], [content]);
 
-  const shuffledItems = useMemo(() => {
+  const [itemOrder, setItemOrder] = useState<string[]>(() => {
     if (!content) return [];
-    return shuffleArray(content.items);
-  }, [content]);
+    return shuffleArray(content.items).map((item) => item.id);
+  });
 
   const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
     isObserve: isObserve && hasValidContent,
@@ -64,57 +148,63 @@ function SequencingComponent(props: {
     widgetId: 'open-edu.sequencing',
   });
 
-  const handleAvailableItemClick = useCallback(
-    (itemId: string) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor),
+  );
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      setActiveDragId(String(event.active.id));
+    },
+    [],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const activeId = String(event.active.id);
+      const overId = event.over ? String(event.over.id) : null;
+      setActiveDragId(null);
       if (submitted || isObserve) return;
-      setUserOrder((prev) => [...prev, itemId]);
+      if (overId && activeId !== overId) {
+        setItemOrder((prev) => {
+          const oldIndex = prev.indexOf(activeId);
+          const newIndex = prev.indexOf(overId);
+          if (oldIndex === -1 || newIndex === -1) return prev;
+          return arrayMove(prev, oldIndex, newIndex);
+        });
+      }
     },
     [submitted, isObserve],
   );
 
-  const handleRemoveItem = useCallback(
-    (itemId: string) => {
-      if (submitted || isObserve) return;
-      setUserOrder((prev) => prev.filter((id) => id !== itemId));
-    },
-    [submitted, isObserve],
-  );
-
-  const moveItem = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      if (submitted || isObserve) return;
-      if (toIndex < 0 || toIndex >= userOrder.length) return;
-      setUserOrder((prev) => {
-        const next = [...prev];
-        const [moved] = next.splice(fromIndex, 1);
-        next.splice(toIndex, 0, moved!);
-        return next;
-      });
-    },
-    [submitted, isObserve, userOrder.length],
-  );
+  const handleDragCancel = useCallback(() => {
+    setActiveDragId(null);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (submitted || !content) return;
 
     const correct =
-      correctOrder.length === userOrder.length &&
-      correctOrder.every((id, i) => id === userOrder[i]);
+      correctOrder.length === itemOrder.length &&
+      correctOrder.every((id, i) => id === itemOrder[i]);
     const accuracy =
-      userOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
+      itemOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
     const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
       action: 'submit',
-      userOrder,
+      userOrder: itemOrder,
       correct,
       accuracy,
       widgetId: 'open-edu.sequencing',
     });
     complete(score);
     setSubmitted(true);
-  }, [submitted, content, userOrder, correctOrder, emitInteraction, complete]);
+  }, [submitted, content, itemOrder, correctOrder, emitInteraction, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -134,11 +224,7 @@ function SequencingComponent(props: {
     );
   }
 
-  const availableItems = shuffledItems.filter((item) => !userOrder.includes(item.id));
-  const placedItems = userOrder
-    .map((id) => items.find((item) => item.id === id))
-    .filter((x): x is (typeof items)[number] => x !== undefined);
-  const allItemsPlaced = userOrder.length === items.length;
+  const activeDragItem = activeDragId ? items.find((i) => i.id === activeDragId) : null;
 
   if (isObserve) {
     return (
@@ -186,294 +272,171 @@ function SequencingComponent(props: {
   }
 
   return (
-    <div data-testid="sequencing" aria-label="Sequencing activity">
-      {content.description && <p>{content.description}</p>}
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div data-testid="sequencing" aria-label="Sequencing activity">
+        {content.description && <p>{content.description}</p>}
 
-      <div role="group" aria-label="Available items" style={{ marginTop: '1rem' }}>
-        <p>Click items to build your sequence:</p>
-        <div
-          data-testid="available-items"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.5rem',
-            padding: '0.75rem',
-            border: '1px dashed var(--oe-color-outline-variant, #d1d5db)',
-            borderRadius: '0.375rem',
-            minHeight: '2.5rem',
-            backgroundColor: 'var(--oe-color-surface-container-lowest, #f9fafb)',
-          }}
-        >
-          {availableItems.length === 0 && (
-            <span
-              style={{ color: 'var(--oe-color-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
+        <div style={{ marginTop: '1rem' }}>
+          <div
+            data-testid="sortable-list"
+            role="group"
+            aria-label="Reorder the items"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              padding: '0.75rem',
+              border: '2px solid var(--oe-color-primary, #3b82f6)',
+              borderRadius: '0.375rem',
+              minHeight: '2.5rem',
+              backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+            }}
+          >
+            <SortableContext
+              items={itemOrder}
+              strategy={verticalListSortingStrategy}
             >
-              All items placed
-            </span>
-          )}
-          {availableItems.map((item) => (
-            <div
-              key={item.id}
-              data-testid={`available-item-${item.id}`}
-              role="button"
-              tabIndex={0}
-              aria-label={`Add ${item.label} to sequence`}
-              onClick={() => handleAvailableItemClick(item.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleAvailableItemClick(item.id);
-                }
-              }}
-              style={{
-                padding: '0.375rem 0.75rem',
-                border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
-                borderRadius: '1rem',
-                cursor: 'pointer',
-                backgroundColor: 'var(--oe-color-surface, #ffffff)',
-                userSelect: 'none',
-              }}
-            >
-              {item.emoji && <span>{item.emoji} </span>}
-              {item.label}
-            </div>
-          ))}
+              {itemOrder.map((id, index) => {
+                const item = items.find((i) => i.id === id);
+                if (!item) return null;
+                return (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    submitted={submitted}
+                    correctOrder={correctOrder}
+                  />
+                );
+              })}
+            </SortableContext>
+          </div>
         </div>
-      </div>
 
-      <div role="group" aria-label="Your sequence" style={{ marginTop: '1rem' }}>
-        <p>Your sequence:</p>
-        <div
-          data-testid="user-sequence"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-            padding: '0.75rem',
-            border: '2px solid var(--oe-color-primary, #3b82f6)',
-            borderRadius: '0.375rem',
-            minHeight: '2.5rem',
-            backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
-          }}
-        >
-          {userOrder.length === 0 && (
-            <span
-              style={{ color: 'var(--oe-color-on-surface-variant, #9ca3af)', fontStyle: 'italic' }}
-            >
-              Click items above to build your sequence
-            </span>
-          )}
-          {correctOrder.map((correctItemId, slotIndex) => {
-            const placedItem = placedItems[slotIndex];
-            const isCorrectPosition = submitted && placedItem?.id === correctItemId;
-            const isIncorrectPosition = submitted && placedItem && placedItem.id !== correctItemId;
-
+        {submitted &&
+          correctOrder.map((correctItemId, slotIndex) => {
+            const placedItemId = itemOrder[slotIndex];
+            const isIncorrectPosition =
+              placedItemId && placedItemId !== correctItemId;
+            if (!isIncorrectPosition) return null;
+            const correctItem = items.find((i) => i.id === correctItemId);
             return (
               <div
-                key={`slot-${slotIndex}`}
-                data-testid={placedItem ? `placed-item-${placedItem.id}` : `slot-${slotIndex}`}
+                key={`correction-${slotIndex}`}
                 style={{
-                  padding: '0.5rem',
-                  border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
-                  borderRadius: '0.25rem',
-                  backgroundColor: isCorrectPosition
-                    ? 'var(--oe-color-success-container, #dcfce7)'
-                    : isIncorrectPosition
-                      ? 'var(--oe-color-error-container, #fee2e2)'
-                      : 'var(--oe-color-surface, #ffffff)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.375rem',
-                  transition: 'all 0.2s ease',
+                  padding: '0.25rem 0.5rem',
+                  marginLeft: '1.5rem',
+                  fontSize: '0.875rem',
+                  color: 'var(--oe-color-on-surface-variant, #6b7280)',
+                  fontStyle: 'italic',
                 }}
               >
-                <span
-                  style={{
-                    fontWeight: 'bold',
-                    color: 'var(--oe-color-primary, #3b82f6)',
-                    minWidth: '1.5rem',
-                  }}
-                >
-                  {slotIndex + 1}.
-                </span>
-                {placedItem ? (
-                  <>
-                    {placedItem.emoji && <span>{placedItem.emoji}</span>}
-                    <span className="flex-1">{placedItem.label}</span>
-                    {isCorrectPosition && (
-                      <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>
-                    )}
-                    {isIncorrectPosition && (
-                      <span style={{ color: 'var(--oe-error, #ef4444)' }}>✗</span>
-                    )}
-                    {!submitted && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          marginLeft: 'auto',
-                        }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveItem(slotIndex, slotIndex - 1)}
-                          disabled={slotIndex === 0}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: slotIndex === 0 ? 'default' : 'pointer',
-                            fontSize: '0.875rem',
-                            padding: '0 0.25rem',
-                            opacity: slotIndex === 0 ? 0.4 : 1,
-                          }}
-                          aria-label={`Move ${placedItem.label} up`}
-                        >
-                          ↑
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveItem(slotIndex, slotIndex + 1)}
-                          disabled={slotIndex === userOrder.length - 1}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: slotIndex === userOrder.length - 1 ? 'default' : 'pointer',
-                            fontSize: '0.875rem',
-                            padding: '0 0.25rem',
-                            opacity: slotIndex === userOrder.length - 1 ? 0.4 : 1,
-                          }}
-                          aria-label={`Move ${placedItem.label} down`}
-                        >
-                          ↓
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveItem(placedItem.id)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            color: 'var(--oe-color-on-surface-variant, #6b7280)',
-                            padding: '0 0.25rem',
-                            borderRadius: '0.25rem',
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.target as HTMLElement).style.backgroundColor =
-                              'var(--oe-color-surface-variant, #f3f4f6)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                          }}
-                          aria-label="Remove from sequence"
-                        >
-                          ✕
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <span
-                    style={{
-                      color: 'var(--oe-color-on-surface-variant, #9ca3af)',
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    ___
-                  </span>
-                )}
+                Correct: {correctItem?.emoji && <span>{correctItem.emoji} </span>}
+                {correctItem?.label}
               </div>
             );
           })}
-          {submitted &&
-            correctOrder.map((correctItemId, slotIndex) => {
-              const placedItem = placedItems[slotIndex];
-              const isIncorrectPosition = placedItem && placedItem.id !== correctItemId;
-              if (!isIncorrectPosition) return null;
-              const correctItem = items.find((i) => i.id === correctItemId);
-              return (
-                <div
-                  key={`correction-${slotIndex}`}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    marginLeft: '1.5rem',
-                    fontSize: '0.875rem',
-                    color: 'var(--oe-color-on-surface-variant, #6b7280)',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  Correct: {correctItem?.emoji && <span>{correctItem.emoji} </span>}
-                  {correctItem?.label}
-                </div>
-              );
-            })}
-        </div>
-      </div>
 
-      <div role="status" aria-live="polite" aria-atomic="true" style={{ marginTop: '0.5rem' }}>
-        {userOrder.length > 0 && (
-          <p data-testid="sequencing-status">
-            {userOrder.length} of {items.length} items in sequence
-          </p>
+        <div role="status" aria-live="polite" aria-atomic="true" style={{ marginTop: '0.5rem' }}>
+          {itemOrder.length > 0 && (
+            <p data-testid="sequencing-status">
+              {itemOrder.length} of {items.length} items in sequence
+            </p>
+          )}
+        </div>
+
+        {!submitted &&
+          content.hints &&
+          content.hints.length > 0 &&
+          content.hints[hintIndex] && (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                marginTop: '0.5rem',
+                color: 'var(--oe-color-on-surface-variant, #6b7280)',
+              }}
+            >
+              <p>{content.hints[hintIndex]}</p>
+              {hintIndex < content.hints.length - 1 && (
+                <Button variant="ghost" size="sm" onClick={handleHintClick}>
+                  More help
+                </Button>
+              )}
+            </div>
+          )}
+
+        {!submitted && content.hint && !content.hints && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              marginTop: '0.5rem',
+              color: 'var(--oe-color-on-surface-variant, #6b7280)',
+            }}
+          >
+            <p>{content.hint}</p>
+          </div>
+        )}
+
+        <div style={{ marginTop: '1rem' }}>
+          {!submitted ? (
+            <Button variant="default" onClick={handleSubmit} disabled={false}>
+              Submit
+            </Button>
+          ) : null}
+        </div>
+
+        {submitted && (
+          <div role="status" aria-live="assertive" data-testid="feedback">
+            {(() => {
+              const correct =
+                correctOrder.length === itemOrder.length &&
+                correctOrder.every((id, i) => id === itemOrder[i]);
+              const correctCount = itemOrder.filter(
+                (id, i) => id === correctOrder[i],
+              ).length;
+              if (correct) {
+                return <p>Correct! The sequence is in the right order.</p>;
+              }
+              return (
+                <p>
+                  {correctCount} of {correctOrder.length} items in the right position.
+                </p>
+              );
+            })()}
+          </div>
         )}
       </div>
 
-      {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
-        >
-          <p>{content.hints[hintIndex]}</p>
-          {hintIndex < content.hints.length - 1 && (
-            <Button variant="ghost" size="sm" onClick={handleHintClick}>
-              More help
-            </Button>
-          )}
-        </div>
-      )}
-
-      {!submitted && content.hint && !content.hints && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{ marginTop: '0.5rem', color: 'var(--oe-color-on-surface-variant, #6b7280)' }}
-        >
-          <p>{content.hint}</p>
-        </div>
-      )}
-
-      <div style={{ marginTop: '1rem' }}>
-        {!submitted ? (
-          <Button variant="default" onClick={handleSubmit} disabled={!allItemsPlaced}>
-            Submit
-          </Button>
+      <DragOverlay>
+        {activeDragItem ? (
+          <div
+            style={{
+              padding: '0.5rem',
+              border: '2px solid var(--oe-color-primary, #3b82f6)',
+              borderRadius: '0.375rem',
+              backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+              cursor: 'grabbing',
+              userSelect: 'none',
+              boxShadow:
+                '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+            }}
+          >
+            {activeDragItem.emoji && <span>{activeDragItem.emoji}</span>}
+            <span>{activeDragItem.label}</span>
+          </div>
         ) : null}
-      </div>
-
-      {submitted && (
-        <div role="status" aria-live="assertive" data-testid="feedback">
-          {(() => {
-            const correct =
-              correctOrder.length === userOrder.length &&
-              correctOrder.every((id, i) => id === userOrder[i]);
-            const correctCount = userOrder.filter((id, i) => id === correctOrder[i]).length;
-            if (correct) {
-              return <p>Correct! The sequence is in the right order.</p>;
-            }
-            return (
-              <p>
-                {correctCount} of {correctOrder.length} items in the right position.
-              </p>
-            );
-          })()}
-        </div>
-      )}
-    </div>
+      </DragOverlay>
+    </DndContext>
   );
 }
 
