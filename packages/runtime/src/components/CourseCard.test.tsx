@@ -48,6 +48,7 @@ describe('CourseCard', () => {
       currentNodeId: 'nodes/lesson-02.md',
       visitedNodes: ['nodes/lesson-01.md'],
       scores: {},
+      answers: {},
       isCompleted: false,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };
@@ -71,6 +72,7 @@ describe('CourseCard', () => {
       currentNodeId: 'nodes/lesson-05.md',
       visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
       scores: {},
+      answers: {},
       isCompleted: true,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };

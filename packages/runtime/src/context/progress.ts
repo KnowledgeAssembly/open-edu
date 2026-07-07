@@ -1,4 +1,4 @@
-import type { ProgressSnapshot } from '@open-edu/schemas';
+import type { ProgressSnapshot, NodeAnswer } from '@open-edu/schemas';
 
 export function buildProgressSnapshot(
   packageId: string,
@@ -7,6 +7,7 @@ export function buildProgressSnapshot(
     currentNodeId: string;
     visitedNodes: string[];
     scores: Record<string, number>;
+    answers: Record<string, NodeAnswer>;
     isCompleted: boolean;
   },
 ): ProgressSnapshot {
@@ -16,6 +17,7 @@ export function buildProgressSnapshot(
     currentNodeId: workflowSnapshot.currentNodeId,
     visitedNodes: workflowSnapshot.visitedNodes,
     scores: workflowSnapshot.scores ?? {},
+    answers: workflowSnapshot.answers ?? {},
     isCompleted: workflowSnapshot.isCompleted,
     updatedAt: new Date().toISOString(),
   };

@@ -12,7 +12,7 @@ import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
-import type { ProgressSnapshot, SkillGraph, MasteryLevel } from '@open-edu/schemas';
+import type { ProgressSnapshot, SkillGraph, MasteryLevel, NodeAnswer } from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
 import { computeSkillScores, getSkillMastery } from './skills';
 
@@ -24,6 +24,8 @@ export interface RuntimeContextValue {
   scores: Record<string, number>;
   lastScore: number | null;
   visitedNodes: string[];
+  answers: Record<string, NodeAnswer>;
+  saveAnswer: (nodeId: string, answer: NodeAnswer) => void;
   completeNode: (score?: number) => void;
   navigateToNode: (nodeId: string) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
@@ -98,6 +100,13 @@ export function RuntimeProvider({
   const [visitedNodes, setVisitedNodes] = useState<string[]>(
     initialSnapshotValid ? initialProgress!.visitedNodes : [],
   );
+  const [answers, setAnswers] = useState<Record<string, NodeAnswer>>(
+    initialSnapshotValid && initialProgress!.answers ? { ...initialProgress!.answers } : {},
+  );
+
+  const saveAnswer = useCallback((nodeId: string, answer: NodeAnswer) => {
+    setAnswers((prev) => ({ ...prev, [nodeId]: answer }));
+  }, []);
 
   const getNode = useCallback(
     (nodeId: string): LoadedNode | undefined => nodeMap[nodeId],
@@ -155,6 +164,7 @@ export function RuntimeProvider({
       currentNodeId,
       visitedNodes,
       scores,
+      answers,
       isCompleted,
     });
     const json = JSON.stringify(snapshot);
@@ -166,6 +176,7 @@ export function RuntimeProvider({
     currentNodeId,
     visitedNodes,
     scores,
+    answers,
     isCompleted,
     onProgressChange,
     loadedPackage.manifest.id,
@@ -194,6 +205,8 @@ export function RuntimeProvider({
       scores,
       lastScore,
       visitedNodes,
+      answers,
+      saveAnswer,
       completeNode,
       navigateToNode,
       getNode,
@@ -204,7 +217,7 @@ export function RuntimeProvider({
       progressSnapshot: buildProgressSnapshot(
         packageId ?? loadedPackage.manifest.id,
         packageVersion ?? loadedPackage.manifest.version,
-        { currentNodeId, visitedNodes, scores, isCompleted },
+        { currentNodeId, visitedNodes, scores, answers, isCompleted },
       ),
     }),
     [
@@ -215,6 +228,8 @@ export function RuntimeProvider({
       scores,
       lastScore,
       visitedNodes,
+      answers,
+      saveAnswer,
       completeNode,
       navigateToNode,
       getNode,

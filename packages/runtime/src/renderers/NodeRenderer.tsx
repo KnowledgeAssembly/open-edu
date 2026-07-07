@@ -7,6 +7,7 @@ import { QuizRenderer } from './QuizRenderer';
 import { ReflectionRenderer } from './ReflectionRenderer';
 import { WidgetRenderer } from './WidgetRenderer';
 import { PlaceholderRenderer } from './PlaceholderRenderer';
+import type { NodeAnswer, QuizAnswer, ReflectionAnswer } from '@open-edu/schemas';
 
 export interface NodeRendererProps {
   node: LoadedNode | null;
@@ -17,6 +18,9 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
   const runtime = useRuntimeOptional();
   const handleComplete: (score?: number) => void =
     onComplete ?? runtime?.completeNode ?? (() => {});
+
+  const storedAnswer: NodeAnswer | undefined =
+    runtime && node ? runtime.answers[node.relativePath] : undefined;
   const { announce } = useLiveRegion();
   const announcedRef = useRef<Set<string>>(new Set());
 
@@ -46,6 +50,8 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
         <QuizRenderer
           key={node.relativePath}
           node={node.node}
+          storedAnswer={storedAnswer?.type === 'quiz' ? (storedAnswer as QuizAnswer) : undefined}
+          onAnswer={(answer) => runtime?.saveAnswer(node.relativePath, answer)}
           onSubmit={(score) => handleComplete(score)}
         />
       );
@@ -55,6 +61,10 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
         <ReflectionRenderer
           key={node.relativePath}
           node={node.node}
+          storedAnswer={
+            storedAnswer?.type === 'reflection' ? (storedAnswer as ReflectionAnswer) : undefined
+          }
+          onAnswer={(answer) => runtime?.saveAnswer(node.relativePath, answer)}
           onSubmit={() => handleComplete()}
         />
       );

@@ -196,6 +196,7 @@ describe('RuntimeProvider', () => {
       currentNodeId: 'nodes/lesson-02.md',
       visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
       scores: { 'nodes/lesson-01.md': 80 },
+      answers: {},
       isCompleted: false,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };
@@ -218,6 +219,7 @@ describe('RuntimeProvider', () => {
       currentNodeId: 'nodes/lesson-02.md',
       visitedNodes: ['nodes/lesson-01.md', 'nodes/lesson-02.md'],
       scores: { 'nodes/lesson-01.md': 80 },
+      answers: {},
       isCompleted: true,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };
@@ -238,6 +240,7 @@ describe('RuntimeProvider', () => {
       currentNodeId: 'nonexistent-node',
       visitedNodes: ['nonexistent-node'],
       scores: {},
+      answers: {},
       isCompleted: false,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };
@@ -289,5 +292,124 @@ describe('RuntimeProvider', () => {
     const { result } = renderHook(() => useRuntime(), { wrapper });
     expect(result.current.progressSnapshot).toBeDefined();
     expect(result.current.progressSnapshot?.packageId).toBe('test');
+  });
+
+  it('saveAnswer stores an answer by nodeId', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-01.md', {
+        type: 'quiz',
+        selectedOptionId: 'b',
+        score: 100,
+      });
+    });
+    expect(result.current.answers['nodes/quiz-01.md']).toEqual({
+      type: 'quiz',
+      selectedOptionId: 'b',
+      score: 100,
+    });
+  });
+
+  it('saveAnswer overwrites previous answer for same nodeId', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-01.md', {
+        type: 'quiz',
+        selectedOptionId: 'b',
+        score: 100,
+      });
+    });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-01.md', {
+        type: 'quiz',
+        selectedOptionId: 'a',
+        score: 0,
+      });
+    });
+    expect(result.current.answers['nodes/quiz-01.md']).toEqual({
+      type: 'quiz',
+      selectedOptionId: 'a',
+      score: 0,
+    });
+  });
+
+  it('saveAnswer stores answers for multiple nodes', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-01.md', {
+        type: 'quiz',
+        selectedOptionId: 'b',
+        score: 100,
+      });
+    });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-02.md', {
+        type: 'quiz',
+        selectedOptionId: 'c',
+        score: 0,
+      });
+    });
+    expect(Object.keys(result.current.answers).length).toBe(2);
+  });
+
+  it('restores answers from initialProgress', () => {
+    const initialProgress: ProgressSnapshot = {
+      packageId: 'test',
+      packageVersion: '1.0.0',
+      currentNodeId: 'nodes/lesson-01.md',
+      visitedNodes: ['nodes/quiz-01.md', 'nodes/lesson-01.md'],
+      scores: { 'nodes/quiz-01.md': 100 },
+      answers: {
+        'nodes/quiz-01.md': { type: 'quiz', selectedOptionId: 'b', score: 100 },
+      },
+      isCompleted: false,
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} initialProgress={initialProgress}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    expect(result.current.answers['nodes/quiz-01.md']).toEqual({
+      type: 'quiz',
+      selectedOptionId: 'b',
+      score: 100,
+    });
+  });
+
+  it('includes answers in progressSnapshot', () => {
+    const onProgressChange = vi.fn();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <RuntimeProvider loadedPackage={pkg} engine={engine} onProgressChange={onProgressChange}>
+        {children}
+      </RuntimeProvider>
+    );
+    const { result } = renderHook(() => useRuntime(), { wrapper });
+    act(() => {
+      result.current.saveAnswer('nodes/quiz-01.md', {
+        type: 'quiz',
+        selectedOptionId: 'b',
+        score: 100,
+      });
+    });
+    expect(result.current.progressSnapshot?.answers).toEqual({
+      'nodes/quiz-01.md': { type: 'quiz', selectedOptionId: 'b', score: 100 },
+    });
   });
 });

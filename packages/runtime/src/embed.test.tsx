@@ -160,6 +160,7 @@ describe('createRuntime embed adapter', () => {
       currentNodeId: 'nodes/start.md',
       visitedNodes: ['nodes/start.md'],
       scores: {},
+      answers: {},
       isCompleted: false,
       updatedAt: new Date().toISOString(),
     };

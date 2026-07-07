@@ -129,4 +129,30 @@ describe('QuizRenderer', () => {
     expect(correctLabel).not.toBeUndefined();
     expect(correctLabel?.textContent).toContain('4');
   });
+
+  it('restores previous answer from storedAnswer prop', () => {
+    const quiz = makeQuiz();
+    const storedAnswer = { type: 'quiz' as const, selectedOptionId: 'b', score: 100 };
+    const { container, getByText, queryByRole } = render(
+      <QuizRenderer node={quiz} onSubmit={vi.fn()} storedAnswer={storedAnswer} />,
+    );
+    const selectedRadio = container.querySelector(
+      'input[type="radio"]:checked',
+    ) as HTMLInputElement;
+    expect(selectedRadio).not.toBeNull();
+    expect(selectedRadio.value).toBe('b');
+    expect(queryByRole('button', { name: 'Submit' })).toBeNull();
+    expect(getByText(/Correct!/)).toBeInTheDocument();
+  });
+
+  it('calls onAnswer when submitting', () => {
+    const quiz = makeQuiz();
+    const onAnswer = vi.fn();
+    const { getByRole, getByLabelText } = render(
+      <QuizRenderer node={quiz} onSubmit={vi.fn()} onAnswer={onAnswer} />,
+    );
+    fireEvent.click(getByLabelText('4'));
+    fireEvent.click(getByRole('button', { name: 'Submit' }));
+    expect(onAnswer).toHaveBeenCalledWith({ type: 'quiz', selectedOptionId: 'b', score: 100 });
+  });
 });

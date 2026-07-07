@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import type { QuizNode } from '@open-edu/schemas';
+import type { QuizNode, QuizAnswer } from '@open-edu/schemas';
 import { FocusTrap } from '@open-edu/accessibility';
 
 export interface QuizRendererProps {
   node: QuizNode;
   onSubmit: (score: number, optionId: string) => void;
+  storedAnswer?: QuizAnswer;
+  onAnswer?: (answer: QuizAnswer) => void;
   className?: string;
 }
 
@@ -14,10 +16,20 @@ export interface QuizOption {
   correct: boolean;
 }
 
-export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): JSX.Element {
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState<boolean>(false);
-  const [score, setScore] = useState<number | null>(null);
+export function QuizRenderer({
+  node,
+  onSubmit,
+  storedAnswer,
+  onAnswer,
+  className,
+}: QuizRendererProps): JSX.Element {
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
+    storedAnswer?.type === 'quiz' ? storedAnswer.selectedOptionId : null,
+  );
+  const [submitted, setSubmitted] = useState<boolean>(storedAnswer?.type === 'quiz');
+  const [score, setScore] = useState<number | null>(
+    storedAnswer?.type === 'quiz' ? storedAnswer.score : null,
+  );
 
   const options: QuizOption[] = node.options;
 
@@ -27,6 +39,8 @@ export function QuizRenderer({ node, onSubmit, className }: QuizRendererProps): 
     const computedScore = selected?.correct ? 100 : 0;
     setScore(computedScore);
     setSubmitted(true);
+    const answer: QuizAnswer = { type: 'quiz', selectedOptionId, score: computedScore };
+    onAnswer?.(answer);
     onSubmit(computedScore, selectedOptionId);
   };
 
