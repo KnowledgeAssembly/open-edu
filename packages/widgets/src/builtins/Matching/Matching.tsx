@@ -62,8 +62,8 @@ function MatchingComponent(props: {
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
-  const [connections, setConnections] = useState<Map<string, string>>(
-    () => parsedState?.connections ? new Map(Object.entries(parsedState.connections)) : new Map(),
+  const [connections, setConnections] = useState<Map<string, string>>(() =>
+    parsedState?.connections ? new Map(Object.entries(parsedState.connections)) : new Map(),
   );
   const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
   const [connectorPositions, setConnectorPositions] = useState<
@@ -148,17 +148,14 @@ function MatchingComponent(props: {
     [],
   );
 
-  const findRightItemAtPoint = useCallback(
-    (clientX: number, clientY: number): string | null => {
-      const elements = document.elementsFromPoint(clientX, clientY);
-      for (const el of elements) {
-        const rightId = (el as HTMLElement).getAttribute?.('data-connector-right');
-        if (rightId) return rightId;
-      }
-      return null;
-    },
-    [],
-  );
+  const findRightItemAtPoint = useCallback((clientX: number, clientY: number): string | null => {
+    const elements = document.elementsFromPoint(clientX, clientY);
+    for (const el of elements) {
+      const rightId = (el as HTMLElement).getAttribute?.('data-connector-right');
+      if (rightId) return rightId;
+    }
+    return null;
+  }, []);
 
   const handleLeftItemClick = useCallback(
     (pairId: string) => {
@@ -216,9 +213,7 @@ function MatchingComponent(props: {
     (e: React.PointerEvent) => {
       if (!drawingLine) return;
       const coords = getContainerCoords(e.clientX, e.clientY);
-      setDrawingLine((prev) =>
-        prev ? { ...prev, x2: coords.x, y2: coords.y } : null,
-      );
+      setDrawingLine((prev) => (prev ? { ...prev, x2: coords.x, y2: coords.y } : null));
     },
     [drawingLine, getContainerCoords],
   );
@@ -616,9 +611,7 @@ function MatchingComponent(props: {
                   }}
                 >
                   <span>{pair.itemB}</span>
-                  {isMatched && (
-                    <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>
-                  )}
+                  {isMatched && <span style={{ color: 'var(--oe-success, #22c55e)' }}>✓</span>}
                 </div>
               );
             })}
@@ -661,26 +654,23 @@ function MatchingComponent(props: {
         )}
       </div>
 
-      {!submitted &&
-        content.hints &&
-        content.hints.length > 0 &&
-        content.hints[hintIndex] && (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{
-              marginTop: '0.5rem',
-              color: 'var(--oe-color-on-surface-variant, #6b7280)',
-            }}
-          >
-            <p>{content.hints[hintIndex]}</p>
-            {hintIndex < content.hints.length - 1 && (
-              <Button variant="ghost" size="sm" onClick={handleHintClick}>
-                More help
-              </Button>
-            )}
-          </div>
-        )}
+      {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            marginTop: '0.5rem',
+            color: 'var(--oe-color-on-surface-variant, #6b7280)',
+          }}
+        >
+          <p>{content.hints[hintIndex]}</p>
+          {hintIndex < content.hints.length - 1 && (
+            <Button variant="ghost" size="sm" onClick={handleHintClick}>
+              More help
+            </Button>
+          )}
+        </div>
+      )}
 
       {!submitted && content.hint && !content.hints && (
         <div
@@ -705,9 +695,7 @@ function MatchingComponent(props: {
 
       {submitted && (
         <div role="status" aria-live="assertive" data-testid="feedback">
-          {Array.from(connections.entries()).every(
-            ([leftId, rightId]) => leftId === rightId,
-          ) ? (
+          {Array.from(connections.entries()).every(([leftId, rightId]) => leftId === rightId) ? (
             <p>Correct! All pairs matched.</p>
           ) : (
             <p>Some pairs are not matched correctly.</p>

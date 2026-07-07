@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design Exploration — Break Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;420;500;600;650;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --oe-color-surface: #fcfaf8;
+    --oe-color-surface-dim: #e3dfda;
+    --oe-color-surface-container-lowest: #ffffff;
+    --oe-color-surface-container-low: #f7f4f0;
+    --oe-color-surface-container: #f2eee9;
+    --oe-color-surface-container-high: #ebe7e2;
+    --oe-color-on-surface: #1f1c18;
+    --oe-color-on-surface-variant: #48443f;
+    --oe-color-outline: #76706b;
+    --oe-color-outline-variant: #ccc6c0;
+    --oe-color-primary: #5d4a8a;
+    --oe-color-on-primary: #ffffff;
+    --oe-color-primary-container: #7c6bb0;
+    --oe-color-primary-light: #7c6bb0;
+    --oe-color-primary-fixed: #ede2ff;
+    --oe-color-secondary: #665e77;
+    --oe-color-success: #16a34a;
+    --oe-color-surface-variant: #e4dfda;
+
+    --oe-radius-sm: 0.125rem;
+    --oe-radius-md: 0.5rem;
+    --oe-radius-lg: 0.625rem;
+    --oe-radius-xl: 0.75rem;
+    --oe-radius-full: 9999px;
+
+    --oe-space-xs: 4px;
+    --oe-space-sm: 12px;
+    --oe-space-md: 24px;
+    --oe-space-lg: 40px;
+
+    --oe-elevation-raised: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --oe-motion-duration-fast: 200ms;
+
+    --oe-font-productive-heading-size: 28px;
+    --oe-font-productive-heading-weight: 650;
+    --oe-font-productive-heading-lineHeight: 1.3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--oe-color-surface);
+    color: var(--oe-color-on-surface);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: var(--oe-space-xl) var(--oe-space-md);
+  }
+
+  .settings-container {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .page-header {
+    margin-bottom: var(--oe-space-lg);
+  }
+
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--oe-color-on-surface-variant);
+    margin-bottom: 4px;
+  }
+
+  .page-title {
+    font-size: var(--oe-font-productive-heading-size);
+    font-weight: var(--oe-font-productive-heading-weight);
+    line-height: var(--oe-font-productive-heading-lineHeight);
+    color: var(--oe-color-on-surface);
+  }
+
+  .card {
+    background: var(--oe-color-surface-container-lowest);
+    border: 1px solid var(--oe-color-outline-variant);
+    border-radius: var(--oe-radius-lg);
+    padding: var(--oe-space-md);
+    margin-bottom: var(--oe-space-md);
+    box-shadow: var(--oe-elevation-raised);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--oe-space-sm);
+    margin-bottom: var(--oe-space-md);
+  }
+
+  .card-header svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  /* ─── Radio Group ─── */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: var(--oe-space-sm);
+    padding: 10px 12px;
+    border-radius: var(--oe-radius-md);
+    cursor: pointer;
+    transition: background var(--oe-motion-duration-fast) ease;
+  }
+
+  .radio-option:hover { background: var(--oe-color-surface-container-low); }
+
+  .radio-option input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--oe-color-outline);
+    border-radius: var(--oe-radius-full);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all var(--oe-motion-duration-fast) ease;
+    position: relative;
+  }
+
+  .radio-option input[type="radio"]:checked {
+    border-color: var(--oe-color-primary);
+  }
+
+  .radio-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 10px;
+    background: var(--oe-color-primary);
+    border-radius: var(--oe-radius-full);
+  }
+
+  .radio-option input[type="radio"]:focus-visible {
+    outline: 2px solid var(--oe-color-primary);
+    outline-offset: 2px;
+  }
+
+  .radio-label {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--oe-color-on-surface);
+  }
+
+  .radio-desc {
+    font-size: 12px;
+    color: var(--oe-color-on-surface-variant);
+  }
+
+  /* ─── Duration pills ─── */
+  .duration-row {
+    display: flex;
+    align-items: center;
+    gap: var(--oe-space-sm);
+    padding: 4px 12px 12px 44px;
+  }
+
+  .duration-pill {
+    padding: 6px 18px;
+    border: 1.5px solid var(--oe-color-outline-variant);
+    border-radius: var(--oe-radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--oe-color-on-surface-variant);
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--oe-motion-duration-fast) ease;
+    font-family: inherit;
+  }
+
+  .duration-pill:hover {
+    border-color: var(--oe-color-primary-light);
+    color: var(--oe-color-primary);
+    background: var(--oe-color-primary-fixed);
+  }
+
+  .duration-pill.selected {
+    border-color: var(--oe-color-primary);
+    background: var(--oe-color-primary);
+    color: var(--oe-color-on-primary);
+  }
+
+  .duration-pill:focus-visible {
+    outline: 2px solid var(--oe-color-primary);
+    outline-offset: 2px;
+  }
+
+  /* ─── Pipili decoration ─── */
+  .pipili-sm {
+    width: 28px;
+    height: 28px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pipili-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pipili-eye {
+    position: absolute;
+    width: 15%;
+    height: 15%;
+    top: 28%;
+  }
+
+  .pipili-eye.left { left: 38%; }
+  .pipili-eye.right { right: 38%; }
+
+  /* ─── Meta ─── */
+  .meta-note {
+    padding: var(--oe-space-sm) var(--oe-space-md);
+    background: var(--oe-color-primary-fixed);
+    border-radius: var(--oe-radius-md);
+    font-size: 13px;
+    color: var(--oe-color-primary);
+    border-left: 3px solid var(--oe-color-primary);
+    margin-top: var(--oe-space-md);
+  }
+
+  .meta-note strong { font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="page-header">
+      <div class="page-eyebrow">Settings</div>
+      <h1 class="page-title">Wellness &amp; Breaks</h1>
+    </div>
+
+    <!-- Break Reminder Card -->
+    <div class="card">
+      <div class="card-header">
+        <!-- Pipili (sm, content) -->
+        <div class="pipili-sm">
+          <div class="pipili-body">
+            <svg class="head" width="28" height="28" viewBox="0 0 20 20" fill="var(--oe-color-primary)">
+              <circle cx="10" cy="10" r="8" />
+            </svg>
+            <svg class="pipili-eye left" width="4.2" height="4.2" viewBox="0 0 20 20" fill="white">
+              <circle cx="10" cy="10" r="8" />
+            </svg>
+            <svg class="pipili-eye right" width="4.2" height="4.2" viewBox="0 0 20 20" fill="white">
+              <circle cx="10" cy="10" r="8" />
+            </svg>
+          </div>
+        </div>
+        <h2>Break Reminder</h2>
+      </div>
+
+      <div class="radio-group" role="radiogroup" aria-label="Break reminder frequency">
+        <label class="radio-option">
+          <input type="radio" name="timer" value="off" />
+          <div class="radio-label">Off</div>
+          <div class="radio-desc">No break reminders</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer" value="15" />
+          <div class="radio-label">15 minutes</div>
+          <div class="radio-desc">Quick sessions — good for focused sprints</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer" value="30" checked />
+          <div class="radio-label">30 minutes</div>
+          <div class="radio-desc">Balanced learning with regular breaks</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer" value="60" />
+          <div class="radio-label">60 minutes</div>
+          <div class="radio-desc">Deep work sessions</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="meta-note">
+      <strong>Design Note:</strong> No <code>&lt;Select&gt;</code> dropdown — radio buttons are more accessible and show all options at a glance. Pipili appears next to the card header for warmth. Duration pills (alternative) shown below if you prefer a segmented control style.
+    </div>
+
+    <!-- Alternative: Pill-based selection -->
+    <div class="card" style="margin-top: var(--oe-space-md);">
+      <div class="card-header">
+        <svg viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="4" fill="var(--oe-color-primary-light)" opacity="0.7" />
+          <circle cx="16" cy="6" r="2" fill="var(--oe-color-primary-light)" opacity="0.4" />
+          <circle cx="16" cy="14" r="2" fill="var(--oe-color-primary-light)" opacity="0.4" />
+        </svg>
+        <h2>Break Reminder <span style="font-weight:400;color:var(--oe-color-on-surface-variant);font-size:13px;">(pill variant)</span></h2>
+      </div>
+
+      <div class="radio-group" role="radiogroup" aria-label="Break reminder frequency">
+        <label class="radio-option">
+          <input type="radio" name="timer2" value="off" />
+          <div class="radio-label">Off</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer2" value="15" />
+          <div class="radio-label">15 min</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer2" value="30" checked />
+          <div class="radio-label">30 min</div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="timer2" value="60" />
+          <div class="radio-label">60 min</div>
+        </label>
+      </div>
+
+      <div class="duration-row" style="display:none;">
+        <button class="duration-pill">15 min</button>
+        <button class="duration-pill selected">30 min</button>
+        <button class="duration-pill">60 min</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

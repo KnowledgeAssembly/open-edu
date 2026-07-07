@@ -66,9 +66,13 @@ function ClockTimeComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const [currentHour, setCurrentHour] = useState(parsedState?.currentHour ?? (config?.hour ?? 12));
-  const [currentMinute, setCurrentMinute] = useState(parsedState?.currentMinute ?? (config?.minute ?? 0));
-  const [selectedHour, setSelectedHour] = useState<number | null>(parsedState?.selectedHour ?? null);
+  const [currentHour, setCurrentHour] = useState(parsedState?.currentHour ?? config?.hour ?? 12);
+  const [currentMinute, setCurrentMinute] = useState(
+    parsedState?.currentMinute ?? config?.minute ?? 0,
+  );
+  const [selectedHour, setSelectedHour] = useState<number | null>(
+    parsedState?.selectedHour ?? null,
+  );
   const [mode, setMode] = useState<'hour' | 'minute'>('hour');
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 

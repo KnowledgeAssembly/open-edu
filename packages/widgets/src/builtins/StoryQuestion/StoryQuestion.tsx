@@ -40,12 +40,14 @@ const StoryQuestionStateSchema = z.object({
   currentIndex: z.number(),
   selections: z.array(z.number().nullable()),
   responses: z.array(z.object({ correct: z.boolean(), selectedIndex: z.number() })),
-  feedback: z.object({
-    selectedIndex: z.number(),
-    correctIndex: z.number(),
-    isCorrect: z.boolean(),
-    explanation: z.string().optional(),
-  }).nullable(),
+  feedback: z
+    .object({
+      selectedIndex: z.number(),
+      correctIndex: z.number(),
+      isCorrect: z.boolean(),
+      explanation: z.string().optional(),
+    })
+    .nullable(),
 });
 
 function StoryQuestionComponent(props: {
@@ -150,7 +152,13 @@ function StoryQuestionComponent(props: {
         totalQuestions,
         accuracy,
       });
-      complete(accuracy * 100, { submitted: true, currentIndex, selections, responses, feedback: null });
+      complete(accuracy * 100, {
+        submitted: true,
+        currentIndex,
+        selections,
+        responses,
+        feedback: null,
+      });
       setSubmitted(true);
     }
   }, [content, currentIndex, selections, responses, emitInteraction, complete]);

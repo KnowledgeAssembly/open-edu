@@ -31,6 +31,9 @@ import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
 import { getBundleProgress } from './bundleProgressStorage';
+import { useBreakTimer } from './useBreakTimer';
+import { BreakNagBar } from './BreakNagBar';
+import { BreakPage } from './BreakPage';
 
 export type AppView =
   | { view: 'home' }
@@ -39,7 +42,8 @@ export type AppView =
   | { view: 'settings' }
   | { view: 'course'; packageId: string; bundleId?: string; moduleId?: string }
   | { view: 'bundleOverview'; bundleId: string }
-  | { view: 'collection' };
+  | { view: 'collection' }
+  | { view: 'break' };
 
 export interface AppShellProps {
   catalogPackages: PackageSummary[];
@@ -63,6 +67,25 @@ export function AppShell({
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
   const pendingNavigation = useRef<AppView | null>(null);
   const preCourseView = useRef<AppView>({ view: 'home' });
+
+  const breakTimer = useBreakTimer();
+
+  const [previousView, setPreviousView] = useState<AppView | null>(null);
+
+  const handleTakeBreak = useCallback(() => {
+    setPreviousView(view);
+    setView({ view: 'break' });
+  }, [view]);
+
+  const handleBackToLearning = useCallback(() => {
+    if (previousView) {
+      setView(previousView);
+      setPreviousView(null);
+    } else {
+      setView({ view: 'home' });
+    }
+    breakTimer.dismiss();
+  }, [previousView, breakTimer]);
 
   const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
     () => {
@@ -225,6 +248,8 @@ export function AppShell({
         const bundle = bundleEntries[view.bundleId];
         return [{ label: 'Course Catalog' }, { label: bundle?.manifest.title ?? 'Bundle' }];
       }
+      case 'break':
+        return [{ label: 'Break' }];
       case 'course': {
         const breadcrumbs = [{ label: coursePkg?.manifest.title ?? 'Course' }];
         if (view.bundleId) {
@@ -342,6 +367,13 @@ export function AppShell({
                 progressCurrent={courseProgressCurrent}
                 progressTotal={courseProgressTotal}
               />
+              {breakTimer.isTriggered && (
+                <BreakNagBar
+                  mode={breakTimer.mode}
+                  onTakeBreak={handleTakeBreak}
+                  onIgnore={breakTimer.dismiss}
+                />
+              )}
               <CourseRuntime
                 pkg={coursePkg}
                 onBackToCatalog={handleBackToCatalog}
@@ -385,6 +417,13 @@ export function AppShell({
               }
               topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
             >
+              {breakTimer.isTriggered && view.view !== 'break' && (
+                <BreakNagBar
+                  mode={breakTimer.mode}
+                  onTakeBreak={handleTakeBreak}
+                  onIgnore={breakTimer.dismiss}
+                />
+              )}
               <main className="bg-surface flex-1 overflow-y-auto" data-testid="app-main">
                 {view.view === 'catalog' && (
                   <CatalogPage
@@ -424,9 +463,17 @@ export function AppShell({
                   />
                 )}
                 {view.view === 'settings' && (
-                  <SettingsPage currentThemeId={themeId} onThemeChange={setThemeId} />
+                  <SettingsPage
+                    currentThemeId={themeId}
+                    onThemeChange={setThemeId}
+                    breakTimer={{
+                      mode: breakTimer.mode,
+                      setMode: breakTimer.setMode,
+                    }}
+                  />
                 )}
                 {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
               </main>
             </AppLayout>
           )}
