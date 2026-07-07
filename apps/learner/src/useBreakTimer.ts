@@ -17,6 +17,7 @@ export function useBreakTimer(): {
   });
   const [isTriggered, setIsTriggered] = useState(false);
   const startTimeRef = useRef<number>(Date.now());
+  const durationMsRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -32,12 +33,12 @@ export function useBreakTimer(): {
       setIsTriggered(false);
       if (newMode === 'off') return;
 
-      const durationMs = parseInt(newMode, 10) * 60 * 1000;
+      durationMsRef.current = parseInt(newMode, 10) * 60 * 1000;
       startTimeRef.current = Date.now();
 
       intervalRef.current = setInterval(() => {
         const elapsed = Date.now() - startTimeRef.current;
-        if (elapsed >= durationMs) {
+        if (elapsed >= durationMsRef.current) {
           setIsTriggered(true);
           clearTimer();
         }

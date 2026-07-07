@@ -46,7 +46,7 @@ function MeasurementScaleComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const [value, setValue] = useState(parsedState?.value ?? (config?.value ?? config?.min ?? 0));
+  const [value, setValue] = useState(parsedState?.value ?? config?.value ?? config?.min ?? 0);
 
   const isInteractive = config?.interactive ?? false;
   const isObserve = parsed.success && !isInteractive;

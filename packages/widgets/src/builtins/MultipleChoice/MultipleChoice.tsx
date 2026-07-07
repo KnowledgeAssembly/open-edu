@@ -40,12 +40,14 @@ const MultipleChoiceStateSchema = z.object({
   currentIndex: z.number(),
   selections: z.array(z.number().nullable()),
   responses: z.array(z.object({ correct: z.boolean(), selectedIndex: z.number() })),
-  feedback: z.object({
-    selectedIndex: z.number(),
-    correctIndex: z.number(),
-    isCorrect: z.boolean(),
-    explanation: z.string().optional(),
-  }).nullable(),
+  feedback: z
+    .object({
+      selectedIndex: z.number(),
+      correctIndex: z.number(),
+      isCorrect: z.boolean(),
+      explanation: z.string().optional(),
+    })
+    .nullable(),
 });
 
 function MultipleChoiceComponent(props: {
@@ -66,7 +68,9 @@ function MultipleChoiceComponent(props: {
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
   const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
-  const [responses, setResponses] = useState<{ correct: boolean; selectedIndex: number }[]>(parsedState?.responses ?? []);
+  const [responses, setResponses] = useState<{ correct: boolean; selectedIndex: number }[]>(
+    parsedState?.responses ?? [],
+  );
   const [feedback, setFeedback] = useState<FeedbackState>(parsedState?.feedback ?? null);
 
   const config: Record<string, unknown> = rawConfig || {};
@@ -113,7 +117,12 @@ function MultipleChoiceComponent(props: {
       currentIndex: 0,
       selections: [selectedIdx],
       responses: [{ correct: isCorrect, selectedIndex: selectedIdx }],
-      feedback: { selectedIndex: selectedIdx, correctIndex: correctIdx, isCorrect, explanation: legacyParsed.data.explanation },
+      feedback: {
+        selectedIndex: selectedIdx,
+        correctIndex: correctIdx,
+        isCorrect,
+        explanation: legacyParsed.data.explanation,
+      },
     });
   }, [selectedId, submitted, legacyParsed, emitInteraction, complete]);
 
@@ -177,7 +186,13 @@ function MultipleChoiceComponent(props: {
         totalQuestions,
         accuracy,
       });
-      complete(accuracy * 100, { submitted: true, currentIndex, selections, responses, feedback: null });
+      complete(accuracy * 100, {
+        submitted: true,
+        currentIndex,
+        selections,
+        responses,
+        feedback: null,
+      });
       setSubmitted(true);
     }
   }, [multiParsed, currentIndex, selections, responses, emitInteraction, complete]);

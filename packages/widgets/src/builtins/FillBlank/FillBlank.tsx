@@ -63,7 +63,9 @@ function FillBlankComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string | number>>(parsedState?.userAnswers ?? {});
+  const [userAnswers, setUserAnswers] = useState<Record<string, string | number>>(
+    parsedState?.userAnswers ?? {},
+  );
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
 

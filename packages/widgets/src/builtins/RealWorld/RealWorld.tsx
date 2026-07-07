@@ -41,7 +41,9 @@ function RealWorldComponent(props: {
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [response, setResponse] = useState(parsedState?.response ?? '');
   const [showSelfAssess, setShowSelfAssess] = useState(parsedState?.submitted ?? false);
-  const [selfAssessment, setSelfAssessment] = useState<SelfAssessment>(parsedState?.selfAssessment ?? null);
+  const [selfAssessment, setSelfAssessment] = useState<SelfAssessment>(
+    parsedState?.selfAssessment ?? null,
+  );
 
   const content = parsed.success ? parsed.data : null;
   const isInteractive = content?.interactive ?? false;

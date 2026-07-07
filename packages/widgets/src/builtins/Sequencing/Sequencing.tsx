@@ -169,12 +169,9 @@ function SequencingComponent(props: {
     useSensor(KeyboardSensor),
   );
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      setActiveDragId(String(event.active.id));
-    },
-    [],
-  );
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id));
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -311,10 +308,7 @@ function SequencingComponent(props: {
               backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
             }}
           >
-            <SortableContext
-              items={itemOrder}
-              strategy={verticalListSortingStrategy}
-            >
+            <SortableContext items={itemOrder} strategy={verticalListSortingStrategy}>
               {itemOrder.map((id, index) => {
                 const item = items.find((i) => i.id === id);
                 if (!item) return null;
@@ -335,8 +329,7 @@ function SequencingComponent(props: {
         {submitted &&
           correctOrder.map((correctItemId, slotIndex) => {
             const placedItemId = itemOrder[slotIndex];
-            const isIncorrectPosition =
-              placedItemId && placedItemId !== correctItemId;
+            const isIncorrectPosition = placedItemId && placedItemId !== correctItemId;
             if (!isIncorrectPosition) return null;
             const correctItem = items.find((i) => i.id === correctItemId);
             return (
@@ -364,26 +357,23 @@ function SequencingComponent(props: {
           )}
         </div>
 
-        {!submitted &&
-          content.hints &&
-          content.hints.length > 0 &&
-          content.hints[hintIndex] && (
-            <div
-              role="status"
-              aria-live="polite"
-              style={{
-                marginTop: '0.5rem',
-                color: 'var(--oe-color-on-surface-variant, #6b7280)',
-              }}
-            >
-              <p>{content.hints[hintIndex]}</p>
-              {hintIndex < content.hints.length - 1 && (
-                <Button variant="ghost" size="sm" onClick={handleHintClick}>
-                  More help
-                </Button>
-              )}
-            </div>
-          )}
+        {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              marginTop: '0.5rem',
+              color: 'var(--oe-color-on-surface-variant, #6b7280)',
+            }}
+          >
+            <p>{content.hints[hintIndex]}</p>
+            {hintIndex < content.hints.length - 1 && (
+              <Button variant="ghost" size="sm" onClick={handleHintClick}>
+                More help
+              </Button>
+            )}
+          </div>
+        )}
 
         {!submitted && content.hint && !content.hints && (
           <div
@@ -412,9 +402,7 @@ function SequencingComponent(props: {
               const correct =
                 correctOrder.length === itemOrder.length &&
                 correctOrder.every((id, i) => id === itemOrder[i]);
-              const correctCount = itemOrder.filter(
-                (id, i) => id === correctOrder[i],
-              ).length;
+              const correctCount = itemOrder.filter((id, i) => id === correctOrder[i]).length;
               if (correct) {
                 return <p>Correct! The sequence is in the right order.</p>;
               }
@@ -438,8 +426,7 @@ function SequencingComponent(props: {
               backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
               cursor: 'grabbing',
               userSelect: 'none',
-              boxShadow:
-                '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.375rem',

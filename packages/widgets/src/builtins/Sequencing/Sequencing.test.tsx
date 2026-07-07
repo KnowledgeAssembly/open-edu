@@ -145,7 +145,10 @@ describe('Sequencing submit and scoring', () => {
     const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith(expectedScore(order, defaultCorrectOrder), expect.any(Object));
+    expect(complete).toHaveBeenCalledWith(
+      expectedScore(order, defaultCorrectOrder),
+      expect.any(Object),
+    );
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
     );
@@ -161,12 +164,18 @@ describe('Sequencing submit and scoring', () => {
     renderWidget(interactiveConfig);
     const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
-    const correct = order.length === defaultCorrectOrder.length && order.every((id, i) => id === defaultCorrectOrder[i]);
+    const correct =
+      order.length === defaultCorrectOrder.length &&
+      order.every((id, i) => id === defaultCorrectOrder[i]);
     const correctCount = order.filter((id, i) => id === defaultCorrectOrder[i]).length;
     if (correct) {
       expect(screen.getByText('Correct! The sequence is in the right order.')).toBeTruthy();
     } else {
-      expect(screen.getByText(`${correctCount} of ${defaultCorrectOrder.length} items in the right position.`)).toBeTruthy();
+      expect(
+        screen.getByText(
+          `${correctCount} of ${defaultCorrectOrder.length} items in the right position.`,
+        ),
+      ).toBeTruthy();
     }
   });
 

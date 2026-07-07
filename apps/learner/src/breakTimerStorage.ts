@@ -30,7 +30,7 @@ export function saveBreakTimerSettings(settings: BreakTimerSettings): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   } catch {
-    // localStorage may be unavailable
+    console.warn('breakTimerStorage: localStorage write failed');
   }
 }
 
@@ -38,6 +38,6 @@ export function clearBreakTimerSettings(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
-    // localStorage may be unavailable
+    console.warn('breakTimerStorage: localStorage remove failed');
   }
 }

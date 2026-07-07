@@ -5,9 +5,7 @@ import { BreakPage } from '../BreakPage';
 describe('BreakPage', () => {
   it('renders Pipili (content mood)', () => {
     render(<BreakPage onBackToLearning={vi.fn()} />);
-    const imgs = screen.getAllByRole('img');
-    const pipili = imgs.find((img) => img.getAttribute('aria-label')?.includes('Pipili'));
-    expect(pipili).toBeDefined();
+    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute('aria-label', 'Pipili — content');
   });
 
   it('renders Time to recharge heading', () => {

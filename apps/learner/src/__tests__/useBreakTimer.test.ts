@@ -133,4 +133,31 @@ describe('useBreakTimer', () => {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     expect(saved.mode).toBe('60');
   });
+
+  it('dismiss restarts the timer for the current mode', () => {
+    const fifteenMinMs = 15 * 60 * 1000;
+    const { result } = renderHook(() => useBreakTimer());
+
+    act(() => {
+      result.current.setMode('15');
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(fifteenMinMs + 10_000);
+    });
+
+    expect(result.current.isTriggered).toBe(true);
+
+    act(() => {
+      result.current.dismiss();
+    });
+
+    expect(result.current.isTriggered).toBe(false);
+
+    act(() => {
+      vi.advanceTimersByTime(fifteenMinMs + 10_000);
+    });
+
+    expect(result.current.isTriggered).toBe(true);
+  });
 });

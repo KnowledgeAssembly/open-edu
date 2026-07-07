@@ -244,7 +244,9 @@ function DragDropComponent(props: {
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [placedItems, setPlacedItems] = useState<Record<string, string>>(parsedState?.placedItems ?? {});
+  const [placedItems, setPlacedItems] = useState<Record<string, string>>(
+    parsedState?.placedItems ?? {},
+  );
   const [hintIndex, setHintIndex] = useState(parsedState?.hintIndex ?? 0);
   const [activeDragItem, setActiveDragItem] = useState<{ id: string } | null>(null);
 
@@ -300,12 +302,9 @@ function DragDropComponent(props: {
     [submitted, isObserve],
   );
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      setActiveDragItem({ id: String(event.active.id) });
-    },
-    [],
-  );
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragItem({ id: String(event.active.id) });
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -403,9 +402,7 @@ function DragDropComponent(props: {
             }}
           >
             {targets.map((target) => {
-              const itemsInTarget = items.filter(
-                (item) => observePositions[item.id] === target.id,
-              );
+              const itemsInTarget = items.filter((item) => observePositions[item.id] === target.id);
               return (
                 <div
                   key={target.id}
@@ -518,9 +515,7 @@ function DragDropComponent(props: {
           style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
         >
           {targets.map((target) => {
-            const itemsInTarget = items.filter(
-              (item) => placedItems[item.id] === target.id,
-            );
+            const itemsInTarget = items.filter((item) => placedItems[item.id] === target.id);
             const hasItem = itemsInTarget.length > 0;
             const shouldHighlight = selectedItemId !== null && !hasItem;
             return (
@@ -548,26 +543,23 @@ function DragDropComponent(props: {
           )}
         </div>
 
-        {!submitted &&
-          content.hints &&
-          content.hints.length > 0 &&
-          content.hints[hintIndex] && (
-            <div
-              role="status"
-              aria-live="polite"
-              style={{
-                marginTop: '0.5rem',
-                color: 'var(--oe-color-on-surface-variant, #6b7280)',
-              }}
-            >
-              <p>{content.hints[hintIndex]}</p>
-              {hintIndex < content.hints.length - 1 && (
-                <Button variant="ghost" size="sm" onClick={handleHintClick}>
-                  More help
-                </Button>
-              )}
-            </div>
-          )}
+        {!submitted && content.hints && content.hints.length > 0 && content.hints[hintIndex] && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              marginTop: '0.5rem',
+              color: 'var(--oe-color-on-surface-variant, #6b7280)',
+            }}
+          >
+            <p>{content.hints[hintIndex]}</p>
+            {hintIndex < content.hints.length - 1 && (
+              <Button variant="ghost" size="sm" onClick={handleHintClick}>
+                More help
+              </Button>
+            )}
+          </div>
+        )}
 
         {!submitted && content.hint && !content.hints && (
           <div
@@ -615,30 +607,30 @@ function DragDropComponent(props: {
       </div>
 
       <DragOverlay>
-        {activeDragItem ? (
-          (() => {
-            const item = items.find((i) => i.id === activeDragItem.id);
-            if (!item) return null;
-            return (
-              <div
-                style={{
-                  padding: '0.375rem 0.75rem',
-                  border: '2px solid var(--oe-color-primary, #3b82f6)',
-                  borderRadius: '1rem',
-                  backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
-                  cursor: 'grabbing',
-                  userSelect: 'none',
-                  boxShadow:
-                    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-                  transform: 'translateY(-2px)',
-                }}
-              >
-                {item.emoji && <span>{item.emoji} </span>}
-                {item.label}
-              </div>
-            );
-          })()
-        ) : null}
+        {activeDragItem
+          ? (() => {
+              const item = items.find((i) => i.id === activeDragItem.id);
+              if (!item) return null;
+              return (
+                <div
+                  style={{
+                    padding: '0.375rem 0.75rem',
+                    border: '2px solid var(--oe-color-primary, #3b82f6)',
+                    borderRadius: '1rem',
+                    backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+                    cursor: 'grabbing',
+                    userSelect: 'none',
+                    boxShadow:
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+                    transform: 'translateY(-2px)',
+                  }}
+                >
+                  {item.emoji && <span>{item.emoji} </span>}
+                  {item.label}
+                </div>
+              );
+            })()
+          : null}
       </DragOverlay>
     </DndContext>
   );

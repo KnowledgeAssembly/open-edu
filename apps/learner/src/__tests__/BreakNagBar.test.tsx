@@ -4,39 +4,44 @@ import { BreakNagBar } from '../BreakNagBar';
 
 describe('BreakNagBar', () => {
   it('renders the AppBanner with break variant', () => {
-    render(<BreakNagBar minutes="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
+    render(<BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
     expect(screen.getByText('Time for a break!')).toBeInTheDocument();
   });
 
   it('renders Pipili in the icon slot', () => {
-    render(<BreakNagBar minutes="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
-    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Pipili — curious');
+    render(<BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
+    expect(screen.getByRole('img', { name: /Pipili/i })).toHaveAttribute('aria-label', 'Pipili — curious');
   });
 
   it('renders Take Break and Ignore buttons', () => {
-    render(<BreakNagBar minutes="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
+    render(<BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
     expect(screen.getByText('Take Break')).toBeInTheDocument();
     expect(screen.getByText('Ignore')).toBeInTheDocument();
   });
 
   it('clicking Take Break calls onTakeBreak', () => {
     const onTakeBreak = vi.fn();
-    render(<BreakNagBar minutes="15" onTakeBreak={onTakeBreak} onIgnore={vi.fn()} />);
+    render(<BreakNagBar mode="15" onTakeBreak={onTakeBreak} onIgnore={vi.fn()} />);
     fireEvent.click(screen.getByText('Take Break'));
     expect(onTakeBreak).toHaveBeenCalledTimes(1);
   });
 
   it('clicking Ignore calls onIgnore', () => {
     const onIgnore = vi.fn();
-    render(<BreakNagBar minutes="15" onTakeBreak={vi.fn()} onIgnore={onIgnore} />);
+    render(<BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={onIgnore} />);
     fireEvent.click(screen.getByText('Ignore'));
     expect(onIgnore).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the elapsed time in the message', () => {
+    render(<BreakNagBar mode="30" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />);
+    expect(screen.getByText(/30 minutes/)).toBeInTheDocument();
   });
 
   it('has no accessibility violations', async () => {
     const axe = await import('axe-core');
     const { container } = render(
-      <BreakNagBar minutes="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />,
+      <BreakNagBar mode="15" onTakeBreak={vi.fn()} onIgnore={vi.fn()} />,
     );
     const results = await axe.default.run(container);
     expect(results.violations).toHaveLength(0);

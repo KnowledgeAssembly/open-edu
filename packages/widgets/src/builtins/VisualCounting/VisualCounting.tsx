@@ -60,7 +60,9 @@ function VisualCountingComponent(props: {
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [hintIndex, setHintIndex] = useState(0);
-  const [selectedCount, setSelectedCount] = useState<number | null>(parsedState?.selectedCount ?? null);
+  const [selectedCount, setSelectedCount] = useState<number | null>(
+    parsedState?.selectedCount ?? null,
+  );
 
   const displayItems = useMemo(() => {
     if (content.items && content.items.length > 0) return content.items;

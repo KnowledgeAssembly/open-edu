@@ -412,7 +412,7 @@ export function AppShell({
             >
               {breakTimer.isTriggered && view.view !== 'break' && (
                 <BreakNagBar
-                  minutes={breakTimer.mode}
+                  mode={breakTimer.mode}
                   onTakeBreak={handleTakeBreak}
                   onIgnore={breakTimer.dismiss}
                 />

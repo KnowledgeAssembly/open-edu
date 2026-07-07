@@ -2,13 +2,13 @@ import { AppBanner, Button, Pipili } from '@open-edu/design-system';
 import type { BreakTimerSettings } from './breakTimerStorage';
 
 export interface BreakNagBarProps {
-  minutes: BreakTimerSettings['mode'];
+  mode: BreakTimerSettings['mode'];
   onTakeBreak: () => void;
   onIgnore: () => void;
 }
 
-export function BreakNagBar({ minutes, onTakeBreak, onIgnore }: BreakNagBarProps): JSX.Element {
-  const minLabel = minutes === 'off' ? '' : `${minutes}`;
+export function BreakNagBar({ mode, onTakeBreak, onIgnore }: BreakNagBarProps): JSX.Element {
+  const minLabel = mode === 'off' ? '' : `${mode}`;
 
   return (
     <AppBanner

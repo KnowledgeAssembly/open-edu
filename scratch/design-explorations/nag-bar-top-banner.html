@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design Exploration — Top Banner Nag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;420;600;650;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+  /* ─── Token definitions (Lumina Scholastica) ─── */
+  :root {
+    --oe-color-surface: #fcfaf8;
+    --oe-color-surface-dim: #e3dfda;
+    --oe-color-surface-bright: #fefcf9;
+    --oe-color-surface-container-lowest: #ffffff;
+    --oe-color-surface-container-low: #f7f4f0;
+    --oe-color-surface-container: #f2eee9;
+    --oe-color-surface-container-high: #ebe7e2;
+    --oe-color-surface-container-highest: #e4dfda;
+    --oe-color-on-surface: #1f1c18;
+    --oe-color-on-surface-variant: #48443f;
+    --oe-color-outline: #76706b;
+    --oe-color-outline-variant: #ccc6c0;
+    --oe-color-primary: #5d4a8a;
+    --oe-color-on-primary: #ffffff;
+    --oe-color-primary-container: #7c6bb0;
+    --oe-color-primary-light: #7c6bb0;
+    --oe-color-secondary: #665e77;
+    --oe-color-success: #16a34a;
+    --oe-color-accent: #665e77;
+    --oe-color-bg: #fcfaf8;
+    --oe-color-fg: #1f1c18;
+    --oe-color-surface-variant: #e4dfda;
+
+    --oe-radius-sm: 0.125rem;
+    --oe-radius-md: 0.5rem;
+    --oe-radius-lg: 0.625rem;
+    --oe-radius-xl: 0.75rem;
+    --oe-radius-full: 9999px;
+
+    --oe-space-xs: 4px;
+    --oe-space-sm: 12px;
+    --oe-space-md: 24px;
+    --oe-space-lg: 40px;
+    --oe-space-xl: 64px;
+    --oe-space-gutter: 24px;
+
+    --oe-elevation-raised: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --oe-elevation-sticky: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+
+    --oe-motion-duration-fast: 200ms;
+    --oe-motion-duration-normal: 300ms;
+    --oe-motion-easing-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --oe-layout-header-height: 56px;
+    --oe-layout-sidebar-width: 240px;
+    --oe-font-productive-body-size: 14px;
+    --oe-font-productive-body-lineHeight: 1.6;
+    --oe-font-productive-body-weight: 420;
+    --oe-font-productive-label-size: 11px;
+    --oe-font-productive-label-lineHeight: 1.0;
+    --oe-font-productive-label-letterSpacing: 0.08em;
+    --oe-font-productive-label-weight: 600;
+    --oe-font-productive-heading-size: 28px;
+    --oe-font-productive-heading-weight: 650;
+    --oe-font-productive-heading-lineHeight: 1.3;
+    --oe-font-expressive-body-size: 18px;
+    --oe-font-expressive-body-lineHeight: 1.7;
+    --oe-font-expressive-body-weight: 420;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--oe-color-surface);
+    color: var(--oe-color-on-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── App Shell Simulation ─── */
+  .app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top-bar {
+    height: var(--oe-layout-header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--oe-space-md);
+    background: var(--oe-color-surface-container-lowest);
+    border-bottom: 1px solid var(--oe-color-outline-variant);
+    box-shadow: var(--oe-elevation-raised);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .top-bar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--oe-color-primary);
+  }
+
+  .top-bar-logo svg { width: 24px; height: 24px; }
+
+  .top-bar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--oe-space-xs);
+    margin-left: var(--oe-space-lg);
+  }
+
+  .top-bar-nav a {
+    padding: 6px 12px;
+    border-radius: var(--oe-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--oe-color-on-surface-variant);
+    text-decoration: none;
+    transition: background var(--oe-motion-duration-fast) ease, color var(--oe-motion-duration-fast) ease;
+  }
+
+  .top-bar-nav a:hover { background: var(--oe-color-surface-container); color: var(--oe-color-on-surface); }
+  .top-bar-nav a.active { color: var(--oe-color-primary); background: var(--oe-color-primary-fixed, #ede2ff); }
+
+  .top-bar-spacer { flex: 1; }
+
+  /* ─── NAG BAR ─── */
+  .nag-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--oe-space-sm);
+    padding: 10px var(--oe-space-md);
+    background: var(--oe-color-surface-container);
+    border-bottom: 1px solid var(--oe-color-outline-variant);
+    animation: nag-slide-down var(--oe-motion-duration-normal) var(--oe-motion-easing-ease-out);
+  }
+
+  @keyframes nag-slide-down {
+    from { opacity: 0; transform: translateY(-100%); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .nag-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nag-message {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 420;
+    line-height: 1.5;
+    color: var(--oe-color-on-surface);
+  }
+
+  .nag-message strong {
+    font-weight: 600;
+    color: var(--oe-color-primary);
+  }
+
+  .nag-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: var(--oe-radius-md);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    transition: all var(--oe-motion-duration-fast) ease;
+    white-space: nowrap;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--oe-color-primary);
+    outline-offset: 2px;
+  }
+
+  .btn-primary {
+    background: var(--oe-color-primary);
+    color: var(--oe-color-on-primary);
+  }
+
+  .btn-primary:hover {
+    background: color-mix(in srgb, var(--oe-color-primary) 90%, black);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--oe-color-on-surface-variant);
+  }
+
+  .btn-ghost:hover {
+    background: var(--oe-color-surface-container-high);
+    color: var(--oe-color-on-surface);
+  }
+
+  /* ─── Pipili (inline SVG) ─── */
+  .pipili {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pipili-28 {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pipili-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pipili-body.curious {
+    animation: none;
+  }
+
+  .pipili-body.curious svg.head { transform: rotate(-12deg); }
+
+  .pipili-eye {
+    position: absolute;
+    width: 15%;
+    height: 15%;
+    top: 28%;
+  }
+
+  .pipili-eye.left { left: 38%; }
+  .pipili-eye.right { right: 38%; }
+
+  .pipili-eye.curious { transform: rotate(12deg); }
+
+  /* ─── Content Area (for context) ─── */
+  .content {
+    display: flex;
+    flex: 1;
+  }
+
+  .sidebar {
+    width: var(--oe-layout-sidebar-width);
+    background: var(--oe-color-surface-container-low);
+    border-right: 1px solid var(--oe-color-outline-variant);
+    padding: var(--oe-space-sm);
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    margin-bottom: var(--oe-space-md);
+  }
+
+  .sidebar-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--oe-color-on-surface-variant);
+    padding: 8px 12px 4px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--oe-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--oe-color-on-surface-variant);
+    cursor: pointer;
+    transition: all var(--oe-motion-duration-fast) ease;
+  }
+
+  .sidebar-item:hover { background: var(--oe-color-surface-container); color: var(--oe-color-on-surface); }
+  .sidebar-item.active { background: var(--oe-color-primary-fixed, #ede2ff); color: var(--oe-color-primary); }
+
+  .main {
+    flex: 1;
+    padding: var(--oe-space-lg) var(--oe-space-xl);
+    max-width: 720px;
+  }
+
+  .main h1 {
+    font-size: var(--oe-font-productive-heading-size);
+    font-weight: var(--oe-font-productive-heading-weight);
+    line-height: var(--oe-font-productive-heading-lineHeight);
+    margin-bottom: var(--oe-space-sm);
+  }
+
+  .main p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--oe-color-on-surface-variant);
+  }
+
+  .card {
+    background: var(--oe-color-surface-container-lowest);
+    border: 1px solid var(--oe-color-outline-variant);
+    border-radius: var(--oe-radius-lg);
+    padding: var(--oe-space-md);
+    margin-top: var(--oe-space-md);
+    box-shadow: var(--oe-elevation-raised);
+  }
+
+  .card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .meta-note {
+    margin-top: var(--oe-space-md);
+    padding: var(--oe-space-sm) var(--oe-space-md);
+    background: var(--oe-color-primary-fixed, #f5eeff);
+    border-radius: var(--oe-radius-md);
+    font-size: 13px;
+    color: var(--oe-color-primary);
+    border-left: 3px solid var(--oe-color-primary);
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-logo">
+        <!-- OpenEdu logo mark (assembled circles) -->
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="5" fill="var(--oe-color-primary)" />
+          <circle cx="20" cy="7" r="2.5" fill="var(--oe-color-primary-light)" opacity="0.7" />
+          <circle cx="20" cy="17" r="2.5" fill="var(--oe-color-primary-light)" opacity="0.7" />
+          <circle cx="4" cy="7" r="2.5" fill="var(--oe-color-primary-light)" opacity="0.3" />
+          <circle cx="4" cy="17" r="2.5" fill="var(--oe-color-primary-light)" opacity="0.3" />
+        </svg>
+        OpenEdu
+      </div>
+      <nav class="top-bar-nav">
+        <a href="#">Home</a>
+        <a href="#" class="active">Catalog</a>
+        <a href="#">Progress</a>
+        <a href="#">Settings</a>
+      </nav>
+      <div class="top-bar-spacer"></div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- NAG BAR — Option A: Top Banner            -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="nag-bar" role="status" aria-live="polite">
+      <!-- Pipili (sm, curious) -->
+      <div class="pipili pipili-28">
+        <div class="pipili-body curious">
+          <svg class="head" width="28" height="28" viewBox="0 0 20 20" fill="var(--oe-color-primary)">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <svg class="pipili-eye left" width="4.2" height="4.2" viewBox="0 0 20 20" fill="white">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <svg class="pipili-eye right" width="4.2" height="4.2" viewBox="0 0 20 20" fill="white">
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="nag-message">
+        <strong>Time for a break!</strong> You've been learning for 30 minutes. Stand up, stretch, and rest your eyes.
+      </div>
+
+      <div class="nag-actions">
+        <button class="btn btn-primary">Take Break</button>
+        <button class="btn btn-ghost">Ignore</button>
+      </div>
+    </div>
+
+    <!-- Content (for visual context) -->
+    <div class="content">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Browse</div>
+          <div class="sidebar-item active">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" fill="var(--oe-color-primary)" />
+              <circle cx="13" cy="5" r="1.5" fill="var(--oe-color-primary-light)" opacity="0.7" />
+              <circle cx="13" cy="11" r="1.5" fill="var(--oe-color-primary-light)" opacity="0.7" />
+            </svg>
+            All Courses
+          </div>
+          <div class="sidebar-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" fill="var(--oe-color-primary-light)" opacity="0.7" />
+            </svg>
+            In Progress
+          </div>
+          <div class="sidebar-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" fill="var(--oe-color-success)" opacity="0.7" />
+            </svg>
+            Completed
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <h1>Catalog</h1>
+        <p>Explore courses and learning bundles. Your break reminder will appear here when it's time to rest.</p>
+
+        <div class="card">
+          <h3>Introduction to JavaScript</h3>
+          <p style="font-size:13px;color:var(--oe-color-on-surface-variant);">Variables · Functions · DOM · 8 lessons</p>
+        </div>
+        <div class="card">
+          <h3>Fractions &amp; Decimals</h3>
+          <p style="font-size:13px;color:var(--oe-color-on-surface-variant);">Addition · Multiplication · Division · 12 lessons</p>
+        </div>
+
+        <div class="meta-note">
+          <strong>Design Note:</strong> Pipili appears in <em>curious</em> mood — gently alerting, not alarming. The banner spans full width below the header, making it visible without blocking content. "Take Break" navigates to the break page; "Ignore" dismisses until the next interval.
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
