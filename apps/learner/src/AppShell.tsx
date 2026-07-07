@@ -367,6 +367,13 @@ export function AppShell({
                 progressCurrent={courseProgressCurrent}
                 progressTotal={courseProgressTotal}
               />
+              {breakTimer.isTriggered && (
+                <BreakNagBar
+                  mode={breakTimer.mode}
+                  onTakeBreak={handleTakeBreak}
+                  onIgnore={breakTimer.dismiss}
+                />
+              )}
               <CourseRuntime
                 pkg={coursePkg}
                 onBackToCatalog={handleBackToCatalog}
