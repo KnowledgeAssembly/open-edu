@@ -20,12 +20,14 @@ function OpenStateWrapper({ children }: { children: React.ReactNode }): JSX.Elem
 }
 
 describe('CompanionPanel', () => {
-  it('is hidden by default when panel is closed', () => {
+  it('is rendered in DOM but translated off-screen when panel is closed', () => {
     renderWithProvider(<CompanionPanel />);
-    expect(screen.queryByTestId('companion-panel')).not.toBeInTheDocument();
+    const panel = screen.getByTestId('companion-panel');
+    expect(panel).toBeInTheDocument();
+    expect(panel.className).toContain('translate-x-full');
   });
 
-  it('renders panel content when panel is open', () => {
+  it('renders panel content visible on screen when panel is open', () => {
     render(
       <CompanionProvider>
         <OpenStateWrapper>
@@ -34,7 +36,8 @@ describe('CompanionPanel', () => {
       </CompanionProvider>,
     );
     fireEvent.click(screen.getByTestId('open-panel'));
-    expect(screen.getByTestId('companion-panel')).toBeInTheDocument();
+    const panel = screen.getByTestId('companion-panel');
+    expect(panel.className).toContain('translate-x-0');
     expect(screen.getByText('AI Companion')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Ask a question about this lesson...')).toBeInTheDocument();
   });
