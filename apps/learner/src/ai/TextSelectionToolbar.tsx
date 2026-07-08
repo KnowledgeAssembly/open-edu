@@ -15,6 +15,9 @@ interface ToolbarPosition {
   left: number;
 }
 
+const SELECTION_DEBOUNCE_MS = 10;
+const OUTSIDE_CLICK_DEBOUNCE_MS = 200;
+
 export function TextSelectionToolbar({
   containerRef,
 }: TextSelectionToolbarProps): JSX.Element | null {
@@ -61,7 +64,7 @@ export function TextSelectionToolbar({
           left: rect.left + rect.width / 2,
         });
         setVisible(true);
-      }, 10);
+      }, SELECTION_DEBOUNCE_MS);
     };
 
     const handleClickOutside = (e: MouseEvent) => {
@@ -73,7 +76,7 @@ export function TextSelectionToolbar({
             setSelectedText('');
             setPosition(null);
           }
-        }, 200);
+        }, OUTSIDE_CLICK_DEBOUNCE_MS);
       }
     };
 
@@ -200,7 +203,6 @@ export function TextSelectionToolbar({
       ref={toolbarRef}
       className={cn(
         'bg-surface-container-high text-on-surface z-[9999] flex items-center gap-0.5 rounded-lg border px-1.5 py-1 shadow-lg',
-        'data-[state=open]:animate-in data-[state=closed]:animate-out',
       )}
       style={{
         position: 'fixed',
@@ -210,6 +212,7 @@ export function TextSelectionToolbar({
       role="toolbar"
       aria-label="Text selection actions"
       data-testid="text-selection-toolbar"
+      data-state="open"
     >
       {actions.map(({ key, label, icon }) => (
         <button

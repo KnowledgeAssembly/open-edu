@@ -268,4 +268,21 @@ describe('TextSelectionToolbar', () => {
       expect(explainBtn.tagName).toBe('BUTTON');
     });
   });
+
+  it('has no accessibility violations', async () => {
+    const axe = await import('axe-core');
+    render(<TextSelectionToolbar />);
+
+    setMockSelection('test', 100, 200);
+    fireEvent.mouseUp(document);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('text-selection-toolbar')).toBeInTheDocument();
+    });
+
+    const results = await axe.default.run(document.body, {
+      rules: { region: { enabled: false } },
+    });
+    expect(results.violations).toHaveLength(0);
+  });
 });

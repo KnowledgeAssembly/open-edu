@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef, useMemo, type ReactNode, type MouseEvent } from 'react';
+import { useState, useCallback, useRef, useMemo, type ReactNode, type TouchEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@open-edu/design-system';
 import { useCompanion } from './CompanionProvider';
+import { Sparkles } from 'lucide-react';
 import type { DictionaryEntry } from '@open-edu/ai-companion';
 
 export interface WordTapHandlerProps {
@@ -19,8 +20,7 @@ interface PopoverState {
 
 export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
   const [popover, setPopover] = useState<PopoverState | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const { search, setPanelState, sendMessage } = useCompanion();
 
   const isTextSelection = useCallback((): boolean => {
@@ -28,9 +28,30 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
     return !!sel && !sel.isCollapsed && sel.toString().trim().length > 0;
   }, []);
 
-  const getWordAtPoint = useCallback((e: MouseEvent<HTMLDivElement>): string | null => {
-    const doc = document as Document & { caretRangeFromPoint?(x: number, y: number): Range | null };
-    const range = doc.caretRangeFromPoint?.(e.clientX, e.clientY);
+  const getRangeAtPoint = useCallback((x: number, y: number): Range | null => {
+    const doc = document as Document & {
+      caretRangeFromPoint?(x: number, y: number): Range | null;
+      caretPositionFromPoint?(x: number, y: number): { offsetNode: Node; offset: number } | null;
+    };
+
+    if (doc.caretRangeFromPoint) {
+      return doc.caretRangeFromPoint(x, y);
+    }
+
+    if (doc.caretPositionFromPoint) {
+      const pos = doc.caretPositionFromPoint(x, y);
+      if (!pos) return null;
+      const range = document.createRange();
+      range.setStart(pos.offsetNode, pos.offset);
+      range.collapse(true);
+      return range;
+    }
+
+    return null;
+  }, []);
+
+  const getWordAtPoint = useCallback((x: number, y: number): string | null => {
+    const range = getRangeAtPoint(x, y);
     if (!range) return null;
 
     const textNode = range.startContainer;
@@ -53,27 +74,27 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
     if (word.length === 1 && !/[a-zA-Z]/.test(word)) return null;
 
     return word.toLowerCase();
+  }, [getRangeAtPoint]);
+
+  const handlePointerDown = useCallback((x: number, y: number) => {
+    pointerDownPos.current = { x, y };
   }, []);
 
-  const handleMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    mouseDownPos.current = { x: e.clientX, y: e.clientY };
-  }, []);
+  const handlePointerUp = useCallback(
+    (x: number, y: number) => {
+      const pointerDown = pointerDownPos.current;
+      pointerDownPos.current = null;
 
-  const handleClick = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      const mousedown = mouseDownPos.current;
-      mouseDownPos.current = null;
+      if (!pointerDown) return;
 
-      if (!mousedown) return;
-
-      const dx = Math.abs(e.clientX - mousedown.x);
-      const dy = Math.abs(e.clientY - mousedown.y);
+      const dx = Math.abs(x - pointerDown.x);
+      const dy = Math.abs(y - pointerDown.y);
       const wasDrag = dx > 5 || dy > 5;
 
       if (wasDrag) return;
       if (isTextSelection()) return;
 
-      const word = getWordAtPoint(e);
+      const word = getWordAtPoint(x, y);
       if (!word) return;
 
       const result = search(word);
@@ -85,8 +106,8 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
           word,
           entry: null,
           suggestions: [],
-          x: e.clientX,
-          y: e.clientY,
+          x,
+          y,
           loading: true,
         });
         enrichedPromise.then((enriched) => {
@@ -114,8 +135,8 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
         word,
         entry,
         suggestions: suggestions.slice(0, 5),
-        x: e.clientX,
-        y: e.clientY,
+        x,
+        y,
         loading: false,
       });
     },
@@ -160,13 +181,13 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
         <div
           className={cn(
             'bg-surface text-on-surface fixed z-[9999] w-[300px] rounded-lg border p-4 shadow-lg',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out',
           )}
           style={{ left: `${left}px`, top: `${top}px` }}
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-label={`Definition for ${popover.word}`}
           data-testid="word-tap-popover"
+          data-state="open"
         >
           {popover.loading && (
             <div className="flex items-center gap-2">
@@ -232,7 +253,7 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
                   className="text-primary hover:text-primary-hover flex items-center gap-1 text-xs font-medium transition-colors"
                   data-testid="word-popover-ask-ai"
                 >
-                  <SparklesIcon />
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                   Ask AI about &ldquo;{popover.word}&rdquo;
                 </button>
               </div>
@@ -251,7 +272,7 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
                 className="text-primary hover:text-primary-hover mt-2 flex items-center gap-1 text-xs font-medium transition-colors"
                 data-testid="word-popover-ask-ai"
               >
-                <SparklesIcon />
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                 Ask AI about &ldquo;{popover.word}&rdquo;
               </button>
             </div>
@@ -264,33 +285,20 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
 
   return (
     <div
-      ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
+      onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
+      onMouseUp={(e) => handlePointerUp(e.clientX, e.clientY)}
+      onTouchStart={(e: TouchEvent<HTMLDivElement>) => {
+        const touch = e.touches[0];
+        if (touch) handlePointerDown(touch.clientX, touch.clientY);
+      }}
+      onTouchEnd={(e: TouchEvent<HTMLDivElement>) => {
+        const touch = e.changedTouches[0];
+        if (touch) handlePointerUp(touch.clientX, touch.clientY);
+      }}
       data-testid="word-tap-container"
     >
       {children}
       {popoverElement}
     </div>
-  );
-}
-
-function SparklesIcon(): JSX.Element {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 3v4m0 10v4M5 12H3m18 0h-2M6.34 6.34l-1.42-1.42m14.14 14.14l-1.42-1.42M9.88 9.88l-2.12-2.12m8.48 8.48l-2.12-2.12" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
   );
 }
