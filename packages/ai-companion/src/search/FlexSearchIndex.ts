@@ -49,15 +49,14 @@ export class FlexSearchIndex {
 
   search(query: string, limit = 10): DictionaryEntry[] {
     const idx = this.ensureIndex();
-    type SearchResult = { field: string; result: { id: string }[] };
-    const results = idx.search(query, limit, { enrich: true }) as unknown as SearchResult[];
+    const results = idx.search(query, { limit, enrich: true });
     if (!results || results.length === 0) return [];
     const fieldResult = results[0];
-    if (!fieldResult || !fieldResult.result) return [];
+    if (!fieldResult?.result) return [];
     const seen = new Set<string>();
     const output: DictionaryEntry[] = [];
     for (const item of fieldResult.result) {
-      const id = typeof item === 'string' ? item : item.id;
+      const id = typeof item === 'string' ? item : String(item.id);
       if (seen.has(id)) continue;
       seen.add(id);
       const entry = this.entries.get(id);

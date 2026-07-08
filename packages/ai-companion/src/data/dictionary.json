@@ -22,7 +22,7 @@
         "example": "Photosynthesis is essential for producing the oxygen we breathe."
       }
     ],
-    "synonyms": ["phot synthesis"],
+    "synonyms": ["photosynthesis"],
     "relatedWords": ["chlorophyll", "chloroplast", "sunlight", "carbon dioxide"]
   },
   {
@@ -111,18 +111,6 @@
       }
     ],
     "relatedWords": ["procedure", "computation", "program", "logic"]
-  },
-  {
-    "word": "photosynthesis",
-    "phonetic": "/ˌfoʊtəˈsɪnθəsɪs/",
-    "partOfSpeech": "noun",
-    "definitions": [
-      {
-        "definition": "The process by which green plants use sunlight to synthesize food from carbon dioxide and water",
-        "example": "Plants undergo photosynthesis to produce glucose."
-      }
-    ],
-    "relatedWords": ["chlorophyll", "sunlight", "carbon", "oxygen"]
   },
   {
     "word": "velocity",

@@ -12,5 +12,6 @@ export type {
   CacheProvider,
 } from './providers/types.js';
 
+export { DictionaryLoader } from './data/DictionaryLoader.js';
 export { ExactIndex } from './search/ExactIndex.js';
 export { FlexSearchIndex } from './search/FlexSearchIndex.js';
