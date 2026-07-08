@@ -100,6 +100,22 @@ describe('ConversationManager', () => {
     expect(manager.getHistory(s2).length).toBe(1);
   });
 
+  it('loads sessions from IndexedDB', async () => {
+    const context: LearningContext = { courseId: 'session-db' };
+    const sessionId = manager.createSession(context);
+    manager.addMessage(sessionId, { id: 'm1', role: 'user', text: 'test', timestamp: 1 });
+
+    const fresh = new ConversationManager();
+    await fresh.loadSessions();
+    expect(fresh.getHistory(sessionId).length).toBe(1);
+    expect(fresh.getHistory(sessionId)[0]!.text).toBe('test');
+  });
+
+  it('handles loadSessions with empty DB', async () => {
+    const fresh = new ConversationManager();
+    await expect(fresh.loadSessions()).resolves.toBeUndefined();
+  });
+
   it('includes citations in messages', () => {
     const sessionId = manager.createSession({});
     manager.addMessage(sessionId, {

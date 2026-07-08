@@ -77,7 +77,9 @@ export class DictionaryService {
       }
     }
 
-    const allSuggestions = this.exactIndex.getSuggestions(lower[0] ?? '', 50);
+    const firstChar = lower[0];
+    if (!firstChar) return null;
+    const allSuggestions = this.exactIndex.getSuggestions(firstChar, 50);
     for (const candidate of allSuggestions) {
       if (
         Math.abs(candidate.length - lower.length) <= 2 &&

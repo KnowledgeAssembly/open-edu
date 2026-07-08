@@ -76,7 +76,7 @@ export class SearchManager {
       if (!trimmed) continue;
 
       const words = queryWords.filter((w) => trimmed.toLowerCase().includes(w));
-      if (words.length > 0 && words.length >= queryWords.length * 0.5) {
+      if (words.length > 0 && words.length > queryWords.length * 0.5) {
         references.push({
           title: context.lessonTitle ?? context.courseTitle ?? 'Course Content',
           snippet: trimmed.length > 120 ? trimmed.slice(0, 120) + '...' : trimmed,

@@ -118,9 +118,31 @@ export class ConversationManager implements ConversationStore {
   }
 
   private persistSession(session: Session): void {
-    this.getDb().then((db) => {
-      const tx = db.transaction('sessions', 'readwrite');
-      tx.objectStore('sessions').put(session);
-    });
+    this.getDb()
+      .then((db) => {
+        const tx = db.transaction('sessions', 'readwrite');
+        tx.objectStore('sessions').put(session);
+      })
+      .catch((err) => {
+        console.warn('ConversationManager: failed to persist session', err); // eslint-disable-line no-console
+      });
+  }
+
+  async loadSessions(): Promise<void> {
+    try {
+      const db = await this.getDb();
+      const tx = db.transaction('sessions', 'readonly');
+      const store = tx.objectStore('sessions');
+      const all: Session[] = await new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result as Session[]);
+        request.onerror = () => reject(request.error);
+      });
+      for (const session of all) {
+        this.sessions.set(session.id, session);
+      }
+    } catch (err) {
+      console.warn('ConversationManager: failed to load sessions', err); // eslint-disable-line no-console
+    }
   }
 }

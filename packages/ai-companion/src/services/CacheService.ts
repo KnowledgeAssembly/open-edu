@@ -121,17 +121,21 @@ export class CacheService implements CacheProvider {
         const tx = db.transaction('cache', 'readwrite');
         tx.objectStore('cache').put(record);
       })
-      .catch(() => {
-        // IndexedDB unavailable
+      .catch((err) => {
+        console.warn('CacheService: IndexedDB write failed', err); // eslint-disable-line no-console
       });
   }
 
   private removeFromStorage(key: string): void {
     localStorage.removeItem(`oe-cache:${key}`);
-    this.dbPromise?.then((db) => {
-      const tx = db.transaction('cache', 'readwrite');
-      tx.objectStore('cache').delete(key);
-    });
+    this.dbPromise
+      ?.then((db) => {
+        const tx = db.transaction('cache', 'readwrite');
+        tx.objectStore('cache').delete(key);
+      })
+      .catch((err) => {
+        console.warn('CacheService: IndexedDB delete failed', err); // eslint-disable-line no-console
+      });
   }
 
   private trackStorageKey(key: string): void {
@@ -148,9 +152,13 @@ export class CacheService implements CacheProvider {
   }
 
   private clearIndexedDB(): void {
-    this.dbPromise?.then((db) => {
-      const tx = db.transaction('cache', 'readwrite');
-      tx.objectStore('cache').clear();
-    });
+    this.dbPromise
+      ?.then((db) => {
+        const tx = db.transaction('cache', 'readwrite');
+        tx.objectStore('cache').clear();
+      })
+      .catch((err) => {
+        console.warn('CacheService: IndexedDB clear failed', err); // eslint-disable-line no-console
+      });
   }
 }
