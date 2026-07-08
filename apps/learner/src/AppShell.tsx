@@ -500,8 +500,7 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element {
   const { panelState, setPanelState, messages } = useCompanion();
   const isOpen = panelState !== 'closed';
 
-  const mood =
-    view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content';
+  const mood = view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content';
 
   return (
     <>

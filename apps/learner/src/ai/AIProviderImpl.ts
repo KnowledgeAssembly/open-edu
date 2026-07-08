@@ -6,7 +6,7 @@ import type {
   LearningContext,
 } from '@open-edu/ai-companion';
 import { createLlmProvider } from '@open-edu/llm-config';
-import type { LlmProvider } from '@open-edu/llm-config';
+import type { LlmProvider, LlmConfig } from '@open-edu/llm-config';
 
 const responseSchema = z.object({
   text: z.string(),
@@ -16,12 +16,40 @@ const responseSchema = z.object({
     .default([]),
 });
 
+function viteLlmConfig(): LlmConfig {
+  return {
+    provider:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_PROVIDER as string | undefined)
+        : undefined) || 'openai',
+    model:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_MODEL as string | undefined)
+        : undefined) || 'gpt-4o-mini',
+    apiKey:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_API_KEY as string | undefined)
+        : undefined) || '',
+    maxTokens: parseInt(
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_MAX_TOKENS as string | undefined)
+        : undefined) || '4096',
+      10,
+    ),
+    temperature: parseFloat(
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_TEMPERATURE as string | undefined)
+        : undefined) || '0.3',
+    ),
+  };
+}
+
 export class AIProviderImpl implements AIProvider {
   private provider: LlmProvider | null;
 
   constructor(provider?: LlmProvider) {
     try {
-      this.provider = provider ?? createLlmProvider();
+      this.provider = provider ?? createLlmProvider(viteLlmConfig());
     } catch {
       this.provider = null;
     }
