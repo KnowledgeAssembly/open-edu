@@ -27,7 +27,6 @@
     "@open-edu/accessibility": "workspace:*",
     "@open-edu/core": "workspace:*",
     "@open-edu/design-system": "workspace:*",
-    "@open-edu/llm-config": "workspace:*",
     "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/telemetry": "workspace:*",
@@ -38,7 +37,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vite": "^5.1.0",
-    "zod": "^3.22.0",
     "@vitejs/plugin-react": "^4.2.0"
   },
   "devDependencies": {

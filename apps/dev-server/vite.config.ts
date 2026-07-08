@@ -5,7 +5,6 @@ import { join, extname } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadPackage, loadBundle } from '@open-edu/core';
 import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
-import { llmProxyHandler } from './src/llm-proxy/index.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
@@ -79,9 +78,6 @@ function eduPackageLoader(): Plugin {
 
     configureServer(srv) {
       server = srv;
-
-      // Register LLM proxy endpoint
-      srv.middlewares.use(llmProxyHandler);
 
       const watchDir = bundleDir || packageDir;
       if (!watchDir) return;

@@ -20,7 +20,7 @@ function getProxyUrl(): string {
   return (
     (typeof import.meta !== 'undefined'
       ? (import.meta.env.VITE_LLM_PROXY_URL as string | undefined)
-      : undefined) || 'http://localhost:4000/api/llm/chat'
+      : undefined) || '/api/llm/chat'
   );
 }
 

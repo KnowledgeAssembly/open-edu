@@ -6,6 +6,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
+import { llmProxyHandler } from './src/llm-proxy/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
@@ -63,6 +64,8 @@ function eduDataPlugin(): Plugin {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
     },
     configureServer(server) {
+      server.middlewares.use(llmProxyHandler);
+
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
 

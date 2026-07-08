@@ -28,19 +28,13 @@ interface MockRes {
   end: (...args: unknown[]) => void;
 }
 
-function createMockReq(
-  method: string,
-  url: string,
-  body?: string,
-  origin?: string,
-): Record<string, unknown> {
+function createMockReq(method: string, url: string, body?: string): Record<string, unknown> {
   return {
     method,
     url,
     socket: { remoteAddress: '127.0.0.1' },
     headers: {
       'content-type': body ? 'application/json' : undefined,
-      origin: origin ?? 'http://localhost:4001',
     },
     on: vi.fn((event: string, handler: (chunk?: string) => void) => {
       if (event === 'data' && body) {
@@ -68,7 +62,7 @@ describe('llmProxyHandler', () => {
     vi.restoreAllMocks();
   });
 
-  it('passes through non-POST requests to proxy path', () => {
+  it('passes through non-POST requests', () => {
     const req = createMockReq('GET', '/api/llm/chat');
     const res = createMockRes();
     const next = vi.fn();
@@ -84,25 +78,6 @@ describe('llmProxyHandler', () => {
 
     llmProxyHandler(req as never, res as never, next);
     expect(next).toHaveBeenCalled();
-  });
-
-  it('handles OPTIONS preflight with CORS headers', () => {
-    const req = createMockReq('OPTIONS', '/api/llm/chat', undefined, 'http://localhost:4001');
-    const res = createMockRes();
-    const next = vi.fn();
-
-    llmProxyHandler(req as never, res as never, next);
-
-    expect(next).not.toHaveBeenCalled();
-    expect(res.statusCode).toBe(204);
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'Access-Control-Allow-Origin',
-      'http://localhost:4001',
-    );
-    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Headers', 'Content-Type');
-    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Max-Age', '86400');
-    expect(res.end).toHaveBeenCalled();
   });
 
   it('returns 503 when no API key configured', async () => {
@@ -147,10 +122,6 @@ describe('llmProxyHandler', () => {
     await vi.waitFor(() => {
       expect(next).not.toHaveBeenCalled();
       expect(res.statusCode).toBe(200);
-      expect(res.setHeader).toHaveBeenCalledWith(
-        'Access-Control-Allow-Origin',
-        'http://localhost:4001',
-      );
       expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-store');
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
     });
