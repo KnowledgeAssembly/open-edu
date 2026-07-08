@@ -86,6 +86,9 @@ importers:
       '@open-edu/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@open-edu/llm-config':
+        specifier: workspace:*
+        version: link:../../packages/llm-config
       '@open-edu/rewards':
         specifier: workspace:*
         version: link:../../packages/rewards
@@ -119,6 +122,9 @@ importers:
       vite:
         specifier: ^5.1.0
         version: 5.4.21(@types/node@20.19.43)(terser@5.48.0)
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.0.0

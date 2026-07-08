@@ -1,33 +1,34 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AIProviderImpl } from './AIProviderImpl';
 import type { ExplanationRequest } from '@open-edu/ai-companion';
 
-vi.mock('@open-edu/llm-config', () => ({
-  createLlmProvider: vi.fn(() => {
-    throw new Error('No API key configured');
-  }),
-  loadConfig: vi.fn(() => ({
-    provider: 'openai',
-    model: 'gpt-4o-mini',
-    apiKey: '',
-    maxTokens: 4096,
-    temperature: 0.3,
-  })),
-  OpenAIProvider: vi.fn(),
-  OpenRouterProvider: vi.fn(),
-}));
-
-function createMockProvider() {
-  return {
-    generateStructured: vi.fn(),
-  };
+function createMockFetch(success: boolean, data?: Record<string, unknown>) {
+  return vi.fn().mockImplementation(async (_url: string, _options?: Record<string, unknown>) => {
+    if (!success) {
+      return {
+        ok: false,
+        status: 503,
+        json: async () => ({ error: 'LLM proxy not available' }),
+      };
+    }
+    return {
+      ok: true,
+      json: async () =>
+        data ?? { content: JSON.stringify({ text: 'Mock response', citations: [] }) },
+    };
+  });
 }
 
 describe('AIProviderImpl', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('explain returns AIResponse with text and citations', async () => {
-    const mock = createMockProvider();
-    mock.generateStructured.mockResolvedValue({ text: 'Photosynthesis is...', citations: [] });
-    const provider = new AIProviderImpl(mock as never);
+    globalThis.fetch = createMockFetch(true, {
+      content: JSON.stringify({ text: 'Photosynthesis is...', citations: [] }),
+    });
+    const provider = new AIProviderImpl();
 
     const request: ExplanationRequest = {
       text: 'What is photosynthesis?',
@@ -42,12 +43,13 @@ describe('AIProviderImpl', () => {
   });
 
   it('ask returns AIResponse', async () => {
-    const mock = createMockProvider();
-    mock.generateStructured.mockResolvedValue({
-      text: 'The answer is 42.',
-      citations: [{ source: 'Book', text: 'Life' }],
+    globalThis.fetch = createMockFetch(true, {
+      content: JSON.stringify({
+        text: 'The answer is 42.',
+        citations: [{ source: 'Book', text: 'Life' }],
+      }),
     });
-    const provider = new AIProviderImpl(mock as never);
+    const provider = new AIProviderImpl();
 
     const response = await provider.ask('What is the meaning?', {});
     expect(response.text).toBe('The answer is 42.');
@@ -56,21 +58,25 @@ describe('AIProviderImpl', () => {
   });
 
   it('simplify returns simplified text', async () => {
-    const mock = createMockProvider();
-    mock.generateStructured.mockResolvedValue({ simplified: 'Simple version.' });
-    const provider = new AIProviderImpl(mock as never);
+    globalThis.fetch = createMockFetch(true, {
+      content: JSON.stringify({ simplified: 'Simple version.' }),
+    });
+    const provider = new AIProviderImpl();
 
     const result = await provider.simplify('Complex text here', 'child');
     expect(result).toBe('Simple version.');
   });
 
-  it('handles missing provider gracefully', async () => {
+  it('handles proxy error gracefully for ask', async () => {
+    globalThis.fetch = createMockFetch(false);
     const provider = new AIProviderImpl();
     const response = await provider.ask('test', {});
-    expect(response.text).toContain('not configured');
+    expect(response.text).toContain('not available');
+    expect(response.citations).toEqual([]);
   });
 
-  it('handles missing provider for explain', async () => {
+  it('handles proxy error gracefully for explain', async () => {
+    globalThis.fetch = createMockFetch(false);
     const provider = new AIProviderImpl();
     const request: ExplanationRequest = {
       text: 'test',
@@ -78,6 +84,13 @@ describe('AIProviderImpl', () => {
       style: 'simple',
     };
     const response = await provider.explain(request);
-    expect(response.text).toContain('not configured');
+    expect(response.text).toContain('not available');
+  });
+
+  it('handles proxy error gracefully for simplify', async () => {
+    globalThis.fetch = createMockFetch(false);
+    const provider = new AIProviderImpl();
+    const result = await provider.simplify('Complex text', 'child');
+    expect(result).toBe('Complex text');
   });
 });
