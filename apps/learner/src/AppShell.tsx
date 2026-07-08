@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useBlocker } from 'react-router-dom';
 import {
   RuntimeThemeProvider,
@@ -31,7 +31,14 @@ import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
-import { CompanionProvider, useCompanion, CompanionPanel, ContextBridge } from './ai';
+import {
+  CompanionProvider,
+  useCompanion,
+  CompanionPanel,
+  ContextBridge,
+  TextSelectionToolbar,
+  WordTapHandler,
+} from './ai';
 import { getBundleProgress } from './bundleProgressStorage';
 import { useBreakTimer } from './useBreakTimer';
 import { BreakNagBar } from './BreakNagBar';
@@ -108,6 +115,7 @@ export function AppShell({
 }: AppShellProps): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
+  const courseContentRef = useRef<HTMLDivElement>(null);
 
   const view = useMemo<AppView>(
     () => pathToView(location.pathname, packageEntries),
@@ -358,46 +366,53 @@ export function AppShell({
         <FontSizeProvider>
           <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
             {isCourseView && coursePkg ? (
-              <div className="flex min-w-0 flex-1 flex-col">
-                <TopAppBar
-                  breadcrumbs={getBreadcrumbs()}
-                  isCourseView
-                  courseTitle={coursePkg.manifest.title}
-                  showA11yControls
-                  progressCurrent={courseProgressCurrent}
-                  progressTotal={courseProgressTotal}
-                />
-                {breakTimer.isTriggered && (
-                  <BreakNagBar
-                    mode={breakTimer.mode}
-                    onTakeBreak={handleTakeBreak}
-                    onIgnore={breakTimer.dismiss}
-                  />
-                )}
-                <CourseRuntime
-                  pkg={coursePkg}
-                  onBackToCatalog={handleBackToCatalog}
-                  hideLayoutShellHeader
-                  onProgressUpdate={handleProgressUpdate}
-                  bundleContext={
-                    courseBundle
-                      ? {
-                          bundleId: courseBundle.manifest.id,
-                          bundle: courseBundle,
-                          onBundleSnapshot: (snapshot) => {
-                            setBundleProgress((prev) => ({
-                              ...prev,
-                              [courseBundle.manifest.id]: snapshot,
-                            }));
-                          },
-                        }
-                      : undefined
-                  }
+              <WordTapHandler>
+                <div
+                  ref={courseContentRef}
+                  className="flex min-w-0 flex-1 flex-col"
+                  data-content-area="true"
                 >
-                  <CourseStepWrapper />
-                  <ContextBridgeWithCompanion />
-                </CourseRuntime>
-              </div>
+                  <TopAppBar
+                    breadcrumbs={getBreadcrumbs()}
+                    isCourseView
+                    courseTitle={coursePkg.manifest.title}
+                    showA11yControls
+                    progressCurrent={courseProgressCurrent}
+                    progressTotal={courseProgressTotal}
+                  />
+                  {breakTimer.isTriggered && (
+                    <BreakNagBar
+                      mode={breakTimer.mode}
+                      onTakeBreak={handleTakeBreak}
+                      onIgnore={breakTimer.dismiss}
+                    />
+                  )}
+                  <CourseRuntime
+                    pkg={coursePkg}
+                    onBackToCatalog={handleBackToCatalog}
+                    hideLayoutShellHeader
+                    onProgressUpdate={handleProgressUpdate}
+                    bundleContext={
+                      courseBundle
+                        ? {
+                            bundleId: courseBundle.manifest.id,
+                            bundle: courseBundle,
+                            onBundleSnapshot: (snapshot) => {
+                              setBundleProgress((prev) => ({
+                                ...prev,
+                                [courseBundle.manifest.id]: snapshot,
+                              }));
+                            },
+                          }
+                        : undefined
+                    }
+                  >
+                    <CourseStepWrapper />
+                    <ContextBridgeWithCompanion />
+                  </CourseRuntime>
+                  <TextSelectionToolbar containerRef={courseContentRef} />
+                </div>
+              </WordTapHandler>
             ) : (
               <AppLayout
                 sidebar={
