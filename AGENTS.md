@@ -169,6 +169,9 @@ Epic 32 (LLM Config)
 
 Epic 298 (Recognition Engine)
   └─► Epics 2, 3, 8, 5, 13 (card schemas, loader, CardBroker, card UI components, Collection Binder learner app integration)
+
+Epic 5 (Runtime Renderer) consumes @open-edu/design-system for UI primitives, tokens, and patterns.
+Epic 13 (Learner App) consumes @open-edu/ai-companion for AI companion services.
 ```
 
 ## OpenWiki

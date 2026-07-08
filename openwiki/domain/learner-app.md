@@ -18,8 +18,6 @@ The learner app includes these top-level screens and flows:
 
 `AppShell.tsx` is the central router/controller. `App.tsx` reconstructs bundle data from the virtual generated dataset and passes it into the shell. The shell also wires in the AI companion panel, the text-selection toolbar, the double-tap word lookup handler, and the break reminder banner/page navigation.
 
-`AppShell.tsx` is the central router/controller. `App.tsx` reconstructs bundle data from the virtual generated dataset and passes it into the shell.
-
 ## Main user flows
 
 ### Catalog and start actions

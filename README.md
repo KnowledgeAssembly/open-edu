@@ -305,8 +305,8 @@ Educational Package (Markdown + JSON)
   │  Placeholder, Node       │
   ├──────────────────────────┤
   │ Theming: RuntimeTheme-   │
- │  Provider,               │
- │  useThemePreference,     │
+   │  Provider,               │
+   │  useThemePreference,     │
   │  ThemeSelector           │
   └──┬───┬───┬───────┬──────┘
      ▼   ▼   ▼       ▼
