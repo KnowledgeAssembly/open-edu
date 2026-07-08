@@ -366,7 +366,9 @@ export function AppShell({
         <FontSizeProvider>
           <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
             {isCourseView && coursePkg ? (
-              <WordTapHandler>
+              <WordTapHandler
+                className="flex min-w-0 flex-1 flex-col"
+              >
                 <div
                   ref={courseContentRef}
                   className="flex min-w-0 flex-1 flex-col"

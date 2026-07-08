@@ -7,6 +7,7 @@ import type { DictionaryEntry } from '@open-edu/ai-companion';
 
 export interface WordTapHandlerProps {
   children: ReactNode;
+  className?: string;
 }
 
 interface PopoverState {
@@ -18,7 +19,7 @@ interface PopoverState {
   loading: boolean;
 }
 
-export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
+export function WordTapHandler({ children, className }: WordTapHandlerProps): JSX.Element {
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const { search, setPanelState, sendMessage } = useCompanion();
@@ -285,6 +286,7 @@ export function WordTapHandler({ children }: WordTapHandlerProps): JSX.Element {
 
   return (
     <div
+      className={className}
       onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
       onMouseUp={(e) => handlePointerUp(e.clientX, e.clientY)}
       onTouchStart={(e: TouchEvent<HTMLDivElement>) => {
