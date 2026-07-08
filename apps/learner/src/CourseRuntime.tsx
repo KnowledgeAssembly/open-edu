@@ -220,7 +220,7 @@ export function CourseRuntime({
   }
 
   return (
-    <div className="flex h-full" data-testid="course-runtime">
+    <div className="flex min-h-0 flex-1" data-testid="course-runtime">
       <AccessibilityProvider>
         <RuntimeProvider
           loadedPackage={pkg}
