@@ -78,6 +78,7 @@ function eduPackageLoader(): Plugin {
 
     configureServer(srv) {
       server = srv;
+
       const watchDir = bundleDir || packageDir;
       if (!watchDir) return;
 

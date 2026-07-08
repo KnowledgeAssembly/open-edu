@@ -28,11 +28,6 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
   const { search, setPanelState, sendMessage } = useCompanion();
 
-  const isTextSelection = useCallback((): boolean => {
-    const sel = window.getSelection();
-    return !!sel && !sel.isCollapsed && sel.toString().trim().length > 0;
-  }, []);
-
   const getRangeAtPoint = useCallback((x: number, y: number): Range | null => {
     const doc = document as Document & {
       caretRangeFromPoint?(x: number, y: number): Range | null;
@@ -55,31 +50,34 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
     return null;
   }, []);
 
-  const getWordAtPoint = useCallback((x: number, y: number): string | null => {
-    const range = getRangeAtPoint(x, y);
-    if (!range) return null;
+  const getWordAtPoint = useCallback(
+    (x: number, y: number): string | null => {
+      const range = getRangeAtPoint(x, y);
+      if (!range) return null;
 
-    const textNode = range.startContainer;
-    if (textNode.nodeType !== Node.TEXT_NODE) return null;
+      const textNode = range.startContainer;
+      if (textNode.nodeType !== Node.TEXT_NODE) return null;
 
-    const text = textNode.textContent ?? '';
-    const offset = range.startOffset;
+      const text = textNode.textContent ?? '';
+      const offset = range.startOffset;
 
-    const textBefore = text.slice(0, offset);
-    const textAfter = text.slice(offset);
+      const textBefore = text.slice(0, offset);
+      const textAfter = text.slice(offset);
 
-    const startMatch = textBefore.match(/(\w+)$/);
-    const endMatch = textAfter.match(/^(\w+)/);
+      const startMatch = textBefore.match(/(\w+)$/);
+      const endMatch = textAfter.match(/^(\w+)/);
 
-    const prefix = startMatch?.[1] ?? '';
-    const suffix = endMatch?.[1] ?? '';
-    const word = prefix + suffix;
+      const prefix = startMatch?.[1] ?? '';
+      const suffix = endMatch?.[1] ?? '';
+      const word = prefix + suffix;
 
-    if (!word || word.length < 1) return null;
-    if (word.length === 1 && !/[a-zA-Z]/.test(word)) return null;
+      if (!word || word.length < 1) return null;
+      if (word.length === 1 && !/[a-zA-Z]/.test(word)) return null;
 
-    return word.toLowerCase();
-  }, [getRangeAtPoint]);
+      return word.toLowerCase();
+    },
+    [getRangeAtPoint],
+  );
 
   const lookupWord = useCallback(
     (word: string, x: number, y: number) => {
@@ -145,7 +143,6 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
       const wasDrag = dx > 5 || dy > 5;
 
       if (wasDrag) return;
-      if (isTextSelection()) return;
 
       const now = Date.now();
       const prev = lastTap.current;
@@ -159,12 +156,14 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
       if (!isDoubleTap) return;
 
+      window.getSelection()?.removeAllRanges();
+
       const word = getWordAtPoint(x, y);
       if (!word) return;
 
       lookupWord(word, x, y);
     },
-    [isTextSelection, getWordAtPoint, lookupWord],
+    [getWordAtPoint, lookupWord],
   );
 
   const closePopover = useCallback(() => {

@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, resolve, dirname } from 'node:path';
@@ -6,6 +6,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
+import { llmProxyHandler } from './src/llm-proxy/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
@@ -63,6 +64,8 @@ function eduDataPlugin(): Plugin {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
     },
     configureServer(server) {
+      server.middlewares.use(llmProxyHandler);
+
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
 
@@ -146,19 +149,29 @@ export const bundleEntries = ${bundleEntriesJson};
   };
 }
 
-export default defineConfig({
-  plugins: [react(), eduDataPlugin()],
-  resolve: {
-    alias: [
-      { find: /^fs\/promises$/, replacement: resolve(__dirname, 'src/stubs/fs-promises.ts') },
-      { find: /^fs$/, replacement: resolve(__dirname, 'src/stubs/fs.ts') },
-      { find: /^path$/, replacement: resolve(__dirname, 'src/stubs/path.ts') },
-      { find: /^child_process$/, replacement: resolve(__dirname, 'src/stubs/child_process.ts') },
-      { find: /^util$/, replacement: resolve(__dirname, 'src/stubs/util.ts') },
-      { find: '@', replacement: resolve(__dirname, './src') },
-      { find: /^@open-edu\/telemetry$/, replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts') },
-      { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
-    ],
-  },
-  server: { port: 4001 },
+export default defineConfig(({ mode }) => {
+  const envDir = resolve(__dirname);
+  const env = loadEnv(mode, envDir, '');
+  for (const [key, value] of Object.entries(env)) {
+    if (key.startsWith('LLM_') && !process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+
+  return {
+    plugins: [react(), eduDataPlugin()],
+    resolve: {
+      alias: [
+        { find: /^fs\/promises$/, replacement: resolve(__dirname, 'src/stubs/fs-promises.ts') },
+        { find: /^fs$/, replacement: resolve(__dirname, 'src/stubs/fs.ts') },
+        { find: /^path$/, replacement: resolve(__dirname, 'src/stubs/path.ts') },
+        { find: /^child_process$/, replacement: resolve(__dirname, 'src/stubs/child_process.ts') },
+        { find: /^util$/, replacement: resolve(__dirname, 'src/stubs/util.ts') },
+        { find: '@', replacement: resolve(__dirname, './src') },
+        { find: /^@open-edu\/telemetry$/, replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts') },
+        { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
+      ],
+    },
+    server: { port: 4001 },
+  };
 });

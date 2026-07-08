@@ -5,8 +5,6 @@ import type {
   ExplanationRequest,
   LearningContext,
 } from '@open-edu/ai-companion';
-import { createLlmProvider } from '@open-edu/llm-config';
-import type { LlmProvider, LlmConfig } from '@open-edu/llm-config';
 
 const responseSchema = z.object({
   text: z.string(),
@@ -16,79 +14,85 @@ const responseSchema = z.object({
     .default([]),
 });
 
-function viteLlmConfig(): LlmConfig {
-  return {
-    provider:
-      (typeof import.meta !== 'undefined'
-        ? (import.meta.env.VITE_LLM_PROVIDER as string | undefined)
-        : undefined) || 'openai',
-    model:
-      (typeof import.meta !== 'undefined'
-        ? (import.meta.env.VITE_LLM_MODEL as string | undefined)
-        : undefined) || 'gpt-4o-mini',
-    apiKey:
-      (typeof import.meta !== 'undefined'
-        ? (import.meta.env.VITE_LLM_API_KEY as string | undefined)
-        : undefined) || '',
-    maxTokens: parseInt(
-      (typeof import.meta !== 'undefined'
-        ? (import.meta.env.VITE_LLM_MAX_TOKENS as string | undefined)
-        : undefined) || '4096',
-      10,
-    ),
-    temperature: parseFloat(
-      (typeof import.meta !== 'undefined'
-        ? (import.meta.env.VITE_LLM_TEMPERATURE as string | undefined)
-        : undefined) || '0.3',
-    ),
-  };
+const simplifySchema = z.object({ simplified: z.string() });
+
+function getProxyUrl(): string {
+  return (
+    (typeof import.meta !== 'undefined'
+      ? (import.meta.env.VITE_LLM_PROXY_URL as string | undefined)
+      : undefined) || '/api/llm/chat'
+  );
+}
+
+async function callLlmProxy(
+  prompt: string,
+  options?: { maxTokens?: number; temperature?: number },
+): Promise<string> {
+  const url = getProxyUrl();
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, ...options }),
+    signal: AbortSignal.timeout(65_000),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    const message = errorBody?.error ?? `LLM proxy returned status ${response.status}`;
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  const content = data.content as string | undefined;
+  if (!content) {
+    throw new Error('LLM proxy returned empty response');
+  }
+  return content;
 }
 
 export class AIProviderImpl implements AIProvider {
-  private provider: LlmProvider | null;
-
-  constructor(provider?: LlmProvider) {
-    try {
-      this.provider = provider ?? createLlmProvider(viteLlmConfig());
-    } catch {
-      this.provider = null;
-    }
-  }
-
   async explain(request: ExplanationRequest): Promise<AIResponse> {
-    if (!this.provider) {
+    try {
+      const prompt = this.buildExplainPrompt(request);
+      const raw = await callLlmProxy(prompt);
+      const parsed = JSON.parse(raw);
+      const result = responseSchema.parse(parsed);
+      return { text: result.text, citations: result.citations ?? [], timestamp: Date.now() };
+    } catch {
       return {
-        text: 'AI assistant is not configured. Please set up your LLM API key.',
+        text: 'AI assistant is not available. Please ensure the LLM proxy is running.',
         citations: [],
         timestamp: Date.now(),
       };
     }
-    const prompt = this.buildExplainPrompt(request);
-    const result = await this.provider.generateStructured(prompt, responseSchema);
-    return { text: result.text, citations: result.citations ?? [], timestamp: Date.now() };
   }
 
   async ask(question: string, context: LearningContext): Promise<AIResponse> {
-    if (!this.provider) {
+    try {
+      const prompt = this.buildAskPrompt(question, context);
+      const raw = await callLlmProxy(prompt);
+      const parsed = JSON.parse(raw);
+      const result = responseSchema.parse(parsed);
+      return { text: result.text, citations: result.citations ?? [], timestamp: Date.now() };
+    } catch {
       return {
-        text: 'AI assistant is not configured. Please set up your LLM API key.',
+        text: 'AI assistant is not available. Please ensure the LLM proxy is running.',
         citations: [],
         timestamp: Date.now(),
       };
     }
-    const prompt = this.buildAskPrompt(question, context);
-    const result = await this.provider.generateStructured(prompt, responseSchema);
-    return { text: result.text, citations: result.citations ?? [], timestamp: Date.now() };
   }
 
   async simplify(text: string, level: string): Promise<string> {
-    if (!this.provider) return text;
-    const prompt = `Simplify the following text for reading level "${level}".\n\n${text}`;
-    const result = await this.provider.generateStructured(
-      prompt,
-      z.object({ simplified: z.string() }),
-    );
-    return result.simplified;
+    try {
+      const prompt = `Simplify the following text for reading level "${level}".\n\n${text}`;
+      const raw = await callLlmProxy(prompt);
+      const parsed = JSON.parse(raw);
+      const result = simplifySchema.parse(parsed);
+      return result.simplified;
+    } catch {
+      return text;
+    }
   }
 
   private buildExplainPrompt(request: ExplanationRequest): string {
