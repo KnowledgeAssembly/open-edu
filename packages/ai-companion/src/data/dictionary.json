@@ -1,0 +1,1276 @@
+[
+  {
+    "word": "gravity",
+    "phonetic": "/ˈɡrævɪti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The force that attracts a body toward the center of the earth or toward any other physical body having mass",
+        "example": "Newton discovered the law of gravity when an apple fell from a tree."
+      }
+    ],
+    "synonyms": ["gravitation", "pull", "weight"],
+    "relatedWords": ["mass", "weight", "orbit", "force"]
+  },
+  {
+    "word": "photosynthesis",
+    "phonetic": "/ˌfoʊtəˈsɪnθəsɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process by which green plants and some other organisms use sunlight to synthesize nutrients from carbon dioxide and water",
+        "example": "Photosynthesis is essential for producing the oxygen we breathe."
+      }
+    ],
+    "synonyms": ["photosynthesis"],
+    "relatedWords": ["chlorophyll", "chloroplast", "sunlight", "carbon dioxide"]
+  },
+  {
+    "word": "mitosis",
+    "phonetic": "/maɪˈtoʊsɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A type of cell division that results in two daughter cells each having the same number and kind of chromosomes as the parent nucleus",
+        "example": "Mitosis allows organisms to grow and repair damaged tissue."
+      }
+    ],
+    "relatedWords": ["meiosis", "cell division", "chromosome", "cytokinesis"]
+  },
+  {
+    "word": "ecosystem",
+    "phonetic": "/ˈiːkoʊˌsɪstəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A biological community of interacting organisms and their physical environment",
+        "example": "The Amazon rainforest is one of the most diverse ecosystems on Earth."
+      }
+    ],
+    "relatedWords": ["biome", "habitat", "biodiversity", "environment"]
+  },
+  {
+    "word": "quantum",
+    "phonetic": "/ˈkwɑntəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The smallest discrete quantity of energy or matter in physics",
+        "example": "Quantum mechanics describes the behavior of particles at the atomic scale."
+      }
+    ],
+    "relatedWords": ["photon", "electron", "wave", "particle"]
+  },
+  {
+    "word": "democracy",
+    "phonetic": "/dɪˈmɑkrəsi/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A system of government by the whole population or all the eligible members of a state, typically through elected representatives",
+        "example": "Ancient Athens is considered the birthplace of democracy."
+      }
+    ],
+    "synonyms": ["republic", "self-government"],
+    "antonyms": ["dictatorship", "autocracy"],
+    "relatedWords": ["election", "vote", "citizen", "representation"]
+  },
+  {
+    "word": "hypothesis",
+    "phonetic": "/haɪˈpɑθəsɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A proposed explanation for a phenomenon, made as a starting point for further investigation",
+        "example": "The scientist formed a hypothesis before conducting the experiment."
+      }
+    ],
+    "synonyms": ["theory", "proposition", "assumption"],
+    "relatedWords": ["experiment", "prediction", "test", "evidence"]
+  },
+  {
+    "word": "renaissance",
+    "phonetic": "/ˈrɛnəsɑns/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The revival of art and learning under the influence of classical models in the 14th-16th centuries",
+        "example": "The Renaissance produced some of history's greatest artists and thinkers."
+      }
+    ],
+    "relatedWords": ["reform", "revival", "humanism", "classical"]
+  },
+  {
+    "word": "algorithm",
+    "phonetic": "/ˈælɡəˌrɪðəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A process or set of rules to be followed in calculations or problem-solving operations, especially by a computer",
+        "example": "Search engines use complex algorithms to rank web pages."
+      }
+    ],
+    "relatedWords": ["procedure", "computation", "program", "logic"]
+  },
+  {
+    "word": "velocity",
+    "phonetic": "/vəˈlɑsɪti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The speed of something in a given direction",
+        "example": "The velocity of the car increased as it went downhill."
+      }
+    ],
+    "synonyms": ["speed", "rate", "pace"],
+    "relatedWords": ["acceleration", "momentum", "vector", "speed"]
+  },
+  {
+    "word": "constitution",
+    "phonetic": "/ˌkɑnstəˈtuʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A body of fundamental principles or established precedents according to which a state or organization is governed",
+        "example": "The US Constitution was signed in 1787."
+      }
+    ],
+    "relatedWords": ["law", "amendment", "rights", "government"]
+  },
+  {
+    "word": "metamorphosis",
+    "phonetic": "/ˌmɛtəˈmɔrfəsɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A change of the form or nature of a thing into a completely different one",
+        "example": "A caterpillar undergoes metamorphosis to become a butterfly."
+      }
+    ],
+    "synonyms": ["transformation", "change", "evolution"],
+    "relatedWords": ["larva", "pupa", "chrysalis", "development"]
+  },
+  {
+    "word": "equilibrium",
+    "phonetic": "/ˌikwəˈlɪbriəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A state in which opposing forces or influences are balanced",
+        "example": "Chemical equilibrium occurs when forward and reverse reactions proceed at the same rate."
+      }
+    ],
+    "synonyms": ["balance", "stability", "symmetry"],
+    "antonyms": ["imbalance", "instability"],
+    "relatedWords": ["balance", "reaction", "force", "steady state"]
+  },
+  {
+    "word": "cellular",
+    "phonetic": "/ˈsɛljələr/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to or consisting of living cells",
+        "example": "Cellular respiration is how cells produce energy."
+      }
+    ],
+    "relatedWords": ["cell", "organelle", "membrane", "cytoplasm"]
+  },
+  {
+    "word": "fraction",
+    "phonetic": "/ˈfrækʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A numerical quantity that is not a whole number, represented as one number divided by another",
+        "example": "Three-fourths is a fraction representing three parts out of four."
+      }
+    ],
+    "relatedWords": ["numerator", "denominator", "decimal", "ratio"]
+  },
+  {
+    "word": "evolution",
+    "phonetic": "/ˌɛvəˈluʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process by which different kinds of living organisms are thought to have developed from earlier forms over generations",
+        "example": "Darwin's theory of evolution changed our understanding of life."
+      }
+    ],
+    "synonyms": ["development", "adaptation"],
+    "relatedWords": ["natural selection", "mutation", "species", "Darwin"]
+  },
+  {
+    "word": "neuron",
+    "phonetic": "/ˈnʊrɑn/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A specialized cell transmitting nerve impulses; a nerve cell",
+        "example": "Neurons communicate with each other through synapses."
+      }
+    ],
+    "relatedWords": ["synapse", "axon", "dendrite", "brain"]
+  },
+  {
+    "word": "molecule",
+    "phonetic": "/ˈmɑləˌkjul/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A group of atoms bonded together, representing the smallest fundamental unit of a chemical compound",
+        "example": "A water molecule consists of two hydrogen atoms and one oxygen atom."
+      }
+    ],
+    "relatedWords": ["atom", "compound", "bond", "element"]
+  },
+  {
+    "word": "diplomacy",
+    "phonetic": "/dɪˈploʊməsi/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The profession, activity, or skill of managing international relations",
+        "example": "Through skilled diplomacy, the two countries avoided war."
+      }
+    ],
+    "synonyms": ["negotiation", "statesmanship"],
+    "relatedWords": ["ambassador", "treaty", "foreign policy", "negotiation"]
+  },
+  {
+    "word": "thermodynamics",
+    "phonetic": "/ˌθɜrmoʊdaɪˈnæmɪks/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The branch of physics dealing with heat, work, and temperature, and their relation to energy and physical properties",
+        "example": "The laws of thermodynamics govern energy transfer."
+      }
+    ],
+    "relatedWords": ["energy", "entropy", "heat", "temperature"]
+  },
+  {
+    "word": "biodiversity",
+    "phonetic": "/ˌbaɪoʊdaɪˈvɜrsɪti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The variety of plant and animal life in a particular habitat or in the world as a whole",
+        "example": "Rainforests have incredible biodiversity."
+      }
+    ],
+    "relatedWords": ["species", "ecosystem", "conservation", "habitat"]
+  },
+  {
+    "word": "geography",
+    "phonetic": "/dʒiˈɑɡrəfi/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The study of the physical features of the earth and its atmosphere, and of human activity as it affects and is affected by these",
+        "example": "Geography helps us understand the relationship between people and their environment."
+      }
+    ],
+    "relatedWords": ["topography", "climate", "cartography", "region"]
+  },
+  {
+    "word": "nucleus",
+    "phonetic": "/ˈnukliəs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The central and most important part of an object, movement, or group, forming the basis for its activity and growth",
+        "example": "The nucleus of an atom contains protons and neutrons."
+      }
+    ],
+    "relatedWords": ["proton", "neutron", "electron", "atom"]
+  },
+  {
+    "word": "perspective",
+    "phonetic": "/pərˈspɛktɪv/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A particular attitude toward or way of regarding something; a point of view",
+        "example": "Reading history gives us perspective on current events."
+      }
+    ],
+    "synonyms": ["viewpoint", "outlook", "standpoint"],
+    "relatedWords": ["view", "context", "interpretation", "lens"]
+  },
+  {
+    "word": "syntax",
+    "phonetic": "/sɪntæks/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The arrangement of words and phrases to create well-formed sentences in a language",
+        "example": "Understanding syntax helps you write clearer sentences."
+      }
+    ],
+    "relatedWords": ["grammar", "morphology", "sentence", "structure"]
+  },
+  {
+    "word": "catalyst",
+    "phonetic": "/ˈkætəlɪst/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A substance that increases the rate of a chemical reaction without itself undergoing any permanent chemical change",
+        "example": "Enzymes act as biological catalysts in the body."
+      }
+    ],
+    "relatedWords": ["enzyme", "reaction", "accelerator", "chemical"]
+  },
+  {
+    "word": "feudalism",
+    "phonetic": "/ˈfjudlˌɪzəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A social system in medieval Europe where land was held by a lord and worked by serfs in exchange for protection",
+        "example": "Feudalism dominated Europe during the Middle Ages."
+      }
+    ],
+    "relatedWords": ["vassal", "lord", "serf", "manor"]
+  },
+  {
+    "word": "variable",
+    "phonetic": "/ˈvɛriəbəl/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An element, feature, or factor that is liable to vary or change",
+        "example": "In the experiment, temperature was the independent variable."
+      }
+    ],
+    "synonyms": ["factor", "element", "parameter"],
+    "relatedWords": ["constant", "experiment", "data", "measurement"]
+  },
+  {
+    "word": "diffusion",
+    "phonetic": "/dɪˈfjuʒən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The spreading of something more widely, such as particles moving from high to low concentration",
+        "example": "Diffusion allows oxygen to move into cells."
+      }
+    ],
+    "relatedWords": ["osmosis", "concentration", "membrane", "transport"]
+  },
+  {
+    "word": "amendment",
+    "phonetic": "/əˈmɛndmənt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A minor change or addition designed to improve a text, piece of legislation, or legal document",
+        "example": "The First Amendment protects freedom of speech."
+      }
+    ],
+    "synonyms": ["revision", "modification", "change"],
+    "relatedWords": ["constitution", "rights", "law", "legislation"]
+  },
+  {
+    "word": "inertia",
+    "phonetic": "/ɪˈnɜrʃə/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A tendency to do nothing or to remain unchanged; in physics, the resistance of an object to a change in its state of motion",
+        "example": "An object at rest stays at rest due to inertia."
+      }
+    ],
+    "relatedWords": ["momentum", "force", "motion", "mass"]
+  },
+  {
+    "word": "isosceles",
+    "phonetic": "/aɪˈsɑsəˌliz/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Having two sides of equal length",
+        "example": "An isosceles triangle has two equal sides."
+      }
+    ],
+    "relatedWords": ["triangle", "equilateral", "scalene", "geometry"]
+  },
+  {
+    "word": "civilization",
+    "phonetic": "/ˌsɪvəlɪˈzeɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An advanced state of human society with developed forms of government, culture, and industry",
+        "example": "Ancient Egyptian civilization flourished along the Nile River."
+      }
+    ],
+    "relatedWords": ["society", "culture", "city", "development"]
+  },
+  {
+    "word": "drought",
+    "phonetic": "/draʊt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A prolonged period of abnormally low rainfall, leading to a shortage of water",
+        "example": "The drought caused crops to fail across the region."
+      }
+    ],
+    "synonyms": ["dry spell", "water shortage"],
+    "antonyms": ["flood", "monsoon"],
+    "relatedWords": ["famine", "irrigation", "climate", "precipitation"]
+  },
+  {
+    "word": "circuit",
+    "phonetic": "/ˈsɜrkɪt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A roughly circular line, route, or movement that starts and finishes at the same place",
+        "example": "An electrical circuit allows current to flow through connected components."
+      }
+    ],
+    "relatedWords": ["current", "voltage", "resistance", "electricity"]
+  },
+  {
+    "word": "enzyme",
+    "phonetic": "/ˈɛnzaɪm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A protein that acts as a biological catalyst to speed up chemical reactions in living organisms",
+        "example": "Lactase is the enzyme that breaks down lactose."
+      }
+    ],
+    "relatedWords": ["protein", "catalyst", "reaction", "substrate"]
+  },
+  {
+    "word": "legislature",
+    "phonetic": "/ˈlɛdʒɪsˌleɪtʃər/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The legislative body of a country or state, responsible for making laws",
+        "example": "Congress is the legislature of the United States."
+      }
+    ],
+    "relatedWords": ["parliament", "congress", "senate", "law"]
+  },
+  {
+    "word": "magnetic",
+    "phonetic": "/mæɡˈnɛtɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Having the property of attracting certain materials, especially iron or steel, as a result of a magnetic field",
+        "example": "Earth's magnetic field protects us from solar radiation."
+      }
+    ],
+    "relatedWords": ["magnet", "field", "pole", "electromagnet"]
+  },
+  {
+    "word": "colonialism",
+    "phonetic": "/kəˈloʊniəˌlɪzəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The policy or practice of acquiring full or partial political control over another country, occupying it with settlers, and exploiting it economically",
+        "example": "Colonialism had a profound impact on the development of many nations."
+      }
+    ],
+    "relatedWords": ["colony", "imperialism", "settlement", "independence"]
+  },
+  {
+    "word": "mutation",
+    "phonetic": "/mjuˈteɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The changing of the structure of a gene, resulting in a variant form that may be transmitted to subsequent generations",
+        "example": "Mutations can be beneficial, neutral, or harmful to an organism."
+      }
+    ],
+    "relatedWords": ["gene", "DNA", "evolution", "variation"]
+  },
+  {
+    "word": "triangular",
+    "phonetic": "/traɪˈæŋɡjələr/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Shaped like a triangle; having three sides and three angles",
+        "example": "The pyramid has triangular faces."
+      }
+    ],
+    "relatedWords": ["triangle", "geometry", "prism", "polygon"]
+  },
+  {
+    "word": "sovereignty",
+    "phonetic": "/ˈsɑvrənti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Supreme power or authority, especially of a state to govern itself",
+        "example": "The treaty respected the sovereignty of each nation."
+      }
+    ],
+    "synonyms": ["autonomy", "independence", "self-rule"],
+    "relatedWords": ["nation", "government", "territory", "independence"]
+  },
+  {
+    "word": "symbiosis",
+    "phonetic": "/ˌsɪmbaɪˈoʊsɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A mutually beneficial relationship between different organisms living closely together",
+        "example": "The clownfish and sea anemone have a symbiotic relationship."
+      }
+    ],
+    "relatedWords": ["mutualism", "parasitism", "commensalism", "relationship"]
+  },
+  {
+    "word": "polynomial",
+    "phonetic": "/ˌpɑliˈnoʊmiəl/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An expression consisting of variables and coefficients, involving operations of addition, subtraction, multiplication, and non-negative integer exponents",
+        "example": "The equation x squared plus 2x plus 1 is a polynomial."
+      }
+    ],
+    "relatedWords": ["algebra", "equation", "coefficient", "variable"]
+  },
+  {
+    "word": "abiotic",
+    "phonetic": "/ˌeɪbaɪˈɑtɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Physical rather than biological; not derived from living organisms",
+        "example": "Abiotic factors include sunlight, temperature, and soil."
+      }
+    ],
+    "antonyms": ["biotic"],
+    "relatedWords": ["ecosystem", "environment", "factor", "nonliving"]
+  },
+  {
+    "word": "capitalism",
+    "phonetic": "/ˈkæpɪtəˌlɪzəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An economic system based on private ownership of the means of production and the creation of goods and services for profit",
+        "example": "Capitalism encourages competition and innovation in the marketplace."
+      }
+    ],
+    "antonyms": ["socialism", "communism"],
+    "relatedWords": ["market", "economy", "profit", "private property"]
+  },
+  {
+    "word": "chromosome",
+    "phonetic": "/ˈkroʊməˌsoʊm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A thread-like structure of nucleic acids and protein found in the nucleus of most living cells, carrying genetic information",
+        "example": "Humans have 23 pairs of chromosomes."
+      }
+    ],
+    "relatedWords": ["DNA", "gene", "genetics", "nucleus"]
+  },
+  {
+    "word": "electoral",
+    "phonetic": "/ɪˈlɛktərəl/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to elections or electors",
+        "example": "The electoral college determines the outcome of presidential elections."
+      }
+    ],
+    "relatedWords": ["election", "vote", "ballot", "democracy"]
+  },
+  {
+    "word": "genotype",
+    "phonetic": "/ˈdʒiːnoʊtaɪp/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The genetic constitution of an individual organism",
+        "example": "The genotype determines the potential traits of an organism."
+      }
+    ],
+    "relatedWords": ["phenotype", "gene", "DNA", "heredity"]
+  },
+  {
+    "word": "hegemony",
+    "phonetic": "/hɪˈdʒɛməni/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Leadership or dominance, especially by one country or social group over others",
+        "example": "The region experienced cultural hegemony under the empire."
+      }
+    ],
+    "synonyms": ["dominance", "supremacy", "leadership"],
+    "relatedWords": ["power", "influence", "authority", "empire"]
+  },
+  {
+    "word": "ionic",
+    "phonetic": "/aɪˈɑnɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to ions or characterized by the transfer of electrons between atoms",
+        "example": "Ionic bonds form when one atom donates an electron to another."
+      }
+    ],
+    "relatedWords": ["ion", "covalent", "bond", "electron"]
+  },
+  {
+    "word": "jurisdiction",
+    "phonetic": "/ˌdʒʊrɪsˈdɪkʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The official power to make legal decisions and judgments",
+        "example": "The court has jurisdiction over this case."
+      }
+    ],
+    "relatedWords": ["authority", "court", "law", "territory"]
+  },
+  {
+    "word": "kinetic",
+    "phonetic": "/kɪˈnɛtɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to or resulting from motion",
+        "example": "Kinetic energy is the energy of moving objects."
+      }
+    ],
+    "relatedWords": ["energy", "motion", "potential", "dynamics"]
+  },
+  {
+    "word": "lipid",
+    "phonetic": "/ˈlɪpɪd/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Any of a class of organic compounds that are fatty acids or their derivatives and are insoluble in water but soluble in organic solvents",
+        "example": "Lipids are essential components of cell membranes."
+      }
+    ],
+    "relatedWords": ["fat", "cell membrane", "phospholipid", "steroid"]
+  },
+  {
+    "word": "mercantilism",
+    "phonetic": "/ˈmɜrkənˌtilɪzəm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An economic policy aimed at maximizing exports and minimizing imports to build national wealth",
+        "example": "Mercantilism was dominant in Europe during the 16th to 18th centuries."
+      }
+    ],
+    "relatedWords": ["trade", "economy", "export", "colony"]
+  },
+  {
+    "word": "nucleotide",
+    "phonetic": "/ˈnukliəˌtaɪd/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The basic building block of nucleic acids such as DNA and RNA",
+        "example": "Each nucleotide consists of a sugar, a phosphate, and a nitrogenous base."
+      }
+    ],
+    "relatedWords": ["DNA", "RNA", "nitrogenous base", "phosphate"]
+  },
+  {
+    "word": "oxidation",
+    "phonetic": "/ˌɑksɪˈdeɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process of a substance combining with oxygen or losing electrons",
+        "example": "Rust is the result of iron oxidation."
+      }
+    ],
+    "antonyms": ["reduction"],
+    "relatedWords": ["oxygen", "rust", "electron", "reaction"]
+  },
+  {
+    "word": "phenotype",
+    "phonetic": "/ˈfiːnətaɪp/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The set of observable characteristics of an individual resulting from the interaction of its genotype with the environment",
+        "example": "Eye color is one example of a phenotype."
+      }
+    ],
+    "relatedWords": ["genotype", "trait", "gene", "expression"]
+  },
+  {
+    "word": "quadratic",
+    "phonetic": "/kwɑˈdrætɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Involving the square of a variable; of or relating to equations of the form ax squared plus bx plus c equals 0",
+        "example": "The quadratic formula helps solve quadratic equations."
+      }
+    ],
+    "relatedWords": ["algebra", "equation", "parabola", "square"]
+  },
+  {
+    "word": "ribosome",
+    "phonetic": "/ˈraɪbəˌsoʊm/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A cellular structure that assembles proteins from amino acids using instructions from messenger RNA",
+        "example": "Ribosomes can be found floating in the cytoplasm or attached to the endoplasmic reticulum."
+      }
+    ],
+    "relatedWords": ["protein", "RNA", "translation", "cytoplasm"]
+  },
+  {
+    "word": "sediment",
+    "phonetic": "/ˈsɛdɪmənt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Matter that settles to the bottom of a liquid; material deposited by water, wind, or glaciers",
+        "example": "Over millions of years, sediment formed layers of sedimentary rock."
+      }
+    ],
+    "relatedWords": ["erosion", "deposit", "rock", "geology"]
+  },
+  {
+    "word": "taxonomy",
+    "phonetic": "/tækˈsɑnəmi/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The branch of science concerned with classification, especially of organisms",
+        "example": "Linnaeus developed the modern system of biological taxonomy."
+      }
+    ],
+    "relatedWords": ["classification", "species", "genus", "binomial"]
+  },
+  {
+    "word": "ultraviolet",
+    "phonetic": "/ˌʌltrəˈvaɪəlɪt/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to electromagnetic radiation with a wavelength shorter than visible light but longer than X-rays",
+        "example": "Ultraviolet radiation from the sun can cause sunburn."
+      }
+    ],
+    "relatedWords": ["radiation", "light", "ozone", "spectrum"]
+  },
+  {
+    "word": "valence",
+    "phonetic": "/ˈveɪləns/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The combining power of an element, especially as measured by the number of hydrogen atoms it can displace or combine with",
+        "example": "Carbon has a valence of four."
+      }
+    ],
+    "relatedWords": ["electron", "bond", "element", "oxidation"]
+  },
+  {
+    "word": "wavelength",
+    "phonetic": "/ˈweɪvˌlɛŋkθ/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The distance between successive crests of a wave, especially in sound or electromagnetic radiation",
+        "example": "Different colors of light have different wavelengths."
+      }
+    ],
+    "relatedWords": ["frequency", "amplitude", "wave", "spectrum"]
+  },
+  {
+    "word": "xenophobia",
+    "phonetic": "/ˌzɛnəˈfoʊbiə/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Dislike of or prejudice against people from other countries",
+        "example": "Xenophobia often arises from fear of the unknown."
+      }
+    ],
+    "relatedWords": ["prejudice", "discrimination", "racism", "intolerance"]
+  },
+  {
+    "word": "zygote",
+    "phonetic": "/ˈzaɪɡoʊt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A fertilized egg cell that results from the union of a male and female gamete",
+        "example": "The zygote begins to divide shortly after fertilization."
+      }
+    ],
+    "relatedWords": ["fertilization", "embryo", "gamete", "cell"]
+  },
+  {
+    "word": "allele",
+    "phonetic": "/əˈlil/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "One of two or more alternative forms of a gene that arise by mutation and are found at the same place on a chromosome",
+        "example": "The allele for blue eyes is recessive."
+      }
+    ],
+    "relatedWords": ["gene", "chromosome", "dominant", "recessive"]
+  },
+  {
+    "word": "base",
+    "phonetic": "/beɪs/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A substance that accepts protons or donates electrons; having a pH greater than 7",
+        "example": "Baking soda is a weak base."
+      }
+    ],
+    "antonyms": ["acid"],
+    "relatedWords": ["pH", "alkali", "acid", "neutralization"]
+  },
+  {
+    "word": "covalent",
+    "phonetic": "/koʊˈveɪlənt/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to chemical bonds formed by the sharing of electrons between atoms",
+        "example": "Water is held together by covalent bonds."
+      }
+    ],
+    "relatedWords": ["bond", "electron", "molecule", "ionic"]
+  },
+  {
+    "word": "density",
+    "phonetic": "/ˈdɛnsɪti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The degree of compactness of a substance, measured as mass per unit volume",
+        "example": "Lead has a higher density than aluminum."
+      }
+    ],
+    "relatedWords": ["mass", "volume", "buoyancy", "concentration"]
+  },
+  {
+    "word": "embryo",
+    "phonetic": "/ˈɛmbrioʊ/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An unborn or unhatched offspring in the process of development",
+        "example": "The embryo develops into a fetus after eight weeks."
+      }
+    ],
+    "relatedWords": ["fetus", "gestation", "development", "zygote"]
+  },
+  {
+    "word": "fossil",
+    "phonetic": "/ˈfɑsəl/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The preserved remains or impression of a prehistoric organism",
+        "example": "Fossils provide evidence of life from millions of years ago."
+      }
+    ],
+    "relatedWords": ["paleontology", "dinosaur", "sediment", "extinction"]
+  },
+  {
+    "word": "gene",
+    "phonetic": "/dʒin/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A unit of heredity that is transferred from a parent to offspring and determines some characteristic",
+        "example": "The gene for eye color is inherited from both parents."
+      }
+    ],
+    "relatedWords": ["DNA", "chromosome", "genetics", "heredity"]
+  },
+  {
+    "word": "habitat",
+    "phonetic": "/ˈhæbɪtæt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The natural home or environment of an organism",
+        "example": "The forest is the natural habitat of the owl."
+      }
+    ],
+    "relatedWords": ["ecosystem", "biome", "environment", "niche"]
+  },
+  {
+    "word": "igneous",
+    "phonetic": "/ˈɪɡniəs/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to rock formed by the solidification of molten magma",
+        "example": "Granite is a common type of igneous rock."
+      }
+    ],
+    "relatedWords": ["magma", "volcano", "sedimentary", "metamorphic"]
+  },
+  {
+    "word": "joint",
+    "phonetic": "/dʒɔɪnt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A point where two bones meet in the body, allowing movement",
+        "example": "The knee is the largest joint in the human body."
+      }
+    ],
+    "relatedWords": ["bone", "ligament", "cartilage", "skeleton"]
+  },
+  {
+    "word": "kelvin",
+    "phonetic": "/ˈkɛlvɪn/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The SI base unit of thermodynamic temperature",
+        "example": "The temperature of absolute zero is 0 kelvin."
+      }
+    ],
+    "relatedWords": ["temperature", "Celsius", "Fahrenheit", "heat"]
+  },
+  {
+    "word": "lava",
+    "phonetic": "/ˈlɑvə/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "Hot molten rock that erupts from a volcano",
+        "example": "Lava can reach temperatures of over 1000 degrees Celsius."
+      }
+    ],
+    "relatedWords": ["magma", "volcano", "eruption", "igneous"]
+  },
+  {
+    "word": "metamorphic",
+    "phonetic": "/ˌmɛtəˈmɔrfɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to rock that has undergone transformation by heat, pressure, or other natural causes",
+        "example": "Marble is a metamorphic rock formed from limestone."
+      }
+    ],
+    "relatedWords": ["rock", "igneous", "sedimentary", "geology"]
+  },
+  {
+    "word": "nitrogen",
+    "phonetic": "/ˈnaɪtrədʒən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A colorless, odorless gas that makes up about 78 percent of Earth's atmosphere",
+        "example": "Nitrogen is essential for plant growth."
+      }
+    ],
+    "relatedWords": ["atmosphere", "gas", "element", "fertilizer"]
+  },
+  {
+    "word": "orbit",
+    "phonetic": "/ˈɔrbɪt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The curved path of a celestial object or spacecraft around a star, planet, or moon",
+        "example": "Earth takes 365 days to complete its orbit around the Sun."
+      }
+    ],
+    "relatedWords": ["gravity", "satellite", "ellipse", "planet"]
+  },
+  {
+    "word": "plateau",
+    "phonetic": "/plæˈtoʊ/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "An area of fairly level high ground",
+        "example": "The Colorado Plateau spans four US states."
+      }
+    ],
+    "relatedWords": ["mountain", "plain", "landform", "elevation"]
+  },
+  {
+    "word": "renewable",
+    "phonetic": "/rɪˈnuːəbəl/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to a natural resource or source of energy that is not depleted by use",
+        "example": "Solar power is a renewable energy source."
+      }
+    ],
+    "antonyms": ["non-renewable"],
+    "relatedWords": ["solar", "wind", "energy", "sustainable"]
+  },
+  {
+    "word": "solar",
+    "phonetic": "/ˈsoʊlər/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to or determined by the sun",
+        "example": "Solar panels convert sunlight into electricity."
+      }
+    ],
+    "relatedWords": ["sun", "energy", "renewable", "photovoltaic"]
+  },
+  {
+    "word": "tectonic",
+    "phonetic": "/tɛkˈtɑnɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to the structure of the Earth's crust and the large-scale processes that shape it",
+        "example": "Tectonic plate movements cause earthquakes."
+      }
+    ],
+    "relatedWords": ["plate", "earthquake", "continent", "geology"]
+  },
+  {
+    "word": "unique",
+    "phonetic": "/juːˈnik/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Being the only one of its kind; unlike anything else",
+        "example": "Each species has unique characteristics."
+      }
+    ],
+    "synonyms": ["distinctive", "singular", "unparalleled"],
+    "antonyms": ["common", "ordinary"],
+    "relatedWords": ["distinct", "special", "rare", "individual"]
+  },
+  {
+    "word": "volcano",
+    "phonetic": "/vɑlˈkeɪnoʊ/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A mountain or hill having a crater through which lava, rock fragments, hot vapor, and gas are erupted",
+        "example": "Mount Vesuvius is a famous active volcano."
+      }
+    ],
+    "relatedWords": ["lava", "magma", "eruption", "crater"]
+  },
+  {
+    "word": "weathering",
+    "phonetic": "/ˈwɛðərɪŋ/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process of breaking down rocks and minerals through contact with the atmosphere, water, and biological organisms",
+        "example": "Weathering gradually wears down mountains over millions of years."
+      }
+    ],
+    "relatedWords": ["erosion", "sediment", "rock", "water"]
+  },
+  {
+    "word": "atmosphere",
+    "phonetic": "/ˈætməsˌfɪr/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The envelope of gases surrounding the earth or another planet",
+        "example": "Earth's atmosphere protects us from harmful solar radiation."
+      }
+    ],
+    "relatedWords": ["air", "ozone", "climate", "weather"]
+  },
+  {
+    "word": "biotic",
+    "phonetic": "/baɪˈɑtɪk/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Relating to living organisms",
+        "example": "Biotic factors in an ecosystem include plants, animals, and bacteria."
+      }
+    ],
+    "antonyms": ["abiotic"],
+    "relatedWords": ["ecosystem", "organism", "living", "environment"]
+  },
+  {
+    "word": "continental",
+    "phonetic": "/ˌkɑntɪˈnɛntl/",
+    "partOfSpeech": "adjective",
+    "definitions": [
+      {
+        "definition": "Forming or belonging to a continent",
+        "example": "Continental drift explains how continents move over time."
+      }
+    ],
+    "relatedWords": ["continent", "drift", "plate", "tectonic"]
+  },
+  {
+    "word": "deposition",
+    "phonetic": "/ˌdɛpəˈzɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process of sediment being deposited in a new location",
+        "example": "River deltas are formed by the deposition of sediment."
+      }
+    ],
+    "relatedWords": ["erosion", "sediment", "delta", "weathering"]
+  },
+  {
+    "word": "erosion",
+    "phonetic": "/ɪˈroʊʒən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The process by which the surface of the earth is worn away by natural forces",
+        "example": "Water erosion can create deep canyons over time."
+      }
+    ],
+    "relatedWords": ["weathering", "deposition", "wind", "water"]
+  },
+  {
+    "word": "fault",
+    "phonetic": "/fɔlt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A fracture in the Earth's crust where blocks of rock have moved relative to each other",
+        "example": "The San Andreas Fault is a well-known earthquake fault line."
+      }
+    ],
+    "relatedWords": ["earthquake", "tectonic", "fracture", "seismic"]
+  },
+  {
+    "word": "glacier",
+    "phonetic": "/ˈɡleɪʃər/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A large, slow-moving mass of ice formed from compacted snow",
+        "example": "Glaciers carve U-shaped valleys as they move."
+      }
+    ],
+    "relatedWords": ["ice", "ice age", "moraine", "erosion"]
+  },
+  {
+    "word": "humidity",
+    "phonetic": "/hjuːˈmɪdɪti/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The amount of water vapor present in the air",
+        "example": "High humidity makes hot days feel even warmer."
+      }
+    ],
+    "relatedWords": ["moisture", "evaporation", "condensation", "weather"]
+  },
+  {
+    "word": "irrigation",
+    "phonetic": "/ˌɪrɪˈɡeɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The supply of water to land or crops to help growth, typically by means of channels",
+        "example": "Drip irrigation conserves water by delivering it directly to plant roots."
+      }
+    ],
+    "relatedWords": ["water", "agriculture", "farming", "drought"]
+  },
+  {
+    "word": "joule",
+    "phonetic": "/dʒul/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The SI unit of work or energy, equal to the work done by a force of one newton when its point of application moves one meter",
+        "example": "One joule is the energy needed to lift a small apple one meter."
+      }
+    ],
+    "relatedWords": ["energy", "work", "newton", "physics"]
+  },
+  {
+    "word": "latitude",
+    "phonetic": "/ˈlætɪˌtud/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The angular distance of a place north or south of the Earth's equator",
+        "example": "The equator has a latitude of zero degrees."
+      }
+    ],
+    "relatedWords": ["longitude", "equator", "map", "coordinate"]
+  },
+  {
+    "word": "mineral",
+    "phonetic": "/ˈmɪnərəl/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A solid, naturally occurring inorganic substance with a definite chemical composition",
+        "example": "Quartz is one of the most common minerals in the Earth's crust."
+      }
+    ],
+    "relatedWords": ["rock", "crystal", "ore", "geology"]
+  },
+  {
+    "word": "nutrient",
+    "phonetic": "/ˈnutriənt/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A substance that provides nourishment essential for growth and the maintenance of life",
+        "example": "Plants absorb nutrients from the soil through their roots."
+      }
+    ],
+    "relatedWords": ["vitamin", "mineral", "nutrition", "food"]
+  },
+  {
+    "word": "oxygen",
+    "phonetic": "/ˈɑksɪdʒən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "A colorless, odorless gas essential for respiration and combustion",
+        "example": "Humans need oxygen to survive."
+      }
+    ],
+    "relatedWords": ["air", "respiration", "photosynthesis", "element"]
+  },
+  {
+    "word": "radiation",
+    "phonetic": "/ˌreɪdiˈeɪʃən/",
+    "partOfSpeech": "noun",
+    "definitions": [
+      {
+        "definition": "The emission of energy as electromagnetic waves or as moving subatomic particles",
+        "example": "The Sun emits radiation that reaches Earth."
+      }
+    ],
+    "relatedWords": ["energy", "wave", "ultraviolet", "radioactive"]
+  }
+]
