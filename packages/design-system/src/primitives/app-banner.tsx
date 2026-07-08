@@ -10,7 +10,7 @@ const appBannerVariants = cva(
       variant: {
         info: 'bg-surface-container text-on-surface border-outline-variant',
         warning: 'bg-tertiary-container text-on-tertiary-container border-outline-variant',
-        break: 'bg-primary-fixed text-primary border-outline-variant',
+        break: 'bg-primary-fixed text-on-primary-fixed border-outline-variant',
       },
     },
     defaultVariants: {
