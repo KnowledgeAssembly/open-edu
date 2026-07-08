@@ -19,6 +19,7 @@ export class OpenRouterProvider implements LlmProvider {
     }
     this.client = new OpenAI({
       apiKey: config.apiKey,
+      dangerouslyAllowBrowser: true,
       baseURL: OPENROUTER_BASE_URL,
       defaultHeaders: {
         'HTTP-Referer': 'https://github.com/spatnaik1982/open-edu',

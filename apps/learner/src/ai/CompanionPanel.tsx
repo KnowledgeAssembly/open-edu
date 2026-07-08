@@ -69,7 +69,7 @@ export function CompanionPanel(): JSX.Element | null {
       />
       <div
         className={cn(
-          'fixed right-0 top-0 z-50 flex h-full flex-col border-l bg-background shadow-xl transition-transform duration-300 ease-in-out w-[90vw] max-w-md sm:w-96',
+          'bg-background fixed right-0 top-0 z-50 flex h-full w-[90vw] max-w-md flex-col border-l shadow-xl transition-transform duration-300 ease-in-out sm:w-96',
           isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
         data-testid="companion-panel"

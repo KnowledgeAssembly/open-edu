@@ -17,16 +17,30 @@ const responseSchema = z.object({
 });
 
 function viteLlmConfig(): LlmConfig {
-  const env =
-    typeof import.meta !== 'undefined'
-      ? (import.meta as { env: Record<string, string | undefined> }).env
-      : {};
   return {
-    provider: env.VITE_LLM_PROVIDER || 'openai',
-    model: env.VITE_LLM_MODEL || 'gpt-4o-mini',
-    apiKey: env.VITE_LLM_API_KEY || '',
-    maxTokens: parseInt(env.VITE_LLM_MAX_TOKENS || '4096', 10),
-    temperature: parseFloat(env.VITE_LLM_TEMPERATURE || '0.3'),
+    provider:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_PROVIDER as string | undefined)
+        : undefined) || 'openai',
+    model:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_MODEL as string | undefined)
+        : undefined) || 'gpt-4o-mini',
+    apiKey:
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_API_KEY as string | undefined)
+        : undefined) || '',
+    maxTokens: parseInt(
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_MAX_TOKENS as string | undefined)
+        : undefined) || '4096',
+      10,
+    ),
+    temperature: parseFloat(
+      (typeof import.meta !== 'undefined'
+        ? (import.meta.env.VITE_LLM_TEMPERATURE as string | undefined)
+        : undefined) || '0.3',
+    ),
   };
 }
 

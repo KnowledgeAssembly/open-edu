@@ -2,6 +2,21 @@ import { describe, it, expect, vi } from 'vitest';
 import { AIProviderImpl } from './AIProviderImpl';
 import type { ExplanationRequest } from '@open-edu/ai-companion';
 
+vi.mock('@open-edu/llm-config', () => ({
+  createLlmProvider: vi.fn(() => {
+    throw new Error('No API key configured');
+  }),
+  loadConfig: vi.fn(() => ({
+    provider: 'openai',
+    model: 'gpt-4o-mini',
+    apiKey: '',
+    maxTokens: 4096,
+    temperature: 0.3,
+  })),
+  OpenAIProvider: vi.fn(),
+  OpenRouterProvider: vi.fn(),
+}));
+
 function createMockProvider() {
   return {
     generateStructured: vi.fn(),

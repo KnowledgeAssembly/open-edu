@@ -15,7 +15,7 @@ export class OpenAIProvider implements LlmProvider {
         'OpenAI API key is required. Set OPENAI_API_KEY or LLM_API_KEY environment variable.',
       );
     }
-    this.client = new OpenAI({ apiKey: config.apiKey });
+    this.client = new OpenAI({ apiKey: config.apiKey, dangerouslyAllowBrowser: true });
     this.model = config.model;
     this.defaultMaxTokens = config.maxTokens;
     this.defaultTemperature = config.temperature;

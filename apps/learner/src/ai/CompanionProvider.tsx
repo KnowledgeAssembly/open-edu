@@ -100,11 +100,10 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
             text:
               instant.entry.definitions[0]?.definition ??
               `See definition for "${instant.entry.word}"`,
-            citations:
-              instant.entry.definitions.slice(0, 3).map((d) => ({
-                source: 'Dictionary',
-                text: d.definition,
-              })),
+            citations: instant.entry.definitions.slice(0, 3).map((d) => ({
+              source: 'Dictionary',
+              text: d.definition,
+            })),
             timestamp: Date.now(),
           };
         } else {
