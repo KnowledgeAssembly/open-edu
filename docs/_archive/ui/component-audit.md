@@ -86,7 +86,7 @@ Carbon v11 React components catalog (from carbondesignsystem.com):
 | 3   | CompletionScreen    | `CompletionScreen.tsx`    | Tailwind `--oe-*` vars | Yes    | Basic (aria-hidden confetti)        | Uses emoji for badges/stats                       |
 | 4   | CourseCard          | `CourseCard.tsx`          | Tailwind `--oe-*` vars | Yes    | Good (aria-label)                   | Uses ProgressBar from layout                      |
 | 5   | CourseOutline       | `CourseOutline.tsx`       | Tailwind `--oe-*` vars | Yes    | Basic                               | Wraps Sidebar                                     |
-| 6   | FontLoader          | `FontLoader.tsx`          | —                      | No     | N/A                                 | Injects `<link>` tags                             |
+| 6   | FontLoader          | `FontLoader.tsx`          | —                      | No     | N/A                                 | Deprecated — not implemented                      |
 | 7   | ProgressBadge       | `ProgressBadge.tsx`       | Tailwind `--oe-*` vars | Yes    | Basic (inline text)                 | 3 states                                          |
 | 8   | ReadingRuler        | `ReadingRuler.tsx`        | Inline CSS             | No     | Good (aria-hidden)                  | Fixed overlay                                     |
 | 9   | SkillSummary        | `SkillSummary.tsx`        | Inline + Tailwind      | Yes    | Good (role=region, aria-label)      |                                                   |
@@ -198,7 +198,7 @@ Carbon v11 React components catalog (from carbondesignsystem.com):
 - **Excellent:** Radix-based components (Dialog, Select, Progress, Tabs, Switch, Tooltip) — WAI-ARIA compliant
 - **Good:** MarkdownRenderer (slug IDs, alt text, external links), ProgressBar (proper ARIA), BundleOverview (aria-progressbar), SkillsSummary (role=region), SideNav (aria-current), CourseTree (aria-expanded), QuizRenderer (radiogroup, FocusTrap)
 - **Basic:** Button, Card, Badge, Input (focus-visible only), AICallout (role=complementary)
-- **Not assessed:** WidgetCanvas, WidgetErrorFallback, FontLoader
+- **Not assessed:** WidgetCanvas, WidgetErrorFallback
 
 ### Gaps Identified
 

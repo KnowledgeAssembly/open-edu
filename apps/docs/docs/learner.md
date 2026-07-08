@@ -20,29 +20,35 @@ The learner app is built on top of the Open-Edu runtime packages:
 
 ```
 @open-edu/learner
-  ├── @open-edu/core       — scanPackages, scanAll, loadPackage, loadBundle
-  ├── @open-edu/workflow   — WorkflowEngine, BundleEngine, getOrderedNodes
-  ├── @open-edu/runtime    — RuntimeThemeProvider, FontLoader, useThemePreference,
-  │                           TopAppBar, SideNav, AITutorPanel, NodeRenderer,
-  │                           BundleOverview, etc.
-  ├── @open-edu/rewards    — RewardBroker for badge delivery
-  ├── @open-edu/telemetry  — TelemetrySession for event capture
+  ├── @open-edu/core          — scanPackages, scanAll, loadPackage, loadBundle
+  ├── @open-edu/workflow      — WorkflowEngine, BundleEngine, getOrderedNodes
+  ├── @open-edu/runtime       — RuntimeThemeProvider, useThemePreference,
+  │                              TopAppBar, SideNav, AITutorPanel, NodeRenderer,
+  │                              BundleOverview, etc.
+  ├── @open-edu/rewards       — RewardBroker for badge delivery
+  ├── @open-edu/telemetry     — TelemetrySession for event capture
   ├── @open-edu/accessibility — AccessibilityProvider
-  └── @open-edu/widgets    — createDefaultRegistry
+  ├── @open-edu/widgets       — createDefaultRegistry
+  ├── @open-edu/design-system — AppSidebar, AppLayout, SideNav, TopAppBar, etc.
+  ├── @open-edu/ai-companion  — CompanionProvider, SearchManager, DictionaryService
+  ├── @open-edu/schemas       — TypeScript types derived from Zod schemas
+  └── @open-edu/llm-config    — LLM provider abstraction
 ```
 
 ## Page Router
 
-The app uses a 6-page `Page` union type with state-based routing (no React Router):
+The app uses **react-router-dom** 6.x (`useNavigate`, `useLocation`, `useBlocker`) for navigation with an `AppView` union type that drives path-to-view mapping:
 
-| Page            | Route Type    | Description                                                               |
-| --------------- | ------------- | ------------------------------------------------------------------------- |
-| **Catalog**     | `catalog`     | Scans and displays all packages as CourseCards                            |
-| **Course Home** | `course-home` | Course overview with progress banner, timeline, and AI insight callout    |
-| **Lesson**      | `lesson`      | 3-panel viewer — SideNav + content canvas + AITutorPanel                  |
-| **Assessment**  | `assessment`  | Quiz renderer with AI hint callout and Exit Quiz button                   |
-| **Code**        | `code`        | Dark-themed code viewer with toolbar (zoom + font size) + AITutorPanel    |
-| **Progress**    | `progress`    | Bento-grid dashboard — completion, AI insights, mastery profile, activity |
+| View           | Route         | Description                                                               |
+| -------------- | ------------- | ------------------------------------------------------------------------- |
+| **Home**       | `/`           | Landing page with quick-start actions                                     |
+| **Catalog**    | `/catalog`    | Scans and displays all packages as CourseCards                            |
+| **Progress**   | `/progress`   | Bento-grid dashboard — completion, AI insights, mastery profile, activity |
+| **Settings**   | `/settings`   | Theme switching, preferences, accessibility controls                      |
+| **Course**     | `/course/:id` | 3-panel viewer — SideNav + content canvas + AITutorPanel                  |
+| **Bundle**     | `/bundle/:id` | Multi-module bundle overview page                                         |
+| **Collection** | `/collection` | Collection Binder — Knowledge Cards gallery                               |
+| **Break**      | `/break`      | Break reminder page                                                       |
 
 ## Course Catalog
 
@@ -154,7 +160,7 @@ After the workflow reaches `COMPLETED`, the app renders a **CompletionScreen** s
 
 ## shadcn/ui Component Library
 
-The learner app includes a custom **shadcn/ui component library** at `src/components/ui/` with 10 components built on Radix UI primitives:
+The learner app uses the **shadcn/ui-style component library** from `@open-edu/design-system` with 10 components built on Radix UI primitives:
 
 | Component  | Radix Primitive | Usage in the app                                        |
 | ---------- | --------------- | ------------------------------------------------------- |

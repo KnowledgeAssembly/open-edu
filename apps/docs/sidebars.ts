@@ -126,6 +126,7 @@ const sidebars: SidebarsConfig = {
         'course-compiler',
         'pipeline',
         'llm-config',
+        'ai-companion',
       ],
     },
     {

@@ -52,7 +52,7 @@ AppView =
   | { view: 'course'; pkg: LoadedPackage }
 ```
 
-- `AppShell` renders `RuntimeThemeProvider` (theme applied app-wide, including catalog/assessments) + `FontLoader` + fixed `LeftNav` + `TopAppBar` + `<main>` center region switching on `AppView`.
+- `AppShell` renders `RuntimeThemeProvider` (theme applied app-wide, including catalog/assessments) + fixed `LeftNav` + `TopAppBar` + `<main>` center region switching on `AppView`.
 - The theme provider wraps the **whole shell**, fixing the `AssessmentPage` theme-gap (and every other view).
 - `handleStartCourse(rootDir)` no longer switches to a `course-home` page — it sets `{ view: 'course', pkg }`. The course-home / lesson / assessment / code page split is removed; the in-course center region is driven by the runtime engine's `currentNodeId`.
 - `packageEntries` / `catalogPackages` from `virtual:edu-data` load into shell state; the shell resolves a `pkg` by `rootDir` on catalog start.
