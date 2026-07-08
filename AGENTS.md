@@ -129,6 +129,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
 - `@open-edu/pipeline`, `@open-edu/llm-config`
+- `@open-edu/design-system`, `@open-edu/ai-companion`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -155,16 +156,13 @@ Epic 13 (Learner App)
 Epic 29 (Course Compiler)
   └─► Epics 2, 3 (compiles specs into validated packages)
 
-Epic 31 (Pipeline)
-  └─► Epics 2 (schemas used in zod schemas)
-        └─► @open-edu/llm-config (LLM provider abstraction)
-              └─► @open-edu/pipeline (6-stage PDF → course-spec.md)
-
 Epic 30 (Step Titles)
   └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)
 
 Epic 31 (Pipeline)
   └─► Epics 2, 3, 29, widgets (AI-generated PDF → course-spec via LLM pipeline)
+        └─► @open-edu/llm-config (LLM provider abstraction)
+              └─► @open-edu/pipeline (6-stage PDF → course-spec.md)
 
 Epic 32 (LLM Config)
   └─► Epic 31 (LLM provider abstraction — OpenAI + OpenRouter)
@@ -230,4 +228,4 @@ Before marking a story complete, verify:
 - [ ] Formatting is correct: `pnpm format:check`
 - [ ] Conventional commit messages
 - [ ] No dead code, debug logs, or temporary edits
-- [ ] Acessibility: axe-core audits pass for all affected components
+- [ ] Accessibility: axe-core audits pass for all affected components

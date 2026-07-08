@@ -44,8 +44,8 @@ Educational Package / Bundle (Markdown + JSON)
   │  Placeholder, Node       │
   ├──────────────────────────┤
   │ Theming: RuntimeTheme-   │
-  │  Provider, FontLoader,   │
-  │  useThemePreference,     │
+ │  Provider,               │
+ │  useThemePreference,     │
   │  ThemeSelector           │
   └──┬───┬───┬───────┬──────┘
      ▼   ▼   ▼       ▼
@@ -142,7 +142,7 @@ The framework ships with 3 built-in themes that control colors, typography, spac
 | OpenEdu Dark  | `nocturnal`          | Dark  | Calm dark for deep focus          | Inter + Source Serif 4 + JetBrains Mono |
 | OpenEdu Zen   | `zen`                | Light | Reduced-stimulation quiet reading | Inter + Source Serif 4 + JetBrains Mono |
 
-The `RuntimeThemeProvider` accepts a `themeId` prop and flattens the corresponding definition. `FontLoader` injects Google Font `<link>` tags based on active font families. `useThemePreference()` persists the selected theme to `localStorage`. `ThemeSelector` provides a popover UI for switching themes at runtime.
+The `RuntimeThemeProvider` accepts a `themeId` prop and flattens the corresponding definition. `useThemePreference()` persists the selected theme to `localStorage`. `ThemeSelector` provides a popover UI for switching themes at runtime.
 
 Both the learner app and dev-server map `--oe-*` tokens to Tailwind utility classes via `tailwind.config.ts` / `tailwind.config.js`.
 

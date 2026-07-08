@@ -13,6 +13,10 @@ The learner app includes these top-level screens and flows:
 - settings / theme selection
 - bundle overview
 - collection binder for Knowledge Cards
+- AI companion surfaces embedded in course pages
+- break reminder flow with a dedicated break page
+
+`AppShell.tsx` is the central router/controller. `App.tsx` reconstructs bundle data from the virtual generated dataset and passes it into the shell. The shell also wires in the AI companion panel, the text-selection toolbar, the double-tap word lookup handler, and the break reminder banner/page navigation.
 
 `AppShell.tsx` is the central router/controller. `App.tsx` reconstructs bundle data from the virtual generated dataset and passes it into the shell.
 
@@ -63,6 +67,25 @@ It derives much of this from local storage and package metadata.
 
 `SettingsPage.tsx` connects the learner app to the runtime theme preference system. The selected theme is persisted through `useThemePreference`.
 
+### AI companion and word lookup
+
+The learner app now embeds the AI companion through `apps/learner/src/ai/`. `AIProviderImpl.ts` sends prompts to a backend LLM proxy instead of talking directly to a model provider from the browser. It reads the proxy URL from `VITE_LLM_PROXY_URL` when available and otherwise falls back to `/api/llm/chat`.
+
+The AI companion services are provided by `@open-edu/ai-companion`. See the [AI Companion domain doc](ai-companion.md) for the service architecture.
+
+The same AI companion feature set now includes two page-level interaction surfaces:
+
+- `TextSelectionToolbar` for selected text
+- `WordTapHandler` for double-tap word lookup in course content
+
+`WordTapHandler.tsx` looks up dictionary entries and suggestions, and it can hand off to the AI companion panel with a prompt like “Tell me more about …”. The handler is intentionally double-tap based so regular text selection remains usable alongside the popover experience.
+
+### Break reminder flow
+
+`BreakNagBar.tsx` renders a break reminder banner using the new `AppBanner` primitive from `packages/design-system`. The banner supports the `break` variant and presents actions to take a break or ignore the reminder.
+
+`AppShell.tsx` routes `/break` to `BreakPage` and shows the break nag bar in the course shell when the timer indicates a reminder should be shown. The back-to-learning action dismisses the reminder timer state when the user returns to learning.
+
 ## Important implementation details
 
 - The app uses `virtual:edu-data` to receive generated package and bundle catalogs.
@@ -79,6 +102,10 @@ It derives much of this from local storage and package metadata.
 - `apps/learner/src/ProgressDashboard.tsx`
 - `apps/learner/src/CollectionBinderPage.tsx`
 - `apps/learner/src/SettingsPage.tsx`
+- `apps/learner/src/ai/AIProviderImpl.ts`
+- `apps/learner/src/ai/WordTapHandler.tsx`
+- `apps/learner/src/BreakNagBar.tsx`
+- `packages/design-system/src/primitives/app-banner.tsx`
 
 ## What to watch out for
 

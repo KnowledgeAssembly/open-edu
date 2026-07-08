@@ -25,6 +25,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 - `packages/workflow` — workflow engine and node ordering logic.
 - `packages/runtime` — React runtime renderers, layout shells, theme system, progress helpers, and knowledge-card components.
 - `packages/design-system` — primitives, patterns, learning UI, tokens, themes, and visual-dna components.
+- `packages/ai-companion` — AI Learning Companion: search, dictionary, conversation, and provider services for the AI companion feature.
 - `packages/accessibility` — accessibility helpers and validation.
 - `packages/telemetry` — event collection and JSONL persistence.
 - `packages/rewards` — reward broker and card unlock logic.

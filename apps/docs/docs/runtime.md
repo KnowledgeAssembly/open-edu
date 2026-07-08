@@ -48,23 +48,6 @@ function MyComponent() {
 }
 ```
 
-### FontLoader
-
-Injects Google Font `<link>` tags matching the active theme's typography families. Cleans up unused font links on theme switch.
-
-```tsx
-import { RuntimeThemeProvider, FontLoader } from '@open-edu/runtime';
-
-function App() {
-  return (
-    <RuntimeThemeProvider themeId={themeId}>
-      <FontLoader />
-      <YourContent />
-    </RuntimeThemeProvider>
-  );
-}
-```
-
 ### useThemePreference
 
 A hook that reads/writes the selected theme to `localStorage` under the key `oe-theme-preference`. Falls back to `lumina-scholastica` gracefully on corrupted storage.
@@ -101,22 +84,33 @@ console.log(themeIds); // ['lumina-scholastica', 'nocturnal', 'zen']
 
 Fixed left navigation panel (260px) with:
 
-- OpenEdu heading
-- 5 navigation tabs (Course Overview, Modules, My Progress, Bookmarks, Settings)
+- Course title
+- 5 navigation tabs (overview, modules, progress, bookmarks, settings)
 - Course structure children slot
 - Resume Last Lesson button
 - Active tab highlighted with left border + primary-container background
+- Supports both controlled (`activeTab`) and uncontrolled (`defaultActiveTab`) modes
 
 ```tsx
 import { SideNav } from '@open-edu/runtime';
 
 <SideNav
-  activeTab="course-home"
-  onTabChange={handleNavigate}
-  modules={modules}
-  currentLessonId={currentNodeId}
-/>;
+  courseTitle="Introduction to Math"
+  activeTab="overview"
+  onTabChange={(tab) => navigate(tab)}
+>
+  <CourseTree modules={modules} />
+</SideNav>;
 ```
+
+| Prop               | Type                      | Default | Description                           |
+| ------------------ | ------------------------- | ------- | ------------------------------------- |
+| `courseTitle`      | `string`                  | —       | Course title displayed in the panel   |
+| `children`         | `ReactNode`               | —       | Course structure content (CourseTree) |
+| `onResumeLesson`   | `() => void`              | —       | Resume last lesson action             |
+| `activeTab`        | `NavTabId`                | —       | Controlled active tab                 |
+| `defaultActiveTab` | `NavTabId`                | —       | Default tab (uncontrolled mode)       |
+| `onTabChange`      | `(tab: NavTabId) => void` | —       | Tab change callback                   |
 
 ### TopAppBar
 
@@ -125,14 +119,33 @@ Sticky header with:
 - Breadcrumb navigation
 - Accessibility controls popover (Reader mode, Reading Ruler toggle, font size A+/A-)
 - ThemeSelector integration (theme switcher)
-- Search button, Ask AI button, user avatar
+- User avatar
 - Backdrop-blur effect
 
 ```tsx
 import { TopAppBar } from '@open-edu/runtime';
 
-<TopAppBar breadcrumbs={breadcrumbs} currentThemeId={themeId} onThemeChange={setThemeId} />;
+<TopAppBar
+  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Course' }]}
+  showA11yControls
+  onReadingRulerChange={setRulerEnabled}
+  isCourseView
+  courseTitle="Introduction to Math"
+  progressCurrent={3}
+  progressTotal={12}
+/>;
 ```
+
+| Prop                   | Type                         | Default | Description                           |
+| ---------------------- | ---------------------------- | ------- | ------------------------------------- |
+| `breadcrumbs`          | `TopAppBarBreadcrumb[]`      | —       | Breadcrumb trail                      |
+| `showA11yControls`     | `boolean`                    | —       | Show accessibility controls popover   |
+| `userAvatar`           | `string`                     | —       | User avatar URL                       |
+| `onReadingRulerChange` | `(enabled: boolean) => void` | —       | Reading Ruler toggle callback         |
+| `isCourseView`         | `boolean`                    | —       | Whether rendered inside a course view |
+| `courseTitle`          | `string`                     | —       | Course title for the header           |
+| `progressCurrent`      | `number`                     | —       | Current step in course progress       |
+| `progressTotal`        | `number`                     | —       | Total steps in course progress        |
 
 ### CourseTree
 
@@ -194,6 +207,9 @@ function CourseView({ pkg }: { pkg: LoadedPackage }) {
         engine={engine}
         initialProgress={initialProgress}
         onProgressChange={handleProgressChange}
+        widgetRegistry={widgetRegistry}
+        packageId={pkg.manifest.id}
+        packageVersion={pkg.manifest.version}
       >
         <LayoutShell />
       </RuntimeProvider>
@@ -201,6 +217,18 @@ function CourseView({ pkg }: { pkg: LoadedPackage }) {
   );
 }
 ```
+
+| Prop               | Type                            | Description                               |
+| ------------------ | ------------------------------- | ----------------------------------------- |
+| `loadedPackage`    | `LoadedPackage`                 | The loaded package object                 |
+| `engine`           | `WorkflowEngine`                | Workflow engine instance                  |
+| `children`         | `ReactNode`                     | Child content                             |
+| `widgetRegistry`   | `WidgetRegistry` (optional)     | Widget registry for exercise/custom nodes |
+| `initialProgress`  | `ProgressSnapshot` (optional)   | Restore progress from a snapshot          |
+| `onProgressChange` | `(snapshot) => void` (optional) | Progress change callback                  |
+| `packageId`        | `string` (optional)             | Override package ID                       |
+| `packageVersion`   | `string` (optional)             | Override package version                  |
+| `skillGraph`       | `SkillGraph` (optional)         | Skill graph for mastery tracking          |
 
 ## useRuntime Hook
 
@@ -212,10 +240,22 @@ import { useRuntime } from '@open-edu/runtime';
 function MyComponent() {
   const {
     loadedPackage, // The current LoadedPackage
-    currentNode, // The active node with metadata
+    currentNode, // The active node with metadata (or null)
+    currentNodeId, // Current node path string
     isCompleted, // Whether workflow is finished
+    scores, // Record<string, number> — per-node scores
+    lastScore, // Score from the last completed node
     visitedNodes, // Array of completed node paths
+    answers, // Record<string, NodeAnswer>
+    saveAnswer, // (nodeId, answer) => void
     completeNode, // (score?) => void — complete current node
+    navigateToNode, // (nodeId) => void — navigate to specific node
+    getNode, // (nodeId) => LoadedNode | undefined
+    widgetRegistry, // WidgetRegistry | undefined
+    progressSnapshot, // ProgressSnapshot | null
+    skillScores, // Record<string, number>
+    getSkillMastery, // (skillId) => MasteryLevel
+    skillGraph, // SkillGraph | undefined
   } = useRuntime();
 }
 ```
@@ -276,16 +316,17 @@ Features:
 import { buildProgressSnapshot, isValidSnapshot } from '@open-edu/runtime';
 import type { ProgressSnapshot } from '@open-edu/schemas';
 
-const snapshot = buildProgressSnapshot(
-  packageId,
-  packageVersion,
-  currentNodeId,
-  visitedNodes,
-  scores,
-);
-// { packageId, packageVersion, currentNodeId, visitedNodes, scores, isCompleted, updatedAt }
+const snapshot = buildProgressSnapshot('my-package', '1.0.0', {
+  currentNodeId: 'nodes/lesson-3.md',
+  visitedNodes: ['nodes/lesson-1.md', 'nodes/lesson-2.md'],
+  scores: { 'nodes/quiz-1.json': 100 },
+  answers: {},
+  isCompleted: false,
+});
+// { packageId, packageVersion, currentNodeId, visitedNodes, scores, answers, isCompleted, updatedAt }
 
-if (isValidSnapshot(data)) {
+const validNodeIds = new Set(['nodes/lesson-1.md', 'nodes/lesson-2.md', 'nodes/lesson-3.md']);
+if (isValidSnapshot(snapshot, validNodeIds)) {
   // Resume from snapshot
 }
 ```
@@ -294,19 +335,19 @@ if (isValidSnapshot(data)) {
 
 The runtime includes 5 reusable card UI components for the Recognition Engine.
 
-### Card
+### KnowledgeCard
 
 A glassmorphism card with category-based color accents, locked/unlocked states, and level stars.
 
 ```tsx
-import { Card } from '@open-edu/runtime';
+import { KnowledgeCard } from '@open-edu/runtime';
 import type { CardDefinition } from '@open-edu/schemas';
 
 const card: CardDefinition = {
   /* ... */
 };
 
-<Card card={card} level={2} isLocked={false} onClick={() => openViewer(card)} />;
+<KnowledgeCard card={card} level={2} isLocked={false} onClick={() => openViewer(card)} />;
 ```
 
 Features:
@@ -316,12 +357,12 @@ Features:
 - Level stars (up to `maximumLevel`) in amber on unlocked cards
 - Full keyboard accessibility (`role="button"`, tabIndex, Enter/Space handlers)
 
-### CardGrid
+### KnowledgeCardGrid
 
 Responsive grid with roving tabindex keyboard navigation (arrow keys, Home, End).
 
 ```tsx
-import { CardGrid } from '@open-edu/runtime';
+import { KnowledgeCardGrid } from '@open-edu/runtime';
 
 const items = cards.map((card) => ({
   card,
@@ -329,19 +370,19 @@ const items = cards.map((card) => ({
   isLocked: getLevel(card.id) === 0,
 }));
 
-<CardGrid cards={items} onCardClick={(card) => setSelected(card)} />;
+<KnowledgeCardGrid cards={items} onCardClick={(card) => setSelected(card)} />;
 ```
 
-### CardViewer
+### KnowledgeCardViewer
 
 Dialog showing full card details with a mastery level evolution stepper.
 
 ```tsx
-import { CardViewer } from '@open-edu/runtime';
+import { KnowledgeCardViewer } from '@open-edu/runtime';
 
 {
   selectedCard && (
-    <CardViewer
+    <KnowledgeCardViewer
       card={selectedCard}
       level={savedProgress[selectedCard.id]?.level ?? 1}
       onClose={() => setSelectedCard(null)}
@@ -368,14 +409,14 @@ import { ProgressRing } from '@open-edu/runtime';
 <ProgressRing progress={75} size={64} strokeWidth={4} />;
 ```
 
-### CardUnlockedToast
+### KnowledgeCardUnlockedToast
 
 Non-blocking bottom-right toast notification for card unlock/level-up events.
 
 ```tsx
-import { CardUnlockedToast } from '@open-edu/runtime';
+import { KnowledgeCardUnlockedToast } from '@open-edu/runtime';
 
-<CardUnlockedToast
+<KnowledgeCardUnlockedToast
   card={card}
   newLevel={2}
   visible={showToast}
@@ -398,7 +439,7 @@ Features:
 Mount the runtime in any DOM element without importing React directly:
 
 ```typescript
-import { createRuntime } from '@open-edu/runtime';
+import { createRuntime } from '@open-edu/runtime/embed';
 
 const handle = await createRuntime({
   packageSource: './examples/hello-world',

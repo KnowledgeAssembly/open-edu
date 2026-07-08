@@ -51,18 +51,12 @@ The framework ships with **3 built-in themes** that control colors, typography, 
 | OpenEdu Zen   | `zen`                | Light | Reduced-stimulation quiet reading | Inter + Source Serif 4 + JetBrains Mono |
 
 ```tsx
-import {
-  RuntimeThemeProvider,
-  FontLoader,
-  useThemePreference,
-  ThemeSelector,
-} from '@open-edu/runtime';
+import { RuntimeThemeProvider, useThemePreference, ThemeSelector } from '@open-edu/runtime';
 
 function App() {
   const [themeId, setThemeId] = useThemePreference(); // persisted to localStorage
   return (
     <RuntimeThemeProvider themeId={themeId}>
-      <FontLoader /> {/* injects Google Font <link> tags */}
       <ThemeSelector currentThemeId={themeId} onThemeChange={setThemeId} />
       {/* ... course content */}
     </RuntimeThemeProvider>
@@ -72,7 +66,6 @@ function App() {
 
 - `useThemePreference()` — reads/writes `oe-theme-preference` in localStorage, defaults to `lumina-scholastica`
 - `RuntimeThemeProvider` — flattens `ThemeDefinition` into 60+ `--oe-*` CSS variables and wraps content in a themed `div`
-- `FontLoader` — injects Google Font `<link>` tags matching the active theme's typography
 - `ThemeSelector` — popover with 3 theme preview cards (color swatches + description), keyboard-navigable
 
 The learner app (`@open-edu/learner`) uses a **shadcn/ui component library** (10 components: Button, Card, Badge, Input, Dialog, Select, Progress, Tabs, Switch, Tooltip) built on **Radix UI** primitives with **Lucide icons**, all styled via Tailwind utility classes. The `ThemeSelector` is accessible from the `TopAppBar` on every course page. The dev-server uses a pre-generated Tailwind CSS file; the learner app processes Tailwind through PostCSS.
@@ -186,22 +179,24 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 
 ## Packages
 
-| Package                     | Description                                                                                                                                                                                                                                                                                                                                                 | Status |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `@open-edu/schemas`         | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress, **bundle manifests**, **bundle progress**                                                                                                                                                                                                              | Done   |
-| `@open-edu/core`            | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner, **bundle loader**, **bundle scanner (scanAll)**, **Learn-Easy importer**, bundle error classes                                                                                                                                               | Done   |
-| `@open-edu/workflow`        | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering, **BundleEngine** (orchestrates per-module WorkflowEngine instances with prerequisite unlock)                                                                                                                                                             | Done   |
-| `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **3 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                                                                                  | Done   |
-| `@open-edu/accessibility`   | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                                                                                                                                                                              | Done   |
-| `@open-edu/telemetry`       | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                                                                                   | Done   |
-| `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                               | Done   |
-| `@open-edu/cli`             | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                                                                                                | Done   |
-| `@open-edu/dev-server`      | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector, **bundle inspector tab**, **multi-module bundle mode**                                                                                                                                                                                                    | Done   |
-| `@open-edu/widgets`         | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                                                                                                                                                                                                                                                | Done   |
-| `@open-edu/course-compiler` | Remark/Unified-based compiler that converts `course-spec.md` or `course-spec.json` into validated OpenEdu packages — auto-detects format by extension                                                                                                                                                                                                       | Done   |
-| `@open-edu/pipeline`        | AI-driven PDF → course spec generation pipeline — 6 stages (extract, chunk, concepts, activities, validate, output), LLM-driven widget selection, supports `--format md/json/both`                                                                                                                                                                          | Done   |
-| `@open-edu/llm-config`      | LLM provider abstraction — `generateStructured<T>()` with Zod validation, supports OpenAI + OpenRouter providers                                                                                                                                                                                                                                            | Done   |
-| `@open-edu/learner`         | Standalone learner app — course catalog, **6-page router** (catalog, course home, lesson, assessment, code, progress), **bundle catalog + overview**, **Collection Binder** (card museum with category shelves), **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward + card integration, E2E-tested workflow | Done   |
+| Package                     | Description                                                                                                                                                                                                                                                                                                                                                                     | Status |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `@open-edu/schemas`         | Zod schemas + type generation for manifests, workflows, nodes, rewards, telemetry, skills, progress, **bundle manifests**, **bundle progress**                                                                                                                                                                                                                                  | Done   |
+| `@open-edu/core`            | Package directory loader, manifest parsing, node file loading, validation, patcher, lint, generation, scanner, **bundle loader**, **bundle scanner (scanAll)**, **Learn-Easy importer**, bundle error classes                                                                                                                                                                   | Done   |
+| `@open-edu/workflow`        | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering, **BundleEngine** (orchestrates per-module WorkflowEngine instances with prerequisite unlock)                                                                                                                                                                                 | Done   |
+| `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **3 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                                                                                                      | Done   |
+| `@open-edu/accessibility`   | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                                                                                                                                                                                                  | Done   |
+| `@open-edu/telemetry`       | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                                                                                                       | Done   |
+| `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                                                   | Done   |
+| `@open-edu/cli`             | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                                                                                                                    | Done   |
+| `@open-edu/dev-server`      | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector, **bundle inspector tab**, **multi-module bundle mode**                                                                                                                                                                                                                        | Done   |
+| `@open-edu/widgets`         | Widget SDK — registry, built-in practice widget, remote widget loader, NPM scaffold template                                                                                                                                                                                                                                                                                    | Done   |
+| `@open-edu/course-compiler` | Remark/Unified-based compiler that converts `course-spec.md` or `course-spec.json` into validated OpenEdu packages — auto-detects format by extension                                                                                                                                                                                                                           | Done   |
+| `@open-edu/pipeline`        | AI-driven PDF → course spec generation pipeline — 6 stages (extract, chunk, concepts, activities, validate, output), LLM-driven widget selection, supports `--format md/json/both`                                                                                                                                                                                              | Done   |
+| `@open-edu/llm-config`      | LLM provider abstraction — `generateStructured<T>()` with Zod validation, supports OpenAI + OpenRouter providers                                                                                                                                                                                                                                                                | Done   |
+| `@open-edu/design-system`   | Design system — UI primitives, tokens, patterns, learning/AI components, shadcn/ui-style component library                                                                                                                                                                                                                                                                      | Done   |
+| `@open-edu/ai-companion`    | AI Learning Companion — search, dictionary, and provider interfaces for the companion feature                                                                                                                                                                                                                                                                                   | Done   |
+| `@open-edu/learner`         | Standalone learner app — course catalog, **8-page router** (home, catalog, progress, settings, course, bundleOverview, collection, break), **bundle catalog + overview**, **Collection Binder** (card museum with category shelves), **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward + card integration, E2E-tested workflow | Done   |
 
 ## Examples
 
@@ -310,8 +305,8 @@ Educational Package (Markdown + JSON)
   │  Placeholder, Node       │
   ├──────────────────────────┤
   │ Theming: RuntimeTheme-   │
-  │  Provider, FontLoader,   │
-  │  useThemePreference,     │
+ │  Provider,               │
+ │  useThemePreference,     │
   │  ThemeSelector           │
   └──┬───┬───┬───────┬──────┘
      ▼   ▼   ▼       ▼
@@ -333,7 +328,7 @@ Educational Package (Markdown + JSON)
 
 ## Testing
 
-The framework uses **Vitest** for unit tests (~1,200+ tests across 150+ files) and **Playwright** for E2E integration tests (40+ tests).
+The framework uses **Vitest** for unit tests (~2,800+ tests across 300+ files) and **Playwright** for E2E integration tests (40+ tests).
 
 ### Unit Tests
 
