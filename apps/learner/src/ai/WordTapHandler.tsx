@@ -19,9 +19,13 @@ interface PopoverState {
   loading: boolean;
 }
 
+const DOUBLE_TAP_TIME_MS = 300;
+const DOUBLE_TAP_DISTANCE_PX = 20;
+
 export function WordTapHandler({ children, className }: WordTapHandlerProps): JSX.Element {
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+  const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
   const { search, setPanelState, sendMessage } = useCompanion();
 
   const isTextSelection = useCallback((): boolean => {
@@ -77,27 +81,8 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
     return word.toLowerCase();
   }, [getRangeAtPoint]);
 
-  const handlePointerDown = useCallback((x: number, y: number) => {
-    pointerDownPos.current = { x, y };
-  }, []);
-
-  const handlePointerUp = useCallback(
-    (x: number, y: number) => {
-      const pointerDown = pointerDownPos.current;
-      pointerDownPos.current = null;
-
-      if (!pointerDown) return;
-
-      const dx = Math.abs(x - pointerDown.x);
-      const dy = Math.abs(y - pointerDown.y);
-      const wasDrag = dx > 5 || dy > 5;
-
-      if (wasDrag) return;
-      if (isTextSelection()) return;
-
-      const word = getWordAtPoint(x, y);
-      if (!word) return;
-
+  const lookupWord = useCallback(
+    (word: string, x: number, y: number) => {
       const result = search(word);
       const { entry, suggestions } = result.instant;
 
@@ -141,7 +126,45 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
         loading: false,
       });
     },
-    [search, getWordAtPoint, isTextSelection],
+    [search],
+  );
+
+  const handlePointerDown = useCallback((x: number, y: number) => {
+    pointerDownPos.current = { x, y };
+  }, []);
+
+  const handlePointerUp = useCallback(
+    (x: number, y: number) => {
+      const pointerDown = pointerDownPos.current;
+      pointerDownPos.current = null;
+
+      if (!pointerDown) return;
+
+      const dx = Math.abs(x - pointerDown.x);
+      const dy = Math.abs(y - pointerDown.y);
+      const wasDrag = dx > 5 || dy > 5;
+
+      if (wasDrag) return;
+      if (isTextSelection()) return;
+
+      const now = Date.now();
+      const prev = lastTap.current;
+      lastTap.current = { x, y, time: now };
+
+      const isDoubleTap =
+        prev &&
+        now - prev.time < DOUBLE_TAP_TIME_MS &&
+        Math.abs(x - prev.x) < DOUBLE_TAP_DISTANCE_PX &&
+        Math.abs(y - prev.y) < DOUBLE_TAP_DISTANCE_PX;
+
+      if (!isDoubleTap) return;
+
+      const word = getWordAtPoint(x, y);
+      if (!word) return;
+
+      lookupWord(word, x, y);
+    },
+    [isTextSelection, getWordAtPoint, lookupWord],
   );
 
   const closePopover = useCallback(() => {
