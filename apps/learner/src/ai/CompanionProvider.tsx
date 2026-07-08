@@ -8,7 +8,13 @@ import {
   useMemo,
   type ReactNode,
 } from 'react';
-import type { LearningContext, ConversationMessage, AIResponse } from '@open-edu/ai-companion';
+import type {
+  LearningContext,
+  ConversationMessage,
+  AIResponse,
+  SearchResponse,
+  EnrichedResult,
+} from '@open-edu/ai-companion';
 import {
   ConversationManager,
   CacheService,
@@ -34,12 +40,6 @@ export interface CompanionContextValue {
 
 export interface CompanionProviderProps {
   children: ReactNode;
-}
-
-interface SearchResponse {
-  query: string;
-  instant: { entry: unknown | null; suggestions: string[] };
-  enriched: Promise<unknown>;
 }
 
 const CompanionContext = createContext<CompanionContextValue | null>(null);
@@ -68,6 +68,7 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
 
     servicesRef.current = { conversationManager, searchManager, aiProvider, cacheService };
     conversationManager.loadSessions();
+    dictionaryService.initialize().catch(() => {});
 
     const unsub = contextManagerRef.current.subscribe((ctx) => {
       setContext(ctx);
@@ -91,23 +92,19 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
       let response: AIResponse;
 
       const firstWord = text.split(/\s+/)[0]?.toLowerCase();
-      if (
-        firstWord &&
-        (services.searchManager as { search: (q: string) => SearchResponse }).search(firstWord)
-          .instant.entry
-      ) {
+      if (firstWord && services.searchManager.search(firstWord).instant.entry) {
         const searchResult = services.searchManager.search(text, ctx);
         const instant = searchResult.instant;
         if (instant.entry) {
-          const entry = instant.entry as { word?: string; definitions?: { definition: string }[] };
           response = {
             text:
-              entry.definitions?.[0]?.definition ?? `See definition for "${entry.word ?? text}"`,
+              instant.entry.definitions[0]?.definition ??
+              `See definition for "${instant.entry.word}"`,
             citations:
-              entry.definitions?.slice(0, 3).map((d: { definition: string }) => ({
+              instant.entry.definitions.slice(0, 3).map((d) => ({
                 source: 'Dictionary',
                 text: d.definition,
-              })) ?? [],
+              })),
             timestamp: Date.now(),
           };
         } else {
@@ -146,7 +143,15 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
   const search = useCallback((query: string): SearchResponse => {
     const services = servicesRef.current;
     if (!services) {
-      return { query, instant: { entry: null, suggestions: [] }, enriched: Promise.resolve({}) };
+      return {
+        query,
+        instant: { entry: null, suggestions: [] },
+        enriched: Promise.resolve<EnrichedResult>({
+          ftsResults: [],
+          cachedAiResponse: null,
+          courseReferences: [],
+        }),
+      };
     }
     return services.searchManager.search(query, contextManagerRef.current.getCurrentContext());
   }, []);

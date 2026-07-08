@@ -32,7 +32,7 @@ export function ContextBridge({ contextManager }: ContextBridgeProps): null {
       lastContextRef.current = ctxJson;
       contextManager.updateContext(ctx);
     }
-  }, [runtime, contextManager, runtime?.currentNodeId, runtime?.currentNode]);
+  }, [runtime, contextManager, runtime?.currentNodeId]);
 
   return null;
 }

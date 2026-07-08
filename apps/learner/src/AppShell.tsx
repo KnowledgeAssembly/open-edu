@@ -500,16 +500,17 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element {
   const { panelState, setPanelState, messages } = useCompanion();
   const isOpen = panelState !== 'closed';
 
+  const mood =
+    view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content';
+
   return (
     <>
-      {view.view !== 'course' && (
-        <Pipili
-          mood={view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content'}
-          visible
-          hasUnread={messages.length > 0 && !isOpen}
-          onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
-        />
-      )}
+      <Pipili
+        mood={mood}
+        visible
+        hasUnread={messages.length > 0 && !isOpen}
+        onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
+      />
       <CompanionPanel />
     </>
   );

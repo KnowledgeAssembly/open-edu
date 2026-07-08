@@ -54,8 +54,11 @@ export function CompanionPanel(): JSX.Element {
   );
 
   return (
-    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="sm:max-w-md md:max-w-lg" data-testid="companion-panel">
+    <Drawer direction="right" open={isOpen} onOpenChange={handleOpenChange}>
+      <DrawerContent
+        className="right-0 inset-y-0 h-full w-[90vw] max-w-md border-l rounded-none mt-0 sm:w-96"
+        data-testid="companion-panel"
+      >
         <DrawerHeader className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
           <DrawerTitle className="text-base font-semibold">AI Companion</DrawerTitle>
           <DrawerClose asChild>
@@ -68,7 +71,7 @@ export function CompanionPanel(): JSX.Element {
             </button>
           </DrawerClose>
         </DrawerHeader>
-        <div className="flex h-[60vh] flex-col sm:h-[70vh]">
+        <div className="flex min-h-0 flex-1 flex-col">
           <AIChat
             messages={messages.map(toChatMessage)}
             onSend={handleSend}
@@ -76,7 +79,7 @@ export function CompanionPanel(): JSX.Element {
             suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
             onSuggestedQuestionSelect={messages.length === 0 ? handleSuggestedQuestion : undefined}
             placeholder="Ask a question about this lesson..."
-            className="h-full"
+            className="min-h-0 flex-1"
           />
         </div>
       </DrawerContent>
