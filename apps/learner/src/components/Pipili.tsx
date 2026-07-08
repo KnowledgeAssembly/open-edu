@@ -7,6 +7,7 @@ export interface PipiliProps {
   mood?: PipiliMood;
   visible?: boolean;
   onClick?: () => void;
+  hasUnread?: boolean;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ export function Pipili({
   mood = 'idle',
   visible = true,
   onClick,
+  hasUnread = false,
   className,
 }: PipiliProps): JSX.Element | null {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -61,6 +63,14 @@ export function Pipili({
         )}
       >
         <PipiliPrimitive size="lg" mood={effectiveMood} />
+        {hasUnread && (
+          <span
+            className="bg-primary absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-bold text-white"
+            aria-label="New messages available"
+          >
+            !
+          </span>
+        )}
       </div>
     </div>
   );

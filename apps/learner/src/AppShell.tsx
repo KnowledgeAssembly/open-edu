@@ -31,6 +31,7 @@ import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
+import { CompanionProvider, useCompanion, CompanionPanel, ContextBridge } from './ai';
 import { getBundleProgress } from './bundleProgressStorage';
 import { useBreakTimer } from './useBreakTimer';
 import { BreakNagBar } from './BreakNagBar';
@@ -352,142 +353,164 @@ export function AppShell({
   }
 
   return (
-    <RuntimeThemeProvider themeId={themeId}>
-      <FontSizeProvider>
-        <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
-          {isCourseView && coursePkg ? (
-            <div className="flex min-w-0 flex-1 flex-col">
-              <TopAppBar
-                breadcrumbs={getBreadcrumbs()}
-                isCourseView
-                courseTitle={coursePkg.manifest.title}
-                showA11yControls
-                progressCurrent={courseProgressCurrent}
-                progressTotal={courseProgressTotal}
-              />
-              {breakTimer.isTriggered && (
-                <BreakNagBar
-                  mode={breakTimer.mode}
-                  onTakeBreak={handleTakeBreak}
-                  onIgnore={breakTimer.dismiss}
+    <CompanionProvider>
+      <RuntimeThemeProvider themeId={themeId}>
+        <FontSizeProvider>
+          <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
+            {isCourseView && coursePkg ? (
+              <div className="flex min-w-0 flex-1 flex-col">
+                <TopAppBar
+                  breadcrumbs={getBreadcrumbs()}
+                  isCourseView
+                  courseTitle={coursePkg.manifest.title}
+                  showA11yControls
+                  progressCurrent={courseProgressCurrent}
+                  progressTotal={courseProgressTotal}
                 />
-              )}
-              <CourseRuntime
-                pkg={coursePkg}
-                onBackToCatalog={handleBackToCatalog}
-                hideLayoutShellHeader
-                onProgressUpdate={handleProgressUpdate}
-                bundleContext={
-                  courseBundle
-                    ? {
-                        bundleId: courseBundle.manifest.id,
-                        bundle: courseBundle,
-                        onBundleSnapshot: (snapshot) => {
-                          setBundleProgress((prev) => ({
-                            ...prev,
-                            [courseBundle.manifest.id]: snapshot,
-                          }));
-                        },
-                      }
-                    : undefined
-                }
-              >
-                <CourseStepWrapper />
-              </CourseRuntime>
-            </div>
-          ) : (
-            <AppLayout
-              sidebar={
-                <div className="relative h-full overflow-hidden">
-                  <AssemblyFlow
-                    density="dense"
-                    className="pointer-events-none absolute inset-0 opacity-[0.08]"
-                    aria-hidden="true"
-                  />
-                  <AppSidebar
-                    logo={<OpenEduLogo variant="lockup" size="sm" />}
-                    logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
-                    items={navItems}
-                    currentItemId={currentNavId}
-                    onNavigate={handleNavAction}
-                  />
-                </div>
-              }
-              topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
-            >
-              {breakTimer.isTriggered && view.view !== 'break' && (
-                <BreakNagBar
-                  mode={breakTimer.mode}
-                  onTakeBreak={handleTakeBreak}
-                  onIgnore={breakTimer.dismiss}
-                />
-              )}
-              <main className="bg-surface flex-1 overflow-y-auto" data-testid="app-main">
-                {view.view === 'catalog' && (
-                  <CatalogPage
-                    packages={catalogPackages}
-                    bundleSummaries={catalogBundles}
-                    bundleProgress={bundleProgress}
-                    onStartCourse={handleStartCourse}
-                    onStartBundle={handleStartBundle}
-                    onNavigate={handleNavigate}
+                {breakTimer.isTriggered && (
+                  <BreakNagBar
+                    mode={breakTimer.mode}
+                    onTakeBreak={handleTakeBreak}
+                    onIgnore={breakTimer.dismiss}
                   />
                 )}
-                {view.view === 'home' && (
-                  <HomePage
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    bundleEntries={bundleEntries}
-                  />
-                )}
-                {(() => {
-                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                  const bundle = bundleEntries[view.bundleId];
-                  if (!bundle) return null;
-                  return (
-                    <BundleOverviewPage
-                      bundle={bundle}
-                      bundleProgress={bundleProgress[view.bundleId] ?? null}
-                      onStartModule={handleStartBundleModule}
-                      onBackToCatalog={handleBackToCatalog}
+                <CourseRuntime
+                  pkg={coursePkg}
+                  onBackToCatalog={handleBackToCatalog}
+                  hideLayoutShellHeader
+                  onProgressUpdate={handleProgressUpdate}
+                  bundleContext={
+                    courseBundle
+                      ? {
+                          bundleId: courseBundle.manifest.id,
+                          bundle: courseBundle,
+                          onBundleSnapshot: (snapshot) => {
+                            setBundleProgress((prev) => ({
+                              ...prev,
+                              [courseBundle.manifest.id]: snapshot,
+                            }));
+                          },
+                        }
+                      : undefined
+                  }
+                >
+                  <CourseStepWrapper />
+                  <ContextBridgeWithCompanion />
+                </CourseRuntime>
+              </div>
+            ) : (
+              <AppLayout
+                sidebar={
+                  <div className="relative h-full overflow-hidden">
+                    <AssemblyFlow
+                      density="dense"
+                      className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                      aria-hidden="true"
                     />
-                  );
-                })()}
-                {view.view === 'progress' && (
-                  <ProgressDashboard
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    packageEntries={packageEntries}
+                    <AppSidebar
+                      logo={<OpenEduLogo variant="lockup" size="sm" />}
+                      logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
+                      items={navItems}
+                      currentItemId={currentNavId}
+                      onNavigate={handleNavAction}
+                    />
+                  </div>
+                }
+                topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
+              >
+                {breakTimer.isTriggered && view.view !== 'break' && (
+                  <BreakNagBar
+                    mode={breakTimer.mode}
+                    onTakeBreak={handleTakeBreak}
+                    onIgnore={breakTimer.dismiss}
                   />
                 )}
-                {view.view === 'settings' && (
-                  <SettingsPage
-                    currentThemeId={themeId}
-                    onThemeChange={setThemeId}
-                    breakTimer={{
-                      mode: breakTimer.mode,
-                      setMode: breakTimer.setMode,
-                    }}
-                  />
-                )}
-                {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
-                {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
-              </main>
-            </AppLayout>
-          )}
-          {!isCourseView && (
-            <Pipili
-              mood={view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content'}
-              visible
+                <main className="bg-surface flex-1 overflow-y-auto" data-testid="app-main">
+                  {view.view === 'catalog' && (
+                    <CatalogPage
+                      packages={catalogPackages}
+                      bundleSummaries={catalogBundles}
+                      bundleProgress={bundleProgress}
+                      onStartCourse={handleStartCourse}
+                      onStartBundle={handleStartBundle}
+                      onNavigate={handleNavigate}
+                    />
+                  )}
+                  {view.view === 'home' && (
+                    <HomePage
+                      onNavigate={handleNavigate}
+                      catalogPackages={catalogPackages}
+                      bundleEntries={bundleEntries}
+                    />
+                  )}
+                  {(() => {
+                    if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                    const bundle = bundleEntries[view.bundleId];
+                    if (!bundle) return null;
+                    return (
+                      <BundleOverviewPage
+                        bundle={bundle}
+                        bundleProgress={bundleProgress[view.bundleId] ?? null}
+                        onStartModule={handleStartBundleModule}
+                        onBackToCatalog={handleBackToCatalog}
+                      />
+                    );
+                  })()}
+                  {view.view === 'progress' && (
+                    <ProgressDashboard
+                      onNavigate={handleNavigate}
+                      catalogPackages={catalogPackages}
+                      packageEntries={packageEntries}
+                    />
+                  )}
+                  {view.view === 'settings' && (
+                    <SettingsPage
+                      currentThemeId={themeId}
+                      onThemeChange={setThemeId}
+                      breakTimer={{
+                        mode: breakTimer.mode,
+                        setMode: breakTimer.setMode,
+                      }}
+                    />
+                  )}
+                  {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                  {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
+                </main>
+              </AppLayout>
+            )}
+            <CompanionFloatingUI view={view} />
+            <CourseExitWarningDialog
+              open={showExitWarning}
+              onStay={handleExitStay}
+              onLeave={handleExitLeave}
             />
-          )}
-          <CourseExitWarningDialog
-            open={showExitWarning}
-            onStay={handleExitStay}
-            onLeave={handleExitLeave}
-          />
-        </div>
-      </FontSizeProvider>
-    </RuntimeThemeProvider>
+          </div>
+        </FontSizeProvider>
+      </RuntimeThemeProvider>
+    </CompanionProvider>
+  );
+}
+
+function ContextBridgeWithCompanion(): JSX.Element | null {
+  const { contextManager } = useCompanion();
+  return <ContextBridge contextManager={contextManager} />;
+}
+
+function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element {
+  const { panelState, setPanelState, messages } = useCompanion();
+  const isOpen = panelState !== 'closed';
+
+  return (
+    <>
+      {view.view !== 'course' && (
+        <Pipili
+          mood={view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content'}
+          visible
+          hasUnread={messages.length > 0 && !isOpen}
+          onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
+        />
+      )}
+      <CompanionPanel />
+    </>
   );
 }

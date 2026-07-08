@@ -181,12 +181,18 @@ importers:
       '@open-edu/accessibility':
         specifier: workspace:*
         version: link:../../packages/accessibility
+      '@open-edu/ai-companion':
+        specifier: workspace:*
+        version: link:../../packages/ai-companion
       '@open-edu/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@open-edu/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@open-edu/llm-config':
+        specifier: workspace:*
+        version: link:../../packages/llm-config
       '@open-edu/rewards':
         specifier: workspace:*
         version: link:../../packages/rewards
@@ -247,6 +253,9 @@ importers:
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.1
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.0.0
