@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { loadConfig, createLlmProvider } from '@open-edu/llm-config';
+import { loadConfig, createLlmProvider, type LlmConfig } from '@open-edu/llm-config';
 import { z } from 'zod';
 import { createRateLimiter } from './rate-limiter.js';
 
@@ -19,6 +19,7 @@ function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
     req.on('data', (chunk: Buffer) => {
       body += chunk.toString();
       if (body.length > 1_000_000) {
+        req.destroy();
         reject(new Error('Request body too large'));
       }
     });
@@ -83,11 +84,13 @@ async function handleLlmRequest(req: IncomingMessage, res: ServerResponse): Prom
 
   const { prompt, provider: overProvider, model: overModel, maxTokens, temperature } = parsed.data;
 
-  const config = loadConfig();
-  if (overProvider) config.provider = overProvider;
-  if (overModel) config.model = overModel;
-  if (maxTokens !== undefined) config.maxTokens = maxTokens;
-  if (temperature !== undefined) config.temperature = temperature;
+  const config: LlmConfig = {
+    ...loadConfig(),
+    ...(overProvider ? { provider: overProvider } : {}),
+    ...(overModel ? { model: overModel } : {}),
+    ...(maxTokens !== undefined ? { maxTokens } : {}),
+    ...(temperature !== undefined ? { temperature } : {}),
+  };
 
   if (!config.apiKey) {
     sendJson(res, 503, {
@@ -116,9 +119,9 @@ async function handleLlmRequest(req: IncomingMessage, res: ServerResponse): Prom
       genericSchema,
       { temperature: config.temperature, maxTokens: config.maxTokens },
     );
+    res.setHeader('Cache-Control', 'no-store');
     sendJson(res, 200, { content: JSON.stringify(result) });
   } catch (err: unknown) {
-    clearTimeout(timer);
     if (err instanceof Error) {
       if (err.name === 'AbortError') {
         sendJson(res, 504, { error: 'LLM request timed out after 60s', code: 'TIMEOUT' });

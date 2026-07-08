@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { llmProxyHandler } from './index';
 
+const mockGenerateStructured = vi.fn();
+
 vi.mock('@open-edu/llm-config', () => ({
   loadConfig: vi.fn(() => ({
     provider: 'openai',
@@ -9,7 +11,15 @@ vi.mock('@open-edu/llm-config', () => ({
     maxTokens: 4096,
     temperature: 0.3,
   })),
-  createLlmProvider: vi.fn(),
+  createLlmProvider: vi.fn((config?: { provider?: string }) => {
+    const provider = config?.provider ?? 'openai';
+    if (!['openai', 'openrouter'].includes(provider)) {
+      throw new Error(`Unknown LLM provider: ${provider}. Supported: openai, openrouter`);
+    }
+    return {
+      generateStructured: mockGenerateStructured,
+    };
+  }),
 }));
 
 interface MockRes {
@@ -35,23 +45,21 @@ function createMockReq(method: string, url: string, body?: string): Record<strin
       }
       return { on: vi.fn() };
     }),
+    destroy: vi.fn(),
   };
 }
 
 function createMockRes(): MockRes {
-  const headers: Record<string, string> = {};
   return {
     statusCode: 200,
-    setHeader: vi.fn((key: string, value: string) => {
-      headers[key] = value;
-    }),
+    setHeader: vi.fn(),
     end: vi.fn(),
   };
 }
 
 describe('llmProxyHandler', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('passes through non-POST requests', () => {
@@ -88,9 +96,204 @@ describe('llmProxyHandler', () => {
 
     llmProxyHandler(req as never, res as never, next);
 
-    await new Promise((r) => setTimeout(r, 100));
+    await vi.waitFor(() => {
+      expect(next).not.toHaveBeenCalled();
+      expect(res.statusCode).toBe(503);
+    });
+  });
 
-    expect(next).not.toHaveBeenCalled();
-    expect(res.statusCode).toBe(503);
+  it('returns 200 on successful LLM response', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+    mockGenerateStructured.mockResolvedValue({ text: 'Hello world', citations: [] });
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hi' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(next).not.toHaveBeenCalled();
+      expect(res.statusCode).toBe(200);
+      expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-store');
+      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+    });
+
+    const endData = vi.mocked(res.end).mock.calls[0]?.[0];
+    expect(endData).toBeDefined();
+    const sentBody = JSON.parse(endData as string);
+    expect(sentBody).toHaveProperty('content');
+    expect(JSON.parse(sentBody.content)).toEqual({ text: 'Hello world', citations: [] });
+  });
+
+  it('returns 400 for empty prompt validation error', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: '' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(400);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('VALIDATION_ERROR'));
+    });
+  });
+
+  it('returns 400 for invalid JSON body', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    const req = createMockReq('POST', '/api/llm/chat', 'not-json');
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(400);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('Invalid JSON'));
+    });
+  });
+
+  it('returns 500 when provider creation fails', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'unsupported',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hello' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(500);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('PROVIDER_ERROR'));
+    });
+  });
+
+  it('returns 504 on LLM request timeout', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    const abortError = new Error('The operation was aborted');
+    abortError.name = 'AbortError';
+    mockGenerateStructured.mockRejectedValue(abortError);
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hello' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(504);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('TIMEOUT'));
+    });
+  });
+
+  it('returns 502 on LLM auth error', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    mockGenerateStructured.mockRejectedValue(new Error('Incorrect API key provided'));
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hello' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(502);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('AUTH_ERROR'));
+    });
+  });
+
+  it('returns 502 on LLM provider rate limit', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    mockGenerateStructured.mockRejectedValue(new Error('429 Too Many Requests'));
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hello' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(502);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('PROVIDER_RATE_LIMIT'));
+    });
+  });
+
+  it('returns 502 on unknown LLM error', async () => {
+    const { loadConfig } = await import('@open-edu/llm-config');
+    vi.mocked(loadConfig).mockReturnValue({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+
+    mockGenerateStructured.mockRejectedValue(new Error('Something went wrong'));
+
+    const req = createMockReq('POST', '/api/llm/chat', JSON.stringify({ prompt: 'Hello' }));
+    const res = createMockRes();
+    const next = vi.fn();
+
+    llmProxyHandler(req as never, res as never, next);
+
+    await vi.waitFor(() => {
+      expect(res.statusCode).toBe(502);
+      expect(res.end).toHaveBeenCalledWith(expect.stringContaining('LLM_ERROR'));
+    });
   });
 });

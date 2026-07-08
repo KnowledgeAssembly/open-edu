@@ -80,7 +80,7 @@ function eduPackageLoader(): Plugin {
     configureServer(srv) {
       server = srv;
 
-      // Register LLM proxy endpoint (must come before other middleware)
+      // Register LLM proxy endpoint
       srv.middlewares.use(llmProxyHandler);
 
       const watchDir = bundleDir || packageDir;

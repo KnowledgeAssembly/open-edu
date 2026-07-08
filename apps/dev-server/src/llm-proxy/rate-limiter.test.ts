@@ -18,12 +18,9 @@ function createMockReq(ip: string): Record<string, unknown> {
 }
 
 function createMockRes(): MockRes {
-  const headers: Record<string, string> = {};
   return {
     statusCode: 200,
-    setHeader: vi.fn((key: string, value: string) => {
-      headers[key] = value;
-    }),
+    setHeader: vi.fn(),
     end: vi.fn(),
   };
 }
