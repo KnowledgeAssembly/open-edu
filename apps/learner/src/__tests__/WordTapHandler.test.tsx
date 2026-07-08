@@ -63,7 +63,14 @@ function renderWithWordTap(children: React.ReactNode) {
   return { ...result, contentDiv, wordEl, spyCaret };
 }
 
-function clickWord(wordEl: HTMLElement, x = 50, y = 50) {
+function doubleTap(wordEl: HTMLElement, x = 50, y = 50) {
+  fireEvent.mouseDown(wordEl, { clientX: x, clientY: y });
+  fireEvent.mouseUp(wordEl, { clientX: x, clientY: y });
+  fireEvent.mouseDown(wordEl, { clientX: x, clientY: y });
+  fireEvent.mouseUp(wordEl, { clientX: x, clientY: y });
+}
+
+function singleClick(wordEl: HTMLElement, x = 50, y = 50) {
   fireEvent.mouseDown(wordEl, { clientX: x, clientY: y });
   fireEvent.mouseUp(wordEl, { clientX: x, clientY: y });
 }
@@ -78,7 +85,38 @@ describe('WordTapHandler', () => {
     expect(screen.getByText('Hello world')).toBeInTheDocument();
   });
 
-  it('shows popover when a known word is tapped', () => {
+  it('does not show popover on single tap', () => {
+    mockSearch.mockReturnValue({
+      query: 'gravity',
+      instant: {
+        entry: {
+          word: 'gravity',
+          phonetic: 'ɡrævɪti',
+          partOfSpeech: 'noun',
+          definitions: [
+            {
+              definition: 'The force that attracts a body toward the center of the earth',
+              example: 'Gravity keeps us on the ground.',
+            },
+          ],
+          synonyms: ['attraction', 'pull'],
+        },
+        suggestions: [],
+      },
+      enriched: Promise.resolve({
+        ftsResults: [],
+        cachedAiResponse: null,
+        courseReferences: [],
+      }),
+    });
+
+    const { wordEl } = renderWithWordTap(<p>gravity</p>);
+    singleClick(wordEl);
+
+    expect(screen.queryByTestId('word-tap-popover')).not.toBeInTheDocument();
+  });
+
+  it('shows popover on double-tap of a known word', () => {
     mockSearch.mockReturnValue({
       query: 'gravity',
       instant: {
@@ -107,7 +145,7 @@ describe('WordTapHandler', () => {
 
     expect(contentDiv).toHaveAttribute('data-testid', 'word-tap-container');
 
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     const popover = screen.getByTestId('word-tap-popover');
     expect(popover).toBeInTheDocument();
@@ -141,7 +179,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>gravity</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     const popover = screen.getByTestId('word-tap-popover');
     expect(popover).toHaveTextContent('gravity');
@@ -169,7 +207,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>gravi</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     expect(screen.getByText('Did you mean?')).toBeInTheDocument();
   });
@@ -199,7 +237,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>graviti</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     expect(screen.getByText('Looking up...')).toBeInTheDocument();
 
@@ -246,7 +284,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>gravity</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     expect(screen.getByText('Looking up...')).toBeInTheDocument();
 
@@ -283,7 +321,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>gravity</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     await waitFor(() => {
       expect(screen.getByTestId('word-tap-popover')).toBeInTheDocument();
@@ -320,7 +358,7 @@ describe('WordTapHandler', () => {
     });
 
     const { wordEl } = renderWithWordTap(<p>gravity</p>);
-    clickWord(wordEl);
+    doubleTap(wordEl);
 
     await waitFor(() => {
       expect(screen.getByTestId('word-tap-popover')).toBeInTheDocument();
