@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@open-edu/accessibility": "workspace:*",
+    "@open-edu/ai-companion": "workspace:*",
     "@open-edu/core": "workspace:*",
     "@open-edu/design-system": "workspace:*",
+    "@open-edu/llm-config": "workspace:*",
     "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/schemas": "workspace:*",
@@ -35,7 +37,8 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-router-dom": "^6.30.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.0.0",

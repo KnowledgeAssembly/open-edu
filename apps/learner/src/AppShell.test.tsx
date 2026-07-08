@@ -10,6 +10,12 @@ vi.mock('../progressStorage', () => ({
   saveProgress: vi.fn(),
 }));
 
+vi.mock('@open-edu/llm-config', () => ({
+  createLlmProvider: vi.fn(() => ({
+    generateStructured: vi.fn().mockResolvedValue({ text: 'test response' }),
+  })),
+}));
+
 vi.mock('@open-edu/runtime', async () => {
   const actual = await vi.importActual('@open-edu/runtime');
   return {

@@ -69,4 +69,14 @@ describe('Pipili (learner wrapper)', () => {
     const status = screen.getByRole('status');
     expect(status.querySelector('[role="img"]')).toHaveAttribute('aria-label', 'Pipili — content');
   });
+
+  it('shows unread dot indicator when hasUnread is true', () => {
+    render(<Pipili visible hasUnread />);
+    expect(screen.getByText('!')).toBeInTheDocument();
+  });
+
+  it('does not show unread dot when hasUnread is false', () => {
+    render(<Pipili visible hasUnread={false} />);
+    expect(screen.queryByText('!')).not.toBeInTheDocument();
+  });
 });

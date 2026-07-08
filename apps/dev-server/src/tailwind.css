@@ -288,6 +288,10 @@
   margin-left: 0.25rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .ml-4 {
   margin-left: 1rem;
 }
@@ -888,6 +892,10 @@
     scaleY(var(--tw-scale-y));
 }
 
+.animate-banner-slide-down {
+  animation: banner-slide-down 0.3s ease-out;
+}
+
 @keyframes bounce {
   0%,
   100% {
@@ -1344,6 +1352,10 @@
   background-color: var(--oe-color-primary-container);
 }
 
+.bg-primary-fixed {
+  background-color: var(--oe-color-primary-fixed);
+}
+
 .bg-secondary {
   background-color: var(--oe-color-secondary);
 }
@@ -1664,6 +1676,10 @@
 
 .pt-0 {
   padding-top: 0px;
+}
+
+.pt-0\.5 {
+  padding-top: 0.125rem;
 }
 
 .pt-2 {
