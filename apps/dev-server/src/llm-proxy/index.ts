@@ -5,6 +5,8 @@ import { createRateLimiter } from './rate-limiter.js';
 
 const TIMEOUT_MS = 60_000;
 
+const ALLOWED_ORIGINS = ['http://localhost:4001', 'http://localhost:4000'];
+
 const chatRequestSchema = z.object({
   prompt: z.string().min(1, 'Prompt must be a non-empty string'),
   provider: z.string().optional(),
@@ -43,16 +45,45 @@ function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   });
 }
 
+function setCorsHeaders(res: ServerResponse, origin: string): void {
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4001');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
+}
+
 function sendJson(res: ServerResponse, statusCode: number, data: Record<string, unknown>): void {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(data));
 }
 
+function writeCorsPreflightResponse(res: ServerResponse): void {
+  res.statusCode = 204;
+  res.end();
+}
+
 const rateLimiter = createRateLimiter({ maxRequests: 20, windowMs: 60_000 });
 
 export function llmProxyHandler(req: IncomingMessage, res: ServerResponse, next: () => void): void {
-  if (req.method !== 'POST' || !req.url?.startsWith('/api/llm/chat')) {
+  if (!req.url?.startsWith('/api/llm/chat')) {
+    next();
+    return;
+  }
+
+  const origin = req.headers.origin ?? '';
+  setCorsHeaders(res, origin);
+
+  if (req.method === 'OPTIONS') {
+    writeCorsPreflightResponse(res);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     next();
     return;
   }
