@@ -65,13 +65,7 @@ function applyDefaultsToEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
 async function fetchJSON<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Failed to fetch ${path}: ${response.status}`);
-  const text = await response.text();
-  try {
-    return JSON.parse(text) as T;
-  } catch (err) {
-    console.error(`[Dictionary] Response (first 200 chars):`, text.slice(0, 200));
-    throw err;
-  }
+  return (await response.json()) as T;
 }
 
 export class DictionaryLoader {

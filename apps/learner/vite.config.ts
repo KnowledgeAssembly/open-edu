@@ -175,6 +175,11 @@ export default defineConfig(({ mode }) => {
         { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
       ],
     },
-    server: { port: 4001 },
+    server: {
+      port: 4001,
+      fs: {
+        allow: [resolve(PKGS_DIR, 'ai-companion/src/data/external')],
+      },
+    },
   };
 });
