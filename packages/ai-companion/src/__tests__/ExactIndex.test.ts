@@ -1,10 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { ExactIndex } from '../search/ExactIndex.js';
 import type { DictionaryEntry } from '../providers/types.js';
+import type { SearchBuilder } from '../search/types.js';
 
 function makeEntry(word: string, definition: string): DictionaryEntry {
   return {
+    id: word,
     word,
+    language: 'en',
     definitions: [{ definition }],
   };
 }
@@ -128,3 +131,48 @@ describe('ExactIndex (Trie)', () => {
     expect(suggestions).toContain('plant');
   });
 });
+
+function searchBuilderConformanceTest(builder: SearchBuilder, label: string): void {
+  describe(`SearchBuilder conformance (${label})`, () => {
+    it('build from entries', () => {
+      const entries = [makeEntry('testword', 'a test word'), makeEntry('another', 'another word')];
+      builder.build(entries);
+      expect(builder.lookup('testword')).not.toBeNull();
+      expect(builder.lookup('testword')!.word).toBe('testword');
+    });
+
+    it('search returns matching entries', () => {
+      const result = builder.search('testword');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('autocomplete returns suggestions', () => {
+      const suggestions = builder.autocomplete('test');
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions).toContain('testword');
+    });
+
+    it('lookup exact word', () => {
+      const result = builder.lookup('another');
+      expect(result).not.toBeNull();
+      expect(result!.word).toBe('another');
+    });
+
+    it('lookup returns null for missing word', () => {
+      expect(builder.lookup('nonexistent')).toBeNull();
+    });
+
+    it('load restores index from serialized data', () => {
+      const newBuilder = new ExactIndex();
+      newBuilder.load({
+        wordCount: 1,
+        nodes: [{ word: 'loaded', entry: makeEntry('loaded', 'loaded from data') }],
+      });
+      expect(newBuilder.lookup('loaded')).not.toBeNull();
+      expect(newBuilder.lookup('loaded')!.word).toBe('loaded');
+    });
+  });
+}
+
+const builderForExact = new ExactIndex();
+searchBuilderConformanceTest(builderForExact, 'ExactIndex');

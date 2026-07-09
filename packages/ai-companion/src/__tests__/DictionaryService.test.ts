@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DictionaryService } from '../services/DictionaryService.js';
+import { DictionaryLoader } from '../data/DictionaryLoader.js';
+import type { SearchBuilder } from '../search/types.js';
 
 describe('DictionaryService', () => {
   let service: DictionaryService;
 
   beforeAll(async () => {
-    service = new DictionaryService();
+    service = DictionaryService.createDefault();
     await service.initialize();
   });
 
@@ -75,5 +77,83 @@ describe('DictionaryService', () => {
     const result = service.lookupExact('gravityed');
     expect(result).not.toBeNull();
     expect(result!.word).toBe('gravity');
+  });
+});
+
+describe('DictionaryService DI behavior', () => {
+  it('createDefault produces working service', async () => {
+    const svc = DictionaryService.createDefault();
+    await svc.initialize();
+    expect(svc.isLoaded()).toBe(true);
+    expect(svc.lookupExact('gravity')).not.toBeNull();
+  });
+
+  it('accepts custom SearchBuilder array', async () => {
+    const mockBuilder: SearchBuilder = {
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (word: string) => {
+        if (word === 'mockword')
+          return {
+            id: 'mockword',
+            word: 'mockword',
+            language: 'en',
+            definitions: [{ definition: 'mock' }],
+          };
+        return null;
+      },
+    };
+    const svc = new DictionaryService([mockBuilder], DictionaryLoader.getInstance());
+    await svc.initialize();
+    expect(svc.lookupExact('mockword')).not.toBeNull();
+    expect(svc.lookupExact('mockword')!.word).toBe('mockword');
+    expect(svc.lookupExact('something')).toBeNull();
+  });
+
+  it('handles empty SearchBuilder array', async () => {
+    const svc = new DictionaryService([], DictionaryLoader.getInstance());
+    await svc.initialize();
+    expect(svc.lookupExact('gravity')).toBeNull();
+    expect(svc.searchFTS('test')).toEqual([]);
+    expect(svc.getSuggestions('test')).toEqual([]);
+  });
+
+  it('lookupExact checks builders in order', async () => {
+    const callOrder: string[] = [];
+    const first: SearchBuilder = {
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (_word: string) => {
+        callOrder.push('first');
+        return null;
+      },
+    };
+    const second: SearchBuilder = {
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (word: string) => {
+        callOrder.push('second');
+        if (word === 'found')
+          return {
+            id: 'found',
+            word: 'found',
+            language: 'en',
+            definitions: [{ definition: 'found' }],
+          };
+        return null;
+      },
+    };
+    const svc = new DictionaryService([first, second], DictionaryLoader.getInstance());
+    await svc.initialize();
+    const result = svc.lookupExact('found');
+    expect(result).not.toBeNull();
+    expect(result!.word).toBe('found');
+    expect(callOrder).toEqual(['first', 'second']);
   });
 });

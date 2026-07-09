@@ -1,4 +1,5 @@
 import type { DictionaryEntry } from '../providers/types.js';
+import type { SearchBuilder } from './types.js';
 import { Document } from 'flexsearch';
 
 interface FlexSearchDoc {
@@ -9,7 +10,7 @@ interface FlexSearchDoc {
   phonetic: string;
 }
 
-export class FlexSearchIndex {
+export class FlexSearchIndex implements SearchBuilder {
   private index: Document<FlexSearchDoc> | null = null;
   private ready = false;
   private entries = new Map<string, DictionaryEntry>();
@@ -80,6 +81,33 @@ export class FlexSearchIndex {
       this.index.clear();
     }
     this.entries.clear();
+  }
+
+  build(entries: DictionaryEntry[]): void {
+    this.addBatch(entries);
+  }
+
+  load(data: unknown): void {
+    if (!data || typeof data !== 'object') return;
+    const serialized = data as { entries: Array<{ word: string; entry: DictionaryEntry }> };
+    if (Array.isArray(serialized.entries)) {
+      for (const item of serialized.entries) {
+        this.add(item.entry);
+      }
+    }
+  }
+
+  autocomplete(prefix: string, limit = 10): string[] {
+    const results = this.search(prefix, limit);
+    return results.map((e) => e.word);
+  }
+
+  lookup(word: string): DictionaryEntry | null {
+    const results = this.search(word, 1);
+    if (results.length > 0 && results[0]!.word.toLowerCase() === word.toLowerCase()) {
+      return results[0]!;
+    }
+    return null;
   }
 
   isReady(): boolean {

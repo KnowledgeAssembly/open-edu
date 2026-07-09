@@ -9,7 +9,7 @@ describe('SearchManager', () => {
 
   beforeAll(async () => {
     cacheService = new CacheService();
-    const dictService = new DictionaryService();
+    const dictService = DictionaryService.createDefault();
     await dictService.initialize();
     searchManager = new SearchManager(dictService, cacheService);
   });

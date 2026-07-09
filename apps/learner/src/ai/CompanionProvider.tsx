@@ -61,7 +61,7 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
 
   useEffect(() => {
     const cacheService = new CacheService();
-    const dictionaryService = new DictionaryService();
+    const dictionaryService = DictionaryService.createDefault();
     const conversationManager = new ConversationManager();
     const searchManager = new SearchManager(dictionaryService, cacheService);
     const aiProvider = new AIProviderImpl();

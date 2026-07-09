@@ -12,7 +12,14 @@ export type {
   CacheProvider,
 } from './providers/types.js';
 
+export type { SearchBuilder } from './search/types.js';
 export { DictionaryLoader } from './data/DictionaryLoader.js';
+export type {
+  PackageManifest,
+  PackageMetadata,
+  PackageInfo,
+  LoadedPackage,
+} from './data/DictionaryLoader.js';
 export { ExactIndex } from './search/ExactIndex.js';
 export { FlexSearchIndex } from './search/FlexSearchIndex.js';
 

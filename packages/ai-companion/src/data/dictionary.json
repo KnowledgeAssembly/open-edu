@@ -1,5 +1,6 @@
 [
   {
+    "id": "gravity",
     "word": "gravity",
     "phonetic": "/ˈɡrævɪti/",
     "partOfSpeech": "noun",
@@ -10,9 +11,11 @@
       }
     ],
     "synonyms": ["gravitation", "pull", "weight"],
-    "relatedWords": ["mass", "weight", "orbit", "force"]
+    "relatedWords": ["mass", "weight", "orbit", "force"],
+    "language": "en"
   },
   {
+    "id": "photosynthesis",
     "word": "photosynthesis",
     "phonetic": "/ˌfoʊtəˈsɪnθəsɪs/",
     "partOfSpeech": "noun",
@@ -23,9 +26,11 @@
       }
     ],
     "synonyms": ["photosynthesis"],
-    "relatedWords": ["chlorophyll", "chloroplast", "sunlight", "carbon dioxide"]
+    "relatedWords": ["chlorophyll", "chloroplast", "sunlight", "carbon dioxide"],
+    "language": "en"
   },
   {
+    "id": "mitosis",
     "word": "mitosis",
     "phonetic": "/maɪˈtoʊsɪs/",
     "partOfSpeech": "noun",
@@ -35,9 +40,11 @@
         "example": "Mitosis allows organisms to grow and repair damaged tissue."
       }
     ],
-    "relatedWords": ["meiosis", "cell division", "chromosome", "cytokinesis"]
+    "relatedWords": ["meiosis", "cell division", "chromosome", "cytokinesis"],
+    "language": "en"
   },
   {
+    "id": "ecosystem",
     "word": "ecosystem",
     "phonetic": "/ˈiːkoʊˌsɪstəm/",
     "partOfSpeech": "noun",
@@ -47,9 +54,11 @@
         "example": "The Amazon rainforest is one of the most diverse ecosystems on Earth."
       }
     ],
-    "relatedWords": ["biome", "habitat", "biodiversity", "environment"]
+    "relatedWords": ["biome", "habitat", "biodiversity", "environment"],
+    "language": "en"
   },
   {
+    "id": "quantum",
     "word": "quantum",
     "phonetic": "/ˈkwɑntəm/",
     "partOfSpeech": "noun",
@@ -59,9 +68,11 @@
         "example": "Quantum mechanics describes the behavior of particles at the atomic scale."
       }
     ],
-    "relatedWords": ["photon", "electron", "wave", "particle"]
+    "relatedWords": ["photon", "electron", "wave", "particle"],
+    "language": "en"
   },
   {
+    "id": "democracy",
     "word": "democracy",
     "phonetic": "/dɪˈmɑkrəsi/",
     "partOfSpeech": "noun",
@@ -73,9 +84,11 @@
     ],
     "synonyms": ["republic", "self-government"],
     "antonyms": ["dictatorship", "autocracy"],
-    "relatedWords": ["election", "vote", "citizen", "representation"]
+    "relatedWords": ["election", "vote", "citizen", "representation"],
+    "language": "en"
   },
   {
+    "id": "hypothesis",
     "word": "hypothesis",
     "phonetic": "/haɪˈpɑθəsɪs/",
     "partOfSpeech": "noun",
@@ -86,9 +99,11 @@
       }
     ],
     "synonyms": ["theory", "proposition", "assumption"],
-    "relatedWords": ["experiment", "prediction", "test", "evidence"]
+    "relatedWords": ["experiment", "prediction", "test", "evidence"],
+    "language": "en"
   },
   {
+    "id": "renaissance",
     "word": "renaissance",
     "phonetic": "/ˈrɛnəsɑns/",
     "partOfSpeech": "noun",
@@ -98,9 +113,11 @@
         "example": "The Renaissance produced some of history's greatest artists and thinkers."
       }
     ],
-    "relatedWords": ["reform", "revival", "humanism", "classical"]
+    "relatedWords": ["reform", "revival", "humanism", "classical"],
+    "language": "en"
   },
   {
+    "id": "algorithm",
     "word": "algorithm",
     "phonetic": "/ˈælɡəˌrɪðəm/",
     "partOfSpeech": "noun",
@@ -110,9 +127,11 @@
         "example": "Search engines use complex algorithms to rank web pages."
       }
     ],
-    "relatedWords": ["procedure", "computation", "program", "logic"]
+    "relatedWords": ["procedure", "computation", "program", "logic"],
+    "language": "en"
   },
   {
+    "id": "velocity",
     "word": "velocity",
     "phonetic": "/vəˈlɑsɪti/",
     "partOfSpeech": "noun",
@@ -123,9 +142,11 @@
       }
     ],
     "synonyms": ["speed", "rate", "pace"],
-    "relatedWords": ["acceleration", "momentum", "vector", "speed"]
+    "relatedWords": ["acceleration", "momentum", "vector", "speed"],
+    "language": "en"
   },
   {
+    "id": "constitution",
     "word": "constitution",
     "phonetic": "/ˌkɑnstəˈtuʃən/",
     "partOfSpeech": "noun",
@@ -135,9 +156,11 @@
         "example": "The US Constitution was signed in 1787."
       }
     ],
-    "relatedWords": ["law", "amendment", "rights", "government"]
+    "relatedWords": ["law", "amendment", "rights", "government"],
+    "language": "en"
   },
   {
+    "id": "metamorphosis",
     "word": "metamorphosis",
     "phonetic": "/ˌmɛtəˈmɔrfəsɪs/",
     "partOfSpeech": "noun",
@@ -148,9 +171,11 @@
       }
     ],
     "synonyms": ["transformation", "change", "evolution"],
-    "relatedWords": ["larva", "pupa", "chrysalis", "development"]
+    "relatedWords": ["larva", "pupa", "chrysalis", "development"],
+    "language": "en"
   },
   {
+    "id": "equilibrium",
     "word": "equilibrium",
     "phonetic": "/ˌikwəˈlɪbriəm/",
     "partOfSpeech": "noun",
@@ -162,9 +187,11 @@
     ],
     "synonyms": ["balance", "stability", "symmetry"],
     "antonyms": ["imbalance", "instability"],
-    "relatedWords": ["balance", "reaction", "force", "steady state"]
+    "relatedWords": ["balance", "reaction", "force", "steady state"],
+    "language": "en"
   },
   {
+    "id": "cellular",
     "word": "cellular",
     "phonetic": "/ˈsɛljələr/",
     "partOfSpeech": "adjective",
@@ -174,9 +201,11 @@
         "example": "Cellular respiration is how cells produce energy."
       }
     ],
-    "relatedWords": ["cell", "organelle", "membrane", "cytoplasm"]
+    "relatedWords": ["cell", "organelle", "membrane", "cytoplasm"],
+    "language": "en"
   },
   {
+    "id": "fraction",
     "word": "fraction",
     "phonetic": "/ˈfrækʃən/",
     "partOfSpeech": "noun",
@@ -186,9 +215,11 @@
         "example": "Three-fourths is a fraction representing three parts out of four."
       }
     ],
-    "relatedWords": ["numerator", "denominator", "decimal", "ratio"]
+    "relatedWords": ["numerator", "denominator", "decimal", "ratio"],
+    "language": "en"
   },
   {
+    "id": "evolution",
     "word": "evolution",
     "phonetic": "/ˌɛvəˈluʃən/",
     "partOfSpeech": "noun",
@@ -199,9 +230,11 @@
       }
     ],
     "synonyms": ["development", "adaptation"],
-    "relatedWords": ["natural selection", "mutation", "species", "Darwin"]
+    "relatedWords": ["natural selection", "mutation", "species", "Darwin"],
+    "language": "en"
   },
   {
+    "id": "neuron",
     "word": "neuron",
     "phonetic": "/ˈnʊrɑn/",
     "partOfSpeech": "noun",
@@ -211,9 +244,11 @@
         "example": "Neurons communicate with each other through synapses."
       }
     ],
-    "relatedWords": ["synapse", "axon", "dendrite", "brain"]
+    "relatedWords": ["synapse", "axon", "dendrite", "brain"],
+    "language": "en"
   },
   {
+    "id": "molecule",
     "word": "molecule",
     "phonetic": "/ˈmɑləˌkjul/",
     "partOfSpeech": "noun",
@@ -223,9 +258,11 @@
         "example": "A water molecule consists of two hydrogen atoms and one oxygen atom."
       }
     ],
-    "relatedWords": ["atom", "compound", "bond", "element"]
+    "relatedWords": ["atom", "compound", "bond", "element"],
+    "language": "en"
   },
   {
+    "id": "diplomacy",
     "word": "diplomacy",
     "phonetic": "/dɪˈploʊməsi/",
     "partOfSpeech": "noun",
@@ -236,9 +273,11 @@
       }
     ],
     "synonyms": ["negotiation", "statesmanship"],
-    "relatedWords": ["ambassador", "treaty", "foreign policy", "negotiation"]
+    "relatedWords": ["ambassador", "treaty", "foreign policy", "negotiation"],
+    "language": "en"
   },
   {
+    "id": "thermodynamics",
     "word": "thermodynamics",
     "phonetic": "/ˌθɜrmoʊdaɪˈnæmɪks/",
     "partOfSpeech": "noun",
@@ -248,9 +287,11 @@
         "example": "The laws of thermodynamics govern energy transfer."
       }
     ],
-    "relatedWords": ["energy", "entropy", "heat", "temperature"]
+    "relatedWords": ["energy", "entropy", "heat", "temperature"],
+    "language": "en"
   },
   {
+    "id": "biodiversity",
     "word": "biodiversity",
     "phonetic": "/ˌbaɪoʊdaɪˈvɜrsɪti/",
     "partOfSpeech": "noun",
@@ -260,9 +301,11 @@
         "example": "Rainforests have incredible biodiversity."
       }
     ],
-    "relatedWords": ["species", "ecosystem", "conservation", "habitat"]
+    "relatedWords": ["species", "ecosystem", "conservation", "habitat"],
+    "language": "en"
   },
   {
+    "id": "geography",
     "word": "geography",
     "phonetic": "/dʒiˈɑɡrəfi/",
     "partOfSpeech": "noun",
@@ -272,9 +315,11 @@
         "example": "Geography helps us understand the relationship between people and their environment."
       }
     ],
-    "relatedWords": ["topography", "climate", "cartography", "region"]
+    "relatedWords": ["topography", "climate", "cartography", "region"],
+    "language": "en"
   },
   {
+    "id": "nucleus",
     "word": "nucleus",
     "phonetic": "/ˈnukliəs/",
     "partOfSpeech": "noun",
@@ -284,9 +329,11 @@
         "example": "The nucleus of an atom contains protons and neutrons."
       }
     ],
-    "relatedWords": ["proton", "neutron", "electron", "atom"]
+    "relatedWords": ["proton", "neutron", "electron", "atom"],
+    "language": "en"
   },
   {
+    "id": "perspective",
     "word": "perspective",
     "phonetic": "/pərˈspɛktɪv/",
     "partOfSpeech": "noun",
@@ -297,9 +344,11 @@
       }
     ],
     "synonyms": ["viewpoint", "outlook", "standpoint"],
-    "relatedWords": ["view", "context", "interpretation", "lens"]
+    "relatedWords": ["view", "context", "interpretation", "lens"],
+    "language": "en"
   },
   {
+    "id": "syntax",
     "word": "syntax",
     "phonetic": "/sɪntæks/",
     "partOfSpeech": "noun",
@@ -309,9 +358,11 @@
         "example": "Understanding syntax helps you write clearer sentences."
       }
     ],
-    "relatedWords": ["grammar", "morphology", "sentence", "structure"]
+    "relatedWords": ["grammar", "morphology", "sentence", "structure"],
+    "language": "en"
   },
   {
+    "id": "catalyst",
     "word": "catalyst",
     "phonetic": "/ˈkætəlɪst/",
     "partOfSpeech": "noun",
@@ -321,9 +372,11 @@
         "example": "Enzymes act as biological catalysts in the body."
       }
     ],
-    "relatedWords": ["enzyme", "reaction", "accelerator", "chemical"]
+    "relatedWords": ["enzyme", "reaction", "accelerator", "chemical"],
+    "language": "en"
   },
   {
+    "id": "feudalism",
     "word": "feudalism",
     "phonetic": "/ˈfjudlˌɪzəm/",
     "partOfSpeech": "noun",
@@ -333,9 +386,11 @@
         "example": "Feudalism dominated Europe during the Middle Ages."
       }
     ],
-    "relatedWords": ["vassal", "lord", "serf", "manor"]
+    "relatedWords": ["vassal", "lord", "serf", "manor"],
+    "language": "en"
   },
   {
+    "id": "variable",
     "word": "variable",
     "phonetic": "/ˈvɛriəbəl/",
     "partOfSpeech": "noun",
@@ -346,9 +401,11 @@
       }
     ],
     "synonyms": ["factor", "element", "parameter"],
-    "relatedWords": ["constant", "experiment", "data", "measurement"]
+    "relatedWords": ["constant", "experiment", "data", "measurement"],
+    "language": "en"
   },
   {
+    "id": "diffusion",
     "word": "diffusion",
     "phonetic": "/dɪˈfjuʒən/",
     "partOfSpeech": "noun",
@@ -358,9 +415,11 @@
         "example": "Diffusion allows oxygen to move into cells."
       }
     ],
-    "relatedWords": ["osmosis", "concentration", "membrane", "transport"]
+    "relatedWords": ["osmosis", "concentration", "membrane", "transport"],
+    "language": "en"
   },
   {
+    "id": "amendment",
     "word": "amendment",
     "phonetic": "/əˈmɛndmənt/",
     "partOfSpeech": "noun",
@@ -371,9 +430,11 @@
       }
     ],
     "synonyms": ["revision", "modification", "change"],
-    "relatedWords": ["constitution", "rights", "law", "legislation"]
+    "relatedWords": ["constitution", "rights", "law", "legislation"],
+    "language": "en"
   },
   {
+    "id": "inertia",
     "word": "inertia",
     "phonetic": "/ɪˈnɜrʃə/",
     "partOfSpeech": "noun",
@@ -383,9 +444,11 @@
         "example": "An object at rest stays at rest due to inertia."
       }
     ],
-    "relatedWords": ["momentum", "force", "motion", "mass"]
+    "relatedWords": ["momentum", "force", "motion", "mass"],
+    "language": "en"
   },
   {
+    "id": "isosceles",
     "word": "isosceles",
     "phonetic": "/aɪˈsɑsəˌliz/",
     "partOfSpeech": "adjective",
@@ -395,9 +458,11 @@
         "example": "An isosceles triangle has two equal sides."
       }
     ],
-    "relatedWords": ["triangle", "equilateral", "scalene", "geometry"]
+    "relatedWords": ["triangle", "equilateral", "scalene", "geometry"],
+    "language": "en"
   },
   {
+    "id": "civilization",
     "word": "civilization",
     "phonetic": "/ˌsɪvəlɪˈzeɪʃən/",
     "partOfSpeech": "noun",
@@ -407,9 +472,11 @@
         "example": "Ancient Egyptian civilization flourished along the Nile River."
       }
     ],
-    "relatedWords": ["society", "culture", "city", "development"]
+    "relatedWords": ["society", "culture", "city", "development"],
+    "language": "en"
   },
   {
+    "id": "drought",
     "word": "drought",
     "phonetic": "/draʊt/",
     "partOfSpeech": "noun",
@@ -421,9 +488,11 @@
     ],
     "synonyms": ["dry spell", "water shortage"],
     "antonyms": ["flood", "monsoon"],
-    "relatedWords": ["famine", "irrigation", "climate", "precipitation"]
+    "relatedWords": ["famine", "irrigation", "climate", "precipitation"],
+    "language": "en"
   },
   {
+    "id": "circuit",
     "word": "circuit",
     "phonetic": "/ˈsɜrkɪt/",
     "partOfSpeech": "noun",
@@ -433,9 +502,11 @@
         "example": "An electrical circuit allows current to flow through connected components."
       }
     ],
-    "relatedWords": ["current", "voltage", "resistance", "electricity"]
+    "relatedWords": ["current", "voltage", "resistance", "electricity"],
+    "language": "en"
   },
   {
+    "id": "enzyme",
     "word": "enzyme",
     "phonetic": "/ˈɛnzaɪm/",
     "partOfSpeech": "noun",
@@ -445,9 +516,11 @@
         "example": "Lactase is the enzyme that breaks down lactose."
       }
     ],
-    "relatedWords": ["protein", "catalyst", "reaction", "substrate"]
+    "relatedWords": ["protein", "catalyst", "reaction", "substrate"],
+    "language": "en"
   },
   {
+    "id": "legislature",
     "word": "legislature",
     "phonetic": "/ˈlɛdʒɪsˌleɪtʃər/",
     "partOfSpeech": "noun",
@@ -457,9 +530,11 @@
         "example": "Congress is the legislature of the United States."
       }
     ],
-    "relatedWords": ["parliament", "congress", "senate", "law"]
+    "relatedWords": ["parliament", "congress", "senate", "law"],
+    "language": "en"
   },
   {
+    "id": "magnetic",
     "word": "magnetic",
     "phonetic": "/mæɡˈnɛtɪk/",
     "partOfSpeech": "adjective",
@@ -469,9 +544,11 @@
         "example": "Earth's magnetic field protects us from solar radiation."
       }
     ],
-    "relatedWords": ["magnet", "field", "pole", "electromagnet"]
+    "relatedWords": ["magnet", "field", "pole", "electromagnet"],
+    "language": "en"
   },
   {
+    "id": "colonialism",
     "word": "colonialism",
     "phonetic": "/kəˈloʊniəˌlɪzəm/",
     "partOfSpeech": "noun",
@@ -481,9 +558,11 @@
         "example": "Colonialism had a profound impact on the development of many nations."
       }
     ],
-    "relatedWords": ["colony", "imperialism", "settlement", "independence"]
+    "relatedWords": ["colony", "imperialism", "settlement", "independence"],
+    "language": "en"
   },
   {
+    "id": "mutation",
     "word": "mutation",
     "phonetic": "/mjuˈteɪʃən/",
     "partOfSpeech": "noun",
@@ -493,9 +572,11 @@
         "example": "Mutations can be beneficial, neutral, or harmful to an organism."
       }
     ],
-    "relatedWords": ["gene", "DNA", "evolution", "variation"]
+    "relatedWords": ["gene", "DNA", "evolution", "variation"],
+    "language": "en"
   },
   {
+    "id": "triangular",
     "word": "triangular",
     "phonetic": "/traɪˈæŋɡjələr/",
     "partOfSpeech": "adjective",
@@ -505,9 +586,11 @@
         "example": "The pyramid has triangular faces."
       }
     ],
-    "relatedWords": ["triangle", "geometry", "prism", "polygon"]
+    "relatedWords": ["triangle", "geometry", "prism", "polygon"],
+    "language": "en"
   },
   {
+    "id": "sovereignty",
     "word": "sovereignty",
     "phonetic": "/ˈsɑvrənti/",
     "partOfSpeech": "noun",
@@ -518,9 +601,11 @@
       }
     ],
     "synonyms": ["autonomy", "independence", "self-rule"],
-    "relatedWords": ["nation", "government", "territory", "independence"]
+    "relatedWords": ["nation", "government", "territory", "independence"],
+    "language": "en"
   },
   {
+    "id": "symbiosis",
     "word": "symbiosis",
     "phonetic": "/ˌsɪmbaɪˈoʊsɪs/",
     "partOfSpeech": "noun",
@@ -530,9 +615,11 @@
         "example": "The clownfish and sea anemone have a symbiotic relationship."
       }
     ],
-    "relatedWords": ["mutualism", "parasitism", "commensalism", "relationship"]
+    "relatedWords": ["mutualism", "parasitism", "commensalism", "relationship"],
+    "language": "en"
   },
   {
+    "id": "polynomial",
     "word": "polynomial",
     "phonetic": "/ˌpɑliˈnoʊmiəl/",
     "partOfSpeech": "noun",
@@ -542,9 +629,11 @@
         "example": "The equation x squared plus 2x plus 1 is a polynomial."
       }
     ],
-    "relatedWords": ["algebra", "equation", "coefficient", "variable"]
+    "relatedWords": ["algebra", "equation", "coefficient", "variable"],
+    "language": "en"
   },
   {
+    "id": "abiotic",
     "word": "abiotic",
     "phonetic": "/ˌeɪbaɪˈɑtɪk/",
     "partOfSpeech": "adjective",
@@ -555,9 +644,11 @@
       }
     ],
     "antonyms": ["biotic"],
-    "relatedWords": ["ecosystem", "environment", "factor", "nonliving"]
+    "relatedWords": ["ecosystem", "environment", "factor", "nonliving"],
+    "language": "en"
   },
   {
+    "id": "capitalism",
     "word": "capitalism",
     "phonetic": "/ˈkæpɪtəˌlɪzəm/",
     "partOfSpeech": "noun",
@@ -568,9 +659,11 @@
       }
     ],
     "antonyms": ["socialism", "communism"],
-    "relatedWords": ["market", "economy", "profit", "private property"]
+    "relatedWords": ["market", "economy", "profit", "private property"],
+    "language": "en"
   },
   {
+    "id": "chromosome",
     "word": "chromosome",
     "phonetic": "/ˈkroʊməˌsoʊm/",
     "partOfSpeech": "noun",
@@ -580,9 +673,11 @@
         "example": "Humans have 23 pairs of chromosomes."
       }
     ],
-    "relatedWords": ["DNA", "gene", "genetics", "nucleus"]
+    "relatedWords": ["DNA", "gene", "genetics", "nucleus"],
+    "language": "en"
   },
   {
+    "id": "electoral",
     "word": "electoral",
     "phonetic": "/ɪˈlɛktərəl/",
     "partOfSpeech": "adjective",
@@ -592,9 +687,11 @@
         "example": "The electoral college determines the outcome of presidential elections."
       }
     ],
-    "relatedWords": ["election", "vote", "ballot", "democracy"]
+    "relatedWords": ["election", "vote", "ballot", "democracy"],
+    "language": "en"
   },
   {
+    "id": "genotype",
     "word": "genotype",
     "phonetic": "/ˈdʒiːnoʊtaɪp/",
     "partOfSpeech": "noun",
@@ -604,9 +701,11 @@
         "example": "The genotype determines the potential traits of an organism."
       }
     ],
-    "relatedWords": ["phenotype", "gene", "DNA", "heredity"]
+    "relatedWords": ["phenotype", "gene", "DNA", "heredity"],
+    "language": "en"
   },
   {
+    "id": "hegemony",
     "word": "hegemony",
     "phonetic": "/hɪˈdʒɛməni/",
     "partOfSpeech": "noun",
@@ -617,9 +716,11 @@
       }
     ],
     "synonyms": ["dominance", "supremacy", "leadership"],
-    "relatedWords": ["power", "influence", "authority", "empire"]
+    "relatedWords": ["power", "influence", "authority", "empire"],
+    "language": "en"
   },
   {
+    "id": "ionic",
     "word": "ionic",
     "phonetic": "/aɪˈɑnɪk/",
     "partOfSpeech": "adjective",
@@ -629,9 +730,11 @@
         "example": "Ionic bonds form when one atom donates an electron to another."
       }
     ],
-    "relatedWords": ["ion", "covalent", "bond", "electron"]
+    "relatedWords": ["ion", "covalent", "bond", "electron"],
+    "language": "en"
   },
   {
+    "id": "jurisdiction",
     "word": "jurisdiction",
     "phonetic": "/ˌdʒʊrɪsˈdɪkʃən/",
     "partOfSpeech": "noun",
@@ -641,9 +744,11 @@
         "example": "The court has jurisdiction over this case."
       }
     ],
-    "relatedWords": ["authority", "court", "law", "territory"]
+    "relatedWords": ["authority", "court", "law", "territory"],
+    "language": "en"
   },
   {
+    "id": "kinetic",
     "word": "kinetic",
     "phonetic": "/kɪˈnɛtɪk/",
     "partOfSpeech": "adjective",
@@ -653,9 +758,11 @@
         "example": "Kinetic energy is the energy of moving objects."
       }
     ],
-    "relatedWords": ["energy", "motion", "potential", "dynamics"]
+    "relatedWords": ["energy", "motion", "potential", "dynamics"],
+    "language": "en"
   },
   {
+    "id": "lipid",
     "word": "lipid",
     "phonetic": "/ˈlɪpɪd/",
     "partOfSpeech": "noun",
@@ -665,9 +772,11 @@
         "example": "Lipids are essential components of cell membranes."
       }
     ],
-    "relatedWords": ["fat", "cell membrane", "phospholipid", "steroid"]
+    "relatedWords": ["fat", "cell membrane", "phospholipid", "steroid"],
+    "language": "en"
   },
   {
+    "id": "mercantilism",
     "word": "mercantilism",
     "phonetic": "/ˈmɜrkənˌtilɪzəm/",
     "partOfSpeech": "noun",
@@ -677,9 +786,11 @@
         "example": "Mercantilism was dominant in Europe during the 16th to 18th centuries."
       }
     ],
-    "relatedWords": ["trade", "economy", "export", "colony"]
+    "relatedWords": ["trade", "economy", "export", "colony"],
+    "language": "en"
   },
   {
+    "id": "nucleotide",
     "word": "nucleotide",
     "phonetic": "/ˈnukliəˌtaɪd/",
     "partOfSpeech": "noun",
@@ -689,9 +800,11 @@
         "example": "Each nucleotide consists of a sugar, a phosphate, and a nitrogenous base."
       }
     ],
-    "relatedWords": ["DNA", "RNA", "nitrogenous base", "phosphate"]
+    "relatedWords": ["DNA", "RNA", "nitrogenous base", "phosphate"],
+    "language": "en"
   },
   {
+    "id": "oxidation",
     "word": "oxidation",
     "phonetic": "/ˌɑksɪˈdeɪʃən/",
     "partOfSpeech": "noun",
@@ -702,9 +815,11 @@
       }
     ],
     "antonyms": ["reduction"],
-    "relatedWords": ["oxygen", "rust", "electron", "reaction"]
+    "relatedWords": ["oxygen", "rust", "electron", "reaction"],
+    "language": "en"
   },
   {
+    "id": "phenotype",
     "word": "phenotype",
     "phonetic": "/ˈfiːnətaɪp/",
     "partOfSpeech": "noun",
@@ -714,9 +829,11 @@
         "example": "Eye color is one example of a phenotype."
       }
     ],
-    "relatedWords": ["genotype", "trait", "gene", "expression"]
+    "relatedWords": ["genotype", "trait", "gene", "expression"],
+    "language": "en"
   },
   {
+    "id": "quadratic",
     "word": "quadratic",
     "phonetic": "/kwɑˈdrætɪk/",
     "partOfSpeech": "adjective",
@@ -726,9 +843,11 @@
         "example": "The quadratic formula helps solve quadratic equations."
       }
     ],
-    "relatedWords": ["algebra", "equation", "parabola", "square"]
+    "relatedWords": ["algebra", "equation", "parabola", "square"],
+    "language": "en"
   },
   {
+    "id": "ribosome",
     "word": "ribosome",
     "phonetic": "/ˈraɪbəˌsoʊm/",
     "partOfSpeech": "noun",
@@ -738,9 +857,11 @@
         "example": "Ribosomes can be found floating in the cytoplasm or attached to the endoplasmic reticulum."
       }
     ],
-    "relatedWords": ["protein", "RNA", "translation", "cytoplasm"]
+    "relatedWords": ["protein", "RNA", "translation", "cytoplasm"],
+    "language": "en"
   },
   {
+    "id": "sediment",
     "word": "sediment",
     "phonetic": "/ˈsɛdɪmənt/",
     "partOfSpeech": "noun",
@@ -750,9 +871,11 @@
         "example": "Over millions of years, sediment formed layers of sedimentary rock."
       }
     ],
-    "relatedWords": ["erosion", "deposit", "rock", "geology"]
+    "relatedWords": ["erosion", "deposit", "rock", "geology"],
+    "language": "en"
   },
   {
+    "id": "taxonomy",
     "word": "taxonomy",
     "phonetic": "/tækˈsɑnəmi/",
     "partOfSpeech": "noun",
@@ -762,9 +885,11 @@
         "example": "Linnaeus developed the modern system of biological taxonomy."
       }
     ],
-    "relatedWords": ["classification", "species", "genus", "binomial"]
+    "relatedWords": ["classification", "species", "genus", "binomial"],
+    "language": "en"
   },
   {
+    "id": "ultraviolet",
     "word": "ultraviolet",
     "phonetic": "/ˌʌltrəˈvaɪəlɪt/",
     "partOfSpeech": "adjective",
@@ -774,9 +899,11 @@
         "example": "Ultraviolet radiation from the sun can cause sunburn."
       }
     ],
-    "relatedWords": ["radiation", "light", "ozone", "spectrum"]
+    "relatedWords": ["radiation", "light", "ozone", "spectrum"],
+    "language": "en"
   },
   {
+    "id": "valence",
     "word": "valence",
     "phonetic": "/ˈveɪləns/",
     "partOfSpeech": "noun",
@@ -786,9 +913,11 @@
         "example": "Carbon has a valence of four."
       }
     ],
-    "relatedWords": ["electron", "bond", "element", "oxidation"]
+    "relatedWords": ["electron", "bond", "element", "oxidation"],
+    "language": "en"
   },
   {
+    "id": "wavelength",
     "word": "wavelength",
     "phonetic": "/ˈweɪvˌlɛŋkθ/",
     "partOfSpeech": "noun",
@@ -798,9 +927,11 @@
         "example": "Different colors of light have different wavelengths."
       }
     ],
-    "relatedWords": ["frequency", "amplitude", "wave", "spectrum"]
+    "relatedWords": ["frequency", "amplitude", "wave", "spectrum"],
+    "language": "en"
   },
   {
+    "id": "xenophobia",
     "word": "xenophobia",
     "phonetic": "/ˌzɛnəˈfoʊbiə/",
     "partOfSpeech": "noun",
@@ -810,9 +941,11 @@
         "example": "Xenophobia often arises from fear of the unknown."
       }
     ],
-    "relatedWords": ["prejudice", "discrimination", "racism", "intolerance"]
+    "relatedWords": ["prejudice", "discrimination", "racism", "intolerance"],
+    "language": "en"
   },
   {
+    "id": "zygote",
     "word": "zygote",
     "phonetic": "/ˈzaɪɡoʊt/",
     "partOfSpeech": "noun",
@@ -822,9 +955,11 @@
         "example": "The zygote begins to divide shortly after fertilization."
       }
     ],
-    "relatedWords": ["fertilization", "embryo", "gamete", "cell"]
+    "relatedWords": ["fertilization", "embryo", "gamete", "cell"],
+    "language": "en"
   },
   {
+    "id": "allele",
     "word": "allele",
     "phonetic": "/əˈlil/",
     "partOfSpeech": "noun",
@@ -834,9 +969,11 @@
         "example": "The allele for blue eyes is recessive."
       }
     ],
-    "relatedWords": ["gene", "chromosome", "dominant", "recessive"]
+    "relatedWords": ["gene", "chromosome", "dominant", "recessive"],
+    "language": "en"
   },
   {
+    "id": "base",
     "word": "base",
     "phonetic": "/beɪs/",
     "partOfSpeech": "noun",
@@ -847,9 +984,11 @@
       }
     ],
     "antonyms": ["acid"],
-    "relatedWords": ["pH", "alkali", "acid", "neutralization"]
+    "relatedWords": ["pH", "alkali", "acid", "neutralization"],
+    "language": "en"
   },
   {
+    "id": "covalent",
     "word": "covalent",
     "phonetic": "/koʊˈveɪlənt/",
     "partOfSpeech": "adjective",
@@ -859,9 +998,11 @@
         "example": "Water is held together by covalent bonds."
       }
     ],
-    "relatedWords": ["bond", "electron", "molecule", "ionic"]
+    "relatedWords": ["bond", "electron", "molecule", "ionic"],
+    "language": "en"
   },
   {
+    "id": "density",
     "word": "density",
     "phonetic": "/ˈdɛnsɪti/",
     "partOfSpeech": "noun",
@@ -871,9 +1012,11 @@
         "example": "Lead has a higher density than aluminum."
       }
     ],
-    "relatedWords": ["mass", "volume", "buoyancy", "concentration"]
+    "relatedWords": ["mass", "volume", "buoyancy", "concentration"],
+    "language": "en"
   },
   {
+    "id": "embryo",
     "word": "embryo",
     "phonetic": "/ˈɛmbrioʊ/",
     "partOfSpeech": "noun",
@@ -883,9 +1026,11 @@
         "example": "The embryo develops into a fetus after eight weeks."
       }
     ],
-    "relatedWords": ["fetus", "gestation", "development", "zygote"]
+    "relatedWords": ["fetus", "gestation", "development", "zygote"],
+    "language": "en"
   },
   {
+    "id": "fossil",
     "word": "fossil",
     "phonetic": "/ˈfɑsəl/",
     "partOfSpeech": "noun",
@@ -895,9 +1040,11 @@
         "example": "Fossils provide evidence of life from millions of years ago."
       }
     ],
-    "relatedWords": ["paleontology", "dinosaur", "sediment", "extinction"]
+    "relatedWords": ["paleontology", "dinosaur", "sediment", "extinction"],
+    "language": "en"
   },
   {
+    "id": "gene",
     "word": "gene",
     "phonetic": "/dʒin/",
     "partOfSpeech": "noun",
@@ -907,9 +1054,11 @@
         "example": "The gene for eye color is inherited from both parents."
       }
     ],
-    "relatedWords": ["DNA", "chromosome", "genetics", "heredity"]
+    "relatedWords": ["DNA", "chromosome", "genetics", "heredity"],
+    "language": "en"
   },
   {
+    "id": "habitat",
     "word": "habitat",
     "phonetic": "/ˈhæbɪtæt/",
     "partOfSpeech": "noun",
@@ -919,9 +1068,11 @@
         "example": "The forest is the natural habitat of the owl."
       }
     ],
-    "relatedWords": ["ecosystem", "biome", "environment", "niche"]
+    "relatedWords": ["ecosystem", "biome", "environment", "niche"],
+    "language": "en"
   },
   {
+    "id": "igneous",
     "word": "igneous",
     "phonetic": "/ˈɪɡniəs/",
     "partOfSpeech": "adjective",
@@ -931,9 +1082,11 @@
         "example": "Granite is a common type of igneous rock."
       }
     ],
-    "relatedWords": ["magma", "volcano", "sedimentary", "metamorphic"]
+    "relatedWords": ["magma", "volcano", "sedimentary", "metamorphic"],
+    "language": "en"
   },
   {
+    "id": "joint",
     "word": "joint",
     "phonetic": "/dʒɔɪnt/",
     "partOfSpeech": "noun",
@@ -943,9 +1096,11 @@
         "example": "The knee is the largest joint in the human body."
       }
     ],
-    "relatedWords": ["bone", "ligament", "cartilage", "skeleton"]
+    "relatedWords": ["bone", "ligament", "cartilage", "skeleton"],
+    "language": "en"
   },
   {
+    "id": "kelvin",
     "word": "kelvin",
     "phonetic": "/ˈkɛlvɪn/",
     "partOfSpeech": "noun",
@@ -955,9 +1110,11 @@
         "example": "The temperature of absolute zero is 0 kelvin."
       }
     ],
-    "relatedWords": ["temperature", "Celsius", "Fahrenheit", "heat"]
+    "relatedWords": ["temperature", "Celsius", "Fahrenheit", "heat"],
+    "language": "en"
   },
   {
+    "id": "lava",
     "word": "lava",
     "phonetic": "/ˈlɑvə/",
     "partOfSpeech": "noun",
@@ -967,9 +1124,11 @@
         "example": "Lava can reach temperatures of over 1000 degrees Celsius."
       }
     ],
-    "relatedWords": ["magma", "volcano", "eruption", "igneous"]
+    "relatedWords": ["magma", "volcano", "eruption", "igneous"],
+    "language": "en"
   },
   {
+    "id": "metamorphic",
     "word": "metamorphic",
     "phonetic": "/ˌmɛtəˈmɔrfɪk/",
     "partOfSpeech": "adjective",
@@ -979,9 +1138,11 @@
         "example": "Marble is a metamorphic rock formed from limestone."
       }
     ],
-    "relatedWords": ["rock", "igneous", "sedimentary", "geology"]
+    "relatedWords": ["rock", "igneous", "sedimentary", "geology"],
+    "language": "en"
   },
   {
+    "id": "nitrogen",
     "word": "nitrogen",
     "phonetic": "/ˈnaɪtrədʒən/",
     "partOfSpeech": "noun",
@@ -991,9 +1152,11 @@
         "example": "Nitrogen is essential for plant growth."
       }
     ],
-    "relatedWords": ["atmosphere", "gas", "element", "fertilizer"]
+    "relatedWords": ["atmosphere", "gas", "element", "fertilizer"],
+    "language": "en"
   },
   {
+    "id": "orbit",
     "word": "orbit",
     "phonetic": "/ˈɔrbɪt/",
     "partOfSpeech": "noun",
@@ -1003,9 +1166,11 @@
         "example": "Earth takes 365 days to complete its orbit around the Sun."
       }
     ],
-    "relatedWords": ["gravity", "satellite", "ellipse", "planet"]
+    "relatedWords": ["gravity", "satellite", "ellipse", "planet"],
+    "language": "en"
   },
   {
+    "id": "plateau",
     "word": "plateau",
     "phonetic": "/plæˈtoʊ/",
     "partOfSpeech": "noun",
@@ -1015,9 +1180,11 @@
         "example": "The Colorado Plateau spans four US states."
       }
     ],
-    "relatedWords": ["mountain", "plain", "landform", "elevation"]
+    "relatedWords": ["mountain", "plain", "landform", "elevation"],
+    "language": "en"
   },
   {
+    "id": "renewable",
     "word": "renewable",
     "phonetic": "/rɪˈnuːəbəl/",
     "partOfSpeech": "adjective",
@@ -1028,9 +1195,11 @@
       }
     ],
     "antonyms": ["non-renewable"],
-    "relatedWords": ["solar", "wind", "energy", "sustainable"]
+    "relatedWords": ["solar", "wind", "energy", "sustainable"],
+    "language": "en"
   },
   {
+    "id": "solar",
     "word": "solar",
     "phonetic": "/ˈsoʊlər/",
     "partOfSpeech": "adjective",
@@ -1040,9 +1209,11 @@
         "example": "Solar panels convert sunlight into electricity."
       }
     ],
-    "relatedWords": ["sun", "energy", "renewable", "photovoltaic"]
+    "relatedWords": ["sun", "energy", "renewable", "photovoltaic"],
+    "language": "en"
   },
   {
+    "id": "tectonic",
     "word": "tectonic",
     "phonetic": "/tɛkˈtɑnɪk/",
     "partOfSpeech": "adjective",
@@ -1052,9 +1223,11 @@
         "example": "Tectonic plate movements cause earthquakes."
       }
     ],
-    "relatedWords": ["plate", "earthquake", "continent", "geology"]
+    "relatedWords": ["plate", "earthquake", "continent", "geology"],
+    "language": "en"
   },
   {
+    "id": "unique",
     "word": "unique",
     "phonetic": "/juːˈnik/",
     "partOfSpeech": "adjective",
@@ -1066,9 +1239,11 @@
     ],
     "synonyms": ["distinctive", "singular", "unparalleled"],
     "antonyms": ["common", "ordinary"],
-    "relatedWords": ["distinct", "special", "rare", "individual"]
+    "relatedWords": ["distinct", "special", "rare", "individual"],
+    "language": "en"
   },
   {
+    "id": "volcano",
     "word": "volcano",
     "phonetic": "/vɑlˈkeɪnoʊ/",
     "partOfSpeech": "noun",
@@ -1078,9 +1253,11 @@
         "example": "Mount Vesuvius is a famous active volcano."
       }
     ],
-    "relatedWords": ["lava", "magma", "eruption", "crater"]
+    "relatedWords": ["lava", "magma", "eruption", "crater"],
+    "language": "en"
   },
   {
+    "id": "weathering",
     "word": "weathering",
     "phonetic": "/ˈwɛðərɪŋ/",
     "partOfSpeech": "noun",
@@ -1090,9 +1267,11 @@
         "example": "Weathering gradually wears down mountains over millions of years."
       }
     ],
-    "relatedWords": ["erosion", "sediment", "rock", "water"]
+    "relatedWords": ["erosion", "sediment", "rock", "water"],
+    "language": "en"
   },
   {
+    "id": "atmosphere",
     "word": "atmosphere",
     "phonetic": "/ˈætməsˌfɪr/",
     "partOfSpeech": "noun",
@@ -1102,9 +1281,11 @@
         "example": "Earth's atmosphere protects us from harmful solar radiation."
       }
     ],
-    "relatedWords": ["air", "ozone", "climate", "weather"]
+    "relatedWords": ["air", "ozone", "climate", "weather"],
+    "language": "en"
   },
   {
+    "id": "biotic",
     "word": "biotic",
     "phonetic": "/baɪˈɑtɪk/",
     "partOfSpeech": "adjective",
@@ -1115,9 +1296,11 @@
       }
     ],
     "antonyms": ["abiotic"],
-    "relatedWords": ["ecosystem", "organism", "living", "environment"]
+    "relatedWords": ["ecosystem", "organism", "living", "environment"],
+    "language": "en"
   },
   {
+    "id": "continental",
     "word": "continental",
     "phonetic": "/ˌkɑntɪˈnɛntl/",
     "partOfSpeech": "adjective",
@@ -1127,9 +1310,11 @@
         "example": "Continental drift explains how continents move over time."
       }
     ],
-    "relatedWords": ["continent", "drift", "plate", "tectonic"]
+    "relatedWords": ["continent", "drift", "plate", "tectonic"],
+    "language": "en"
   },
   {
+    "id": "deposition",
     "word": "deposition",
     "phonetic": "/ˌdɛpəˈzɪʃən/",
     "partOfSpeech": "noun",
@@ -1139,9 +1324,11 @@
         "example": "River deltas are formed by the deposition of sediment."
       }
     ],
-    "relatedWords": ["erosion", "sediment", "delta", "weathering"]
+    "relatedWords": ["erosion", "sediment", "delta", "weathering"],
+    "language": "en"
   },
   {
+    "id": "erosion",
     "word": "erosion",
     "phonetic": "/ɪˈroʊʒən/",
     "partOfSpeech": "noun",
@@ -1151,9 +1338,11 @@
         "example": "Water erosion can create deep canyons over time."
       }
     ],
-    "relatedWords": ["weathering", "deposition", "wind", "water"]
+    "relatedWords": ["weathering", "deposition", "wind", "water"],
+    "language": "en"
   },
   {
+    "id": "fault",
     "word": "fault",
     "phonetic": "/fɔlt/",
     "partOfSpeech": "noun",
@@ -1163,9 +1352,11 @@
         "example": "The San Andreas Fault is a well-known earthquake fault line."
       }
     ],
-    "relatedWords": ["earthquake", "tectonic", "fracture", "seismic"]
+    "relatedWords": ["earthquake", "tectonic", "fracture", "seismic"],
+    "language": "en"
   },
   {
+    "id": "glacier",
     "word": "glacier",
     "phonetic": "/ˈɡleɪʃər/",
     "partOfSpeech": "noun",
@@ -1175,9 +1366,11 @@
         "example": "Glaciers carve U-shaped valleys as they move."
       }
     ],
-    "relatedWords": ["ice", "ice age", "moraine", "erosion"]
+    "relatedWords": ["ice", "ice age", "moraine", "erosion"],
+    "language": "en"
   },
   {
+    "id": "humidity",
     "word": "humidity",
     "phonetic": "/hjuːˈmɪdɪti/",
     "partOfSpeech": "noun",
@@ -1187,9 +1380,11 @@
         "example": "High humidity makes hot days feel even warmer."
       }
     ],
-    "relatedWords": ["moisture", "evaporation", "condensation", "weather"]
+    "relatedWords": ["moisture", "evaporation", "condensation", "weather"],
+    "language": "en"
   },
   {
+    "id": "irrigation",
     "word": "irrigation",
     "phonetic": "/ˌɪrɪˈɡeɪʃən/",
     "partOfSpeech": "noun",
@@ -1199,9 +1394,11 @@
         "example": "Drip irrigation conserves water by delivering it directly to plant roots."
       }
     ],
-    "relatedWords": ["water", "agriculture", "farming", "drought"]
+    "relatedWords": ["water", "agriculture", "farming", "drought"],
+    "language": "en"
   },
   {
+    "id": "joule",
     "word": "joule",
     "phonetic": "/dʒul/",
     "partOfSpeech": "noun",
@@ -1211,9 +1408,11 @@
         "example": "One joule is the energy needed to lift a small apple one meter."
       }
     ],
-    "relatedWords": ["energy", "work", "newton", "physics"]
+    "relatedWords": ["energy", "work", "newton", "physics"],
+    "language": "en"
   },
   {
+    "id": "latitude",
     "word": "latitude",
     "phonetic": "/ˈlætɪˌtud/",
     "partOfSpeech": "noun",
@@ -1223,9 +1422,11 @@
         "example": "The equator has a latitude of zero degrees."
       }
     ],
-    "relatedWords": ["longitude", "equator", "map", "coordinate"]
+    "relatedWords": ["longitude", "equator", "map", "coordinate"],
+    "language": "en"
   },
   {
+    "id": "mineral",
     "word": "mineral",
     "phonetic": "/ˈmɪnərəl/",
     "partOfSpeech": "noun",
@@ -1235,9 +1436,11 @@
         "example": "Quartz is one of the most common minerals in the Earth's crust."
       }
     ],
-    "relatedWords": ["rock", "crystal", "ore", "geology"]
+    "relatedWords": ["rock", "crystal", "ore", "geology"],
+    "language": "en"
   },
   {
+    "id": "nutrient",
     "word": "nutrient",
     "phonetic": "/ˈnutriənt/",
     "partOfSpeech": "noun",
@@ -1247,9 +1450,11 @@
         "example": "Plants absorb nutrients from the soil through their roots."
       }
     ],
-    "relatedWords": ["vitamin", "mineral", "nutrition", "food"]
+    "relatedWords": ["vitamin", "mineral", "nutrition", "food"],
+    "language": "en"
   },
   {
+    "id": "oxygen",
     "word": "oxygen",
     "phonetic": "/ˈɑksɪdʒən/",
     "partOfSpeech": "noun",
@@ -1259,9 +1464,11 @@
         "example": "Humans need oxygen to survive."
       }
     ],
-    "relatedWords": ["air", "respiration", "photosynthesis", "element"]
+    "relatedWords": ["air", "respiration", "photosynthesis", "element"],
+    "language": "en"
   },
   {
+    "id": "radiation",
     "word": "radiation",
     "phonetic": "/ˌreɪdiˈeɪʃən/",
     "partOfSpeech": "noun",
@@ -1271,6 +1478,7 @@
         "example": "The Sun emits radiation that reaches Earth."
       }
     ],
-    "relatedWords": ["energy", "wave", "ultraviolet", "radioactive"]
+    "relatedWords": ["energy", "wave", "ultraviolet", "radioactive"],
+    "language": "en"
   }
 ]
