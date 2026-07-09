@@ -66,6 +66,27 @@ function eduDataPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(llmProxyHandler);
 
+      // Serve external dictionary at /dictionary/
+      const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const url = decodeURIComponent(req.url ?? '');
+        if (!url.startsWith('/dictionary/')) return next();
+        const filePath = join(dictionaryDir, url.slice('/dictionary/'.length));
+        if (!filePath.startsWith(dictionaryDir)) return next();
+        try {
+          if (statSync(filePath).isFile()) {
+            const ext = extname(filePath);
+            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.end(readFileSync(filePath));
+            return;
+          }
+        } catch {
+          // file not found
+        }
+        next();
+      });
+
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
 
@@ -177,12 +198,6 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 4001,
-      fs: {
-        allow: [
-          __dirname,
-          resolve(PKGS_DIR, 'ai-companion/src/data/external'),
-        ],
-      },
     },
   };
 });
