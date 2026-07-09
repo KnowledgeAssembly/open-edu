@@ -92,7 +92,7 @@ describe('DictionaryService DI behavior', () => {
     expect(svc.lookupExact('gravity')).not.toBeNull();
   });
 
-  it('createDefault with PackageInfo uses loadPackage', async () => {
+  it('createDefault with PackageInfo loads bundled dict for sync lookups', async () => {
     const svc = DictionaryService.createDefault({
       basePath: '/nonexistent/path',
       language: 'en',
@@ -100,8 +100,11 @@ describe('DictionaryService DI behavior', () => {
     });
     await svc.initialize();
     expect(svc.isLoaded()).toBe(true);
-    // Should fall back to empty entries since path doesn't exist
-    expect(svc.lookupExact('gravity')).toBeNull();
+    // Bundled dictionary (104 entries) is always loaded for sync lookups
+    expect(svc.lookupExact('gravity')).not.toBeNull();
+    // Remote search falls back gracefully when no server API is available
+    const remote = await svc.searchRemote('gravity');
+    expect(remote).toEqual([]);
   });
 
   it('accepts custom SearchBuilder array', async () => {

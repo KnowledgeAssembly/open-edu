@@ -55,21 +55,7 @@ export class DictionaryService {
 
   async initialize(): Promise<void> {
     if (this.loaded) return;
-    let entries: DictionaryEntry[];
-    if (this.packageInfo) {
-      try {
-        const loaded = await this.loader.loadPackage(this.packageInfo);
-        entries = loaded.entries;
-        console.log(
-          `[Dictionary] Loaded ${entries.length} entries from ${this.packageInfo.basePath}`,
-        );
-      } catch (err) {
-        console.warn('[Dictionary] External package failed, falling back to bundled:', err);
-        entries = await this.loader.load();
-      }
-    } else {
-      entries = await this.loader.load();
-    }
+    const entries = await this.loader.load();
     for (const builder of this.searchBuilders) {
       builder.build(entries);
     }
@@ -132,6 +118,19 @@ export class DictionaryService {
     const fts = this.searchBuilders.find((b) => b.type === 'fts');
     if (fts) return fts.search(query, limit);
     return this.searchBuilders[0]?.search(query, limit) ?? [];
+  }
+
+  async searchRemote(query: string, limit = 10): Promise<DictionaryEntry[]> {
+    if (!this.packageInfo) return [];
+    try {
+      const res = await fetch(
+        `/api/dictionary/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+      );
+      if (!res.ok) return [];
+      return (await res.json()) as DictionaryEntry[];
+    } catch {
+      return [];
+    }
   }
 
   getSuggestions(prefix: string, limit = 10): string[] {

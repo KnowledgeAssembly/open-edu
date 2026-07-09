@@ -46,13 +46,21 @@ export class SearchManager {
     query: string,
     context?: LearningContext,
   ): Promise<EnrichedResult> {
-    const [ftsResults, cachedAiResponse, courseReferences] = await Promise.all([
+    const [ftsResults, remoteResults, cachedAiResponse, courseReferences] = await Promise.all([
       this.dictionaryService.searchFTS(query, 8),
+      this.dictionaryService.searchRemote(query, 8),
       this.lookupAiCache(query),
       this.searchCourseContent(query, context),
     ]);
 
-    return { ftsResults, cachedAiResponse, courseReferences };
+    const merged = [...ftsResults];
+    for (const r of remoteResults) {
+      if (!merged.some((m) => m.word === r.word)) {
+        merged.push(r);
+      }
+    }
+
+    return { ftsResults: merged, cachedAiResponse, courseReferences };
   }
 
   private async lookupAiCache(query: string): Promise<string | null> {

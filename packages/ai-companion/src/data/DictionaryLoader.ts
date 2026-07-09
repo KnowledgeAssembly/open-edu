@@ -62,9 +62,16 @@ function applyDefaultsToEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
   return entries.map(applyDefaults);
 }
 
-async function fetchJSON<T>(path: string): Promise<T> {
+async function fetchJSON<T>(path: string, compressed = false): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Failed to fetch ${path}: ${response.status}`);
+  if (compressed) {
+    const blob = await response.blob();
+    const ds = new DecompressionStream('gzip');
+    const decompressed = blob.stream().pipeThrough(ds);
+    const text = await new Response(decompressed).text();
+    return JSON.parse(text) as T;
+  }
   return (await response.json()) as T;
 }
 
@@ -133,14 +140,15 @@ export class DictionaryLoader {
     }
 
     const dictionaryPath = `${packageInfo.basePath}/${manifest.files.dictionary}`;
+    const timerLabel = `[Dictionary] fetch + parse ${manifest.files.dictionary} (${Date.now()})`;
     let rawEntries: DictionaryEntry[];
 
     try {
-      console.time('[Dictionary] fetch + parse dictionary.json');
-      rawEntries = await fetchJSON<DictionaryEntry[]>(dictionaryPath);
-      console.timeEnd('[Dictionary] fetch + parse dictionary.json');
+      console.time(timerLabel);
+      rawEntries = await fetchJSON<DictionaryEntry[]>(dictionaryPath, manifest.compressed);
+      console.timeEnd(timerLabel);
     } catch (err) {
-      console.error('[Dictionary] Failed to load dictionary.json:', err);
+      console.error(`[Dictionary] Failed to load ${manifest.files.dictionary}:`, err);
       rawEntries = [];
     }
 
