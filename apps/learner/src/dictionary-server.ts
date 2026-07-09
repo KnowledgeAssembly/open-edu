@@ -89,7 +89,7 @@ export function handleDictionaryRequest(
     const result = [];
     if (entries && prefix) {
       const lower = prefix.toLowerCase();
-      let start = bisectLeft(words, lower);
+      const start = bisectLeft(words, lower);
       for (let i = start; i < words.length && result.length < limit; i++) {
         const w = words[i]!;
         if (w.toLowerCase().startsWith(lower)) result.push(w);
