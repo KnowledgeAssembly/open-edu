@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { existsSync, readFileSync, readdirSync, statSync, createReadStream } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, resolve, dirname } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
@@ -13,7 +13,6 @@ const CATALOG_DIR = process.env.EDU_CATALOG_DIR
   ? resolve(process.env.EDU_CATALOG_DIR)
   : resolve(__dirname, '../../examples');
 const PKGS_DIR = resolve(__dirname, '../../packages');
-const EXTERNAL_DICT_DIR = resolve(PKGS_DIR, 'ai-companion/src/data/external');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
 
@@ -66,33 +65,6 @@ function eduDataPlugin(): Plugin {
     },
     configureServer(server) {
       server.middlewares.use(llmProxyHandler);
-
-      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-        const requestPath = decodeURIComponent(req.url ?? '');
-        if (!requestPath.startsWith('/dictionary/')) return next();
-
-        const relativePath = requestPath.slice('/dictionary/'.length);
-        const filePath = join(EXTERNAL_DICT_DIR, relativePath);
-        if (!filePath.startsWith(EXTERNAL_DICT_DIR)) {
-          res.statusCode = 403;
-          res.end('Forbidden');
-          return;
-        }
-        try {
-          const stat = statSync(filePath);
-          if (stat.isFile()) {
-            const ext = extname(filePath).toLowerCase();
-            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
-            res.setHeader('Cache-Control', 'no-cache');
-            const data = readFileSync(filePath);
-            res.end(data);
-            return;
-          }
-        } catch {
-          // file not found, fall through
-        }
-        next();
-      });
 
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
