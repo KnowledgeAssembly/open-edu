@@ -55,9 +55,21 @@ export class DictionaryService {
 
   async initialize(): Promise<void> {
     if (this.loaded) return;
-    const entries = this.packageInfo
-      ? (await this.loader.loadPackage(this.packageInfo)).entries
-      : await this.loader.load();
+    let entries: DictionaryEntry[];
+    if (this.packageInfo) {
+      try {
+        const loaded = await this.loader.loadPackage(this.packageInfo);
+        entries = loaded.entries;
+        console.log(
+          `[Dictionary] Loaded ${entries.length} entries from ${this.packageInfo.basePath}`,
+        );
+      } catch (err) {
+        console.warn('[Dictionary] External package failed, falling back to bundled:', err);
+        entries = await this.loader.load();
+      }
+    } else {
+      entries = await this.loader.load();
+    }
     for (const builder of this.searchBuilders) {
       builder.build(entries);
     }

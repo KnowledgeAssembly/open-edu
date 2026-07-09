@@ -74,7 +74,9 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
 
     servicesRef.current = { conversationManager, searchManager, aiProvider, cacheService };
     conversationManager.loadSessions();
-    dictionaryService.initialize().catch(() => {});
+    dictionaryService.initialize().catch((err) => {
+      console.error('[Dictionary] Failed to initialize:', err);
+    });
 
     const unsub = contextManagerRef.current.subscribe((ctx) => {
       setContext(ctx);
