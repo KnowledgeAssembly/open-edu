@@ -80,17 +80,17 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
   if (assets.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 text-xs text-teal-700">
+        <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
           Upload images and other assets for your package.
         </div>
         <div
-          className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 p-8 hover:border-blue-300"
+          className="border-outline-variant hover:border-primary flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
           <svg
-            className="mb-2 h-8 w-8 text-gray-300"
+            className="text-on-surface-variant mb-2 h-8 w-8"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -102,8 +102,8 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
             />
           </svg>
-          <p className="text-sm text-gray-500">Drop files here or click to upload</p>
-          <p className="text-xs text-gray-400">Images, PDFs, videos, and other assets</p>
+          <p className="text-on-surface-variant text-sm">Drop files here or click to upload</p>
+          <p className="text-on-surface-variant text-xs">Images, PDFs, videos, and other assets</p>
         </div>
         <input
           ref={fileInputRef}
@@ -112,25 +112,25 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
           onChange={handleUpload}
           aria-label="Upload asset file"
         />
-        {uploading && <p className="text-xs text-blue-600">Uploading...</p>}
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {uploading && <p className="text-primary text-xs">Uploading...</p>}
+        {error && <p className="text-error text-xs">{error}</p>}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 text-xs text-teal-700">
+      <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
         {assets.length} asset{assets.length !== 1 ? 's' : ''} in your package.
       </div>
 
       <div
-        className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 p-4 hover:border-blue-300"
+        className="border-outline-variant hover:border-primary flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
       >
-        <p className="text-xs text-gray-500">Drop files or click to upload</p>
+        <p className="text-on-surface-variant text-xs">Drop files or click to upload</p>
       </div>
 
       <input
@@ -140,8 +140,8 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
         onChange={handleUpload}
         aria-label="Upload asset file"
       />
-      {uploading && <p className="text-xs text-blue-600">Uploading...</p>}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {uploading && <p className="text-primary text-xs">Uploading...</p>}
+      {error && <p className="text-error text-xs">{error}</p>}
 
       <div className="grid grid-cols-3 gap-2">
         {assets.map((assetPath) => {
@@ -152,10 +152,10 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
           return (
             <div
               key={assetPath}
-              className="group relative rounded-lg border border-gray-200 bg-white p-2"
+              className="border-outline-variant bg-surface group relative rounded-lg border p-2"
             >
               {isImage ? (
-                <div className="mb-1 flex aspect-square items-center justify-center overflow-hidden rounded bg-gray-50">
+                <div className="bg-surface-container-low mb-1 flex aspect-square items-center justify-center overflow-hidden rounded">
                   <img
                     src={`/assets/${assetPath.replace(/^assets\//, '')}`}
                     alt={fileName}
@@ -163,23 +163,23 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML =
-                        '<span class="text-2xl text-gray-300">?</span>';
+                        '<span class="text-2xl text-on-surface-variant">?</span>';
                     }}
                   />
                 </div>
               ) : (
-                <div className="mb-1 flex aspect-square items-center justify-center rounded bg-gray-50">
-                  <span className="text-2xl text-gray-300">
+                <div className="bg-surface-container-low mb-1 flex aspect-square items-center justify-center rounded">
+                  <span className="text-on-surface-variant text-2xl">
                     {ext === '.pdf' ? 'PDF' : ext === '.mp4' ? 'VID' : 'FILE'}
                   </span>
                 </div>
               )}
-              <p className="truncate text-[10px] text-gray-600" title={assetPath}>
+              <p className="text-on-surface-variant truncate text-[10px]" title={assetPath}>
                 {fileName}
               </p>
               <button
                 type="button"
-                className="absolute right-1 top-1 rounded bg-red-500 px-1 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100"
+                className="bg-destructive absolute right-1 top-1 rounded px-1 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(assetPath);

@@ -112,7 +112,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-purple-100 bg-purple-50 px-3 py-2 text-xs text-purple-700">
+      <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
         <span className="font-medium">
           {data.type.charAt(0).toUpperCase() + data.type.slice(1)} node
         </span>
@@ -121,9 +121,9 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
       </div>
 
       <div className="flex items-center gap-2">
-        <label className="text-xs font-medium text-gray-600">Type</label>
+        <label className="text-on-surface-variant text-xs font-medium">Type</label>
         <select
-          className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1"
           value={data.type}
           onChange={(e) => onChange({ ...data, type: e.target.value as NodeType })}
         >
@@ -133,7 +133,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
           <option value="exercise">Exercise</option>
           <option value="custom">Custom Widget</option>
         </select>
-        <span className="text-xs text-gray-400">{fileName}</span>
+        <span className="text-on-surface-variant text-xs">{fileName}</span>
       </div>
 
       <SchemaForm
@@ -146,12 +146,12 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
 
       {data.type === 'quiz' && (
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-600">Answer Options</label>
+          <label className="text-on-surface-variant text-xs font-medium">Answer Options</label>
           {(data.options ?? []).map((opt, idx) => (
             <div key={idx} className="flex items-center gap-2">
               <input
                 type="text"
-                className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={`Option ${String.fromCharCode(97 + idx)}...`}
                 value={opt.text}
                 onChange={(e) => {
@@ -161,10 +161,10 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
                   onChange({ ...data, options: opts });
                 }}
               />
-              <label className="flex items-center gap-1 text-xs text-gray-600">
+              <label className="text-on-surface-variant flex items-center gap-1 text-xs">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  className="border-outline-variant text-success focus:ring-success h-4 w-4 rounded"
                   checked={opt.correct}
                   onChange={(e) => {
                     const opts = [...(data.options ?? [])];
@@ -177,7 +177,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
               </label>
               <button
                 type="button"
-                className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"
                 onClick={() => {
                   const opts = data.options?.filter((_, i) => i !== idx);
                   onChange({ ...data, options: opts });
@@ -198,7 +198,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
           ))}
           <button
             type="button"
-            className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+            className="text-primary hover:bg-primary-container rounded px-2 py-1 text-xs font-medium"
             onClick={() => {
               const newId = String.fromCharCode(97 + (data.options?.length ?? 0));
               onChange({
@@ -214,9 +214,9 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
 
       {data.type === 'reflection' && (
         <div>
-          <label className="mb-0.5 block text-xs font-medium text-gray-600">Prompt</label>
+          <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">Prompt</label>
           <textarea
-            className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
             rows={4}
             placeholder="Enter reflection prompt..."
             value={data.prompt ?? ''}

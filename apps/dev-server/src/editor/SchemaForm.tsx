@@ -42,7 +42,7 @@ export function SchemaForm({
             <FieldWrapper key={key} label={label}>
               <input
                 type="text"
-                className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                 value=""
                 onChange={(e) => handleFieldChange(key, e.target.value)}
@@ -57,7 +57,7 @@ export function SchemaForm({
             return (
               <FieldWrapper key={key} label={label}>
                 <textarea
-                  className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                   rows={4}
                   placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                   value={value}
@@ -70,7 +70,7 @@ export function SchemaForm({
             <FieldWrapper key={key} label={label}>
               <input
                 type="text"
-                className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                 value={value}
                 onChange={(e) => handleFieldChange(key, e.target.value)}
@@ -84,7 +84,7 @@ export function SchemaForm({
             <FieldWrapper key={key} label={label}>
               <input
                 type="number"
-                className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                 value={value}
                 onChange={(e) => handleFieldChange(key, Number(e.target.value))}
@@ -99,12 +99,12 @@ export function SchemaForm({
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="border-outline-variant text-primary focus:ring-primary h-4 w-4 rounded"
                   checked={value}
                   onChange={(e) => handleFieldChange(key, e.target.checked)}
                   id={`field-${key}`}
                 />
-                <label htmlFor={`field-${key}`} className="text-sm text-gray-600">
+                <label htmlFor={`field-${key}`} className="text-on-surface-variant text-sm">
                   {label}
                 </label>
               </div>
@@ -113,6 +113,25 @@ export function SchemaForm({
         }
 
         if (Array.isArray(value)) {
+          const hasObjectItems = value.some((item) => typeof item === 'object' && item !== null);
+          if (hasObjectItems) {
+            return (
+              <FieldWrapper key={key} label={label}>
+                <textarea
+                  className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
+                  rows={4}
+                  value={JSON.stringify(value, null, 2)}
+                  onChange={(e) => {
+                    try {
+                      handleFieldChange(key, JSON.parse(e.target.value));
+                    } catch {
+                      // Allow invalid JSON during editing
+                    }
+                  }}
+                />
+              </FieldWrapper>
+            );
+          }
           return (
             <FieldWrapper key={key} label={label}>
               <div className="space-y-1">
@@ -120,8 +139,8 @@ export function SchemaForm({
                   <div key={idx} className="flex items-center gap-1">
                     <input
                       type="text"
-                      className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      value={typeof item === 'string' ? item : JSON.stringify(item)}
+                      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
+                      value={typeof item === 'string' ? item : String(item)}
                       onChange={(e) => {
                         const newArray = [...value];
                         newArray[idx] = e.target.value;
@@ -130,7 +149,7 @@ export function SchemaForm({
                     />
                     <button
                       type="button"
-                      className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                      className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"
                       onClick={() => {
                         const newArray = value.filter((_, i) => i !== idx);
                         handleFieldChange(key, newArray);
@@ -155,7 +174,7 @@ export function SchemaForm({
                 ))}
                 <button
                   type="button"
-                  className="mt-1 rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                  className="text-primary hover:bg-primary-container mt-1 rounded px-2 py-1 text-xs font-medium"
                   onClick={() => handleFieldChange(key, [...value, ''])}
                 >
                   + Add item
@@ -169,7 +188,7 @@ export function SchemaForm({
           return (
             <FieldWrapper key={key} label={label}>
               <textarea
-                className="w-full rounded border border-gray-300 px-2.5 py-1.5 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
                 rows={3}
                 value={JSON.stringify(value, null, 2)}
                 onChange={(e) => {
@@ -194,7 +213,7 @@ export function SchemaForm({
 function FieldWrapper({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-0.5 block text-xs font-medium text-gray-600">{label}</label>
+      <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">{label}</label>
       {children}
     </div>
   );

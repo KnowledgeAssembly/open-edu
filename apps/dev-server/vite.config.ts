@@ -118,6 +118,16 @@ interface FileEntry {
 
 function validateFile(filePath: string, content: string): string | null {
   const ext = extname(filePath).toLowerCase();
+  const basename = filePath.split('/').pop()?.toLowerCase() ?? '';
+
+  // Markdown files must have at least one # Heading
+  if (ext === '.md') {
+    if (!/^#{1,6}\s/m.test(content)) {
+      return 'Markdown content must include at least one heading (# Heading)';
+    }
+    return null;
+  }
+
   if (ext !== '.json') return null;
 
   let parsed: unknown;
@@ -127,37 +137,27 @@ function validateFile(filePath: string, content: string): string | null {
     return 'Invalid JSON syntax';
   }
 
-  const basename = filePath.split('/').pop()?.toLowerCase();
-
   if (basename === 'package.json') {
     const result = PackageManifestSchema.safeParse(parsed);
     if (!result.success) {
       return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     }
-  }
-
-  if (basename === 'workflow.json') {
+  } else if (basename === 'workflow.json') {
     const result = WorkflowSchema.safeParse(parsed);
     if (!result.success) {
       return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     }
-  }
-
-  if (basename === 'rewards.json') {
+  } else if (basename === 'rewards.json') {
     const result = RewardsSchema.safeParse(parsed);
     if (!result.success) {
       return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     }
-  }
-
-  if (basename === 'cards.json') {
+  } else if (basename === 'cards.json') {
     const result = CardDefinitionsSchema.safeParse(parsed);
     if (!result.success) {
       return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     }
-  }
-
-  if (filePath.startsWith('nodes/') || filePath.startsWith('nodes\\')) {
+  } else if (filePath.startsWith('nodes/') || filePath.startsWith('nodes\\')) {
     const result = ContentNodeSchema.safeParse(parsed);
     if (!result.success) {
       return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
@@ -177,7 +177,6 @@ interface MultipartPart {
 function multipartParse(body: Buffer, boundary: string): MultipartPart[] {
   const parts: MultipartPart[] = [];
   const boundaryBuf = Buffer.from(`--${boundary}`);
-  const searchBuf = Buffer.from('\r\n');
 
   let searchStart = 0;
   while (searchStart < body.length) {
@@ -363,8 +362,8 @@ function eduPackageLoader(): Plugin {
           const pathname = parsedUrl.pathname;
           const method = req.method ?? 'GET';
 
-          // GET /api/files — list all files
-          if (pathname === '/api/files' && method === 'GET') {
+          // GET /api/package/tree — list all files
+          if (pathname === '/api/package/tree' && method === 'GET') {
             const filePath = parsedUrl.searchParams.get('path');
 
             if (filePath) {
@@ -408,8 +407,42 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // POST /api/files — write a file
-          if (pathname === '/api/files' && method === 'POST') {
+          // GET /api/package/file — read a single file
+          if (pathname === '/api/package/file' && method === 'GET') {
+            const filePath = toForwardSlashes(
+              decodeURIComponent(parsedUrl.searchParams.get('path') ?? ''),
+            );
+            if (!filePath) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing path parameter' }));
+              return;
+            }
+            const absPath = join(currentDir, filePath);
+            if (!absPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+            if (!existsSync(absPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'File not found' }));
+              return;
+            }
+            const content = await readFile(absPath, 'utf-8');
+            const ext = extname(filePath).toLowerCase();
+            res.end(
+              JSON.stringify({
+                path: filePath,
+                content,
+                isEditable: EDITABLE_EXTS.has(ext),
+                extension: ext,
+              }),
+            );
+            return;
+          }
+
+          // PUT /api/package/file — write/update a file
+          if (pathname === '/api/package/file' && method === 'PUT') {
             const body = (await parseJsonBody(req)) as {
               path: string;
               content: string;
@@ -457,8 +490,66 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // DELETE /api/files — delete a file
-          if (pathname === '/api/files' && method === 'DELETE') {
+          // POST /api/package/file — create a new file
+          if (pathname === '/api/package/file' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              path: string;
+              content?: string;
+              entry?: boolean;
+            };
+            const filePath = toForwardSlashes(body.path);
+
+            if (!filePath) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing path' }));
+              return;
+            }
+
+            const absPath = join(currentDir, filePath);
+            if (!absPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+
+            if (existsSync(absPath)) {
+              res.statusCode = 409;
+              res.end(JSON.stringify({ error: 'File already exists' }));
+              return;
+            }
+
+            const content =
+              body.content ??
+              (filePath.endsWith('.md') ? '# New Node\n\nStart writing here...' : '{}');
+
+            if (body.validate !== false) {
+              const validationError = validateFile(filePath, content);
+              if (validationError) {
+                res.statusCode = 422;
+                res.end(JSON.stringify({ error: 'Validation failed', details: validationError }));
+                return;
+              }
+            }
+
+            const dir = dirname(absPath);
+            if (!existsSync(dir)) {
+              mkdirSync(dir, { recursive: true });
+            }
+
+            await writeFile(absPath, content, 'utf-8');
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true, path: filePath }));
+            return;
+          }
+
+          // DELETE /api/package/file — delete a file
+          if (pathname === '/api/package/file' && method === 'DELETE') {
             const filePath = toForwardSlashes(
               decodeURIComponent(parsedUrl.searchParams.get('path') ?? ''),
             );
@@ -493,8 +584,35 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // POST /api/assets/upload — upload an asset
-          if (pathname === '/api/assets/upload' && method === 'POST') {
+          // POST /api/package/validate — run full package validation
+          if (pathname === '/api/package/validate' && method === 'POST') {
+            try {
+              const errors: Array<{ path: string; error: string }> = [];
+              const allFiles = collectAllFiles(currentDir);
+              for (const f of allFiles) {
+                const relPath = toForwardSlashes(relative(currentDir, f));
+                if (!EDITABLE_EXTS.has(extname(f).toLowerCase())) continue;
+                if (IGNORE_DIRS.has(f.split('/').pop() ?? '')) continue;
+                try {
+                  const content = readFileSync(f, 'utf-8');
+                  const validationError = validateFile(relPath, content);
+                  if (validationError) {
+                    errors.push({ path: relPath, error: validationError });
+                  }
+                } catch {
+                  errors.push({ path: relPath, error: 'Failed to read file' });
+                }
+              }
+              res.end(JSON.stringify({ valid: errors.length === 0, errors }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: (err as Error).message }));
+            }
+            return;
+          }
+
+          // POST /api/package/assets/upload — upload an asset
+          if (pathname === '/api/package/assets/upload' && method === 'POST') {
             const contentType = req.headers['content-type'] ?? '';
             if (!contentType.includes('multipart/form-data')) {
               res.statusCode = 400;

@@ -12,10 +12,10 @@ export function RawJsonEditor({ content, onChange, fileName }: RawJsonEditorProp
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-500">{fileName} (raw JSON)</span>
-        <span className="text-xs text-gray-400">{lineCount} lines</span>
+        <span className="text-on-surface-variant text-xs font-medium">{fileName} (raw JSON)</span>
+        <span className="text-on-surface-variant text-xs">{lineCount} lines</span>
       </div>
-      <div className="flex-1 overflow-hidden rounded border border-gray-300">
+      <div className="border-outline-variant flex-1 overflow-hidden rounded border">
         <textarea
           className="h-full w-full resize-none p-3 font-mono text-xs leading-relaxed focus:outline-none"
           value={content}

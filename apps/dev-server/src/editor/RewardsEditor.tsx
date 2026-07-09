@@ -46,15 +46,15 @@ export function RewardsEditor({ data, onChange }: RewardsEditorProps) {
   if (triggers.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-xs text-green-700">
+        <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
           Define reward triggers — events that award badges, call webhooks, or run scripts.
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+        <div className="border-outline-variant text-on-surface-variant rounded-lg border-2 border-dashed p-6 text-center text-sm">
           No triggers defined
         </div>
         <button
           type="button"
-          className="rounded px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+          className="text-primary hover:bg-primary-container rounded px-3 py-1.5 text-xs font-medium"
           onClick={handleAddTrigger}
         >
           + Add Trigger
@@ -65,7 +65,7 @@ export function RewardsEditor({ data, onChange }: RewardsEditorProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-xs text-green-700">
+      <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
         Define reward triggers — events that award badges, call webhooks, or run scripts.
       </div>
 
@@ -83,7 +83,7 @@ export function RewardsEditor({ data, onChange }: RewardsEditorProps) {
 
       <button
         type="button"
-        className="rounded px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+        className="text-primary hover:bg-primary-container rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddTrigger}
       >
         + Add Trigger
@@ -121,12 +121,12 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="border-outline-variant bg-surface shadow-elevation-flat rounded-lg border p-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-500">Trigger</span>
+        <span className="text-on-surface-variant text-xs font-medium">Trigger</span>
         <button
           type="button"
-          className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+          className="text-on-surface-variant hover:bg-error-container hover:text-error rounded p-1"
           onClick={onRemove}
           aria-label="Remove trigger"
         >
@@ -143,11 +143,13 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
       </div>
 
       <div className="mb-2">
-        <label className="mb-0.5 block text-[10px] font-medium text-gray-500">On Event</label>
+        <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+          On Event
+        </label>
         <div className="flex gap-1">
           <input
             type="text"
-            className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
             value={trigger.onEvent}
             onChange={(e) => onChange({ ...trigger, onEvent: e.target.value })}
             placeholder="node_complete"
@@ -162,7 +164,7 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-medium text-gray-500">Rewards</label>
+        <label className="text-on-surface-variant text-[10px] font-medium">Rewards</label>
         {trigger.rewards.map((reward, idx) => (
           <RewardRow
             key={idx}
@@ -173,7 +175,7 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
         ))}
         <button
           type="button"
-          className="rounded px-2 py-0.5 text-[10px] font-medium text-blue-600 hover:bg-blue-50"
+          className="text-primary hover:bg-primary-container rounded px-2 py-0.5 text-[10px] font-medium"
           onClick={handleAddReward}
         >
           + Add reward
@@ -191,10 +193,10 @@ interface RewardRowProps {
 
 function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
   return (
-    <div className="flex items-start gap-2 rounded border border-gray-100 bg-gray-50 p-2">
+    <div className="border-outline-variant bg-surface-container-low flex items-start gap-2 rounded border p-2">
       <div className="min-w-0 flex-1 space-y-1">
         <select
-          className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
           value={reward.action}
           onChange={(e) => onChange({ ...reward, action: e.target.value })}
         >
@@ -206,7 +208,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
         {reward.action === 'badge.award' && (
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             placeholder="Badge ID"
             value={reward.badge ?? ''}
             onChange={(e) => onChange({ ...reward, badge: e.target.value })}
@@ -216,7 +218,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
         {reward.action === 'webhook' && (
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             placeholder="https://example.com/webhook"
             value={reward.url ?? ''}
             onChange={(e) => onChange({ ...reward, url: e.target.value })}
@@ -225,7 +227,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
 
         {reward.action === 'script' && (
           <textarea
-            className="w-full rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
             rows={2}
             placeholder="Script content"
             value={reward.exec ?? ''}
@@ -235,7 +237,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
       </div>
       <button
         type="button"
-        className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+        className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"
         onClick={onRemove}
         aria-label="Remove reward"
       >

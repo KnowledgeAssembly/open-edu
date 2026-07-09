@@ -67,15 +67,15 @@ export function CardsEditor({ data, onChange }: CardsEditorProps) {
   if (cards.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs text-indigo-700">
+        <div className="border-secondary-container bg-secondary-container text-secondary rounded-lg border px-3 py-2 text-xs">
           Define collection cards — knowledge, skill, achievement, exploration, or mentor cards.
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+        <div className="border-outline-variant text-on-surface-variant rounded-lg border-2 border-dashed p-6 text-center text-sm">
           No cards defined
         </div>
         <button
           type="button"
-          className="rounded px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+          className="text-primary hover:bg-primary-container rounded px-3 py-1.5 text-xs font-medium"
           onClick={handleAddCard}
         >
           + Add Card
@@ -86,14 +86,14 @@ export function CardsEditor({ data, onChange }: CardsEditorProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs text-indigo-700">
+      <div className="border-secondary-container bg-secondary-container text-secondary rounded-lg border px-3 py-2 text-xs">
         Define collection cards — knowledge, skill, achievement, exploration, or mentor cards.
       </div>
 
       <div className="space-y-3">
         {cards.map((card, idx) => (
           <CardEditorCard
-            key={card.id}
+            key={`${card.id}-${idx}`}
             card={card}
             onChange={(c) => handleCardChange(idx, c)}
             onRemove={() => handleRemoveCard(idx)}
@@ -103,7 +103,7 @@ export function CardsEditor({ data, onChange }: CardsEditorProps) {
 
       <button
         type="button"
-        className="rounded px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+        className="text-primary hover:bg-primary-container rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddCard}
       >
         + Add Card
@@ -120,12 +120,12 @@ interface CardEditorCardProps {
 
 function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="border-outline-variant bg-surface shadow-elevation-flat rounded-lg border p-3">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-500">Card: {card.id}</span>
+        <span className="text-on-surface-variant text-xs font-medium">Card: {card.id}</span>
         <button
           type="button"
-          className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+          className="text-on-surface-variant hover:bg-error-container hover:text-error rounded p-1"
           onClick={onRemove}
           aria-label="Remove card"
         >
@@ -143,56 +143,66 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">ID</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">ID</label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.id}
             onChange={(e) => onChange({ ...card, id: e.target.value })}
           />
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Slug</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Slug
+          </label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.slug ?? ''}
             onChange={(e) => onChange({ ...card, slug: e.target.value })}
             placeholder="Optional"
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Title</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Title
+          </label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.title}
             onChange={(e) => onChange({ ...card, title: e.target.value })}
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Subtitle</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Subtitle
+          </label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.subtitle ?? ''}
             onChange={(e) => onChange({ ...card, subtitle: e.target.value })}
             placeholder="Optional"
           />
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Category</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Category
+          </label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.category}
             onChange={(e) => onChange({ ...card, category: e.target.value })}
           />
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Type</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Type
+          </label>
           <select
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.type}
             onChange={(e) => onChange({ ...card, type: e.target.value })}
           >
@@ -204,9 +214,11 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           </select>
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Difficulty</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Difficulty
+          </label>
           <select
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.difficulty ?? 'medium'}
             onChange={(e) => onChange({ ...card, difficulty: e.target.value })}
           >
@@ -218,42 +230,48 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           </select>
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Level</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Level
+          </label>
           <input
             type="number"
             min={1}
             max={5}
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.level}
             onChange={(e) => onChange({ ...card, level: parseInt(e.target.value) || 1 })}
           />
         </div>
         <div>
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Max Level</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Max Level
+          </label>
           <input
             type="number"
             min={1}
             max={5}
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.maximumLevel}
             onChange={(e) => onChange({ ...card, maximumLevel: parseInt(e.target.value) || 1 })}
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Summary</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Summary
+          </label>
           <textarea
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             rows={2}
             value={card.summary}
             onChange={(e) => onChange({ ...card, summary: e.target.value })}
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
             Detailed Explanation
           </label>
           <textarea
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             rows={2}
             value={card.detailedExplanation ?? ''}
             onChange={(e) => onChange({ ...card, detailedExplanation: e.target.value })}
@@ -261,21 +279,23 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Icon</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Icon
+          </label>
           <input
             type="text"
-            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
             value={card.icon ?? ''}
             onChange={(e) => onChange({ ...card, icon: e.target.value })}
             placeholder="Optional icon path"
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
             Unlock Condition
           </label>
           <textarea
-            className="w-full rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
             rows={2}
             value={JSON.stringify(card.unlock, null, 2)}
             onChange={(e) => {
@@ -288,17 +308,19 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           />
         </div>
         <div className="col-span-2">
-          <label className="mb-0.5 block text-[10px] font-medium text-gray-500">Tags</label>
+          <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
+            Tags
+          </label>
           <div className="flex flex-wrap gap-1">
             {(card.tags ?? []).map((tag, idx) => (
               <span
                 key={idx}
-                className="flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px]"
+                className="bg-surface-variant flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px]"
               >
                 {tag}
                 <button
                   type="button"
-                  className="text-gray-400 hover:text-red-600"
+                  className="text-on-surface-variant hover:text-error"
                   onClick={() => {
                     const tags = card.tags?.filter((_, i) => i !== idx);
                     onChange({ ...card, tags });
@@ -310,7 +332,7 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
             ))}
             <input
               type="text"
-              className="w-20 rounded border border-gray-300 px-1 py-0.5 text-[10px] focus:border-blue-500 focus:outline-none"
+              className="border-outline-variant focus:border-primary w-20 rounded border px-1 py-0.5 text-[10px] focus:outline-none"
               placeholder="Add tag"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {

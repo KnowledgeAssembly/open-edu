@@ -58,7 +58,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+      <div className="border-secondary-container bg-secondary-container text-secondary rounded-lg border px-3 py-2 text-xs">
         Define the routing between content nodes. Each key is a node path, and its value specifies
         where the learner goes next.
       </div>
@@ -78,7 +78,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
 
       <button
         type="button"
-        className="flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+        className="text-primary hover:bg-primary-container flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddRoute}
       >
         <svg
@@ -94,7 +94,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
       </button>
 
       {routingKeys.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+        <div className="border-outline-variant text-on-surface-variant rounded-lg border-2 border-dashed p-6 text-center text-sm">
           No routes defined. Add a route to define content flow.
         </div>
       )}
@@ -115,13 +115,13 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
   const targetIsCompleted = route.onComplete === COMPLETED_SENTINEL;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="border-outline-variant bg-surface shadow-elevation-flat rounded-lg border p-3">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex flex-1 items-center gap-2">
-          <span className="text-xs font-medium text-gray-500">Node:</span>
+          <span className="text-on-surface-variant text-xs font-medium">Node:</span>
           <input
             type="text"
-            className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
             value={routeKey}
             onChange={(e) => onKeyChange(e.target.value)}
             placeholder="nodes/example.md"
@@ -129,7 +129,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
         </div>
         <button
           type="button"
-          className="ml-2 shrink-0 rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+          className="text-on-surface-variant hover:bg-error-container hover:text-error ml-2 shrink-0 rounded p-1"
           onClick={onRemove}
           aria-label="Remove route"
         >
@@ -147,7 +147,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
 
       <div className="flex items-center gap-2">
         <select
-          className="rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
           value={isSimple ? 'simple' : 'conditional'}
           onChange={(e) => {
             if (e.target.value === 'simple') {
@@ -163,16 +163,16 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
 
         {isSimple ? (
           <div className="flex flex-1 items-center gap-2">
-            <span className="text-xs text-gray-500">onComplete →</span>
+            <span className="text-on-surface-variant text-xs">onComplete →</span>
             <input
               type="text"
-              className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
               value={route.onComplete ?? ''}
               onChange={(e) => onRouteChange({ onComplete: e.target.value })}
               placeholder={COMPLETED_SENTINEL}
             />
             {targetIsCompleted && (
-              <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+              <span className="bg-success/20 text-success rounded px-1.5 py-0.5 text-[10px] font-medium">
                 End
               </span>
             )}
@@ -181,10 +181,10 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
           <div className="flex-1 space-y-1">
             {(route.conditions ?? []).map((cond, idx) => (
               <div key={idx} className="flex items-center gap-1">
-                <span className="text-xs text-gray-500">if</span>
+                <span className="text-on-surface-variant text-xs">if</span>
                 <input
                   type="text"
-                  className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
                   value={cond.if}
                   onChange={(e) => {
                     const conditions = [...(route.conditions ?? [])];
@@ -194,10 +194,10 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                   }}
                   placeholder="score >= 80"
                 />
-                <span className="text-xs text-gray-500">→</span>
+                <span className="text-on-surface-variant text-xs">→</span>
                 <input
                   type="text"
-                  className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
                   value={cond.then}
                   onChange={(e) => {
                     const conditions = [...(route.conditions ?? [])];
@@ -209,7 +209,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                 />
                 <button
                   type="button"
-                  className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                  className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"
                   onClick={() => {
                     const conditions = route.conditions?.filter((_, i) => i !== idx);
                     onRouteChange({ conditions });
@@ -230,7 +230,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
             ))}
             <button
               type="button"
-              className="rounded px-2 py-0.5 text-[10px] font-medium text-blue-600 hover:bg-blue-50"
+              className="text-primary hover:bg-primary-container rounded px-2 py-0.5 text-[10px] font-medium"
               onClick={() => {
                 const conditions = [...(route.conditions ?? []), { if: '', then: '' }];
                 onRouteChange({ conditions });
