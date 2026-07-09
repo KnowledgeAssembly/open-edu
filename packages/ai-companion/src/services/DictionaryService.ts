@@ -109,13 +109,13 @@ export class DictionaryService {
   }
 
   searchFTS(query: string, limit = 10): DictionaryEntry[] {
-    const fts = this.searchBuilders.find((b) => b instanceof FlexSearchIndex);
+    const fts = this.searchBuilders.find((b) => b.type === 'fts');
     if (fts) return fts.search(query, limit);
     return this.searchBuilders[0]?.search(query, limit) ?? [];
   }
 
   getSuggestions(prefix: string, limit = 10): string[] {
-    const exact = this.searchBuilders.find((b) => b instanceof ExactIndex);
+    const exact = this.searchBuilders.find((b) => b.type === 'exact');
     if (exact) return exact.autocomplete(prefix, limit);
     return this.searchBuilders[0]?.autocomplete(prefix, limit) ?? [];
   }

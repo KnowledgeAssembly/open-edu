@@ -73,6 +73,10 @@ export class DictionaryLoader {
     return DictionaryLoader.instance;
   }
 
+  static reset(): void {
+    DictionaryLoader.instance = new DictionaryLoader();
+  }
+
   async load(): Promise<DictionaryEntry[]> {
     if (this.entries) return this.entries;
     const data = await import('./dictionary.json');
@@ -81,6 +85,13 @@ export class DictionaryLoader {
     return this.entries;
   }
 
+  /**
+   * Load a dictionary package from an external base path.
+   *
+   * NOTE: This uses dynamic import() with computed paths, which works in Vite dev
+   * mode but will fail in production bundles. For production, replace with
+   * fetch() + JSON.parse() once the dictionary assets are served as static files.
+   */
   async loadPackage(packageInfo: PackageInfo): Promise<LoadedPackage> {
     const manifestPath = `${packageInfo.basePath}/manifest.json`;
     const metadataPath = `${packageInfo.basePath}/metadata.json`;
@@ -142,7 +153,13 @@ export class DictionaryLoader {
   }
 
   getEntries(): DictionaryEntry[] {
-    if (!this.entries) throw new Error('Dictionary not loaded. Call load() first.');
+    if (!this.entries) {
+      throw new Error('Dictionary not loaded. Call load() first.');
+    }
     return this.entries;
+  }
+
+  hasEntries(): boolean {
+    return this.entries !== null;
   }
 }

@@ -12,7 +12,7 @@ export type {
   CacheProvider,
 } from './providers/types.js';
 
-export type { SearchBuilder } from './search/types.js';
+export type { SearchBuilder, SearchBuilderType } from './search/types.js';
 export { DictionaryLoader } from './data/DictionaryLoader.js';
 export type {
   PackageManifest,

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { ExactIndex } from '../search/ExactIndex.js';
 import type { DictionaryEntry } from '../providers/types.js';
 import type { SearchBuilder } from '../search/types.js';
@@ -134,9 +134,13 @@ describe('ExactIndex (Trie)', () => {
 
 function searchBuilderConformanceTest(builder: SearchBuilder, label: string): void {
   describe(`SearchBuilder conformance (${label})`, () => {
-    it('build from entries', () => {
-      const entries = [makeEntry('testword', 'a test word'), makeEntry('another', 'another word')];
+    const entries = [makeEntry('testword', 'a test word'), makeEntry('another', 'another word')];
+
+    beforeAll(() => {
       builder.build(entries);
+    });
+
+    it('build from entries', () => {
       expect(builder.lookup('testword')).not.toBeNull();
       expect(builder.lookup('testword')!.word).toBe('testword');
     });

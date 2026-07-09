@@ -11,6 +11,7 @@ interface FlexSearchDoc {
 }
 
 export class FlexSearchIndex implements SearchBuilder {
+  readonly type = 'fts' as const;
   private index: Document<FlexSearchDoc> | null = null;
   private ready = false;
   private entries = new Map<string, DictionaryEntry>();
@@ -103,6 +104,8 @@ export class FlexSearchIndex implements SearchBuilder {
   }
 
   lookup(word: string): DictionaryEntry | null {
+    const exact = this.entries.get(word.toLowerCase());
+    if (exact) return exact;
     const results = this.search(word, 1);
     if (results.length > 0 && results[0]!.word.toLowerCase() === word.toLowerCase()) {
       return results[0]!;

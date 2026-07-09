@@ -90,6 +90,7 @@ describe('DictionaryService DI behavior', () => {
 
   it('accepts custom SearchBuilder array', async () => {
     const mockBuilder: SearchBuilder = {
+      type: 'exact',
       build: () => {},
       load: () => {},
       search: () => [],
@@ -123,6 +124,7 @@ describe('DictionaryService DI behavior', () => {
   it('lookupExact checks builders in order', async () => {
     const callOrder: string[] = [];
     const first: SearchBuilder = {
+      type: 'exact',
       build: () => {},
       load: () => {},
       search: () => [],
@@ -133,6 +135,7 @@ describe('DictionaryService DI behavior', () => {
       },
     };
     const second: SearchBuilder = {
+      type: 'fts',
       build: () => {},
       load: () => {},
       search: () => [],

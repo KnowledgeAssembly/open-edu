@@ -20,7 +20,7 @@ export function BreakNagBar({ mode, onTakeBreak, onIgnore }: BreakNagBarProps): 
           <Button variant="default" size="sm" onClick={onTakeBreak}>
             Take Break
           </Button>
-          <Button variant="outline" size="sm" onClick={onIgnore}>
+          <Button variant="ghost" size="sm" onClick={onIgnore}>
             Ignore
           </Button>
         </>

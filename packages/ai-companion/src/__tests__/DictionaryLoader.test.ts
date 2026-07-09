@@ -2,6 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { DictionaryLoader, type PackageInfo } from '../data/DictionaryLoader.js';
 
 describe('DictionaryLoader', () => {
+  beforeEach(() => {
+    DictionaryLoader.reset();
+  });
+
   it('loads bundled dictionary with defaults applied', async () => {
     const loader = DictionaryLoader.getInstance();
     const entries = await loader.load();
@@ -36,6 +40,10 @@ describe('DictionaryLoader', () => {
 });
 
 describe('DictionaryLoader backward compat', () => {
+  beforeEach(() => {
+    DictionaryLoader.reset();
+  });
+
   it('applies defaults for missing id and language', async () => {
     const loader = DictionaryLoader.getInstance();
     const entries = await loader.load();

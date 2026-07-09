@@ -8,6 +8,7 @@ class TrieNode {
 }
 
 export class ExactIndex implements SearchBuilder {
+  readonly type = 'exact' as const;
   private root = new TrieNode();
   private wordCount = 0;
 
