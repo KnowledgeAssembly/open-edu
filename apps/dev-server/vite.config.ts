@@ -1,10 +1,26 @@
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { join, extname } from 'node:path';
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  mkdirSync,
+  statSync,
+  readdirSync,
+} from 'node:fs';
+import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
+import { join, extname, dirname, relative, sep } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadPackage, loadBundle } from '@open-edu/core';
 import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
+import {
+  PackageManifestSchema,
+  WorkflowSchema,
+  RewardsSchema,
+  CardDefinitionsSchema,
+  ContentNodeSchema,
+} from '@open-edu/schemas';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
@@ -24,6 +40,201 @@ const ASSET_MIME_TYPES: Record<string, string> = {
   '.json': 'application/json',
   '.txt': 'text/plain',
 };
+
+const EDITABLE_EXTS = new Set(['.md', '.json']);
+const IGNORE_DIRS = new Set(['node_modules', '.git', '.vite', 'dist']);
+
+function toForwardSlashes(p: string): string {
+  return sep === '/' ? p : p.split(sep).join('/');
+}
+
+function collectAllFiles(dir: string): string[] {
+  const results: string[] = [];
+
+  function walk(current: string) {
+    let entries;
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const fullPath = join(current, entry.name);
+      if (entry.isDirectory()) {
+        if (!IGNORE_DIRS.has(entry.name) && !entry.name.startsWith('.')) {
+          walk(fullPath);
+        }
+      } else {
+        results.push(fullPath);
+      }
+    }
+  }
+
+  walk(dir);
+  return results;
+}
+
+function parseJsonBody(req: IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf-8')));
+      } catch {
+        reject(new Error('Invalid JSON body'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+function getFileLabel(filePath: string): string {
+  const name = filePath.split('/').pop() ?? filePath;
+  if (filePath === 'package.json') return 'Manifest (package.json)';
+  if (filePath === 'workflow.json') return 'Workflow (workflow.json)';
+  if (filePath === 'rewards.json') return 'Rewards (rewards.json)';
+  if (filePath === 'cards.json') return 'Cards (cards.json)';
+  return name;
+}
+
+function getFileCategory(filePath: string): string {
+  if (filePath === 'package.json') return 'manifest';
+  if (filePath === 'workflow.json') return 'workflow';
+  if (filePath === 'rewards.json') return 'rewards';
+  if (filePath === 'cards.json') return 'cards';
+  if (filePath.startsWith('nodes/') || filePath.startsWith('nodes\\')) return 'nodes';
+  if (filePath.startsWith('assets/') || filePath.startsWith('assets\\')) return 'assets';
+  return 'other';
+}
+
+interface FileEntry {
+  path: string;
+  label: string;
+  category: string;
+  extension: string;
+}
+
+function validateFile(filePath: string, content: string): string | null {
+  const ext = extname(filePath).toLowerCase();
+  if (ext !== '.json') return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    return 'Invalid JSON syntax';
+  }
+
+  const basename = filePath.split('/').pop()?.toLowerCase();
+
+  if (basename === 'package.json') {
+    const result = PackageManifestSchema.safeParse(parsed);
+    if (!result.success) {
+      return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    }
+  }
+
+  if (basename === 'workflow.json') {
+    const result = WorkflowSchema.safeParse(parsed);
+    if (!result.success) {
+      return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    }
+  }
+
+  if (basename === 'rewards.json') {
+    const result = RewardsSchema.safeParse(parsed);
+    if (!result.success) {
+      return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    }
+  }
+
+  if (basename === 'cards.json') {
+    const result = CardDefinitionsSchema.safeParse(parsed);
+    if (!result.success) {
+      return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    }
+  }
+
+  if (filePath.startsWith('nodes/') || filePath.startsWith('nodes\\')) {
+    const result = ContentNodeSchema.safeParse(parsed);
+    if (!result.success) {
+      return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    }
+  }
+
+  return null;
+}
+
+interface MultipartPart {
+  name: string;
+  filename?: string;
+  data: Buffer;
+  contentType?: string;
+}
+
+function multipartParse(body: Buffer, boundary: string): MultipartPart[] {
+  const parts: MultipartPart[] = [];
+  const boundaryBuf = Buffer.from(`--${boundary}`);
+  const searchBuf = Buffer.from('\r\n');
+
+  let searchStart = 0;
+  while (searchStart < body.length) {
+    const boundaryStart = body.indexOf(boundaryBuf, searchStart);
+    if (boundaryStart === -1) break;
+
+    const afterBoundary = boundaryStart + boundaryBuf.length;
+    const nextBoundaryStart = body.indexOf(boundaryBuf, afterBoundary);
+    if (nextBoundaryStart === -1) break;
+
+    const partBuf = body.subarray(afterBoundary, nextBoundaryStart);
+    const headerEnd = partBuf.indexOf(Buffer.from('\r\n\r\n'));
+    if (headerEnd === -1) {
+      searchStart = nextBoundaryStart;
+      continue;
+    }
+
+    const headerSection = partBuf.subarray(0, headerEnd).toString('utf-8');
+    let dataSection = partBuf.subarray(headerEnd + 4);
+
+    const nameMatch = headerSection.match(/name="([^"]*)"/);
+    const filenameMatch = headerSection.match(/filename="([^"]*)"/);
+    const contentTypeMatch = headerSection.match(/Content-Type:\s*(\S+)/i);
+
+    // Strip trailing \r\n
+    if (
+      dataSection.length >= 2 &&
+      dataSection[dataSection.length - 2] === 13 &&
+      dataSection[dataSection.length - 1] === 10
+    ) {
+      dataSection = dataSection.subarray(0, dataSection.length - 2);
+    }
+
+    const part: MultipartPart = {
+      name: nameMatch?.[1] ?? '',
+      data: dataSection,
+    };
+
+    if (filenameMatch) part.filename = filenameMatch[1];
+    if (contentTypeMatch) part.contentType = contentTypeMatch[1];
+
+    parts.push(part);
+
+    // Check if this is the end boundary
+    if (
+      body
+        .subarray(nextBoundaryStart, nextBoundaryStart + boundaryBuf.length + 2)
+        .equals(Buffer.from(`--${boundary}--`))
+    ) {
+      break;
+    }
+
+    searchStart = nextBoundaryStart;
+  }
+
+  return parts;
+}
 
 function eduPackageLoader(): Plugin {
   let packageData: LoadedPackage | null = null;
@@ -133,6 +344,229 @@ function eduPackageLoader(): Plugin {
         });
         console.log(`[edu-dev] Serving assets from: ${assetsDir}`);
       }
+
+      // ---- Package Editor API Routes ----
+      const currentDir = packageDir || bundleDir;
+      if (!currentDir) return;
+
+      const apiRegexp = /^\/api\//;
+
+      srv.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const url = req.url ?? '';
+        if (!apiRegexp.test(url)) return next();
+
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
+
+        try {
+          const parsedUrl = new URL(url, `http://${req.headers.host ?? 'localhost'}`);
+          const pathname = parsedUrl.pathname;
+          const method = req.method ?? 'GET';
+
+          // GET /api/files — list all files
+          if (pathname === '/api/files' && method === 'GET') {
+            const filePath = parsedUrl.searchParams.get('path');
+
+            if (filePath) {
+              const normalizedPath = toForwardSlashes(filePath);
+              const absPath = join(currentDir, normalizedPath);
+              if (!absPath.startsWith(currentDir)) {
+                res.statusCode = 403;
+                res.end(JSON.stringify({ error: 'Forbidden' }));
+                return;
+              }
+              if (!existsSync(absPath)) {
+                res.statusCode = 404;
+                res.end(JSON.stringify({ error: 'File not found' }));
+                return;
+              }
+              const content = await readFile(absPath, 'utf-8');
+              const ext = extname(filePath).toLowerCase();
+              res.end(
+                JSON.stringify({
+                  path: normalizedPath,
+                  content,
+                  isEditable: EDITABLE_EXTS.has(ext),
+                  extension: ext,
+                }),
+              );
+            } else {
+              const allFiles = collectAllFiles(currentDir);
+              const files: FileEntry[] = allFiles
+                .map((f) => {
+                  const relPath = toForwardSlashes(relative(currentDir, f));
+                  return {
+                    path: relPath,
+                    label: getFileLabel(relPath),
+                    category: getFileCategory(relPath),
+                    extension: extname(f).toLowerCase(),
+                  };
+                })
+                .filter((f) => EDITABLE_EXTS.has(f.extension) || f.category === 'assets');
+              res.end(JSON.stringify({ files }));
+            }
+            return;
+          }
+
+          // POST /api/files — write a file
+          if (pathname === '/api/files' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              path: string;
+              content: string;
+              validate?: boolean;
+            };
+            const filePath = toForwardSlashes(body.path);
+            const content = body.content;
+
+            if (!filePath || content === undefined) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing path or content' }));
+              return;
+            }
+
+            const absPath = join(currentDir, filePath);
+            if (!absPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+
+            if (body.validate !== false) {
+              const validationError = validateFile(filePath, content);
+              if (validationError) {
+                res.statusCode = 422;
+                res.end(JSON.stringify({ error: 'Validation failed', details: validationError }));
+                return;
+              }
+            }
+
+            const dir = dirname(absPath);
+            if (!existsSync(dir)) {
+              mkdirSync(dir, { recursive: true });
+            }
+
+            await writeFile(absPath, content, 'utf-8');
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true, path: filePath }));
+            return;
+          }
+
+          // DELETE /api/files — delete a file
+          if (pathname === '/api/files' && method === 'DELETE') {
+            const filePath = toForwardSlashes(
+              decodeURIComponent(parsedUrl.searchParams.get('path') ?? ''),
+            );
+            if (!filePath) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing path parameter' }));
+              return;
+            }
+
+            const absPath = join(currentDir, filePath);
+            if (!absPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+
+            if (!existsSync(absPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'File not found' }));
+              return;
+            }
+
+            await unlink(absPath);
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true, path: filePath }));
+            return;
+          }
+
+          // POST /api/assets/upload — upload an asset
+          if (pathname === '/api/assets/upload' && method === 'POST') {
+            const contentType = req.headers['content-type'] ?? '';
+            if (!contentType.includes('multipart/form-data')) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Expected multipart/form-data' }));
+              return;
+            }
+
+            const boundary = contentType.split('boundary=')[1]?.trim();
+            if (!boundary) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'No boundary found' }));
+              return;
+            }
+
+            const chunks: Buffer[] = [];
+            for await (const chunk of req) {
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            }
+            const fullBody = Buffer.concat(chunks);
+
+            const parts = multipartParse(fullBody, boundary);
+            const filePart = parts.find((p) => p.name === 'file');
+
+            if (!filePart || !filePart.filename) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'No file provided' }));
+              return;
+            }
+
+            const pathPart = parts.find((p) => p.name === 'path');
+            const targetPath = toForwardSlashes(
+              pathPart?.data.toString('utf-8').trim() || `assets/${filePart.filename}`,
+            );
+            const absPath = join(currentDir, targetPath);
+
+            if (!absPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+
+            const dir = dirname(absPath);
+            if (!existsSync(dir)) {
+              mkdirSync(dir, { recursive: true });
+            }
+
+            writeFileSync(absPath, filePart.data);
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true, path: targetPath }));
+            return;
+          }
+
+          // Fallback route for /api/package/dir — return package directory path
+          if (pathname === '/api/package/dir' && method === 'GET') {
+            res.end(JSON.stringify({ packageDir: currentDir }));
+            return;
+          }
+
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: 'Unknown API endpoint' }));
+        } catch (err) {
+          console.error('[edu-dev] API error:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: (err as Error).message }));
+        }
+      });
     },
 
     resolveId(id) {

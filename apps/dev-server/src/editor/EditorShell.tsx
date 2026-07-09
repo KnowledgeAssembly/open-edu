@@ -1,0 +1,600 @@
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import * as api from './api';
+import type { FileEntry, EditorFile, EditorMode, ViewMode } from './types';
+import { FileTree } from './FileTree';
+import { ManifestEditor } from './ManifestEditor';
+import { MarkdownEditor } from './MarkdownEditor';
+import { JSONNodeEditor } from './JSONNodeEditor';
+import { WorkflowEditor } from './WorkflowEditor';
+import { RewardsEditor } from './RewardsEditor';
+import { CardsEditor } from './CardsEditor';
+import { AssetManager } from './AssetManager';
+import { RawJsonEditor } from './RawJsonEditor';
+
+interface EditorShellProps {
+  isOpen: boolean;
+  onToggle: () => void;
+  mode: EditorMode;
+  onModeChange: (mode: EditorMode) => void;
+}
+
+interface ToastMessage {
+  text: string;
+  type: 'success' | 'error' | 'info';
+}
+
+export function EditorShell({ mode, onModeChange }: EditorShellProps) {
+  const [files, setFiles] = useState<FileEntry[]>([]);
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [openFiles, setOpenFiles] = useState<Map<string, EditorFile>>(new Map());
+  const [viewMode, setViewMode] = useState<ViewMode>('form');
+  const [_packageDir, setPackageDir] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const currentFile = selectedPath ? (openFiles.get(selectedPath) ?? null) : null;
+
+  const showToast = useCallback((text: string, type: ToastMessage['type'] = 'info') => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ text, type });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  }, []);
+
+  // Load files on mount
+  useEffect(() => {
+    async function load() {
+      try {
+        const [fileList, dir] = await Promise.all([api.listFiles(), api.getPackageDir()]);
+        setFiles(fileList);
+        setPackageDir(dir);
+
+        if (fileList.length > 0) {
+          const first = fileList[0];
+          if (first) {
+            setSelectedPath(first.path);
+          }
+        }
+      } catch (err) {
+        showToast('Failed to load files: ' + (err as Error).message, 'error');
+      }
+    }
+    load();
+  }, [showToast]);
+
+  // Load file content when selected
+  useEffect(() => {
+    if (!selectedPath) return;
+    if (openFiles.has(selectedPath)) return;
+
+    async function loadContent() {
+      try {
+        const fileContent = await api.readFile(selectedPath!);
+        setOpenFiles((prev) => {
+          const next = new Map(prev);
+          next.set(selectedPath!, {
+            path: selectedPath!,
+            content: fileContent.content,
+            originalContent: fileContent.content,
+            isDirty: false,
+            validationError: null,
+          });
+          return next;
+        });
+      } catch (err) {
+        showToast('Failed to read file: ' + (err as Error).message, 'error');
+      }
+    }
+    loadContent();
+  }, [selectedPath, openFiles, showToast]);
+
+  const handleFileSelect = useCallback((path: string) => {
+    setSelectedPath(path);
+    setViewMode('form');
+  }, []);
+
+  const handleFileDelete = useCallback(
+    async (path: string) => {
+      try {
+        await api.deleteFile(path);
+        setFiles((prev) => prev.filter((f) => f.path !== path));
+        setOpenFiles((prev) => {
+          const next = new Map(prev);
+          next.delete(path);
+          return next;
+        });
+        if (selectedPath === path) {
+          setSelectedPath(null);
+        }
+        showToast(`Deleted ${path}`, 'success');
+      } catch (err) {
+        showToast('Failed to delete: ' + (err as Error).message, 'error');
+      }
+    },
+    [selectedPath, showToast],
+  );
+
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (!selectedPath) return;
+      setOpenFiles((prev) => {
+        const existing = prev.get(selectedPath);
+        if (!existing) return prev;
+        const next = new Map(prev);
+        next.set(selectedPath, {
+          ...existing,
+          content,
+          isDirty: content !== existing.originalContent,
+          validationError: null,
+        });
+        return next;
+      });
+    },
+    [selectedPath],
+  );
+
+  const handleSave = useCallback(async () => {
+    if (!selectedPath || !currentFile) return;
+    if (!currentFile.isDirty) {
+      showToast('No changes to save', 'info');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.writeFile(selectedPath, currentFile.content, true);
+      setOpenFiles((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(selectedPath);
+        if (existing) {
+          next.set(selectedPath, {
+            ...existing,
+            originalContent: existing.content,
+            isDirty: false,
+            validationError: null,
+          });
+        }
+        return next;
+      });
+      showToast('Saved successfully! Preview will reload.', 'success');
+    } catch (err) {
+      const message = (err as Error).message;
+      showToast(`Save failed: ${message}`, 'error');
+      if (message.includes('Validation failed')) {
+        setOpenFiles((prev) => {
+          const next = new Map(prev);
+          const existing = next.get(selectedPath);
+          if (existing) {
+            next.set(selectedPath, {
+              ...existing,
+              validationError: message,
+            });
+          }
+          return next;
+        });
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [selectedPath, currentFile, showToast]);
+
+  const handleStructuredDataChange = useCallback(
+    (data: Record<string, unknown>) => {
+      if (!selectedPath) return;
+      const content = JSON.stringify(data, null, 2);
+      handleContentChange(content);
+    },
+    [selectedPath, handleContentChange],
+  );
+
+  const handleRefreshAssets = useCallback(() => {
+    api
+      .listFiles()
+      .then(setFiles)
+      .catch(() => {});
+  }, []);
+
+  // Refresh files periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      api
+        .listFiles()
+        .then(setFiles)
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const dirtyCount = useMemo(() => {
+    let count = 0;
+    for (const file of openFiles.values()) {
+      if (file.isDirty) count++;
+    }
+    return count;
+  }, [openFiles]);
+
+  const currentExtension = currentFile?.path ? '.' + (currentFile.path.split('.').pop() ?? '') : '';
+  const isJsonFile = currentExtension === '.json';
+
+  const fileEditorContent = useMemo(() => {
+    if (!currentFile) return null;
+
+    if (currentFile.path === 'package.json') {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <ManifestEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    if (currentFile.path === 'workflow.json') {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <WorkflowEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    if (currentFile.path === 'rewards.json') {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <RewardsEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    if (currentFile.path === 'cards.json') {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <CardsEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    if (currentFile.path.startsWith('nodes/') && isJsonFile) {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <JSONNodeEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+            fileName={currentFile.path}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    if (currentExtension === '.md') {
+      return (
+        <MarkdownEditor
+          content={currentFile.content}
+          onChange={handleContentChange}
+          fileName={currentFile.path}
+        />
+      );
+    }
+
+    if (currentExtension === '.json') {
+      if (viewMode === 'raw') {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+      try {
+        const parsed = JSON.parse(currentFile.content);
+        return (
+          <JSONNodeEditor
+            data={parsed}
+            onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
+            fileName={currentFile.path}
+          />
+        );
+      } catch {
+        return (
+          <RawJsonEditor
+            content={currentFile.content}
+            onChange={handleContentChange}
+            fileName={currentFile.path}
+          />
+        );
+      }
+    }
+
+    return (
+      <div className="flex h-full flex-col">
+        <div className="mb-2">
+          <span className="text-xs font-medium text-gray-500">{currentFile.path}</span>
+        </div>
+        <textarea
+          className="flex-1 resize-none rounded border border-gray-300 p-3 font-mono text-sm focus:outline-none"
+          value={currentFile.content}
+          onChange={(e) => handleContentChange(e.target.value)}
+          spellCheck={false}
+          aria-label="File editor"
+        />
+      </div>
+    );
+  }, [
+    currentFile,
+    viewMode,
+    handleContentChange,
+    handleStructuredDataChange,
+    isJsonFile,
+    currentExtension,
+  ]);
+
+  const assetFiles = useMemo(
+    () => files.filter((f) => f.category === 'assets').map((f) => f.path),
+    [files],
+  );
+
+  const showAssetManager = mode === 'edit' && selectedPath?.startsWith('assets/');
+
+  return (
+    <div className="flex h-full flex-col bg-white" role="region" aria-label="Package editor">
+      <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+            EDITOR
+          </span>
+          {mode === 'edit' && (
+            <>
+              <span className="text-xs text-gray-500">Edit Mode</span>
+              {dirtyCount > 0 && (
+                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                  {dirtyCount} unsaved
+                </span>
+              )}
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {mode === 'edit' && isJsonFile && (
+            <button
+              type="button"
+              className={`rounded px-2 py-1 text-xs font-medium ${
+                viewMode === 'raw'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+              onClick={() => setViewMode(viewMode === 'raw' ? 'form' : 'raw')}
+            >
+              {viewMode === 'raw' ? 'Form View' : 'Raw JSON'}
+            </button>
+          )}
+          <button
+            type="button"
+            className={`rounded px-3 py-1 text-xs font-medium ${
+              mode === 'edit'
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+            }`}
+            onClick={() => onModeChange(mode === 'preview' ? 'edit' : 'preview')}
+          >
+            {mode === 'edit' ? 'Done Editing' : 'Edit Package'}
+          </button>
+        </div>
+      </div>
+
+      {mode === 'edit' ? (
+        <div className="flex flex-1 overflow-hidden">
+          <div className="w-56 shrink-0 overflow-hidden border-r border-gray-200">
+            <FileTree
+              files={files}
+              selectedPath={selectedPath}
+              onSelect={handleFileSelect}
+              onDelete={handleFileDelete}
+            />
+          </div>
+
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {selectedPath && (
+              <div className="flex items-center border-b border-gray-200 bg-white px-2">
+                <div className="flex items-center gap-1 border-r border-gray-200 pr-2">
+                  <span className="text-xs text-gray-500">{currentFile?.isDirty ? '●' : '○'}</span>
+                  <span className="max-w-[200px] truncate text-xs font-medium text-gray-700">
+                    {selectedPath}
+                  </span>
+                </div>
+                <div className="flex-1" />
+                <button
+                  type="button"
+                  className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 disabled:text-gray-400 disabled:hover:bg-transparent"
+                  onClick={handleSave}
+                  disabled={!currentFile?.isDirty || saving}
+                >
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-auto p-3">
+              {showAssetManager ? (
+                <AssetManager assets={assetFiles} onRefresh={handleRefreshAssets} />
+              ) : currentFile ? (
+                <div>
+                  {currentFile.validationError && (
+                    <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                      <p className="text-xs font-medium text-red-700">Validation Error:</p>
+                      <p className="mt-0.5 text-xs text-red-600">{currentFile.validationError}</p>
+                    </div>
+                  )}
+                  {fileEditorContent}
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <div className="text-center">
+                    <svg
+                      className="mx-auto mb-2 h-10 w-10 text-gray-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                      />
+                    </svg>
+                    <p className="text-sm text-gray-400">Select a file from the sidebar to edit</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-1 items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <svg
+              className="mx-auto mb-3 h-12 w-12 text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            <p className="text-sm font-medium text-gray-500">Package Preview Below</p>
+            <p className="mt-1 text-xs text-gray-400">
+              Click "Edit Package" to start editing files
+            </p>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          className={`fixed bottom-20 right-4 z-50 max-w-sm rounded-lg px-4 py-3 text-sm shadow-lg ${
+            toast.type === 'success'
+              ? 'bg-green-600 text-white'
+              : toast.type === 'error'
+                ? 'bg-red-600 text-white'
+                : 'bg-gray-800 text-white'
+          }`}
+        >
+          {toast.text}
+        </div>
+      )}
+    </div>
+  );
+}
