@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, createReadStream } from 'node:fs';
 import { join, extname, resolve, dirname } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
@@ -84,7 +84,9 @@ function eduDataPlugin(): Plugin {
             const ext = extname(filePath).toLowerCase();
             res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
             res.setHeader('Cache-Control', 'no-cache');
-            res.end(readFileSync(filePath));
+            res.setHeader('Content-Length', stat.size);
+            const stream = createReadStream(filePath);
+            stream.pipe(res);
             return;
           }
         } catch {
