@@ -84,9 +84,8 @@ function eduDataPlugin(): Plugin {
             const ext = extname(filePath).toLowerCase();
             res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
             res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Content-Length', stat.size);
-            const stream = createReadStream(filePath);
-            stream.pipe(res);
+            const data = readFileSync(filePath);
+            res.end(data);
             return;
           }
         } catch {
