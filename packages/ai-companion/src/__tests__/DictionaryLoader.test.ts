@@ -25,7 +25,7 @@ describe('DictionaryLoader', () => {
     expect(first).toBe(second);
   });
 
-  it('loadPackage requires valid base path', async () => {
+  it('loadPackage falls back on missing path', async () => {
     const loader = DictionaryLoader.getInstance();
     const packageInfo: PackageInfo = {
       basePath: '/nonexistent/path/v1.0.0',

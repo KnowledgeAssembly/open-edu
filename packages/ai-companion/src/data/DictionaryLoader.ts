@@ -62,6 +62,12 @@ function applyDefaultsToEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
   return entries.map(applyDefaults);
 }
 
+async function fetchJSON<T>(path: string): Promise<T> {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Failed to fetch ${path}: ${response.status}`);
+  return (await response.json()) as T;
+}
+
 export class DictionaryLoader {
   private static instance: DictionaryLoader;
   private entries: DictionaryEntry[] | null = null;
@@ -85,13 +91,6 @@ export class DictionaryLoader {
     return this.entries;
   }
 
-  /**
-   * Load a dictionary package from an external base path.
-   *
-   * NOTE: This uses dynamic import() with computed paths, which works in Vite dev
-   * mode but will fail in production bundles. For production, replace with
-   * fetch() + JSON.parse() once the dictionary assets are served as static files.
-   */
   async loadPackage(packageInfo: PackageInfo): Promise<LoadedPackage> {
     const manifestPath = `${packageInfo.basePath}/manifest.json`;
     const metadataPath = `${packageInfo.basePath}/metadata.json`;
@@ -100,8 +99,7 @@ export class DictionaryLoader {
     let metadata: PackageMetadata;
 
     try {
-      const manifestData = await import(/* @vite-ignore */ manifestPath);
-      manifest = manifestData.default as PackageManifest;
+      manifest = await fetchJSON<PackageManifest>(manifestPath);
     } catch {
       manifest = {
         package: `dictionary-${packageInfo.language}`,
@@ -115,8 +113,7 @@ export class DictionaryLoader {
     }
 
     try {
-      const metadataData = await import(/* @vite-ignore */ metadataPath);
-      metadata = metadataData.default as PackageMetadata;
+      metadata = await fetchJSON<PackageMetadata>(metadataPath);
     } catch {
       metadata = {
         version: packageInfo.version,
@@ -139,8 +136,7 @@ export class DictionaryLoader {
     let rawEntries: DictionaryEntry[];
 
     try {
-      const dictData = await import(/* @vite-ignore */ dictionaryPath);
-      rawEntries = dictData.default as DictionaryEntry[];
+      rawEntries = await fetchJSON<DictionaryEntry[]>(dictionaryPath);
     } catch {
       rawEntries = [];
     }
