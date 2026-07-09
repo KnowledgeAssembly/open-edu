@@ -13,6 +13,7 @@ const CATALOG_DIR = process.env.EDU_CATALOG_DIR
   ? resolve(process.env.EDU_CATALOG_DIR)
   : resolve(__dirname, '../../examples');
 const PKGS_DIR = resolve(__dirname, '../../packages');
+const EXTERNAL_DICT_DIR = resolve(PKGS_DIR, 'ai-companion/src/data/external');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
 
@@ -65,6 +66,32 @@ function eduDataPlugin(): Plugin {
     },
     configureServer(server) {
       server.middlewares.use(llmProxyHandler);
+
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const requestPath = decodeURIComponent(req.url ?? '');
+        if (!requestPath.startsWith('/dictionary/')) return next();
+
+        const relativePath = requestPath.slice('/dictionary/'.length);
+        const filePath = join(EXTERNAL_DICT_DIR, relativePath);
+        if (!filePath.startsWith(EXTERNAL_DICT_DIR)) {
+          res.statusCode = 403;
+          res.end('Forbidden');
+          return;
+        }
+        try {
+          const stat = statSync(filePath);
+          if (stat.isFile()) {
+            const ext = extname(filePath).toLowerCase();
+            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.end(readFileSync(filePath));
+            return;
+          }
+        } catch {
+          // file not found, fall through
+        }
+        next();
+      });
 
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
@@ -168,7 +195,10 @@ export default defineConfig(({ mode }) => {
         { find: /^child_process$/, replacement: resolve(__dirname, 'src/stubs/child_process.ts') },
         { find: /^util$/, replacement: resolve(__dirname, 'src/stubs/util.ts') },
         { find: '@', replacement: resolve(__dirname, './src') },
-        { find: /^@open-edu\/telemetry$/, replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts') },
+        {
+          find: /^@open-edu\/telemetry$/,
+          replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts'),
+        },
         { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
       ],
     },

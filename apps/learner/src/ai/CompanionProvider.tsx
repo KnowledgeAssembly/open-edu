@@ -22,6 +22,7 @@ import {
   SearchManager,
   ContextManager,
 } from '@open-edu/ai-companion';
+import type { PackageInfo } from '@open-edu/ai-companion';
 import { AIProviderImpl } from './AIProviderImpl';
 
 export type PanelState = 'closed' | 'floating' | 'expanded' | 'pinned';
@@ -61,7 +62,12 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
 
   useEffect(() => {
     const cacheService = new CacheService();
-    const dictionaryService = DictionaryService.createDefault();
+    const packageInfo: PackageInfo = {
+      basePath: '/dictionary/en/v1.0.0',
+      language: 'en',
+      version: '1.0.0',
+    };
+    const dictionaryService = DictionaryService.createDefault(packageInfo);
     const conversationManager = new ConversationManager();
     const searchManager = new SearchManager(dictionaryService, cacheService);
     const aiProvider = new AIProviderImpl();

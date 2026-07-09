@@ -1,5 +1,6 @@
 import type { DictionaryEntry } from '../providers/types.js';
 import type { SearchBuilder } from '../search/types.js';
+import type { PackageInfo } from '../data/DictionaryLoader.js';
 import { ExactIndex } from '../search/ExactIndex.js';
 import { FlexSearchIndex } from '../search/FlexSearchIndex.js';
 import { DictionaryLoader } from '../data/DictionaryLoader.js';
@@ -34,22 +35,29 @@ function editDistance(a: string, b: string): number {
 
 export class DictionaryService {
   private loaded = false;
+  private packageInfo?: PackageInfo;
 
   constructor(
     private searchBuilders: SearchBuilder[],
     private loader: DictionaryLoader,
   ) {}
 
-  static createDefault(): DictionaryService {
-    return new DictionaryService(
+  static createDefault(packageInfo?: PackageInfo): DictionaryService {
+    const service = new DictionaryService(
       [new ExactIndex(), new FlexSearchIndex()],
       DictionaryLoader.getInstance(),
     );
+    if (packageInfo) {
+      service.packageInfo = packageInfo;
+    }
+    return service;
   }
 
   async initialize(): Promise<void> {
     if (this.loaded) return;
-    const entries = await this.loader.load();
+    const entries = this.packageInfo
+      ? (await this.loader.loadPackage(this.packageInfo)).entries
+      : await this.loader.load();
     for (const builder of this.searchBuilders) {
       builder.build(entries);
     }

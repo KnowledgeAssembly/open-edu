@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { DictionaryService } from '../services/DictionaryService.js';
 import { DictionaryLoader } from '../data/DictionaryLoader.js';
 import type { SearchBuilder } from '../search/types.js';
@@ -81,11 +81,27 @@ describe('DictionaryService', () => {
 });
 
 describe('DictionaryService DI behavior', () => {
+  beforeEach(() => {
+    DictionaryLoader.reset();
+  });
+
   it('createDefault produces working service', async () => {
     const svc = DictionaryService.createDefault();
     await svc.initialize();
     expect(svc.isLoaded()).toBe(true);
     expect(svc.lookupExact('gravity')).not.toBeNull();
+  });
+
+  it('createDefault with PackageInfo uses loadPackage', async () => {
+    const svc = DictionaryService.createDefault({
+      basePath: '/nonexistent/path',
+      language: 'en',
+      version: '1.0.0',
+    });
+    await svc.initialize();
+    expect(svc.isLoaded()).toBe(true);
+    // Should fall back to empty entries since path doesn't exist
+    expect(svc.lookupExact('gravity')).toBeNull();
   });
 
   it('accepts custom SearchBuilder array', async () => {
