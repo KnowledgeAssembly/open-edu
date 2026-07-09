@@ -178,7 +178,10 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 4001,
       fs: {
-        allow: [resolve(PKGS_DIR, 'ai-companion/src/data/external')],
+        allow: [
+          __dirname,
+          resolve(PKGS_DIR, 'ai-companion/src/data/external'),
+        ],
       },
     },
   };
