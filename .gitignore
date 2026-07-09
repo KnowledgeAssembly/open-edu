@@ -15,3 +15,5 @@ test-results/
 *.tsbuildinfo
 apps/docs/build/
 apps/docs/.docusaurus/
+packages/ai-companion/src/data/external/
+apps/learner/public/dictionary

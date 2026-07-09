@@ -1,11 +1,13 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { DictionaryService } from '../services/DictionaryService.js';
+import { DictionaryLoader } from '../data/DictionaryLoader.js';
+import type { SearchBuilder } from '../search/types.js';
 
 describe('DictionaryService', () => {
   let service: DictionaryService;
 
   beforeAll(async () => {
-    service = new DictionaryService();
+    service = DictionaryService.createDefault();
     await service.initialize();
   });
 
@@ -75,5 +77,105 @@ describe('DictionaryService', () => {
     const result = service.lookupExact('gravityed');
     expect(result).not.toBeNull();
     expect(result!.word).toBe('gravity');
+  });
+});
+
+describe('DictionaryService DI behavior', () => {
+  beforeEach(() => {
+    DictionaryLoader.reset();
+  });
+
+  it('createDefault produces working service', async () => {
+    const svc = DictionaryService.createDefault();
+    await svc.initialize();
+    expect(svc.isLoaded()).toBe(true);
+    expect(svc.lookupExact('gravity')).not.toBeNull();
+  });
+
+  it('createDefault with PackageInfo loads bundled dict for sync lookups', async () => {
+    const svc = DictionaryService.createDefault({
+      basePath: '/nonexistent/path',
+      language: 'en',
+      version: '1.0.0',
+    });
+    await svc.initialize();
+    expect(svc.isLoaded()).toBe(true);
+    // Bundled dictionary (104 entries) is always loaded for sync lookups
+    expect(svc.lookupExact('gravity')).not.toBeNull();
+    // Remote search falls back gracefully when no server API is available
+    const remote = await svc.searchRemote('gravity');
+    expect(remote).toEqual([]);
+  });
+
+  it('accepts custom SearchBuilder array', async () => {
+    const mockBuilder: SearchBuilder = {
+      type: 'exact',
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (word: string) => {
+        if (word === 'mockword')
+          return {
+            id: 'mockword',
+            word: 'mockword',
+            language: 'en',
+            definitions: [{ definition: 'mock' }],
+          };
+        return null;
+      },
+    };
+    const svc = new DictionaryService([mockBuilder], DictionaryLoader.getInstance());
+    await svc.initialize();
+    expect(svc.lookupExact('mockword')).not.toBeNull();
+    expect(svc.lookupExact('mockword')!.word).toBe('mockword');
+    expect(svc.lookupExact('something')).toBeNull();
+  });
+
+  it('handles empty SearchBuilder array', async () => {
+    const svc = new DictionaryService([], DictionaryLoader.getInstance());
+    await svc.initialize();
+    expect(svc.lookupExact('gravity')).toBeNull();
+    expect(svc.searchFTS('test')).toEqual([]);
+    expect(svc.getSuggestions('test')).toEqual([]);
+  });
+
+  it('lookupExact checks builders in order', async () => {
+    const callOrder: string[] = [];
+    const first: SearchBuilder = {
+      type: 'exact',
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (_word: string) => {
+        callOrder.push('first');
+        return null;
+      },
+    };
+    const second: SearchBuilder = {
+      type: 'fts',
+      build: () => {},
+      load: () => {},
+      search: () => [],
+      autocomplete: () => [],
+      lookup: (word: string) => {
+        callOrder.push('second');
+        if (word === 'found')
+          return {
+            id: 'found',
+            word: 'found',
+            language: 'en',
+            definitions: [{ definition: 'found' }],
+          };
+        return null;
+      },
+    };
+    const svc = new DictionaryService([first, second], DictionaryLoader.getInstance());
+    await svc.initialize();
+    const result = svc.lookupExact('found');
+    expect(result).not.toBeNull();
+    expect(result!.word).toBe('found');
+    expect(callOrder).toEqual(['first', 'second']);
   });
 });

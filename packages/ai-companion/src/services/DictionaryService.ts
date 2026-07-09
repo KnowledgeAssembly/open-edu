@@ -1,4 +1,6 @@
 import type { DictionaryEntry } from '../providers/types.js';
+import type { SearchBuilder } from '../search/types.js';
+import type { PackageInfo } from '../data/DictionaryLoader.js';
 import { ExactIndex } from '../search/ExactIndex.js';
 import { FlexSearchIndex } from '../search/FlexSearchIndex.js';
 import { DictionaryLoader } from '../data/DictionaryLoader.js';
@@ -32,29 +34,46 @@ function editDistance(a: string, b: string): number {
 }
 
 export class DictionaryService {
-  private exactIndex = new ExactIndex();
-  private ftsIndex = new FlexSearchIndex();
   private loaded = false;
+  private packageInfo?: PackageInfo;
+
+  constructor(
+    private searchBuilders: SearchBuilder[],
+    private loader: DictionaryLoader,
+  ) {}
+
+  static createDefault(packageInfo?: PackageInfo): DictionaryService {
+    const service = new DictionaryService(
+      [new ExactIndex(), new FlexSearchIndex()],
+      DictionaryLoader.getInstance(),
+    );
+    if (packageInfo) {
+      service.packageInfo = packageInfo;
+    }
+    return service;
+  }
 
   async initialize(): Promise<void> {
     if (this.loaded) return;
-    const loader = DictionaryLoader.getInstance();
-    const entries = await loader.load();
-    for (const entry of entries) {
-      this.exactIndex.insert(entry.word, entry);
-      this.ftsIndex.add(entry);
+    const entries = await this.loader.load();
+    for (const builder of this.searchBuilders) {
+      builder.build(entries);
     }
     this.loaded = true;
   }
 
   lookupExact(word: string): DictionaryEntry | null {
-    const direct = this.exactIndex.get(word);
-    if (direct) return direct;
+    for (const builder of this.searchBuilders) {
+      const result = builder.lookup(word);
+      if (result) return result;
+    }
 
     const stripped = stripSuffix(word, PLURAL_SUFFIXES) ?? stripSuffix(word, VERB_SUFFIXES);
     if (stripped) {
-      const resolved = this.exactIndex.get(stripped);
-      if (resolved) return resolved;
+      for (const builder of this.searchBuilders) {
+        const result = builder.lookup(stripped);
+        if (result) return result;
+      }
     }
 
     const fuzzyResult = this.fuzzyMatch(word);
@@ -65,27 +84,30 @@ export class DictionaryService {
 
   private fuzzyMatch(word: string): DictionaryEntry | null {
     const lower = word.toLowerCase();
+    const primary = this.searchBuilders[0];
+    if (!primary) return null;
+
     for (let len = lower.length; len >= 1; len--) {
       const prefix = lower.slice(0, len);
-      const suggestions = this.exactIndex.getSuggestions(prefix, 10);
+      const suggestions = primary.autocomplete(prefix, 10);
       if (suggestions.length === 0) continue;
 
       for (const candidate of suggestions) {
         if (editDistance(lower, candidate.toLowerCase()) <= 2) {
-          return this.exactIndex.get(candidate);
+          return primary.lookup(candidate);
         }
       }
     }
 
     const firstChar = lower[0];
     if (!firstChar) return null;
-    const allSuggestions = this.exactIndex.getSuggestions(firstChar, 50);
+    const allSuggestions = primary.autocomplete(firstChar, 50);
     for (const candidate of allSuggestions) {
       if (
         Math.abs(candidate.length - lower.length) <= 2 &&
         editDistance(lower, candidate.toLowerCase()) <= 2
       ) {
-        return this.exactIndex.get(candidate);
+        return primary.lookup(candidate);
       }
     }
 
@@ -93,11 +115,28 @@ export class DictionaryService {
   }
 
   searchFTS(query: string, limit = 10): DictionaryEntry[] {
-    return this.ftsIndex.search(query, limit);
+    const fts = this.searchBuilders.find((b) => b.type === 'fts');
+    if (fts) return fts.search(query, limit);
+    return this.searchBuilders[0]?.search(query, limit) ?? [];
+  }
+
+  async searchRemote(query: string, limit = 10): Promise<DictionaryEntry[]> {
+    if (!this.packageInfo) return [];
+    try {
+      const res = await fetch(
+        `/api/dictionary/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+      );
+      if (!res.ok) return [];
+      return (await res.json()) as DictionaryEntry[];
+    } catch {
+      return [];
+    }
   }
 
   getSuggestions(prefix: string, limit = 10): string[] {
-    return this.exactIndex.getSuggestions(prefix, limit);
+    const exact = this.searchBuilders.find((b) => b.type === 'exact');
+    if (exact) return exact.autocomplete(prefix, limit);
+    return this.searchBuilders[0]?.autocomplete(prefix, limit) ?? [];
   }
 
   isLoaded(): boolean {

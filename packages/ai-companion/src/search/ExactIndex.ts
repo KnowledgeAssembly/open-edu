@@ -1,4 +1,5 @@
 import type { DictionaryEntry } from '../providers/types.js';
+import type { SearchBuilder } from './types.js';
 
 class TrieNode {
   children: Map<string, TrieNode> = new Map();
@@ -6,7 +7,8 @@ class TrieNode {
   entry: DictionaryEntry | null = null;
 }
 
-export class ExactIndex {
+export class ExactIndex implements SearchBuilder {
+  readonly type = 'exact' as const;
   private root = new TrieNode();
   private wordCount = 0;
 
@@ -59,6 +61,46 @@ export class ExactIndex {
 
   get size(): number {
     return this.wordCount;
+  }
+
+  build(entries: DictionaryEntry[]): void {
+    for (const entry of entries) {
+      this.insert(entry.word, entry);
+    }
+  }
+
+  load(data: unknown): void {
+    if (!data || typeof data !== 'object') return;
+    const serialized = data as {
+      wordCount: number;
+      nodes: Array<{ word: string; entry: DictionaryEntry }>;
+    };
+    if (serialized.wordCount && Array.isArray(serialized.nodes)) {
+      for (const node of serialized.nodes) {
+        this.insert(node.word, node.entry);
+      }
+    }
+  }
+
+  search(query: string, limit = 10): DictionaryEntry[] {
+    const suggestions = this.getSuggestions(query, limit);
+    const results: DictionaryEntry[] = [];
+    for (const word of suggestions) {
+      const entry = this.get(word);
+      if (entry) {
+        results.push(entry);
+        if (results.length >= limit) break;
+      }
+    }
+    return results;
+  }
+
+  autocomplete(prefix: string, limit = 10): string[] {
+    return this.getSuggestions(prefix, limit);
+  }
+
+  lookup(word: string): DictionaryEntry | null {
+    return this.get(word);
   }
 
   clear(): void {

@@ -1,5 +1,7 @@
 export interface DictionaryEntry {
+  id: string;
   word: string;
+  language: string;
   phonetic?: string;
   pronunciations?: { text: string; audioUrl?: string }[];
   partOfSpeech?: string;

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { llmProxyHandler } from './src/llm-proxy/index.js';
+import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
@@ -29,6 +30,8 @@ const ASSET_MIME_TYPES: Record<string, string> = {
   '.webm': 'video/webm',
   '.pdf': 'application/pdf',
   '.json': 'application/json',
+  '.json.gz': 'application/gzip',
+  '.gz': 'application/gzip',
   '.txt': 'text/plain',
 };
 
@@ -65,6 +68,36 @@ function eduDataPlugin(): Plugin {
     },
     configureServer(server) {
       server.middlewares.use(llmProxyHandler);
+
+      // Load dictionary on server startup
+      const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
+      loadDictionary(dictionaryDir);
+
+      // Dictionary API endpoints (server-side search: never sends full dict to browser)
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        if (handleDictionaryRequest(req, res)) return;
+        next();
+      });
+
+      // Serve external dictionary static files at /dictionary/
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const url = decodeURIComponent(req.url ?? '');
+        if (!url.startsWith('/dictionary/')) return next();
+        const filePath = join(dictionaryDir, url.slice('/dictionary/'.length));
+        if (!filePath.startsWith(dictionaryDir)) return next();
+        try {
+          if (statSync(filePath).isFile()) {
+            const ext = extname(filePath);
+            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.end(readFileSync(filePath));
+            return;
+          }
+        } catch {
+          // file not found
+        }
+        next();
+      });
 
       const assetDirs = findAssetsDirs(CATALOG_DIR);
       if (assetDirs.length === 0) return;
@@ -168,10 +201,15 @@ export default defineConfig(({ mode }) => {
         { find: /^child_process$/, replacement: resolve(__dirname, 'src/stubs/child_process.ts') },
         { find: /^util$/, replacement: resolve(__dirname, 'src/stubs/util.ts') },
         { find: '@', replacement: resolve(__dirname, './src') },
-        { find: /^@open-edu\/telemetry$/, replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts') },
+        {
+          find: /^@open-edu\/telemetry$/,
+          replacement: resolve(PKGS_DIR, 'telemetry/src/index.ts'),
+        },
         { find: /^@open-edu\/rewards$/, replacement: resolve(PKGS_DIR, 'rewards/src/index.ts') },
       ],
     },
-    server: { port: 4001 },
+    server: {
+      port: 4001,
+    },
   };
 });

@@ -1,10 +1,13 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { FlexSearchIndex } from '../search/FlexSearchIndex.js';
 import type { DictionaryEntry } from '../providers/types.js';
+import type { SearchBuilder } from '../search/types.js';
 
 function makeEntry(word: string, definition: string): DictionaryEntry {
   return {
+    id: word,
     word,
+    language: 'en',
     definitions: [{ definition }],
   };
 }
@@ -80,3 +83,48 @@ describe('FlexSearchIndex', () => {
     expect(testIndex.isReady()).toBe(true);
   });
 });
+
+function searchBuilderConformanceTest(builder: SearchBuilder, label: string): void {
+  describe(`SearchBuilder conformance (${label})`, () => {
+    const entries = [
+      makeEntry('testword', 'a test word for search'),
+      makeEntry('another', 'another word entirely'),
+    ];
+
+    beforeAll(() => {
+      builder.build(entries);
+    });
+
+    it('search returns matching entries', () => {
+      const result = builder.search('testword');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('autocomplete returns suggestions', () => {
+      const suggestions = builder.autocomplete('test');
+      expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('lookup exact word', () => {
+      const result = builder.lookup('another');
+      expect(result).not.toBeNull();
+      expect(result!.word).toBe('another');
+    });
+
+    it('lookup returns null for missing word', () => {
+      expect(builder.lookup('nonexistent')).toBeNull();
+    });
+
+    it('load restores index from serialized data', () => {
+      const newBuilder = new FlexSearchIndex();
+      newBuilder.load({
+        entries: [{ word: 'loaded', entry: makeEntry('loaded', 'loaded from data') }],
+      });
+      const results = newBuilder.search('loaded');
+      expect(results.length).toBeGreaterThan(0);
+    });
+  });
+}
+
+const builderForFlex = new FlexSearchIndex();
+searchBuilderConformanceTest(builderForFlex, 'FlexSearchIndex');
