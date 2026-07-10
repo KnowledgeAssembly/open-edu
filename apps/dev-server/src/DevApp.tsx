@@ -284,6 +284,7 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
               </div>
               <div style={{ position: 'fixed', bottom: '1rem', right: '24rem', zIndex: 50 }}>
                 <button
+                  tabIndex={-1}
                   onClick={handleReset}
                   style={{
                     padding: '0.375rem 0.75rem',
@@ -471,6 +472,7 @@ function SinglePackageDevApp(): JSX.Element {
                 }}
               >
                 <button
+                  tabIndex={-1}
                   onClick={handleEditorToggle}
                   style={{
                     padding: '0.375rem 0.75rem',
