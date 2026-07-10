@@ -16,6 +16,8 @@ import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
+import { EditorShell } from './editor/EditorShell';
+import type { EditorMode } from './editor/types';
 
 import {
   packageData as rawPackageData,
@@ -54,6 +56,8 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
   const [rewardReceipts] = useState<RewardReceipt[]>([]);
   const [showOverview, setShowOverview] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
+  const [editorMode, setEditorMode] = useState<EditorMode>('preview');
+  const [editorOpen, setEditorOpen] = useState(false);
 
   const currentPkg = useMemo(() => {
     return selectedModuleId ? (bundle.moduleMap.get(selectedModuleId) ?? null) : null;
@@ -133,6 +137,27 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
       setProgressKey((k) => k + 1);
     }
   }, [currentPkg]);
+
+  const handleEditorToggle = useCallback(() => {
+    setEditorOpen((prev) => !prev);
+    setEditorMode((prev) => (prev === 'preview' ? 'edit' : 'preview'));
+  }, []);
+
+  if (editorMode === 'edit') {
+    return (
+      <RuntimeThemeProvider>
+        <EditorShell
+          isOpen={editorOpen}
+          onToggle={handleEditorToggle}
+          mode={editorMode}
+          onModeChange={(mode) => {
+            setEditorMode(mode);
+            setEditorOpen(mode === 'edit');
+          }}
+        />
+      </RuntimeThemeProvider>
+    );
+  }
 
   if (showOverview) {
     return (
@@ -240,9 +265,26 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
                 >
                   Bundle Overview
                 </button>
+                <button
+                  type="button"
+                  onClick={handleEditorToggle}
+                  style={{
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    background: '#10b981',
+                    border: '1px solid #059669',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    color: '#fff',
+                    fontWeight: 600,
+                  }}
+                >
+                  Edit Package
+                </button>
               </div>
               <div style={{ position: 'fixed', bottom: '1rem', right: '24rem', zIndex: 50 }}>
                 <button
+                  tabIndex={-1}
                   onClick={handleReset}
                   style={{
                     padding: '0.375rem 0.75rem',
@@ -277,6 +319,8 @@ function SinglePackageDevApp(): JSX.Element {
   const brokerRef = useRef<RewardBroker | null>(null);
   const [rewardReceipts, setRewardReceipts] = useState<RewardReceipt[]>([]);
   const [progressKey, setProgressKey] = useState(0);
+  const [editorMode, setEditorMode] = useState<EditorMode>('preview');
+  const [editorOpen, setEditorOpen] = useState(false);
 
   const initialProgress = useMemo(() => {
     if (!loadedPkg) return undefined;
@@ -365,6 +409,28 @@ function SinglePackageDevApp(): JSX.Element {
     }
   }, []);
 
+  const handleEditorToggle = useCallback(() => {
+    setEditorOpen((prev) => !prev);
+    setEditorMode((prev) => (prev === 'preview' ? 'edit' : 'preview'));
+  }, []);
+
+  // Show editor when in edit mode
+  if (editorMode === 'edit') {
+    return (
+      <RuntimeThemeProvider>
+        <EditorShell
+          isOpen={editorOpen}
+          onToggle={handleEditorToggle}
+          mode={editorMode}
+          onModeChange={(mode) => {
+            setEditorMode(mode);
+            setEditorOpen(mode === 'edit');
+          }}
+        />
+      </RuntimeThemeProvider>
+    );
+  }
+
   if (!loadedPkg) {
     return (
       <DevAppFallback
@@ -401,8 +467,26 @@ function SinglePackageDevApp(): JSX.Element {
                   bottom: '1rem',
                   right: '24rem',
                   zIndex: 50,
+                  display: 'flex',
+                  gap: '0.5rem',
                 }}
               >
+                <button
+                  tabIndex={-1}
+                  onClick={handleEditorToggle}
+                  style={{
+                    padding: '0.375rem 0.75rem',
+                    fontSize: '0.75rem',
+                    backgroundColor: '#10b981',
+                    border: '1px solid #059669',
+                    borderRadius: '0.25rem',
+                    color: '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Edit Package
+                </button>
                 <button
                   onClick={handleReset}
                   style={{
