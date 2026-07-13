@@ -23,6 +23,12 @@ import {
   chartReader,
   clockTime,
   measurementScale,
+  callout,
+  imageCompare,
+  hotspot,
+  timeline,
+  labelDiagram,
+  imageLabel,
 } from './builtins';
 
 export function createWidgetRegistry(): WidgetRegistry {
@@ -115,6 +121,12 @@ const BUILTIN_WIDGETS: WidgetDefinition[] = [
   chartReader,
   clockTime,
   measurementScale,
+  callout,
+  imageCompare,
+  hotspot,
+  timeline,
+  labelDiagram,
+  imageLabel,
 ];
 
 export function registerAllBuiltins(registry: WidgetRegistry): void {
