@@ -157,7 +157,9 @@ widget
     if (json) {
       handleResult({ success: true, data: { ...result } }, true);
     } else {
-      console.log(`Migrated ${result.migrated} widget reference(s)${result.dryRun ? ' (dry run)' : ''}`);
+      console.log(
+        `Migrated ${result.migrated} widget reference(s)${result.dryRun ? ' (dry run)' : ''}`,
+      );
       for (const c of result.changes) {
         console.log(`  ${c.file}: ${c.oldId} \u2192 ${c.newId}`);
       }

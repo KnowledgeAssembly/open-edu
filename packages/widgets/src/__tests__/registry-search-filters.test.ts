@@ -69,9 +69,15 @@ describe('Registry searchWithFilters', () => {
 
   it('combines multiple filters with AND logic', () => {
     const r = createWidgetRegistry();
-    r.register(v2('a', { domain: 'core', learningIntents: [LearningIntent.Practice], status: 'stable' }));
-    r.register(v2('b', { domain: 'core', learningIntents: [LearningIntent.Assess], status: 'stable' }));
-    r.register(v2('c', { domain: 'math', learningIntents: [LearningIntent.Practice], status: 'stable' }));
+    r.register(
+      v2('a', { domain: 'core', learningIntents: [LearningIntent.Practice], status: 'stable' }),
+    );
+    r.register(
+      v2('b', { domain: 'core', learningIntents: [LearningIntent.Assess], status: 'stable' }),
+    );
+    r.register(
+      v2('c', { domain: 'math', learningIntents: [LearningIntent.Practice], status: 'stable' }),
+    );
     const result = r.searchWithFilters({ domain: 'core', intent: LearningIntent.Practice });
     expect(result).toHaveLength(1);
     expect(result[0]!.id).toBe('a');

@@ -440,9 +440,6 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
-      '@open-edu/widgets':
-        specifier: workspace:*
-        version: link:../widgets
       zod:
         specifier: ^3.25.76
         version: 3.25.76

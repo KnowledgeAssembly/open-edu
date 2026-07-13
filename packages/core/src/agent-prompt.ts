@@ -1,8 +1,11 @@
-import { createDefaultRegistry } from '@open-edu/widgets';
-import { generateWidgetCatalog } from './widget-catalog.js';
+const DEFAULT_WIDGET_CATALOG = `## Widget Catalog
 
-export function generateAgentPrompt(): string {
-  const widgetCatalog = generateWidgetCatalog(createDefaultRegistry());
+The following built-in widgets are available. Each has a unique \`widget\` ID and expects a specific \`config\` object shape.
+Legacy \`open-edu.*\` IDs are automatically resolved to their new domain-prefixed equivalents.
+`;
+
+export function generateAgentPrompt(widgetCatalog?: string): string {
+  const catalog = widgetCatalog ?? DEFAULT_WIDGET_CATALOG;
   return `# Open-Edu Educational Package Generation Prompt
 
 You are an AI assistant that generates complete, valid Open-Edu educational packages. Follow this specification precisely.
@@ -153,7 +156,7 @@ Zod Schema:
 }
 \`\`\`
 
-${widgetCatalog}
+${catalog}
 
 ## Rewards Configuration (rewards.json, optional)
 

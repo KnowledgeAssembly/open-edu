@@ -1,20 +1,36 @@
-import type { WidgetRegistry, WidgetDefinitionV2 } from '@open-edu/widgets';
-import { WIDGET_ALIAS_MAP, getLearningIntentsForWidget } from '@open-edu/widgets';
+export interface WidgetCatalogEntry {
+  id: string;
+  name?: string;
+  description?: string;
+  domain?: string;
+  status?: string;
+  deprecated?: boolean;
+  replacement?: string;
+  keywords?: string[];
+  learningIntents?: string[];
+  legacyId?: string;
+}
 
-export function generateWidgetCatalog(registry: WidgetRegistry): string {
+export interface WidgetCatalogInput {
+  widgets: WidgetCatalogEntry[];
+}
+
+export function generateWidgetCatalog(input: WidgetCatalogInput): string {
   const lines: string[] = [];
   lines.push('## Widget Catalog');
   lines.push('');
-  lines.push('The following built-in widgets are available. Each has a unique `widget` ID and expects a specific `config` object shape.');
-  lines.push('Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.');
+  lines.push(
+    'The following built-in widgets are available. Each has a unique `widget` ID and expects a specific `config` object shape.',
+  );
+  lines.push(
+    'Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.',
+  );
   lines.push('');
 
-  const allWidgets = registry.getAll();
-  const byDomain = new Map<string, typeof allWidgets>();
+  const byDomain = new Map<string, WidgetCatalogEntry[]>();
 
-  for (const w of allWidgets) {
-    const v2 = w as WidgetDefinitionV2;
-    const domain = v2.domain || w.id.split('.')[0] || 'unknown';
+  for (const w of input.widgets) {
+    const domain = w.domain || w.id.split('.')[0] || 'unknown';
     if (!byDomain.has(domain)) byDomain.set(domain, []);
     byDomain.get(domain)!.push(w);
   }
@@ -32,39 +48,35 @@ export function generateWidgetCatalog(registry: WidgetRegistry): string {
     lines.push('');
 
     for (const w of widgets) {
-      const v2 = w as WidgetDefinitionV2;
-      const intents = getLearningIntentsForWidget(w.id);
-
       let statusTag = '';
-      if (v2.status === 'deprecated') {
+      if (w.status === 'deprecated') {
         statusTag = ' **[DEPRECATED]**';
-      } else if (v2.status === 'experimental') {
+      } else if (w.status === 'experimental') {
         statusTag = ' *(experimental)*';
       }
 
-      lines.push(`#### ${v2.name ?? w.id} (\`${w.id}\`)${statusTag}`);
-      if (v2.description) lines.push(v2.description);
+      lines.push(`#### ${w.name ?? w.id} (\`${w.id}\`)${statusTag}`);
+      if (w.description) lines.push(w.description);
       lines.push('');
 
-      if (intents.length > 0) {
-        const labels = intents.map(i => i.charAt(0).toUpperCase() + i.slice(1));
+      if (w.learningIntents && w.learningIntents.length > 0) {
+        const labels = w.learningIntents.map((i) => i.charAt(0).toUpperCase() + i.slice(1));
         lines.push(`Learning intents: ${labels.join(', ')}`);
         lines.push('');
       }
 
-      const legacyEntry = Object.entries(WIDGET_ALIAS_MAP).find(([, target]) => target === w.id);
-      if (legacyEntry) {
-        lines.push(`Legacy ID: \`${legacyEntry[0]}\` (auto-resolved)`);
+      if (w.legacyId) {
+        lines.push(`Legacy ID: \`${w.legacyId}\` (auto-resolved)`);
         lines.push('');
       }
 
-      if (v2.deprecated && v2.replacement) {
-        lines.push(`Note: This widget is deprecated. Use \`${v2.replacement}\` instead.`);
+      if (w.deprecated && w.replacement) {
+        lines.push(`Note: This widget is deprecated. Use \`${w.replacement}\` instead.`);
         lines.push('');
       }
 
-      if (v2.keywords?.length) {
-        lines.push(`Keywords: ${v2.keywords.join(', ')}`);
+      if (w.keywords && w.keywords.length > 0) {
+        lines.push(`Keywords: ${w.keywords.join(', ')}`);
         lines.push('');
       }
     }

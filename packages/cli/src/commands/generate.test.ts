@@ -6,11 +6,24 @@ import { tmpdir } from 'node:os';
 const mockGenerateAgentPrompt = vi.hoisted(() => vi.fn());
 const mockLoadPackage = vi.hoisted(() => vi.fn());
 const mockCreatePackage = vi.hoisted(() => vi.fn());
+const mockCreateDefaultRegistry = vi.hoisted(() => vi.fn());
+const mockGetLearningIntentsForWidget = vi.hoisted(() => vi.fn());
 
 vi.mock('@open-edu/core', async () => {
   return {
     generateAgentPrompt: mockGenerateAgentPrompt,
+    generateWidgetCatalog: vi.fn(() => '## Widget Catalog\n\nMock catalog'),
     loadPackage: mockLoadPackage,
+  };
+});
+
+vi.mock('@open-edu/widgets', async () => {
+  return {
+    createDefaultRegistry: mockCreateDefaultRegistry.mockReturnValue({
+      getAll: () => [],
+    }),
+    WIDGET_ALIAS_MAP: {},
+    getLearningIntentsForWidget: mockGetLearningIntentsForWidget.mockReturnValue([]),
   };
 });
 
