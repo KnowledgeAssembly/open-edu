@@ -8,17 +8,17 @@ export type {
   WidgetSearchFilters,
   RemoteWidgetManifest,
   RemoteWidgetRegistration,
-} from './types';
-export { WidgetRegistrationError } from './types';
-export { createWidgetRegistry, registerAllBuiltins, createDefaultRegistry } from './registry';
-export { RemoteWidgetLoader } from './remote-loader';
-export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader';
-export { useRemoteWidget } from './use-remote-widget';
-export type { UseRemoteWidgetResult } from './use-remote-widget';
+} from './types.js';
+export { WidgetRegistrationError } from './types.js';
+export { createWidgetRegistry, registerAllBuiltins, createDefaultRegistry } from './registry.js';
+export { RemoteWidgetLoader } from './remote-loader.js';
+export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader.js';
+export { useRemoteWidget } from './use-remote-widget.js';
+export type { UseRemoteWidgetResult } from './use-remote-widget.js';
 export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
-export { useObserveMode } from './use-observe-mode';
-export type { ObserveModeOptions } from './use-observe-mode';
+export { useObserveMode } from './use-observe-mode.js';
+export type { ObserveModeOptions } from './use-observe-mode.js';
 export {
   multipleChoicePractice,
   multipleChoice,
@@ -41,7 +41,7 @@ export {
   timeline,
   labelDiagram,
   imageLabel,
-} from './builtins';
+} from './builtins/index.js';
 
 export {
   WidgetDomain,
@@ -49,17 +49,17 @@ export {
   resolveWidgetId,
   migrateWidgetId,
   getDomainPrefix,
-} from './domains';
+} from './domains.js';
 
-export { validateWidgetMetadata } from './validate-metadata';
-export type { MetadataValidationResult } from './validate-metadata';
+export { validateWidgetMetadata } from './validate-metadata.js';
+export type { MetadataValidationResult } from './validate-metadata.js';
 
 export {
   LearningIntent,
   WIDGET_LEARNING_INTENTS,
   getLearningIntentsForWidget,
   getWidgetsByLearningIntent,
-} from './metadata/learning-intents';
+} from './metadata/learning-intents.js';
 
 export type {
   WidgetCapabilities,
@@ -70,4 +70,4 @@ export type {
   BloomsLevel,
   CognitiveLoad,
   DifficultyLevel,
-} from './metadata';
+} from './metadata/index.js';
