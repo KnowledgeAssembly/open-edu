@@ -42,6 +42,7 @@ const config: Config = {
       maxWidth: {
         ...tailwindLayoutExtensions,
         reading: 'var(--oe-reading-width)',
+        ...tailwindLayoutExtensions,
       },
       opacity: tailwindOpacityExtensions,
       borderWidth: tailwindBorderWidthExtensions,
