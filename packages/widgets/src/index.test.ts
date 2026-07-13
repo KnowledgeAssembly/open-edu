@@ -11,7 +11,7 @@ import {
 
 describe('@open-edu/widgets', () => {
   it('should export a version', () => {
-    expect(WIDGETS_VERSION).toBe('0.1.0');
+    expect(WIDGETS_VERSION).toBe('0.2.0');
   });
 
   it('should export createWidgetRegistry', () => {
