@@ -369,7 +369,7 @@ export function AppShell({
               <WordTapHandler className="flex min-w-0 flex-1 flex-col">
                 <div
                   ref={courseContentRef}
-                  className="flex min-w-0 flex-1 flex-col min-h-0"
+                  className="flex min-h-0 min-w-0 flex-1 flex-col"
                   data-content-area="true"
                 >
                   <TopAppBar
