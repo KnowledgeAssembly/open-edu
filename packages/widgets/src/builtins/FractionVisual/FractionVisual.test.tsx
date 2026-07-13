@@ -28,7 +28,7 @@ function getUnshaded(container: HTMLElement, segment: string): Element[] {
 
 describe('FractionVisual schema', () => {
   it('has correct widget id', () => {
-    expect(fractionVisual.id).toBe('open-edu.fraction-visual');
+    expect(fractionVisual.id).toBe('math.fraction-visual');
   });
 
   it('has a render function', () => {

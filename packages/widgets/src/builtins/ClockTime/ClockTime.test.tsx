@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('ClockTime widget definition', () => {
   it('has correct widget id', () => {
-    expect(clockTime.id).toBe('open-edu.clock-time');
+    expect(clockTime.id).toBe('math.clock-time');
   });
 
   it('has a render function', () => {

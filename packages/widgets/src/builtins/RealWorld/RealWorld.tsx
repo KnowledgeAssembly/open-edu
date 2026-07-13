@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -52,7 +53,7 @@ function RealWorldComponent(props: {
     isObserve: parsed.success && !isInteractive,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.real-world',
+    widgetId: 'core.real-world',
   });
 
   const handleComplete = () => {
@@ -68,7 +69,7 @@ function RealWorldComponent(props: {
 
     const interactionData: Record<string, unknown> = {
       type: 'widget.interaction',
-      widgetId: 'open-edu.real-world',
+      widgetId: 'core.real-world',
       action: 'submit',
       response,
       selfAssessment: assessment,
@@ -236,10 +237,52 @@ function RealWorldComponent(props: {
   );
 }
 
-const RealWorldWidget: WidgetDefinition = {
-  id: 'open-edu.real-world',
+const RealWorldWidget: WidgetDefinitionV2 = {
+  id: 'core.real-world',
+  name: 'Real World',
+  description: 'Apply learning to real-world scenarios and contexts',
+  domain: 'core',
   version: '0.1.0',
   render: RealWorldComponent,
+  learningIntents: [LearningIntent.Apply, LearningIntent.Explore],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    tts: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium',
+    estimatedMinutes: 5,
+    bloomsLevel: 'apply',
+    cognitiveLoad: 'moderate',
+    subjectTags: ['general'],
+    authoringPrompt: 'Create a real-world application scenario',
+  },
+  icon: 'globe',
+  keywords: ['real', 'world', 'application', 'scenario'],
+  status: 'stable',
 };
 
 export { RealWorldWidget as realWorld };

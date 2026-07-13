@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('VisualCounting schema', () => {
   it('has correct widget id', () => {
-    expect(visualCounting.id).toBe('open-edu.visual-counting');
+    expect(visualCounting.id).toBe('core.visual-counting');
   });
 
   it('has a render function', () => {
@@ -246,7 +246,7 @@ describe('VisualCounting edge cases', () => {
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.visual-counting' }),
+      expect.objectContaining({ widgetId: 'core.visual-counting' }),
     );
   });
 

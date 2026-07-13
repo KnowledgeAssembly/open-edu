@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('PlaceValueChart schema', () => {
   it('has correct widget id', () => {
-    expect(placeValueChart.id).toBe('open-edu.place-value-chart');
+    expect(placeValueChart.id).toBe('math.place-value-chart');
   });
 
   it('has a render function', () => {
@@ -407,7 +407,7 @@ describe('PlaceValueChart edge cases', () => {
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.place-value-chart' }),
+      expect.objectContaining({ widgetId: 'math.place-value-chart' }),
     );
   });
 

@@ -24,15 +24,13 @@ describe('living-vs-nonliving example package', () => {
 
     const visualCounting = exerciseNodes.find((n) => n.relativePath === 'nodes/observe.json');
     expect(visualCounting).toBeDefined();
-    expect((visualCounting!.node as any).widget).toBe('open-edu.visual-counting');
+    expect((visualCounting!.node as any).widget).toBe('core.visual-counting');
 
     const matching = exerciseNodes.find((n) => n.relativePath === 'nodes/guided-practice.json');
     expect(matching).toBeDefined();
-    expect((matching!.node as any).widget).toBe('open-edu.matching');
+    expect((matching!.node as any).widget).toBe('core.matching');
 
-    const mcNodes = exerciseNodes.filter(
-      (n) => (n.node as any).widget === 'open-edu.multiple-choice',
-    );
+    const mcNodes = exerciseNodes.filter((n) => (n.node as any).widget === 'core.multiple-choice');
     expect(mcNodes).toHaveLength(2);
   });
 

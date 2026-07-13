@@ -71,7 +71,9 @@ function doubleTap(el: HTMLElement, x = 50, y = 50) {
 describe('WordTapHandler remote data flow', () => {
   it('shows popover with server-formatted entry for word not in bundle', async () => {
     let resolveEnriched!: (v: unknown) => void;
-    const enrichedDeferred = new Promise((resolve) => { resolveEnriched = resolve; });
+    const enrichedDeferred = new Promise((resolve) => {
+      resolveEnriched = resolve;
+    });
 
     mockSearch.mockReturnValue({
       query: 'apple',
@@ -103,7 +105,9 @@ describe('WordTapHandler remote data flow', () => {
 
   it('handles entry with minimal wikitext definitions without crashing', async () => {
     let resolveEnriched!: (v: unknown) => void;
-    const enrichedDeferred = new Promise((resolve) => { resolveEnriched = resolve; });
+    const enrichedDeferred = new Promise((resolve) => {
+      resolveEnriched = resolve;
+    });
 
     mockSearch.mockReturnValue({
       query: 'dog',
@@ -116,10 +120,15 @@ describe('WordTapHandler remote data flow', () => {
 
     act(() => {
       resolveEnriched({
-        ftsResults: [{
-            id: 'dog', word: 'dog', language: 'en', partOfSpeech: 'noun',
+        ftsResults: [
+          {
+            id: 'dog',
+            word: 'dog',
+            language: 'en',
+            partOfSpeech: 'noun',
             definitions: [{ definition: '.' }],
-        }],
+          },
+        ],
         cachedAiResponse: null,
         courseReferences: [],
       });
@@ -134,7 +143,9 @@ describe('WordTapHandler remote data flow', () => {
 
   it('shows Ask AI button when enriched promise resolves with empty results', async () => {
     let resolveEnriched!: (v: unknown) => void;
-    const enrichedDeferred = new Promise((resolve) => { resolveEnriched = resolve; });
+    const enrichedDeferred = new Promise((resolve) => {
+      resolveEnriched = resolve;
+    });
 
     mockSearch.mockReturnValue({
       query: 'unknownword',
@@ -163,7 +174,9 @@ describe('WordTapHandler remote data flow', () => {
 
   it('rapid double-tap on different words shows correct final popover', async () => {
     let resolveApple!: (v: unknown) => void;
-    const appleDeferred = new Promise((resolve) => { resolveApple = resolve; });
+    const appleDeferred = new Promise((resolve) => {
+      resolveApple = resolve;
+    });
     const bananaDeferred = new Promise(() => {});
 
     // First search returns apple results

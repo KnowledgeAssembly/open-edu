@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -59,7 +60,7 @@ function MeasurementScaleComponent(props: {
     isObserve: isObserve && !!config,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.measurement-scale',
+    widgetId: 'math.measurement-scale',
   });
 
   const clamp = useCallback(
@@ -141,7 +142,7 @@ function MeasurementScaleComponent(props: {
     const score = correct ? 100 : 0;
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.measurement-scale',
+      widgetId: 'math.measurement-scale',
       action: 'submit',
       value,
       targetValue: target,
@@ -610,10 +611,52 @@ function MeasurementScaleComponent(props: {
   );
 }
 
-const MeasurementScaleWidget: WidgetDefinition = {
-  id: 'open-edu.measurement-scale',
-  version: '0.1.0',
+const MeasurementScaleWidget: WidgetDefinitionV2 = {
+  id: 'math.measurement-scale',
+  name: 'Measurement Scale',
+  description: 'Measure lengths, weights, and volumes using interactive scales',
+  domain: 'math',
+  version: '1.0.0',
   render: MeasurementScaleComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    tts: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium',
+    estimatedMinutes: 4,
+    bloomsLevel: 'apply',
+    cognitiveLoad: 'moderate',
+    subjectTags: ['math', 'measurement'],
+    authoringPrompt: 'Create a measurement exercise using scales and rulers',
+  },
+  icon: 'ruler',
+  keywords: ['measurement', 'scale', 'math', 'ruler', '测量'],
+  status: 'stable',
 };
 
 export { MeasurementScaleWidget as measurementScale };

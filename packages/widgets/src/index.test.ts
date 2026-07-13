@@ -11,7 +11,7 @@ import {
 
 describe('@open-edu/widgets', () => {
   it('should export a version', () => {
-    expect(WIDGETS_VERSION).toBe('0.1.0');
+    expect(WIDGETS_VERSION).toBe('0.2.0');
   });
 
   it('should export createWidgetRegistry', () => {
@@ -35,7 +35,7 @@ describe('@open-edu/widgets', () => {
   });
 
   it('should export visualCounting widget', () => {
-    expect(visualCounting.id).toBe('open-edu.visual-counting');
+    expect(visualCounting.id).toBe('core.visual-counting');
     expect(visualCounting.render).toBeInstanceOf(Function);
   });
 

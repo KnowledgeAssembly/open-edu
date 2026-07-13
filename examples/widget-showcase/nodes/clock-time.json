@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Clock Time Practice",
-  "widget": "open-edu.clock-time",
+  "widget": "math.clock-time",
   "config": {
     "description": "Set the clock to show 7:30.",
     "hour": 3,

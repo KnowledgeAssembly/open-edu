@@ -204,9 +204,7 @@ function mapFDApiToEntry(word: string, data: FDApiResponse): DictionaryEntry {
   for (const entry of data.entries) {
     if (!partOfSpeech && entry.partOfSpeech) partOfSpeech = entry.partOfSpeech;
     if (!phonetic && entry.pronunciations) {
-      const ipa = entry.pronunciations.find(
-        (p) => p.type === 'ipa' || p.type === 'IPA',
-      );
+      const ipa = entry.pronunciations.find((p) => p.type === 'ipa' || p.type === 'IPA');
       if (ipa) {
         phonetic = ipa.text;
       } else if (entry.pronunciations.length > 0) {
@@ -281,9 +279,7 @@ export function loadDictionary(dictionaryDir: string): boolean {
     const baseDir = join(dictionaryDir, 'en/v1.0.0');
     const manifestPath = join(baseDir, 'manifest.json');
     if (!existsSync(manifestPath)) return false;
-    const manifest: PackageManifest = JSON.parse(
-      readFileSync(manifestPath, 'utf-8'),
-    );
+    const manifest: PackageManifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
     const dictPath = join(baseDir, manifest.files.dictionary);
     if (!existsSync(dictPath)) return false;
 
@@ -303,9 +299,7 @@ export function loadDictionary(dictionaryDir: string): boolean {
         localEntries.set(e.word, [e]);
       }
     }
-    localWords = data
-      .map((e) => e.word)
-      .sort((a, b) => a.localeCompare(b));
+    localWords = data.map((e) => e.word).sort((a, b) => a.localeCompare(b));
     console.log(
       `[DictionaryServer] Local fallback: ${localEntries.size} words (${data.length} entries)`,
     );
@@ -316,14 +310,8 @@ export function loadDictionary(dictionaryDir: string): boolean {
   }
 }
 
-export function handleDictionaryRequest(
-  req: IncomingMessage,
-  res: ServerResponse,
-): boolean {
-  const url = new URL(
-    req.url ?? '',
-    `http://${req.headers.host ?? 'localhost'}`,
-  );
+export function handleDictionaryRequest(req: IncomingMessage, res: ServerResponse): boolean {
+  const url = new URL(req.url ?? '', `http://${req.headers.host ?? 'localhost'}`);
   const pathname = url.pathname;
   if (!pathname.startsWith('/api/dictionary/')) return false;
   res.setHeader('Content-Type', 'application/json');
@@ -338,19 +326,12 @@ export function handleDictionaryRequest(
   /* ----- autocomplete ----- */
   if (pathname === '/api/dictionary/autocomplete') {
     const prefix = url.searchParams.get('prefix') ?? '';
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') ?? '10', 10),
-      50,
-    );
+    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '10', 10), 50);
     const result: string[] = [];
     if (prefix) {
       const lower = prefix.toLowerCase();
       const start = bisectLeft(localWords, lower);
-      for (
-        let i = start;
-        i < localWords.length && result.length < limit;
-        i++
-      ) {
+      for (let i = start; i < localWords.length && result.length < limit; i++) {
         const w = localWords[i]!;
         if (w.toLowerCase().startsWith(lower)) result.push(w);
         else break;
@@ -363,10 +344,7 @@ export function handleDictionaryRequest(
   /* ----- search ----- */
   if (pathname === '/api/dictionary/search') {
     const query = url.searchParams.get('q') ?? '';
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') ?? '10', 10),
-      50,
-    );
+    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '10', 10), 50);
     (async () => {
       const result: DictionaryEntry[] = [];
       const seen = new Set<string>();
@@ -410,9 +388,7 @@ export function handleDictionaryRequest(
       }
 
       const cleaned = result.slice(0, limit).map(cleanEntry);
-      const deduped = cleaned.filter(
-        (e, i, arr) => arr.findIndex((x) => x.word === e.word) === i,
-      );
+      const deduped = cleaned.filter((e, i, arr) => arr.findIndex((x) => x.word === e.word) === i);
       res.end(JSON.stringify(deduped));
     })();
     return true;

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -111,7 +112,7 @@ function ClockTimeComponent(props: {
     isObserve: isObserve && !!config,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.clock-time',
+    widgetId: 'math.clock-time',
   });
 
   const handleReadSelect = useCallback(
@@ -131,7 +132,7 @@ function ClockTimeComponent(props: {
     setAwaitingConfirm(false);
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.clock-time',
+      widgetId: 'math.clock-time',
       action: 'submit',
       mode: 'read',
       selectedHour,
@@ -173,7 +174,7 @@ function ClockTimeComponent(props: {
     setSubmitted(true);
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.clock-time',
+      widgetId: 'math.clock-time',
       action: 'submit',
       mode: 'set',
       currentHour,
@@ -553,10 +554,53 @@ function ClockTimeComponent(props: {
   );
 }
 
-const ClockTimeWidget: WidgetDefinition = {
-  id: 'open-edu.clock-time',
-  version: '0.1.0',
+const ClockTimeWidget: WidgetDefinitionV2 = {
+  id: 'math.clock-time',
+  name: 'Clock Time',
+  description: 'Read and set time on analog and digital clocks',
+  domain: 'math',
+  version: '1.0.0',
   render: ClockTimeComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsAnimation: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    tts: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy',
+    estimatedMinutes: 3,
+    bloomsLevel: 'understand',
+    cognitiveLoad: 'low',
+    subjectTags: ['math', 'time'],
+    authoringPrompt: 'Create a clock-reading exercise with analog and digital times',
+  },
+  icon: 'clock',
+  keywords: ['clock', 'time', 'math', '时钟', '时间'],
+  status: 'stable',
 };
 
 export { ClockTimeWidget as clockTime };

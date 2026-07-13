@@ -27,7 +27,7 @@ const sampleConfig = {
 
 describe('RealWorld widget definition', () => {
   it('has correct widget id', () => {
-    expect(realWorld.id).toBe('open-edu.real-world');
+    expect(realWorld.id).toBe('core.real-world');
   });
 
   it('has a render function', () => {
@@ -405,7 +405,7 @@ describe('RealWorld edge cases', () => {
     fireEvent.click(screen.getByTestId('complete-task-button'));
     fireEvent.click(screen.getByTestId('self-assess-well'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.real-world' }),
+      expect.objectContaining({ widgetId: 'core.real-world' }),
     );
   });
 

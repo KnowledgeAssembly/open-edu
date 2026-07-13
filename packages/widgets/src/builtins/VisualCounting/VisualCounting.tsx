@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -99,7 +100,7 @@ function VisualCountingComponent(props: {
     isObserve,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.visual-counting',
+    widgetId: 'core.visual-counting',
   });
 
   const handleNumberClick = useCallback(
@@ -121,7 +122,7 @@ function VisualCountingComponent(props: {
       count: selectedCount,
       correct,
       accuracy,
-      widgetId: 'open-edu.visual-counting',
+      widgetId: 'core.visual-counting',
     });
     complete(accuracy * 100, { submitted: true, selectedCount });
     setSubmitted(true);
@@ -315,10 +316,52 @@ function VisualCountingComponent(props: {
   );
 }
 
-const VisualCountingWidget: WidgetDefinition = {
-  id: 'open-edu.visual-counting',
+const VisualCountingWidget: WidgetDefinitionV2 = {
+  id: 'core.visual-counting',
+  name: 'Visual Counting',
+  description: 'Count visual objects and identify quantities',
+  domain: 'core',
   version: '0.1.0',
   render: VisualCountingComponent,
+  learningIntents: [LearningIntent.Observe, LearningIntent.Practice],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    tts: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy',
+    estimatedMinutes: 2,
+    bloomsLevel: 'remember',
+    cognitiveLoad: 'low',
+    subjectTags: ['math', 'counting'],
+    authoringPrompt: 'Create a visual counting exercise with clear images',
+  },
+  icon: 'hash',
+  keywords: ['count', 'visual', 'number', 'quantity'],
+  status: 'stable',
 };
 
 export { VisualCountingWidget as visualCounting };

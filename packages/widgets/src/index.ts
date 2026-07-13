@@ -1,8 +1,9 @@
-export const WIDGETS_VERSION = '0.1.0';
+export const WIDGETS_VERSION = '0.2.0';
 
 export type {
   WidgetRenderProps,
   WidgetDefinition,
+  WidgetDefinitionV2,
   WidgetRegistry,
   RemoteWidgetManifest,
   RemoteWidgetRegistration,
@@ -33,4 +34,36 @@ export {
   placeValueChart,
   measurementScale,
   clockTime,
+  callout,
+  imageCompare,
+  hotspot,
+  timeline,
+  labelDiagram,
+  imageLabel,
 } from './builtins';
+
+export {
+  WidgetDomain,
+  WIDGET_ALIAS_MAP,
+  resolveWidgetId,
+  migrateWidgetId,
+  getDomainPrefix,
+} from './domains';
+
+export {
+  LearningIntent,
+  WIDGET_LEARNING_INTENTS,
+  getLearningIntentsForWidget,
+  getWidgetsByLearningIntent,
+} from './metadata/learning-intents';
+
+export type {
+  WidgetCapabilities,
+  AccessibilityMetadata,
+  AnalyticsMetadata,
+  RewardMetadata,
+  AIMetadata,
+  BloomsLevel,
+  CognitiveLoad,
+  DifficultyLevel,
+} from './metadata';

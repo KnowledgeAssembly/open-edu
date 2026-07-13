@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Fraction Shading",
-  "widget": "open-edu.fraction-visual",
+  "widget": "math.fraction-visual",
   "config": {
     "description": "Shade 3/4 of the circle.",
     "numerator": 3,

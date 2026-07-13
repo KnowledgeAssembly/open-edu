@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 import {
@@ -159,7 +160,7 @@ function SequencingComponent(props: {
     isObserve: isObserve && hasValidContent,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.sequencing',
+    widgetId: 'core.sequencing',
   });
 
   const sensors = useSensors(
@@ -211,7 +212,7 @@ function SequencingComponent(props: {
       userOrder: itemOrder,
       correct,
       accuracy,
-      widgetId: 'open-edu.sequencing',
+      widgetId: 'core.sequencing',
     });
     complete(score, { submitted: true, itemOrder, hintIndex });
     setSubmitted(true);
@@ -441,10 +442,51 @@ function SequencingComponent(props: {
   );
 }
 
-const SequencingWidget: WidgetDefinition = {
-  id: 'open-edu.sequencing',
+const SequencingWidget: WidgetDefinitionV2 = {
+  id: 'core.sequencing',
+  name: 'Sequencing',
+  description: 'Arrange items in the correct order',
+  domain: 'core',
   version: '0.1.0',
   render: SequencingComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium',
+    estimatedMinutes: 5,
+    bloomsLevel: 'understand',
+    cognitiveLoad: 'moderate',
+    subjectTags: ['general'],
+    authoringPrompt: 'Create a sequencing exercise with 4-6 steps in logical order',
+  },
+  icon: 'list-ordered',
+  keywords: ['sequence', 'order', 'steps', 'sort'],
+  status: 'stable',
 };
 
 export { SequencingWidget as sequencing };

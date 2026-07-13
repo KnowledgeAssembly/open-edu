@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Widget Practice Exercise",
-  "widget": "open-edu.multiple-choice-practice",
+  "widget": "core.multiple-choice",
   "config": {
     "prompt": "What is the capital of France?",
     "options": [

@@ -252,7 +252,7 @@ function generateQuizJson(quiz: Quiz): Record<string, unknown> {
 
   return {
     type: 'exercise',
-    widget: 'open-edu.multiple-choice',
+    widget: 'core.multiple-choice',
     title: quiz.title,
     config: {
       questions,

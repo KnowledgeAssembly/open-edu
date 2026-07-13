@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -89,7 +90,7 @@ function FillBlankComponent(props: {
     isObserve: isObserve && hasValidContent,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.fill-blank',
+    widgetId: 'core.fill-blank',
   });
 
   const handleSelect = useCallback(
@@ -123,7 +124,7 @@ function FillBlankComponent(props: {
 
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.fill-blank',
+      widgetId: 'core.fill-blank',
       action: 'submit',
       answers: userAnswers,
       correct,
@@ -389,10 +390,53 @@ function FillBlankComponent(props: {
   );
 }
 
-const FillBlankWidget: WidgetDefinition = {
-  id: 'open-edu.fill-blank',
+const FillBlankWidget: WidgetDefinitionV2 = {
+  id: 'core.fill-blank',
+  name: 'Fill in the Blank',
+  description: 'Complete sentences or equations by filling in missing parts',
+  domain: 'core',
   version: '0.1.0',
   render: FillBlankComponent,
+  learningIntents: [LearningIntent.Assess, LearningIntent.Practice],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    tts: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+    trackMistakes: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy',
+    estimatedMinutes: 3,
+    bloomsLevel: 'remember',
+    cognitiveLoad: 'low',
+    subjectTags: ['general', 'language', 'math'],
+    authoringPrompt: 'Create a fill-in-the-blank exercise with 3-5 blanks',
+  },
+  icon: 'text-cursor-input',
+  keywords: ['fill', 'blank', 'complete', 'gap'],
+  status: 'stable',
 };
 
 export { FillBlankWidget as fillBlank };

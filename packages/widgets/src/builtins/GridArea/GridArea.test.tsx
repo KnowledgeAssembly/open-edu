@@ -28,7 +28,7 @@ function cell(rowColIndex: number) {
 
 describe('GridArea schema', () => {
   it('has correct widget id', () => {
-    expect(gridArea.id).toBe('open-edu.grid-area');
+    expect(gridArea.id).toBe('math.grid-area');
   });
 
   it('has a render function', () => {
@@ -254,7 +254,7 @@ describe('GridArea interactive mode - area', () => {
     fireEvent.click(cell(0));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.grid-area' }),
+      expect.objectContaining({ widgetId: 'math.grid-area' }),
     );
   });
 

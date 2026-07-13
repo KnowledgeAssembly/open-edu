@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('MeasurementScale widget definition', () => {
   it('has correct widget id', () => {
-    expect(measurementScale.id).toBe('open-edu.measurement-scale');
+    expect(measurementScale.id).toBe('math.measurement-scale');
   });
 
   it('has a render function', () => {

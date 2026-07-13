@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 import {
@@ -260,7 +261,7 @@ function DragDropComponent(props: {
     isObserve: isObserve && hasValidContent,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.drag-drop',
+    widgetId: 'core.drag-drop',
   });
 
   const sensors = useSensors(
@@ -350,7 +351,7 @@ function DragDropComponent(props: {
       droppedPositions: placedItems,
       correct: allCorrect,
       accuracy,
-      widgetId: 'open-edu.drag-drop',
+      widgetId: 'core.drag-drop',
     });
     complete(score, { submitted: true, placedItems, hintIndex });
     setSubmitted(true);
@@ -636,10 +637,51 @@ function DragDropComponent(props: {
   );
 }
 
-const DragDropWidget: WidgetDefinition = {
-  id: 'open-edu.drag-drop',
+const DragDropWidget: WidgetDefinitionV2 = {
+  id: 'core.drag-drop',
+  name: 'Drag & Drop',
+  description: 'Drag items to correct locations or categories',
+  domain: 'core',
   version: '0.1.0',
   render: DragDropComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Compare],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium',
+    estimatedMinutes: 5,
+    bloomsLevel: 'apply',
+    cognitiveLoad: 'moderate',
+    subjectTags: ['general'],
+    authoringPrompt: 'Create a drag-and-drop categorization exercise',
+  },
+  icon: 'move',
+  keywords: ['drag', 'drop', 'sort', 'categorize'],
+  status: 'stable',
 };
 
 export { DragDropWidget as dragDrop };

@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Independent Practice",
-  "widget": "open-edu.multiple-choice",
+  "widget": "core.multiple-choice",
   "config": {
     "questions": [
       {

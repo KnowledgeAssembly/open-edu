@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('MultipleChoice widget definition', () => {
   it('has correct widget id for multipleChoice', () => {
-    expect(multipleChoice.id).toBe('open-edu.multiple-choice');
+    expect(multipleChoice.id).toBe('core.multiple-choice');
   });
 
   it('has correct widget id for multipleChoicePractice alias', () => {
@@ -266,7 +266,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.multiple-choice' }),
+      expect.objectContaining({ widgetId: 'core.multiple-choice' }),
     );
   });
 

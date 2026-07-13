@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -92,7 +93,7 @@ function MatchingComponent(props: {
     isObserve: isObserve && hasValidContent,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.matching',
+    widgetId: 'core.matching',
   });
 
   const updateConnectorPositions = useCallback(() => {
@@ -285,7 +286,7 @@ function MatchingComponent(props: {
       pairs: results,
       correct: allCorrect,
       accuracy,
-      widgetId: 'open-edu.matching',
+      widgetId: 'core.matching',
     });
     const connObj: Record<string, string> = {};
     for (const [k, v] of connections.entries()) {
@@ -706,10 +707,52 @@ function MatchingComponent(props: {
   );
 }
 
-const MatchingWidget: WidgetDefinition = {
-  id: 'open-edu.matching',
+const MatchingWidget: WidgetDefinitionV2 = {
+  id: 'core.matching',
+  name: 'Matching',
+  description: 'Match pairs of items by dragging or selecting',
+  domain: 'core',
   version: '0.1.0',
   render: MatchingComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Compare],
+  capabilities: {
+    supportsKeyboard: true,
+    supportsScreenReader: true,
+    supportsHints: true,
+    supportsRetry: true,
+    supportsScoring: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
+    supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true,
+    keyboardOnly: true,
+    screenReader: true,
+    focusManagement: true,
+    ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+    trackMistakes: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy',
+    estimatedMinutes: 3,
+    bloomsLevel: 'remember',
+    cognitiveLoad: 'low',
+    subjectTags: ['general'],
+    authoringPrompt: 'Create a matching exercise with 4-6 pairs',
+  },
+  icon: 'puzzle',
+  keywords: ['match', 'pairs', 'connect', 'drag'],
+  status: 'stable',
 };
 
 export { MatchingWidget as matching };

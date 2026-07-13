@@ -1,4 +1,10 @@
 import type { ReactNode } from 'react';
+import type { LearningIntent } from './metadata/learning-intents';
+import type { WidgetCapabilities } from './metadata/capabilities';
+import type { AccessibilityMetadata } from './metadata/accessibility';
+import type { AnalyticsMetadata } from './metadata/analytics';
+import type { RewardMetadata } from './metadata/reward';
+import type { AIMetadata } from './metadata/ai';
 
 export interface WidgetRenderProps<TState = unknown> {
   nodeId: string;
@@ -12,6 +18,28 @@ export interface WidgetDefinition {
   id: string;
   version?: string;
   render: (props: WidgetRenderProps) => ReactNode;
+}
+
+export interface WidgetDefinitionV2 extends WidgetDefinition {
+  name: string;
+  description: string;
+  domain: string;
+  learningIntents: LearningIntent[];
+  capabilities: WidgetCapabilities;
+  accessibility: AccessibilityMetadata;
+  analytics: AnalyticsMetadata;
+  reward: RewardMetadata;
+  ai: AIMetadata;
+  schema?: Record<string, unknown>;
+  // TODO: refine renderer type (e.g., React.ComponentType or string reference)
+  renderer?: unknown;
+  // TODO: refine validator type (e.g., a validation function signature)
+  validator?: unknown;
+  icon?: string;
+  keywords?: string[];
+  status: 'stable' | 'experimental' | 'deprecated';
+  deprecated?: boolean;
+  replacement?: string;
 }
 
 export interface RemoteWidgetManifest {
@@ -41,6 +69,11 @@ export interface WidgetRegistry {
     status: RemoteWidgetRegistration['status'],
     error?: string,
   ) => void;
+  registerAlias: (aliasId: string, targetId: string) => void;
+  resolveAlias: (id: string) => string;
+  getAll: () => WidgetDefinition[];
+  getByDomain: (domain: string) => WidgetDefinition[];
+  search: (query: string) => WidgetDefinition[];
 }
 
 export class WidgetRegistrationError extends Error {
