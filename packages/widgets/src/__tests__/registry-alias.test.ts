@@ -82,14 +82,20 @@ describe('WidgetRegistry alias resolution', () => {
 
   it('search finds widgets by name, description, or keywords', () => {
     const registry = createWidgetRegistry();
-    registry.register(makeWidgetV2('core.matching', {
-      name: 'Matching', description: 'Match pairs of items together',
-      keywords: ['match', 'pairs', 'connect'],
-    }));
-    registry.register(makeWidgetV2('core.multiple-choice', {
-      name: 'Multiple Choice', description: 'Select the correct answer from options',
-      keywords: ['quiz', 'test', 'select'],
-    }));
+    registry.register(
+      makeWidgetV2('core.matching', {
+        name: 'Matching',
+        description: 'Match pairs of items together',
+        keywords: ['match', 'pairs', 'connect'],
+      }),
+    );
+    registry.register(
+      makeWidgetV2('core.multiple-choice', {
+        name: 'Multiple Choice',
+        description: 'Select the correct answer from options',
+        keywords: ['quiz', 'test', 'select'],
+      }),
+    );
     expect(registry.search('matching')).toHaveLength(1);
     expect(registry.search('match')).toHaveLength(1);
     expect(registry.search('pairs')).toHaveLength(1);
@@ -99,9 +105,13 @@ describe('WidgetRegistry alias resolution', () => {
 
   it('search is case-insensitive', () => {
     const registry = createWidgetRegistry();
-    registry.register(makeWidgetV2('core.matching', {
-      name: 'Matching', description: 'Match pairs', keywords: ['match'],
-    }));
+    registry.register(
+      makeWidgetV2('core.matching', {
+        name: 'Matching',
+        description: 'Match pairs',
+        keywords: ['match'],
+      }),
+    );
     expect(registry.search('MATCHING')).toHaveLength(1);
     expect(registry.search('Matching')).toHaveLength(1);
     expect(registry.search('matching')).toHaveLength(1);

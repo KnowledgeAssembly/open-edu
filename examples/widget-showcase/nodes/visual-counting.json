@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Visual Counting",
-  "widget": "open-edu.visual-counting",
+  "widget": "core.visual-counting",
   "config": {
     "description": "Count the stars!",
     "items": ["⭐"],

@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Habitat Sort",
-  "widget": "open-edu.drag-drop",
+  "widget": "core.drag-drop",
   "config": {
     "description": "Sort each animal into the correct habitat.",
     "items": [

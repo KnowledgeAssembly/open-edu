@@ -3,20 +3,20 @@ import { loadPackage } from '@open-edu/core';
 import { resolve } from 'path';
 
 const WIDGET_IDS = [
-  'open-edu.visual-counting',
-  'open-edu.multiple-choice',
-  'open-edu.matching',
-  'open-edu.drag-drop',
-  'open-edu.sequencing',
-  'open-edu.fill-blank',
-  'open-edu.story-question',
-  'open-edu.real-world',
-  'open-edu.fraction-visual',
-  'open-edu.place-value-chart',
-  'open-edu.grid-area',
-  'open-edu.chart-reader',
-  'open-edu.clock-time',
-  'open-edu.measurement-scale',
+  'core.visual-counting',
+  'core.multiple-choice',
+  'core.matching',
+  'core.drag-drop',
+  'core.sequencing',
+  'core.fill-blank',
+  'core.story-question',
+  'core.real-world',
+  'math.fraction-visual',
+  'math.place-value-chart',
+  'math.grid-area',
+  'core.chart-reader',
+  'math.clock-time',
+  'math.measurement-scale',
 ];
 
 describe('widget-showcase example package', () => {

@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Water Cycle Sentences",
-  "widget": "open-edu.fill-blank",
+  "widget": "core.fill-blank",
   "config": {
     "description": "Complete the sentences about the water cycle.",
     "template": "Water ___ from the ground into the air. It forms ___ in the sky. Then it falls back down as ___.",

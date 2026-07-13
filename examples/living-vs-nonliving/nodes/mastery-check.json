@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Mastery Check: Living Things",
-  "widget": "open-edu.multiple-choice",
+  "widget": "core.multiple-choice",
   "config": {
     "questions": [
       {

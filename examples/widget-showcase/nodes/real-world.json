@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Real World Application",
-  "widget": "open-edu.real-world",
+  "widget": "core.real-world",
   "config": {
     "description": "Apply measurement to the real world.",
     "scenario": "You are helping to bake cookies for a school event. The recipe calls for 2 cups of flour, 1 cup of sugar, and 1 teaspoon of vanilla. You need to triple the recipe to make enough for everyone.",

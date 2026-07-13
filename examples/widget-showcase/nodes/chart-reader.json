@@ -1,7 +1,7 @@
 {
   "type": "exercise",
   "title": "Chart Reading",
-  "widget": "open-edu.chart-reader",
+  "widget": "core.chart-reader",
   "config": {
     "description": "Which sport is the most popular based on the chart?",
     "type": "bar",
