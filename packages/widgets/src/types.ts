@@ -4,7 +4,7 @@ import type { WidgetCapabilities } from './metadata/capabilities';
 import type { AccessibilityMetadata } from './metadata/accessibility';
 import type { AnalyticsMetadata } from './metadata/analytics';
 import type { RewardMetadata } from './metadata/reward';
-import type { AIMetadata } from './metadata/ai';
+import type { AIMetadata, DifficultyLevel } from './metadata/ai';
 
 export interface WidgetRenderProps<TState = unknown> {
   nodeId: string;
@@ -58,6 +58,16 @@ export interface RemoteWidgetRegistration {
   error?: string;
 }
 
+export interface WidgetSearchFilters {
+  query?: string;
+  domain?: string;
+  intent?: LearningIntent;
+  difficulty?: DifficultyLevel;
+  status?: WidgetDefinitionV2['status'];
+  capability?: keyof WidgetCapabilities;
+  accessibility?: keyof AccessibilityMetadata;
+}
+
 export interface WidgetRegistry {
   register: (definition: WidgetDefinition) => void;
   get: (id: string) => WidgetDefinition | undefined;
@@ -74,6 +84,7 @@ export interface WidgetRegistry {
   getAll: () => WidgetDefinition[];
   getByDomain: (domain: string) => WidgetDefinition[];
   search: (query: string) => WidgetDefinition[];
+  searchWithFilters: (filters: WidgetSearchFilters) => WidgetDefinition[];
 }
 
 export class WidgetRegistrationError extends Error {

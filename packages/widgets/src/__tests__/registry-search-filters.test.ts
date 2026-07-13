@@ -1,0 +1,101 @@
+import { describe, it, expect } from 'vitest';
+import { createWidgetRegistry } from '../registry';
+import type { WidgetDefinitionV2 } from '../types';
+import { LearningIntent } from '../metadata/learning-intents';
+
+function v2(id: string, overrides: Partial<WidgetDefinitionV2> = {}): WidgetDefinitionV2 {
+  return {
+    id,
+    name: id,
+    description: id,
+    domain: id.split('.')[0] ?? '',
+    learningIntents: [],
+    capabilities: {},
+    accessibility: {},
+    analytics: {},
+    reward: {},
+    ai: {},
+    status: 'stable',
+    render: () => null,
+    ...overrides,
+  };
+}
+
+describe('Registry searchWithFilters', () => {
+  it('filters by domain', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('core.matching', { domain: 'core' }));
+    r.register(v2('math.fraction-visual', { domain: 'math' }));
+    expect(r.searchWithFilters({ domain: 'core' })).toHaveLength(1);
+    expect(r.searchWithFilters({ domain: 'math' })).toHaveLength(1);
+    expect(r.searchWithFilters({ domain: 'science' })).toHaveLength(0);
+  });
+
+  it('filters by learning intent', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('core.matching', { learningIntents: [LearningIntent.Practice] }));
+    r.register(v2('core.multiple-choice', { learningIntents: [LearningIntent.Assess] }));
+    expect(r.searchWithFilters({ intent: LearningIntent.Practice })).toHaveLength(1);
+    expect(r.searchWithFilters({ intent: LearningIntent.Assess })).toHaveLength(1);
+  });
+
+  it('filters by difficulty', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('a', { ai: { difficulty: 'easy' } }));
+    r.register(v2('b', { ai: { difficulty: 'hard' } }));
+    expect(r.searchWithFilters({ difficulty: 'easy' })).toHaveLength(1);
+  });
+
+  it('filters by status', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('a', { status: 'stable' }));
+    r.register(v2('b', { status: 'experimental' }));
+    expect(r.searchWithFilters({ status: 'stable' })).toHaveLength(1);
+  });
+
+  it('filters by capability flag', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('a', { capabilities: { supportsKeyboard: true } }));
+    r.register(v2('b', { capabilities: {} }));
+    expect(r.searchWithFilters({ capability: 'supportsKeyboard' })).toHaveLength(1);
+  });
+
+  it('filters by accessibility flag', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('a', { accessibility: { screenReader: true } }));
+    r.register(v2('b', { accessibility: {} }));
+    expect(r.searchWithFilters({ accessibility: 'screenReader' })).toHaveLength(1);
+  });
+
+  it('combines multiple filters with AND logic', () => {
+    const r = createWidgetRegistry();
+    r.register(
+      v2('a', { domain: 'core', learningIntents: [LearningIntent.Practice], status: 'stable' }),
+    );
+    r.register(
+      v2('b', { domain: 'core', learningIntents: [LearningIntent.Assess], status: 'stable' }),
+    );
+    r.register(
+      v2('c', { domain: 'math', learningIntents: [LearningIntent.Practice], status: 'stable' }),
+    );
+    const result = r.searchWithFilters({ domain: 'core', intent: LearningIntent.Practice });
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('a');
+  });
+
+  it('returns all widgets when no filters specified', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('a'));
+    r.register(v2('b'));
+    expect(r.searchWithFilters({})).toHaveLength(2);
+  });
+
+  it('searches text in combination with filters', () => {
+    const r = createWidgetRegistry();
+    r.register(v2('core.matching', { name: 'Matching', domain: 'core', keywords: ['match'] }));
+    r.register(v2('core.drag-drop', { name: 'Drag Drop', domain: 'core', keywords: ['drag'] }));
+    const result = r.searchWithFilters({ domain: 'core', query: 'match' });
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('core.matching');
+  });
+});

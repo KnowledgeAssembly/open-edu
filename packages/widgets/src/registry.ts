@@ -2,6 +2,7 @@ import type {
   WidgetDefinition,
   WidgetDefinitionV2,
   WidgetRegistry,
+  WidgetSearchFilters,
   RemoteWidgetManifest,
   RemoteWidgetRegistration,
 } from './types';
@@ -23,6 +24,12 @@ import {
   chartReader,
   clockTime,
   measurementScale,
+  callout,
+  imageCompare,
+  hotspot,
+  timeline,
+  labelDiagram,
+  imageLabel,
 } from './builtins';
 
 export function createWidgetRegistry(): WidgetRegistry {
@@ -74,6 +81,35 @@ export function createWidgetRegistry(): WidgetRegistry {
         return false;
       });
     },
+    searchWithFilters(filters: WidgetSearchFilters) {
+      return Array.from(widgets.values()).filter((w) => {
+        const v2 = w as WidgetDefinitionV2;
+
+        if (filters.query) {
+          const lower = filters.query.trim().toLowerCase();
+          const textMatch =
+            w.id.toLowerCase().includes(lower) ||
+            v2.name?.toLowerCase().includes(lower) ||
+            v2.description?.toLowerCase().includes(lower) ||
+            v2.keywords?.some((k) => k.toLowerCase().includes(lower));
+          if (!textMatch) return false;
+        }
+
+        if (filters.domain && v2.domain !== filters.domain) return false;
+
+        if (filters.intent && !v2.learningIntents?.includes(filters.intent)) return false;
+
+        if (filters.difficulty && v2.ai?.difficulty !== filters.difficulty) return false;
+
+        if (filters.status && v2.status !== filters.status) return false;
+
+        if (filters.capability && !v2.capabilities?.[filters.capability]) return false;
+
+        if (filters.accessibility && !v2.accessibility?.[filters.accessibility]) return false;
+
+        return true;
+      });
+    },
     registerRemote(manifest: RemoteWidgetManifest) {
       const key = `${manifest.id}@${manifest.version}`;
       if (remoteWidgets.has(key)) {
@@ -115,6 +151,12 @@ const BUILTIN_WIDGETS: WidgetDefinition[] = [
   chartReader,
   clockTime,
   measurementScale,
+  callout,
+  imageCompare,
+  hotspot,
+  timeline,
+  labelDiagram,
+  imageLabel,
 ];
 
 export function registerAllBuiltins(registry: WidgetRegistry): void {

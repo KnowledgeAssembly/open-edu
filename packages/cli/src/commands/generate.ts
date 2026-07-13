@@ -1,9 +1,42 @@
-import { generateAgentPrompt, loadPackage } from '@open-edu/core';
+import { generateAgentPrompt, generateWidgetCatalog, loadPackage } from '@open-edu/core';
+import {
+  createDefaultRegistry,
+  WIDGET_ALIAS_MAP,
+  getLearningIntentsForWidget,
+} from '@open-edu/widgets';
+import type { WidgetDefinitionV2 } from '@open-edu/widgets';
 import { createPackage } from './create.js';
 import type { CliResult } from '../utils/json-output.js';
+import type { WidgetCatalogInput } from '@open-edu/core';
+
+function buildWidgetCatalog(): string {
+  const registry = createDefaultRegistry();
+  const allWidgets = registry.getAll();
+  const input: WidgetCatalogInput = {
+    widgets: allWidgets.map((w) => {
+      const v2 = w as unknown as WidgetDefinitionV2;
+      const intents = getLearningIntentsForWidget(w.id);
+      const legacyEntry = Object.entries(WIDGET_ALIAS_MAP).find(([, target]) => target === w.id);
+      return {
+        id: w.id,
+        name: v2.name,
+        description: v2.description,
+        domain: v2.domain,
+        status: v2.status,
+        deprecated: v2.deprecated,
+        replacement: v2.replacement,
+        keywords: v2.keywords,
+        learningIntents: intents,
+        legacyId: legacyEntry?.[0],
+      };
+    }),
+  };
+  return generateWidgetCatalog(input);
+}
 
 export async function generatePrompt(options?: { json?: boolean }): Promise<CliResult> {
-  const prompt = generateAgentPrompt();
+  const widgetCatalog = buildWidgetCatalog();
+  const prompt = generateAgentPrompt(widgetCatalog);
 
   if (options?.json) {
     return { success: true, data: { prompt } };
