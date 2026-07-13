@@ -5,6 +5,7 @@ export type {
   WidgetDefinition,
   WidgetDefinitionV2,
   WidgetRegistry,
+  WidgetSearchFilters,
   RemoteWidgetManifest,
   RemoteWidgetRegistration,
 } from './types';

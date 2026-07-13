@@ -58,6 +58,16 @@ export interface RemoteWidgetRegistration {
   error?: string;
 }
 
+export interface WidgetSearchFilters {
+  query?: string;
+  domain?: string;
+  intent?: LearningIntent;
+  difficulty?: import('./metadata/ai').DifficultyLevel;
+  status?: WidgetDefinitionV2['status'];
+  capability?: keyof WidgetCapabilities;
+  accessibility?: keyof AccessibilityMetadata;
+}
+
 export interface WidgetRegistry {
   register: (definition: WidgetDefinition) => void;
   get: (id: string) => WidgetDefinition | undefined;
@@ -74,6 +84,7 @@ export interface WidgetRegistry {
   getAll: () => WidgetDefinition[];
   getByDomain: (domain: string) => WidgetDefinition[];
   search: (query: string) => WidgetDefinition[];
+  searchWithFilters: (filters: WidgetSearchFilters) => WidgetDefinition[];
 }
 
 export class WidgetRegistrationError extends Error {

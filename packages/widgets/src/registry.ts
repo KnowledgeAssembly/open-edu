@@ -2,6 +2,7 @@ import type {
   WidgetDefinition,
   WidgetDefinitionV2,
   WidgetRegistry,
+  WidgetSearchFilters,
   RemoteWidgetManifest,
   RemoteWidgetRegistration,
 } from './types';
@@ -78,6 +79,35 @@ export function createWidgetRegistry(): WidgetRegistry {
         if (v2.description?.toLowerCase().includes(lower)) return true;
         if (v2.keywords?.some((k) => k.toLowerCase().includes(lower))) return true;
         return false;
+      });
+    },
+    searchWithFilters(filters: WidgetSearchFilters) {
+      return Array.from(widgets.values()).filter((w) => {
+        const v2 = w as WidgetDefinitionV2;
+
+        if (filters.query) {
+          const lower = filters.query.trim().toLowerCase();
+          const textMatch =
+            w.id.toLowerCase().includes(lower) ||
+            v2.name?.toLowerCase().includes(lower) ||
+            v2.description?.toLowerCase().includes(lower) ||
+            v2.keywords?.some((k) => k.toLowerCase().includes(lower));
+          if (!textMatch) return false;
+        }
+
+        if (filters.domain && v2.domain !== filters.domain) return false;
+
+        if (filters.intent && !v2.learningIntents?.includes(filters.intent)) return false;
+
+        if (filters.difficulty && v2.ai?.difficulty !== filters.difficulty) return false;
+
+        if (filters.status && v2.status !== filters.status) return false;
+
+        if (filters.capability && !v2.capabilities?.[filters.capability]) return false;
+
+        if (filters.accessibility && !v2.accessibility?.[filters.accessibility]) return false;
+
+        return true;
       });
     },
     registerRemote(manifest: RemoteWidgetManifest) {
