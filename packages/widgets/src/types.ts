@@ -31,7 +31,9 @@ export interface WidgetDefinitionV2 extends WidgetDefinition {
   reward: RewardMetadata;
   ai: AIMetadata;
   schema?: Record<string, unknown>;
+  // TODO: refine renderer type (e.g., React.ComponentType or string reference)
   renderer?: unknown;
+  // TODO: refine validator type (e.g., a validation function signature)
   validator?: unknown;
   icon?: string;
   keywords?: string[];

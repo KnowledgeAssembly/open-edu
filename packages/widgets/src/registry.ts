@@ -64,7 +64,7 @@ export function createWidgetRegistry(): WidgetRegistry {
       return Array.from(widgets.values()).filter((w) => w.id.startsWith(prefix));
     },
     search(query: string) {
-      const lower = query.toLowerCase();
+      const lower = query.trim().toLowerCase();
       return Array.from(widgets.values()).filter((w) => {
         if (w.id.toLowerCase().includes(lower)) return true;
         const v2 = w as WidgetDefinitionV2;

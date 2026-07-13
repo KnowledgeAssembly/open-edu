@@ -4,12 +4,14 @@ export enum LearningIntent {
   Observe = 'observe',
   Compare = 'compare',
   Explore = 'explore',
+  /** Reserved for future creative widgets (e.g., drawing, composition) */
   Create = 'create',
   Reflect = 'reflect',
   Apply = 'apply',
 }
 
 export const WIDGET_LEARNING_INTENTS: Record<string, LearningIntent[]> = {
+  // Core widgets
   'core.matching': [LearningIntent.Practice, LearningIntent.Compare],
   'core.multiple-choice': [LearningIntent.Assess],
   'core.multiple-choice-practice': [LearningIntent.Practice],
@@ -19,12 +21,20 @@ export const WIDGET_LEARNING_INTENTS: Record<string, LearningIntent[]> = {
   'core.fill-blank': [LearningIntent.Assess, LearningIntent.Practice],
   'core.story-question': [LearningIntent.Assess, LearningIntent.Reflect],
   'core.real-world': [LearningIntent.Apply, LearningIntent.Explore],
+  'core.chart-reader': [LearningIntent.Observe, LearningIntent.Apply],
+  // Math widgets
   'math.fraction-visual': [LearningIntent.Observe, LearningIntent.Explore],
   'math.place-value-chart': [LearningIntent.Observe, LearningIntent.Practice],
   'math.grid-area': [LearningIntent.Practice, LearningIntent.Apply],
-  'core.chart-reader': [LearningIntent.Observe, LearningIntent.Apply],
   'math.clock-time': [LearningIntent.Practice, LearningIntent.Apply],
   'math.measurement-scale': [LearningIntent.Practice, LearningIntent.Apply],
+  // Foundation stubs (experimental)
+  'core.callout': [LearningIntent.Observe],
+  'core.image-compare': [LearningIntent.Compare, LearningIntent.Observe],
+  'core.hotspot': [LearningIntent.Explore, LearningIntent.Assess],
+  'core.timeline': [LearningIntent.Apply, LearningIntent.Observe],
+  'science.label-diagram': [LearningIntent.Apply, LearningIntent.Assess],
+  'science.image-label': [LearningIntent.Observe, LearningIntent.Apply],
 };
 
 export function getLearningIntentsForWidget(widgetId: string): LearningIntent[] {
