@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -115,7 +116,7 @@ function PlaceValueChartComponent(props: {
     isObserve: !!isObserve && !!content,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.place-value-chart',
+    widgetId: 'math.place-value-chart',
   });
 
   const handleSlotClick = useCallback(
@@ -170,7 +171,7 @@ function PlaceValueChartComponent(props: {
       expected,
       placedNumber: placedNum,
       correct,
-      widgetId: 'open-edu.place-value-chart',
+      widgetId: 'math.place-value-chart',
     });
     complete(score, { submitted: true, placedDigits });
     setSubmitted(true);
@@ -411,10 +412,36 @@ function PlaceValueChartComponent(props: {
   );
 }
 
-const PlaceValueChartWidget: WidgetDefinition = {
-  id: 'open-edu.place-value-chart',
-  version: '0.1.0',
+const PlaceValueChartWidget: WidgetDefinitionV2 = {
+  id: 'math.place-value-chart',
+  name: 'Place Value Chart',
+  description: 'Understand place value with interactive chart manipulation',
+  domain: 'math',
+  version: '1.0.0',
   render: PlaceValueChartComponent,
+  learningIntents: [LearningIntent.Observe, LearningIntent.Practice],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy', estimatedMinutes: 3, bloomsLevel: 'understand',
+    cognitiveLoad: 'low', subjectTags: ['math', 'place-value'],
+    authoringPrompt: 'Create a place value chart exercise for multi-digit numbers',
+  },
+  icon: 'table',
+  keywords: ['place', 'value', 'chart', 'math', '位值'],
+  status: 'stable',
 };
 
 export { PlaceValueChartWidget as placeValueChart };

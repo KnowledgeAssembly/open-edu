@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -108,7 +109,7 @@ function GridAreaComponent(props: {
     isObserve: isObserve && !!config,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.grid-area',
+    widgetId: 'math.grid-area',
   });
 
   const totalCells = config ? config.rows * config.cols : 0;
@@ -155,7 +156,7 @@ function GridAreaComponent(props: {
       expected: expectedCount,
       correct,
       mode: config.mode,
-      widgetId: 'open-edu.grid-area',
+      widgetId: 'math.grid-area',
     });
     complete(correct ? 100 : 0, { submitted: true, highlighted: Array.from(highlighted) });
     setSubmitted(true);
@@ -345,10 +346,36 @@ function GridAreaComponent(props: {
   );
 }
 
-const GridAreaWidget: WidgetDefinition = {
-  id: 'open-edu.grid-area',
-  version: '0.1.0',
+const GridAreaWidget: WidgetDefinitionV2 = {
+  id: 'math.grid-area',
+  name: 'Grid Area',
+  description: 'Calculate and visualize area using grid models',
+  domain: 'math',
+  version: '1.0.0',
   render: GridAreaComponent,
+  learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium', estimatedMinutes: 4, bloomsLevel: 'apply',
+    cognitiveLoad: 'moderate', subjectTags: ['math', 'geometry', 'area'],
+    authoringPrompt: 'Create a grid-area calculation exercise',
+  },
+  icon: 'grid-3x3',
+  keywords: ['grid', 'area', 'math', 'geometry', '面积'],
+  status: 'stable',
 };
 
 export { GridAreaWidget as gridArea };

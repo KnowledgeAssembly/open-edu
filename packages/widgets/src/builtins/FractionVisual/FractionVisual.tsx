@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -115,7 +116,7 @@ function FractionVisualComponent(props: {
     isObserve: !!isObserve,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.fraction-visual',
+    widgetId: 'math.fraction-visual',
   });
 
   const handleSegmentClick = useCallback(
@@ -139,7 +140,7 @@ function FractionVisualComponent(props: {
       shaded: shadedCount,
       expected: content.numerator,
       correct,
-      widgetId: 'open-edu.fraction-visual',
+      widgetId: 'math.fraction-visual',
     });
     complete(score, { submitted: true, shadedMask });
     setSubmitted(true);
@@ -442,10 +443,36 @@ function FractionVisualComponent(props: {
   );
 }
 
-const FractionVisualWidget: WidgetDefinition = {
-  id: 'open-edu.fraction-visual',
-  version: '0.1.0',
+const FractionVisualWidget: WidgetDefinitionV2 = {
+  id: 'math.fraction-visual',
+  name: 'Fraction Visual',
+  description: 'Visualize and manipulate fractions with interactive models',
+  domain: 'math',
+  version: '1.0.0',
   render: FractionVisualComponent,
+  learningIntents: [LearningIntent.Observe, LearningIntent.Explore],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsAnimation: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'easy', estimatedMinutes: 3, bloomsLevel: 'understand',
+    cognitiveLoad: 'low', subjectTags: ['math', 'fractions'],
+    authoringPrompt: 'Create a fraction visualization exercise with clear visual models',
+  },
+  icon: 'pie-chart',
+  keywords: ['fraction', 'visual', 'math', '分数'],
+  status: 'stable',
 };
 
 export { FractionVisualWidget as fractionVisual };
