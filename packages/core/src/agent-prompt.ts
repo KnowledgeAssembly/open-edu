@@ -1,5 +1,5 @@
 import { createDefaultRegistry } from '@open-edu/widgets';
-import { generateWidgetCatalog } from './widget-catalog';
+import { generateWidgetCatalog } from './widget-catalog.js';
 
 export function generateAgentPrompt(): string {
   const widgetCatalog = generateWidgetCatalog(createDefaultRegistry());
