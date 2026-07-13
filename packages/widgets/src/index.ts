@@ -51,6 +51,9 @@ export {
   getDomainPrefix,
 } from './domains';
 
+export { validateWidgetMetadata } from './validate-metadata';
+export type { MetadataValidationResult } from './validate-metadata';
+
 export {
   LearningIntent,
   WIDGET_LEARNING_INTENTS,
