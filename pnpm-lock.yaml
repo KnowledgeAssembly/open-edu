@@ -421,6 +421,9 @@ importers:
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../telemetry
+      '@open-edu/widgets':
+        specifier: workspace:*
+        version: link:../widgets
       commander:
         specifier: ^12.0.0
         version: 12.1.0
@@ -437,6 +440,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@open-edu/widgets':
+        specifier: workspace:*
+        version: link:../widgets
       zod:
         specifier: ^3.25.76
         version: 3.25.76
