@@ -15,6 +15,8 @@ function v2(overrides: Partial<WidgetDefinitionV2> = {}): WidgetDefinitionV2 {
     analytics: {},
     reward: {},
     ai: { difficulty: 'medium' },
+    icon: 'info',
+    keywords: ['test'],
     status: 'stable',
     render: () => null,
     ...overrides,
@@ -72,5 +74,20 @@ describe('validateWidgetMetadata', () => {
   it('warns when icon is missing', () => {
     const result = validateWidgetMetadata(v2({ icon: undefined }));
     expect(result.warnings).toContainEqual(expect.stringContaining('icon'));
+  });
+
+  it('returns no warnings for a fully populated V2 definition', () => {
+    const result = validateWidgetMetadata(v2());
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('does not warn about replacement when deprecated with replacement provided', () => {
+    const result = validateWidgetMetadata(v2({ deprecated: true, replacement: 'other.widget' }));
+    expect(result.warnings).not.toContainEqual(expect.stringContaining('replacement'));
+  });
+
+  it('warns about missing replacement when status is deprecated', () => {
+    const result = validateWidgetMetadata(v2({ status: 'deprecated', deprecated: false }));
+    expect(result.warnings).toContainEqual(expect.stringContaining('replacement'));
   });
 });

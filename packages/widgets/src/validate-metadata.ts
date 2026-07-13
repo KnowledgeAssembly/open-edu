@@ -42,7 +42,7 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
     warnings.push(`Widget ${widget.id} is marked experimental — ensure it is ready for use`);
   }
 
-  if (widget.deprecated && !widget.replacement) {
+  if ((widget.deprecated || widget.status === 'deprecated') && !widget.replacement) {
     warnings.push(`Widget ${widget.id} is deprecated but has no replacement ID specified`);
   }
 
