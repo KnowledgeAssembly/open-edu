@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateWidgetMetadata, type MetadataValidationResult } from '../validate-metadata';
+import { validateWidgetMetadata } from '../validate-metadata';
 import type { WidgetDefinitionV2 } from '../types';
 import { LearningIntent } from '../metadata/learning-intents';
 

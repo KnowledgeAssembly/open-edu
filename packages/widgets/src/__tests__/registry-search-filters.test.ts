@@ -74,7 +74,7 @@ describe('Registry searchWithFilters', () => {
     r.register(v2('c', { domain: 'math', learningIntents: [LearningIntent.Practice], status: 'stable' }));
     const result = r.searchWithFilters({ domain: 'core', intent: LearningIntent.Practice });
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('a');
+    expect(result[0]!.id).toBe('a');
   });
 
   it('returns all widgets when no filters specified', () => {
@@ -90,6 +90,6 @@ describe('Registry searchWithFilters', () => {
     r.register(v2('core.drag-drop', { name: 'Drag Drop', domain: 'core', keywords: ['drag'] }));
     const result = r.searchWithFilters({ domain: 'core', query: 'match' });
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('core.matching');
+    expect(result[0]!.id).toBe('core.matching');
   });
 });
