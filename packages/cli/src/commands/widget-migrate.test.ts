@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { migratePackage } from './widget-migrate';
 
+const MOCK_DIRS = new Set(['/fake/pkg', '/fake/pkg/nodes']);
+
 const mockFiles: Record<string, string[]> = {
   '/fake/pkg': ['package.json', 'workflow.json', 'nodes'],
   '/fake/pkg/nodes': ['intro.md'],
@@ -28,8 +30,7 @@ vi.mock('node:fs', () => ({
   }),
   statSync: vi.fn((path: string) => {
     const p = String(path);
-    const lastPart = p.split('/').pop() ?? '';
-    return { isDirectory: () => lastPart === 'nodes' };
+    return { isDirectory: () => MOCK_DIRS.has(p) };
   }),
   writeFileSync: vi.fn(),
 }));

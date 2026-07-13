@@ -50,8 +50,7 @@ export async function migratePackage(
     let modified = content;
     for (const legacyId of legacyIds) {
       if (!modified.includes(legacyId)) continue;
-      const { newId, migrated } = migrateWidgetId(legacyId);
-      if (!migrated) continue;
+      const { newId } = migrateWidgetId(legacyId);
 
       while (modified.includes(legacyId)) {
         modified = modified.replace(legacyId, newId);
