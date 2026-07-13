@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('Matching schema', () => {
   it('has correct widget id', () => {
-    expect(matching.id).toBe('open-edu.matching');
+    expect(matching.id).toBe('core.matching');
   });
 
   it('has a render function', () => {
@@ -470,7 +470,7 @@ describe('Matching edge cases', () => {
     fireEvent.click(screen.getByTestId('right-item-2'));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.matching' }),
+      expect.objectContaining({ widgetId: 'core.matching' }),
     );
   });
 

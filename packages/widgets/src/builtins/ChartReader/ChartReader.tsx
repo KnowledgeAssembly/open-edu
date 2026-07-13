@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -67,7 +68,7 @@ function ChartReaderComponent(props: {
     isObserve,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.chart-reader',
+    widgetId: 'core.chart-reader',
   });
 
   const handleSelect = useCallback(
@@ -77,7 +78,7 @@ function ChartReaderComponent(props: {
       const score = isCorrect ? 100 : 0;
       emitInteraction({
         type: 'widget.interaction',
-        widgetId: 'open-edu.chart-reader',
+        widgetId: 'core.chart-reader',
         action: 'select',
         selectedLabel: label,
         correct: isCorrect,
@@ -352,10 +353,36 @@ function PictographChart({
   );
 }
 
-const ChartReaderWidget: WidgetDefinition = {
-  id: 'open-edu.chart-reader',
+const ChartReaderWidget: WidgetDefinitionV2 = {
+  id: 'core.chart-reader',
+  name: 'Chart Reader',
+  description: 'Read and interpret charts, graphs, and data visualizations',
+  domain: 'core',
   version: '0.1.0',
   render: ChartReaderComponent,
+  learningIntents: [LearningIntent.Observe, LearningIntent.Apply],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium', estimatedMinutes: 4, bloomsLevel: 'understand',
+    cognitiveLoad: 'moderate', subjectTags: ['math', 'data'],
+    authoringPrompt: 'Create a chart-reading exercise with bar or line charts',
+  },
+  icon: 'bar-chart-2',
+  keywords: ['chart', 'graph', 'data', 'read'],
+  status: 'stable',
 };
 
 export { ChartReaderWidget as chartReader };

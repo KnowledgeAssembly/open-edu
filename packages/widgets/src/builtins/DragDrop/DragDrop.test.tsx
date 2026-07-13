@@ -35,7 +35,7 @@ const defaultConfig = {
 
 describe('DragDrop schema', () => {
   it('has correct widget id', () => {
-    expect(dragDrop.id).toBe('open-edu.drag-drop');
+    expect(dragDrop.id).toBe('core.drag-drop');
   });
 
   it('has a render function', () => {
@@ -369,7 +369,7 @@ describe('DragDrop edge cases', () => {
     fireEvent.click(screen.getByTestId('target-mammal'));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.drag-drop' }),
+      expect.objectContaining({ widgetId: 'core.drag-drop' }),
     );
   });
 

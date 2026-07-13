@@ -35,7 +35,7 @@ describe('@open-edu/widgets', () => {
   });
 
   it('should export visualCounting widget', () => {
-    expect(visualCounting.id).toBe('open-edu.visual-counting');
+    expect(visualCounting.id).toBe('core.visual-counting');
     expect(visualCounting.render).toBeInstanceOf(Function);
   });
 

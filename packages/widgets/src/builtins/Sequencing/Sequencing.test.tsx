@@ -40,7 +40,7 @@ function expectedScore(order: string[], correct: string[]): number {
 
 describe('Sequencing schema', () => {
   it('has correct widget id', () => {
-    expect(sequencing.id).toBe('open-edu.sequencing');
+    expect(sequencing.id).toBe('core.sequencing');
   });
 
   it('has a render function', () => {
@@ -150,7 +150,7 @@ describe('Sequencing submit and scoring', () => {
       expect.any(Object),
     );
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
+      expect.objectContaining({ widgetId: 'core.sequencing' }),
     );
   });
 
@@ -189,7 +189,7 @@ describe('Sequencing submit and scoring', () => {
     const { emitInteraction } = renderWidget(interactiveConfig);
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.sequencing' }),
+      expect.objectContaining({ widgetId: 'core.sequencing' }),
     );
   });
 });

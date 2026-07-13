@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -89,7 +90,7 @@ function StoryQuestionComponent(props: {
     isObserve: parsed.success && !isInteractive,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.story-question',
+    widgetId: 'core.story-question',
   });
 
   const handleSelect = useCallback(
@@ -118,7 +119,7 @@ function StoryQuestionComponent(props: {
 
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.story-question',
+      widgetId: 'core.story-question',
       action: 'answer',
       questionIndex: currentIndex,
       selectedIndex: currentSelection,
@@ -145,7 +146,7 @@ function StoryQuestionComponent(props: {
       const accuracy = correctCount / totalQuestions;
       emitInteraction({
         type: 'widget.interaction',
-        widgetId: 'open-edu.story-question',
+        widgetId: 'core.story-question',
         action: 'submit',
         responses,
         correctCount,
@@ -383,10 +384,36 @@ function StoryQuestionComponent(props: {
   );
 }
 
-const StoryQuestionWidget: WidgetDefinition = {
-  id: 'open-edu.story-question',
+const StoryQuestionWidget: WidgetDefinitionV2 = {
+  id: 'core.story-question',
+  name: 'Story Question',
+  description: 'Reading comprehension with story-based questions',
+  domain: 'core',
   version: '0.1.0',
   render: StoryQuestionComponent,
+  learningIntents: [LearningIntent.Assess, LearningIntent.Reflect],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    captions: true, easyLanguage: true, focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true,
+  },
+  reward: { completionXP: 10, confetti: true },
+  ai: {
+    difficulty: 'medium', estimatedMinutes: 5, bloomsLevel: 'understand',
+    cognitiveLoad: 'moderate', subjectTags: ['language', 'reading'],
+    authoringPrompt: 'Create a story-based comprehension question',
+  },
+  icon: 'book-open',
+  keywords: ['story', 'reading', 'comprehension', 'question'],
+  status: 'stable',
 };
 
 export { StoryQuestionWidget as storyQuestion };

@@ -33,7 +33,7 @@ const sampleConfig = {
 
 describe('StoryQuestion widget definition', () => {
   it('has correct widget id', () => {
-    expect(storyQuestion.id).toBe('open-edu.story-question');
+    expect(storyQuestion.id).toBe('core.story-question');
   });
 
   it('has a render function', () => {
@@ -433,7 +433,7 @@ describe('StoryQuestion edge cases', () => {
     fireEvent.click(screen.getByLabelText('A knight'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.story-question' }),
+      expect.objectContaining({ widgetId: 'core.story-question' }),
     );
   });
 

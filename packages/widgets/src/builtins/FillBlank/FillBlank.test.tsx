@@ -42,7 +42,7 @@ const typeConfig = {
 
 describe('FillBlank widget definition', () => {
   it('has correct widget id', () => {
-    expect(fillBlank.id).toBe('open-edu.fill-blank');
+    expect(fillBlank.id).toBe('core.fill-blank');
   });
 
   it('has a render function', () => {
@@ -283,7 +283,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
     expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'open-edu.fill-blank' }),
+      expect.objectContaining({ widgetId: 'core.fill-blank' }),
     );
   });
 

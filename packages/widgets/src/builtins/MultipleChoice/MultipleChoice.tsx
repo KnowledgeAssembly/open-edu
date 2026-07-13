@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { z } from 'zod';
-import type { WidgetDefinition } from '../../types';
+import type { WidgetDefinitionV2 } from '../../types';
+import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 
@@ -94,7 +95,7 @@ function MultipleChoiceComponent(props: {
     isObserve: isMultiObserve,
     onComplete: complete,
     onInteract: emitInteraction,
-    widgetId: 'open-edu.multiple-choice',
+    widgetId: 'core.multiple-choice',
   });
 
   const handleLegacySubmit = useCallback(() => {
@@ -107,7 +108,7 @@ function MultipleChoiceComponent(props: {
     const correctIdx = legacyParsed.data.options.findIndex((o) => o.correct);
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.multiple-choice',
+      widgetId: 'core.multiple-choice',
       action: 'submit',
       selectedId,
       score,
@@ -152,7 +153,7 @@ function MultipleChoiceComponent(props: {
 
     emitInteraction({
       type: 'widget.interaction',
-      widgetId: 'open-edu.multiple-choice',
+      widgetId: 'core.multiple-choice',
       action: 'answer',
       questionIndex: currentIndex,
       selectedIndex: currentSelection,
@@ -179,7 +180,7 @@ function MultipleChoiceComponent(props: {
       const accuracy = correctCount / totalQuestions;
       emitInteraction({
         type: 'widget.interaction',
-        widgetId: 'open-edu.multiple-choice',
+        widgetId: 'core.multiple-choice',
         action: 'submit',
         responses,
         correctCount,
@@ -439,16 +440,56 @@ function MultipleChoiceComponent(props: {
   return null;
 }
 
-const MultipleChoiceWidget: WidgetDefinition = {
-  id: 'open-edu.multiple-choice',
+const MultipleChoiceWidget: WidgetDefinitionV2 = {
+  id: 'core.multiple-choice',
+  name: 'Multiple Choice',
+  description: 'Select the correct answer from a list of options',
+  domain: 'core',
   version: '0.1.0',
   render: MultipleChoiceComponent,
+  learningIntents: [LearningIntent.Assess],
+  capabilities: {
+    supportsKeyboard: true, supportsScreenReader: true, supportsHints: true,
+    supportsRetry: true, supportsScoring: true, supportsTouch: true,
+    supportsMouse: true, supportsAnalytics: true, supportsRewards: true,
+    supportsAccessibility: true, supportsOffline: true,
+  },
+  accessibility: {
+    highContrast: true, keyboardOnly: true, screenReader: true, tts: true,
+    focusManagement: true, ariaSupport: true,
+  },
+  analytics: {
+    trackAttempts: true, trackCompletionTime: true, trackSuccessRate: true, trackMistakes: true,
+  },
+  reward: { completionXP: 10, confetti: true, positiveMessage: 'Correct!' },
+  ai: {
+    difficulty: 'medium', estimatedMinutes: 3, bloomsLevel: 'remember',
+    cognitiveLoad: 'low', subjectTags: ['general'],
+    authoringPrompt: 'Create a multiple-choice question with 3-4 options and one correct answer',
+  },
+  icon: 'circle-check',
+  keywords: ['quiz', 'test', 'select', 'options', 'choice'],
+  status: 'stable',
 };
 
-const LegacyChoiceWidget: WidgetDefinition = {
+const LegacyChoiceWidget: WidgetDefinitionV2 = {
   id: 'open-edu.multiple-choice-practice',
+  name: 'Multiple Choice Practice',
+  description: 'Select the correct answer from a list of options',
+  domain: 'core',
   version: '0.1.0',
   render: MultipleChoiceComponent,
+  learningIntents: [LearningIntent.Practice],
+  capabilities: MultipleChoiceWidget.capabilities,
+  accessibility: MultipleChoiceWidget.accessibility,
+  analytics: MultipleChoiceWidget.analytics,
+  reward: MultipleChoiceWidget.reward,
+  ai: MultipleChoiceWidget.ai,
+  icon: MultipleChoiceWidget.icon,
+  keywords: MultipleChoiceWidget.keywords,
+  status: 'deprecated',
+  deprecated: true,
+  replacement: 'core.multiple-choice',
 };
 
 export { MultipleChoiceWidget as multipleChoice };

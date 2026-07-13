@@ -20,7 +20,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
 
 describe('ChartReader widget definition', () => {
   it('has correct widget id', () => {
-    expect(chartReader.id).toBe('open-edu.chart-reader');
+    expect(chartReader.id).toBe('core.chart-reader');
   });
 
   it('has a render function', () => {
