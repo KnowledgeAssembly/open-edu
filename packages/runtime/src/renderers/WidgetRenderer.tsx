@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
-import { useRemoteWidget } from '@open-edu/widgets';
+import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import type { WidgetAnswer } from '@open-edu/schemas';
@@ -46,9 +46,9 @@ class WidgetErrorBoundary extends Component<
 }
 
 function resolveWidgetId(node: { type: string; widget?: string }): string {
-  if (node.type === 'custom' && node.widget) return node.widget;
-  if (node.type === 'exercise') return node.widget ?? 'exercise';
-  return 'exercise';
+  if (node.type === 'custom' && node.widget) return resolveAlias(node.widget);
+  if (node.type === 'exercise') return resolveAlias(node.widget ?? 'exercise');
+  return resolveAlias('exercise');
 }
 
 interface RemoteNode {
