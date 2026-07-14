@@ -4,6 +4,7 @@ import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
+import { WidgetError } from '../WidgetError';
 
 const cardSchema = z.object({
   front: z.string().min(1),
@@ -104,7 +105,7 @@ function FlashcardComponent(props: {
         cardIndex: currentIndex,
       });
       if (currentIndex < totalCards - 1) {
-        setCurrentIndex(currentIndex + 1);
+        setCurrentIndex((prev) => prev + 1);
         setShowHint(false);
       } else {
         const score = ((correctCards.length + (isCorrect ? 1 : 0)) / totalCards) * 100;
@@ -130,15 +131,7 @@ function FlashcardComponent(props: {
   }, [incorrectCards]);
 
   if (!parsed.success || !currentCard) {
-    return (
-      <div
-        role="alert"
-        data-testid="widget-config-error"
-        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
-      >
-        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
-      </div>
-    );
+    return <WidgetError />;
   }
 
   if (isObserve) {

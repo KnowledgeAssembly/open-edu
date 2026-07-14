@@ -4,6 +4,7 @@ import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
+import { WidgetError } from '../WidgetError';
 
 const regionSchema = z.object({
   id: z.string(),
@@ -116,21 +117,19 @@ function SocialMapComponent(props: {
   }, []);
 
   if (!parsed.success) {
-    return (
-      <div
-        role="alert"
-        data-testid="widget-config-error"
-        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
-      >
-        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
-      </div>
-    );
+    return <WidgetError />;
   }
 
   const config = parsed.data;
 
   const selected = config.regions.find((r) => r.id === selectedRegion);
   const hovered = config.regions.find((r) => r.id === hoveredRegion);
+
+  const viewBoxWidth = 600;
+  const viewBoxHeight = 400;
+  const regionWidth = 80;
+  const totalRegions = config.regions.length;
+  const fallbackSpacing = Math.min(regionWidth + 20, (viewBoxWidth - 40) / totalRegions);
 
   return (
     <div role="group" aria-label={config.title ?? 'Interactive map'} data-testid="social-map">
@@ -199,9 +198,9 @@ function SocialMapComponent(props: {
                 />
               ) : (
                 <rect
-                  x={config.regions.indexOf(region) * 100}
-                  y={100}
-                  width={80}
+                  x={20 + config.regions.indexOf(region) * fallbackSpacing}
+                  y={viewBoxHeight / 2 - 40}
+                  width={regionWidth}
                   height={80}
                   rx={4}
                   fill={region.color ?? 'var(--oe-color-primary-container, #e8def8)'}
@@ -215,8 +214,8 @@ function SocialMapComponent(props: {
               )}
               {config.labels && (
                 <text
-                  x={region.path ? 300 : config.regions.indexOf(region) * 100 + 40}
-                  y={region.path ? 200 : 140}
+                  x={region.path ? 300 : 20 + config.regions.indexOf(region) * fallbackSpacing + regionWidth / 2}
+                  y={region.path ? 200 : viewBoxHeight / 2}
                   textAnchor="middle"
                   fill="var(--oe-color-on-surface, #1c1b1f)"
                   fontSize={12}

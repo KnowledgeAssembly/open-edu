@@ -4,6 +4,7 @@ import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
+import { WidgetError } from '../WidgetError';
 
 const markerSchema = z.object({
   value: z.number(),
@@ -64,15 +65,7 @@ function NumberLineComponent(props: {
   });
 
   if (!parsed.success) {
-    return (
-      <div
-        role="alert"
-        data-testid="widget-config-error"
-        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
-      >
-        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
-      </div>
-    );
+    return <WidgetError />;
   }
 
   const { min, max, step, markers, showLabels, showGrid, mode, target, tolerance } = parsed.data;

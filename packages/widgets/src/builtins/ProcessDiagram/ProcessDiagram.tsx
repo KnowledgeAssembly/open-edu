@@ -4,6 +4,7 @@ import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
+import { WidgetError } from '../WidgetError';
 
 const nodeSchema = z.object({
   id: z.string(),
@@ -113,7 +114,12 @@ function ProcessDiagramComponent(props: {
   });
 
   const containerWidth = 600;
-  const containerHeight = Math.max(300, (parsed?.data?.nodes.length ?? 2) * 80);
+  const nodeCount = parsed?.data?.nodes.length ?? 2;
+  const layoutType = parsed?.data?.layout ?? 'horizontal';
+  const containerHeight =
+    layoutType === 'cycle' || layoutType === 'radial'
+      ? Math.max(300, nodeCount * 60)
+      : Math.max(300, nodeCount * 80);
 
   const positions = useMemo(() => {
     if (!parsed.success) return new Map();
@@ -140,15 +146,7 @@ function ProcessDiagramComponent(props: {
   }, [parsed, revealedNodes, emitInteraction, complete]);
 
   if (!parsed.success) {
-    return (
-      <div
-        role="alert"
-        data-testid="widget-config-error"
-        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
-      >
-        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
-      </div>
-    );
+    return <WidgetError />;
   }
 
   const config = parsed.data;
