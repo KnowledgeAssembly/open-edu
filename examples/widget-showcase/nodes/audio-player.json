@@ -1,0 +1,21 @@
+{
+  "type": "exercise",
+  "title": "Audio Player",
+  "widget": "core.audio-player",
+  "config": {
+    "audio": "assets/audio/sample-audio.wav",
+    "title": "Introduction to the Water Cycle",
+    "description": "Listen to this educational audio about the water cycle and its key stages.",
+    "transcript": "The water cycle is the continuous movement of water through Earth's systems. Water evaporates from oceans and lakes, rises into the atmosphere, condenses into clouds, and falls back as precipitation. This process sustains all life on Earth.",
+    "captions": [
+      { "start": 0, "end": 3, "text": "The water cycle is the continuous" },
+      { "start": 3, "end": 6, "text": "movement of water through Earth's systems." },
+      { "start": 6, "end": 9, "text": "Water evaporates from oceans and lakes," }
+    ],
+    "duration": 10,
+    "showTranscript": true,
+    "waveform": true,
+    "bookmarks": true,
+    "interactive": false
+  }
+}

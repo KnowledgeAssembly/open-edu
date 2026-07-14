@@ -1,0 +1,21 @@
+{
+  "type": "exercise",
+  "title": "Number Line",
+  "widget": "math.number-line",
+  "config": {
+    "min": -10,
+    "max": 10,
+    "step": 1,
+    "target": 3.5,
+    "markers": [
+      { "value": -5, "label": "-5", "color": "var(--oe-color-error)" },
+      { "value": 0, "label": "0", "color": "var(--oe-color-primary)" },
+      { "value": 7, "label": "7", "color": "var(--oe-color-success)" }
+    ],
+    "showLabels": true,
+    "showGrid": true,
+    "mode": "decimals",
+    "tolerance": 0.5,
+    "interactive": false
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "exercise",
+  "title": "Process Diagram",
+  "widget": "science.process-diagram",
+  "config": {
+    "nodes": [
+      {
+        "id": "evaporation",
+        "title": "Evaporation",
+        "description": "Sun heats water, turning it into vapor",
+        "icon": "☀️"
+      },
+      {
+        "id": "condensation",
+        "title": "Condensation",
+        "description": "Water vapor cools and forms clouds",
+        "icon": "☁️"
+      },
+      {
+        "id": "precipitation",
+        "title": "Precipitation",
+        "description": "Water falls as rain, snow, or hail",
+        "icon": "🌧️"
+      },
+      {
+        "id": "collection",
+        "title": "Collection",
+        "description": "Water gathers in oceans, lakes, and rivers",
+        "icon": "🌊"
+      },
+      {
+        "id": "transpiration",
+        "title": "Transpiration",
+        "description": "Plants release water vapor into the air",
+        "icon": "🌿"
+      }
+    ],
+    "connections": [
+      { "from": "evaporation", "to": "condensation", "label": "vapor rises" },
+      { "from": "condensation", "to": "precipitation", "label": "clouds form" },
+      { "from": "precipitation", "to": "collection", "label": "water falls" },
+      { "from": "collection", "to": "evaporation", "type": "loop", "label": "cycle repeats" },
+      { "from": "transpiration", "to": "condensation", "type": "dashed", "label": "water vapor" }
+    ],
+    "layout": "cycle",
+    "title": "The Water Cycle",
+    "stepByStep": true,
+    "interactive": false
+  }
+}

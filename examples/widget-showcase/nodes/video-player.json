@@ -1,0 +1,23 @@
+{
+  "type": "exercise",
+  "title": "Video Player",
+  "widget": "core.video-player",
+  "config": {
+    "video": "assets/video/water-cycle.mp4",
+    "poster": "assets/images/water-cycle-poster.png",
+    "title": "The Water Cycle Explained",
+    "transcript": "This animated diagram shows how water moves through the environment. The sun heats water in oceans and lakes, causing evaporation. Water vapor rises, cools, and condenses into clouds. When clouds become heavy, precipitation falls as rain or snow.",
+    "chapters": [
+      { "time": 0, "title": "Evaporation" },
+      { "time": 1, "title": "Condensation" },
+      { "time": 2, "title": "Precipitation" }
+    ],
+    "captions": [
+      { "start": 0, "end": 2, "text": "The sun heats water in oceans and lakes" },
+      { "start": 2, "end": 3, "text": "causing evaporation." }
+    ],
+    "showTranscript": true,
+    "allowFullscreen": true,
+    "interactive": false
+  }
+}

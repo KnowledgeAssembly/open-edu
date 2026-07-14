@@ -20,7 +20,13 @@
     "nodes/hotspot.json": { "onComplete": "nodes/timeline.json" },
     "nodes/timeline.json": { "onComplete": "nodes/label-diagram.json" },
     "nodes/label-diagram.json": { "onComplete": "nodes/image-label.json" },
-    "nodes/image-label.json": { "onComplete": "nodes/outro.md" },
+    "nodes/image-label.json": { "onComplete": "nodes/audio-player.json" },
+    "nodes/audio-player.json": { "onComplete": "nodes/video-player.json" },
+    "nodes/video-player.json": { "onComplete": "nodes/flashcard.json" },
+    "nodes/flashcard.json": { "onComplete": "nodes/process-diagram.json" },
+    "nodes/process-diagram.json": { "onComplete": "nodes/number-line.json" },
+    "nodes/number-line.json": { "onComplete": "nodes/social-map.json" },
+    "nodes/social-map.json": { "onComplete": "nodes/outro.md" },
     "nodes/outro.md": { "onComplete": "COMPLETED" }
   }
 }

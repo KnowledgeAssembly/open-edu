@@ -1,6 +1,6 @@
 # Widget Showcase
 
-Welcome to the Widget Showcase! This package demonstrates all **14 built-in widgets** in the Open-Edu runtime.
+Welcome to the Widget Showcase! This package demonstrates all **27 built-in widgets** in the Open-Edu runtime.
 
 Each widget is a different type of interactive exercise. Follow along to see:
 
@@ -18,5 +18,17 @@ Each widget is a different type of interactive exercise. Follow along to see:
 - **Chart Reader** — Read values from bar charts
 - **Clock Time** — Read and set analog clocks
 - **Measurement Scale** — Read measurements on scales
+- **Callout** — Highlighted information callouts
+- **Image Compare** — Side-by-side image comparison
+- **Hotspot** — Clickable regions on images
+- **Timeline** — Horizontal timeline visualization
+- **Label Diagram** — Label parts of a diagram
+- **Image Label** — Label parts of an image
+- **Audio Player** — Play audio with transcript and captions
+- **Video Player** — Play video with chapters and transcript
+- **Flashcard** — Flip cards for vocabulary review
+- **Process Diagram** — Visual explanation of systems
+- **Number Line** — Interactive number line
+- **Interactive Map** — World map with regions and markers
 
 Click **Next** to begin!
