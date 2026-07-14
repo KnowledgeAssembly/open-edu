@@ -1,0 +1,11 @@
+{
+  "type": "exercise",
+  "title": "Did you know?",
+  "widget": "core.callout",
+  "config": {
+    "type": "tip",
+    "title": "Did you know?",
+    "content": "Plants make food using sunlight through photosynthesis.",
+    "icon": "🌿"
+  }
+}

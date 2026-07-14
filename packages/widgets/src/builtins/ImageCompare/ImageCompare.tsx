@@ -1,45 +1,715 @@
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { z } from 'zod';
 import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
+import { Button } from '@open-edu/design-system';
+import { useObserveMode } from '../../use-observe-mode';
 
-function ImageCompareComponent() {
+const imageCompareSchema = z.object({
+  leftImage: z.string().min(1),
+  rightImage: z.string().min(1),
+  leftLabel: z.string().optional(),
+  rightLabel: z.string().optional(),
+  mode: z.enum(['slider', 'side-by-side', 'overlay', 'before-after']).default('slider'),
+  caption: z.string().optional(),
+  altText: z.object({
+    left: z.string().min(1),
+    right: z.string().min(1),
+  }),
+  showLabels: z.boolean().optional().default(true),
+  sliderPosition: z.number().min(0).max(100).optional().default(50),
+  interactive: z.boolean().optional().default(false),
+});
+
+const ImageCompareStateSchema = z.object({
+  sliderPosition: z.number(),
+});
+
+function ImageCompareComponent(props: {
+  nodeId: string;
+  config: Record<string, unknown>;
+  emitInteraction: (data: Record<string, unknown>) => void;
+  complete: (score?: number, state?: unknown) => void;
+  storedState?: unknown;
+}) {
+  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const parsed = imageCompareSchema.safeParse(rawConfig);
+  const content = parsed.success ? parsed.data : null;
+  const hasValidContent = parsed.success && content;
+
+  const parsedState = useMemo(() => {
+    const result = ImageCompareStateSchema.safeParse(storedState);
+    return result.success ? result.data : null;
+  }, [storedState]);
+
+  const initialPos = parsedState?.sliderPosition ?? content?.sliderPosition ?? 50;
+  const [sliderPos, setSliderPos] = useState(initialPos);
+  const [overlayOpacity, setOverlayOpacity] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const [localAcknowledged, setLocalAcknowledged] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const isObserve = !!(content?.interactive !== true && hasValidContent);
+
+  const { handleAcknowledge: handleObserveAcknowledge, showAcknowledgeButton } = useObserveMode({
+    isObserve,
+    onComplete: complete,
+    onInteract: emitInteraction,
+    widgetId: 'core.image-compare',
+  });
+
+  const handleGotIt = useCallback(() => {
+    emitInteraction({
+      type: 'widget.interaction',
+      action: 'acknowledge',
+      widgetId: 'core.image-compare',
+    });
+    complete(100, { sliderPosition: sliderPos });
+    setLocalAcknowledged(true);
+  }, [complete, emitInteraction, sliderPos]);
+
+  const updateSliderPosition = useCallback(
+    (clientX: number) => {
+      if (!containerRef.current || isObserve) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const pct = Math.round((x / rect.width) * 100);
+      setSliderPos(Math.max(0, Math.min(100, pct)));
+    },
+    [isObserve],
+  );
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (isObserve) return;
+      e.preventDefault();
+      setIsDragging(true);
+      updateSliderPosition(e.clientX);
+    },
+    [isObserve, updateSliderPosition],
+  );
+
+  useEffect(() => {
+    if (!isDragging || isObserve) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      updateSliderPosition(e.clientX);
+    };
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      emitInteraction({
+        type: 'widget.interaction',
+        action: 'slider-drag',
+        position: sliderPos,
+        widgetId: 'core.image-compare',
+      });
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isObserve, updateSliderPosition, emitInteraction, sliderPos]);
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (isObserve) return;
+      updateSliderPosition(e.touches[0]!.clientX);
+    },
+    [isObserve, updateSliderPosition],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (isObserve) return;
+    setIsDragging(false);
+    emitInteraction({
+      type: 'widget.interaction',
+      action: 'slider-drag',
+      position: sliderPos,
+      widgetId: 'core.image-compare',
+    });
+  }, [isObserve, emitInteraction, sliderPos]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (isObserve) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSliderPos((p) => Math.min(100, p + 5));
+        emitInteraction({
+          type: 'widget.interaction',
+          action: 'slider-keyboard',
+          position: Math.min(100, sliderPos + 5),
+          widgetId: 'core.image-compare',
+        });
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSliderPos((p) => Math.max(0, p - 5));
+        emitInteraction({
+          type: 'widget.interaction',
+          action: 'slider-keyboard',
+          position: Math.max(0, sliderPos - 5),
+          widgetId: 'core.image-compare',
+        });
+      }
+    },
+    [isObserve, emitInteraction, sliderPos],
+  );
+
+  const handleOverlayChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isObserve) return;
+      const val = Number(e.target.value);
+      setOverlayOpacity(val);
+      emitInteraction({
+        type: 'widget.interaction',
+        action: 'overlay-adjust',
+        opacity: val,
+        widgetId: 'core.image-compare',
+      });
+    },
+    [isObserve, emitInteraction],
+  );
+
+  if (!hasValidContent) {
+    return (
+      <div role="alert" data-testid="widget-config-error">
+        <p>This activity could not be loaded.</p>
+      </div>
+    );
+  }
+
+  const mode = content.mode;
+  const leftSrc = `/assets/${content.leftImage.replace(/^assets\//, '')}`;
+  const rightSrc = `/assets/${content.rightImage.replace(/^assets\//, '')}`;
+  const compositeAriaLabel = [
+    content.caption,
+    content.leftLabel && `Left: ${content.leftLabel}`,
+    content.rightLabel && `Right: ${content.rightLabel}`,
+    content.altText.left,
+    content.altText.right,
+  ]
+    .filter(Boolean)
+    .join('. ');
+
+  const finalAcknowledged = parsedState ? true : localAcknowledged;
+
+  const renderAcknowledge = () => {
+    if (isObserve) {
+      if (showAcknowledgeButton && !finalAcknowledged) {
+        return (
+          <div style={{ marginTop: '0.75rem' }}>
+            <Button
+              variant="default"
+              onClick={handleObserveAcknowledge}
+              data-testid="observe-acknowledge"
+            >
+              Mark as seen \u2713
+            </Button>
+          </div>
+        );
+      }
+      return (
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="observe-complete"
+          style={{ marginTop: '0.75rem' }}
+        >
+          <p>Content acknowledged.</p>
+        </div>
+      );
+    }
+    if (!finalAcknowledged) {
+      return (
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="default" onClick={handleGotIt} data-testid="image-compare-got-it">
+            Got it \u2713
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div
+        role="status"
+        aria-live="assertive"
+        data-testid="image-compare-acknowledged"
+        style={{ marginTop: '0.75rem' }}
+      >
+        <p>Acknowledged.</p>
+      </div>
+    );
+  };
+
+  if (mode === 'side-by-side') {
+    return (
+      <div data-testid="image-compare" role="img" aria-label={compositeAriaLabel}>
+        {content.caption && (
+          <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{content.caption}</p>
+        )}
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <img
+              src={leftSrc}
+              alt={content.altText.left}
+              data-testid="image-compare-left"
+              style={{ maxHeight: '400px', objectFit: 'contain', width: '100%' }}
+            />
+            {content.showLabels && content.leftLabel && (
+              <p style={{ textAlign: 'center', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                {content.leftLabel}
+              </p>
+            )}
+          </div>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <img
+              src={rightSrc}
+              alt={content.altText.right}
+              data-testid="image-compare-right"
+              style={{ maxHeight: '400px', objectFit: 'contain', width: '100%' }}
+            />
+            {content.showLabels && content.rightLabel && (
+              <p style={{ textAlign: 'center', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                {content.rightLabel}
+              </p>
+            )}
+          </div>
+        </div>
+        {renderAcknowledge()}
+      </div>
+    );
+  }
+
+  if (mode === 'overlay') {
+    const displayOpacity = isObserve ? 50 : overlayOpacity;
+    return (
+      <div data-testid="image-compare" role="img" aria-label={compositeAriaLabel}>
+        {content.caption && (
+          <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{content.caption}</p>
+        )}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            minHeight: '200px',
+          }}
+        >
+          <img
+            src={rightSrc}
+            alt={content.altText.right}
+            style={{ width: '100%', display: 'block', objectFit: 'contain', maxHeight: '400px' }}
+          />
+          <img
+            src={leftSrc}
+            alt={content.altText.left}
+            data-testid="image-compare-overlay-top"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              opacity: displayOpacity / 100,
+            }}
+          />
+        </div>
+        {!isObserve && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <label
+              htmlFor={`overlay-slider-${props.nodeId}`}
+              style={{ fontSize: '0.875rem', display: 'block', marginBottom: '0.25rem' }}
+            >
+              Adjust overlay: {displayOpacity}%
+            </label>
+            <input
+              id={`overlay-slider-${props.nodeId}`}
+              type="range"
+              min={0}
+              max={100}
+              value={displayOpacity}
+              onChange={handleOverlayChange}
+              data-testid="image-compare-overlay-slider"
+              aria-label={`Overlay opacity ${displayOpacity} percent`}
+              style={{ width: '100%' }}
+            />
+          </div>
+        )}
+        {renderAcknowledge()}
+      </div>
+    );
+  }
+
+  const displaySliderPos = isObserve ? content.sliderPosition : sliderPos;
+
+  if (mode === 'before-after') {
+    return (
+      <div data-testid="image-compare" role="img" aria-label={compositeAriaLabel}>
+        {content.caption && (
+          <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{content.caption}</p>
+        )}
+        <div
+          ref={containerRef}
+          data-testid="image-compare-slider"
+          role="slider"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={displaySliderPos}
+          aria-label="Image comparison slider"
+          tabIndex={isObserve ? -1 : 0}
+          onKeyDown={handleKeyDown}
+          onMouseDown={handleMouseDown}
+          onTouchStart={
+            isObserve
+              ? undefined
+              : (e) => {
+                  setIsDragging(true);
+                  updateSliderPosition(e.touches[0]!.clientX);
+                }
+          }
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            position: 'relative',
+            width: '100%',
+            minHeight: '200px',
+            overflow: 'hidden',
+            cursor: isObserve ? 'default' : 'ew-resize',
+            userSelect: 'none',
+          }}
+        >
+          <img
+            src={leftSrc}
+            alt={content.altText.left}
+            style={{
+              width: '100%',
+              display: 'block',
+              objectFit: 'contain',
+              maxHeight: '400px',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              clipPath: `inset(0 ${100 - displaySliderPos}% 0 0)`,
+            }}
+          >
+            <img
+              src={rightSrc}
+              alt={content.altText.right}
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'block',
+                objectFit: 'contain',
+                maxHeight: '400px',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: `${displaySliderPos}%`,
+              width: '3px',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+              transform: 'translateX(-50%)',
+              zIndex: 2,
+            }}
+          />
+          {content.showLabels && (
+            <>
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '0.5rem',
+                  left: '0.5rem',
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: '#ffffff',
+                  padding: '0.125rem 0.5rem',
+                  borderRadius: '0.25rem',
+                  fontSize: '0.75rem',
+                  zIndex: 3,
+                }}
+              >
+                {content.leftLabel ?? 'Before'}
+              </span>
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '0.5rem',
+                  right: '0.5rem',
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: '#ffffff',
+                  padding: '0.125rem 0.5rem',
+                  borderRadius: '0.25rem',
+                  fontSize: '0.75rem',
+                  zIndex: 3,
+                }}
+              >
+                {content.rightLabel ?? 'After'}
+              </span>
+            </>
+          )}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: `${displaySliderPos}%`,
+              transform: 'translate(-50%, -50%)',
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+              zIndex: 3,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: isObserve ? 'default' : 'ew-resize',
+            }}
+          >
+            <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>
+          </div>
+        </div>
+        <div role="status" aria-live="polite" data-testid="slider-position">
+          <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Position: {displaySliderPos}%</p>
+        </div>
+        {renderAcknowledge()}
+      </div>
+    );
+  }
+
+  // slider mode (default)
   return (
-    <div role="region" aria-label="Image Compare">
-      <p>Image Compare widget — coming soon</p>
+    <div data-testid="image-compare" role="img" aria-label={compositeAriaLabel}>
+      {content.caption && (
+        <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{content.caption}</p>
+      )}
+      <div
+        ref={containerRef}
+        data-testid="image-compare-slider"
+        role="slider"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={displaySliderPos}
+        aria-label="Image comparison slider"
+        tabIndex={isObserve ? -1 : 0}
+        onKeyDown={handleKeyDown}
+        onMouseDown={handleMouseDown}
+        onTouchStart={
+          isObserve
+            ? undefined
+            : (e) => {
+                setIsDragging(true);
+                updateSliderPosition(e.touches[0]!.clientX);
+              }
+        }
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          position: 'relative',
+          width: '100%',
+          minHeight: '200px',
+          overflow: 'hidden',
+          cursor: isObserve ? 'default' : 'ew-resize',
+          userSelect: 'none',
+        }}
+      >
+        <img
+          src={leftSrc}
+          alt={content.altText.left}
+          data-testid="image-compare-left"
+          style={{
+            width: '100%',
+            display: 'block',
+            objectFit: 'contain',
+            maxHeight: '400px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            clipPath: `inset(0 ${100 - displaySliderPos}% 0 0)`,
+          }}
+        >
+          <img
+            src={rightSrc}
+            alt={content.altText.right}
+            data-testid="image-compare-right"
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              objectFit: 'contain',
+              maxHeight: '400px',
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: `${displaySliderPos}%`,
+            width: '3px',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+            transform: 'translateX(-50%)',
+            zIndex: 2,
+          }}
+        />
+        {content.showLabels && (
+          <>
+            <span
+              style={{
+                position: 'absolute',
+                top: '0.5rem',
+                left: '0.5rem',
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                color: '#ffffff',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '0.25rem',
+                fontSize: '0.75rem',
+                zIndex: 3,
+              }}
+            >
+              {content.leftLabel ?? 'Left'}
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                color: '#ffffff',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '0.25rem',
+                fontSize: '0.75rem',
+                zIndex: 3,
+              }}
+            >
+              {content.rightLabel ?? 'Right'}
+            </span>
+          </>
+        )}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: `${displaySliderPos}%`,
+            transform: 'translate(-50%, -50%)',
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+            zIndex: 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: isObserve ? 'default' : 'ew-resize',
+            pointerEvents: 'none',
+          }}
+        >
+          <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>
+        </div>
+      </div>
+      <div role="status" aria-live="polite" data-testid="slider-position">
+        <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Position: {displaySliderPos}%</p>
+      </div>
+      {renderAcknowledge()}
     </div>
   );
 }
 
 const ImageCompareWidget: WidgetDefinitionV2 = {
   id: 'core.image-compare',
-  version: '0.1.0',
+  version: '1.0.0',
   name: 'Image Compare',
   description: 'Compare two images side by side to identify differences or similarities',
   domain: 'core',
+  render: ImageCompareComponent,
   learningIntents: [LearningIntent.Compare, LearningIntent.Observe],
   capabilities: {
+    supportsObserveMode: true,
     supportsKeyboard: true,
     supportsScreenReader: true,
     supportsOffline: true,
+    supportsTouch: true,
+    supportsMouse: true,
+    supportsAnalytics: true,
+    supportsRewards: true,
+    supportsAccessibility: true,
   },
   accessibility: {
     highContrast: true,
+    keyboardOnly: true,
     screenReader: true,
+    focusManagement: true,
     ariaSupport: true,
   },
-  analytics: {},
-  reward: {},
+  analytics: {
+    trackAttempts: true,
+    trackCompletionTime: true,
+    trackSuccessRate: true,
+  },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-image-compare',
+    positiveMessage: 'Images compared!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 2,
     bloomsLevel: 'analyze',
     cognitiveLoad: 'low',
-    subjectTags: ['general'],
+    recommendedAge: [5, 18],
+    readingLevel: 'grade-2',
+    subjectTags: ['general', 'visual'],
+    learningObjectives: [
+      'Identify differences between two similar images',
+      'Observe and compare visual details systematically',
+    ],
+    commonMisconceptions: ['Focusing only on obvious differences while missing subtle ones'],
+    generationHints: [
+      'Provide images with clear, meaningful differences for comparison',
+      'Use alt text that describes the key differences between images',
+      'Keep images in the same orientation and scale for fair comparison',
+    ],
     authoringPrompt: 'Create an image comparison activity',
+    exampleConfigs: [
+      {
+        leftImage: 'assets/images/healthy-leaf.png',
+        rightImage: 'assets/images/diseased-leaf.png',
+        leftLabel: 'Healthy Leaf',
+        rightLabel: 'Diseased Leaf',
+        mode: 'slider',
+        altText: { left: 'A healthy green leaf', right: 'A diseased leaf with brown spots' },
+        caption: 'Compare a healthy leaf with a diseased one',
+      },
+    ],
   },
   icon: 'columns-2',
-  keywords: ['image', 'compare', 'difference', 'side-by-side'],
-  status: 'experimental',
-  render: ImageCompareComponent,
+  keywords: ['image', 'compare', 'difference', 'side-by-side', 'slider', 'overlay'],
+  status: 'stable',
 };
 
 export { ImageCompareWidget as imageCompare };

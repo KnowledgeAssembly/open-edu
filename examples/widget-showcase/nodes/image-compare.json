@@ -1,0 +1,17 @@
+{
+  "type": "exercise",
+  "title": "Leaf Comparison",
+  "widget": "core.image-compare",
+  "config": {
+    "leftImage": "assets/images/healthy-leaf.png",
+    "rightImage": "assets/images/diseased-leaf.png",
+    "leftLabel": "Healthy Leaf",
+    "rightLabel": "Diseased Leaf",
+    "mode": "slider",
+    "altText": {
+      "left": "A healthy green leaf",
+      "right": "A diseased leaf with brown spots"
+    },
+    "caption": "Compare a healthy leaf with a diseased one"
+  }
+}

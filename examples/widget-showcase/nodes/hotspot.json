@@ -1,0 +1,25 @@
+{
+  "type": "exercise",
+  "title": "Identify Maharashtra",
+  "widget": "core.hotspot",
+  "config": {
+    "image": "assets/images/india-map.png",
+    "altText": "Map of India with states highlighted",
+    "hotspots": [
+      {
+        "id": "mh",
+        "x": 45,
+        "y": 55,
+        "radius": 8,
+        "label": "Maharashtra",
+        "correct": true,
+        "description": "Capital: Mumbai"
+      },
+      { "id": "ka", "x": 42, "y": 65, "radius": 8, "label": "Karnataka", "correct": false },
+      { "id": "dl", "x": 48, "y": 30, "radius": 8, "label": "Delhi", "correct": false }
+    ],
+    "mode": "single",
+    "interactive": true,
+    "hints": ["Look for the western coastal state"]
+  }
+}
