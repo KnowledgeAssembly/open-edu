@@ -8,7 +8,12 @@ function renderWidget(config: Record<string, unknown> = {}) {
   const emitInteraction = vi.fn();
   const complete = vi.fn();
   const result = render(
-    <WidgetComponent nodeId="test-node" config={config} emitInteraction={emitInteraction} complete={complete} />,
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
   );
   return { emitInteraction, complete, ...result };
 }

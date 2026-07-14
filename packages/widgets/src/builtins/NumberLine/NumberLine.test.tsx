@@ -8,7 +8,12 @@ function renderWidget(config: Record<string, unknown> = {}) {
   const emitInteraction = vi.fn();
   const complete = vi.fn();
   const result = render(
-    <WidgetComponent nodeId="test-node" config={config} emitInteraction={emitInteraction} complete={complete} />,
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
   );
   return { emitInteraction, complete, ...result };
 }
@@ -73,9 +78,7 @@ describe('NumberLine interactive mode', () => {
     const { emitInteraction } = renderWidget({ min: 0, max: 10, interactive: true });
     const svg = screen.getByTestId('number-line').querySelector('svg');
     fireEvent.click(svg!, { clientX: 300 });
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'place' }),
-    );
+    expect(emitInteraction).toHaveBeenCalledWith(expect.objectContaining({ action: 'place' }));
   });
 });
 

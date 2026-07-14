@@ -19,7 +19,10 @@ const numberLineSchema = z.object({
   markers: z.array(markerSchema).optional(),
   showLabels: z.boolean().optional().default(true),
   showGrid: z.boolean().optional().default(false),
-  mode: z.enum(['integers', 'decimals', 'fractions', 'negative', 'measurement']).optional().default('integers'),
+  mode: z
+    .enum(['integers', 'decimals', 'fractions', 'negative', 'measurement'])
+    .optional()
+    .default('integers'),
   interactive: z.boolean().optional().default(false),
   tolerance: z.number().optional().default(0.5),
 });
@@ -47,9 +50,10 @@ function NumberLineComponent(props: {
   }, [storedState]);
 
   const svgRef = useRef<SVGSVGElement>(null);
-  const [userValue, setUserValue] = useState<number | null>(null);
   const [placedMarkers, setPlacedMarkers] = useState<number[]>(parsedState?.placedMarkers ?? []);
-  const [answeredCorrectly, setAnsweredCorrectly] = useState(parsedState?.answeredCorrectly ?? false);
+  const [answeredCorrectly, setAnsweredCorrectly] = useState(
+    parsedState?.answeredCorrectly ?? false,
+  );
 
   const isObserve = parsed.success && !parsed.data.interactive;
   const { handleAcknowledge, showAcknowledgeButton } = useObserveMode({
@@ -59,7 +63,20 @@ function NumberLineComponent(props: {
     widgetId: 'math.number-line',
   });
 
-  const config = parsed.success ? parsed.data : { min: 0, max: 10, step: 1, showLabels: true, showGrid: false, mode: 'integers' as const, tolerance: 0.5 };
+  const config = parsed.success
+    ? parsed.data
+    : {
+        min: 0,
+        max: 10,
+        step: 1,
+        showLabels: true,
+        showGrid: false,
+        mode: 'integers' as const,
+        tolerance: 0.5,
+        interactive: false,
+        markers: undefined,
+        target: undefined,
+      };
   const { min, max, step, markers, showLabels, showGrid, mode, target, tolerance } = config;
 
   const svgWidth = 600;
@@ -88,7 +105,6 @@ function NumberLineComponent(props: {
       const rect = svg.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * svgWidth;
       const value = xToValue(x);
-      setUserValue(value);
       setPlacedMarkers((prev) => [...prev, value]);
 
       const isCorrect = target !== undefined && Math.abs(value - target) <= (tolerance ?? 0.5);
@@ -105,12 +121,25 @@ function NumberLineComponent(props: {
         complete(100, { placedMarkers: [...placedMarkers, value], answeredCorrectly: true });
       }
     },
-    [parsed, xToValue, target, tolerance, placedMarkers, answeredCorrectly, emitInteraction, complete],
+    [
+      parsed,
+      xToValue,
+      target,
+      tolerance,
+      placedMarkers,
+      answeredCorrectly,
+      emitInteraction,
+      complete,
+    ],
   );
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -135,7 +164,9 @@ function NumberLineComponent(props: {
   return (
     <div role="group" aria-label="Number line" data-testid="number-line">
       {target !== undefined && parsed.data.interactive && (
-        <p className="text-on-surface font-semibold mb-sm">Find {formatLabel(target)} on the number line</p>
+        <p className="text-on-surface mb-sm font-semibold">
+          Find {formatLabel(target)} on the number line
+        </p>
       )}
 
       <svg
@@ -148,25 +179,52 @@ function NumberLineComponent(props: {
         role={parsed.data.interactive ? 'application' : 'img'}
         aria-label={`Number line from ${min} to ${max}`}
       >
-        {showGrid && tickValues.map((v) => (
-          <line key={`grid-${v}`} x1={valueToX(v)} y1={10} x2={valueToX(v)} y2={LINE_HEIGHT - 10} stroke="var(--oe-color-outline-variant, #e0e0e0)" strokeWidth={1} />
-        ))}
+        {showGrid &&
+          tickValues.map((v) => (
+            <line
+              key={`grid-${v}`}
+              x1={valueToX(v)}
+              y1={10}
+              x2={valueToX(v)}
+              y2={LINE_HEIGHT - 10}
+              stroke="var(--oe-color-outline-variant, #e0e0e0)"
+              strokeWidth={1}
+            />
+          ))}
 
         <line
-          x1={lineStart} y1={LINE_HEIGHT / 2}
-          x2={lineEnd} y2={LINE_HEIGHT / 2}
+          x1={lineStart}
+          y1={LINE_HEIGHT / 2}
+          x2={lineEnd}
+          y2={LINE_HEIGHT / 2}
           stroke="var(--oe-color-on-surface, #1c1b1f)"
           strokeWidth={2}
         />
-        <polygon points={`${lineEnd},${LINE_HEIGHT / 2 - 5} ${lineEnd + 10},${LINE_HEIGHT / 2} ${lineEnd},${LINE_HEIGHT / 2 + 5}`} fill="var(--oe-color-on-surface, #1c1b1f)" />
+        <polygon
+          points={`${lineEnd},${LINE_HEIGHT / 2 - 5} ${lineEnd + 10},${LINE_HEIGHT / 2} ${lineEnd},${LINE_HEIGHT / 2 + 5}`}
+          fill="var(--oe-color-on-surface, #1c1b1f)"
+        />
 
         {tickValues.map((v) => {
           const x = valueToX(v);
           return (
             <g key={v}>
-              <line x1={x} y1={LINE_HEIGHT / 2 - 8} x2={x} y2={LINE_HEIGHT / 2 + 8} stroke="var(--oe-color-on-surface, #1c1b1f)" strokeWidth={2} />
+              <line
+                x1={x}
+                y1={LINE_HEIGHT / 2 - 8}
+                x2={x}
+                y2={LINE_HEIGHT / 2 + 8}
+                stroke="var(--oe-color-on-surface, #1c1b1f)"
+                strokeWidth={2}
+              />
               {showLabels && (
-                <text x={x} y={LINE_HEIGHT / 2 + 25} textAnchor="middle" fill="var(--oe-color-on-surface, #1c1b1f)" fontSize={12}>
+                <text
+                  x={x}
+                  y={LINE_HEIGHT / 2 + 25}
+                  textAnchor="middle"
+                  fill="var(--oe-color-on-surface, #1c1b1f)"
+                  fontSize={12}
+                >
                   {formatLabel(v)}
                 </text>
               )}
@@ -175,15 +233,41 @@ function NumberLineComponent(props: {
         })}
 
         {markers?.map((m, i) => (
-          <circle key={`marker-${i}`} cx={valueToX(m.value)} cy={LINE_HEIGHT / 2} r={6} fill={m.color ?? 'var(--oe-color-primary, #6750a4)'} aria-label={m.label ?? formatLabel(m.value)} />
+          <circle
+            key={`marker-${i}`}
+            cx={valueToX(m.value)}
+            cy={LINE_HEIGHT / 2}
+            r={6}
+            fill={m.color ?? 'var(--oe-color-primary, #6750a4)'}
+            aria-label={m.label ?? formatLabel(m.value)}
+          />
         ))}
 
         {target !== undefined && isObserve && (
-          <circle cx={valueToX(target)} cy={LINE_HEIGHT / 2} r={8} fill="var(--oe-color-primary, #6750a4)" stroke="var(--oe-color-on-primary, #fff)" strokeWidth={2} aria-label={`Target: ${formatLabel(target)}`} />
+          <circle
+            cx={valueToX(target)}
+            cy={LINE_HEIGHT / 2}
+            r={8}
+            fill="var(--oe-color-primary, #6750a4)"
+            stroke="var(--oe-color-on-primary, #fff)"
+            strokeWidth={2}
+            aria-label={`Target: ${formatLabel(target)}`}
+          />
         )}
 
         {placedMarkers.map((v, i) => (
-          <circle key={`placed-${i}`} cx={valueToX(v)} cy={LINE_HEIGHT / 2} r={6} fill={answeredCorrectly && v === target ? 'var(--oe-color-success, #16a34a)' : 'var(--oe-color-error, #dc2626)'} aria-label={`Placed at ${formatLabel(v)}`} />
+          <circle
+            key={`placed-${i}`}
+            cx={valueToX(v)}
+            cy={LINE_HEIGHT / 2}
+            r={6}
+            fill={
+              answeredCorrectly && v === target
+                ? 'var(--oe-color-success, #16a34a)'
+                : 'var(--oe-color-error, #dc2626)'
+            }
+            aria-label={`Placed at ${formatLabel(v)}`}
+          />
         ))}
       </svg>
 
@@ -264,12 +348,22 @@ const NumberLineWidget: WidgetDefinitionV2 = {
     authoringPrompt: 'Create a number line activity for locating or comparing numbers',
     exampleConfigs: [
       {
-        min: 0, max: 10, step: 1, target: 7,
-        showLabels: true, interactive: true, mode: 'integers',
+        min: 0,
+        max: 10,
+        step: 1,
+        target: 7,
+        showLabels: true,
+        interactive: true,
+        mode: 'integers',
       },
       {
-        min: -5, max: 5, step: 1, target: -3,
-        showLabels: true, interactive: true, mode: 'negative',
+        min: -5,
+        max: 5,
+        step: 1,
+        target: -3,
+        showLabels: true,
+        interactive: true,
+        mode: 'negative',
       },
     ],
   },

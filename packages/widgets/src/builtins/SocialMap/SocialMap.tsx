@@ -61,7 +61,9 @@ function SocialMapComponent(props: {
     return result.success ? result.data : null;
   }, [storedState]);
 
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(parsedState?.selectedRegion ?? null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(
+    parsedState?.selectedRegion ?? null,
+  );
   const [foundRegions, setFoundRegions] = useState<string[]>(parsedState?.foundRegions ?? []);
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(parsedState?.zoomLevel ?? 1);
@@ -74,18 +76,9 @@ function SocialMapComponent(props: {
     widgetId: 'social.map',
   });
 
-  if (!parsed.success) {
-    return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
-        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
-      </div>
-    );
-  }
-
-  const config = parsed.data;
-
   const handleRegionClick = useCallback(
     (regionId: string) => {
+      if (!parsed.success || !parsed.data) return;
       if (!parsed.data.interactive) return;
       setSelectedRegion(regionId);
 
@@ -122,28 +115,53 @@ function SocialMapComponent(props: {
     setZoomLevel((z) => Math.max(z - 0.25, 0.5));
   }, []);
 
+  if (!parsed.success) {
+    return (
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
+        <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
+      </div>
+    );
+  }
+
+  const config = parsed.data;
+
   const selected = config.regions.find((r) => r.id === selectedRegion);
   const hovered = config.regions.find((r) => r.id === hoveredRegion);
 
   return (
     <div role="group" aria-label={config.title ?? 'Interactive map'} data-testid="social-map">
-      {config.title && <h3 className="text-on-surface font-semibold mb-sm">{config.title}</h3>}
+      {config.title && <h3 className="text-on-surface mb-sm font-semibold">{config.title}</h3>}
 
       {config.interactive && parsed.data.targetRegion && (
         <p className="text-on-surface/70 mb-sm text-sm">
-          Find: {config.regions.find((r) => r.id === parsed.data.targetRegion)?.name ?? parsed.data.targetRegion}
+          Find:{' '}
+          {config.regions.find((r) => r.id === parsed.data.targetRegion)?.name ??
+            parsed.data.targetRegion}
         </p>
       )}
 
       {config.zoom && (
-        <div className="flex gap-xs mb-sm">
-          <Button variant="outline" size="sm" onClick={handleZoomIn} aria-label="Zoom in">+</Button>
-          <Button variant="outline" size="sm" onClick={handleZoomOut} aria-label="Zoom out">−</Button>
-          <span className="text-on-surface/70 self-center text-sm">{Math.round(zoomLevel * 100)}%</span>
+        <div className="gap-xs mb-sm flex">
+          <Button variant="outline" size="sm" onClick={handleZoomIn} aria-label="Zoom in">
+            +
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleZoomOut} aria-label="Zoom out">
+            −
+          </Button>
+          <span className="text-on-surface/70 self-center text-sm">
+            {Math.round(zoomLevel * 100)}%
+          </span>
         </div>
       )}
 
-      <div className="border-outline-variant bg-surface-container-lowest overflow-auto rounded-lg border" style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}>
+      <div
+        className="border-outline-variant bg-surface-container-lowest overflow-auto rounded-lg border"
+        style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
+      >
         <svg
           width="100%"
           height="400"
@@ -172,7 +190,11 @@ function SocialMapComponent(props: {
                 <path
                   d={region.path}
                   fill={region.color ?? 'var(--oe-color-primary-container, #e8def8)'}
-                  stroke={selectedRegion === region.id ? 'var(--oe-color-primary, #6750a4)' : 'var(--oe-color-outline, #79747e)'}
+                  stroke={
+                    selectedRegion === region.id
+                      ? 'var(--oe-color-primary, #6750a4)'
+                      : 'var(--oe-color-outline, #79747e)'
+                  }
                   strokeWidth={selectedRegion === region.id ? 3 : 1}
                 />
               ) : (
@@ -183,7 +205,11 @@ function SocialMapComponent(props: {
                   height={80}
                   rx={4}
                   fill={region.color ?? 'var(--oe-color-primary-container, #e8def8)'}
-                  stroke={selectedRegion === region.id ? 'var(--oe-color-primary, #6750a4)' : 'var(--oe-color-outline, #79747e)'}
+                  stroke={
+                    selectedRegion === region.id
+                      ? 'var(--oe-color-primary, #6750a4)'
+                      : 'var(--oe-color-outline, #79747e)'
+                  }
                   strokeWidth={selectedRegion === region.id ? 3 : 1}
                 />
               )}
@@ -206,7 +232,14 @@ function SocialMapComponent(props: {
           {config.markers?.map((m) => (
             <g key={m.id}>
               <circle cx={m.x} cy={m.y} r={6} fill="var(--oe-color-error, #dc2626)" />
-              <text x={m.x} y={m.y - 10} textAnchor="middle" fill="var(--oe-color-on-surface, #1c1b1f)" fontSize={10} aria-hidden="true">
+              <text
+                x={m.x}
+                y={m.y - 10}
+                textAnchor="middle"
+                fill="var(--oe-color-on-surface, #1c1b1f)"
+                fontSize={10}
+                aria-hidden="true"
+              >
                 {m.label}
               </text>
             </g>
@@ -215,7 +248,11 @@ function SocialMapComponent(props: {
       </div>
 
       {(hovered || selected) && (
-        <div className="border-outline-variant bg-surface-container rounded-lg border p-sm mt-sm" role="status" aria-live="polite">
+        <div
+          className="border-outline-variant bg-surface-container p-sm mt-sm rounded-lg border"
+          role="status"
+          aria-live="polite"
+        >
           <p className="text-on-surface font-medium">{(hovered ?? selected)?.name}</p>
           {(hovered ?? selected)?.description && (
             <p className="text-on-surface/70 text-sm">{(hovered ?? selected)?.description}</p>
@@ -224,10 +261,14 @@ function SocialMapComponent(props: {
       )}
 
       {config.legend && config.legend.length > 0 && (
-        <div className="flex flex-wrap gap-sm mt-sm" role="list" aria-label="Map legend">
+        <div className="gap-sm mt-sm flex flex-wrap" role="list" aria-label="Map legend">
           {config.legend.map((item, i) => (
-            <div key={i} role="listitem" className="flex items-center gap-xs">
-              <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: item.color }} aria-hidden="true" />
+            <div key={i} role="listitem" className="gap-xs flex items-center">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: item.color }}
+                aria-hidden="true"
+              />
               <span className="text-on-surface/70 text-sm">{item.label}</span>
             </div>
           ))}

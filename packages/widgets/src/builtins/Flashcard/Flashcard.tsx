@@ -81,7 +81,7 @@ function FlashcardComponent(props: {
 
   const handleFlip = useCallback(() => {
     if (isObserve) return;
-    setFlipped((prev) => prev.includes(currentIndex) ? prev : [...prev, currentIndex]);
+    setFlipped((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
     emitInteraction({
       type: 'widget.interaction',
       widgetId: 'language.flashcard',
@@ -131,7 +131,11 @@ function FlashcardComponent(props: {
 
   if (!parsed.success || !currentCard) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -141,7 +145,10 @@ function FlashcardComponent(props: {
     return (
       <div role="group" aria-label="Flashcard activity" data-testid="flashcard-observe">
         {cards.map((card, idx) => (
-          <div key={idx} className="border-outline-variant bg-surface-container-lowest mb-sm rounded-lg border p-md">
+          <div
+            key={idx}
+            className="border-outline-variant bg-surface-container-lowest mb-sm p-md rounded-lg border"
+          >
             <p className="text-on-surface font-semibold">{card.front}</p>
             <p className="text-on-surface/70 mt-xs">{card.back}</p>
           </div>
@@ -164,16 +171,30 @@ function FlashcardComponent(props: {
       </p>
 
       <div
-        className={`border-outline-variant bg-surface-container-lowest rounded-xl border p-lg text-center min-h-[200px] flex flex-col items-center justify-center cursor-pointer`}
+        className={`border-outline-variant bg-surface-container-lowest p-lg flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-xl border text-center`}
         onClick={handleFlip}
         role="button"
-        aria-label={isFlipped ? 'Card back: ' + currentCard.back : 'Card front: ' + currentCard.front + '. Click to flip.'}
+        aria-label={
+          isFlipped
+            ? 'Card back: ' + currentCard.back
+            : 'Card front: ' + currentCard.front + '. Click to flip.'
+        }
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleFlip(); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleFlip();
+          }
+        }}
         data-testid="flashcard-card"
       >
         {currentCard.image && (
-          <img src={currentCard.image} alt="" className="mb-sm max-h-32 rounded" aria-hidden="true" />
+          <img
+            src={currentCard.image}
+            alt=""
+            className="mb-sm max-h-32 rounded"
+            aria-hidden="true"
+          />
         )}
         <p className="text-on-surface text-lg font-medium">
           {isFlipped ? currentCard.back : currentCard.front}
@@ -191,23 +212,41 @@ function FlashcardComponent(props: {
       )}
 
       {isFlipped && (
-        <div className="mt-md flex gap-sm justify-center">
-          <Button variant="outline" onClick={() => handleSelfAssess(false)} data-testid="btn-incorrect">
+        <div className="mt-md gap-sm flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => handleSelfAssess(false)}
+            data-testid="btn-incorrect"
+          >
             ✗ Incorrect
           </Button>
-          <Button variant="default" onClick={() => handleSelfAssess(true)} data-testid="btn-correct">
+          <Button
+            variant="default"
+            onClick={() => handleSelfAssess(true)}
+            data-testid="btn-correct"
+          >
             ✓ Correct
           </Button>
         </div>
       )}
 
       {allReviewed && (
-        <div role="status" aria-live="assertive" data-testid="flashcard-complete" className="mt-md text-center">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="flashcard-complete"
+          className="mt-md text-center"
+        >
           <p className="text-on-surface font-semibold">
             Done! {correctCards.length} correct, {incorrectCards.length} incorrect.
           </p>
           {incorrectCards.length > 0 && (
-            <Button variant="outline" onClick={handleRetryIncorrect} className="mt-sm" data-testid="btn-retry">
+            <Button
+              variant="outline"
+              onClick={handleRetryIncorrect}
+              className="mt-sm"
+              data-testid="btn-retry"
+            >
               Retry Incorrect
             </Button>
           )}

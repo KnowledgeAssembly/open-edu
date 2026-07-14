@@ -74,7 +74,7 @@ function VideoPlayerComponent(props: {
       if (parsed?.data?.chapters) {
         let chIdx = 0;
         for (let i = parsed.data.chapters.length - 1; i >= 0; i--) {
-          if (video.currentTime >= parsed.data.chapters[i].time) {
+          if (video.currentTime >= parsed.data.chapters[i]!.time) {
             chIdx = i;
             break;
           }
@@ -132,7 +132,11 @@ function VideoPlayerComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -155,9 +159,9 @@ function VideoPlayerComponent(props: {
         className="w-full rounded-lg"
       />
 
-      {config.title && <h3 className="text-on-surface font-semibold mt-sm">{config.title}</h3>}
+      {config.title && <h3 className="text-on-surface mt-sm font-semibold">{config.title}</h3>}
 
-      <div className="flex items-center gap-sm mt-sm">
+      <div className="gap-sm mt-sm flex items-center">
         <Button variant="default" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
           {isPlaying ? '⏸' : '▶'}
         </Button>
@@ -181,7 +185,7 @@ function VideoPlayerComponent(props: {
       </div>
 
       {config.chapters && config.chapters.length > 0 && (
-        <div className="mt-sm flex flex-wrap gap-xs">
+        <div className="mt-sm gap-xs flex flex-wrap">
           {config.chapters.map((ch, idx) => (
             <Button
               key={idx}
@@ -197,7 +201,12 @@ function VideoPlayerComponent(props: {
       )}
 
       {config.captions && activeCaptionIndex !== null && (
-        <div role="status" aria-live="polite" data-testid="active-caption" className="text-on-surface mt-sm text-center font-medium">
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="active-caption"
+          className="text-on-surface mt-sm text-center font-medium"
+        >
           {config.captions[activeCaptionIndex]?.text}
         </div>
       )}
@@ -205,7 +214,9 @@ function VideoPlayerComponent(props: {
       {config.showTranscript && config.transcript && (
         <details className="mt-sm">
           <summary className="text-on-surface/70 cursor-pointer text-sm">Show Transcript</summary>
-          <p className="text-on-surface/70 mt-xs text-sm whitespace-pre-wrap">{config.transcript}</p>
+          <p className="text-on-surface/70 mt-xs whitespace-pre-wrap text-sm">
+            {config.transcript}
+          </p>
         </details>
       )}
 

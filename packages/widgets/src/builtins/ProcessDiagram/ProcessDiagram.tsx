@@ -39,7 +39,12 @@ const NODE_WIDTH = 140;
 const NODE_HEIGHT = 60;
 const GAP = 80;
 
-function computePositions(nodes: { id: string }[], layout: string, containerWidth: number, containerHeight: number) {
+function computePositions(
+  nodes: { id: string }[],
+  layout: string,
+  containerWidth: number,
+  containerHeight: number,
+) {
   const positions = new Map<string, { x: number; y: number }>();
   const cx = containerWidth / 2;
   const cy = containerHeight / 2;
@@ -94,7 +99,8 @@ function ProcessDiagramComponent(props: {
   }, [storedState]);
 
   const [revealedNodes, setRevealedNodes] = useState<number[]>(
-    parsedState?.revealedNodes ?? (parsed?.success && !parsed.data.stepByStep ? parsed.data.nodes.map((_, i) => i) : []),
+    parsedState?.revealedNodes ??
+      (parsed?.success && !parsed.data.stepByStep ? parsed.data.nodes.map((_, i) => i) : []),
   );
   const [currentStep, setCurrentStep] = useState(parsedState?.currentStep ?? 0);
 
@@ -135,7 +141,11 @@ function ProcessDiagramComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -145,11 +155,28 @@ function ProcessDiagramComponent(props: {
 
   if (isObserve) {
     return (
-      <div role="group" aria-label={config.title ?? 'Process diagram'} data-testid="process-diagram-observe">
-        {config.title && <h3 className="text-on-surface font-semibold mb-sm">{config.title}</h3>}
-        <svg width={containerWidth} height={containerHeight} viewBox={`0 0 ${containerWidth} ${containerHeight}`} className="w-full">
+      <div
+        role="group"
+        aria-label={config.title ?? 'Process diagram'}
+        data-testid="process-diagram-observe"
+      >
+        {config.title && <h3 className="text-on-surface mb-sm font-semibold">{config.title}</h3>}
+        <svg
+          width={containerWidth}
+          height={containerHeight}
+          viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+          className="w-full"
+        >
           <defs>
-            <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+            <marker
+              id="arrow"
+              viewBox="0 0 10 7"
+              refX="10"
+              refY="3.5"
+              markerWidth="10"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
               <polygon points="0 0, 10 3.5, 0 7" fill="var(--oe-color-on-surface, #1c1b1f)" />
             </marker>
           </defs>
@@ -164,7 +191,10 @@ function ProcessDiagramComponent(props: {
             return (
               <line
                 key={i}
-                x1={x1} y1={y1} x2={x2} y2={y2}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
                 stroke="var(--oe-color-on-surface, #1c1b1f)"
                 strokeWidth={2}
                 strokeDasharray={conn.type === 'dashed' ? '8 4' : undefined}
@@ -178,8 +208,10 @@ function ProcessDiagramComponent(props: {
             return (
               <g key={node.id} role="listitem" aria-label={`Step ${idx + 1}: ${node.title}`}>
                 <rect
-                  x={pos.x} y={pos.y}
-                  width={NODE_WIDTH} height={NODE_HEIGHT}
+                  x={pos.x}
+                  y={pos.y}
+                  width={NODE_WIDTH}
+                  height={NODE_HEIGHT}
                   rx={8}
                   fill="var(--oe-color-primary-container, #e8def8)"
                   stroke="var(--oe-color-primary, #6750a4)"
@@ -213,12 +245,25 @@ function ProcessDiagramComponent(props: {
 
   return (
     <div role="group" aria-label={config.title ?? 'Process diagram'} data-testid="process-diagram">
-      {config.title && <h3 className="text-on-surface font-semibold mb-sm">{config.title}</h3>}
+      {config.title && <h3 className="text-on-surface mb-sm font-semibold">{config.title}</h3>}
 
       <div role="list" aria-label="Process steps" className="overflow-auto">
-        <svg width={containerWidth} height={containerHeight} viewBox={`0 0 ${containerWidth} ${containerHeight}`} className="w-full">
+        <svg
+          width={containerWidth}
+          height={containerHeight}
+          viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+          className="w-full"
+        >
           <defs>
-            <marker id="arrow-interactive" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+            <marker
+              id="arrow-interactive"
+              viewBox="0 0 10 7"
+              refX="10"
+              refY="3.5"
+              markerWidth="10"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
               <polygon points="0 0, 10 3.5, 0 7" fill="var(--oe-color-on-surface, #1c1b1f)" />
             </marker>
           </defs>
@@ -236,7 +281,10 @@ function ProcessDiagramComponent(props: {
             return (
               <line
                 key={i}
-                x1={x1} y1={y1} x2={x2} y2={y2}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
                 stroke="var(--oe-color-on-surface, #1c1b1f)"
                 strokeWidth={2}
                 strokeDasharray={conn.type === 'dashed' ? '8 4' : undefined}
@@ -251,11 +299,23 @@ function ProcessDiagramComponent(props: {
             return (
               <g key={node.id} role="listitem" aria-label={`Step ${idx + 1}: ${node.title}`}>
                 <rect
-                  x={pos.x} y={pos.y}
-                  width={NODE_WIDTH} height={NODE_HEIGHT}
+                  x={pos.x}
+                  y={pos.y}
+                  width={NODE_WIDTH}
+                  height={NODE_HEIGHT}
                   rx={8}
-                  fill={isRevealed ? (idx === currentStep ? 'var(--oe-color-primary, #6750a4)' : 'var(--oe-color-primary-container, #e8def8)') : 'var(--oe-color-surface-container-highest, #e6e1e5)'}
-                  stroke={isRevealed ? 'var(--oe-color-primary, #6750a4)' : 'var(--oe-color-outline-variant, #cac4d0)'}
+                  fill={
+                    isRevealed
+                      ? idx === currentStep
+                        ? 'var(--oe-color-primary, #6750a4)'
+                        : 'var(--oe-color-primary-container, #e8def8)'
+                      : 'var(--oe-color-surface-container-highest, #e6e1e5)'
+                  }
+                  stroke={
+                    isRevealed
+                      ? 'var(--oe-color-primary, #6750a4)'
+                      : 'var(--oe-color-outline-variant, #cac4d0)'
+                  }
                   strokeWidth={2}
                   opacity={isRevealed ? 1 : 0.4}
                 />
@@ -264,7 +324,13 @@ function ProcessDiagramComponent(props: {
                   y={pos.y + NODE_HEIGHT / 2}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fill={isRevealed ? (idx === currentStep ? 'var(--oe-color-on-primary, #fff)' : 'var(--oe-color-on-primary-container, #1d192b)') : 'var(--oe-color-on-surface, #1c1b1f)'}
+                  fill={
+                    isRevealed
+                      ? idx === currentStep
+                        ? 'var(--oe-color-on-primary, #fff)'
+                        : 'var(--oe-color-on-primary-container, #1d192b)'
+                      : 'var(--oe-color-on-surface, #1c1b1f)'
+                  }
                   fontSize={13}
                   fontWeight={500}
                   opacity={isRevealed ? 1 : 0.4}
@@ -289,7 +355,12 @@ function ProcessDiagramComponent(props: {
       )}
 
       {config.stepByStep && revealedNodes.length >= config.nodes.length && (
-        <div role="status" aria-live="assertive" data-testid="diagram-complete" className="mt-md text-center">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="diagram-complete"
+          className="mt-md text-center"
+        >
           <p className="text-on-surface font-semibold">All steps revealed!</p>
         </div>
       )}
@@ -361,7 +432,8 @@ const ProcessDiagramWidget: WidgetDefinitionV2 = {
       'Label connections with transition descriptions',
       'Choose layout based on process shape (linear=horizontal, cyclical=cycle)',
     ],
-    authoringPrompt: 'Create a process diagram showing the stages of a natural or computational process',
+    authoringPrompt:
+      'Create a process diagram showing the stages of a natural or computational process',
     exampleConfigs: [
       {
         title: 'Water Cycle',

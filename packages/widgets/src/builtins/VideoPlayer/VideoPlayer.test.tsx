@@ -8,7 +8,12 @@ function renderWidget(config: Record<string, unknown> = {}) {
   const emitInteraction = vi.fn();
   const complete = vi.fn();
   const result = render(
-    <WidgetComponent nodeId="test-node" config={config} emitInteraction={emitInteraction} complete={complete} />,
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
   );
   return { emitInteraction, complete, ...result };
 }
@@ -51,7 +56,10 @@ describe('VideoPlayer rendering', () => {
   it('renders chapter buttons when chapters provided', () => {
     renderWidget({
       video: 'https://example.com/test.mp4',
-      chapters: [{ time: 0, title: 'Intro' }, { time: 60, title: 'Main' }],
+      chapters: [
+        { time: 0, title: 'Intro' },
+        { time: 60, title: 'Main' },
+      ],
     });
     expect(screen.getByRole('button', { name: 'Chapter: Intro' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Chapter: Main' })).toBeInTheDocument();

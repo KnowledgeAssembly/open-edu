@@ -141,7 +141,11 @@ function AudioPlayerComponent(props: {
 
   if (!parsed.success) {
     return (
-      <div role="alert" data-testid="widget-config-error" className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center">
+      <div
+        role="alert"
+        data-testid="widget-config-error"
+        className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
+      >
         <p className="text-on-surface font-semibold">This activity could not be loaded.</p>
       </div>
     );
@@ -158,19 +162,20 @@ function AudioPlayerComponent(props: {
     <div role="group" aria-label={config.title ?? 'Audio player'} data-testid="audio-player">
       <audio ref={audioRef} src={config.audio} loop={config.loop} preload="metadata" />
 
-      {config.title && (
-        <h3 className="text-on-surface font-semibold">{config.title}</h3>
-      )}
+      {config.title && <h3 className="text-on-surface font-semibold">{config.title}</h3>}
       {config.description && (
         <p className="text-on-surface/70 mb-sm text-sm">{config.description}</p>
       )}
 
       {config.showControls && (
-        <div className="flex items-center gap-sm">
+        <div className="gap-sm flex items-center">
           <Button variant="default" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
             {isPlaying ? '⏸' : '▶'}
           </Button>
-          <span className="text-on-surface/70 text-sm" aria-label={`Current time ${formatTime(currentTime)} of ${formatTime(totalDuration)}`}>
+          <span
+            className="text-on-surface/70 text-sm"
+            aria-label={`Current time ${formatTime(currentTime)} of ${formatTime(totalDuration)}`}
+          >
             {formatTime(currentTime)} / {formatTime(totalDuration || (config.duration ?? 0))}
           </span>
           <input
@@ -186,7 +191,7 @@ function AudioPlayerComponent(props: {
             value={rate}
             onChange={(e) => handleRateChange(Number(e.target.value))}
             aria-label="Playback speed"
-            className="text-on-surface bg-surface-container-lowest border-outline-variant rounded border px-xs py-xs text-sm"
+            className="text-on-surface bg-surface-container-lowest border-outline-variant px-xs py-xs rounded border text-sm"
           >
             <option value={0.5}>0.5x</option>
             <option value={0.75}>0.75x</option>
@@ -199,13 +204,23 @@ function AudioPlayerComponent(props: {
       )}
 
       {config.bookmarks && parsed.data.interactive && (
-        <Button variant="outline" onClick={handleBookmark} className="mt-sm" aria-label="Add bookmark">
+        <Button
+          variant="outline"
+          onClick={handleBookmark}
+          className="mt-sm"
+          aria-label="Add bookmark"
+        >
           🔖 Bookmark
         </Button>
       )}
 
       {config.captions && activeCaptionIndex !== null && (
-        <div role="status" aria-live="polite" data-testid="active-caption" className="text-on-surface mt-sm text-center font-medium">
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="active-caption"
+          className="text-on-surface mt-sm text-center font-medium"
+        >
           {config.captions[activeCaptionIndex]?.text}
         </div>
       )}
@@ -213,7 +228,9 @@ function AudioPlayerComponent(props: {
       {config.showTranscript && config.transcript && (
         <details className="mt-sm">
           <summary className="text-on-surface/70 cursor-pointer text-sm">Show Transcript</summary>
-          <p className="text-on-surface/70 mt-xs text-sm whitespace-pre-wrap">{config.transcript}</p>
+          <p className="text-on-surface/70 mt-xs whitespace-pre-wrap text-sm">
+            {config.transcript}
+          </p>
         </details>
       )}
 
@@ -292,7 +309,8 @@ const AudioPlayerWidget: WidgetDefinitionV2 = {
       'Use captions for key moments rather than full text',
       'Keep audio segments under 5 minutes for engagement',
     ],
-    authoringPrompt: 'Create an audio playback activity for listening comprehension or pronunciation practice',
+    authoringPrompt:
+      'Create an audio playback activity for listening comprehension or pronunciation practice',
     exampleConfigs: [
       {
         audio: 'https://example.com/audio/hello.mp3',

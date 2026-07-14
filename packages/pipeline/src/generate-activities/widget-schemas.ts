@@ -228,20 +228,34 @@ const videoPlayerSchema = z.object({
 });
 
 const flashcardSchema = z.object({
-  cards: z.array(z.object({
-    front: z.string().min(1),
-    back: z.string().min(1),
-    hint: z.string().optional(),
-    image: z.string().optional(),
-  })).min(1),
+  cards: z
+    .array(
+      z.object({
+        front: z.string().min(1),
+        back: z.string().min(1),
+        hint: z.string().optional(),
+        image: z.string().optional(),
+      }),
+    )
+    .min(1),
   mode: z.enum(['flip', 'multiple', 'spaced']).optional(),
   interactive: z.boolean().optional(),
   shuffle: z.boolean().optional(),
 });
 
 const processDiagramSchema = z.object({
-  nodes: z.array(z.object({ id: z.string(), title: z.string(), description: z.string().optional() })).min(2),
-  connections: z.array(z.object({ from: z.string(), to: z.string(), type: z.enum(['arrow', 'dashed', 'double', 'loop']).optional() })).min(1),
+  nodes: z
+    .array(z.object({ id: z.string(), title: z.string(), description: z.string().optional() }))
+    .min(2),
+  connections: z
+    .array(
+      z.object({
+        from: z.string(),
+        to: z.string(),
+        type: z.enum(['arrow', 'dashed', 'double', 'loop']).optional(),
+      }),
+    )
+    .min(1),
   layout: z.enum(['horizontal', 'vertical', 'cycle', 'radial']).optional(),
   title: z.string().optional(),
   interactive: z.boolean().optional(),
@@ -260,10 +274,21 @@ const numberLineSchema = z.object({
 });
 
 const socialMapSchema = z.object({
-  regions: z.array(z.object({ id: z.string(), name: z.string(), color: z.string().optional(), description: z.string().optional() })).min(1),
+  regions: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        color: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .min(1),
   labels: z.boolean().optional(),
   legend: z.array(z.object({ color: z.string(), label: z.string() })).optional(),
-  markers: z.array(z.object({ id: z.string(), label: z.string(), x: z.number(), y: z.number() })).optional(),
+  markers: z
+    .array(z.object({ id: z.string(), label: z.string(), x: z.number(), y: z.number() }))
+    .optional(),
   title: z.string().optional(),
   interactive: z.boolean().optional(),
   targetRegion: z.string().optional(),

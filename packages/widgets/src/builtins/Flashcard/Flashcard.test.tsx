@@ -8,7 +8,12 @@ function renderWidget(config: Record<string, unknown> = {}) {
   const emitInteraction = vi.fn();
   const complete = vi.fn();
   const result = render(
-    <WidgetComponent nodeId="test-node" config={config} emitInteraction={emitInteraction} complete={complete} />,
+    <WidgetComponent
+      nodeId="test-node"
+      config={config}
+      emitInteraction={emitInteraction}
+      complete={complete}
+    />,
   );
   return { emitInteraction, complete, ...result };
 }
@@ -157,7 +162,12 @@ describe('Flashcard retry', () => {
 
 describe('Flashcard observe mode', () => {
   it('shows all cards in observe mode', () => {
-    renderWidget({ cards: [{ front: 'A', back: 'B' }, { front: 'C', back: 'D' }] });
+    renderWidget({
+      cards: [
+        { front: 'A', back: 'B' },
+        { front: 'C', back: 'D' },
+      ],
+    });
     expect(screen.getByText('A')).toBeInTheDocument();
     expect(screen.getByText('B')).toBeInTheDocument();
     expect(screen.getByText('C')).toBeInTheDocument();
