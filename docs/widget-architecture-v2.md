@@ -14,12 +14,15 @@ Every widget implements `WidgetDefinition` (base) or `WidgetDefinitionV2` (exten
 - **version**: Semver string
 - **render**: React component function
 - **domain**: Content domain (`core`, `math`, `language`, `science`, `social`)
+- **status**: Lifecycle status (`stable`, `experimental`, `deprecated`)
 - **learningIntents**: How the widget supports learning (`assess`, `practice`, `observe`, `compare`, `explore`, `create`, `reflect`, `apply`)
-- **capabilities**: Feature flags (keyboard, touch, offline, etc.)
-- **accessibility**: A11y feature documentation
-- **analytics**: What events the widget can emit
-- **reward**: Reward hooks the widget supports
-- **ai**: Metadata for LLM course generation
+- **capabilities**: Feature flags (keyboard, touch, offline, observeMode, hints, retry, etc.)
+- **accessibility**: A11y feature documentation (high contrast, keyboard, screen reader, etc.)
+- **analytics**: What events the widget can emit (attempts, hints, completion time, etc.)
+- **reward**: Reward hooks the widget supports (completionXP, achievement, positiveMessage, confetti, etc.)
+- **ai**: Metadata for LLM course generation (difficulty, estimatedMinutes, bloomsLevel, cognitiveLoad, recommendedAge, readingLevel, learningObjectives, commonMisconceptions, generationHints, exampleConfigs)
+
+All 14 stable widgets are enriched with complete metadata across all categories. The 6 experimental stubs have minimal metadata.
 
 ### Registry
 
@@ -51,6 +54,42 @@ Widgets are grouped by content domain:
 - `language.*` — Language arts (reserved for future use)
 - `science.*` — Science (label-diagram, image-label)
 - `social.*` — Social studies (reserved for future use)
+
+### Metadata Validation
+
+`validateWidgetMetadata()` enforces completeness and cross-field consistency:
+
+**Completeness checks** (warnings for stable widgets):
+
+- `ai.recommendedAge` — age-appropriate content generation
+- `ai.learningObjectives` — content alignment
+- `ai.commonMisconceptions` — generating helpful distractors
+- `ai.exampleConfigs` — must contain at least one example
+- `capabilities.supportsObserveMode` — all stable widgets should support observe mode
+
+**Cross-field consistency checks:**
+
+- `capabilities.supportsHints` requires `analytics.trackHints`
+- `capabilities.supportsRetry` requires `analytics.trackRetries`
+- `reward.completionXP` requires `reward.positiveMessage`
+
+### Widget Catalog Generation
+
+`generateWidgetCatalog()` produces a structured Markdown catalog from the widget registry, used in LLM prompts for AI-assisted content generation:
+
+```
+generateWidgetCatalog(registry)
+  → extracts: id, name, description, domain, status, keywords, learningIntents
+  → extracts: capabilities, accessibility, analytics (boolean → label)
+  → extracts: reward (completionXP, positiveMessage, achievement)
+  → extracts: AI metadata (difficulty, estimatedMinutes, bloomsLevel, cognitiveLoad,
+               recommendedAge, readingLevel, learningObjectives, commonMisconceptions,
+               generationHints)
+  → groups widgets by domain with section headers
+  → renders as Markdown suitable for LLM prompt injection
+```
+
+The CLI's `buildWidgetCatalog()` function extracts metadata from the registry and passes it through `generateWidgetCatalog()` to produce the catalog string.
 
 ## Data Flow
 

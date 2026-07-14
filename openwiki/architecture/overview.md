@@ -68,7 +68,7 @@ Translates events into reward receipts, including badge delivery and card progre
 
 ### `@open-edu/widgets`
 
-Provides the widget registry and built-in widgets used by content nodes and runtime renderers.
+Provides the widget registry and built-in widgets used by content nodes and runtime renderers. Includes 21 built-in widgets (14 stable + 6 experimental + 1 deprecated alias) with enriched metadata across AI, capabilities, accessibility, analytics, and reward categories. The registry supports alias resolution, domain namespacing, structured search, metadata validation, and catalog generation for LLM prompts.
 
 ### `@open-edu/course-compiler`
 

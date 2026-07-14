@@ -80,7 +80,7 @@ open-edu/
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
-│   └── widgets/             # Widget SDK + registry + 14 built-in widgets + remote loader
+│   └── widgets/             # Widget SDK + registry + 21 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/

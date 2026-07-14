@@ -109,6 +109,17 @@ edu widget create ./my-widget --id my-widget-id --title "My Widget"
 
 Generates a complete widget package with `package.json`, `src/index.tsx`, `src/index.test.tsx`, and `vitest.config.ts`.
 
+### Widget Migrate
+
+Batch-migrate legacy `open-edu.*` widget IDs to new domain-prefixed IDs:
+
+```bash
+edu widget migrate ./my-package
+edu widget migrate ./my-package --dry-run
+```
+
+Scans all JSON and Markdown files in the package for legacy widget references and replaces them with the new domain-prefixed equivalents (e.g., `open-edu.matching` → `core.matching`). The `--dry-run` flag shows proposed changes without writing files.
+
 ### Compile
 
 Compile a `course-spec.md` into a validated OpenEdu educational package:
