@@ -1,0 +1,14 @@
+{
+  "type": "exercise",
+  "title": "Locate Numbers on Number Line",
+  "widget": "math.number-line",
+  "config": {
+    "min": 0,
+    "max": 10,
+    "step": 1,
+    "target": 7,
+    "showLabels": true,
+    "interactive": true,
+    "mode": "integers"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "exercise",
+  "title": "Spanish Vocabulary",
+  "widget": "language.flashcard",
+  "config": {
+    "cards": [
+      { "front": "Hola", "back": "Hello", "hint": "Common greeting", "category": "Greetings" },
+      { "front": "Gracias", "back": "Thank you", "category": "Politeness" },
+      { "front": "Adios", "back": "Goodbye", "category": "Greetings" },
+      { "front": "Por favor", "back": "Please", "category": "Politeness" }
+    ],
+    "mode": "flip",
+    "interactive": true,
+    "shuffle": true
+  }
+}

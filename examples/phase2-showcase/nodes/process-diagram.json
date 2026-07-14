@@ -1,0 +1,23 @@
+{
+  "type": "exercise",
+  "title": "Water Cycle",
+  "widget": "science.process-diagram",
+  "config": {
+    "title": "The Water Cycle",
+    "nodes": [
+      { "id": "evap", "title": "Evaporation" },
+      { "id": "cond", "title": "Condensation" },
+      { "id": "precip", "title": "Precipitation" },
+      { "id": "collect", "title": "Collection" }
+    ],
+    "connections": [
+      { "from": "evap", "to": "cond", "type": "arrow" },
+      { "from": "cond", "to": "precip", "type": "arrow" },
+      { "from": "precip", "to": "collect", "type": "arrow" },
+      { "from": "collect", "to": "evap", "type": "loop" }
+    ],
+    "layout": "cycle",
+    "interactive": true,
+    "stepByStep": true
+  }
+}

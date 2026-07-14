@@ -1,0 +1,36 @@
+{
+  "type": "exercise",
+  "title": "Indian States Map",
+  "widget": "social.map",
+  "config": {
+    "title": "States of India",
+    "regions": [
+      {
+        "id": "mh",
+        "name": "Maharashtra",
+        "color": "#e8def8",
+        "description": "Western India, capital Mumbai"
+      },
+      {
+        "id": "ka",
+        "name": "Karnataka",
+        "color": "#d0bcff",
+        "description": "Southern India, capital Bangalore"
+      },
+      {
+        "id": "tn",
+        "name": "Tamil Nadu",
+        "color": "#b69df8",
+        "description": "Southeast India, capital Chennai"
+      }
+    ],
+    "labels": true,
+    "interactive": true,
+    "targetRegion": "ka",
+    "legend": [
+      { "color": "#e8def8", "label": "Western" },
+      { "color": "#d0bcff", "label": "Southern" },
+      { "color": "#b69df8", "label": "Southeastern" }
+    ]
+  }
+}
