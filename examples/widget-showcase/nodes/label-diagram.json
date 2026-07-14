@@ -1,0 +1,26 @@
+{
+  "type": "exercise",
+  "title": "Plant Anatomy Labeling",
+  "widget": "science.label-diagram",
+  "config": {
+    "image": "assets/images/plant-anatomy.png",
+    "altText": "Diagram of a plant with parts to label",
+    "labels": [
+      { "id": "roots", "text": "Roots", "target": { "x": 50, "y": 90 }, "hint": "Below the soil" },
+      {
+        "id": "stem",
+        "text": "Stem",
+        "target": { "x": 50, "y": 60 },
+        "hint": "Supports the plant"
+      },
+      {
+        "id": "leaves",
+        "text": "Leaves",
+        "target": { "x": 30, "y": 40 },
+        "hint": "Green and flat"
+      },
+      { "id": "flower", "text": "Flower", "target": { "x": 50, "y": 20 }, "hint": "Colorful top" }
+    ],
+    "interactive": true
+  }
+}

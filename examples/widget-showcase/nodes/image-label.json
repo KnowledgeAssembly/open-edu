@@ -1,0 +1,36 @@
+{
+  "type": "exercise",
+  "title": "Solar System Explorer",
+  "widget": "science.image-label",
+  "config": {
+    "image": "assets/images/solar-system.png",
+    "altText": "Solar system with clickable planets",
+    "regions": [
+      {
+        "id": "mars",
+        "title": "Mars",
+        "description": "The Red Planet, 4th from the Sun",
+        "x": 45,
+        "y": 30,
+        "tooltip": "Click to learn about Mars"
+      },
+      {
+        "id": "jupiter",
+        "title": "Jupiter",
+        "description": "Largest planet in our solar system",
+        "x": 60,
+        "y": 50,
+        "tooltip": "Click to learn about Jupiter"
+      },
+      {
+        "id": "earth",
+        "title": "Earth",
+        "description": "Our home planet, 3rd from the Sun",
+        "x": 35,
+        "y": 40,
+        "tooltip": "Click to learn about Earth"
+      }
+    ],
+    "interactive": false
+  }
+}

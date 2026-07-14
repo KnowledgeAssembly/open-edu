@@ -1,0 +1,37 @@
+{
+  "type": "exercise",
+  "title": "The Water Cycle",
+  "widget": "core.timeline",
+  "config": {
+    "title": "The Water Cycle",
+    "events": [
+      {
+        "id": "evap",
+        "title": "Evaporation",
+        "icon": "☀️",
+        "description": "Water heats up and rises as vapor"
+      },
+      {
+        "id": "cond",
+        "title": "Condensation",
+        "icon": "☁️",
+        "description": "Water vapor cools and forms clouds"
+      },
+      {
+        "id": "rain",
+        "title": "Rain",
+        "icon": "🌧️",
+        "description": "Water falls as precipitation"
+      },
+      {
+        "id": "collect",
+        "title": "Collection",
+        "icon": "🌊",
+        "description": "Water collects in oceans and lakes"
+      }
+    ],
+    "layout": "vertical",
+    "showDates": false,
+    "interactive": false
+  }
+}

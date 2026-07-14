@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createWidgetRegistry, registerAllBuiltins } from '../registry';
 
-describe('Foundation stub auto-registration', () => {
-  const STUB_IDS = [
+describe('Widget registration', () => {
+  const WIDGET_IDS = [
     'core.callout',
     'core.image-compare',
     'core.hotspot',
@@ -11,7 +11,7 @@ describe('Foundation stub auto-registration', () => {
     'science.image-label',
   ];
 
-  for (const id of STUB_IDS) {
+  for (const id of WIDGET_IDS) {
     it(`registers ${id} in default registry`, () => {
       const registry = createWidgetRegistry();
       registerAllBuiltins(registry);
@@ -20,9 +20,12 @@ describe('Foundation stub auto-registration', () => {
     });
   }
 
-  it('registers all 21 builtins (15 stable + 6 stubs)', () => {
+  it('registers all 21 builtins (20 stable, 1 deprecated)', () => {
     const registry = createWidgetRegistry();
     registerAllBuiltins(registry);
-    expect(registry.getAll()).toHaveLength(21);
+    const all = registry.getAll();
+    expect(all).toHaveLength(21);
+    const stable = all.filter((w) => (w as unknown as Record<string, unknown>).status === 'stable');
+    expect(stable.length).toBeGreaterThanOrEqual(20);
   });
 });
