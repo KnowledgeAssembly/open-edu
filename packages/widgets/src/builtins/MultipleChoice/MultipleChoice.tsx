@@ -460,6 +460,7 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -474,8 +475,10 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
     trackCompletionTime: true,
     trackSuccessRate: true,
     trackMistakes: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, positiveMessage: 'Correct!' },
+  reward: { completionXP: 10, confetti: true, positiveMessage: 'Correct!', achievement: 'first-answer' },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 3,
@@ -483,6 +486,26 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['general'],
     authoringPrompt: 'Create a multiple-choice question with 3-4 options and one correct answer',
+    recommendedAge: [6, 18],
+    readingLevel: 'grade-3',
+    learningObjectives: [
+      'Select the correct answer from multiple alternatives',
+      'Apply knowledge to eliminate incorrect options',
+      'Distinguish between similar answer choices',
+    ],
+    commonMisconceptions: [
+      'Choosing the most familiar-sounding option without reading all choices',
+      'Selecting options that are true but do not answer the question',
+    ],
+    generationHints: [
+      'Include one clearly correct answer',
+      'Write plausible distractors that reflect common errors',
+      'Keep the question stem concise and unambiguous',
+    ],
+    exampleConfigs: [
+      { prompt: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: 1 },
+      { prompt: 'Which planet is closest to the Sun?', options: ['Venus', 'Mercury', 'Mars', 'Earth'], correct: 1 },
+    ],
   },
   icon: 'circle-check',
   keywords: ['quiz', 'test', 'select', 'options', 'choice'],

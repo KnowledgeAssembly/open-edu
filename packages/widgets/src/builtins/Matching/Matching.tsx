@@ -727,6 +727,7 @@ const MatchingWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -740,8 +741,10 @@ const MatchingWidget: WidgetDefinitionV2 = {
     trackCompletionTime: true,
     trackSuccessRate: true,
     trackMistakes: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: { completionXP: 10, confetti: true, positiveMessage: 'All pairs matched!', achievement: 'first-match' },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -749,6 +752,26 @@ const MatchingWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['general'],
     authoringPrompt: 'Create a matching exercise with 4-6 pairs',
+    recommendedAge: [5, 12],
+    readingLevel: 'pre-reader',
+    learningObjectives: [
+      'Identify correct pairs of related items',
+      'Match items based on shared attributes',
+      'Compare and contrast items to find relationships',
+    ],
+    commonMisconceptions: [
+      'Selecting both items from the same column',
+      'Assuming alphabetical order determines matches',
+    ],
+    generationHints: [
+      'Use items with clear, unambiguous associations',
+      'Mix obvious and challenging pairs',
+      'Keep text labels short (2-4 words)',
+    ],
+    exampleConfigs: [
+      { pairs: [{ left: 'Dog', right: 'Puppy' }, { left: 'Cat', right: 'Kitten' }] },
+      { pairs: [{ left: 'Hot', right: 'Cold' }, { left: 'Big', right: 'Small' }, { left: 'Fast', right: 'Slow' }] },
+    ],
   },
   icon: 'puzzle',
   keywords: ['match', 'pairs', 'connect', 'drag'],

@@ -366,6 +366,7 @@ const GridAreaWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -379,8 +380,10 @@ const GridAreaWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: { completionXP: 10, confetti: true, achievement: 'first-area' },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,
@@ -388,6 +391,27 @@ const GridAreaWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['math', 'geometry', 'area'],
     authoringPrompt: 'Create a grid-area calculation exercise',
+    recommendedAge: [7, 12],
+    readingLevel: 'grade-3',
+    learningObjectives: [
+      'Calculate the area of a shape by counting grid squares',
+      'Understand area as the number of covered unit squares',
+      'Distinguish between area and perimeter measurements',
+    ],
+    commonMisconceptions: [
+      'Counting grid lines instead of grid squares',
+      'Confusing perimeter count with area count',
+      'Double-counting squares shared between adjacent shapes',
+    ],
+    generationHints: [
+      'Keep grids under 10x10 for visual clarity',
+      'Use maxHighlights to limit interactive cell selections',
+      'Provide pre-highlighted shapes for observe/learn mode',
+    ],
+    exampleConfigs: [
+      { rows: 5, cols: 5, highlights: [[0,0],[0,1],[1,0],[1,1]], mode: 'area' },
+      { rows: 4, cols: 4, highlights: [[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]], mode: 'perimeter' },
+    ],
   },
   icon: 'grid-3x3',
   keywords: ['grid', 'area', 'math', 'geometry', '面积'],

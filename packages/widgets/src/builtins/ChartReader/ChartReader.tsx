@@ -373,6 +373,7 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -386,8 +387,10 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: { completionXP: 10, confetti: true, achievement: 'first-chart' },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,
@@ -395,6 +398,27 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['math', 'data'],
     authoringPrompt: 'Create a chart-reading exercise with bar or line charts',
+    recommendedAge: [6, 14],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Read values accurately from a bar or pictograph chart',
+      'Compare data across categories to identify trends',
+      'Interpret visual representations of quantitative data',
+    ],
+    commonMisconceptions: [
+      'Confusing bar height with bar width when reading values',
+      'Miscounting emoji rows in pictograph charts',
+      'Comparing absolute values instead of relative proportions',
+    ],
+    generationHints: [
+      'Use small, clear datasets with 3-6 items',
+      'Ensure bar values are visually distinguishable',
+      'Use relevant emoji for pictograph mode',
+    ],
+    exampleConfigs: [
+      { type: 'bar', data: [{ label: 'Apples', value: 5 }, { label: 'Bananas', value: 3 }] },
+      { type: 'pictograph', data: [{ label: 'Dogs', count: 4, emoji: '🐕' }, { label: 'Cats', count: 2, emoji: '🐱' }] },
+    ],
   },
   icon: 'bar-chart-2',
   keywords: ['chart', 'graph', 'data', 'read'],

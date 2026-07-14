@@ -410,6 +410,7 @@ const FillBlankWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -424,8 +425,10 @@ const FillBlankWidget: WidgetDefinitionV2 = {
     trackCompletionTime: true,
     trackSuccessRate: true,
     trackMistakes: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: { completionXP: 10, confetti: true, positiveMessage: 'All blanks filled correctly!', achievement: 'first-blank' },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -433,6 +436,27 @@ const FillBlankWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['general', 'language', 'math'],
     authoringPrompt: 'Create a fill-in-the-blank exercise with 3-5 blanks',
+    recommendedAge: [5, 16],
+    readingLevel: 'grade-3',
+    learningObjectives: [
+      'Complete sentences with the correct word or phrase',
+      'Apply knowledge of vocabulary or mathematical terms',
+      'Demonstrate recall of key concepts through cloze tasks',
+    ],
+    commonMisconceptions: [
+      'Choosing syntactically correct but semantically wrong answers',
+      'Ignoring sentence context when selecting from options',
+      'Entering the correct meaning in an incorrect grammatical form',
+    ],
+    generationHints: [
+      'Place blanks on key concepts, not filler words',
+      'Provide 3-5 options per blank in select mode',
+      'Ensure the sentence is grammatically complete with the answer filled in',
+    ],
+    exampleConfigs: [
+      { template: 'The capital of France is ___.', answers: ['Paris'] },
+      { template: 'Water boils at ___ degrees Celsius.', answers: ['100'] },
+    ],
   },
   icon: 'text-cursor-input',
   keywords: ['fill', 'blank', 'complete', 'gap'],
