@@ -509,7 +509,11 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
     exampleConfigs: [
       { numerator: 1, denominator: 2, mode: 'bar' },
       { numerator: 3, denominator: 4, mode: 'circle' },
-      { left: { numerator: 1, denominator: 2 }, right: { numerator: 2, denominator: 4 }, mode: 'compare' },
+      {
+        left: { numerator: 1, denominator: 2 },
+        right: { numerator: 2, denominator: 4 },
+        mode: 'compare',
+      },
     ],
   },
   icon: 'pie-chart',

@@ -129,7 +129,8 @@ export function generateWidgetCatalog(input: WidgetCatalogInput): string {
         if (w.ai.estimatedMinutes) lines.push(`- Estimated time: ${w.ai.estimatedMinutes} min`);
         if (w.ai.bloomsLevel) lines.push(`- Bloom's: ${w.ai.bloomsLevel}`);
         if (w.ai.cognitiveLoad) lines.push(`- Cognitive load: ${w.ai.cognitiveLoad}`);
-        if (w.ai.recommendedAge) lines.push(`- Ages: ${w.ai.recommendedAge[0]}-${w.ai.recommendedAge[1]}`);
+        if (w.ai.recommendedAge)
+          lines.push(`- Ages: ${w.ai.recommendedAge[0]}-${w.ai.recommendedAge[1]}`);
         if (w.ai.learningObjectives && w.ai.learningObjectives.length > 0) {
           lines.push('- Learning objectives:');
           for (const obj of w.ai.learningObjectives) {

@@ -610,10 +610,10 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
     commonMisconceptions: [
       'Reading the minute hand position as the hour',
       'Not accounting for the minute hand affecting the hour hand position',
-      'Confusing o\'clock times with half-past times',
+      "Confusing o'clock times with half-past times",
     ],
     generationHints: [
-      'Use round times (o\'clock, half past) for easy mode',
+      "Use round times (o'clock, half past) for easy mode",
       'Use targetTime for precise grading in set mode',
       'Prefer 12-hour display for young learners',
     ],

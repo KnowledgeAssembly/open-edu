@@ -744,7 +744,12 @@ const MatchingWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, positiveMessage: 'All pairs matched!', achievement: 'first-match' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    positiveMessage: 'All pairs matched!',
+    achievement: 'first-match',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -769,8 +774,19 @@ const MatchingWidget: WidgetDefinitionV2 = {
       'Keep text labels short (2-4 words)',
     ],
     exampleConfigs: [
-      { pairs: [{ left: 'Dog', right: 'Puppy' }, { left: 'Cat', right: 'Kitten' }] },
-      { pairs: [{ left: 'Hot', right: 'Cold' }, { left: 'Big', right: 'Small' }, { left: 'Fast', right: 'Slow' }] },
+      {
+        pairs: [
+          { left: 'Dog', right: 'Puppy' },
+          { left: 'Cat', right: 'Kitten' },
+        ],
+      },
+      {
+        pairs: [
+          { left: 'Hot', right: 'Cold' },
+          { left: 'Big', right: 'Small' },
+          { left: 'Fast', right: 'Slow' },
+        ],
+      },
     ],
   },
   icon: 'puzzle',

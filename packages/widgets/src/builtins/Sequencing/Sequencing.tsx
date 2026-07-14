@@ -478,7 +478,12 @@ const SequencingWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, positiveMessage: 'Sequence is correct!', achievement: 'first-sequence' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    positiveMessage: 'Sequence is correct!',
+    achievement: 'first-sequence',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,

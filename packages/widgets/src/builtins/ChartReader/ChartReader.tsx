@@ -416,8 +416,20 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
       'Use relevant emoji for pictograph mode',
     ],
     exampleConfigs: [
-      { type: 'bar', data: [{ label: 'Apples', value: 5 }, { label: 'Bananas', value: 3 }] },
-      { type: 'pictograph', data: [{ label: 'Dogs', count: 4, emoji: '🐕' }, { label: 'Cats', count: 2, emoji: '🐱' }] },
+      {
+        type: 'bar',
+        data: [
+          { label: 'Apples', value: 5 },
+          { label: 'Bananas', value: 3 },
+        ],
+      },
+      {
+        type: 'pictograph',
+        data: [
+          { label: 'Dogs', count: 4, emoji: '🐕' },
+          { label: 'Cats', count: 2, emoji: '🐱' },
+        ],
+      },
     ],
   },
   icon: 'bar-chart-2',

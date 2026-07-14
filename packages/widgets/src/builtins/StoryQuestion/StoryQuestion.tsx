@@ -440,7 +440,7 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
     ],
     commonMisconceptions: [
       'Selecting an answer without reading the full story',
-      'Confusing the narrator\'s perspective with objective facts',
+      "Confusing the narrator's perspective with objective facts",
       'Choosing answers that are generally true but not supported by the text',
     ],
     generationHints: [
@@ -449,7 +449,16 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
       'Make distractors plausible but clearly contradicted by the text',
     ],
     exampleConfigs: [
-      { story: 'The cat sat on the mat. It was a sunny day.', questions: [{ prompt: 'Where did the cat sit?', options: ['On the mat', 'On the rug', 'Under the table'], correct: 0 }] },
+      {
+        story: 'The cat sat on the mat. It was a sunny day.',
+        questions: [
+          {
+            prompt: 'Where did the cat sit?',
+            options: ['On the mat', 'On the rug', 'Under the table'],
+            correct: 0,
+          },
+        ],
+      },
     ],
   },
   icon: 'book-open',

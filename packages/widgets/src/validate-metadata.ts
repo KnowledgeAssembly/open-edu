@@ -66,16 +66,28 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
   }
 
   // Capabilities — supportsObserveMode for stable widgets
-  if (widget.status === 'stable' && widget.capabilities && !widget.capabilities.supportsObserveMode) {
+  if (
+    widget.status === 'stable' &&
+    widget.capabilities &&
+    !widget.capabilities.supportsObserveMode
+  ) {
     warnings.push('Stable widgets should declare supportsObserveMode capability');
   }
 
   // Analytics — consistency with capabilities
-  if (widget.capabilities?.supportsHints && widget.analytics && widget.analytics.trackHints !== true) {
+  if (
+    widget.capabilities?.supportsHints &&
+    widget.analytics &&
+    widget.analytics.trackHints !== true
+  ) {
     warnings.push('Widget supports hints but trackHints is not enabled');
   }
 
-  if (widget.capabilities?.supportsRetry && widget.analytics && widget.analytics.trackRetries !== true) {
+  if (
+    widget.capabilities?.supportsRetry &&
+    widget.analytics &&
+    widget.analytics.trackRetries !== true
+  ) {
     warnings.push('Widget supports retry but trackRetries is not enabled');
   }
 

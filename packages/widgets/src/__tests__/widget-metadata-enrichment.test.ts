@@ -53,7 +53,9 @@ describe('Widget metadata enrichment', () => {
   describe('Capabilities completeness', () => {
     it('all stable widgets declare supportsObserveMode', () => {
       for (const w of stableWidgets) {
-        expect(w.capabilities.supportsObserveMode, `${w.id} missing supportsObserveMode`).toBe(true);
+        expect(w.capabilities.supportsObserveMode, `${w.id} missing supportsObserveMode`).toBe(
+          true,
+        );
       }
     });
   });
@@ -70,7 +72,9 @@ describe('Widget metadata enrichment', () => {
     it('all stable widgets with supportsRetry declare trackRetries', () => {
       for (const w of stableWidgets) {
         if (w.capabilities.supportsRetry) {
-          expect(w.analytics.trackRetries, `${w.id} has supportsRetry but no trackRetries`).toBe(true);
+          expect(w.analytics.trackRetries, `${w.id} has supportsRetry but no trackRetries`).toBe(
+            true,
+          );
         }
       }
     });

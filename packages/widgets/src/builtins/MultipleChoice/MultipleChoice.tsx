@@ -478,7 +478,12 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, positiveMessage: 'Correct!', achievement: 'first-answer' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    positiveMessage: 'Correct!',
+    achievement: 'first-answer',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 3,
@@ -504,7 +509,11 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
     ],
     exampleConfigs: [
       { prompt: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: 1 },
-      { prompt: 'Which planet is closest to the Sun?', options: ['Venus', 'Mercury', 'Mars', 'Earth'], correct: 1 },
+      {
+        prompt: 'Which planet is closest to the Sun?',
+        options: ['Venus', 'Mercury', 'Mars', 'Earth'],
+        correct: 1,
+      },
     ],
   },
   icon: 'circle-check',

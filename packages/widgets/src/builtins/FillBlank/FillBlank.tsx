@@ -428,7 +428,12 @@ const FillBlankWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, positiveMessage: 'All blanks filled correctly!', achievement: 'first-blank' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    positiveMessage: 'All blanks filled correctly!',
+    achievement: 'first-blank',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,

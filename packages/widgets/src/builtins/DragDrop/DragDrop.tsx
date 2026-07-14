@@ -698,8 +698,18 @@ const DragDropWidget: WidgetDefinitionV2 = {
       'Use 3-6 draggable items for manageable complexity',
     ],
     exampleConfigs: [
-      { items: [{ id: '1', label: 'Apple', target: 'Fruit' }, { id: '2', label: 'Carrot', target: 'Vegetable' }] },
-      { items: [{ id: '1', label: 'Mercury', target: 'Inner Planet' }, { id: '2', label: 'Jupiter', target: 'Outer Planet' }] },
+      {
+        items: [
+          { id: '1', label: 'Apple', target: 'Fruit' },
+          { id: '2', label: 'Carrot', target: 'Vegetable' },
+        ],
+      },
+      {
+        items: [
+          { id: '1', label: 'Mercury', target: 'Inner Planet' },
+          { id: '2', label: 'Jupiter', target: 'Outer Planet' },
+        ],
+      },
     ],
   },
   icon: 'move',

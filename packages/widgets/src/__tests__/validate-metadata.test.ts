@@ -103,17 +103,23 @@ describe('validateWidgetMetadata', () => {
   });
 
   it('warns when learningObjectives is empty', () => {
-    const result = validateWidgetMetadata(v2({ ai: { difficulty: 'easy', learningObjectives: [] } }));
+    const result = validateWidgetMetadata(
+      v2({ ai: { difficulty: 'easy', learningObjectives: [] } }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('learningObjectives'));
   });
 
   it('warns when commonMisconceptions is empty', () => {
-    const result = validateWidgetMetadata(v2({ ai: { difficulty: 'easy', commonMisconceptions: [] } }));
+    const result = validateWidgetMetadata(
+      v2({ ai: { difficulty: 'easy', commonMisconceptions: [] } }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('commonMisconceptions'));
   });
 
   it('warns when supportsObserveMode is missing on stable widget', () => {
-    const result = validateWidgetMetadata(v2({ status: 'stable', capabilities: { supportsKeyboard: true } }));
+    const result = validateWidgetMetadata(
+      v2({ status: 'stable', capabilities: { supportsKeyboard: true } }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('supportsObserveMode'));
   });
 
@@ -123,49 +129,59 @@ describe('validateWidgetMetadata', () => {
   });
 
   it('warns when supportsHints is true but trackHints is false', () => {
-    const result = validateWidgetMetadata(v2({
-      capabilities: { supportsHints: true },
-      analytics: { trackHints: false },
-    }));
+    const result = validateWidgetMetadata(
+      v2({
+        capabilities: { supportsHints: true },
+        analytics: { trackHints: false },
+      }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('trackHints'));
   });
 
   it('warns when supportsRetry is true but trackRetries is false', () => {
-    const result = validateWidgetMetadata(v2({
-      capabilities: { supportsRetry: true },
-      analytics: { trackRetries: false },
-    }));
+    const result = validateWidgetMetadata(
+      v2({
+        capabilities: { supportsRetry: true },
+        analytics: { trackRetries: false },
+      }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('trackRetries'));
   });
 
   it('warns when completionXP is set but positiveMessage is missing', () => {
-    const result = validateWidgetMetadata(v2({
-      reward: { completionXP: 10 },
-    }));
+    const result = validateWidgetMetadata(
+      v2({
+        reward: { completionXP: 10 },
+      }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('positiveMessage'));
   });
 
   it('warns when exampleConfigs is empty array', () => {
-    const result = validateWidgetMetadata(v2({
-      ai: { difficulty: 'easy', exampleConfigs: [] },
-    }));
+    const result = validateWidgetMetadata(
+      v2({
+        ai: { difficulty: 'easy', exampleConfigs: [] },
+      }),
+    );
     expect(result.warnings).toContainEqual(expect.stringContaining('exampleConfigs'));
   });
 
   it('no warnings for fully-populated widget with consistent metadata', () => {
-    const result = validateWidgetMetadata(v2({
-      status: 'stable',
-      capabilities: { supportsObserveMode: true, supportsHints: true, supportsRetry: true },
-      analytics: { trackHints: true, trackRetries: true },
-      reward: { completionXP: 10, positiveMessage: 'Great!' },
-      ai: {
-        difficulty: 'easy',
-        recommendedAge: [5, 10],
-        learningObjectives: ['Learn something'],
-        commonMisconceptions: ['A common error'],
-        exampleConfigs: [{ test: true }],
-      },
-    }));
+    const result = validateWidgetMetadata(
+      v2({
+        status: 'stable',
+        capabilities: { supportsObserveMode: true, supportsHints: true, supportsRetry: true },
+        analytics: { trackHints: true, trackRetries: true },
+        reward: { completionXP: 10, positiveMessage: 'Great!' },
+        ai: {
+          difficulty: 'easy',
+          recommendedAge: [5, 10],
+          learningObjectives: ['Learn something'],
+          commonMisconceptions: ['A common error'],
+          exampleConfigs: [{ test: true }],
+        },
+      }),
+    );
     expect(result.warnings).toHaveLength(0);
   });
 });

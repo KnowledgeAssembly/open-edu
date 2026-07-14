@@ -97,22 +97,24 @@ describe('generateWidgetCatalog', () => {
 
   it('includes AI metadata when provided', () => {
     const catalog = generateWidgetCatalog({
-      widgets: [{
-        id: 'test.widget',
-        name: 'Test Widget',
-        description: 'A test',
-        domain: 'core',
-        status: 'stable',
-        learningIntents: ['practice'],
-        ai: {
-          difficulty: 'easy',
-          estimatedMinutes: 3,
-          bloomsLevel: 'remember',
-          recommendedAge: [5, 10],
-          learningObjectives: ['Learn to test'],
-          commonMisconceptions: ['Assuming tests always pass'],
+      widgets: [
+        {
+          id: 'test.widget',
+          name: 'Test Widget',
+          description: 'A test',
+          domain: 'core',
+          status: 'stable',
+          learningIntents: ['practice'],
+          ai: {
+            difficulty: 'easy',
+            estimatedMinutes: 3,
+            bloomsLevel: 'remember',
+            recommendedAge: [5, 10],
+            learningObjectives: ['Learn to test'],
+            commonMisconceptions: ['Assuming tests always pass'],
+          },
         },
-      }],
+      ],
     });
     expect(catalog).toContain('AI Notes');
     expect(catalog).toContain('Difficulty: easy');
@@ -127,13 +129,15 @@ describe('generateWidgetCatalog', () => {
 
   it('includes capabilities when provided', () => {
     const catalog = generateWidgetCatalog({
-      widgets: [{
-        id: 'test.widget',
-        name: 'Test',
-        domain: 'core',
-        status: 'stable',
-        capabilities: ['observeMode', 'keyboard', 'screenReader', 'offline'],
-      }],
+      widgets: [
+        {
+          id: 'test.widget',
+          name: 'Test',
+          domain: 'core',
+          status: 'stable',
+          capabilities: ['observeMode', 'keyboard', 'screenReader', 'offline'],
+        },
+      ],
     });
     expect(catalog).toContain('Capabilities:');
     expect(catalog).toContain('keyboard');
@@ -143,13 +147,15 @@ describe('generateWidgetCatalog', () => {
 
   it('includes accessibility when provided', () => {
     const catalog = generateWidgetCatalog({
-      widgets: [{
-        id: 'test.widget',
-        name: 'Test',
-        domain: 'core',
-        status: 'stable',
-        accessibility: ['highContrast', 'tts', 'ariaSupport'],
-      }],
+      widgets: [
+        {
+          id: 'test.widget',
+          name: 'Test',
+          domain: 'core',
+          status: 'stable',
+          accessibility: ['highContrast', 'tts', 'ariaSupport'],
+        },
+      ],
     });
     expect(catalog).toContain('Accessibility:');
     expect(catalog).toContain('highContrast');
@@ -158,13 +164,15 @@ describe('generateWidgetCatalog', () => {
 
   it('includes reward info when provided', () => {
     const catalog = generateWidgetCatalog({
-      widgets: [{
-        id: 'test.widget',
-        name: 'Test',
-        domain: 'core',
-        status: 'stable',
-        reward: { completionXP: 15, positiveMessage: 'Well done!' },
-      }],
+      widgets: [
+        {
+          id: 'test.widget',
+          name: 'Test',
+          domain: 'core',
+          status: 'stable',
+          reward: { completionXP: 15, positiveMessage: 'Well done!' },
+        },
+      ],
     });
     expect(catalog).toContain('Rewards:');
     expect(catalog).toContain('15 XP');
@@ -173,13 +181,15 @@ describe('generateWidgetCatalog', () => {
 
   it('includes analytics when provided', () => {
     const catalog = generateWidgetCatalog({
-      widgets: [{
-        id: 'test.widget',
-        name: 'Test',
-        domain: 'core',
-        status: 'stable',
-        analytics: ['attempts', 'hints', 'completionTime'],
-      }],
+      widgets: [
+        {
+          id: 'test.widget',
+          name: 'Test',
+          domain: 'core',
+          status: 'stable',
+          analytics: ['attempts', 'hints', 'completionTime'],
+        },
+      ],
     });
     expect(catalog).toContain('Analytics:');
     expect(catalog).toContain('attempts');

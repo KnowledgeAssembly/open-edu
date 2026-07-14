@@ -299,7 +299,10 @@ const RealWorldWidget: WidgetDefinitionV2 = {
       'Keep the scenario brief and concrete',
     ],
     exampleConfigs: [
-      { scenario: 'You have ₹50 and buy 3 notebooks at ₹12 each.', prompt: 'How much change do you get?' },
+      {
+        scenario: 'You have ₹50 and buy 3 notebooks at ₹12 each.',
+        prompt: 'How much change do you get?',
+      },
       { scenario: 'A plant grows 2 cm every week.', prompt: 'How tall will it be after 5 weeks?' },
     ],
   },
