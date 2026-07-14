@@ -336,6 +336,7 @@ const VisualCountingWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -349,8 +350,15 @@ const VisualCountingWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-count',
+    positiveMessage: 'Counting correct!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 2,
@@ -358,6 +366,28 @@ const VisualCountingWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['math', 'counting'],
     authoringPrompt: 'Create a visual counting exercise with clear images',
+    recommendedAge: [3, 7],
+    readingLevel: 'pre-reader',
+    learningObjectives: [
+      'Count objects accurately up to 12',
+      'Recognize quantities visually without counting',
+      'Add two groups of objects together',
+    ],
+    commonMisconceptions: [
+      'Double-counting an object at the boundary of groups',
+      'Confusing 6 and 9 when items are rotated',
+      'Losing track when items are scattered irregularly',
+    ],
+    generationHints: [
+      'Use visually distinct emoji items',
+      'Limit count to 1-12 for clarity',
+      'Space items clearly in the grid layout',
+    ],
+    exampleConfigs: [
+      { items: ['🍎', '🍎', '🍎'], answer: 3 },
+      { items: ['🌟', '🌟', '🌟', '🌟', '🌟'], answer: 5 },
+      { left: ['🐱', '🐱'], right: ['🐱', '🐱', '🐱'], answer: 5 },
+    ],
   },
   icon: 'hash',
   keywords: ['count', 'visual', 'number', 'quantity'],

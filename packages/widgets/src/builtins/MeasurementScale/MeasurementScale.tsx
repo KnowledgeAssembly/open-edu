@@ -631,6 +631,7 @@ const MeasurementScaleWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -644,8 +645,15 @@ const MeasurementScaleWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-measure',
+    positiveMessage: 'Measurement accurate!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,
@@ -653,6 +661,28 @@ const MeasurementScaleWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['math', 'measurement'],
     authoringPrompt: 'Create a measurement exercise using scales and rulers',
+    recommendedAge: [6, 12],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Read measurements accurately on a ruler or scale',
+      'Understand the relationship between tick marks and values',
+      'Estimate a measurement and verify against a target',
+    ],
+    commonMisconceptions: [
+      'Starting measurement count at 1 instead of 0',
+      'Ignoring unit labels when reading values',
+      'Misreading thermometer as showing area instead of temperature',
+    ],
+    generationHints: [
+      'Use simple step values (1, 2, 5, or 10)',
+      'Keep the measurement range under 100 for young learners',
+      'Always include the unit label in all markings',
+    ],
+    exampleConfigs: [
+      { type: 'ruler', max: 20, unit: 'cm', target: 12 },
+      { type: 'thermometer', max: 50, unit: '°C', target: 37 },
+      { type: 'cylinder', max: 100, unit: 'ml', target: 60 },
+    ],
   },
   icon: 'ruler',
   keywords: ['measurement', 'scale', 'math', 'ruler', '测量'],

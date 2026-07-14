@@ -257,6 +257,7 @@ const RealWorldWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -270,8 +271,15 @@ const RealWorldWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-scenario',
+    positiveMessage: 'Scenario completed!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,
@@ -279,6 +287,29 @@ const RealWorldWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['general'],
     authoringPrompt: 'Create a real-world application scenario',
+    recommendedAge: [8, 18],
+    readingLevel: 'grade-4',
+    learningObjectives: [
+      'Apply learned concepts to a real-world scenario',
+      'Explain reasoning using everyday context',
+      'Self-assess understanding through open-ended reflection',
+    ],
+    commonMisconceptions: [
+      'Treating it as a right/wrong quiz instead of a reflection exercise',
+      'Providing generic answers instead of scenario-specific responses',
+    ],
+    generationHints: [
+      'Use relatable, age-appropriate everyday scenarios',
+      'Include an optional expectedAnswer for comparison',
+      'Keep the scenario brief and concrete',
+    ],
+    exampleConfigs: [
+      {
+        scenario: 'You have ₹50 and buy 3 notebooks at ₹12 each.',
+        prompt: 'How much change do you get?',
+      },
+      { scenario: 'A plant grows 2 cm every week.', prompt: 'How tall will it be after 5 weeks?' },
+    ],
   },
   icon: 'globe',
   keywords: ['real', 'world', 'application', 'scenario'],

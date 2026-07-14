@@ -464,6 +464,7 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
     supportsAccessibility: true,
     supportsAnimation: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -477,8 +478,15 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-fraction',
+    positiveMessage: 'Fraction understood!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -486,6 +494,32 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['math', 'fractions'],
     authoringPrompt: 'Create a fraction visualization exercise with clear visual models',
+    recommendedAge: [5, 10],
+    readingLevel: 'pre-reader',
+    learningObjectives: [
+      'Understand that a fraction represents parts of a whole',
+      'Visualize the relationship between numerator and denominator',
+      'Compare two fractions using visual models',
+    ],
+    commonMisconceptions: [
+      'Thinking a larger denominator means a larger fraction',
+      'Confusing the shaded region with the unshaded region',
+      'Not recognizing equivalent fractions across different models',
+    ],
+    generationHints: [
+      'Limit denominator to 12 or less for clear visualization',
+      'Use circle mode for comparisons under 1 whole',
+      'Always include the fraction notation alongside the visual model',
+    ],
+    exampleConfigs: [
+      { numerator: 1, denominator: 2, mode: 'bar' },
+      { numerator: 3, denominator: 4, mode: 'circle' },
+      {
+        left: { numerator: 1, denominator: 2 },
+        right: { numerator: 2, denominator: 4 },
+        mode: 'compare',
+      },
+    ],
   },
   icon: 'pie-chart',
   keywords: ['fraction', 'visual', 'math', '分数'],

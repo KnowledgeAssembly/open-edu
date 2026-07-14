@@ -432,6 +432,7 @@ const PlaceValueChartWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -445,8 +446,15 @@ const PlaceValueChartWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-place-value',
+    positiveMessage: 'Place value identified!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -454,6 +462,28 @@ const PlaceValueChartWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['math', 'place-value'],
     authoringPrompt: 'Create a place value chart exercise for multi-digit numbers',
+    recommendedAge: [6, 10],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Identify the position and value of each digit in a multi-digit number',
+      'Understand how digit position determines its value',
+      'Compose and decompose numbers using place value columns',
+    ],
+    commonMisconceptions: [
+      'Treating each column as having equal value regardless of position',
+      'Confusing the Indian lakh/crore system with Western million/billion notation',
+      'Placing digits without considering their positional value',
+    ],
+    generationHints: [
+      'Use targetNumber to auto-generate draggable digit bank',
+      'Start with lakh mode before introducing crore',
+      'Display column labels (Ones, Tens, Hundreds, ...) clearly above each slot',
+    ],
+    exampleConfigs: [
+      { targetNumber: 1234, mode: 'lakh' },
+      { targetNumber: 56789, mode: 'lakh' },
+      { targetNumber: 1234567, mode: 'crore' },
+    ],
   },
   icon: 'table',
   keywords: ['place', 'value', 'chart', 'math', '位值'],

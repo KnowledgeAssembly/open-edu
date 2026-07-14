@@ -404,6 +404,7 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -419,8 +420,15 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-story',
+    positiveMessage: 'Story comprehension correct!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,
@@ -428,6 +436,35 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['language', 'reading'],
     authoringPrompt: 'Create a story-based comprehension question',
+    recommendedAge: [6, 14],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Comprehend a short story and identify key details',
+      'Distinguish between facts stated in the text and opinions',
+      'Make simple inferences based on story context',
+    ],
+    commonMisconceptions: [
+      'Selecting an answer without reading the full story',
+      "Confusing the narrator's perspective with objective facts",
+      'Choosing answers that are generally true but not supported by the text',
+    ],
+    generationHints: [
+      'Keep stories under 150 words for focused comprehension',
+      'Include a clear narrative with a beginning, middle, and end',
+      'Make distractors plausible but clearly contradicted by the text',
+    ],
+    exampleConfigs: [
+      {
+        story: 'The cat sat on the mat. It was a sunny day.',
+        questions: [
+          {
+            prompt: 'Where did the cat sit?',
+            options: ['On the mat', 'On the rug', 'Under the table'],
+            correct: 0,
+          },
+        ],
+      },
+    ],
   },
   icon: 'book-open',
   keywords: ['story', 'reading', 'comprehension', 'question'],

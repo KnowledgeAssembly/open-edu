@@ -462,6 +462,7 @@ const SequencingWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -474,8 +475,15 @@ const SequencingWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    positiveMessage: 'Sequence is correct!',
+    achievement: 'first-sequence',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,
@@ -483,6 +491,27 @@ const SequencingWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['general'],
     authoringPrompt: 'Create a sequencing exercise with 4-6 steps in logical order',
+    recommendedAge: [6, 14],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Arrange events in chronological or logical order',
+      'Understand dependencies between steps',
+      'Apply sequential reasoning to reorder scrambled items',
+    ],
+    commonMisconceptions: [
+      'Assuming alphabetical order is the correct sequence',
+      'Confusing cause and effect in process steps',
+      'Ignoring intermediate steps between start and end',
+    ],
+    generationHints: [
+      'Ensure a clear logical flow with no ambiguous ordering',
+      'Avoid steps that could legitimately be swapped',
+      'Keep total steps between 3-8 for manageable complexity',
+    ],
+    exampleConfigs: [
+      { items: ['First', 'Second', 'Third'], answer: [0, 1, 2] },
+      { items: ['Mix ingredients', 'Preheat oven', 'Bake cake', 'Serve'], answer: [1, 0, 2, 3] },
+    ],
   },
   icon: 'list-ordered',
   keywords: ['sequence', 'order', 'steps', 'sort'],

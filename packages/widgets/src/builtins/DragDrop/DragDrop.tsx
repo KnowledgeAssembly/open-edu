@@ -657,6 +657,7 @@ const DragDropWidget: WidgetDefinitionV2 = {
     supportsRewards: true,
     supportsAccessibility: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -669,8 +670,15 @@ const DragDropWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-sort',
+    positiveMessage: 'Items sorted correctly!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,
@@ -678,6 +686,36 @@ const DragDropWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'moderate',
     subjectTags: ['general'],
     authoringPrompt: 'Create a drag-and-drop categorization exercise',
+    recommendedAge: [5, 14],
+    readingLevel: 'grade-2',
+    learningObjectives: [
+      'Classify items into the correct categories',
+      'Categorize items based on shared attributes',
+      'Compare categories to determine correct placement',
+    ],
+    commonMisconceptions: [
+      'Placing items in the first available target without reading labels',
+      'Ignoring category boundaries and grouping by personal preference',
+    ],
+    generationHints: [
+      'Make item labels unambiguous',
+      'Ensure target zone labels have distinct meanings',
+      'Use 3-6 draggable items for manageable complexity',
+    ],
+    exampleConfigs: [
+      {
+        items: [
+          { id: '1', label: 'Apple', target: 'Fruit' },
+          { id: '2', label: 'Carrot', target: 'Vegetable' },
+        ],
+      },
+      {
+        items: [
+          { id: '1', label: 'Mercury', target: 'Inner Planet' },
+          { id: '2', label: 'Jupiter', target: 'Outer Planet' },
+        ],
+      },
+    ],
   },
   icon: 'move',
   keywords: ['drag', 'drop', 'sort', 'categorize'],

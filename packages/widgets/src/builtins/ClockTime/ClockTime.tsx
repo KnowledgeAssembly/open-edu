@@ -575,6 +575,7 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
     supportsAccessibility: true,
     supportsAnimation: true,
     supportsOffline: true,
+    supportsObserveMode: true,
   },
   accessibility: {
     highContrast: true,
@@ -588,8 +589,15 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
     trackAttempts: true,
     trackCompletionTime: true,
     trackSuccessRate: true,
+    trackHints: true,
+    trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-clock',
+    positiveMessage: 'Time telling correct!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,
@@ -597,6 +605,28 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
     cognitiveLoad: 'low',
     subjectTags: ['math', 'time'],
     authoringPrompt: 'Create a clock-reading exercise with analog and digital times',
+    recommendedAge: [4, 10],
+    readingLevel: 'pre-reader',
+    learningObjectives: [
+      'Read the hour from an analog clock face',
+      'Set clock hands to match a given digital time',
+      'Understand the relationship between hour and minute hands',
+    ],
+    commonMisconceptions: [
+      'Reading the minute hand position as the hour',
+      'Not accounting for the minute hand affecting the hour hand position',
+      "Confusing o'clock times with half-past times",
+    ],
+    generationHints: [
+      "Use round times (o'clock, half past) for easy mode",
+      'Use targetTime for precise grading in set mode',
+      'Prefer 12-hour display for young learners',
+    ],
+    exampleConfigs: [
+      { hour: 3, minute: 0, mode: 'read' },
+      { hour: 7, minute: 30, mode: 'set', targetTime: '7:30' },
+      { hour: 11, minute: 45, mode: 'set', targetTime: '11:45' },
+    ],
   },
   icon: 'clock',
   keywords: ['clock', 'time', 'math', '时钟', '时间'],
