@@ -1,0 +1,18 @@
+{
+  "type": "exercise",
+  "title": "Listen to Spanish Greetings",
+  "widget": "core.audio-player",
+  "config": {
+    "audio": "https://example.com/audio/spanish-greetings.mp3",
+    "title": "Spanish Greetings",
+    "transcript": "Hola, Buenos dias, Como estas?",
+    "showTranscript": true,
+    "interactive": true,
+    "bookmarks": true,
+    "captions": [
+      { "start": 0, "end": 2, "text": "Hola" },
+      { "start": 2, "end": 4, "text": "Buenos dias" },
+      { "start": 4, "end": 6, "text": "Como estas?" }
+    ]
+  }
+}

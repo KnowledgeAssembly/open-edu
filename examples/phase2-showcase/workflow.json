@@ -1,0 +1,13 @@
+{
+  "steps": [
+    { "ref": "nodes/intro.md" },
+    { "ref": "nodes/audio-player.json" },
+    { "ref": "nodes/video-player.json" },
+    { "ref": "nodes/flashcard.json" },
+    { "ref": "nodes/process-diagram.json" },
+    { "ref": "nodes/number-line.json" },
+    { "ref": "nodes/social-map.json" },
+    { "ref": "nodes/outro.md" },
+    "COMPLETED"
+  ]
+}

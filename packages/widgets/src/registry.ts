@@ -30,6 +30,12 @@ import {
   timeline,
   labelDiagram,
   imageLabel,
+  audioPlayer,
+  videoPlayer,
+  flashcard,
+  processDiagram,
+  numberLine,
+  socialMap,
 } from './builtins';
 
 export function createWidgetRegistry(): WidgetRegistry {
@@ -157,6 +163,12 @@ const BUILTIN_WIDGETS: WidgetDefinition[] = [
   timeline,
   labelDiagram,
   imageLabel,
+  audioPlayer,
+  videoPlayer,
+  flashcard,
+  processDiagram,
+  numberLine,
+  socialMap,
 ];
 
 export function registerAllBuiltins(registry: WidgetRegistry): void {

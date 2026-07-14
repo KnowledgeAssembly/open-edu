@@ -207,6 +207,93 @@ const multipleChoiceSchema = z.object({
   interactive: z.boolean().optional(),
 });
 
+const audioPlayerSchema = z.object({
+  audio: z.string().min(1),
+  title: z.string().optional(),
+  transcript: z.string().optional(),
+  captions: z.array(z.object({ start: z.number(), end: z.number(), text: z.string() })).optional(),
+  showTranscript: z.boolean().optional(),
+  interactive: z.boolean().optional(),
+  bookmarks: z.boolean().optional(),
+});
+
+const videoPlayerSchema = z.object({
+  video: z.string().min(1),
+  title: z.string().optional(),
+  poster: z.string().optional(),
+  chapters: z.array(z.object({ time: z.number(), title: z.string() })).optional(),
+  transcript: z.string().optional(),
+  showTranscript: z.boolean().optional(),
+  interactive: z.boolean().optional(),
+});
+
+const flashcardSchema = z.object({
+  cards: z
+    .array(
+      z.object({
+        front: z.string().min(1),
+        back: z.string().min(1),
+        hint: z.string().optional(),
+        image: z.string().optional(),
+      }),
+    )
+    .min(1),
+  mode: z.enum(['flip', 'multiple', 'spaced']).optional(),
+  interactive: z.boolean().optional(),
+  shuffle: z.boolean().optional(),
+});
+
+const processDiagramSchema = z.object({
+  nodes: z
+    .array(z.object({ id: z.string(), title: z.string(), description: z.string().optional() }))
+    .min(2),
+  connections: z
+    .array(
+      z.object({
+        from: z.string(),
+        to: z.string(),
+        type: z.enum(['arrow', 'dashed', 'double', 'loop']).optional(),
+      }),
+    )
+    .min(1),
+  layout: z.enum(['horizontal', 'vertical', 'cycle', 'radial']).optional(),
+  title: z.string().optional(),
+  interactive: z.boolean().optional(),
+  stepByStep: z.boolean().optional(),
+});
+
+const numberLineSchema = z.object({
+  min: z.number().optional(),
+  max: z.number().optional(),
+  step: z.number().optional(),
+  target: z.number().optional(),
+  markers: z.array(z.object({ value: z.number(), label: z.string().optional() })).optional(),
+  showLabels: z.boolean().optional(),
+  mode: z.enum(['integers', 'decimals', 'fractions', 'negative', 'measurement']).optional(),
+  interactive: z.boolean().optional(),
+});
+
+const socialMapSchema = z.object({
+  regions: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        color: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .min(1),
+  labels: z.boolean().optional(),
+  legend: z.array(z.object({ color: z.string(), label: z.string() })).optional(),
+  markers: z
+    .array(z.object({ id: z.string(), label: z.string(), x: z.number(), y: z.number() }))
+    .optional(),
+  title: z.string().optional(),
+  interactive: z.boolean().optional(),
+  targetRegion: z.string().optional(),
+});
+
 // Register all widget schemas
 const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
   'open-edu.matching': matchingSchema,
@@ -224,6 +311,12 @@ const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
   'open-edu.real-world': realWorldSchema,
   'open-edu.multiple-choice': multipleChoiceSchema,
   'open-edu.multiple-choice-practice': multipleChoiceSchema,
+  'core.audio-player': audioPlayerSchema,
+  'core.video-player': videoPlayerSchema,
+  'language.flashcard': flashcardSchema,
+  'science.process-diagram': processDiagramSchema,
+  'math.number-line': numberLineSchema,
+  'social.map': socialMapSchema,
 };
 
 export function registerAllWidgetSchemas(): void {

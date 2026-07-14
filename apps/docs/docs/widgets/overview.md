@@ -106,37 +106,58 @@ const filtered = registry.searchWithFilters({ domain: 'core', intent: 'practice'
 
 ## Built-in Widgets
 
-21 built-in widgets across 5 content domains (14 stable + 6 experimental + 1 deprecated alias):
+27 built-in widgets across 5 content domains (26 stable + 1 deprecated alias):
 
-### Stable Widgets
+### Core Widgets
 
-| Widget ID                | Domain | Description                                                  |
-| ------------------------ | ------ | ------------------------------------------------------------ |
-| `core.matching`          | core   | Match items between two columns                              |
-| `core.multiple-choice`   | core   | Single or multi-question multiple choice                     |
-| `core.drag-drop`         | core   | Drag and drop items into categorized zones                   |
-| `core.sequencing`        | core   | Arrange items in the correct order                           |
-| `core.fill-blank`        | core   | Type the missing word or phrase in a sentence                |
-| `core.story-question`    | core   | Read a passage and answer a comprehension question           |
-| `core.real-world`        | core   | Identify real-world examples of a concept                    |
-| `core.chart-reader`      | core   | Read and interpret data from bar charts and graphs           |
-| `core.visual-counting`   | core   | Count objects in a visual grid and select the correct number |
-| `math.fraction-visual`   | math   | Visual fraction representation — identify fractions          |
-| `math.place-value-chart` | math   | Identify digit place values (ones, tens, hundreds)           |
-| `math.grid-area`         | math   | Calculate area by counting grid squares                      |
-| `math.clock-time`        | math   | Read analog clock faces and identify the time                |
-| `math.measurement-scale` | math   | Read measurements from a labeled scale                       |
+| Widget ID              | Domain | Description                                                    |
+| ---------------------- | ------ | -------------------------------------------------------------- |
+| `core.multiple-choice` | core   | Single or multi-question multiple choice                       |
+| `core.matching`        | core   | Match items between two columns                                |
+| `core.drag-drop`       | core   | Drag and drop items into categorized zones                     |
+| `core.sequencing`      | core   | Arrange items in the correct order                             |
+| `core.fill-blank`      | core   | Type the missing word or phrase in a sentence                  |
+| `core.story-question`  | core   | Read a passage and answer a comprehension question             |
+| `core.real-world`      | core   | Identify real-world examples of a concept                      |
+| `core.chart-reader`    | core   | Read and interpret data from bar charts and graphs             |
+| `core.visual-counting` | core   | Count objects in a visual grid and select the correct number   |
+| `core.callout`         | core   | Highlighted information callout with configurable styling      |
+| `core.image-compare`   | core   | Side-by-side image comparison with slider                      |
+| `core.hotspot`         | core   | Clickable regions on images with feedback                      |
+| `core.timeline`        | core   | Horizontal timeline visualization with events                  |
+| `core.audio-player`    | core   | Play audio with transcript, captions, bookmarks, speed control |
+| `core.video-player`    | core   | Play video with chapters, captions, transcript, bookmarks      |
 
-### Experimental Widgets (Stubs)
+### Math Widgets
 
-| Widget ID               | Domain  | Description                   |
-| ----------------------- | ------- | ----------------------------- |
-| `core.callout`          | core    | Information callout           |
-| `core.image-compare`    | core    | Side-by-side image comparison |
-| `core.hotspot`          | core    | Clickable regions on images   |
-| `core.timeline`         | core    | Timeline-based content        |
-| `science.label-diagram` | science | Label parts of a diagram      |
-| `science.image-label`   | science | Label parts of an image       |
+| Widget ID                | Domain | Description                                 |
+| ------------------------ | ------ | ------------------------------------------- |
+| `math.fraction-visual`   | math   | Visual fraction representation              |
+| `math.place-value-chart` | math   | Identify digit place values                 |
+| `math.grid-area`         | math   | Calculate area by counting grid squares     |
+| `math.clock-time`        | math   | Read analog clock faces                     |
+| `math.measurement-scale` | math   | Read measurements from a labeled scale      |
+| `math.number-line`       | math   | Interactive number line with click-to-place |
+
+### Science Widgets
+
+| Widget ID                 | Domain  | Description                                    |
+| ------------------------- | ------- | ---------------------------------------------- |
+| `science.label-diagram`   | science | Label parts of a diagram with draggable labels |
+| `science.image-label`     | science | Label parts of an image with draggable labels  |
+| `science.process-diagram` | science | Visual explanation of systems with 4 layouts   |
+
+### Language Widgets
+
+| Widget ID            | Domain   | Description                                     |
+| -------------------- | -------- | ----------------------------------------------- |
+| `language.flashcard` | language | Flip cards with self-assessment, shuffle, retry |
+
+### Social Widgets
+
+| Widget ID    | Domain | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| `social.map` | social | Interactive map with regions, zoom, legend, tooltips |
 
 ### Deprecated Aliases
 
@@ -144,7 +165,7 @@ const filtered = registry.searchWithFilters({ domain: 'core', intent: 'practice'
 | ----------------------------------- | ---------------------- |
 | `open-edu.multiple-choice-practice` | `core.multiple-choice` |
 
-All 14 stable widgets have enriched metadata across all categories (AI, capabilities, accessibility, analytics, reward). Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.
+All 26 stable widgets have enriched metadata across all categories (AI, capabilities, accessibility, analytics, reward). Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.
 
 For a live demo of every widget, run the [Widget Showcase](../examples/widget-showcase) example package.
 

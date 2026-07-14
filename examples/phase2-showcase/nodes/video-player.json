@@ -1,0 +1,16 @@
+{
+  "type": "exercise",
+  "title": "Photosynthesis Video",
+  "widget": "core.video-player",
+  "config": {
+    "video": "https://example.com/video/photosynthesis.mp4",
+    "title": "Understanding Photosynthesis",
+    "chapters": [
+      { "time": 0, "title": "Introduction" },
+      { "time": 60, "title": "Light Reactions" },
+      { "time": 180, "title": "Calvin Cycle" }
+    ],
+    "showTranscript": true,
+    "interactive": true
+  }
+}
