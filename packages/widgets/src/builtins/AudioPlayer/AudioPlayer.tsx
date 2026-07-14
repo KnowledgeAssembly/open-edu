@@ -153,7 +153,7 @@ function AudioPlayerComponent(props: {
 
   return (
     <div role="group" aria-label={config.title ?? 'Audio player'} data-testid="audio-player">
-      <audio ref={audioRef} src={config.audio} loop={config.loop} preload="metadata" />
+      <audio ref={audioRef} src={config.audio?.replace(/^assets\//, '/assets/')} loop={config.loop} preload="metadata" />
 
       {config.title && <h3 className="text-on-surface font-semibold">{config.title}</h3>}
       {config.description && (

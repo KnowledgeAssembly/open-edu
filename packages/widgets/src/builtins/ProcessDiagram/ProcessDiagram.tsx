@@ -101,7 +101,9 @@ function ProcessDiagramComponent(props: {
 
   const [revealedNodes, setRevealedNodes] = useState<number[]>(
     parsedState?.revealedNodes ??
-      (parsed?.success && !parsed.data.stepByStep ? parsed.data.nodes.map((_, i) => i) : []),
+      (parsed?.success && (!parsed.data.stepByStep || !parsed.data.interactive)
+        ? parsed.data.nodes.map((_, i) => i)
+        : []),
   );
   const [currentStep, setCurrentStep] = useState(parsedState?.currentStep ?? 0);
 
