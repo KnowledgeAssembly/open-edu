@@ -22,7 +22,7 @@ Every widget implements `WidgetDefinition` (base) or `WidgetDefinitionV2` (exten
 - **reward**: Reward hooks the widget supports (completionXP, achievement, positiveMessage, confetti, etc.)
 - **ai**: Metadata for LLM course generation (difficulty, estimatedMinutes, bloomsLevel, cognitiveLoad, recommendedAge, readingLevel, learningObjectives, commonMisconceptions, generationHints, exampleConfigs)
 
-All 14 stable widgets are enriched with complete metadata across all categories. The 6 experimental stubs have minimal metadata.
+All 26 stable widgets are enriched with complete metadata across all categories.
 
 ### Registry
 
@@ -30,7 +30,7 @@ All 14 stable widgets are enriched with complete metadata across all categories.
 
 ```
 createDefaultRegistry()
-  → registers all 21 builtins
+  → registers all 27 builtins
   → applies 15 alias mappings
   → supports: get, has, getAll, getByDomain, search, searchWithFilters
 ```
@@ -49,11 +49,11 @@ open-edu.multiple-choice-practice → core.multiple-choice
 
 Widgets are grouped by content domain:
 
-- `core.*` — Universal widgets (matching, multiple-choice, drag-drop, sequencing, etc.)
-- `math.*` — Math-specific (fraction-visual, clock-time, measurement-scale, etc.)
-- `language.*` — Language arts (reserved for future use)
-- `science.*` — Science (label-diagram, image-label)
-- `social.*` — Social studies (reserved for future use)
+- `core.*` — Universal widgets (matching, multiple-choice, drag-drop, sequencing, audio-player, video-player, etc.)
+- `math.*` — Math-specific (fraction-visual, clock-time, measurement-scale, number-line, etc.)
+- `language.*` — Language arts (flashcard)
+- `science.*` — Science (label-diagram, image-label, process-diagram)
+- `social.*` — Social studies (map)
 
 ### Metadata Validation
 
@@ -131,7 +131,7 @@ packages/widgets/src/
 │   ├── reward.ts           # RewardMetadata (7 fields)
 │   ├── ai.ts               # AIMetadata (12 fields)
 │   └── index.ts            # Barrel exports
-├── builtins/             # 15 stable + 6 stub widget implementations
+├── builtins/             # 26 stable widget implementations + shared WidgetError
 ├── remote-loader.ts      # Remote widget loading with integrity check
 └── use-remote-widget.ts  # React hook for remote widgets
 

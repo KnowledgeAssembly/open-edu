@@ -4,8 +4,8 @@ sidebar_position: 11
 
 # Widget Showcase
 
-**Demonstrates all 14 built-in widgets in the Open-Edu runtime.** A linear package with 16 nodes that walks through every available widget type: Visual Counting, Multiple Choice, Matching, Drag & Drop, Sequencing, Fill in the Blank, Story Question, Real World, Fraction Visual, Place Value Chart, Grid Area, Chart Reader, Clock Time, and Measurement Scale. Each widget node uses the same configuration format documented in the Widget SDK.
+**Demonstrates all 27 built-in widgets in the Open-Edu runtime.** A linear package that walks through every available widget type across 5 content domains: Core (Multiple Choice, Matching, Drag & Drop, Sequencing, Fill in the Blank, Story Question, Real World, Chart Reader, Visual Counting, Callout, Image Compare, Hotspot, Timeline, Audio Player, Video Player), Math (Fraction Visual, Place Value Chart, Grid Area, Clock Time, Measurement Scale, Number Line), Science (Label Diagram, Image Label, Process Diagram), Language (Flashcard), and Social (Map). Each widget node uses the same configuration format documented in the Widget SDK.
 
-**Workflow pattern:** Linear chain of 14 widget demos → COMPLETED
+**Workflow pattern:** Linear chain of 27 widget demos → COMPLETED
 
-**Widgets demonstrated:** `open-edu.visual-counting`, `open-edu.multiple-choice`, `open-edu.matching`, `open-edu.drag-drop`, `open-edu.sequencing`, `open-edu.fill-blank`, `open-edu.story-question`, `open-edu.real-world`, `open-edu.fraction-visual`, `open-edu.place-value-chart`, `open-edu.grid-area`, `open-edu.chart-reader`, `open-edu.clock-time`, `open-edu.measurement-scale`
+**Widgets demonstrated:** `core.multiple-choice`, `core.matching`, `core.drag-drop`, `core.sequencing`, `core.fill-blank`, `core.story-question`, `core.real-world`, `core.chart-reader`, `core.visual-counting`, `core.callout`, `core.image-compare`, `core.hotspot`, `core.timeline`, `core.audio-player`, `core.video-player`, `math.fraction-visual`, `math.place-value-chart`, `math.grid-area`, `math.clock-time`, `math.measurement-scale`, `math.number-line`, `science.label-diagram`, `science.image-label`, `science.process-diagram`, `language.flashcard`, `social.map`

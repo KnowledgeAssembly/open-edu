@@ -93,18 +93,46 @@ Replace widget IDs in your node files:
 
 The `open-edu.multiple-choice-practice` widget is deprecated and will be removed in a future version.
 
-## New Widgets (Experimental)
+## Additional Widgets (Added After Initial Migration)
 
-The following widgets are available as experimental stubs for future use:
+These widgets were added after the original 15 and use domain-prefixed IDs directly (no legacy `open-edu.*` equivalents):
 
-| ID                      | Description                       | Status       |
-| ----------------------- | --------------------------------- | ------------ |
-| `core.callout`          | Highlighted information callout   | Experimental |
-| `core.image-compare`    | Side-by-side image comparison     | Experimental |
-| `core.hotspot`          | Clickable regions on an image     | Experimental |
-| `core.timeline`         | Horizontal timeline visualization | Experimental |
-| `science.label-diagram` | Labeled diagram component         | Experimental |
-| `science.image-label`   | Image with draggable labels       | Experimental |
+### Core Widgets
+
+| ID                   | Description                                                    |
+| -------------------- | -------------------------------------------------------------- |
+| `core.callout`       | Highlighted information callout with configurable styling      |
+| `core.image-compare` | Side-by-side image comparison with slider                      |
+| `core.hotspot`       | Clickable regions on images with feedback                      |
+| `core.timeline`      | Horizontal timeline visualization with events                  |
+| `core.audio-player`  | Play audio with transcript, captions, bookmarks, speed control |
+| `core.video-player`  | Play video with chapters, captions, transcript, bookmarks      |
+
+### Math Widgets
+
+| ID                 | Description                                 |
+| ------------------ | ------------------------------------------- |
+| `math.number-line` | Interactive number line with click-to-place |
+
+### Science Widgets
+
+| ID                        | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `science.label-diagram`   | Label parts of a diagram with draggable labels |
+| `science.image-label`     | Label parts of an image with draggable labels  |
+| `science.process-diagram` | Visual explanation of systems with 4 layouts   |
+
+### Language Widgets
+
+| ID                   | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `language.flashcard` | Flip cards with self-assessment, shuffle, retry |
+
+### Social Widgets
+
+| ID           | Description                                          |
+| ------------ | ---------------------------------------------------- |
+| `social.map` | Interactive map with regions, zoom, legend, tooltips |
 
 ## Backward Compatibility
 
