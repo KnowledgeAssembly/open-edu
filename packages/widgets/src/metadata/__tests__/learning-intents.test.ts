@@ -6,7 +6,7 @@ import {
 } from '../learning-intents';
 
 describe('LearningIntent', () => {
-  it('defines all 8 learning intents', () => {
+  it('defines all 11 learning intents', () => {
     const intents = Object.values(LearningIntent);
     expect(intents).toContain('assess');
     expect(intents).toContain('practice');
@@ -16,7 +16,10 @@ describe('LearningIntent', () => {
     expect(intents).toContain('create');
     expect(intents).toContain('reflect');
     expect(intents).toContain('apply');
-    expect(intents).toHaveLength(8);
+    expect(intents).toContain('listen');
+    expect(intents).toContain('recall');
+    expect(intents).toContain('understand');
+    expect(intents).toHaveLength(11);
   });
 
   it('maps matching widget to practice and compare intents', () => {

@@ -8,6 +8,9 @@ export enum LearningIntent {
   Create = 'create',
   Reflect = 'reflect',
   Apply = 'apply',
+  Listen = 'listen',
+  Recall = 'recall',
+  Understand = 'understand',
 }
 
 export const WIDGET_LEARNING_INTENTS: Record<string, LearningIntent[]> = {
@@ -35,6 +38,13 @@ export const WIDGET_LEARNING_INTENTS: Record<string, LearningIntent[]> = {
   'core.timeline': [LearningIntent.Apply, LearningIntent.Observe],
   'science.label-diagram': [LearningIntent.Apply, LearningIntent.Assess],
   'science.image-label': [LearningIntent.Observe, LearningIntent.Apply],
+  // Phase 2 widgets
+  'core.audio-player': [LearningIntent.Observe, LearningIntent.Listen],
+  'core.video-player': [LearningIntent.Observe, LearningIntent.Understand],
+  'language.flashcard': [LearningIntent.Practice, LearningIntent.Recall],
+  'science.process-diagram': [LearningIntent.Observe, LearningIntent.Understand],
+  'math.number-line': [LearningIntent.Observe, LearningIntent.Practice, LearningIntent.Compare],
+  'social.map': [LearningIntent.Explore, LearningIntent.Observe],
 };
 
 export function getLearningIntentsForWidget(widgetId: string): LearningIntent[] {
