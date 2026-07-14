@@ -25,6 +25,7 @@ The schema package is the single source of truth for all data structures in the 
 | `MasteryLevelSchema`                                                                                   | Enum: `not_attempted`, `in_progress`, `achieved`, `mastered`                                 |
 | `TelemetryEventSchema`                                                                                 | Discriminated union of all telemetry event types                                             |
 | `RemoteWidgetManifestSchema`                                                                           | Remote widget identity, URL, integrity hash, fallback                                        |
+| `WidgetDefinitionV2`                                                                                   | Widget contract with enriched metadata — AI, capabilities, accessibility, analytics, reward  |
 | `SkillsSchema`                                                                                         | Skill definitions in manifest                                                                |
 | `CardDefinitionSchema`                                                                                 | A single Living Knowledge Card — `id`, `title`, `type`, `category`, `summary`, `unlock` etc. |
 | `CardDefinitionsSchema`                                                                                | Object wrapper `{ cards: [...] }` for card definitions                                       |

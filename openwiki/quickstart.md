@@ -29,7 +29,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 - `packages/accessibility` — accessibility helpers and validation.
 - `packages/telemetry` — event collection and JSONL persistence.
 - `packages/rewards` — reward broker and card unlock logic.
-- `packages/widgets` — widget registry and built-in widget support.
+- `packages/widgets` — widget registry and built-in widget support (21 built-in widgets with enriched metadata, validation, and catalog generation).
 - `packages/cli` — `edu` command-line interface.
 - `packages/course-compiler` — converts course-spec files into validated packages.
 - `packages/pipeline` and `packages/llm-config` — AI-assisted PDF-to-course-spec pipeline and model-provider abstraction.

@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Widgets Overview
 
-The Widget SDK provides a typed contract for interactive nodes, a registry for managing widget definitions, built-in widgets, remote widget loading, and NPM scaffold templates for publishing custom widgets.
+The Widget SDK provides a typed contract for interactive nodes, a registry for managing widget definitions, enriched metadata for AI generation, metadata validation, widget catalog generation, built-in widgets, remote widget loading, and NPM scaffold templates for publishing custom widgets.
 
 ## Widget Contract
 
@@ -17,17 +17,61 @@ interface WidgetDefinition {
   render(props: WidgetRenderProps): ReactNode;
 }
 
-interface WidgetRenderProps {
+interface WidgetDefinitionV2 extends WidgetDefinition {
+  name: string;
+  description: string;
+  domain: string;
+  learningIntents: LearningIntent[];
+  capabilities: WidgetCapabilities;
+  accessibility: AccessibilityMetadata;
+  analytics: AnalyticsMetadata;
+  reward: RewardMetadata;
+  ai: AIMetadata;
+  status: 'stable' | 'experimental' | 'deprecated';
+  keywords?: string[];
+  icon?: string;
+}
+
+interface WidgetRenderProps<TState = unknown> {
   nodeId: string;
   config: Record<string, unknown>;
   emitInteraction(data: Record<string, unknown>): void;
-  complete(score?: number): void;
+  complete(score?: number, state?: TState): void;
+  storedState?: TState;
 }
 ```
 
+## Metadata Categories
+
+Every `WidgetDefinitionV2` includes enriched metadata across five categories:
+
+### Learning Intents
+
+How the widget supports learning — `assess`, `practice`, `observe`, `compare`, `explore`, `create`, `reflect`, `apply`.
+
+### Capabilities
+
+Feature flags including `supportsKeyboard`, `supportsTouch`, `supportsOffline`, `supportsObserveMode`, `supportsHints`, `supportsRetry`, and more (16 flags total).
+
+### Accessibility
+
+A11y features like `highContrast`, `tts`, `keyboardNavigation`, `screenReader`, `ariaSupport`, `focusManagement`, and more (11 flags total).
+
+### Analytics
+
+What events the widget emits — `attempts`, `hints`, `completionTime`, `scoreChanges`, `interactions`, `trackHints`, `trackRetries`, and more (8 flags total).
+
+### Reward
+
+Reward hooks — `completionXP`, `achievement`, `badge`, `positiveMessage`, `confetti`, `collectibleCard`, `celebrationAnimation`.
+
+### AI Metadata
+
+Metadata for LLM course generation — `difficulty`, `estimatedMinutes`, `bloomsLevel`, `cognitiveLoad`, `recommendedAge`, `readingLevel`, `learningObjectives`, `commonMisconceptions`, `generationHints`, `exampleConfigs`.
+
 ## Widget Registry
 
-The `WidgetRegistry` manages registration and lookup:
+The `WidgetRegistry` manages registration, lookup, alias resolution, and structured search:
 
 ```typescript
 import { createWidgetRegistry } from '@open-edu/widgets';
@@ -36,38 +80,111 @@ const registry = createWidgetRegistry();
 
 registry.register({
   id: 'my-widget',
+  name: 'My Widget',
+  description: 'A custom widget',
+  domain: 'core',
+  learningIntents: ['practice'],
+  capabilities: { supportsKeyboard: true },
+  accessibility: {},
+  analytics: {},
+  reward: {},
+  ai: { difficulty: 'easy' },
+  status: 'stable',
   render(props) {
     return <div>{/* widget UI */}</div>;
   },
 });
 
 const widget = registry.get('my-widget');
-// widget.render({ nodeId, config, emitInteraction, complete });
+const mathWidgets = registry.getByDomain('math');
+const filtered = registry.searchWithFilters({ domain: 'core', intent: 'practice' });
 ```
 
 - Duplicate widget IDs are rejected with a typed error.
 - `registry.get()` returns `undefined` when a widget is not registered.
+- Legacy `open-edu.*` IDs are automatically resolved to domain-prefixed IDs.
 
 ## Built-in Widgets
 
-| Widget ID                    | Description                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------- |
-| `open-edu.multiple-choice`   | Standard multiple-choice with radio inputs, single correct answer, and score feedback |
-| `open-edu.visual-counting`   | Count objects in a visual grid and select the correct number                          |
-| `open-edu.matching`          | Drag items from a source list to their matching targets                               |
-| `open-edu.drag-drop`         | Drag and drop items into categorized zones                                            |
-| `open-edu.sequencing`        | Arrange items in the correct order                                                    |
-| `open-edu.fill-blank`        | Type the missing word or phrase in a sentence                                         |
-| `open-edu.story-question`    | Read a passage and answer a comprehension question                                    |
-| `open-edu.real-world`        | Identify real-world examples of a concept from images or descriptions                 |
-| `open-edu.fraction-visual`   | Visual fraction representation — identify fractions from shaded shapes                |
-| `open-edu.place-value-chart` | Identify digit place values (ones, tens, hundreds)                                    |
-| `open-edu.grid-area`         | Calculate area by counting grid squares                                               |
-| `open-edu.chart-reader`      | Read and interpret data from bar charts and graphs                                    |
-| `open-edu.clock-time`        | Read analog clock faces and identify the time                                         |
-| `open-edu.measurement-scale` | Read measurements from a labeled scale                                                |
+21 built-in widgets across 5 content domains (14 stable + 6 experimental + 1 deprecated alias):
 
-All built-in widgets follow the same `WidgetDefinition` contract and accept widget-specific configuration via the `config` field on exercise nodes. For a live demo of every widget, run the [Widget Showcase](../examples/widget-showcase) example package.
+### Stable Widgets
+
+| Widget ID                | Domain | Description                                                  |
+| ------------------------ | ------ | ------------------------------------------------------------ |
+| `core.matching`          | core   | Match items between two columns                              |
+| `core.multiple-choice`   | core   | Single or multi-question multiple choice                     |
+| `core.drag-drop`         | core   | Drag and drop items into categorized zones                   |
+| `core.sequencing`        | core   | Arrange items in the correct order                           |
+| `core.fill-blank`        | core   | Type the missing word or phrase in a sentence                |
+| `core.story-question`    | core   | Read a passage and answer a comprehension question           |
+| `core.real-world`        | core   | Identify real-world examples of a concept                    |
+| `core.chart-reader`      | core   | Read and interpret data from bar charts and graphs           |
+| `core.visual-counting`   | core   | Count objects in a visual grid and select the correct number |
+| `math.fraction-visual`   | math   | Visual fraction representation — identify fractions          |
+| `math.place-value-chart` | math   | Identify digit place values (ones, tens, hundreds)           |
+| `math.grid-area`         | math   | Calculate area by counting grid squares                      |
+| `math.clock-time`        | math   | Read analog clock faces and identify the time                |
+| `math.measurement-scale` | math   | Read measurements from a labeled scale                       |
+
+### Experimental Widgets (Stubs)
+
+| Widget ID               | Domain  | Description                   |
+| ----------------------- | ------- | ----------------------------- |
+| `core.callout`          | core    | Information callout           |
+| `core.image-compare`    | core    | Side-by-side image comparison |
+| `core.hotspot`          | core    | Clickable regions on images   |
+| `core.timeline`         | core    | Timeline-based content        |
+| `science.label-diagram` | science | Label parts of a diagram      |
+| `science.image-label`   | science | Label parts of an image       |
+
+### Deprecated Aliases
+
+| Legacy ID                           | Resolves To            |
+| ----------------------------------- | ---------------------- |
+| `open-edu.multiple-choice-practice` | `core.multiple-choice` |
+
+All 14 stable widgets have enriched metadata across all categories (AI, capabilities, accessibility, analytics, reward). Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.
+
+For a live demo of every widget, run the [Widget Showcase](../examples/widget-showcase) example package.
+
+## Metadata Validation
+
+`validateWidgetMetadata()` enforces completeness and cross-field consistency for widget definitions:
+
+```typescript
+import { validateWidgetMetadata } from '@open-edu/widgets';
+
+const result = validateWidgetMetadata(myWidget);
+// result.valid — boolean
+// result.errors — critical issues
+// result.warnings — completeness recommendations
+```
+
+**Checks performed:**
+
+- Required fields: `id`, `name`, `description`, `learningIntents`, `keywords`, `icon`
+- AI completeness: `recommendedAge`, `learningObjectives`, `commonMisconceptions`, `exampleConfigs`
+- Stable widget requirements: `supportsObserveMode` capability
+- Cross-field consistency: hints/retry capabilities must match analytics tracking
+- Reward completeness: `completionXP` should have `positiveMessage`
+
+## Widget Catalog Generation
+
+`generateWidgetCatalog()` produces a structured Markdown catalog from the widget registry, used in LLM prompts for AI-assisted content generation:
+
+```typescript
+import { generateWidgetCatalog } from '@open-edu/core';
+
+const catalog = generateWidgetCatalog({ widgets: catalogEntries });
+// Produces Markdown with per-widget sections including:
+// - Domain grouping, status tags, learning intents, keywords
+// - Capabilities, accessibility, analytics labels
+// - Reward info (XP, achievement, positive message)
+// - AI notes (difficulty, Bloom's level, age range, learning objectives, misconceptions)
+```
+
+The CLI's `generate` command uses this to produce agent-ready prompts with a live widget catalog.
 
 ## Remote Widget Loading
 
@@ -83,7 +200,7 @@ const state = await loader.load(
     version: '1.0.0',
     url: 'https://example.com/widgets/quiz.js',
     integrity: 'sha256-abc123...',
-    fallback: 'open-edu.multiple-choice-practice',
+    fallback: 'core.multiple-choice',
   },
   registry,
 );
@@ -112,12 +229,12 @@ my-widget/
 
 ## Usage in Packages
 
-Reference widgets in exercise or custom nodes:
+Reference widgets in exercise or custom nodes using the new domain-prefixed IDs:
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.multiple-choice-practice",
+  "widget": "core.multiple-choice",
   "config": {
     "prompt": "What is the capital of France?",
     "options": [
@@ -127,5 +244,7 @@ Reference widgets in exercise or custom nodes:
   }
 }
 ```
+
+Legacy `open-edu.*` IDs are automatically resolved — no migration required for existing packages.
 
 For remote widgets, use the `remoteWidget` field on custom nodes.
