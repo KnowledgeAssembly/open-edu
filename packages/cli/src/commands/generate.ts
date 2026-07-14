@@ -17,6 +17,28 @@ function buildWidgetCatalog(): string {
       const v2 = w as unknown as WidgetDefinitionV2;
       const intents = getLearningIntentsForWidget(w.id);
       const legacyEntry = Object.entries(WIDGET_ALIAS_MAP).find(([, target]) => target === w.id);
+
+      const capabilityKeys: string[] = [];
+      if (v2.capabilities) {
+        for (const [key, val] of Object.entries(v2.capabilities)) {
+          if (val === true) capabilityKeys.push(key.replace('supports', '').toLowerCase());
+        }
+      }
+
+      const accessibilityKeys: string[] = [];
+      if (v2.accessibility) {
+        for (const [key, val] of Object.entries(v2.accessibility)) {
+          if (val === true) accessibilityKeys.push(key);
+        }
+      }
+
+      const analyticsKeys: string[] = [];
+      if (v2.analytics) {
+        for (const [key, val] of Object.entries(v2.analytics)) {
+          if (val === true) analyticsKeys.push(key);
+        }
+      }
+
       return {
         id: w.id,
         name: v2.name,
@@ -28,6 +50,23 @@ function buildWidgetCatalog(): string {
         keywords: v2.keywords,
         learningIntents: intents,
         legacyId: legacyEntry?.[0],
+        capabilities: capabilityKeys,
+        accessibility: accessibilityKeys,
+        analytics: analyticsKeys,
+        reward: v2.reward
+          ? { completionXP: v2.reward.completionXP, positiveMessage: v2.reward.positiveMessage }
+          : undefined,
+        ai: v2.ai
+          ? {
+              difficulty: v2.ai.difficulty,
+              estimatedMinutes: v2.ai.estimatedMinutes,
+              bloomsLevel: v2.ai.bloomsLevel,
+              cognitiveLoad: v2.ai.cognitiveLoad,
+              recommendedAge: v2.ai.recommendedAge,
+              learningObjectives: v2.ai.learningObjectives,
+              commonMisconceptions: v2.ai.commonMisconceptions,
+            }
+          : undefined,
       };
     }),
   };
