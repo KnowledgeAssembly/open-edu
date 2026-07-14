@@ -249,10 +249,12 @@ const FlashcardWidget: WidgetDefinitionV2 = {
   analytics: {
     trackAttempts: true,
     trackCompletionTime: true,
+    trackHints: true,
     trackSuccessRate: true,
     trackConfidence: true,
     trackInteractions: true,
     trackMistakes: true,
+    trackRetries: true,
   },
   reward: {
     completionXP: 15,

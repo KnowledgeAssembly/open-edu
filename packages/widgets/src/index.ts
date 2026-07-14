@@ -41,6 +41,12 @@ export {
   timeline,
   labelDiagram,
   imageLabel,
+  audioPlayer,
+  videoPlayer,
+  flashcard,
+  processDiagram,
+  numberLine,
+  socialMap,
 } from './builtins/index.js';
 
 export {

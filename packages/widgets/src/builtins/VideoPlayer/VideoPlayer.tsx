@@ -254,6 +254,7 @@ const VideoPlayerWidget: WidgetDefinitionV2 = {
   analytics: {
     trackAttempts: true,
     trackCompletionTime: true,
+    trackHints: true,
     trackInteractions: true,
   },
   reward: {
