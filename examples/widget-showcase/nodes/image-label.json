@@ -31,6 +31,7 @@
         "tooltip": "Click to learn about Earth"
       }
     ],
-    "interactive": false
+    "interactive": false,
+    "hints": ["Mars is known as the Red Planet", "Jupiter is the largest planet"]
   }
 }

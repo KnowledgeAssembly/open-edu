@@ -21,6 +21,7 @@
       },
       { "id": "flower", "text": "Flower", "target": { "x": 50, "y": 20 }, "hint": "Colorful top" }
     ],
-    "interactive": true
+    "interactive": true,
+    "hints": ["Roots are found underground", "The stem connects roots to leaves"]
   }
 }

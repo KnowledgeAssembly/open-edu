@@ -9,29 +9,34 @@
         "id": "evap",
         "title": "Evaporation",
         "icon": "☀️",
-        "description": "Water heats up and rises as vapor"
+        "description": "Water heats up and rises as vapor",
+        "image": "assets/images/water-evaporation.png"
       },
       {
         "id": "cond",
         "title": "Condensation",
         "icon": "☁️",
-        "description": "Water vapor cools and forms clouds"
+        "description": "Water vapor cools and forms clouds",
+        "image": "assets/images/water-condensation.png"
       },
       {
         "id": "rain",
         "title": "Rain",
         "icon": "🌧️",
-        "description": "Water falls as precipitation"
+        "description": "Water falls as precipitation",
+        "image": "assets/images/water-precipitation.png"
       },
       {
         "id": "collect",
         "title": "Collection",
         "icon": "🌊",
-        "description": "Water collects in oceans and lakes"
+        "description": "Water collects in oceans and lakes",
+        "image": "assets/images/water-collection.png"
       }
     ],
     "layout": "vertical",
     "showDates": false,
+    "showImages": true,
     "interactive": false
   }
 }
