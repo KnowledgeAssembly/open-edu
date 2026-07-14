@@ -390,7 +390,12 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-chart' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-chart',
+    positiveMessage: 'Chart read correctly!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,

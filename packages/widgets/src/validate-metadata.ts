@@ -46,7 +46,6 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
     warnings.push(`Widget ${widget.id} is deprecated but has no replacement ID specified`);
   }
 
-  // AI metadata completeness
   if (widget.ai) {
     if (!widget.ai.recommendedAge) {
       warnings.push('AI recommendedAge is recommended for age-appropriate content generation');
@@ -65,7 +64,6 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
     }
   }
 
-  // Capabilities — supportsObserveMode for stable widgets
   if (
     widget.status === 'stable' &&
     widget.capabilities &&
@@ -74,7 +72,6 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
     warnings.push('Stable widgets should declare supportsObserveMode capability');
   }
 
-  // Analytics — consistency with capabilities
   if (
     widget.capabilities?.supportsHints &&
     widget.analytics &&
@@ -91,7 +88,6 @@ export function validateWidgetMetadata(widget: WidgetDefinitionV2): MetadataVali
     warnings.push('Widget supports retry but trackRetries is not enabled');
   }
 
-  // Reward — completionXP should have positiveMessage
   if (widget.reward?.completionXP && !widget.reward.positiveMessage) {
     warnings.push('Widget awards completionXP but has no positiveMessage for feedback');
   }

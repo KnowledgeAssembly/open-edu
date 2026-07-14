@@ -353,7 +353,12 @@ const VisualCountingWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-count' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-count',
+    positiveMessage: 'Counting correct!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 2,

@@ -592,7 +592,12 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-clock' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-clock',
+    positiveMessage: 'Time telling correct!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,

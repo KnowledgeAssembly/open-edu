@@ -673,7 +673,12 @@ const DragDropWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-sort' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-sort',
+    positiveMessage: 'Items sorted correctly!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,

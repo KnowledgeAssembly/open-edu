@@ -423,7 +423,12 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-story' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-story',
+    positiveMessage: 'Story comprehension correct!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,

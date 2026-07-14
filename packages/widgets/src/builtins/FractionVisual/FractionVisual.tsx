@@ -481,7 +481,12 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-fraction' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-fraction',
+    positiveMessage: 'Fraction understood!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,

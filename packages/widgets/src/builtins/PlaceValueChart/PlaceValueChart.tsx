@@ -449,7 +449,12 @@ const PlaceValueChartWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-place-value' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-place-value',
+    positiveMessage: 'Place value identified!',
+  },
   ai: {
     difficulty: 'easy',
     estimatedMinutes: 3,

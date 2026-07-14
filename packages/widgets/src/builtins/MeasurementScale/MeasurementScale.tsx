@@ -648,7 +648,12 @@ const MeasurementScaleWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-measure' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-measure',
+    positiveMessage: 'Measurement accurate!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,

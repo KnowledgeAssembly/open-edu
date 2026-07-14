@@ -383,7 +383,12 @@ const GridAreaWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-area' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-area',
+    positiveMessage: 'Area calculated correctly!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 4,

@@ -21,7 +21,7 @@ function buildWidgetCatalog(): string {
       const capabilityKeys: string[] = [];
       if (v2.capabilities) {
         for (const [key, val] of Object.entries(v2.capabilities)) {
-          if (val === true) capabilityKeys.push(key.replace('supports', '').toLowerCase());
+          if (val === true) capabilityKeys.push(key.slice('supports'.length));
         }
       }
 
@@ -54,7 +54,11 @@ function buildWidgetCatalog(): string {
         accessibility: accessibilityKeys,
         analytics: analyticsKeys,
         reward: v2.reward
-          ? { completionXP: v2.reward.completionXP, positiveMessage: v2.reward.positiveMessage }
+          ? {
+              completionXP: v2.reward.completionXP,
+              positiveMessage: v2.reward.positiveMessage,
+              achievement: v2.reward.achievement,
+            }
           : undefined,
         ai: v2.ai
           ? {
@@ -63,8 +67,10 @@ function buildWidgetCatalog(): string {
               bloomsLevel: v2.ai.bloomsLevel,
               cognitiveLoad: v2.ai.cognitiveLoad,
               recommendedAge: v2.ai.recommendedAge,
+              readingLevel: v2.ai.readingLevel,
               learningObjectives: v2.ai.learningObjectives,
               commonMisconceptions: v2.ai.commonMisconceptions,
+              generationHints: v2.ai.generationHints,
             }
           : undefined,
       };

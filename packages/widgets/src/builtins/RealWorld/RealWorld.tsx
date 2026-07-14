@@ -274,7 +274,12 @@ const RealWorldWidget: WidgetDefinitionV2 = {
     trackHints: true,
     trackRetries: true,
   },
-  reward: { completionXP: 10, confetti: true, achievement: 'first-scenario' },
+  reward: {
+    completionXP: 10,
+    confetti: true,
+    achievement: 'first-scenario',
+    positiveMessage: 'Scenario completed!',
+  },
   ai: {
     difficulty: 'medium',
     estimatedMinutes: 5,

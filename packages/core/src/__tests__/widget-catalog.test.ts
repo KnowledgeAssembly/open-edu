@@ -110,8 +110,10 @@ describe('generateWidgetCatalog', () => {
             estimatedMinutes: 3,
             bloomsLevel: 'remember',
             recommendedAge: [5, 10],
+            readingLevel: 'Grade 3',
             learningObjectives: ['Learn to test'],
             commonMisconceptions: ['Assuming tests always pass'],
+            generationHints: ['Use simple language'],
           },
         },
       ],
@@ -121,10 +123,13 @@ describe('generateWidgetCatalog', () => {
     expect(catalog).toContain('Estimated time: 3 min');
     expect(catalog).toContain("Bloom's: remember");
     expect(catalog).toContain('Ages: 5-10');
+    expect(catalog).toContain('Reading level: Grade 3');
     expect(catalog).toContain('Learning objectives:');
     expect(catalog).toContain('Learn to test');
     expect(catalog).toContain('Common misconceptions:');
     expect(catalog).toContain('Assuming tests always pass');
+    expect(catalog).toContain('Generation hints:');
+    expect(catalog).toContain('Use simple language');
   });
 
   it('includes capabilities when provided', () => {
@@ -170,13 +175,14 @@ describe('generateWidgetCatalog', () => {
           name: 'Test',
           domain: 'core',
           status: 'stable',
-          reward: { completionXP: 15, positiveMessage: 'Well done!' },
+          reward: { completionXP: 15, positiveMessage: 'Well done!', achievement: 'first-test' },
         },
       ],
     });
     expect(catalog).toContain('Rewards:');
     expect(catalog).toContain('15 XP');
     expect(catalog).toContain('Well done!');
+    expect(catalog).toContain('achievement: first-test');
   });
 
   it('includes analytics when provided', () => {

@@ -12,15 +12,17 @@ export interface WidgetCatalogEntry {
   capabilities?: string[];
   accessibility?: string[];
   analytics?: string[];
-  reward?: { completionXP?: number; positiveMessage?: string };
+  reward?: { completionXP?: number; positiveMessage?: string; achievement?: string };
   ai?: {
     difficulty?: string;
     estimatedMinutes?: number;
     bloomsLevel?: string;
     cognitiveLoad?: string;
     recommendedAge?: [number, number];
+    readingLevel?: string;
     learningObjectives?: string[];
     commonMisconceptions?: string[];
+    generationHints?: string[];
   };
 }
 
@@ -93,36 +95,32 @@ export function generateWidgetCatalog(input: WidgetCatalogInput): string {
         lines.push('');
       }
 
-      // Capabilities
       if (w.capabilities && w.capabilities.length > 0) {
         lines.push(`**Capabilities:** ${w.capabilities.join(', ')}`);
         lines.push('');
       }
 
-      // Accessibility
       if (w.accessibility && w.accessibility.length > 0) {
         lines.push(`**Accessibility:** ${w.accessibility.join(', ')}`);
         lines.push('');
       }
 
-      // Analytics
       if (w.analytics && w.analytics.length > 0) {
         lines.push(`**Analytics:** ${w.analytics.join(', ')}`);
         lines.push('');
       }
 
-      // Rewards
       if (w.reward) {
         const parts: string[] = [];
         if (w.reward.completionXP) parts.push(`${w.reward.completionXP} XP`);
         if (w.reward.positiveMessage) parts.push(`"${w.reward.positiveMessage}"`);
+        if (w.reward.achievement) parts.push(`achievement: ${w.reward.achievement}`);
         if (parts.length > 0) {
           lines.push(`**Rewards:** ${parts.join(', ')}`);
           lines.push('');
         }
       }
 
-      // AI Notes
       if (w.ai) {
         lines.push('**AI Notes:**');
         if (w.ai.difficulty) lines.push(`- Difficulty: ${w.ai.difficulty}`);
@@ -131,6 +129,7 @@ export function generateWidgetCatalog(input: WidgetCatalogInput): string {
         if (w.ai.cognitiveLoad) lines.push(`- Cognitive load: ${w.ai.cognitiveLoad}`);
         if (w.ai.recommendedAge)
           lines.push(`- Ages: ${w.ai.recommendedAge[0]}-${w.ai.recommendedAge[1]}`);
+        if (w.ai.readingLevel) lines.push(`- Reading level: ${w.ai.readingLevel}`);
         if (w.ai.learningObjectives && w.ai.learningObjectives.length > 0) {
           lines.push('- Learning objectives:');
           for (const obj of w.ai.learningObjectives) {
@@ -141,6 +140,12 @@ export function generateWidgetCatalog(input: WidgetCatalogInput): string {
           lines.push('- Common misconceptions:');
           for (const m of w.ai.commonMisconceptions) {
             lines.push(`  - ${m}`);
+          }
+        }
+        if (w.ai.generationHints && w.ai.generationHints.length > 0) {
+          lines.push('- Generation hints:');
+          for (const h of w.ai.generationHints) {
+            lines.push(`  - ${h}`);
           }
         }
         lines.push('');
