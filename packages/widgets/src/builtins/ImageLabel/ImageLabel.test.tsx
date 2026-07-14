@@ -170,6 +170,7 @@ describe('ImageLabel interactive mode (quiz)', () => {
   const interactiveConfig = {
     ...defaultConfig,
     interactive: true,
+    hints: ['Mars is the fourth planet from the Sun.'],
   };
 
   it('renders image in interactive mode', () => {

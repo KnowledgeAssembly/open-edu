@@ -479,7 +479,7 @@ function HotspotComponent(props: {
 
 const HotspotWidget: WidgetDefinitionV2 = {
   id: 'core.hotspot',
-  version: '0.2.0',
+  version: '1.0.0',
   name: 'Hotspot',
   description: 'Click or tap on specific areas of an image to answer questions',
   domain: 'core',

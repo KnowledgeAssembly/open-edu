@@ -554,6 +554,7 @@ function TimelineComponent(props: {
             {eventOrder.map((id, index) => {
               const event = events.find((e) => e.id === id);
               if (!event) return null;
+              // Compact layout uses static items (drag disabled for compact display)
               if (layout === 'compact') {
                 return (
                   <div
@@ -711,7 +712,7 @@ function TimelineComponent(props: {
 
 const TimelineWidget: WidgetDefinitionV2 = {
   id: 'core.timeline',
-  version: '0.2.0',
+  version: '1.0.0',
   name: 'Timeline',
   description: 'Explore events in chronological order with interactive timeline',
   domain: 'core',

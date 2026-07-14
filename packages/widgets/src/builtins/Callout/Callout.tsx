@@ -37,16 +37,56 @@ const CALLOUT_STYLES: Record<
   CalloutType,
   { borderColor: string; backgroundColor: string; accentColor: string }
 > = {
-  note: { borderColor: '#3b82f6', backgroundColor: '#eff6ff', accentColor: '#3b82f6' },
-  tip: { borderColor: '#22c55e', backgroundColor: '#f0fdf4', accentColor: '#22c55e' },
-  warning: { borderColor: '#eab308', backgroundColor: '#fefce8', accentColor: '#eab308' },
-  important: { borderColor: '#ef4444', backgroundColor: '#fef2f2', accentColor: '#ef4444' },
-  definition: { borderColor: '#3b82f6', backgroundColor: '#eff6ff', accentColor: '#3b82f6' },
-  example: { borderColor: '#a855f7', backgroundColor: '#faf5ff', accentColor: '#a855f7' },
-  'fun-fact': { borderColor: '#22c55e', backgroundColor: '#f0fdf4', accentColor: '#22c55e' },
-  quote: { borderColor: '#6b7280', backgroundColor: '#f9fafb', accentColor: '#6b7280' },
-  success: { borderColor: '#22c55e', backgroundColor: '#f0fdf4', accentColor: '#22c55e' },
-  question: { borderColor: '#3b82f6', backgroundColor: '#eff6ff', accentColor: '#3b82f6' },
+  note: {
+    borderColor: 'var(--oe-color-primary, #3b82f6)',
+    backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+    accentColor: 'var(--oe-color-primary, #3b82f6)',
+  },
+  tip: {
+    borderColor: 'var(--oe-success, #22c55e)',
+    backgroundColor: 'var(--oe-color-success-container, #f0fdf4)',
+    accentColor: 'var(--oe-success, #22c55e)',
+  },
+  warning: {
+    borderColor: 'var(--oe-warning, #eab308)',
+    backgroundColor: 'var(--oe-color-warning-container, #fefce8)',
+    accentColor: 'var(--oe-warning, #eab308)',
+  },
+  important: {
+    borderColor: 'var(--oe-error, #ef4444)',
+    backgroundColor: 'var(--oe-color-error-container, #fef2f2)',
+    accentColor: 'var(--oe-error, #ef4444)',
+  },
+  definition: {
+    borderColor: 'var(--oe-color-primary, #3b82f6)',
+    backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+    accentColor: 'var(--oe-color-primary, #3b82f6)',
+  },
+  example: {
+    borderColor: 'var(--oe-color-secondary, #a855f7)',
+    backgroundColor: 'var(--oe-color-secondary-container, #faf5ff)',
+    accentColor: 'var(--oe-color-secondary, #a855f7)',
+  },
+  'fun-fact': {
+    borderColor: 'var(--oe-success, #22c55e)',
+    backgroundColor: 'var(--oe-color-success-container, #f0fdf4)',
+    accentColor: 'var(--oe-success, #22c55e)',
+  },
+  quote: {
+    borderColor: 'var(--oe-color-outline-variant, #6b7280)',
+    backgroundColor: 'var(--oe-color-surface-container-lowest, #f9fafb)',
+    accentColor: 'var(--oe-color-outline-variant, #6b7280)',
+  },
+  success: {
+    borderColor: 'var(--oe-success, #22c55e)',
+    backgroundColor: 'var(--oe-color-success-container, #f0fdf4)',
+    accentColor: 'var(--oe-success, #22c55e)',
+  },
+  question: {
+    borderColor: 'var(--oe-color-primary, #3b82f6)',
+    backgroundColor: 'var(--oe-color-primary-container, #eff6ff)',
+    accentColor: 'var(--oe-color-primary, #3b82f6)',
+  },
 };
 
 const CALLOUT_ICONS: Record<CalloutType, string> = {

@@ -24,6 +24,7 @@ export const imageLabelSchema = z.object({
   altText: z.string().optional(),
   regions: z.array(regionSchema).min(1),
   interactive: z.boolean().optional().default(false),
+  hints: z.array(z.string()).optional(),
 });
 
 export type ImageLabelConfig = z.infer<typeof imageLabelSchema>;
@@ -312,10 +313,10 @@ function ImageLabelComponent(props: {
   }, []);
 
   const handleHintClick = useCallback(() => {
-    if (content?.regions && hintIndex === 0) {
-      setHintIndex(1);
+    if (content?.hints && hintIndex < content.hints.length) {
+      setHintIndex((i) => i + 1);
     }
-  }, [content?.regions, hintIndex]);
+  }, [content?.hints, hintIndex]);
 
   useEffect(() => {
     if (!selectedRegionId) return;
@@ -562,31 +563,33 @@ function ImageLabelComponent(props: {
         </div>
       )}
 
-      {!isObserve && !submitted && hintIndex === 0 && (
+      {!isObserve && !submitted && content?.hints && hintIndex < content.hints.length && (
         <div style={{ marginTop: '0.5rem' }}>
           <Button variant="ghost" size="sm" onClick={handleHintClick} data-testid="hint-button">
-            Show hint
+            {hintIndex === 0 ? 'Show hint' : 'More help'}
           </Button>
         </div>
       )}
 
-      {!isObserve && hintIndex > 0 && quizRegionId && !submitted && (
-        <div
-          role="status"
-          aria-live="polite"
-          data-testid="hint-text"
-          style={{
-            marginTop: '0.5rem',
-            color: 'var(--oe-color-on-surface-variant, #6b7280)',
-            fontStyle: 'italic',
-            fontSize: '0.875rem',
-          }}
-        >
-          <p style={{ margin: 0 }}>
-            Hint: Look for &ldquo;{regions.find((r) => r.id === quizRegionId)?.title}&rdquo;
-          </p>
-        </div>
-      )}
+      {!isObserve &&
+        hintIndex > 0 &&
+        content?.hints &&
+        hintIndex <= content.hints.length &&
+        !submitted && (
+          <div
+            role="status"
+            aria-live="polite"
+            data-testid="hint-text"
+            style={{
+              marginTop: '0.5rem',
+              color: 'var(--oe-color-on-surface-variant, #6b7280)',
+              fontStyle: 'italic',
+              fontSize: '0.875rem',
+            }}
+          >
+            <p style={{ margin: 0 }}>Hint: {content.hints[hintIndex - 1]}</p>
+          </div>
+        )}
 
       {isObserve && showAcknowledgeButton && (
         <div style={{ marginTop: '1rem' }}>

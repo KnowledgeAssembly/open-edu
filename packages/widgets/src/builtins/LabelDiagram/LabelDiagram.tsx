@@ -727,7 +727,7 @@ function LabelDiagramComponent(props: {
 
 const LabelDiagramWidget: WidgetDefinitionV2 = {
   id: 'science.label-diagram',
-  version: '0.2.0',
+  version: '1.0.0',
   name: 'Label Diagram',
   description: 'Label parts of a scientific diagram or illustration',
   domain: 'science',

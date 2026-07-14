@@ -44,6 +44,7 @@ function ImageCompareComponent(props: {
 
   const initialPos = parsedState?.sliderPosition ?? content?.sliderPosition ?? 50;
   const [sliderPos, setSliderPos] = useState(initialPos);
+  const sliderPosRef = useRef(initialPos);
   const [overlayOpacity, setOverlayOpacity] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [localAcknowledged, setLocalAcknowledged] = useState(false);
@@ -74,7 +75,9 @@ function ImageCompareComponent(props: {
       const rect = containerRef.current.getBoundingClientRect();
       const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
       const pct = Math.round((x / rect.width) * 100);
-      setSliderPos(Math.max(0, Math.min(100, pct)));
+      const newPos = Math.max(0, Math.min(100, pct));
+      setSliderPos(newPos);
+      sliderPosRef.current = newPos;
     },
     [isObserve],
   );
@@ -99,7 +102,7 @@ function ImageCompareComponent(props: {
       emitInteraction({
         type: 'widget.interaction',
         action: 'slider-drag',
-        position: sliderPos,
+        position: sliderPosRef.current,
         widgetId: 'core.image-compare',
       });
     };
@@ -109,7 +112,7 @@ function ImageCompareComponent(props: {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isObserve, updateSliderPosition, emitInteraction, sliderPos]);
+  }, [isDragging, isObserve, updateSliderPosition, emitInteraction]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -125,35 +128,39 @@ function ImageCompareComponent(props: {
     emitInteraction({
       type: 'widget.interaction',
       action: 'slider-drag',
-      position: sliderPos,
+      position: sliderPosRef.current,
       widgetId: 'core.image-compare',
     });
-  }, [isObserve, emitInteraction, sliderPos]);
+  }, [isObserve, emitInteraction]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (isObserve) return;
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
-        setSliderPos((p) => Math.min(100, p + 5));
+        const newPos = Math.min(100, sliderPosRef.current + 5);
+        setSliderPos(newPos);
+        sliderPosRef.current = newPos;
         emitInteraction({
           type: 'widget.interaction',
           action: 'slider-keyboard',
-          position: Math.min(100, sliderPos + 5),
+          position: newPos,
           widgetId: 'core.image-compare',
         });
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setSliderPos((p) => Math.max(0, p - 5));
+        const newPos = Math.max(0, sliderPosRef.current - 5);
+        setSliderPos(newPos);
+        sliderPosRef.current = newPos;
         emitInteraction({
           type: 'widget.interaction',
           action: 'slider-keyboard',
-          position: Math.max(0, sliderPos - 5),
+          position: newPos,
           widgetId: 'core.image-compare',
         });
       }
     },
-    [isObserve, emitInteraction, sliderPos],
+    [isObserve, emitInteraction],
   );
 
   const handleOverlayChange = useCallback(
