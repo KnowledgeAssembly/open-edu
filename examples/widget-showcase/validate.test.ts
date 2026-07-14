@@ -3,6 +3,7 @@ import { loadPackage } from '@open-edu/core';
 import { resolve } from 'path';
 
 const WIDGET_IDS = [
+  'core.callout',
   'core.visual-counting',
   'core.multiple-choice',
   'core.matching',
@@ -11,12 +12,17 @@ const WIDGET_IDS = [
   'core.fill-blank',
   'core.story-question',
   'core.real-world',
+  'core.hotspot',
+  'core.image-compare',
+  'core.timeline',
   'math.fraction-visual',
   'math.place-value-chart',
   'math.grid-area',
   'core.chart-reader',
   'math.clock-time',
   'math.measurement-scale',
+  'science.image-label',
+  'science.label-diagram',
 ];
 
 describe('widget-showcase example package', () => {
@@ -24,7 +30,7 @@ describe('widget-showcase example package', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('widget-showcase');
     expect(pkg.manifest.title).toBe('Widget Showcase');
-    expect(pkg.nodes.length).toBe(16);
+    expect(pkg.nodes.length).toBe(22);
   });
 
   it('should have correct node types', async () => {
@@ -33,10 +39,10 @@ describe('widget-showcase example package', () => {
     expect(pkg.nodes.find((n) => n.relativePath === 'nodes/outro.md')?.node.type).toBe('lesson');
 
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
-    expect(exerciseNodes).toHaveLength(14);
+    expect(exerciseNodes).toHaveLength(20);
   });
 
-  it('should reference all 14 widget IDs in exercise nodes', async () => {
+  it('should reference all 20 widget IDs in exercise nodes', async () => {
     const pkg = await loadPackage(resolve(__dirname));
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
 

@@ -14,7 +14,13 @@
     "nodes/grid-area.json": { "onComplete": "nodes/chart-reader.json" },
     "nodes/chart-reader.json": { "onComplete": "nodes/clock-time.json" },
     "nodes/clock-time.json": { "onComplete": "nodes/measurement-scale.json" },
-    "nodes/measurement-scale.json": { "onComplete": "nodes/outro.md" },
+    "nodes/measurement-scale.json": { "onComplete": "nodes/callout.json" },
+    "nodes/callout.json": { "onComplete": "nodes/image-compare.json" },
+    "nodes/image-compare.json": { "onComplete": "nodes/hotspot.json" },
+    "nodes/hotspot.json": { "onComplete": "nodes/timeline.json" },
+    "nodes/timeline.json": { "onComplete": "nodes/label-diagram.json" },
+    "nodes/label-diagram.json": { "onComplete": "nodes/image-label.json" },
+    "nodes/image-label.json": { "onComplete": "nodes/outro.md" },
     "nodes/outro.md": { "onComplete": "COMPLETED" }
   }
 }
