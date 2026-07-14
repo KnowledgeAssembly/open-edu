@@ -1,0 +1,63 @@
+{
+  "type": "exercise",
+  "title": "Interactive Map",
+  "widget": "social.map",
+  "config": {
+    "regions": [
+      {
+        "id": "north",
+        "name": "North America",
+        "description": "Third largest continent by area",
+        "color": "var(--oe-color-primary)"
+      },
+      {
+        "id": "south",
+        "name": "South America",
+        "description": "Largest tropical rainforest region",
+        "color": "var(--oe-color-success)"
+      },
+      {
+        "id": "europe",
+        "name": "Europe",
+        "description": "Sixth largest continent",
+        "color": "var(--oe-color-warning)"
+      },
+      {
+        "id": "africa",
+        "name": "Africa",
+        "description": "Second largest continent by area",
+        "color": "var(--oe-color-error)"
+      },
+      {
+        "id": "asia",
+        "name": "Asia",
+        "description": "Largest and most populous continent",
+        "color": "var(--oe-color-accent)"
+      },
+      {
+        "id": "oceania",
+        "name": "Oceania",
+        "description": "Smallest continent by land area",
+        "color": "var(--oe-color-muted)"
+      }
+    ],
+    "legend": [
+      { "color": "var(--oe-color-primary)", "label": "North America" },
+      { "color": "var(--oe-color-success)", "label": "South America" },
+      { "color": "var(--oe-color-warning)", "label": "Europe" },
+      { "color": "var(--oe-color-error)", "label": "Africa" },
+      { "color": "var(--oe-color-accent)", "label": "Asia" },
+      { "color": "var(--oe-color-muted)", "label": "Oceania" }
+    ],
+    "markers": [
+      { "id": "nyc", "label": "New York", "x": 25, "y": 35, "icon": "🏙️" },
+      { "id": "london", "label": "London", "x": 48, "y": 28, "icon": "🇬🇧" },
+      { "id": "tokyo", "label": "Tokyo", "x": 85, "y": 35, "icon": "🗼" }
+    ],
+    "title": "World Continents",
+    "labels": true,
+    "zoom": true,
+    "interactive": true,
+    "targetRegion": "asia"
+  }
+}

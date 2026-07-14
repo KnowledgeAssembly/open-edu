@@ -1,0 +1,47 @@
+{
+  "type": "exercise",
+  "title": "Flashcard Review",
+  "widget": "language.flashcard",
+  "config": {
+    "cards": [
+      {
+        "front": "Evaporation",
+        "back": "The process where liquid water turns into water vapor when heated by the sun.",
+        "hint": "Think about what happens to a puddle on a sunny day.",
+        "category": "Water Cycle",
+        "difficulty": "easy"
+      },
+      {
+        "front": "Condensation",
+        "back": "The process where water vapor cools and turns back into liquid droplets, forming clouds.",
+        "hint": "Think about water droplets on a cold glass.",
+        "category": "Water Cycle",
+        "difficulty": "easy"
+      },
+      {
+        "front": "Precipitation",
+        "back": "Water that falls from clouds to Earth's surface as rain, snow, sleet, or hail.",
+        "hint": "What comes down from clouds?",
+        "category": "Water Cycle",
+        "difficulty": "easy"
+      },
+      {
+        "front": "Collection",
+        "back": "The gathering of water in oceans, lakes, rivers, and underground aquifers after precipitation.",
+        "hint": "Where does rainwater end up?",
+        "category": "Water Cycle",
+        "difficulty": "medium"
+      },
+      {
+        "front": "Transpiration",
+        "back": "The release of water vapor from plants into the atmosphere through their leaves.",
+        "hint": "Plants 'breathe out' water.",
+        "category": "Water Cycle",
+        "difficulty": "hard"
+      }
+    ],
+    "mode": "flip",
+    "shuffle": true,
+    "interactive": true
+  }
+}
