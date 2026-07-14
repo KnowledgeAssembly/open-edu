@@ -16,6 +16,6 @@
     "showGrid": true,
     "mode": "decimals",
     "tolerance": 0.5,
-    "interactive": true
+    "interactive": false
   }
 }

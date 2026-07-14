@@ -45,6 +45,6 @@
     "layout": "cycle",
     "title": "The Water Cycle",
     "stepByStep": true,
-    "interactive": true
+    "interactive": false
   }
 }

@@ -16,6 +16,6 @@
     "showTranscript": true,
     "waveform": true,
     "bookmarks": true,
-    "interactive": true
+    "interactive": false
   }
 }

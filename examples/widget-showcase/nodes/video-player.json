@@ -18,6 +18,6 @@
     ],
     "showTranscript": true,
     "allowFullscreen": true,
-    "interactive": true
+    "interactive": false
   }
 }

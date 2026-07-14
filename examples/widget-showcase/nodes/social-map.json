@@ -57,7 +57,7 @@
     "title": "World Continents",
     "labels": true,
     "zoom": true,
-    "interactive": true,
+    "interactive": false,
     "targetRegion": "asia"
   }
 }
