@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { z } from 'zod';
 import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
@@ -63,76 +63,6 @@ function NumberLineComponent(props: {
     widgetId: 'math.number-line',
   });
 
-  const config = parsed.success
-    ? parsed.data
-    : {
-        min: 0,
-        max: 10,
-        step: 1,
-        showLabels: true,
-        showGrid: false,
-        mode: 'integers' as const,
-        tolerance: 0.5,
-        interactive: false,
-        markers: undefined,
-        target: undefined,
-      };
-  const { min, max, step, markers, showLabels, showGrid, mode, target, tolerance } = config;
-
-  const svgWidth = 600;
-  const lineStart = PADDING;
-  const lineEnd = svgWidth - PADDING;
-  const lineLength = lineEnd - lineStart;
-
-  const valueToX = useCallback(
-    (val: number) => lineStart + ((val - min) / (max - min)) * lineLength,
-    [min, max, lineStart, lineLength],
-  );
-
-  const xToValue = useCallback(
-    (x: number) => {
-      const raw = min + ((x - lineStart) / lineLength) * (max - min);
-      return Math.round(raw / step) * step;
-    },
-    [min, max, step, lineStart, lineLength],
-  );
-
-  const handleSvgClick = useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      if (!parsed.success || !parsed.data.interactive) return;
-      const svg = svgRef.current;
-      if (!svg) return;
-      const rect = svg.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * svgWidth;
-      const value = xToValue(x);
-      setPlacedMarkers((prev) => [...prev, value]);
-
-      const isCorrect = target !== undefined && Math.abs(value - target) <= (tolerance ?? 0.5);
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'math.number-line',
-        action: 'place',
-        value,
-        correct: isCorrect,
-      });
-
-      if (isCorrect && !answeredCorrectly) {
-        setAnsweredCorrectly(true);
-        complete(100, { placedMarkers: [...placedMarkers, value], answeredCorrectly: true });
-      }
-    },
-    [
-      parsed,
-      xToValue,
-      target,
-      tolerance,
-      placedMarkers,
-      answeredCorrectly,
-      emitInteraction,
-      complete,
-    ],
-  );
-
   if (!parsed.success) {
     return (
       <div
@@ -144,6 +74,45 @@ function NumberLineComponent(props: {
       </div>
     );
   }
+
+  const { min, max, step, markers, showLabels, showGrid, mode, target, tolerance } = parsed.data;
+
+  const svgWidth = 600;
+  const lineStart = PADDING;
+  const lineEnd = svgWidth - PADDING;
+  const lineLength = lineEnd - lineStart;
+
+  const valueToX = (val: number) =>
+    lineStart + ((val - min) / (max - min)) * lineLength;
+
+  const xToValue = (x: number) => {
+    const raw = min + ((x - lineStart) / lineLength) * (max - min);
+    return Math.round(raw / step) * step;
+  };
+
+  const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!parsed.data.interactive) return;
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * svgWidth;
+    const value = xToValue(x);
+    setPlacedMarkers((prev) => [...prev, value]);
+
+    const isCorrect = target !== undefined && Math.abs(value - target) <= (tolerance ?? 0.5);
+    emitInteraction({
+      type: 'widget.interaction',
+      widgetId: 'math.number-line',
+      action: 'place',
+      value,
+      correct: isCorrect,
+    });
+
+    if (isCorrect && !answeredCorrectly) {
+      setAnsweredCorrectly(true);
+      complete(100, { placedMarkers: [...placedMarkers, value], answeredCorrectly: true });
+    }
+  };
 
   const tickValues: number[] = [];
   for (let v = min; v <= max; v = Math.round((v + step) * 1000) / 1000) {

@@ -38,7 +38,7 @@ function VideoPlayerComponent(props: {
   storedState?: unknown;
 }) {
   const { config: rawConfig, emitInteraction, complete, storedState } = props;
-  const parsed = videoPlayerSchema.safeParse(rawConfig);
+  const parsed = useMemo(() => videoPlayerSchema.safeParse(rawConfig), [rawConfig]);
   const parsedState = useMemo(() => {
     const result = VideoPlayerStateSchema.safeParse(storedState);
     return result.success ? result.data : null;
@@ -50,6 +50,10 @@ function VideoPlayerComponent(props: {
   const [totalDuration, setTotalDuration] = useState(0);
   const [activeCaptionIndex, setActiveCaptionIndex] = useState<number | null>(null);
   const [activeChapterIndex, setActiveChapterIndex] = useState<number | null>(null);
+  const activeChapterIndexRef = useRef(activeChapterIndex);
+  useEffect(() => {
+    activeChapterIndexRef.current = activeChapterIndex;
+  }, [activeChapterIndex]);
   const [bookmarks, setBookmarks] = useState<number[]>(parsedState?.bookmarks ?? []);
 
   const isObserve = parsed.success && !parsed.data.interactive;
@@ -79,7 +83,7 @@ function VideoPlayerComponent(props: {
             break;
           }
         }
-        if (chIdx !== activeChapterIndex) setActiveChapterIndex(chIdx);
+        if (chIdx !== activeChapterIndexRef.current) setActiveChapterIndex(chIdx);
       }
     };
     const handleLoadedMetadata = () => setTotalDuration(video.duration);
@@ -100,7 +104,7 @@ function VideoPlayerComponent(props: {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('ended', handleEnded);
     };
-  }, [parsed, activeChapterIndex, emitInteraction]);
+  }, [parsed, emitInteraction]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;

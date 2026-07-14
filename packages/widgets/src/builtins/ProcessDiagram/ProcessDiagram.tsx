@@ -169,7 +169,7 @@ function ProcessDiagramComponent(props: {
         >
           <defs>
             <marker
-              id="arrow"
+              id={`arrow-${props.nodeId}`}
               viewBox="0 0 10 7"
               refX="10"
               refY="3.5"
@@ -198,7 +198,7 @@ function ProcessDiagramComponent(props: {
                 stroke="var(--oe-color-on-surface, #1c1b1f)"
                 strokeWidth={2}
                 strokeDasharray={conn.type === 'dashed' ? '8 4' : undefined}
-                markerEnd="url(#arrow)"
+                markerEnd={`url(#arrow-${props.nodeId})`}
               />
             );
           })}
@@ -256,7 +256,7 @@ function ProcessDiagramComponent(props: {
         >
           <defs>
             <marker
-              id="arrow-interactive"
+              id={`arrow-interactive-${props.nodeId}`}
               viewBox="0 0 10 7"
               refX="10"
               refY="3.5"
@@ -288,7 +288,7 @@ function ProcessDiagramComponent(props: {
                 stroke="var(--oe-color-on-surface, #1c1b1f)"
                 strokeWidth={2}
                 strokeDasharray={conn.type === 'dashed' ? '8 4' : undefined}
-                markerEnd="url(#arrow-interactive)"
+                markerEnd={`url(#arrow-interactive-${props.nodeId})`}
               />
             );
           })}

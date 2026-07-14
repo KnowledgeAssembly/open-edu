@@ -36,7 +36,7 @@ function AudioPlayerComponent(props: {
   storedState?: unknown;
 }) {
   const { config: rawConfig, emitInteraction, complete, storedState } = props;
-  const parsed = audioPlayerSchema.safeParse(rawConfig);
+  const parsed = useMemo(() => audioPlayerSchema.safeParse(rawConfig), [rawConfig]);
   const parsedState = useMemo(() => {
     const result = AudioPlayerStateSchema.safeParse(storedState);
     return result.success ? result.data : null;
