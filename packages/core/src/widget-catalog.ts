@@ -9,6 +9,19 @@ export interface WidgetCatalogEntry {
   keywords?: string[];
   learningIntents?: string[];
   legacyId?: string;
+  capabilities?: string[];
+  accessibility?: string[];
+  analytics?: string[];
+  reward?: { completionXP?: number; positiveMessage?: string };
+  ai?: {
+    difficulty?: string;
+    estimatedMinutes?: number;
+    bloomsLevel?: string;
+    cognitiveLoad?: string;
+    recommendedAge?: [number, number];
+    learningObjectives?: string[];
+    commonMisconceptions?: string[];
+  };
 }
 
 export interface WidgetCatalogInput {
@@ -77,6 +90,58 @@ export function generateWidgetCatalog(input: WidgetCatalogInput): string {
 
       if (w.keywords && w.keywords.length > 0) {
         lines.push(`Keywords: ${w.keywords.join(', ')}`);
+        lines.push('');
+      }
+
+      // Capabilities
+      if (w.capabilities && w.capabilities.length > 0) {
+        lines.push(`**Capabilities:** ${w.capabilities.join(', ')}`);
+        lines.push('');
+      }
+
+      // Accessibility
+      if (w.accessibility && w.accessibility.length > 0) {
+        lines.push(`**Accessibility:** ${w.accessibility.join(', ')}`);
+        lines.push('');
+      }
+
+      // Analytics
+      if (w.analytics && w.analytics.length > 0) {
+        lines.push(`**Analytics:** ${w.analytics.join(', ')}`);
+        lines.push('');
+      }
+
+      // Rewards
+      if (w.reward) {
+        const parts: string[] = [];
+        if (w.reward.completionXP) parts.push(`${w.reward.completionXP} XP`);
+        if (w.reward.positiveMessage) parts.push(`"${w.reward.positiveMessage}"`);
+        if (parts.length > 0) {
+          lines.push(`**Rewards:** ${parts.join(', ')}`);
+          lines.push('');
+        }
+      }
+
+      // AI Notes
+      if (w.ai) {
+        lines.push('**AI Notes:**');
+        if (w.ai.difficulty) lines.push(`- Difficulty: ${w.ai.difficulty}`);
+        if (w.ai.estimatedMinutes) lines.push(`- Estimated time: ${w.ai.estimatedMinutes} min`);
+        if (w.ai.bloomsLevel) lines.push(`- Bloom's: ${w.ai.bloomsLevel}`);
+        if (w.ai.cognitiveLoad) lines.push(`- Cognitive load: ${w.ai.cognitiveLoad}`);
+        if (w.ai.recommendedAge) lines.push(`- Ages: ${w.ai.recommendedAge[0]}-${w.ai.recommendedAge[1]}`);
+        if (w.ai.learningObjectives && w.ai.learningObjectives.length > 0) {
+          lines.push('- Learning objectives:');
+          for (const obj of w.ai.learningObjectives) {
+            lines.push(`  - ${obj}`);
+          }
+        }
+        if (w.ai.commonMisconceptions && w.ai.commonMisconceptions.length > 0) {
+          lines.push('- Common misconceptions:');
+          for (const m of w.ai.commonMisconceptions) {
+            lines.push(`  - ${m}`);
+          }
+        }
         lines.push('');
       }
     }

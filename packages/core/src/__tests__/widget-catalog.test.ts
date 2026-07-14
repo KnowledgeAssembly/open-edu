@@ -94,4 +94,95 @@ describe('generateWidgetCatalog', () => {
     expect(catalog).toContain('Widget Catalog');
     expect(catalog).not.toContain('Core Widgets');
   });
+
+  it('includes AI metadata when provided', () => {
+    const catalog = generateWidgetCatalog({
+      widgets: [{
+        id: 'test.widget',
+        name: 'Test Widget',
+        description: 'A test',
+        domain: 'core',
+        status: 'stable',
+        learningIntents: ['practice'],
+        ai: {
+          difficulty: 'easy',
+          estimatedMinutes: 3,
+          bloomsLevel: 'remember',
+          recommendedAge: [5, 10],
+          learningObjectives: ['Learn to test'],
+          commonMisconceptions: ['Assuming tests always pass'],
+        },
+      }],
+    });
+    expect(catalog).toContain('AI Notes');
+    expect(catalog).toContain('Difficulty: easy');
+    expect(catalog).toContain('Estimated time: 3 min');
+    expect(catalog).toContain("Bloom's: remember");
+    expect(catalog).toContain('Ages: 5-10');
+    expect(catalog).toContain('Learning objectives:');
+    expect(catalog).toContain('Learn to test');
+    expect(catalog).toContain('Common misconceptions:');
+    expect(catalog).toContain('Assuming tests always pass');
+  });
+
+  it('includes capabilities when provided', () => {
+    const catalog = generateWidgetCatalog({
+      widgets: [{
+        id: 'test.widget',
+        name: 'Test',
+        domain: 'core',
+        status: 'stable',
+        capabilities: ['observeMode', 'keyboard', 'screenReader', 'offline'],
+      }],
+    });
+    expect(catalog).toContain('Capabilities:');
+    expect(catalog).toContain('keyboard');
+    expect(catalog).toContain('screenReader');
+    expect(catalog).toContain('offline');
+  });
+
+  it('includes accessibility when provided', () => {
+    const catalog = generateWidgetCatalog({
+      widgets: [{
+        id: 'test.widget',
+        name: 'Test',
+        domain: 'core',
+        status: 'stable',
+        accessibility: ['highContrast', 'tts', 'ariaSupport'],
+      }],
+    });
+    expect(catalog).toContain('Accessibility:');
+    expect(catalog).toContain('highContrast');
+    expect(catalog).toContain('tts');
+  });
+
+  it('includes reward info when provided', () => {
+    const catalog = generateWidgetCatalog({
+      widgets: [{
+        id: 'test.widget',
+        name: 'Test',
+        domain: 'core',
+        status: 'stable',
+        reward: { completionXP: 15, positiveMessage: 'Well done!' },
+      }],
+    });
+    expect(catalog).toContain('Rewards:');
+    expect(catalog).toContain('15 XP');
+    expect(catalog).toContain('Well done!');
+  });
+
+  it('includes analytics when provided', () => {
+    const catalog = generateWidgetCatalog({
+      widgets: [{
+        id: 'test.widget',
+        name: 'Test',
+        domain: 'core',
+        status: 'stable',
+        analytics: ['attempts', 'hints', 'completionTime'],
+      }],
+    });
+    expect(catalog).toContain('Analytics:');
+    expect(catalog).toContain('attempts');
+    expect(catalog).toContain('hints');
+  });
 });
