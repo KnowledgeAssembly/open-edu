@@ -33,7 +33,8 @@ function findNearest(
       .sort((a, b) => getRegionCenter(regions.get(a)!).x - getRegionCenter(regions.get(b)!).x);
 
     if (right.length > 0) return right[0]!;
-    if (currentIndex >= 0 && currentIndex < sortedIds.length - 1) return sortedIds[currentIndex + 1]!;
+    if (currentIndex >= 0 && currentIndex < sortedIds.length - 1)
+      return sortedIds[currentIndex + 1]!;
     return sortedIds[0]!;
   }
 

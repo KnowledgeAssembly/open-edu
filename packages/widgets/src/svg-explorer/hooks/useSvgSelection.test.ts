@@ -64,9 +64,7 @@ describe('useSvgSelection', () => {
 
   describe('multi mode', () => {
     it('toggles selection in multi mode (select A, select B -> both, deselect A -> only B)', () => {
-      const { result } = renderHook(() =>
-        useSvgSelection({ mode: 'multi' }),
-      );
+      const { result } = renderHook(() => useSvgSelection({ mode: 'multi' }));
 
       act(() => {
         result.current.select('region-a');
@@ -91,9 +89,7 @@ describe('useSvgSelection', () => {
     it('does nothing in none mode', () => {
       const onSelect = vi.fn();
       const onDeselect = vi.fn();
-      const { result } = renderHook(() =>
-        useSvgSelection({ mode: 'none', onSelect, onDeselect }),
-      );
+      const { result } = renderHook(() => useSvgSelection({ mode: 'none', onSelect, onDeselect }));
 
       act(() => {
         result.current.select('region-a');
@@ -111,9 +107,7 @@ describe('useSvgSelection', () => {
   describe('common operations', () => {
     it('clears all selections', () => {
       const onDeselect = vi.fn();
-      const { result } = renderHook(() =>
-        useSvgSelection({ mode: 'multi', onDeselect }),
-      );
+      const { result } = renderHook(() => useSvgSelection({ mode: 'multi', onDeselect }));
 
       act(() => {
         result.current.select('region-a');
@@ -130,9 +124,7 @@ describe('useSvgSelection', () => {
     });
 
     it('checks isSelected correctly', () => {
-      const { result } = renderHook(() =>
-        useSvgSelection({ mode: 'multi' }),
-      );
+      const { result } = renderHook(() => useSvgSelection({ mode: 'multi' }));
 
       expect(result.current.isSelected('region-a')).toBe(false);
 
@@ -147,9 +139,7 @@ describe('useSvgSelection', () => {
     it('toggle works in multi mode', () => {
       const onSelect = vi.fn();
       const onDeselect = vi.fn();
-      const { result } = renderHook(() =>
-        useSvgSelection({ mode: 'multi', onSelect, onDeselect }),
-      );
+      const { result } = renderHook(() => useSvgSelection({ mode: 'multi', onSelect, onDeselect }));
 
       act(() => {
         result.current.toggle('region-a');

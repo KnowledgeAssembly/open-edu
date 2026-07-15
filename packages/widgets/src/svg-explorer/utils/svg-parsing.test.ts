@@ -2,19 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { parseSvgRegions, extractRegionsFromSvg } from './svg-parsing.js';
 
 function createSvgString(paths: Array<{ id: string; d?: string }>): string {
-  const elements = paths
-    .map((p) => `<path id="${p.id}" d="${p.d ?? 'M0 0L10 10'}"/>`)
-    .join('\n');
+  const elements = paths.map((p) => `<path id="${p.id}" d="${p.d ?? 'M0 0L10 10'}"/>`).join('\n');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${elements}</svg>`;
 }
 
 describe('parseSvgRegions', () => {
   it('parses SVG string and extracts regions by id', () => {
-    const svg = createSvgString([
-      { id: 'odisha' },
-      { id: 'karnataka' },
-      { id: 'maharashtra' },
-    ]);
+    const svg = createSvgString([{ id: 'odisha' }, { id: 'karnataka' }, { id: 'maharashtra' }]);
     const result = parseSvgRegions(svg, ['odisha', 'karnataka', 'maharashtra']);
     expect(result.regions.size).toBe(3);
     expect(result.regions.has('odisha')).toBe(true);
@@ -23,10 +17,7 @@ describe('parseSvgRegions', () => {
   });
 
   it('ignores elements not in the requested id list', () => {
-    const svg = createSvgString([
-      { id: 'odisha' },
-      { id: 'background' },
-    ]);
+    const svg = createSvgString([{ id: 'odisha' }, { id: 'background' }]);
     const result = parseSvgRegions(svg, ['odisha']);
     expect(result.regions.size).toBe(1);
     expect(result.regions.has('odisha')).toBe(true);

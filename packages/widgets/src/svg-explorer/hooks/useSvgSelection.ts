@@ -92,10 +92,7 @@ export function useSvgSelection(options: UseSvgSelectionOptions): UseSvgSelectio
     });
   }, [mode, onDeselect]);
 
-  const isSelected = useCallback(
-    (regionId: string) => selectedIds.has(regionId),
-    [selectedIds],
-  );
+  const isSelected = useCallback((regionId: string) => selectedIds.has(regionId), [selectedIds]);
 
   return { selectedIds, select, deselect, toggle, clear, isSelected };
 }

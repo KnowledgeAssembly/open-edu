@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { SvgRegion as SvgRegionType } from './types.js';
 
 export interface SvgRegionProps {
@@ -15,6 +15,18 @@ export interface SvgRegionProps {
   disabled?: boolean;
 }
 
+function createReactElementFromDom(el: SVGElement): React.ReactElement | null {
+  const tagName = el.tagName.toLowerCase();
+  const props: Record<string, unknown> = {};
+  for (let i = 0; i < el.attributes.length; i++) {
+    const attr = el.attributes.item(i);
+    if (attr && attr.name !== 'class' && attr.name !== 'id' && attr.name !== 'style') {
+      props[attr.name] = attr.value;
+    }
+  }
+  return React.createElement(tagName, props);
+}
+
 function SvgRegionComponent({
   region,
   selected,
@@ -28,6 +40,15 @@ function SvgRegionComponent({
   ariaDescription,
   disabled = false,
 }: SvgRegionProps) {
+  const baseElement = useMemo(() => {
+    try {
+      const el = region.element;
+      return createReactElementFromDom(el);
+    } catch {
+      return null;
+    }
+  }, [region.element]);
+
   const classNames = [
     'oe-svg-region',
     selected && '--selected',
@@ -46,7 +67,7 @@ function SvgRegionComponent({
         ? 'var(--oe-color-focus, #bfdbfe)'
         : 'var(--oe-color-default, transparent)';
 
-  const style: React.CSSProperties = {
+  const style: Record<string, string> = {
     fill: fillColor,
     cursor: interactive && !disabled ? 'pointer' : 'default',
     transition: 'fill 0.15s ease-in-out',
@@ -94,9 +115,13 @@ function SvgRegionComponent({
     [interactive, disabled, onSelect, region.id],
   );
 
-  return React.cloneElement(region.element, {
+  if (!baseElement) {
+    return null;
+  }
+
+  return React.cloneElement(baseElement, {
     className: classNames,
-    style: { ...(region.element.style || {}), ...style },
+    style,
     role: interactive ? 'button' : 'img',
     tabIndex: interactive ? 0 : undefined,
     'aria-label': ariaLabel,

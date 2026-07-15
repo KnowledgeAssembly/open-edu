@@ -39,9 +39,7 @@ describe('useSvgLoader', () => {
   });
 
   it('loads SVG from inline string', async () => {
-    const { result } = renderHook(() =>
-      useSvgLoader({ src: MOCK_SVG, regionIds: ['region1'] }),
-    );
+    const { result } = renderHook(() => useSvgLoader({ src: MOCK_SVG, regionIds: ['region1'] }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -66,9 +64,7 @@ describe('useSvgLoader', () => {
   });
 
   it('sets error on invalid SVG content', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response('not valid svg', { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('not valid svg', { status: 200 }));
 
     const { result } = renderHook(() =>
       useSvgLoader({ src: 'https://example.com/map.svg', regionIds: ['region1'] }),

@@ -2,9 +2,7 @@ import type { SvgRegion, SvgLoadResult } from '../types.js';
 
 const INTERACTIVE_TAGS = new Set(['path', 'rect', 'circle', 'ellipse', 'polygon', 'polyline']);
 
-function parseSvgDoc(
-  svgString: string
-): { svgElement: SVGSVGElement; allElements: Element[] } {
+function parseSvgDoc(svgString: string): { svgElement: SVGSVGElement; allElements: Element[] } {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
@@ -79,7 +77,12 @@ function getBBoxFromAttributes(el: Element): DOMRect {
   return new DOMRect(0, 0, 0, 0);
 }
 
-function parseViewBox(svgElement: SVGSVGElement): { x: number; y: number; width: number; height: number } {
+function parseViewBox(svgElement: SVGSVGElement): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
   const viewBox = svgElement.getAttribute('viewBox');
   if (viewBox) {
     const parts = viewBox.split(/[\s,]+/).map(Number);
@@ -90,10 +93,7 @@ function parseViewBox(svgElement: SVGSVGElement): { x: number; y: number; width:
   return { x: 0, y: 0, width: 100, height: 100 };
 }
 
-export function parseSvgRegions(
-  svgString: string,
-  regionIds: string[]
-): SvgLoadResult {
+export function parseSvgRegions(svgString: string, regionIds: string[]): SvgLoadResult {
   const { svgElement, allElements } = parseSvgDoc(svgString);
   const viewBox = parseViewBox(svgElement);
 

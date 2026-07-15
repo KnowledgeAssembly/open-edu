@@ -18,7 +18,11 @@ function makeRegions(ids: string[]): Map<string, SvgRegion> {
 }
 
 function createEvent(key: string): React.KeyboardEvent {
-  return { key, preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as React.KeyboardEvent;
+  return {
+    key,
+    preventDefault: vi.fn(),
+    stopPropagation: vi.fn(),
+  } as unknown as React.KeyboardEvent;
 }
 
 describe('useSvgKeyboard', () => {
