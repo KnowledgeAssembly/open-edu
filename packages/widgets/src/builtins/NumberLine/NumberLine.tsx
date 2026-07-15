@@ -75,8 +75,7 @@ function NumberLineComponent(props: {
   const lineEnd = svgWidth - PADDING;
   const lineLength = lineEnd - lineStart;
 
-  const valueToX = (val: number) =>
-    lineStart + ((val - min) / (max - min)) * lineLength;
+  const valueToX = (val: number) => lineStart + ((val - min) / (max - min)) * lineLength;
 
   const xToValue = (x: number) => {
     const raw = min + ((x - lineStart) / lineLength) * (max - min);

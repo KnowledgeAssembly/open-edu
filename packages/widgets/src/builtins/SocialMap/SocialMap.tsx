@@ -5,6 +5,7 @@ import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { useObserveMode } from '../../use-observe-mode';
 import { WidgetError } from '../WidgetError';
+import { SvgExplorer } from '../../svg-explorer/SvgExplorer.js';
 
 const regionSchema = z.object({
   id: z.string(),
@@ -31,6 +32,7 @@ const legendItemSchema = z.object({
 
 const socialMapSchema = z.object({
   map: z.string().optional(),
+  svgSrc: z.string().max(2048).optional(),
   regions: z.array(regionSchema).min(1),
   labels: z.boolean().optional().default(true),
   legend: z.array(legendItemSchema).optional(),
@@ -121,6 +123,39 @@ function SocialMapComponent(props: {
   }
 
   const config = parsed.data;
+
+  // SVG-based rendering via SvgExplorer
+  if (config.svgSrc) {
+    return (
+      <div className="space-y-4">
+        {config.title && <h2 className="text-on-surface text-xl font-semibold">{config.title}</h2>}
+        <SvgExplorer
+          src={config.svgSrc}
+          regions={config.regions.map((r) => ({
+            id: r.id,
+            name: r.name,
+            description: r.description,
+            capital: (r as Record<string, unknown>).capital as string | undefined,
+          }))}
+          selection={config.interactive ? 'single' : 'none'}
+          zoom={config.zoom ? { enabled: true } : undefined}
+          onEvent={(event) => {
+            if (event.type === 'region:select') {
+              emitInteraction({
+                type: 'widget.interaction',
+                widgetId: 'social.map',
+                action: 'select',
+                regionId: event.regionId,
+              });
+              if (config.targetRegion && event.regionId === config.targetRegion) {
+                complete(100, { selectedRegion: event.regionId });
+              }
+            }
+          }}
+        />
+      </div>
+    );
+  }
 
   const selected = config.regions.find((r) => r.id === selectedRegion);
   const hovered = config.regions.find((r) => r.id === hoveredRegion);
@@ -214,7 +249,11 @@ function SocialMapComponent(props: {
               )}
               {config.labels && (
                 <text
-                  x={region.path ? 300 : 20 + config.regions.indexOf(region) * fallbackSpacing + regionWidth / 2}
+                  x={
+                    region.path
+                      ? 300
+                      : 20 + config.regions.indexOf(region) * fallbackSpacing + regionWidth / 2
+                  }
                   y={region.path ? 200 : viewBoxHeight / 2}
                   textAnchor="middle"
                   fill="var(--oe-color-on-surface, #1c1b1f)"
