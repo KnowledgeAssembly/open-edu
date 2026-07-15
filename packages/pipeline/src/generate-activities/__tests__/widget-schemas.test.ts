@@ -42,6 +42,19 @@ describe('widget schema registry', () => {
       'open-edu.grid-area',
       'open-edu.real-world',
       'open-edu.multiple-choice',
+      'open-edu.multiple-choice-practice',
+      'core.audio-player',
+      'core.video-player',
+      'language.flashcard',
+      'science.process-diagram',
+      'math.number-line',
+      'social.map',
+      'core.callout',
+      'core.image-compare',
+      'core.hotspot',
+      'core.timeline',
+      'science.label-diagram',
+      'science.image-label',
     ];
     for (const id of expectedIds) {
       expect(getWidgetSchema(id)).toBeDefined();
@@ -101,6 +114,97 @@ describe('widget schema validation', () => {
   it('clockTimeSchema rejects invalid hour', () => {
     const schema = getWidgetSchema('open-edu.clock-time')!;
     const result = schema.safeParse({ hour: 25, minute: 30 });
+    expect(result.success).toBe(false);
+  });
+
+  it('calloutSchema accepts valid config', () => {
+    const schema = getWidgetSchema('core.callout')!;
+    const result = schema.safeParse({ content: 'This is a tip.' });
+    expect(result.success).toBe(true);
+  });
+
+  it('calloutSchema rejects empty content', () => {
+    const schema = getWidgetSchema('core.callout')!;
+    const result = schema.safeParse({ content: '' });
+    expect(result.success).toBe(false);
+  });
+
+  it('imageCompareSchema accepts valid config', () => {
+    const schema = getWidgetSchema('core.image-compare')!;
+    const result = schema.safeParse({
+      leftImage: 'left.jpg',
+      rightImage: 'right.jpg',
+      altText: { left: 'Left image', right: 'Right image' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('imageCompareSchema rejects missing altText', () => {
+    const schema = getWidgetSchema('core.image-compare')!;
+    const result = schema.safeParse({ leftImage: 'left.jpg', rightImage: 'right.jpg' });
+    expect(result.success).toBe(false);
+  });
+
+  it('hotspotSchema accepts valid config', () => {
+    const schema = getWidgetSchema('core.hotspot')!;
+    const result = schema.safeParse({
+      image: 'map.jpg',
+      altText: 'A map',
+      hotspots: [{ id: 'h1', x: 50, y: 50, label: 'Point A' }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('hotspotSchema rejects empty hotspots', () => {
+    const schema = getWidgetSchema('core.hotspot')!;
+    const result = schema.safeParse({ image: 'map.jpg', altText: 'A map', hotspots: [] });
+    expect(result.success).toBe(false);
+  });
+
+  it('timelineSchema accepts valid config', () => {
+    const schema = getWidgetSchema('core.timeline')!;
+    const result = schema.safeParse({
+      events: [
+        { id: 'e1', title: 'Event 1' },
+        { id: 'e2', title: 'Event 2' },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('timelineSchema rejects single event', () => {
+    const schema = getWidgetSchema('core.timeline')!;
+    const result = schema.safeParse({ events: [{ id: 'e1', title: 'Event 1' }] });
+    expect(result.success).toBe(false);
+  });
+
+  it('labelDiagramSchema accepts valid config', () => {
+    const schema = getWidgetSchema('science.label-diagram')!;
+    const result = schema.safeParse({
+      image: 'cell.svg',
+      labels: [{ id: 'l1', text: 'Nucleus', target: { x: 50, y: 50 } }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('labelDiagramSchema rejects empty labels', () => {
+    const schema = getWidgetSchema('science.label-diagram')!;
+    const result = schema.safeParse({ image: 'cell.svg', labels: [] });
+    expect(result.success).toBe(false);
+  });
+
+  it('imageLabelSchema accepts valid config', () => {
+    const schema = getWidgetSchema('science.image-label')!;
+    const result = schema.safeParse({
+      image: 'map.svg',
+      regions: [{ id: 'r1', title: 'Region A', x: 50, y: 50 }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('imageLabelSchema rejects empty regions', () => {
+    const schema = getWidgetSchema('science.image-label')!;
+    const result = schema.safeParse({ image: 'map.svg', regions: [] });
     expect(result.success).toBe(false);
   });
 });

@@ -273,6 +273,99 @@ const numberLineSchema = z.object({
   interactive: z.boolean().optional(),
 });
 
+const calloutSchema = z.object({
+  content: z.string().min(1),
+  type: z.enum(['note', 'tip', 'warning', 'important', 'definition', 'example', 'fun-fact', 'quote', 'success', 'question']).optional(),
+  title: z.string().optional(),
+  icon: z.string().optional(),
+  collapsible: z.boolean().optional(),
+  defaultExpanded: z.boolean().optional(),
+  colorVariant: z.enum(['default', 'primary', 'success', 'warning', 'error']).optional(),
+  interactive: z.boolean().optional(),
+});
+
+const imageCompareSchema = z.object({
+  leftImage: z.string().min(1),
+  rightImage: z.string().min(1),
+  leftLabel: z.string().optional(),
+  rightLabel: z.string().optional(),
+  mode: z.enum(['slider', 'side-by-side', 'overlay', 'before-after']).optional(),
+  caption: z.string().optional(),
+  altText: z.object({ left: z.string().min(1), right: z.string().min(1) }),
+  showLabels: z.boolean().optional(),
+  sliderPosition: z.number().min(0).max(100).optional(),
+  interactive: z.boolean().optional(),
+});
+
+const hotspotSchema = z.object({
+  image: z.string().min(1),
+  altText: z.string().min(1),
+  hotspots: z.array(z.object({
+    id: z.string(),
+    x: z.number().min(0).max(100),
+    y: z.number().min(0).max(100),
+    radius: z.number().optional(),
+    label: z.string(),
+    correct: z.boolean().optional(),
+    description: z.string().optional(),
+    hint: z.string().optional(),
+  })).min(1),
+  mode: z.enum(['single', 'multiple']).optional(),
+  interactive: z.boolean().optional(),
+  hints: z.array(z.string()).optional(),
+});
+
+const timelineSchema = z.object({
+  events: z.array(z.object({
+    id: z.string(),
+    title: z.string().min(1),
+    date: z.string().optional(),
+    icon: z.string().optional(),
+    description: z.string().optional(),
+    image: z.string().optional(),
+  })).min(2),
+  title: z.string().optional(),
+  layout: z.enum(['horizontal', 'vertical', 'compact']).optional(),
+  showDates: z.boolean().optional(),
+  showImages: z.boolean().optional(),
+  interactive: z.boolean().optional(),
+  hints: z.array(z.string()).optional(),
+});
+
+const labelDiagramSchema = z.object({
+  image: z.string().min(1),
+  altText: z.string().optional(),
+  labels: z.array(z.object({
+    id: z.string(),
+    text: z.string().min(1),
+    target: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }),
+    hint: z.string().optional(),
+    description: z.string().optional(),
+  })).min(1),
+  interactive: z.boolean().optional(),
+  hints: z.array(z.string()).optional(),
+});
+
+const imageLabelSchema = z.object({
+  image: z.string().min(1),
+  altText: z.string().optional(),
+  regions: z.array(z.object({
+    id: z.string(),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    image: z.string().optional(),
+    audio: z.string().optional(),
+    video: z.string().optional(),
+    tooltip: z.string().optional(),
+    x: z.number().min(0).max(100),
+    y: z.number().min(0).max(100),
+    width: z.number().min(0).max(100).optional(),
+    height: z.number().min(0).max(100).optional(),
+  })).min(1),
+  interactive: z.boolean().optional(),
+  hints: z.array(z.string()).optional(),
+});
+
 const socialMapSchema = z.object({
   regions: z
     .array(
@@ -317,6 +410,12 @@ const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
   'science.process-diagram': processDiagramSchema,
   'math.number-line': numberLineSchema,
   'social.map': socialMapSchema,
+  'core.callout': calloutSchema,
+  'core.image-compare': imageCompareSchema,
+  'core.hotspot': hotspotSchema,
+  'core.timeline': timelineSchema,
+  'science.label-diagram': labelDiagramSchema,
+  'science.image-label': imageLabelSchema,
 };
 
 export function registerAllWidgetSchemas(): void {

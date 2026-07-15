@@ -1,6 +1,6 @@
 # Skill: course-spec-generator
 
-Generate OpenEdu `course-spec.md` or `course-spec.json` files for the course-compiler using an LLM. Use this whenever you need to create educational content, generate course outlines, design learning experiences, or build structured educational packages for the OpenEdu framework. Covers the full spec format, validation rules, and all 15 built-in widgets with their configuration schemas and usage examples.
+Generate OpenEdu `course-spec.md` or `course-spec.json` files for the course-compiler using an LLM. Use this whenever you need to create educational content, generate course outlines, design learning experiences, or build structured educational packages for the OpenEdu framework. Covers the full spec format, validation rules, and all 26 built-in widgets with their configuration schemas and usage examples.
 
 ## Output Formats
 
@@ -177,18 +177,18 @@ course-spec.md          course-spec.json
 | `widget`     | Interactive widget      | `widgetId`, `config`, `description?`                     |
 | `quiz`       | Assessment              | `questions[]` with `question`, `options`, `correctIndex` |
 
-## Available Widgets (15 built-in)
+## Available Widgets (26 built-in)
 
 All widgets use the `exercise` node type with a `widget` field set to the widget ID. The `config` object is widget-specific. Every widget supports an `interactive: true|false` flag — when `false`, it renders in **observe mode** (correct answers pre-displayed, user acknowledges).
 
-### 1. `open-edu.multiple-choice` — Multiple Question Quiz
+### 1. `core.multiple-choice` — Multiple Question Quiz
 
 Multi-question quiz with interactive or observe modes. One question at a time with per-question feedback and final results.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.multiple-choice",
+  "widget": "core.multiple-choice",
   "config": {
     "questions": [
       {
@@ -212,14 +212,16 @@ Multi-question quiz with interactive or observe modes. One question at a time wi
   - `explanation?`: string
 - `interactive?`: boolean (default: true)
 
-### 2. `open-edu.multiple-choice-practice` — Single Question Practice
+### 2. `core.multiple-choice-practice` — Single Question Practice (DEPRECATED)
+
+> **Deprecated:** Use `core.multiple-choice` instead.
 
 Legacy single-question mode with immediate feedback.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.multiple-choice-practice",
+  "widget": "core.multiple-choice-practice",
   "config": {
     "prompt": "What is the capital of France?",
     "options": [
@@ -242,14 +244,14 @@ Legacy single-question mode with immediate feedback.
   - `correct`: boolean
 - `explanation?`: string
 
-### 3. `open-edu.visual-counting` — Count Items
+### 3. `core.visual-counting` — Count Items
 
 Count items displayed in a grid. Supports simple counting and addition mode.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.visual-counting",
+  "widget": "core.visual-counting",
   "config": {
     "description": "Count the stars!",
     "items": ["⭐"],
@@ -277,14 +279,14 @@ Count items displayed in a grid. Supports simple counting and addition mode.
 
 For **addition mode**, set `left` + `right` + `sum` instead of `items` + `count`.
 
-### 4. `open-edu.matching` — Pair Matching
+### 4. `core.matching` — Pair Matching
 
 Click-to-connect matching with visual SVG connector lines.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.matching",
+  "widget": "core.matching",
   "config": {
     "description": "Match each fruit to its color.",
     "pairs": [
@@ -310,14 +312,14 @@ Click-to-connect matching with visual SVG connector lines.
 - `hints?`: string[]
 - `interactive?`: boolean
 
-### 5. `open-edu.drag-drop` — Drag Items to Targets
+### 5. `core.drag-drop` — Drag Items to Targets
 
 Click-based sorting: assign items to target zones.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.drag-drop",
+  "widget": "core.drag-drop",
   "config": {
     "description": "Sort each animal into the correct habitat.",
     "items": [
@@ -356,14 +358,14 @@ Click-based sorting: assign items to target zones.
 - `hints?`: string[]
 - `interactive?`: boolean
 
-### 6. `open-edu.sequencing` — Order Items
+### 6. `core.sequencing` — Order Items
 
 Arrange items in the correct sequential order.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.sequencing",
+  "widget": "core.sequencing",
   "config": {
     "description": "Put the life cycle steps in correct order.",
     "items": [
@@ -390,14 +392,14 @@ Arrange items in the correct sequential order.
 - `hints?`: string[]
 - `interactive?`: boolean
 
-### 7. `open-edu.fill-blank` — Fill in the Blank
+### 7. `core.fill-blank` — Fill in the Blank
 
 Template-based fill-in-the-blank with dropdown (`select`) or text input (`type`) mode.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.fill-blank",
+  "widget": "core.fill-blank",
   "config": {
     "description": "Complete the sentences about the water cycle.",
     "template": "Water ___ from the ground into the air. It forms ___ in the sky. Then it falls back down as ___.",
@@ -439,14 +441,14 @@ Template-based fill-in-the-blank with dropdown (`select`) or text input (`type`)
 - `statement?`: string (pipeline mode)
 - `answers?`: string[] (pipeline mode — auto-converted to blanks)
 
-### 8. `open-edu.story-question` — Comprehension Questions
+### 8. `core.story-question` — Comprehension Questions
 
 Story-based reading comprehension with multiple questions.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.story-question",
+  "widget": "core.story-question",
   "config": {
     "scenario": "Maya planted a sunflower seed in a small pot...",
     "questions": [
@@ -473,14 +475,14 @@ Story-based reading comprehension with multiple questions.
   - `explanation?`: string
 - `interactive?`: boolean
 
-### 9. `open-edu.real-world` — Real World Task
+### 9. `core.real-world` — Real World Task
 
 Open-ended real-world task with self-assessment.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.real-world",
+  "widget": "core.real-world",
   "config": {
     "description": "Apply measurement to the real world.",
     "scenario": "You are helping to bake cookies for a school event...",
@@ -500,14 +502,14 @@ Open-ended real-world task with self-assessment.
 - `hint?`: string
 - `interactive?`: boolean
 
-### 10. `open-edu.fraction-visual` — Fraction Shading
+### 10. `math.fraction-visual` — Fraction Shading
 
 Visual fraction bars or circles with interactive shading.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.fraction-visual",
+  "widget": "math.fraction-visual",
   "config": {
     "description": "Shade 3/4 of the circle.",
     "numerator": 3,
@@ -530,14 +532,14 @@ Visual fraction bars or circles with interactive shading.
 - `compare?`: { numerator: number, denominator: number } — comparison mode
 - `interactive?`: boolean
 
-### 11. `open-edu.chart-reader` — Bar & Pictograph Charts
+### 11. `core.chart-reader` — Bar & Pictograph Charts
 
 Read data from bar charts or pictograph charts.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.chart-reader",
+  "widget": "core.chart-reader",
   "config": {
     "description": "Which sport is the most popular?",
     "type": "bar",
@@ -567,14 +569,14 @@ Read data from bar charts or pictograph charts.
 - `correctLabel?`: string — **required when interactive: true**
 - `interactive?`: boolean
 
-### 12. `open-edu.grid-area` — Grid Area/Perimeter
+### 12. `math.grid-area` — Grid Area/Perimeter
 
 Click cells on a grid to calculate area or perimeter.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.grid-area",
+  "widget": "math.grid-area",
   "config": {
     "description": "Highlight 6 cells to match the area shown.",
     "rows": 5,
@@ -599,14 +601,14 @@ Click cells on a grid to calculate area or perimeter.
 - `description?`: string
 - `interactive?`: boolean
 
-### 13. `open-edu.place-value-chart` — Place Value
+### 13. `math.place-value-chart` — Place Value
 
 Build numbers using a place value chart (Lakh/Crore system).
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.place-value-chart",
+  "widget": "math.place-value-chart",
   "config": {
     "description": "Build the number 543.",
     "maxPlaces": "lakh",
@@ -630,14 +632,14 @@ Build numbers using a place value chart (Lakh/Crore system).
 - `description?`: string
 - `interactive?`: boolean
 
-### 14. `open-edu.measurement-scale` — Ruler/Thermometer/Cylinder
+### 14. `math.measurement-scale` — Ruler/Thermometer/Cylinder
 
 Interactive measurement instruments.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.measurement-scale",
+  "widget": "math.measurement-scale",
   "config": {
     "description": "Set the thermometer to 25 degrees.",
     "type": "thermometer",
@@ -667,14 +669,14 @@ Interactive measurement instruments.
 - `description?`: string
 - `interactive?`: boolean
 
-### 15. `open-edu.clock-time` — Analog Clock
+### 15. `math.clock-time` — Analog Clock
 
 Read or set time on an analog clock face.
 
 ```json
 {
   "type": "exercise",
-  "widget": "open-edu.clock-time",
+  "widget": "math.clock-time",
   "config": {
     "description": "Set the clock to show 7:30.",
     "hour": 3,
@@ -700,6 +702,512 @@ Read or set time on an analog clock face.
 - `size?`: number — clock diameter in pixels
 - `interactive?`: boolean
 
+### 16. `core.callout` — Definitions, Tips, Notes
+
+Styled callout boxes for definitions, tips, warnings, and key concepts. Supports 10 callout types with collapsible mode.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.callout",
+  "config": {
+    "type": "definition",
+    "title": "What is Photosynthesis?",
+    "content": "Photosynthesis is the process by which plants convert sunlight, water, and carbon dioxide into glucose and oxygen.",
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `content`: string (required — the callout text)
+- `type?`: "note" | "tip" | "warning" | "important" | "definition" | "example" | "fun-fact" | "quote" | "success" | "question" (default: "note")
+- `title?`: string
+- `icon?`: string
+- `collapsible?`: boolean (default: false)
+- `defaultExpanded?`: boolean (default: true)
+- `colorVariant?`: "default" | "primary" | "success" | "warning" | "error"
+- `interactive?`: boolean
+
+### 17. `core.image-compare` — Compare Two Images
+
+Side-by-side or slider-based image comparison. Great for before/after, correct/incorrect, or similar/different activities.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.image-compare",
+  "config": {
+    "leftImage": "healthy-food.jpg",
+    "rightImage": "junk-food.jpg",
+    "leftLabel": "Healthy Food",
+    "rightLabel": "Junk Food",
+    "altText": {
+      "left": "Assortment of fruits and vegetables",
+      "right": "Assortment of chips and soda"
+    },
+    "mode": "side-by-side",
+    "caption": "Compare healthy and unhealthy food choices.",
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `leftImage`: string (required — URL or path)
+- `rightImage`: string (required — URL or path)
+- `altText`: { left: string, right: string } (required — accessibility descriptions)
+- `mode?`: "slider" | "side-by-side" | "overlay" | "before-after" (default: "slider")
+- `leftLabel?`: string
+- `rightLabel?`: string
+- `caption?`: string
+- `showLabels?`: boolean (default: true)
+- `sliderPosition?`: number (0-100, default: 50)
+- `interactive?`: boolean
+
+### 18. `core.hotspot` — Click-to-Identify on Images
+
+Clickable hotspots on an image for identification activities. Supports single and multiple selection modes with scoring.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.hotspot",
+  "config": {
+    "image": "solar-system.jpg",
+    "altText": "The solar system with planets orbiting the sun",
+    "hotspots": [
+      {
+        "id": "earth",
+        "x": 50,
+        "y": 60,
+        "label": "Earth",
+        "correct": true,
+        "description": "Our home planet"
+      },
+      { "id": "mars", "x": 70, "y": 45, "label": "Mars", "correct": false },
+      { "id": "jupiter", "x": 30, "y": 30, "label": "Jupiter", "correct": false }
+    ],
+    "mode": "single",
+    "interactive": true,
+    "hints": ["Look for the blue planet closest to the sun"]
+  }
+}
+```
+
+**Config schema:**
+
+- `image`: string (required — URL or path)
+- `altText`: string (required — accessibility description)
+- `hotspots[]`: Array of hotspot objects (required, min 1)
+  - `id`: string (required)
+  - `x`: number (0-100, required — horizontal position %)
+  - `y`: number (0-100, required — vertical position %)
+  - `label`: string (required)
+  - `correct?`: boolean (default: false)
+  - `radius?`: number (default: 5)
+  - `description?`: string
+  - `hint?`: string
+- `mode?`: "single" | "multiple" (default: "single")
+- `hints?`: string[]
+- `interactive?`: boolean
+
+### 19. `core.timeline` — Historical Events & Process Stages
+
+Drag-and-drop timeline sorting with horizontal, vertical, or compact layouts. Great for historical sequences and process stages.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.timeline",
+  "config": {
+    "title": "Important Events in Indian History",
+    "events": [
+      {
+        "id": "e1",
+        "title": "Independence Day",
+        "date": "1947-08-15",
+        "icon": "🇮🇳",
+        "description": "India gained independence from British rule"
+      },
+      {
+        "id": "e2",
+        "title": "Republic Day",
+        "date": "1950-01-26",
+        "icon": "📜",
+        "description": "The Constitution of India came into effect"
+      },
+      {
+        "id": "e3",
+        "title": "First Moon Mission",
+        "date": "2008-11-22",
+        "icon": "🚀",
+        "description": "Chandrayaan-1 was launched by ISRO"
+      }
+    ],
+    "layout": "vertical",
+    "showDates": true,
+    "interactive": true,
+    "hints": ["Independence came before the Constitution was adopted"]
+  }
+}
+```
+
+**Config schema:**
+
+- `events[]`: Array of event objects (required, min 2)
+  - `id`: string (required)
+  - `title`: string (required)
+  - `date?`: string
+  - `icon?`: string
+  - `description?`: string
+  - `image?`: string
+- `title?`: string
+- `layout?`: "horizontal" | "vertical" | "compact" (default: "vertical")
+- `showDates?`: boolean (default: true)
+- `showImages?`: boolean (default: false)
+- `hints?`: string[]
+- `interactive?`: boolean
+
+### 20. `core.audio-player` — Audio Narration & Pronunciation
+
+Audio player with transcript support, bookmarks, and captions. Ideal for listening exercises, pronunciation practice, and music appreciation.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.audio-player",
+  "config": {
+    "audio": "french-animals.mp3",
+    "title": "French Animal Names",
+    "transcript": "Le chat, le chien, le poisson...",
+    "showTranscript": true,
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `audio`: string (required — URL or path to audio file)
+- `title?`: string
+- `transcript?`: string
+- `captions?`: Array of { start: number, end: number, text: string }
+- `showTranscript?`: boolean
+- `bookmarks?`: boolean
+- `interactive?`: boolean
+
+### 21. `core.video-player` — Video Lessons & Demonstrations
+
+Video player with chapters, transcript, and poster image. Perfect for video-based lessons and demonstrations.
+
+```json
+{
+  "type": "exercise",
+  "widget": "core.video-player",
+  "config": {
+    "video": "water-cycle.mp4",
+    "title": "The Water Cycle",
+    "poster": "water-cycle-poster.jpg",
+    "chapters": [
+      { "time": 0, "title": "Introduction" },
+      { "time": 45, "title": "Evaporation" },
+      { "time": 120, "title": "Condensation" }
+    ],
+    "showTranscript": true,
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `video`: string (required — URL or path to video file)
+- `title?`: string
+- `poster?`: string (thumbnail image)
+- `chapters?`: Array of { time: number, title: string }
+- `transcript?`: string
+- `showTranscript?`: boolean
+- `interactive?`: boolean
+
+### 22. `math.number-line` — Number Line Activities
+
+Interactive number line for placing integers, decimals, fractions, or measurements. Supports multiple modes.
+
+```json
+{
+  "type": "exercise",
+  "widget": "math.number-line",
+  "config": {
+    "min": -10,
+    "max": 10,
+    "step": 1,
+    "target": -3,
+    "mode": "negative",
+    "showLabels": true,
+    "interactive": true,
+    "hints": ["Start at 0 and count left for negative numbers"]
+  }
+}
+```
+
+**Config schema:**
+
+- `min?`: number (default: 0)
+- `max?`: number (default: 10)
+- `step?`: number (default: 1)
+- `target?`: number — the value the learner should identify or place
+- `markers?`: Array of { value: number, label?: string }
+- `showLabels?`: boolean
+- `mode?`: "integers" | "decimals" | "fractions" | "negative" | "measurement"
+- `hints?`: string[]
+- `interactive?`: boolean
+
+### 23. `science.label-diagram` — Label Parts of a Diagram
+
+Drag-and-drop labeling for diagrams. Learners drag labels to numbered targets on an image.
+
+```json
+{
+  "type": "exercise",
+  "widget": "science.label-diagram",
+  "config": {
+    "image": "plant-cell.svg",
+    "altText": "Diagram of a plant cell",
+    "labels": [
+      {
+        "id": "nucleus",
+        "text": "Nucleus",
+        "target": { "x": 45, "y": 35 },
+        "description": "Contains the cell's DNA"
+      },
+      {
+        "id": "chloroplast",
+        "text": "Chloroplast",
+        "target": { "x": 60, "y": 50 },
+        "description": "Site of photosynthesis"
+      },
+      {
+        "id": "cell-wall",
+        "text": "Cell Wall",
+        "target": { "x": 20, "y": 30 },
+        "description": "Provides structure and support"
+      }
+    ],
+    "interactive": true,
+    "hints": ["The nucleus is typically the largest organelle"]
+  }
+}
+```
+
+**Config schema:**
+
+- `image`: string (required — URL or path)
+- `labels[]`: Array of label objects (required, min 1)
+  - `id`: string (required)
+  - `text`: string (required — the label text)
+  - `target`: { x: number (0-100), y: number (0-100) } (required — position on image)
+  - `hint?`: string
+  - `description?`: string
+- `altText?`: string
+- `hints?`: string[]
+- `interactive?`: boolean
+
+### 24. `science.image-label` — Identify Regions on an Image
+
+Clickable regions on an image with info cards. Great for exploring labeled maps, anatomy, or diagrams.
+
+```json
+{
+  "type": "exercise",
+  "widget": "science.image-label",
+  "config": {
+    "image": "india-map.svg",
+    "altText": "Map of India with clickable states",
+    "regions": [
+      {
+        "id": "rajasthan",
+        "title": "Rajasthan",
+        "description": "Largest state by area, known for deserts",
+        "x": 25,
+        "y": 40,
+        "width": 12,
+        "height": 10
+      },
+      {
+        "id": "kerala",
+        "title": "Kerala",
+        "description": "Known as God's Own Country",
+        "x": 55,
+        "y": 80,
+        "width": 8,
+        "height": 8
+      }
+    ],
+    "interactive": true,
+    "hints": ["Rajasthan is in the western part of India"]
+  }
+}
+```
+
+**Config schema:**
+
+- `image`: string (required — URL or path)
+- `regions[]`: Array of region objects (required, min 1)
+  - `id`: string (required)
+  - `title`: string (required)
+  - `x`: number (0-100, required — horizontal position %)
+  - `y`: number (0-100, required — vertical position %)
+  - `description?`: string
+  - `image?`: string (media for info card)
+  - `audio?`: string
+  - `video?`: string
+  - `tooltip?`: string
+  - `width?`: number (default: 10)
+  - `height?`: number (default: 10)
+- `altText?`: string
+- `hints?`: string[]
+- `interactive?`: boolean
+
+### 25. `science.process-diagram` — Process Flows & Cycles
+
+Visual process flow with connected nodes. Supports horizontal, vertical, cycle, and radial layouts.
+
+```json
+{
+  "type": "exercise",
+  "widget": "science.process-diagram",
+  "config": {
+    "title": "The Water Cycle",
+    "nodes": [
+      { "id": "evaporation", "title": "Evaporation", "description": "Water heats up and rises" },
+      { "id": "condensation", "title": "Condensation", "description": "Vapor forms clouds" },
+      { "id": "precipitation", "title": "Precipitation", "description": "Rain falls down" },
+      { "id": "collection", "title": "Collection", "description": "Water gathers in bodies" }
+    ],
+    "connections": [
+      { "from": "evaporation", "to": "condensation", "type": "arrow" },
+      { "from": "condensation", "to": "precipitation", "type": "arrow" },
+      { "from": "precipitation", "to": "collection", "type": "arrow" },
+      { "from": "collection", "to": "evaporation", "type": "arrow" }
+    ],
+    "layout": "cycle",
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `nodes[]`: Array of node objects (required, min 2)
+  - `id`: string (required)
+  - `title`: string (required)
+  - `description?`: string
+- `connections[]`: Array of connection objects (required, min 1)
+  - `from`: string (node ID)
+  - `to`: string (node ID)
+  - `type?`: "arrow" | "dashed" | "double" | "loop"
+- `layout?`: "horizontal" | "vertical" | "cycle" | "radial"
+- `title?`: string
+- `stepByStep?`: boolean
+- `interactive?`: boolean
+
+### 26. `language.flashcard` — Vocabulary & Memorization
+
+Flashcard deck with flip, multiple-choice, and spaced repetition modes. Ideal for vocabulary and key term memorization.
+
+```json
+{
+  "type": "exercise",
+  "widget": "language.flashcard",
+  "config": {
+    "cards": [
+      { "front": "Planet", "back": "A celestial body orbiting a star", "hint": "Think of Earth" },
+      {
+        "front": "Gravity",
+        "back": "The force that pulls objects toward each other",
+        "hint": "What keeps us on the ground?"
+      },
+      {
+        "front": "Orbit",
+        "back": "The path a planet takes around a star",
+        "hint": "The Earth follows this path around the Sun"
+      }
+    ],
+    "mode": "flip",
+    "interactive": true
+  }
+}
+```
+
+**Config schema:**
+
+- `cards[]`: Array of card objects (required, min 1)
+  - `front`: string (required)
+  - `back`: string (required)
+  - `hint?`: string
+  - `image?`: string
+- `mode?`: "flip" | "multiple" | "spaced"
+- `shuffle?`: boolean
+- `interactive?`: boolean
+
+### 27. `social.map` — Geography & Regional Data
+
+Interactive map with colored regions, labels, legends, and markers. Great for geography and social studies.
+
+```json
+{
+  "type": "exercise",
+  "widget": "social.map",
+  "config": {
+    "title": "Continents of the World",
+    "regions": [
+      {
+        "id": "asia",
+        "name": "Asia",
+        "color": "#ef4444",
+        "description": "Largest continent by area"
+      },
+      {
+        "id": "africa",
+        "name": "Africa",
+        "color": "#f59e0b",
+        "description": "Second largest continent"
+      },
+      {
+        "id": "europe",
+        "name": "Europe",
+        "color": "#3b82f6",
+        "description": "Known for its cultural diversity"
+      }
+    ],
+    "labels": true,
+    "legend": [
+      { "color": "#ef4444", "label": "Asia" },
+      { "color": "#f59e0b", "label": "Africa" },
+      { "color": "#3b82f6", "label": "Europe" }
+    ],
+    "interactive": false
+  }
+}
+```
+
+**Config schema:**
+
+- `regions[]`: Array of region objects (required, min 1)
+  - `id`: string (required)
+  - `name`: string (required)
+  - `color?`: string (hex color)
+  - `description?`: string
+- `labels?`: boolean (show region names on map)
+- `legend?`: Array of { color: string, label: string }
+- `markers?`: Array of { id: string, label: string, x: number, y: number }
+- `title?`: string
+- `targetRegion?`: string (for interactive quiz mode)
+- `interactive?`: boolean
+
 ## Widget Activity in JSON course-spec
 
 When using the JSON format, widget activities use `type: "widget"`:
@@ -711,7 +1219,7 @@ When using the JSON format, widget activities use `type: "widget"`:
   "type": "widget",
   "description": "Match the items",
   "instructions": "Match each item to its pair",
-  "widgetId": "open-edu.matching",
+  "widgetId": "core.matching",
   "widgetConfig": {
     "pairs": [
       { "itemA": "Apple", "itemB": "Fruit" },
@@ -754,22 +1262,33 @@ When using JSON format, each activity has a `step` field that defines its pedago
 
 ## Widget Selection Guide
 
-| Learning Goal               | Best Widget                                   |
-| --------------------------- | --------------------------------------------- |
-| Assess knowledge            | `multiple-choice`, `multiple-choice-practice` |
-| Vocabulary/concept matching | `matching`                                    |
-| Categorization              | `drag-drop`                                   |
-| Ordering steps              | `sequencing`                                  |
-| Reading comprehension       | `story-question`                              |
-| Counting/early math         | `visual-counting`                             |
-| Real-world application      | `real-world`                                  |
-| Fractions                   | `fraction-visual`                             |
-| Data literacy               | `chart-reader`                                |
-| Area/perimeter              | `grid-area`                                   |
-| Place value                 | `place-value-chart`                           |
-| Measurement                 | `measurement-scale`                           |
-| Telling time                | `clock-time`                                  |
-| Fill vocabulary             | `fill-blank`                                  |
+| Learning Goal               | Best Widget                               |
+| --------------------------- | ----------------------------------------- |
+| Assess knowledge            | `core.multiple-choice`, `core.fill-blank` |
+| Vocabulary/concept matching | `core.matching`, `language.flashcard`     |
+| Categorization              | `core.drag-drop`                          |
+| Ordering steps              | `core.sequencing`, `core.timeline`        |
+| Reading comprehension       | `core.story-question`                     |
+| Counting/early math         | `core.visual-counting`                    |
+| Real-world application      | `core.real-world`                         |
+| Fractions                   | `math.fraction-visual`                    |
+| Data literacy               | `core.chart-reader`                       |
+| Area/perimeter              | `math.grid-area`                          |
+| Place value                 | `math.place-value-chart`                  |
+| Measurement                 | `math.measurement-scale`                  |
+| Telling time                | `math.clock-time`                         |
+| Number line                 | `math.number-line`                        |
+| Fill vocabulary             | `core.fill-blank`                         |
+| Definitions & key concepts  | `core.callout`                            |
+| Comparing images            | `core.image-compare`                      |
+| Click-to-identify           | `core.hotspot`                            |
+| Audio/listening exercises   | `core.audio-player`                       |
+| Video lessons               | `core.video-player`                       |
+| Labeling diagrams           | `science.label-diagram`                   |
+| Exploring images            | `science.image-label`                     |
+| Process flows & cycles      | `science.process-diagram`                 |
+| Memorization                | `language.flashcard`                      |
+| Geography                   | `social.map`                              |
 
 ## Compiler CLI Usage
 
