@@ -2,9 +2,9 @@ import type { SvgRegion, SvgLoadResult } from '../types.js';
 
 const INTERACTIVE_TAGS = new Set(['path', 'rect', 'circle', 'ellipse', 'polygon', 'polyline']);
 
-export function extractRegionsFromSvg(
+function parseSvgDoc(
   svgString: string
-): Map<string, SvgRegion> & { svgElement: SVGSVGElement } {
+): { svgElement: SVGSVGElement; allElements: Element[] } {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
@@ -14,11 +14,15 @@ export function extractRegionsFromSvg(
   }
 
   const svgElement = doc.documentElement as unknown as SVGSVGElement;
-  const regions = new Map<string, SvgRegion>() as Map<string, SvgRegion> & { svgElement: SVGSVGElement };
-  regions.svgElement = svgElement;
+  const allElements = Array.from(svgElement.querySelectorAll('[id]'));
 
-  const allElements = svgElement.querySelectorAll('[id]');
-  for (const el of Array.from(allElements)) {
+  return { svgElement, allElements };
+}
+
+function extractRegions(allElements: Element[]): Map<string, SvgRegion> {
+  const regions = new Map<string, SvgRegion>();
+
+  for (const el of allElements) {
     if (!INTERACTIVE_TAGS.has(el.tagName.toLowerCase())) continue;
 
     const id = el.getAttribute('id')!;
@@ -39,6 +43,11 @@ export function extractRegionsFromSvg(
   }
 
   return regions;
+}
+
+export function extractRegionsFromSvg(svgString: string): Map<string, SvgRegion> {
+  const { allElements } = parseSvgDoc(svgString);
+  return extractRegions(allElements);
 }
 
 function getBBoxFromAttributes(el: Element): DOMRect {
@@ -85,22 +94,13 @@ export function parseSvgRegions(
   svgString: string,
   regionIds: string[]
 ): SvgLoadResult {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(svgString, 'image/svg+xml');
-
-  const parseError = doc.querySelector('parsererror');
-  if (parseError) {
-    throw new Error(`Invalid SVG: ${parseError.textContent}`);
-  }
-
-  const svgElement = doc.documentElement as unknown as SVGSVGElement;
+  const { svgElement, allElements } = parseSvgDoc(svgString);
   const viewBox = parseViewBox(svgElement);
 
   const regions = new Map<string, SvgRegion>();
   const idSet = new Set(regionIds);
 
-  const allElements = svgElement.querySelectorAll('[id]');
-  for (const el of Array.from(allElements)) {
+  for (const el of allElements) {
     if (!INTERACTIVE_TAGS.has(el.tagName.toLowerCase())) continue;
 
     const id = el.getAttribute('id')!;

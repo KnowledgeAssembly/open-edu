@@ -64,10 +64,12 @@ describe('parseSvgRegions', () => {
 });
 
 describe('extractRegionsFromSvg', () => {
-  it('returns the parsed SVGSVGElement', () => {
+  it('returns a Map with region entries', () => {
     const svg = createSvgString([{ id: 'a' }]);
     const result = extractRegionsFromSvg(svg);
-    expect(result.svgElement).toBeInstanceOf(SVGSVGElement);
+    expect(result).toBeInstanceOf(Map);
+    expect(result.size).toBe(1);
+    expect(result.has('a')).toBe(true);
   });
 
   it('finds path, rect, circle, and polygon elements with ids', () => {
