@@ -218,7 +218,7 @@ export const EXEMPLARS: Exemplar[] = [
         ],
       },
     },
-    widgetId: 'open-edu.matching',
+    widgetId: 'core.matching',
   },
   {
     type: 'widget',
@@ -241,7 +241,7 @@ export const EXEMPLARS: Exemplar[] = [
         interactive: true,
       },
     },
-    widgetId: 'open-edu.drag-drop',
+    widgetId: 'core.drag-drop',
   },
   {
     type: 'widget',
@@ -261,6 +261,127 @@ export const EXEMPLARS: Exemplar[] = [
         interactive: true,
       },
     },
-    widgetId: 'open-edu.sequencing',
+    widgetId: 'core.sequencing',
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'water_cycle — Understand the stages of the water cycle',
+    content: {
+      description: 'The Water Cycle Process',
+      instructions: 'This diagram shows how water moves through the water cycle.',
+      widgetConfig: {
+        nodes: [
+          { id: 'evaporation', title: 'Evaporation', description: 'Water heats up and rises as vapor' },
+          { id: 'condensation', title: 'Condensation', description: 'Vapor cools and forms clouds' },
+          { id: 'precipitation', title: 'Precipitation', description: 'Water falls as rain or snow' },
+          { id: 'collection', title: 'Collection', description: 'Water gathers in rivers, lakes, oceans' },
+        ],
+        connections: [
+          { from: 'evaporation', to: 'condensation', type: 'arrow' },
+          { from: 'condensation', to: 'precipitation', type: 'arrow' },
+          { from: 'precipitation', to: 'collection', type: 'arrow' },
+          { from: 'collection', to: 'evaporation', type: 'arrow' },
+        ],
+        layout: 'cycle',
+        title: 'The Water Cycle',
+        interactive: false,
+      },
+    },
+    widgetId: 'science.process-diagram',
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'planets — Identify the planets in our solar system',
+    content: {
+      description: 'Solar System Audio Tour',
+      instructions: 'Listen to an overview of the planets in our solar system.',
+      widgetConfig: {
+        audio: 'planets-overview.mp3',
+        title: 'The Solar System',
+        showTranscript: true,
+        interactive: false,
+      },
+    },
+    widgetId: 'core.audio-player',
+  },
+  {
+    type: 'widget',
+    step: 'guided_practice',
+    conceptDescription: 'integers_on_number_line — Place integers on a number line',
+    content: {
+      description: 'Number Line: Integers',
+      instructions: 'Identify where each integer falls on the number line.',
+      widgetConfig: {
+        min: -10,
+        max: 10,
+        step: 1,
+        target: -3,
+        mode: 'negative',
+        showLabels: true,
+        interactive: true,
+        hints: ['Start at 0 and count left for negative numbers'],
+      },
+    },
+    widgetId: 'math.number-line',
+  },
+  {
+    type: 'widget',
+    step: 'guided_practice',
+    conceptDescription: 'french_animals — Learn animal names in French',
+    content: {
+      description: 'French Animal Vocabulary',
+      instructions: 'Flip each card to reveal the French word for the animal.',
+      widgetConfig: {
+        cards: [
+          { front: '🐱 Cat', back: 'le chat', hint: 'Sounds like "shah"' },
+          { front: '🐕 Dog', back: 'le chien', hint: 'Sounds like "shee-en"' },
+          { front: '🐟 Fish', back: 'le poisson', hint: 'Sounds like "pwah-son"' },
+        ],
+        mode: 'flip',
+        interactive: true,
+      },
+    },
+    widgetId: 'language.flashcard',
+  },
+  {
+    type: 'widget',
+    step: 'independent_practice',
+    conceptDescription: 'human_body — Label the parts of the human body',
+    content: {
+      description: 'Human Body Diagram',
+      instructions: 'Drag each label to the correct body part on the diagram.',
+      widgetConfig: {
+        image: 'human-body-outline.svg',
+        labels: [
+          { id: 'heart', text: 'Heart', target: { x: 45, y: 35 }, description: 'Pumps blood through the body' },
+          { id: 'lungs', text: 'Lungs', target: { x: 55, y: 35 }, description: 'Help you breathe' },
+          { id: 'brain', text: 'Brain', target: { x: 50, y: 10 }, description: 'Controls the body' },
+        ],
+        interactive: true,
+      },
+    },
+    widgetId: 'science.label-diagram',
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'world_oceans — Identify the major oceans of the world',
+    content: {
+      description: 'World Oceans Map',
+      instructions: 'Explore the map to learn about the five major oceans.',
+      widgetConfig: {
+        regions: [
+          { id: 'pacific', name: 'Pacific Ocean', color: '#3b82f6', description: 'The largest and deepest ocean' },
+          { id: 'atlantic', name: 'Atlantic Ocean', color: '#06b6d4', description: 'The second largest ocean' },
+          { id: 'indian', name: 'Indian Ocean', color: '#8b5cf6', description: 'The warmest ocean' },
+        ],
+        labels: true,
+        title: 'World Oceans',
+        interactive: false,
+      },
+    },
+    widgetId: 'social.map',
   },
 ];
