@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { cn } from '@open-edu/design-system';
 import type { SvgRegion as SvgRegionType } from './types.js';
 
 export interface SvgRegionProps {
@@ -49,23 +50,21 @@ function SvgRegionComponent({
     }
   }, [region.element]);
 
-  const classNames = [
+  const classNames = cn(
     'oe-svg-region',
-    selected && '--selected',
-    focused && '--focus',
-    hovered && '--hover',
-    disabled && '--disabled',
-  ]
-    .filter(Boolean)
-    .join(' ');
+    selected && 'oe-svg-region--selected',
+    focused && 'oe-svg-region--focus',
+    hovered && 'oe-svg-region--hover',
+    disabled && 'oe-svg-region--disabled',
+  );
 
   const fillColor = selected
-    ? 'var(--oe-color-selected, #3b82f6)'
+    ? 'var(--oe-color-primary)'
     : hovered
-      ? 'var(--oe-color-hover, #93c5fd)'
+      ? 'var(--oe-color-primary-container)'
       : focused
-        ? 'var(--oe-color-focus, #bfdbfe)'
-        : 'var(--oe-color-default, transparent)';
+        ? 'var(--oe-color-surface-variant)'
+        : 'transparent';
 
   const style: Record<string, string> = {
     fill: fillColor,

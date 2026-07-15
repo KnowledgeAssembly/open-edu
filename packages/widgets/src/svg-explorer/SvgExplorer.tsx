@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
+import { cn } from '@open-edu/design-system';
 import type { SvgExplorerConfig, SvgExplorerEvent } from './types.js';
 import { useSvgLoader } from './hooks/useSvgLoader.js';
 import { useSvgSelection } from './hooks/useSvgSelection.js';
@@ -22,22 +23,34 @@ export function SvgExplorer(props: SvgExplorerProps) {
     className,
   } = props;
 
-  const regionIds = regionConfigs.map((r) => r.id);
-  const regionMetaMap = new Map(regionConfigs.map((r) => [r.id, r]));
+  const regionIds = useMemo(() => regionConfigs.map((r) => r.id), [regionConfigs]);
+  const regionMetaMap = useMemo(
+    () => new Map(regionConfigs.map((r) => [r.id, r])),
+    [regionConfigs],
+  );
 
   const { loading, error, svgElement, regions, viewBox } = useSvgLoader({ src, regionIds });
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState<string | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = useCallback(
-    (regionId: string) => onEvent({ type: 'region:select', regionId }),
-    [onEvent],
+    (regionId: string) => {
+      onEvent({ type: 'region:select', regionId });
+      const meta = regionMetaMap.get(regionId);
+      setAnnouncement(`Selected ${meta?.name ?? regionId}`);
+    },
+    [onEvent, regionMetaMap],
   );
   const handleDeselect = useCallback(
-    (regionId: string) => onEvent({ type: 'region:deselect', regionId }),
-    [onEvent],
+    (regionId: string) => {
+      onEvent({ type: 'region:deselect', regionId });
+      const meta = regionMetaMap.get(regionId);
+      setAnnouncement(`Deselected ${meta?.name ?? regionId}`);
+    },
+    [onEvent, regionMetaMap],
   );
 
   const { select, clear, isSelected } = useSvgSelection({
@@ -51,7 +64,10 @@ export function SvgExplorer(props: SvgExplorerProps) {
     min: zoomConfig?.min,
     max: zoomConfig?.max,
     step: zoomConfig?.step,
-    onZoomChange: (level) => onEvent({ type: 'zoom:change', level }),
+    onZoomChange: (level) => {
+      onEvent({ type: 'zoom:change', level });
+      setAnnouncement(`Zoom level ${level}%`);
+    },
   });
 
   const handleEscape = useCallback(() => {
@@ -64,7 +80,6 @@ export function SvgExplorer(props: SvgExplorerProps) {
     focusedId,
     onSelect: (id) => {
       select(id);
-      onEvent({ type: 'region:select', regionId: id });
     },
     onFocus: (id) => {
       setFocusedId(id);
@@ -78,7 +93,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
 
   if (loading) {
     return (
-      <div role="status" aria-label="Loading SVG" className="p-4 text-center">
+      <div role="status" aria-label="Loading SVG" className={cn('p-4 text-center', className)}>
         <span className="text-on-surface-variant">Loading map...</span>
       </div>
     );
@@ -86,7 +101,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
 
   if (error || !svgElement) {
     return (
-      <div role="alert" className="p-4 text-center">
+      <div role="alert" className={cn('p-4 text-center', className)}>
         <span className="text-error">Failed to load map: {error}</span>
       </div>
     );
@@ -99,7 +114,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
       ref={svgContainerRef}
       role="group"
       aria-label="SVG Explorer"
-      className={`relative overflow-hidden ${className ?? ''}`}
+      className={cn('relative overflow-hidden', className)}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
@@ -164,6 +179,10 @@ export function SvgExplorer(props: SvgExplorerProps) {
           </button>
         </div>
       )}
+
+      <div role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </div>
     </div>
   );
 }

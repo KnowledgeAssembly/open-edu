@@ -198,7 +198,53 @@ describe('SocialMap SVG explorer mode', () => {
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'select', regionId: 'odisha' }),
     );
-    expect(complete).toHaveBeenCalledWith(100, { selectedRegion: 'odisha' });
+    expect(complete).toHaveBeenCalledWith(100, {
+      selectedRegion: 'odisha',
+      foundRegions: ['odisha'],
+    });
+  });
+
+  it('emits interaction on select without completing when wrong region clicked', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+          <path id="odisha" d="M10 10L100 10L100 100L10 100Z"/>
+          <path id="karnataka" d="M150 150L250 150L250 250L150 250Z"/>
+        </svg>`,
+        { status: 200 },
+      ),
+    );
+
+    const complete = vi.fn();
+    const emitInteraction = vi.fn();
+
+    render(
+      <WidgetComponent
+        nodeId="test-3"
+        config={{
+          svgSrc: '/maps/india.svg',
+          regions: [
+            { id: 'odisha', name: 'Odisha' },
+            { id: 'karnataka', name: 'Karnataka' },
+          ],
+          interactive: true,
+          targetRegion: 'karnataka',
+        }}
+        emitInteraction={emitInteraction}
+        complete={complete}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /odisha/i }));
+
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'select', regionId: 'odisha' }),
+    );
+    expect(complete).not.toHaveBeenCalled();
   });
 });
 

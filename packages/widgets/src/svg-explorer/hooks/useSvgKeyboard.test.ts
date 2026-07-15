@@ -17,9 +17,10 @@ function makeRegions(ids: string[]): Map<string, SvgRegion> {
   );
 }
 
-function createEvent(key: string): React.KeyboardEvent {
+function createEvent(key: string, shiftKey = false): React.KeyboardEvent {
   return {
     key,
+    shiftKey,
     preventDefault: vi.fn(),
     stopPropagation: vi.fn(),
   } as unknown as React.KeyboardEvent;
@@ -189,5 +190,50 @@ describe('useSvgKeyboard', () => {
     result.current.handleKeyDown(createEvent('Home'));
 
     expect(onZoomReset).toHaveBeenCalled();
+  });
+
+  it('moves focus forward on Tab (a -> b)', () => {
+    const onFocus = vi.fn();
+    const { result } = renderHook(() =>
+      useSvgKeyboard({
+        regions: makeRegions(['a', 'b', 'c']),
+        focusedId: 'a',
+        onFocus,
+      }),
+    );
+
+    result.current.handleKeyDown(createEvent('Tab'));
+
+    expect(onFocus).toHaveBeenCalledWith('b');
+  });
+
+  it('moves focus backward on Shift+Tab (b -> a)', () => {
+    const onFocus = vi.fn();
+    const { result } = renderHook(() =>
+      useSvgKeyboard({
+        regions: makeRegions(['a', 'b', 'c']),
+        focusedId: 'b',
+        onFocus,
+      }),
+    );
+
+    result.current.handleKeyDown(createEvent('Tab', true));
+
+    expect(onFocus).toHaveBeenCalledWith('a');
+  });
+
+  it('wraps around on Shift+Tab at start (a -> c)', () => {
+    const onFocus = vi.fn();
+    const { result } = renderHook(() =>
+      useSvgKeyboard({
+        regions: makeRegions(['a', 'b', 'c']),
+        focusedId: 'a',
+        onFocus,
+      }),
+    );
+
+    result.current.handleKeyDown(createEvent('Tab', true));
+
+    expect(onFocus).toHaveBeenCalledWith('c');
   });
 });

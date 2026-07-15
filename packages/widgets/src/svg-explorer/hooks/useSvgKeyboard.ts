@@ -80,14 +80,23 @@ export function useSvgKeyboard(options: UseSvgKeyboardOptions): UseSvgKeyboardRe
           if (prev) onFocus?.(prev);
           break;
         }
-        case 'ArrowDown': {
+        case 'ArrowDown':
+        case 'Tab': {
           if (!focusedId || sortedIds.length === 0) return;
           event.preventDefault();
           const currentIndex = sortedIds.indexOf(focusedId);
-          if (currentIndex >= 0 && currentIndex < sortedIds.length - 1) {
-            onFocus?.(sortedIds[currentIndex + 1]!);
+          if (event.shiftKey) {
+            if (currentIndex > 0) {
+              onFocus?.(sortedIds[currentIndex - 1]!);
+            } else {
+              onFocus?.(sortedIds[sortedIds.length - 1]!);
+            }
           } else {
-            onFocus?.(sortedIds[0]!);
+            if (currentIndex >= 0 && currentIndex < sortedIds.length - 1) {
+              onFocus?.(sortedIds[currentIndex + 1]!);
+            } else {
+              onFocus?.(sortedIds[0]!);
+            }
           }
           break;
         }

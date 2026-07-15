@@ -135,7 +135,6 @@ function SocialMapComponent(props: {
             id: r.id,
             name: r.name,
             description: r.description,
-            capital: (r as Record<string, unknown>).capital as string | undefined,
           }))}
           selection={config.interactive ? 'single' : 'none'}
           zoom={config.zoom ? { enabled: true } : undefined}
@@ -148,7 +147,13 @@ function SocialMapComponent(props: {
                 regionId: event.regionId,
               });
               if (config.targetRegion && event.regionId === config.targetRegion) {
-                complete(100, { selectedRegion: event.regionId });
+                if (!foundRegions.includes(event.regionId)) {
+                  const next = [...foundRegions, event.regionId];
+                  setFoundRegions(next);
+                  complete(100, { selectedRegion: event.regionId, foundRegions: next });
+                } else {
+                  complete(100, { selectedRegion: event.regionId, foundRegions });
+                }
               }
             }
           }}

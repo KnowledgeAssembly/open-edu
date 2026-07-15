@@ -36,7 +36,7 @@ export function useSvgLoader({ src, regionIds }: UseSvgLoaderOptions): UseSvgLoa
       try {
         let svgString: string;
 
-        if (src.startsWith('<svg')) {
+        if (src.trimStart().startsWith('<svg')) {
           svgString = src;
         } else {
           const response = await fetch(src);
