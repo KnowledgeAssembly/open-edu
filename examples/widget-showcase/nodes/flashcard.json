@@ -42,6 +42,6 @@
     ],
     "mode": "flip",
     "shuffle": true,
-    "interactive": false
+    "interactive": true
   }
 }

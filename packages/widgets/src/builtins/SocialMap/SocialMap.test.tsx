@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { socialMap } from './SocialMap';
 
 const WidgetComponent = socialMap.render;
@@ -128,6 +128,123 @@ describe('SocialMap zoom', () => {
   it('does not show zoom controls by default', () => {
     renderWidget(baseConfig);
     expect(screen.queryByRole('button', { name: 'Zoom in' })).not.toBeInTheDocument();
+  });
+});
+
+describe('SocialMap SVG explorer mode', () => {
+  it('renders SvgExplorer when svgSrc is provided', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+          <path id="odisha" d="M10 10L100 10L100 100L10 100Z"/>
+        </svg>`,
+        { status: 200 },
+      ),
+    );
+
+    render(
+      <WidgetComponent
+        nodeId="test-1"
+        config={{
+          svgSrc: '/maps/india.svg',
+          regions: [{ id: 'odisha', name: 'Odisha' }],
+        }}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).toBeNull();
+    });
+
+    expect(screen.getByRole('group', { name: /svg explorer/i })).toBeTruthy();
+  });
+
+  it('calls complete when correct region is clicked with svgSrc', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+          <path id="odisha" d="M10 10L100 10L100 100L10 100Z"/>
+        </svg>`,
+        { status: 200 },
+      ),
+    );
+
+    const complete = vi.fn();
+    const emitInteraction = vi.fn();
+
+    render(
+      <WidgetComponent
+        nodeId="test-2"
+        config={{
+          svgSrc: '/maps/india.svg',
+          regions: [{ id: 'odisha', name: 'Odisha' }],
+          interactive: true,
+          targetRegion: 'odisha',
+        }}
+        emitInteraction={emitInteraction}
+        complete={complete}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).toBeNull();
+    });
+
+    const region = screen.getByRole('button', { name: /odisha/i });
+    fireEvent.click(region);
+
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'select', regionId: 'odisha' }),
+    );
+    expect(complete).toHaveBeenCalledWith(100, {
+      selectedRegion: 'odisha',
+      foundRegions: ['odisha'],
+    });
+  });
+
+  it('emits interaction on select without completing when wrong region clicked', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+          <path id="odisha" d="M10 10L100 10L100 100L10 100Z"/>
+          <path id="karnataka" d="M150 150L250 150L250 250L150 250Z"/>
+        </svg>`,
+        { status: 200 },
+      ),
+    );
+
+    const complete = vi.fn();
+    const emitInteraction = vi.fn();
+
+    render(
+      <WidgetComponent
+        nodeId="test-3"
+        config={{
+          svgSrc: '/maps/india.svg',
+          regions: [
+            { id: 'odisha', name: 'Odisha' },
+            { id: 'karnataka', name: 'Karnataka' },
+          ],
+          interactive: true,
+          targetRegion: 'karnataka',
+        }}
+        emitInteraction={emitInteraction}
+        complete={complete}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /odisha/i }));
+
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'select', regionId: 'odisha' }),
+    );
+    expect(complete).not.toHaveBeenCalled();
   });
 });
 

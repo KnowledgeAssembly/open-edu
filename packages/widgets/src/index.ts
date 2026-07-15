@@ -19,6 +19,8 @@ export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
 export { useObserveMode } from './use-observe-mode.js';
 export type { ObserveModeOptions } from './use-observe-mode.js';
+export * as svgExplorer from './svg-explorer/index.js';
+
 export {
   multipleChoicePractice,
   multipleChoice,
