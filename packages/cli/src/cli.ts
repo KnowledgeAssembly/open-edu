@@ -11,7 +11,6 @@ import { reportTelemetry } from './commands/report.js';
 import { generatePrompt, generateFromDescription } from './commands/generate.js';
 import { patchPackage } from './commands/patch.js';
 import { importLearnEasyCommand } from './commands/import.js';
-import { migratePackage } from './commands/widget-migrate.js';
 import { createCompileCommand } from '@open-edu/course-compiler';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
@@ -144,26 +143,6 @@ widget
       ? { success: true, data: { files: result.files } }
       : { success: false, error: result.error!, code: 1 };
     handleResult(cliResult, json);
-  });
-
-widget
-  .command('migrate')
-  .description('Migrate open-edu.* widget IDs to domain-prefixed IDs')
-  .argument('<package-dir>', 'Path to the course package directory')
-  .option('--dry-run', 'Preview changes without writing files')
-  .action(async (packageDir: string, cmdOptions: { dryRun?: boolean }) => {
-    const json = program.optsWithGlobals().json;
-    const result = await migratePackage(packageDir, { dryRun: cmdOptions.dryRun });
-    if (json) {
-      handleResult({ success: true, data: { ...result } }, true);
-    } else {
-      console.log(
-        `Migrated ${result.migrated} widget reference(s)${result.dryRun ? ' (dry run)' : ''}`,
-      );
-      for (const c of result.changes) {
-        console.log(`  ${c.file}: ${c.oldId} \u2192 ${c.newId}`);
-      }
-    }
   });
 
 program

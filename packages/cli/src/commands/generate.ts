@@ -1,82 +1,9 @@
-import { generateAgentPrompt, generateWidgetCatalog, loadPackage } from '@open-edu/core';
-import {
-  createDefaultRegistry,
-  WIDGET_ALIAS_MAP,
-  getLearningIntentsForWidget,
-} from '@open-edu/widgets';
-import type { WidgetDefinitionV2 } from '@open-edu/widgets';
+import { generateAgentPrompt, getDefaultWidgetCatalog, loadPackage } from '@open-edu/core';
 import { createPackage } from './create.js';
 import type { CliResult } from '../utils/json-output.js';
-import type { WidgetCatalogInput } from '@open-edu/core';
 
 function buildWidgetCatalog(): string {
-  const registry = createDefaultRegistry();
-  const allWidgets = registry.getAll();
-  const input: WidgetCatalogInput = {
-    widgets: allWidgets.map((w) => {
-      const v2 = w as unknown as WidgetDefinitionV2;
-      const intents = getLearningIntentsForWidget(w.id);
-      const legacyEntry = Object.entries(WIDGET_ALIAS_MAP).find(([, target]) => target === w.id);
-
-      const capabilityKeys: string[] = [];
-      if (v2.capabilities) {
-        for (const [key, val] of Object.entries(v2.capabilities)) {
-          if (val === true) capabilityKeys.push(key.slice('supports'.length));
-        }
-      }
-
-      const accessibilityKeys: string[] = [];
-      if (v2.accessibility) {
-        for (const [key, val] of Object.entries(v2.accessibility)) {
-          if (val === true) accessibilityKeys.push(key);
-        }
-      }
-
-      const analyticsKeys: string[] = [];
-      if (v2.analytics) {
-        for (const [key, val] of Object.entries(v2.analytics)) {
-          if (val === true) analyticsKeys.push(key);
-        }
-      }
-
-      return {
-        id: w.id,
-        name: v2.name,
-        description: v2.description,
-        domain: v2.domain,
-        status: v2.status,
-        deprecated: v2.deprecated,
-        replacement: v2.replacement,
-        keywords: v2.keywords,
-        learningIntents: intents,
-        legacyId: legacyEntry?.[0],
-        capabilities: capabilityKeys,
-        accessibility: accessibilityKeys,
-        analytics: analyticsKeys,
-        reward: v2.reward
-          ? {
-              completionXP: v2.reward.completionXP,
-              positiveMessage: v2.reward.positiveMessage,
-              achievement: v2.reward.achievement,
-            }
-          : undefined,
-        ai: v2.ai
-          ? {
-              difficulty: v2.ai.difficulty,
-              estimatedMinutes: v2.ai.estimatedMinutes,
-              bloomsLevel: v2.ai.bloomsLevel,
-              cognitiveLoad: v2.ai.cognitiveLoad,
-              recommendedAge: v2.ai.recommendedAge,
-              readingLevel: v2.ai.readingLevel,
-              learningObjectives: v2.ai.learningObjectives,
-              commonMisconceptions: v2.ai.commonMisconceptions,
-              generationHints: v2.ai.generationHints,
-            }
-          : undefined,
-      };
-    }),
-  };
-  return generateWidgetCatalog(input);
+  return getDefaultWidgetCatalog();
 }
 
 export async function generatePrompt(options?: { json?: boolean }): Promise<CliResult> {
