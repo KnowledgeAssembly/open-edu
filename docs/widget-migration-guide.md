@@ -28,25 +28,11 @@ Widget IDs have been updated from a flat `open-edu.*` namespace to domain-prefix
 
 **Recommended.** New IDs are more descriptive and will be the standard going forward for all authoring tools, AI generation, and documentation.
 
-## Automatic Migration
+## Automatic Resolution
 
-Use the CLI migration tool to rewrite all legacy IDs in a course package:
+Legacy `open-edu.*` IDs are automatically resolved at runtime via the alias map. No migration step is needed — existing courses work without changes.
 
-```bash
-edu widget migrate ./my-course-package
-```
-
-This will:
-
-1. Recursively scan all `.md`, `.json`, and `.jsonc` files in the package
-2. Replace all `open-edu.*` widget references with their new domain-prefixed IDs
-3. Report what was changed and how many references were migrated
-
-Preview changes without writing:
-
-```bash
-edu widget migrate ./my-course-package --dry-run
-```
+If you want to adopt the new IDs in your source files, replace widget IDs manually (see below) or use find-and-replace in your editor.
 
 ## Manual Migration
 

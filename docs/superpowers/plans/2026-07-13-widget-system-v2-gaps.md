@@ -647,15 +647,9 @@ git commit -m "fix(runtime): use alias map for widget ID resolution in WidgetRen
 
 ---
 
-## Task 5: Add CLI `widget migrate` Command
+## Task 5: ~~Add CLI `widget migrate` Command~~ — REMOVED
 
-The spec (Part 15) requires a batch migration utility. This CLI command scans a course package and rewrites all `open-edu.*` widget references to their new domain-prefixed IDs.
-
-**Files:**
-
-- Create: `packages/cli/src/commands/widget-migrate.ts`
-- Create: `packages/cli/src/commands/widget-migrate.test.ts`
-- Modify: `packages/cli/src/index.ts`
+> **Removed.** This task was deprioritized for MVP. Legacy `open-edu.*` IDs are automatically resolved at runtime via the alias map, so a batch migration tool is not required. The `WIDGET_ALIAS_MAP` in `@open-edu/widgets/src/domains.ts` handles transparent resolution. If batch migration is needed in the future, it can be added as a standalone utility without coupling to the CLI.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1141,9 +1135,9 @@ Runtime renders widget via definition.render(config)
 
 | Consumer | Uses |
 |----------|------|
-| Compiler (agent-prompt.ts) | `generateWidgetCatalog(registry)` for LLM prompts |
+| Compiler (agent-prompt.ts) | `getDefaultWidgetCatalog()` for LLM prompts |
 | Runtime (WidgetRenderer) | `registry.get()` with alias resolution |
-| CLI (widget-migrate) | `WIDGET_ALIAS_MAP` for batch migration |
+| CLI (generate command) | `getDefaultWidgetCatalog()` from `@open-edu/core` |
 | Authoring tools | `registry.searchWithFilters()` for widget discovery |
 | Validation | `validateWidgetMetadata()` for metadata completeness |
 
@@ -1384,7 +1378,7 @@ Critical Path: Task 1 → Task 6 → Task 7 → Task 9
 2. `feat(widgets): add structured filter API (searchWithFilters) to registry`
 3. `feat(widgets): add metadata validation for WidgetDefinitionV2`
 4. `fix(runtime): use alias map for widget ID resolution in WidgetRenderer`
-5. `feat(cli): add widget-migrate command for batch ID migration`
+5. ~~`feat(cli): add widget-migrate command for batch ID migration`~~ — Removed (auto-resolved at runtime)
 6. `feat(core): generate widget catalog from registry instead of hardcoding`
 7. `docs: add Widget Architecture v2 document`
 8. `docs: add widget migration guide for course authors`
@@ -1397,7 +1391,7 @@ After all tasks complete:
 - [ ] `searchWithFilters()` supports domain, intent, difficulty, status, capability, accessibility
 - [ ] `validateWidgetMetadata()` returns errors and warnings for V2 definitions
 - [ ] `WidgetRenderer` uses alias map from `@open-edu/widgets`
-- [ ] `edu widget-migrate` rewrites legacy IDs in course packages
+- [ ] ~~`edu widget-migrate` rewrites legacy IDs in course packages~~ — Removed (auto-resolved at runtime)
 - [ ] Agent prompt generated from registry (no hardcoded widget IDs)
 - [ ] Architecture document published
 - [ ] Migration guide published

@@ -75,21 +75,36 @@ Widgets are grouped by content domain:
 
 ### Widget Catalog Generation
 
-`generateWidgetCatalog()` produces a structured Markdown catalog from the widget registry, used in LLM prompts for AI-assisted content generation:
+The widget catalog is a Markdown reference of all available widgets, used in LLM prompts for AI-assisted content generation. The data flows through a build-time pipeline:
 
 ```
-generateWidgetCatalog(registry)
-  → extracts: id, name, description, domain, status, keywords, learningIntents
-  → extracts: capabilities, accessibility, analytics (boolean → label)
-  → extracts: reward (completionXP, positiveMessage, achievement)
-  → extracts: AI metadata (difficulty, estimatedMinutes, bloomsLevel, cognitiveLoad,
-               recommendedAge, readingLevel, learningObjectives, commonMisconceptions,
-               generationHints)
-  → groups widgets by domain with section headers
-  → renders as Markdown suitable for LLM prompt injection
+packages/widgets/src/widget-catalog-source.ts   ← Canonical source (pure data)
+        │
+        ▼  pnpm --filter @open-edu/widgets generate:catalog
+packages/core/src/widget-catalog-data.json      ← Auto-generated JSON
+        │
+        ▼  fs.readFileSync at runtime
+packages/core/src/widget-catalog.ts             ← generateWidgetCatalog() + getDefaultWidgetCatalog()
+        │
+        ▼  CLI imports from @open-edu/core
+edu generate --prompt                           ← Injects catalog into agent prompt
 ```
 
-The CLI's `buildWidgetCatalog()` function extracts metadata from the registry and passes it through `generateWidgetCatalog()` to produce the catalog string.
+`generateWidgetCatalog({ widgets: entries })` takes a `WidgetCatalogInput` and produces structured Markdown:
+
+- Groups widgets by domain with section headers
+- Renders status tags (deprecated, experimental), learning intents, keywords
+- Includes capabilities, accessibility, analytics labels
+- Includes reward info (completionXP, positiveMessage, achievement)
+- Includes AI metadata (difficulty, Bloom's level, age range, learning objectives, misconceptions)
+
+`getDefaultWidgetCatalog()` reads the auto-generated `widget-catalog-data.json` and passes it through `generateWidgetCatalog()`.
+
+To update the catalog after modifying widget metadata in `@open-edu/widgets`, run:
+
+```bash
+pnpm --filter @open-edu/widgets generate:catalog
+```
 
 ## Data Flow
 
@@ -107,13 +122,13 @@ Runtime renders widget via definition.render(config)
 
 ## Integration Points
 
-| Consumer                       | Integration                                                                     |
-| ------------------------------ | ------------------------------------------------------------------------------- |
-| **Compiler** (agent-prompt.ts) | `generateWidgetCatalog(registry)` generates LLM prompt with live widget catalog |
-| **Runtime** (WidgetRenderer)   | `registry.get()` with alias resolution via `resolveWidgetId()`                  |
-| **CLI** (widget migrate)       | `WIDGET_ALIAS_MAP` for batch migration of legacy IDs                            |
-| **Authoring tools**            | `registry.searchWithFilters()` for structured widget discovery                  |
-| **Validation**                 | `validateWidgetMetadata()` for metadata completeness checks                     |
+| Consumer                       | Integration                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| **Compiler** (agent-prompt.ts) | `getDefaultWidgetCatalog()` generates LLM prompt with widget catalog from JSON |
+| **Runtime** (WidgetRenderer)   | `registry.get()` with alias resolution via `resolveWidgetId()`                 |
+| **CLI** (generate command)     | `getDefaultWidgetCatalog()` from `@open-edu/core` for agent prompts            |
+| **Authoring tools**            | `registry.searchWithFilters()` for structured widget discovery                 |
+| **Validation**                 | `validateWidgetMetadata()` for metadata completeness checks                    |
 
 ## File Structure
 
@@ -136,12 +151,12 @@ packages/widgets/src/
 └── use-remote-widget.ts  # React hook for remote widgets
 
 packages/core/src/
-├── agent-prompt.ts       # LLM prompt using generateWidgetCatalog(createDefaultRegistry())
-└── widget-catalog.ts     # generateWidgetCatalog() — dynamic catalog from registry
+├── agent-prompt.ts              # LLM prompt template with widget catalog interpolation
+├── widget-catalog.ts            # generateWidgetCatalog() + getDefaultWidgetCatalog()
+└── widget-catalog-data.json     # Auto-generated catalog data (from @open-edu/widgets)
 
-packages/cli/src/
-└── commands/
-    └── widget-migrate.ts # CLI batch migration of open-edu.* IDs
+packages/widgets/scripts/
+└── generate-catalog.ts          # Build script: widget-catalog-source.ts → widget-catalog-data.json
 ```
 
 ## Extension Points
