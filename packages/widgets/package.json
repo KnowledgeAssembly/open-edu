@@ -2,6 +2,7 @@
   "name": "@open-edu/widgets",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Widget SDK and built-in widgets for Open-Edu",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,6 +18,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "generate:catalog": "tsx scripts/generate-catalog.ts",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",

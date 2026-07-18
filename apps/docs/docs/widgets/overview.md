@@ -192,20 +192,54 @@ const result = validateWidgetMetadata(myWidget);
 
 ## Widget Catalog Generation
 
-`generateWidgetCatalog()` produces a structured Markdown catalog from the widget registry, used in LLM prompts for AI-assisted content generation:
+The widget catalog provides structured Markdown descriptions of all available widgets for LLM prompts used in AI-assisted content generation.
 
-```typescript
-import { generateWidgetCatalog } from '@open-edu/core';
+### Data Flow
 
-const catalog = generateWidgetCatalog({ widgets: catalogEntries });
-// Produces Markdown with per-widget sections including:
-// - Domain grouping, status tags, learning intents, keywords
-// - Capabilities, accessibility, analytics labels
-// - Reward info (XP, achievement, positive message)
-// - AI notes (difficulty, Bloom's level, age range, learning objectives, misconceptions)
+```
+packages/widgets/src/widget-catalog-source.ts   ← Canonical source (pure data, no React imports)
+        │
+        ▼  pnpm --filter @open-edu/widgets generate:catalog
+packages/core/src/widget-catalog-data.json      ← Auto-generated JSON (27 entries)
+        │
+        ▼  fs.readFileSync at runtime
+packages/core/src/widget-catalog.ts             ← Reads JSON, exposes getDefaultWidgetCatalog()
+        │
+        ▼  CLI imports from @open-edu/core
+edu generate --prompt                           ← Injects catalog into agent prompt
 ```
 
-The CLI's `generate` command uses this to produce agent-ready prompts with a live widget catalog.
+### Canonical Source
+
+Widget metadata lives in `packages/widgets/src/widget-catalog-source.ts` as a `WIDGET_CATALOG_ENTRIES` array. This is the single source of truth — pure data with no React or design-system dependencies.
+
+### Generating the Catalog JSON
+
+After modifying `widget-catalog-source.ts`, regenerate the JSON:
+
+```bash
+pnpm --filter @open-edu/widgets generate:catalog
+```
+
+This runs `packages/widgets/scripts/generate-catalog.ts`, which imports `WIDGET_CATALOG_ENTRIES` and writes `packages/core/src/widget-catalog-data.json`.
+
+### Programmatic Usage
+
+```typescript
+import { getDefaultWidgetCatalog, generateWidgetCatalog } from '@open-edu/core';
+
+// Get the full catalog as Markdown (reads from auto-generated JSON)
+const catalog = getDefaultWidgetCatalog();
+
+// Or generate from custom entries
+const custom = generateWidgetCatalog({ widgets: myEntries });
+```
+
+The catalog Markdown includes per-widget sections with domain grouping, status tags, learning intents, keywords, capabilities, accessibility, analytics, reward info, and AI notes (difficulty, Bloom's level, age range, learning objectives, misconceptions).
+
+### How the CLI Uses It
+
+When you run `edu generate --prompt`, the CLI calls `getDefaultWidgetCatalog()` from `@open-edu/core` and passes the resulting Markdown into the agent prompt template. This gives AI agents a complete reference of available widgets, their configs, and pedagogical metadata.
 
 ## Remote Widget Loading
 

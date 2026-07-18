@@ -345,6 +345,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
 
+  examples/phase2-showcase: {}
+
   examples/remote-widget-demo:
     devDependencies:
       '@open-edu/core':
@@ -421,9 +423,6 @@ importers:
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../telemetry
-      '@open-edu/widgets':
-        specifier: workspace:*
-        version: link:../widgets
       commander:
         specifier: ^12.0.0
         version: 12.1.0

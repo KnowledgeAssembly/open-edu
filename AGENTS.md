@@ -56,6 +56,7 @@ pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile cours
 pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math  # Generate curriculum from PDF
 pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --format json  # JSON-only pipeline output
 pnpm --filter @open-edu/pipeline test  # Run pipeline tests
+pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-data.json from canonical source
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -80,7 +81,7 @@ open-edu/
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
-│   └── widgets/             # Widget SDK + registry + 21 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
+│   └── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/

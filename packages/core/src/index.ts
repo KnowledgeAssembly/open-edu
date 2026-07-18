@@ -31,8 +31,9 @@ export type {
   BuildManifestEntry,
 } from './integrity.js';
 export { generateAgentPrompt } from './agent-prompt.js';
-export { generateWidgetCatalog } from './widget-catalog.js';
+export { generateWidgetCatalog, getDefaultWidgetCatalog } from './widget-catalog.js';
 export type { WidgetCatalogEntry, WidgetCatalogInput } from './widget-catalog.js';
+export { WIDGET_ALIAS_MAP } from './widget-catalog.js';
 export { applyPatch } from './patcher.js';
 export type { PatchOperation, PatchReport, PatchOperationResult } from './patcher.js';
 export { scanPackages } from './scanner.js';
