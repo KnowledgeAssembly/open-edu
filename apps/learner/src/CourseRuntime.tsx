@@ -55,8 +55,20 @@ export function CourseRuntime({
   const [savedProgress, setSavedProgress] = useState<ProgressSnapshot | null>(null);
 
   useEffect(() => {
-    getProgress(pkg.manifest.id).then(setSavedProgress);
-  }, [pkg.manifest.id]);
+    let cancelled = false;
+    void (async () => {
+      const [progress, bundleSnapshot] = await Promise.all([
+        getProgress(pkg.manifest.id),
+        bundleContext ? getBundleProgress(bundleContext.bundleId) : Promise.resolve(null),
+      ]);
+      if (cancelled) return;
+      setSavedProgress(progress);
+      if (bundleSnapshot) bundleProgressRef.current = bundleSnapshot;
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pkg.manifest.id, bundleContext]);
 
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
@@ -79,18 +91,6 @@ export function CourseRuntime({
   const initialProgress = useMemo(() => {
     return savedProgress ?? undefined;
   }, [savedProgress]);
-
-  useEffect(() => {
-    if (!bundleContext) return;
-    let cancelled = false;
-    void (async () => {
-      const snapshot = await getBundleProgress(bundleContext.bundleId);
-      if (!cancelled) bundleProgressRef.current = snapshot;
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [bundleContext]);
 
   const cardBrokerRef = useRef<CardBroker | null>(null);
 
