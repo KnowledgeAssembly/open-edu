@@ -230,6 +230,17 @@ export default defineConfig(({ mode }) => {
                 },
               },
             },
+            {
+              urlPattern: /\/api\/.*\/(catalog|metadata|summary)/,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'metadata-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 86400,
+                },
+              },
+            },
           ],
         },
       }),
