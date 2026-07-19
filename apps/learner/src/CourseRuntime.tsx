@@ -80,12 +80,17 @@ export function CourseRuntime({
     return savedProgress ?? undefined;
   }, [savedProgress]);
 
-  const initialBundleSnapshot = useMemo(() => {
-    if (!bundleContext) return null;
-    return getBundleProgress(bundleContext.bundleId);
+  useEffect(() => {
+    if (!bundleContext) return;
+    let cancelled = false;
+    void (async () => {
+      const snapshot = await getBundleProgress(bundleContext.bundleId);
+      if (!cancelled) bundleProgressRef.current = snapshot;
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [bundleContext]);
-
-  bundleProgressRef.current = initialBundleSnapshot;
 
   const cardBrokerRef = useRef<CardBroker | null>(null);
 
@@ -214,7 +219,7 @@ export function CourseRuntime({
           updatedAt: snapshot.updatedAt,
         };
 
-        saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
+        void saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
         bundleContext.onBundleSnapshot(bundleSnapshot);
       }
     },

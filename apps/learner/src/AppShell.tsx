@@ -144,15 +144,23 @@ export function AppShell({
   }, [navigate, breakTimer]);
 
   const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
-    () => {
+    {},
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
       const progress: Record<string, BundleProgressSnapshot> = {};
       for (const bundleId of Object.keys(bundleEntries)) {
-        const saved = getBundleProgress(bundleId);
+        const saved = await getBundleProgress(bundleId);
         if (saved) progress[bundleId] = saved;
       }
-      return progress;
-    },
-  );
+      if (!cancelled) setBundleProgress(progress);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bundleEntries]);
 
   const handleProgressUpdate = useCallback((current: number, total: number) => {
     setCourseProgressCurrent(current);

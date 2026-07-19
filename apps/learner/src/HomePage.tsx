@@ -3,7 +3,7 @@ import type { PackageSummary } from '@open-edu/core';
 import { type AppView } from './AppShell';
 import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
-import { getAllBundleProgress } from './bundleProgressStorage';
+import { getAllBundleProgress, type BundleProgressData } from './bundleProgressStorage';
 import { OpenModule } from '@open-edu/design-system';
 import {
   Button,
@@ -27,11 +27,12 @@ export function HomePage({
 }: HomePageProps): JSX.Element {
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
+  const [bundleProg, setBundleProg] = useState<BundleProgressData>({});
   useEffect(() => {
     getAllProgress().then(setProgress);
     getAllBadges().then(setBadgeData);
+    getAllBundleProgress().then(setBundleProg);
   }, []);
-  const bundleProg = getAllBundleProgress();
   const courseCount = catalogPackages.length;
   const bundleCount = bundleEntries ? Object.keys(bundleEntries).length : 0;
   const totalUnits = courseCount + bundleCount;

@@ -1,36 +1,55 @@
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
+import {
+  saveProgress as saveProgressToDB,
+  getProgress as getProgressFromDB,
+  getAllCourseProgress,
+} from '@open-edu/storage';
 
-const STORAGE_KEY = 'open-edu-bundle-progress';
+const BUNDLE_SENTINEL = '__bundle__';
 
 export interface BundleProgressData {
   [bundleId: string]: BundleProgressSnapshot;
 }
 
-export function getAllBundleProgress(): BundleProgressData {
+export async function getAllBundleProgress(): Promise<BundleProgressData> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as BundleProgressData;
+    const records = await getAllCourseProgress();
+    const data: BundleProgressData = {};
+    for (const record of records) {
+      if (record.lessonId === BUNDLE_SENTINEL && record.data) {
+        data[record.courseId] = record.data as unknown as BundleProgressSnapshot;
+      }
+    }
+    return data;
   } catch {
     return {};
   }
 }
 
-export function getBundleProgress(bundleId: string): BundleProgressSnapshot | null {
+export async function getBundleProgress(
+  bundleId: string,
+): Promise<BundleProgressSnapshot | null> {
   try {
-    const all = getAllBundleProgress();
-    return all[bundleId] ?? null;
+    const record = await getProgressFromDB(bundleId, BUNDLE_SENTINEL);
+    return (record?.data as unknown as BundleProgressSnapshot) ?? null;
   } catch {
     return null;
   }
 }
 
-export function saveBundleProgress(bundleId: string, snapshot: BundleProgressSnapshot): void {
+export async function saveBundleProgress(
+  bundleId: string,
+  snapshot: BundleProgressSnapshot,
+): Promise<void> {
   try {
-    const all = getAllBundleProgress();
-    all[bundleId] = snapshot;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    await saveProgressToDB({
+      courseId: bundleId,
+      lessonId: BUNDLE_SENTINEL,
+      completed: true,
+      updatedAt: new Date().toISOString(),
+      data: snapshot as unknown as Record<string, unknown>,
+    });
   } catch {
-    // localStorage unavailable; silently fail
+    // IndexedDB unavailable
   }
 }
