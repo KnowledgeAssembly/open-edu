@@ -32,7 +32,9 @@ import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
 import { OfflineBanner } from './components/OfflineBanner.js';
+import { UpdatePrompt } from './components/UpdatePrompt.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
+import { useUpdatePrompt } from './hooks/useUpdatePrompt.js';
 import {
   CompanionProvider,
   useCompanion,
@@ -252,6 +254,7 @@ export function AppShell({
   }, [view, bundleEntries]);
 
   const isOnline = useOnlineStatus();
+  const updatePrompt = useUpdatePrompt();
 
   const getBreadcrumbs = () => {
     switch (view.view) {
@@ -511,6 +514,11 @@ export function AppShell({
               open={showExitWarning}
               onStay={handleExitStay}
               onLeave={handleExitLeave}
+            />
+            <UpdatePrompt
+              updateAvailable={updatePrompt.updateAvailable}
+              onUpdate={updatePrompt.accept}
+              onDismiss={updatePrompt.dismiss}
             />
           </div>
         </FontSizeProvider>
