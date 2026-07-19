@@ -18,6 +18,7 @@ export interface LearningProgress {
   completed: boolean;
   score?: number;
   updatedAt: string;
+  data?: Record<string, unknown>;
 }
 
 export interface SearchIndex {

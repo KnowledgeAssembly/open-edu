@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
 import type { PackageSummary } from '@open-edu/core';
 
 const { getAllProgressMock, getAllBadgesMock } = vi.hoisted(() => ({
-  getAllProgressMock: vi.fn().mockReturnValue({}),
+  getAllProgressMock: vi.fn().mockResolvedValue({}),
   getAllBadgesMock: vi.fn().mockResolvedValue({}),
 }));
 
@@ -45,7 +45,7 @@ const samplePackages: PackageSummary[] = [
 
 describe('CatalogPage', () => {
   beforeEach(() => {
-    getAllProgressMock.mockReturnValue({});
+    getAllProgressMock.mockResolvedValue({});
     getAllBadgesMock.mockResolvedValue({});
   });
 
@@ -75,7 +75,7 @@ describe('CatalogPage', () => {
 
   describe('continue learning shelf', () => {
     beforeEach(() => {
-      getAllProgressMock.mockReturnValue({
+      getAllProgressMock.mockResolvedValue({
         'course-1': {
           packageId: 'course-1',
           packageVersion: '1.0.0',
@@ -88,17 +88,19 @@ describe('CatalogPage', () => {
       });
     });
 
-    it('shows in-progress count badge', () => {
+    it('shows in-progress count badge', async () => {
       render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
-      expect(screen.getByText('1 in progress')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('1 in progress')).toBeInTheDocument();
+      });
     });
 
-    it('shows "View all →" button that navigates to progress', () => {
+    it('shows "View all →" button that navigates to progress', async () => {
       const onNavigate = vi.fn();
       render(
         <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} onNavigate={onNavigate} />,
       );
-      const viewAll = screen.getByText('View all →');
+      const viewAll = await screen.findByText('View all →');
       expect(viewAll).toBeInTheDocument();
       fireEvent.click(viewAll);
       expect(onNavigate).toHaveBeenCalledWith({ view: 'progress' });
@@ -107,7 +109,7 @@ describe('CatalogPage', () => {
 
   describe('completed course card', () => {
     beforeEach(() => {
-      getAllProgressMock.mockReturnValue({
+      getAllProgressMock.mockResolvedValue({
         'course-1': {
           packageId: 'course-1',
           packageVersion: '1.0.0',
@@ -131,9 +133,11 @@ describe('CatalogPage', () => {
       expect(svgs.length).toBeGreaterThan(0);
     });
 
-    it('shows "Completed" text on completed course', () => {
+    it('shows "Completed" text on completed course', async () => {
       render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
-      expect(screen.getByText('Completed')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Completed')).toBeInTheDocument();
+      });
     });
   });
 });

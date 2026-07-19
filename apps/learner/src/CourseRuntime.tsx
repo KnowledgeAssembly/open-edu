@@ -52,14 +52,19 @@ export function CourseRuntime({
   const [toastCardVisible, setToastCardVisible] = useState(false);
   const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
+  const [savedProgress, setSavedProgress] = useState<ProgressSnapshot | null>(null);
+
+  useEffect(() => {
+    getProgress(pkg.manifest.id).then(setSavedProgress);
+  }, [pkg.manifest.id]);
+
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
-    const saved = getProgress(pkg.manifest.id);
-    const savedNode = saved?.currentNodeId;
+    const savedNode = savedProgress?.currentNodeId;
     const entry = savedNode && savedNode in pkg.workflow.routing ? savedNode : pkg.manifest.entry;
     if (!entry) return null;
     return new WorkflowEngine(pkg.workflow, { entry });
-  }, [pkg]);
+  }, [pkg, savedProgress]);
 
   const orderedNodes = useMemo<LoadedNode[]>(() => {
     if (!pkg.workflow || !pkg.manifest.entry) return [];
@@ -72,8 +77,8 @@ export function CourseRuntime({
   const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
 
   const initialProgress = useMemo(() => {
-    return getProgress(pkg.manifest.id) ?? undefined;
-  }, [pkg]);
+    return savedProgress ?? undefined;
+  }, [savedProgress]);
 
   const initialBundleSnapshot = useMemo(() => {
     if (!bundleContext) return null;
@@ -181,8 +186,8 @@ export function CourseRuntime({
   }, [engine, pkg]);
 
   const handleProgressChange = useCallback(
-    (snapshot: ProgressSnapshot) => {
-      saveProgress(pkg.manifest.id, snapshot);
+    async (snapshot: ProgressSnapshot) => {
+      await saveProgress(pkg.manifest.id, snapshot);
 
       if (bundleContext) {
         const existingBundleSnapshot = bundleProgressRef.current;

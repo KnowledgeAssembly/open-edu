@@ -13,9 +13,9 @@ import { AppSidebar } from '@open-edu/design-system';
 import type { PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getAllProgress: vi.fn(() => Promise.resolve({})),
+  getProgress: vi.fn(() => Promise.resolve(null)),
+  saveProgress: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../badgesStorage', () => ({

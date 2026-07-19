@@ -5,9 +5,9 @@ import { AppShell } from './AppShell';
 import type { LoadedPackage, PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getAllProgress: vi.fn(() => Promise.resolve({})),
+  getProgress: vi.fn(() => Promise.resolve(null)),
+  saveProgress: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('@open-edu/llm-config', () => ({

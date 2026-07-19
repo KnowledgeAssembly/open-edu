@@ -69,8 +69,8 @@ vi.mock('./cardsStorage.js', () => ({
 }));
 
 vi.mock('./progressStorage', () => ({
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getProgress: vi.fn(() => Promise.resolve(null)),
+  saveProgress: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('./badgesStorage', () => ({

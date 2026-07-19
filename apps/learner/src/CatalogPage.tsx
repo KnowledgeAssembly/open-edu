@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
-import { getAllProgress } from './progressStorage';
+import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
   BundleCard,
@@ -37,9 +37,10 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
-  const progress = getAllProgress();
+  const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   useEffect(() => {
+    getAllProgress().then(setProgress);
     getAllBadges().then(setBadgeData);
   }, []);
 
