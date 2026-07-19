@@ -31,6 +31,8 @@ import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
+import { OfflineBanner } from './components/OfflineBanner.js';
+import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import {
   CompanionProvider,
   useCompanion,
@@ -241,6 +243,8 @@ export function AppShell({
     return bundle;
   }, [view, bundleEntries]);
 
+  const isOnline = useOnlineStatus();
+
   const getBreadcrumbs = () => {
     switch (view.view) {
       case 'home':
@@ -365,6 +369,7 @@ export function AppShell({
       <RuntimeThemeProvider themeId={themeId}>
         <FontSizeProvider>
           <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
+            <OfflineBanner isOnline={isOnline} />
             {isCourseView && coursePkg ? (
               <WordTapHandler className="flex min-w-0 flex-1 flex-col">
                 <div
