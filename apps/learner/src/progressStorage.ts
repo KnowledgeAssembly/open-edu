@@ -1,6 +1,7 @@
 import type { ProgressSnapshot } from '@open-edu/schemas';
 import {
   saveProgress as saveProgressToDB,
+  getProgress as getProgressFromDB,
   getAllCourseProgress,
 } from '@open-edu/storage';
 
@@ -27,8 +28,8 @@ export async function getAllProgress(): Promise<ProgressData> {
 
 export async function getProgress(packageId: string): Promise<ProgressSnapshot | null> {
   try {
-    const all = await getAllProgress();
-    return all[packageId] ?? null;
+    const record = await getProgressFromDB(packageId, SNAPSHOT_LESSON_ID);
+    return (record?.data as unknown as ProgressSnapshot) ?? null;
   } catch {
     return null;
   }

@@ -186,8 +186,8 @@ export function CourseRuntime({
   }, [engine, pkg]);
 
   const handleProgressChange = useCallback(
-    async (snapshot: ProgressSnapshot) => {
-      await saveProgress(pkg.manifest.id, snapshot);
+    (snapshot: ProgressSnapshot) => {
+      void saveProgress(pkg.manifest.id, snapshot);
 
       if (bundleContext) {
         const existingBundleSnapshot = bundleProgressRef.current;
