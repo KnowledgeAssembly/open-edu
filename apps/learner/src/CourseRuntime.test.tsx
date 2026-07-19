@@ -61,6 +61,13 @@ vi.mock('@open-edu/accessibility', () => ({
   useLiveRegion: vi.fn(() => ({ announce: vi.fn() })),
 }));
 
+vi.mock('./cardsStorage.js', () => ({
+  getAllCardProgress: vi.fn().mockResolvedValue({}),
+  saveCardProgress: vi.fn().mockResolvedValue(undefined),
+  getCardProgress: vi.fn().mockResolvedValue(null),
+  clearCardProgress: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('./progressStorage', () => ({
   getProgress: vi.fn(() => null),
   saveProgress: vi.fn(),

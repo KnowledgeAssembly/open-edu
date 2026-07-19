@@ -137,8 +137,10 @@ export function CourseRuntime({
       }
     });
 
+    let cancelled = false;
     void (async () => {
       const savedCardProgress = await getAllCardProgress();
+      if (cancelled) return;
       const cb = pkg.cards?.cards
         ? new CardBroker({
             cards: pkg.cards.cards,
@@ -167,6 +169,7 @@ export function CourseRuntime({
     })();
 
     return () => {
+      cancelled = true;
       engineUnsub();
       compUnsub();
       broker?.stop();
