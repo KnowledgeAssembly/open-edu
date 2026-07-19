@@ -2,11 +2,36 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
+const PKGS_DIR = resolve(__dirname, '../../packages');
+
+const VIRTUAL_MODULE_ID = 'virtual:edu-data';
+const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
+
+function virtualEduDataPlugin() {
+  return {
+    name: 'virtual-edu-data',
+    resolveId(id: string) {
+      if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
+    },
+    load(id: string) {
+      if (id === RESOLVED_MODULE_ID) {
+        return `
+export const catalogPackages = [];
+export const packageEntries = {};
+export const catalogBundles = [];
+export const bundleEntries = {};
+`;
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), virtualEduDataPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@open-edu/storage': resolve(PKGS_DIR, 'storage/src/index.ts'),
     },
   },
   test: {
