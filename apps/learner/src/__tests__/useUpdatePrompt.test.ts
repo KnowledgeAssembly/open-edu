@@ -6,7 +6,6 @@ import { registerUpdateListener, skipWaiting } from '@open-edu/pwa-core';
 vi.mock('@open-edu/pwa-core', () => ({
   registerUpdateListener: vi.fn().mockResolvedValue(vi.fn()),
   skipWaiting: vi.fn().mockResolvedValue(undefined),
-  getUpdateState: vi.fn().mockReturnValue({ updateAvailable: false, registration: null }),
 }));
 
 describe('useUpdatePrompt', () => {
@@ -46,5 +45,22 @@ describe('useUpdatePrompt', () => {
   it('registers an update listener on mount', () => {
     renderHook(() => useUpdatePrompt());
     expect(registerUpdateListener).toHaveBeenCalled();
+  });
+
+  it('transitions to update available when listener fires', async () => {
+    let listenerCb: (state: { updateAvailable: boolean }) => void = () => {};
+    vi.mocked(registerUpdateListener).mockImplementation((cb) => {
+      listenerCb = cb;
+      return Promise.resolve(vi.fn());
+    });
+
+    const { result } = renderHook(() => useUpdatePrompt());
+    expect(result.current.updateAvailable).toBe(false);
+
+    await act(async () => {
+      listenerCb({ updateAvailable: true });
+    });
+
+    expect(result.current.updateAvailable).toBe(true);
   });
 });
