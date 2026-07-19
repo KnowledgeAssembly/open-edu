@@ -1,3 +1,10 @@
+---
+type: Domain Guide
+title: Design System and UI Architecture
+description: Guide to the two-tier UI architecture in the Open-Edu design system — primitives for generic building blocks and visual DNA for learner-facing surfaces.
+tags: [openwiki, domain, design-system, ui]
+---
+
 # Design System and UI Architecture
 
 The UI layer is split into two tiers:

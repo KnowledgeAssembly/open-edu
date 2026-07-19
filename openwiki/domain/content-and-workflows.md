@@ -1,3 +1,10 @@
+---
+type: Domain Guide
+title: Content, Workflows, and Examples
+description: Canonical explanation of package structure, workflow routing, progress semantics, rewards, bundles, SVG-backed widgets, and example content in the Open-Edu monorepo.
+tags: [openwiki, domain, workflows, content]
+---
+
 # Content, Workflows, and Examples
 
 This repository models learning content as portable package directories rather than database-backed courses.
@@ -91,3 +98,7 @@ The examples directory is a useful map of supported behaviors:
 - Update route or mastery logic in `packages/workflow`
 - Update rendered node behavior in `packages/runtime`
 - Add or adjust example content in `examples/` to cover the new behavior
+
+## Widget catalog and ID resolution
+
+Widget-based exercises depend on the registry and catalog pipeline. The canonical widget metadata is defined in `packages/widgets/src/widget-catalog-source.ts`, resolved through `packages/widgets/src/domains.ts`, and consumed by `packages/core/src/widget-catalog.ts` when the CLI builds prompt/catalog output. That separation keeps author-facing widget IDs stable while allowing legacy `open-edu.*` IDs to be migrated automatically. The SVG explorer widget family also lives under `packages/widgets/src/svg-explorer/` and extends the same catalog pathway for interactive content.

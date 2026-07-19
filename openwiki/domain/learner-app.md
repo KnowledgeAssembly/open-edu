@@ -1,3 +1,10 @@
+---
+type: Domain Guide
+title: Learner App
+description: Canonical guide to the learner application screens, runtime composition, AI companion integration, SVG-backed widget surfaces, and break reminder flow in apps/learner.
+tags: [openwiki, domain, learner, app]
+---
+
 # Learner App
 
 `apps/learner` is the main end-user application in the repository. It composes the runtime, design system, core loaders, workflow logic, and local persistence helpers into a course browsing and learning experience.
@@ -67,9 +74,9 @@ It derives much of this from local storage and package metadata.
 
 ### AI companion and word lookup
 
-The learner app now embeds the AI companion through `apps/learner/src/ai/`. `AIProviderImpl.ts` sends prompts to a backend LLM proxy instead of talking directly to a model provider from the browser. It reads the proxy URL from `VITE_LLM_PROXY_URL` when available and otherwise falls back to `/api/llm/chat`.
+The learner app embeds the AI companion through `apps/learner/src/ai/`. `AIProviderImpl.ts` sends prompts to a backend LLM proxy instead of talking directly to a model provider from the browser. It reads the proxy URL from `VITE_LLM_PROXY_URL` when available and otherwise falls back to `/api/llm/chat`. The same app also consumes widget surfaces that can include SVG explorer content from `packages/widgets`.
 
-The AI companion services are provided by `@open-edu/ai-companion`. See the [AI Companion domain doc](ai-companion.md) for the service architecture.
+The AI companion services are provided by `@open-edu/ai-companion`; the service architecture and search/dictionary layering are documented in the [AI Companion domain doc](ai-companion.md).
 
 The same AI companion feature set now includes two page-level interaction surfaces:
 
@@ -110,3 +117,4 @@ The same AI companion feature set now includes two page-level interaction surfac
 - Bundle module navigation and plain course navigation are not the same path.
 - Course runtime state is coupled to local storage, telemetry, reward delivery, and card unlocks.
 - Many learner screens depend on runtime and design-system exports; changing those exports can affect the app widely.
+- The break reminder banner depends on the `AppBanner` primitive, so changing that primitive can affect the course shell and break page.

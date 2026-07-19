@@ -1,3 +1,10 @@
+---
+type: Operations Guide
+title: Operations, Commands, and Change Workflow
+description: Runbook-style guide for building, testing, linting, and regenerating derived assets in the Open-Edu monorepo, including the widget catalog pipeline and the current `edu generate` flow.
+tags: [openwiki, operations, testing, runbook]
+---
+
 # Operations, Commands, and Change Workflow
 
 This repo is optimized for local development and agentic code changes. The root `package.json` and `AGENTS.md` define the main commands and constraints.
@@ -16,6 +23,7 @@ From the repository root:
 - `pnpm test:e2e` — run Playwright end-to-end tests
 - `pnpm --filter @open-edu/learner dev` — start the learner app
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js ...` — use the CLI after building it
+- `pnpm --filter @open-edu/widgets generate:catalog` — regenerate the widget catalog JSON from the canonical source in `packages/widgets/src/widget-catalog-source.ts`
 
 ## Package-local commands
 
@@ -49,6 +57,7 @@ This matters because runtime and dev-server styling are intentionally coupled th
 - Preserve accessibility: especially in runtime and learner-app surfaces.
 - Preserve progress persistence and local-storage behavior when changing learner flows.
 - Be careful with bundle navigation, because module-level navigation can bypass some normal exit warnings.
+- When touching widget catalogs, update the canonical source in `packages/widgets/src/widget-catalog-source.ts` and regenerate the derived JSON rather than editing the JSON by hand.
 
 ## Best starting points by change type
 
