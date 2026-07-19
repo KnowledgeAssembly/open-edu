@@ -24,6 +24,21 @@ vi.mock('@open-edu/runtime', async () => {
   };
 });
 
+vi.mock('@open-edu/pwa-core', () => ({
+  getInstallState: vi.fn().mockReturnValue({
+    isInstallable: false,
+    isInstalled: false,
+    platform: 'desktop',
+  }),
+  promptInstall: vi.fn().mockResolvedValue({ outcome: 'dismissed' }),
+  registerUpdateListener: vi.fn().mockResolvedValue(vi.fn()),
+  skipWaiting: vi.fn().mockResolvedValue(undefined),
+  getUpdateState: vi.fn().mockReturnValue({ updateAvailable: false, registration: null }),
+  getOnlineStatus: vi.fn().mockReturnValue(true),
+  onOnlineStatusChange: vi.fn().mockReturnValue(vi.fn()),
+  getStorageUsage: vi.fn().mockReturnValue({ usage: 0, quota: 0 }),
+}));
+
 import type { BundleSummary, LoadedBundle } from '@open-edu/core';
 
 const emptyPackages: PackageSummary[] = [];
