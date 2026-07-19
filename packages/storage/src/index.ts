@@ -1,1 +1,1 @@
-export { openDatabase, type OpenEduDB } from './db.js';
+export { openDatabase, resetDatabase, type OpenEduDB, type StoredCourse, type LearningProgress, type SearchIndex, type UserPreferences } from './db.js';
