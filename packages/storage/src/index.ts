@@ -3,5 +3,5 @@ export { saveCourse, getCourse, listCourses, deleteCourse } from './course-store
 export { saveProgress, getProgress, getCourseProgress, deleteCourseProgress } from './progress-store.js';
 export { saveSearchIndex, getSearchIndex, deleteSearchIndex } from './search-store.js';
 export { savePreferences, getPreferences, deletePreferences } from './prefs-store.js';
-export { saveBadge, getBadges, getAllBadges as getAllBadgeRecords } from './badge-store.js';
+export { saveBadge, getBadges, getAllBadges as getAllBadgeRecords, deleteAllBadges } from './badge-store.js';
 export { saveCard, getCard, getAllCards, deleteAllCards } from './card-store.js';

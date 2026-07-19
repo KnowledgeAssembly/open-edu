@@ -15,3 +15,10 @@ export async function getAllBadges(): Promise<BadgeData[]> {
   const db = await openDatabase();
   return db.getAll('badges');
 }
+
+export async function deleteAllBadges(): Promise<void> {
+  const db = await openDatabase();
+  const tx = db.transaction('badges', 'readwrite');
+  await tx.objectStore('badges').clear();
+  await tx.done;
+}
