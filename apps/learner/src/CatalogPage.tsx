@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from '@open-edu/design-system';
 import type { AppView } from './AppShell';
+import { InstallPrompt } from './components/InstallPrompt.js';
+import { useInstallPrompt } from './hooks/useInstallPrompt.js';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -37,6 +39,7 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
+  const installPrompt = useInstallPrompt();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   useEffect(() => {
@@ -113,6 +116,12 @@ export function CatalogPage({
   return (
     <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
       <PageHeader eyebrow="Catalog" title="Course Catalog" className="mb-xl" />
+
+      <InstallPrompt
+        isInstallable={installPrompt.isInstallable}
+        isInstalled={installPrompt.isInstalled}
+        onInstall={installPrompt.install}
+      />
 
       {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">

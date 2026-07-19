@@ -16,6 +16,15 @@ vi.mock('./badgesStorage', () => ({
   getAllBadges: getAllBadgesMock,
 }));
 
+vi.mock('@open-edu/pwa-core', () => ({
+  getInstallState: vi.fn().mockReturnValue({
+    isInstallable: false,
+    isInstalled: false,
+    platform: 'desktop',
+  }),
+  promptInstall: vi.fn().mockResolvedValue({ outcome: 'dismissed' }),
+}));
+
 const samplePackages: PackageSummary[] = [
   {
     manifest: {
