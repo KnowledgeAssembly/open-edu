@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "pwa:analyze": "npx vite-bundle-visualizer"
   },
   "dependencies": {
     "@open-edu/accessibility": "workspace:*",
