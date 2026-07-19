@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
 import { getAllProgress } from './progressStorage';
-import { getAllBadges } from './badgesStorage';
+import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
   BundleCard,
   BundleCardWithModule,
@@ -38,7 +38,10 @@ export function CatalogPage({
   onNavigate,
 }: CatalogPageProps): JSX.Element {
   const progress = getAllProgress();
-  const badgeData = getAllBadges();
+  const [badgeData, setBadgeData] = useState<BadgesData>({});
+  useEffect(() => {
+    getAllBadges().then(setBadgeData);
+  }, []);
 
   const badgeCounts = useMemo(() => {
     const counts: Record<string, number> = {};

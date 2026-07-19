@@ -7,7 +7,7 @@ vi.mock('../progressStorage', () => ({
 }));
 
 vi.mock('../badgesStorage', () => ({
-  getAllBadges: vi.fn(() => ({})),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('../bundleProgressStorage', () => ({

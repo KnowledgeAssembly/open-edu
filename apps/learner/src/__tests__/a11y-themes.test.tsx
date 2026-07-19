@@ -20,8 +20,8 @@ vi.mock('../progressStorage', () => ({
 
 vi.mock('../badgesStorage', () => ({
   addBadge: vi.fn(),
-  getBadges: vi.fn(() => []),
-  getAllBadges: vi.fn(() => ({})),
+  getBadges: vi.fn(() => Promise.resolve([])),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
 }));
 
 const mockBreakTimer = {

@@ -67,9 +67,9 @@ vi.mock('./progressStorage', () => ({
 }));
 
 vi.mock('./badgesStorage', () => ({
-  addBadge: vi.fn(),
-  getBadges: vi.fn(() => []),
-  getAllBadges: vi.fn(() => ({})),
+  addBadge: vi.fn(() => Promise.resolve()),
+  getBadges: vi.fn(() => Promise.resolve([])),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
 }));
 
 const samplePackage: LoadedPackage = {

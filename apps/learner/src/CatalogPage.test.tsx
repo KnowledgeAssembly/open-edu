@@ -5,7 +5,7 @@ import type { PackageSummary } from '@open-edu/core';
 
 const { getAllProgressMock, getAllBadgesMock } = vi.hoisted(() => ({
   getAllProgressMock: vi.fn().mockReturnValue({}),
-  getAllBadgesMock: vi.fn().mockReturnValue({}),
+  getAllBadgesMock: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock('./progressStorage', () => ({
@@ -46,7 +46,7 @@ const samplePackages: PackageSummary[] = [
 describe('CatalogPage', () => {
   beforeEach(() => {
     getAllProgressMock.mockReturnValue({});
-    getAllBadgesMock.mockReturnValue({});
+    getAllBadgesMock.mockResolvedValue({});
   });
 
   it('renders course cards', () => {
@@ -118,7 +118,7 @@ describe('CatalogPage', () => {
           updatedAt: '2025-01-01T00:00:00Z',
         },
       });
-      getAllBadgesMock.mockReturnValue({
+      getAllBadgesMock.mockResolvedValue({
         'course-1': ['badge-1'],
       });
     });

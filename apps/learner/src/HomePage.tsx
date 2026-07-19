@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import type { PackageSummary } from '@open-edu/core';
 import { type AppView } from './AppShell';
 import { getAllProgress } from './progressStorage';
-import { getAllBadges } from './badgesStorage';
+import { getAllBadges, type BadgesData } from './badgesStorage';
 import { getAllBundleProgress } from './bundleProgressStorage';
 import { OpenModule } from '@open-edu/design-system';
 import {
@@ -25,7 +26,10 @@ export function HomePage({
   bundleEntries,
 }: HomePageProps): JSX.Element {
   const progress = getAllProgress();
-  const badgeData = getAllBadges();
+  const [badgeData, setBadgeData] = useState<BadgesData>({});
+  useEffect(() => {
+    getAllBadges().then(setBadgeData);
+  }, []);
   const bundleProg = getAllBundleProgress();
   const courseCount = catalogPackages.length;
   const bundleCount = bundleEntries ? Object.keys(bundleEntries).length : 0;
