@@ -39,7 +39,7 @@ describe('DownloadedCourseList', () => {
     const onDelete = vi.fn();
     render(<DownloadedCourseList courses={mockCourses} onDelete={onDelete} />);
     const removeButtons = screen.getAllByRole('button', { name: /Remove/ });
-    fireEvent.click(removeButtons[0]);
+    fireEvent.click(removeButtons[0]!);
     expect(onDelete).toHaveBeenCalledWith('course-1');
   });
 });
