@@ -82,6 +82,8 @@ export function CourseRuntime({
 
   bundleProgressRef.current = initialBundleSnapshot;
 
+  const cardBrokerRef = useRef<CardBroker | null>(null);
+
   useEffect(() => {
     if (!engine) return;
 
@@ -107,31 +109,6 @@ export function CourseRuntime({
       : null;
     broker?.start();
 
-    const cardBroker = pkg.cards?.cards
-      ? new CardBroker({
-          cards: pkg.cards.cards,
-          source: session.events$,
-          initialLevels: Object.fromEntries(
-            Object.entries(getAllCardProgress()).map(([id, p]) => [id, p.level]),
-          ),
-          onCardUnlocked: (card) => {
-            saveCardProgress(card.id, card.level);
-            setToastCard(card);
-            setToastCardLevel(card.level);
-            setToastCardType('unlock');
-            setToastCardVisible(true);
-          },
-          onCardLeveledUp: (card, newLevel) => {
-            saveCardProgress(card.id, newLevel);
-            setToastCard(card);
-            setToastCardLevel(newLevel);
-            setToastCardType('levelUp');
-            setToastCardVisible(true);
-          },
-        })
-      : null;
-    cardBroker?.start();
-
     const engineUnsub = engine.subscribe((event: WorkflowEvent) => {
       if (event.type === 'node.entered' && event.nodeId) {
         session.emit({ event: 'node_open', nodeId: event.nodeId } as never);
@@ -140,7 +117,7 @@ export function CourseRuntime({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
-        cardBroker?.updateContext({
+        cardBrokerRef.current?.updateContext({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
@@ -160,11 +137,41 @@ export function CourseRuntime({
       }
     });
 
+    void (async () => {
+      const savedCardProgress = await getAllCardProgress();
+      const cb = pkg.cards?.cards
+        ? new CardBroker({
+            cards: pkg.cards.cards,
+            source: session.events$,
+            initialLevels: Object.fromEntries(
+              Object.entries(savedCardProgress).map(([id, p]) => [id, p.level]),
+            ),
+            onCardUnlocked: (card) => {
+              void saveCardProgress(card.id, card.level);
+              setToastCard(card);
+              setToastCardLevel(card.level);
+              setToastCardType('unlock');
+              setToastCardVisible(true);
+            },
+            onCardLeveledUp: (card, newLevel) => {
+              void saveCardProgress(card.id, newLevel);
+              setToastCard(card);
+              setToastCardLevel(newLevel);
+              setToastCardType('levelUp');
+              setToastCardVisible(true);
+            },
+          })
+        : null;
+      cardBrokerRef.current = cb;
+      cb?.start();
+    })();
+
     return () => {
       engineUnsub();
       compUnsub();
       broker?.stop();
-      cardBroker?.stop();
+      cardBrokerRef.current?.stop();
+      cardBrokerRef.current = null;
       eventSub.unsubscribe();
       session.stop();
     };

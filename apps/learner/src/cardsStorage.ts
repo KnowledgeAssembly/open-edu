@@ -1,46 +1,58 @@
-const STORAGE_KEY = 'open-edu-cards';
+import {
+  saveCard as saveCardToDB,
+  getCard as getCardFromDB,
+  getAllCards as getAllFromDB,
+  deleteAllCards as deleteAllFromDB,
+  type CardProgressData,
+} from '@open-edu/storage';
 
-export interface CardProgress {
-  level: number;
-  unlockedAt: string;
-}
+export type { CardProgressData };
 
 export interface CardsData {
-  [cardId: string]: CardProgress;
+  [cardId: string]: CardProgressData;
 }
 
-export function getAllCardProgress(): CardsData {
+export async function getAllCardProgress(): Promise<CardsData> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as CardsData;
+    const records = await getAllFromDB();
+    const data: CardsData = {};
+    for (const record of records) {
+      data[record.cardId] = record;
+    }
+    return data;
   } catch {
     return {};
   }
 }
 
-export function getCardProgress(cardId: string): CardProgress | null {
-  const all = getAllCardProgress();
-  return all[cardId] ?? null;
-}
-
-export function saveCardProgress(cardId: string, level: number): void {
+export async function getCardProgress(cardId: string): Promise<CardProgressData | null> {
   try {
-    const all = getAllCardProgress();
-    const existing = all[cardId];
-    if (!existing || level > existing.level) {
-      all[cardId] = { level, unlockedAt: existing?.unlockedAt ?? new Date().toISOString() };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    }
+    const record = await getCardFromDB(cardId);
+    return record ?? null;
   } catch {
-    // localStorage unavailable
+    return null;
   }
 }
 
-export function clearCardProgress(): void {
+export async function saveCardProgress(cardId: string, level: number): Promise<void> {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    const existing = await getCardFromDB(cardId);
+    if (!existing || level > existing.level) {
+      await saveCardToDB({
+        cardId,
+        level,
+        unlockedAt: existing?.unlockedAt ?? new Date().toISOString(),
+      });
+    }
   } catch {
-    // localStorage unavailable
+    // IndexedDB unavailable
+  }
+}
+
+export async function clearCardProgress(): Promise<void> {
+  try {
+    await deleteAllFromDB();
+  } catch {
+    // IndexedDB unavailable
   }
 }

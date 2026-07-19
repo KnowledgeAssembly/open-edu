@@ -1,10 +1,10 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
 import { PageHeader, StatsSummary, SectionDivider } from '@open-edu/design-system';
 import { KnowledgeCardGrid, KnowledgeCardViewer, ProgressRing } from '@open-edu/runtime';
 import type { KnowledgeCardGridItem } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
-import { getAllCardProgress } from './cardsStorage';
+import { getAllCardProgress, type CardsData } from './cardsStorage';
 
 export interface CollectionBinderPageProps {
   packages: Record<string, LoadedPackage>;
@@ -17,7 +17,11 @@ interface ShelfData {
 
 export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
-  const savedProgress = useMemo(() => getAllCardProgress(), []);
+  const [savedProgress, setSavedProgress] = useState<CardsData>({});
+
+  useEffect(() => {
+    getAllCardProgress().then(setSavedProgress);
+  }, []);
 
   const allCardItems = useMemo<KnowledgeCardGridItem[]>(() => {
     const items: KnowledgeCardGridItem[] = [];
