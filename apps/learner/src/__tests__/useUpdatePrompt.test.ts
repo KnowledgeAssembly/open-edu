@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useUpdatePrompt } from '../hooks/useUpdatePrompt.js';
-import { registerUpdateListener, skipWaiting } from '@open-edu/pwa-core';
+import { registerUpdateListener, skipWaiting, type UpdateState } from '@open-edu/pwa-core';
 
 vi.mock('@open-edu/pwa-core', () => ({
   registerUpdateListener: vi.fn().mockResolvedValue(vi.fn()),
@@ -48,8 +48,8 @@ describe('useUpdatePrompt', () => {
   });
 
   it('transitions to update available when listener fires', async () => {
-    let listenerCb: (state: { updateAvailable: boolean }) => void = () => {};
-    vi.mocked(registerUpdateListener).mockImplementation((cb) => {
+    let listenerCb: (state: UpdateState) => void = () => {};
+    vi.mocked(registerUpdateListener).mockImplementation((cb: (state: UpdateState) => void) => {
       listenerCb = cb;
       return Promise.resolve(vi.fn());
     });
@@ -58,7 +58,7 @@ describe('useUpdatePrompt', () => {
     expect(result.current.updateAvailable).toBe(false);
 
     await act(async () => {
-      listenerCb({ updateAvailable: true });
+      listenerCb({ updateAvailable: true, registration: null });
     });
 
     expect(result.current.updateAvailable).toBe(true);

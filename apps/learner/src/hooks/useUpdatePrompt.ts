@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { registerUpdateListener, skipWaiting } from '@open-edu/pwa-core';
+import { registerUpdateListener, skipWaiting, type UpdateState } from '@open-edu/pwa-core';
 
 export function useUpdatePrompt() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -8,11 +8,11 @@ export function useUpdatePrompt() {
     let cancelled = false;
     let cleanupFn: (() => void) | null = null;
 
-    registerUpdateListener((state) => {
+    registerUpdateListener((state: UpdateState) => {
       if (!cancelled) {
         setUpdateAvailable(state.updateAvailable);
       }
-    }).then((cleanup) => {
+    }).then((cleanup: () => void) => {
       if (cancelled) cleanup();
       else cleanupFn = cleanup;
     });

@@ -22,6 +22,7 @@
     "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/schemas": "workspace:*",
+    "@open-edu/pwa-core": "workspace:*",
     "@open-edu/storage": "workspace:^",
     "@open-edu/telemetry": "workspace:*",
     "@open-edu/widgets": "workspace:*",
