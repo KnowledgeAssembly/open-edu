@@ -8,6 +8,7 @@ import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { llmProxyHandler } from './src/llm-proxy/index.js';
 import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
@@ -195,7 +196,45 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), eduDataPlugin()],
+    plugins: [
+      react(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable.png'],
+        manifest: false,
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,svg,png,woff,woff2}'],
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [/^\/api\//],
+          runtimeCaching: [
+            {
+              urlPattern: /^\/api\//,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 300,
+                },
+                networkTimeoutSeconds: 3,
+              },
+            },
+            {
+              urlPattern: /\.(png|jpg|jpeg|gif|svg|webp|woff2?|ttf|eot)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'course-assets',
+                expiration: {
+                  maxEntries: 200,
+                  maxAgeSeconds: 2592000,
+                },
+              },
+            },
+          ],
+        },
+      }),
+      eduDataPlugin(),
+    ],
     resolve: {
       alias: [
         { find: /^fs\/promises$/, replacement: resolve(__dirname, 'src/stubs/fs-promises.ts') },
