@@ -1,3 +1,10 @@
+---
+type: Architecture Overview
+title: Architecture Overview
+description: High-level map of the Open-Edu monorepo architecture, including content loading, workflow execution, runtime rendering, the widget catalog pipeline used by core and the CLI, and the SVG explorer widget family.
+tags: [openwiki, architecture, monorepo, runtime]
+---
+
 # Architecture Overview
 
 Open-Edu is a pnpm workspace monorepo built around a content/runtime split:
@@ -68,7 +75,7 @@ Translates events into reward receipts, including badge delivery and card progre
 
 ### `@open-edu/widgets`
 
-Provides the widget registry and built-in widgets used by content nodes and runtime renderers. Includes 21 built-in widgets (14 stable + 6 experimental + 1 deprecated alias) with enriched metadata across AI, capabilities, accessibility, analytics, and reward categories. The registry supports alias resolution, domain namespacing, structured search, metadata validation, and catalog generation for LLM prompts.
+Provides the widget registry and built-in widgets used by content nodes and runtime renderers. The registry supports alias resolution, domain namespacing, structured search, metadata validation, and catalog generation for LLM prompts. Recent changes moved the canonical widget metadata into `packages/widgets/src/widget-catalog-source.ts` and added the SVG explorer widget family, while `@open-edu/core` now reads the generated catalog data at runtime.
 
 ### `@open-edu/course-compiler`
 
@@ -117,4 +124,5 @@ The repo is organized to keep learning content portable and the runtime platform
 - routing and mastery: `packages/workflow`
 - rendering and theme behavior: `packages/runtime`
 - visual structure and reusable UI: `packages/design-system`
+- widget ID resolution and catalog generation: `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, `packages/widgets/scripts/generate-catalog.ts`, plus SVG explorer components under `packages/widgets/src/svg-explorer`
 - end-user navigation and app composition: `apps/learner`

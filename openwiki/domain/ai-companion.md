@@ -1,3 +1,10 @@
+---
+type: Domain Guide
+title: AI Companion
+description: Canonical guide to the AI Learning Companion services package, including search, dictionary, conversation, and provider interfaces used by the learner app.
+tags: [openwiki, domain, ai, learner]
+---
+
 # AI Companion
 
 `packages/ai-companion` provides the search, dictionary, conversation, and provider interfaces used by the learner app's AI companion feature.
@@ -10,6 +17,7 @@
 - **CacheService** — generic TTL-based caching
 - **ContextManager** — learning context for personalized AI responses
 - **Provider interfaces** — `AIProvider`, `DictionaryProvider`, `ContextProvider`, `CacheProvider`
+- `DictionaryLoader` and the package data files it reads, which keep dictionary content separate from search behavior
 
 ## How it integrates with the learner app
 
@@ -51,5 +59,6 @@ Full design specification at `docs/superpowers/specs/2026-07-08-ai-companion-des
 - To add a new service: create in `packages/ai-companion/src/services/` and export from `src/index.ts`
 - To add a provider interface: define in `packages/ai-companion/src/providers/types.ts`
 - To change search behavior: modify `SearchManager` or individual index implementations in `packages/ai-companion/src/search/`
+- The learner app consumes this package through `apps/learner/src/ai/CompanionProvider.tsx`, `TextSelectionToolbar`, and `WordTapHandler`
 - The package is pure TypeScript — no build step required
 - Tests live alongside source files as `*.test.ts`
