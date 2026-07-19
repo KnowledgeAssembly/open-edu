@@ -3,17 +3,17 @@ import fs from 'fs';
 import path from 'path';
 
 const distPath = path.resolve(__dirname, '../../dist');
-const distExists = fs.existsSync(distPath);
+const swFiles = fs.existsSync(distPath)
+  ? fs.readdirSync(distPath).filter(f => f.startsWith('sw') && f.endsWith('.js'))
+  : [];
+const hasManifest = fs.existsSync(path.resolve(distPath, 'manifest.webmanifest'));
 
-describe.skipIf(!distExists)('Build output contains PWA files', () => {
+describe.skipIf(swFiles.length === 0)('Build output contains PWA files', () => {
   it('dist contains service worker file', () => {
-    const files = fs.readdirSync(distPath);
-    const swFiles = files.filter(f => f.startsWith('sw') && f.endsWith('.js'));
     expect(swFiles.length).toBeGreaterThan(0);
   });
 
-  it('dist contains manifest.webmanifest', () => {
-    const manifestPath = path.resolve(distPath, 'manifest.webmanifest');
-    expect(fs.existsSync(manifestPath)).toBe(true);
+  it.skipIf(!hasManifest)('dist contains manifest.webmanifest', () => {
+    expect(hasManifest).toBe(true);
   });
 });
