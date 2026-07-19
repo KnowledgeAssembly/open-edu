@@ -4,6 +4,7 @@ export interface UpdateState {
 }
 
 let registration: ServiceWorkerRegistration | null = null;
+let updateAvailable = false;
 
 export async function registerUpdateListener(
   callback: (state: UpdateState) => void,
@@ -18,6 +19,7 @@ export async function registerUpdateListener(
     if (newWorker) {
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          updateAvailable = true;
           callback({ updateAvailable: true, registration: reg });
         }
       });
@@ -26,12 +28,13 @@ export async function registerUpdateListener(
 
   return () => {
     registration = null;
+    updateAvailable = false;
   };
 }
 
 export function getUpdateState(): UpdateState {
   return {
-    updateAvailable: false,
+    updateAvailable,
     registration,
   };
 }

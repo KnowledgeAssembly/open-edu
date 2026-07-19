@@ -61,6 +61,9 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
           db.createObjectStore('preferences', { keyPath: 'locale' });
         }
       },
+    }).catch((err) => {
+      dbPromise = null;
+      throw err;
     });
   }
   return dbPromise;

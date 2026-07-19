@@ -21,12 +21,16 @@ export async function getCourseProgress(courseId: string): Promise<LearningProgr
 
 export async function deleteCourseProgress(courseId: string): Promise<void> {
   const db = await openDatabase();
-  const all = await db.getAll('progress');
   const tx = db.transaction('progress', 'readwrite');
-  for (const p of all) {
-    if (p.courseId === courseId) {
-      await tx.store.delete([p.courseId, p.lessonId]);
+  const store = tx.objectStore('progress');
+
+  let cursor = await store.openCursor();
+  while (cursor) {
+    const key = cursor.key as [string, string];
+    if (key[0] === courseId) {
+      cursor.delete();
     }
+    cursor = await cursor.continue();
   }
   await tx.done;
 }
