@@ -60,6 +60,8 @@ pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-da
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales  # Extract translatable strings
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales  # Validate translation completeness
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang  # Find missing translations
+pnpm lint:hardcoded-strings                       # Scan for hardcoded user-facing strings (part of pnpm lint)
+node packages/i18n/src/i18n-keys.test.ts          # Run i18n key validation test
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -109,8 +111,9 @@ open-edu/
 2. **Schemas are the source of truth.** All types derive from Zod schemas, never hand-written.
 3. **Packages must be self-contained.** No cross-package imports except through published interfaces (package.json exports).
 4. **Accessibility is not optional.** Every rendered component must pass axe-core.
-5. **Commits should be scoped.** Use conventional commits: `feat(schemas): add workflow schema`
-6. **One story per PR.** Each story gets its own branch and PR.
+5. **Internationalization is not optional.** All user-facing strings in renderers, layout components, and learner app must use `t()` from `@open-edu/i18n`. Never hardcode UI labels — add the English translation to `packages/i18n/locales/en/{namespace}.json`. The lint step (`pnpm lint:hardcoded-strings`) enforces this automatically.
+6. **Commits should be scoped.** Use conventional commits: `feat(schemas): add workflow schema`
+7. **One story per PR.** Each story gets its own branch and PR.
 
 ## UI Coding Standards
 
@@ -231,12 +234,13 @@ Both the learner (`apps/learner/tailwind.config.ts`) and dev-server (`apps/dev-s
 Before marking a story complete, verify:
 
 - [ ] All tests pass: `pnpm test`
-- [ ] No lint errors: `pnpm lint`
+- [ ] No lint errors: `pnpm lint` (includes i18n hardcoded string check)
 - [ ] TypeScript compiles: `pnpm typecheck`
 - [ ] Formatting is correct: `pnpm format:check`
 - [ ] Conventional commit messages
 - [ ] No dead code, debug logs, or temporary edits
 - [ ] Accessibility: axe-core audits pass for all affected components
+- [ ] Internationalization: all user-facing strings use `t()` with keys in `packages/i18n/locales/en/`
 
 <!-- OPENWIKI:START -->
 

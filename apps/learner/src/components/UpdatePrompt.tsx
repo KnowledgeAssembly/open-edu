@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from './ui/button.js';
+import { useTranslation } from '@open-edu/i18n';
 
 interface UpdatePromptProps {
   updateAvailable: boolean;
@@ -10,6 +11,7 @@ interface UpdatePromptProps {
 
 export const UpdatePrompt = React.forwardRef<HTMLDivElement, UpdatePromptProps>(
   ({ updateAvailable, onUpdate, onDismiss }, ref) => {
+    const { t } = useTranslation();
     if (!updateAvailable) return null;
 
     return (
@@ -18,7 +20,7 @@ export const UpdatePrompt = React.forwardRef<HTMLDivElement, UpdatePromptProps>(
         role="status"
         className="fixed bottom-4 right-4 z-50 rounded-lg border border-border bg-surface p-4 shadow-lg"
       >
-        <p className="mb-2 text-sm font-medium">A new version is available</p>
+        <p className="mb-2 text-sm font-medium">{t('learner.update.available')}</p>
         <div className="flex gap-2">
           <Button size="sm" onClick={onUpdate}>
             <RefreshCw className="mr-1 h-3 w-3" aria-hidden="true" />

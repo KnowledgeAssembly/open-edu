@@ -6,6 +6,7 @@ import { TelemetrySession } from '@open-edu/telemetry';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
+import { useTranslation } from '@open-edu/i18n';
 import type { RewardReceipt } from '@open-edu/rewards';
 import type { CardDefinition } from '@open-edu/schemas';
 import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
@@ -42,6 +43,7 @@ export function CourseRuntime({
   onProgressUpdate,
   bundleContext,
 }: CourseRuntimeProps): JSX.Element {
+  const { t } = useTranslation();
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
@@ -229,8 +231,8 @@ export function CourseRuntime({
   if (!engine) {
     return (
       <div className="p-lg max-w-2xl" data-testid="course-runtime">
-        <h1 className="text-h1 font-display text-error mb-md">Course not available</h1>
-        <p className="text-on-surface-variant mb-lg">This course has no workflow defined.</p>
+        <h1 className="text-h1 font-display text-error mb-md">{t('learner.course.not_available')}</h1>
+        <p className="text-on-surface-variant mb-lg">{t('learner.course.no_workflow')}</p>
         <Button onClick={onBackToCatalog}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to catalog

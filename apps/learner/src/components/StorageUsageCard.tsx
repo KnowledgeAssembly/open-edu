@@ -2,6 +2,7 @@ import * as React from 'react';
 import { HardDrive } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Progress } from './ui/progress.js';
+import { useTranslation } from '@open-edu/i18n';
 
 interface StorageUsageCardProps {
   usage: number;
@@ -18,13 +19,14 @@ function formatBytes(bytes: number): string {
 
 export const StorageUsageCard = React.forwardRef<HTMLDivElement, StorageUsageCardProps>(
   ({ usage, quota }, ref) => {
+    const { t } = useTranslation();
     const percentage = quota > 0 ? Math.round((usage / quota) * 100) : 0;
 
     return (
       <Card ref={ref}>
         <CardHeader className="flex flex-row items-center gap-2 pb-2">
           <HardDrive className="h-5 w-5" aria-hidden="true" />
-          <CardTitle className="text-base">Storage Usage</CardTitle>
+          <CardTitle className="text-base">{t('learner.storage.usage')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Progress value={percentage} className="mb-2" aria-label={`${percentage}% used`} />

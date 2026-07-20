@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
+import { useTranslation } from '@open-edu/i18n';
 import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
@@ -39,6 +40,7 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
+  const { t } = useTranslation();
   const installPrompt = useInstallPrompt();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
@@ -107,7 +109,7 @@ export function CatalogPage({
           variant="no-courses"
           heading="No courses yet"
           description="Start exploring to build your learning path."
-          action={<Button onClick={() => onNavigate?.({ view: 'catalog' })}>Browse Catalog</Button>}
+          action={<Button onClick={() => onNavigate?.({ view: 'catalog' })}>{t('learner.catalog.browse')}</Button>}
         />
       </div>
     );
@@ -127,7 +129,7 @@ export function CatalogPage({
         <section className="mb-xl" data-testid="continue-learning-shelf">
           <div className="mb-md flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-h2 font-display text-on-surface">Continue Learning</h2>
+              <h2 className="text-h2 font-display text-on-surface">{t('learner.catalog.continue_learning')}</h2>
               <span className="bg-surface-container text-on-surface-variant rounded-full px-2 py-0.5 text-xs">
                 {inProgressCourses.length} in progress
               </span>
@@ -168,7 +170,7 @@ export function CatalogPage({
 
       {bundleSummaries && bundleSummaries.length > 0 && (
         <section className="mb-xl" data-testid="bundle-list-section">
-          <h2 className="text-h2 font-display text-on-surface mb-md">Learning Bundles</h2>
+          <h2 className="text-h2 font-display text-on-surface mb-md">{t('learner.catalog.learning_bundles')}</h2>
           <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {bundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
@@ -225,7 +227,7 @@ export function CatalogPage({
       )}
 
       <div className="gap-md mb-md flex items-center" data-testid="sort-controls">
-        <span className="text-on-surface-variant text-sm font-semibold">Sort:</span>
+        <span className="text-on-surface-variant text-sm font-semibold">{t('learner.catalog.sort_label')}</span>
         <Select
           value={sortBy}
           onValueChange={(v) => setSortBy(v as 'newest' | 'inProgress' | 'alphabetical')}
@@ -235,7 +237,7 @@ export function CatalogPage({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="inProgress">In Progress First</SelectItem>
+            <SelectItem value="inProgress">{t('learner.catalog.in_progress_first')}</SelectItem>
             <SelectItem value="alphabetical">Alphabetical</SelectItem>
           </SelectContent>
         </Select>

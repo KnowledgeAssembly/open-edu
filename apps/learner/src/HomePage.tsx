@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { PackageSummary } from '@open-edu/core';
+import { useTranslation } from '@open-edu/i18n';
 import { type AppView } from './AppShell';
 import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
@@ -25,6 +26,7 @@ export function HomePage({
   catalogPackages = [],
   bundleEntries,
 }: HomePageProps): JSX.Element {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   const [bundleProg, setBundleProg] = useState<BundleProgressData>({});
@@ -46,12 +48,12 @@ export function HomePage({
   return (
     <div className="p-xl mx-auto max-w-4xl" data-testid="home-page">
       <HeroSection variant="editorial" showIllustration className="mb-xl">
-        <h1 className="text-display-lg font-display text-on-surface">Welcome back, Learner</h1>
+        <h1 className="text-display-lg font-display text-on-surface">{t('learner.home.welcome_back')}</h1>
         <p className="text-body-reading text-on-surface-variant mt-md max-w-prose">
           Continue where you left off, or explore new courses in the catalog.
         </p>
         <div className="mt-md flex items-center gap-4">
-          <Button onClick={() => onNavigate({ view: 'catalog' })}>Begin Learning</Button>
+          <Button onClick={() => onNavigate({ view: 'catalog' })}>{t('learner.home.begin_learning')}</Button>
           <Pipili size="sm" mood="idle" animated />
         </div>
       </HeroSection>
@@ -112,7 +114,7 @@ export function HomePage({
             Ready to continue your learning journey?
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => onNavigate({ view: 'catalog' })}>Browse Courses</Button>
+            <Button onClick={() => onNavigate({ view: 'catalog' })}>{t('learner.home.browse_courses')}</Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
               View Progress
             </Button>

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo, type ReactNode, type TouchEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
 import { Sparkles } from 'lucide-react';
 import type { DictionaryEntry } from '@open-edu/ai-companion';
@@ -23,6 +24,7 @@ const DOUBLE_TAP_TIME_MS = 300;
 const DOUBLE_TAP_DISTANCE_PX = 20;
 
 export function WordTapHandler({ children, className }: WordTapHandlerProps): JSX.Element {
+  const { t } = useTranslation();
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -215,7 +217,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
           {popover.loading && (
             <div className="flex items-center gap-2">
               <div className="bg-primary/20 border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-transparent" />
-              <span className="text-on-surface-variant text-sm">Looking up...</span>
+              <span className="text-on-surface-variant text-sm">{t('learner.ai.looking_up')}</span>
             </div>
           )}
 
@@ -248,14 +250,14 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
               {popover.entry?.synonyms && popover.entry.synonyms.length > 0 && (
                 <div className="mt-3">
-                  <span className="text-on-surface-variant text-xs font-medium">Synonyms: </span>
+                  <span className="text-on-surface-variant text-xs font-medium">{t('learner.ai.synonyms')} </span>
                   <span className="text-xs">{popover.entry.synonyms.slice(0, 5).join(', ')}</span>
                 </div>
               )}
 
               {popover.suggestions.length > 0 && !popover.entry && (
                 <div>
-                  <p className="text-on-surface-variant mb-1 text-xs font-medium">Did you mean?</p>
+                  <p className="text-on-surface-variant mb-1 text-xs font-medium">{t('learner.ai.did_you_mean')}</p>
                   <div className="flex flex-wrap gap-1">
                     {popover.suggestions.map((s) => (
                       <span

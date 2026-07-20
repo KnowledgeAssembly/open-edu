@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { WordTapHandler } from '../ai/WordTapHandler';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const SERVER_ENTRY = {
   id: 'apple',
@@ -53,7 +55,11 @@ function getMockRange(textNode: Node, length: number): Range {
 }
 
 function renderWithWordTap(children: React.ReactNode) {
-  const result = render(<WordTapHandler>{children}</WordTapHandler>);
+  const result = render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      <WordTapHandler>{children}</WordTapHandler>
+    </I18nProvider>,
+  );
   const contentDiv = result.container.firstChild as HTMLElement;
   const wordEl = contentDiv.querySelector('p')!;
   const range = getMockRange(wordEl.firstChild!, wordEl.textContent!.length);

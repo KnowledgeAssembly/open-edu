@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Award } from 'lucide-react';
 import { cn, ConfettiBurst, GlowPulse } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 
 export interface BadgeToastProps {
   badgeName: string;
@@ -15,6 +16,7 @@ export function BadgeToast({
   onDismiss,
   autoDismissMs = 4000,
 }: BadgeToastProps): JSX.Element | null {
+  const { t } = useTranslation();
   const [shouldRender, setShouldRender] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -82,7 +84,7 @@ export function BadgeToast({
             </div>
           </GlowPulse>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-tertiary text-sm font-semibold">Achievement Unlocked!</span>
+            <span className="text-tertiary text-sm font-semibold">{t('learner.badge.achievement_unlocked')}</span>
             <span className="text-on-surface truncate text-sm">{badgeName}</span>
           </div>
         </div>

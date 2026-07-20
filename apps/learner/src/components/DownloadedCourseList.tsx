@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Trash2, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Button } from './ui/button.js';
+import { useTranslation } from '@open-edu/i18n';
 import type { StoredCourse } from '@open-edu/storage';
 
 interface DownloadedCourseListProps {
@@ -15,12 +16,13 @@ function formatDate(iso: string): string {
 
 export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedCourseListProps>(
   ({ courses, onDelete }, ref) => {
+    const { t } = useTranslation();
     if (courses.length === 0) {
       return (
         <Card ref={ref}>
           <CardContent className="py-8 text-center text-on-surface/60">
             <BookOpen className="mx-auto mb-2 h-8 w-8 opacity-50" aria-hidden="true" />
-            <p className="text-sm">No downloaded courses yet.</p>
+            <p className="text-sm">{t('learner.downloads.no_courses')}</p>
           </CardContent>
         </Card>
       );

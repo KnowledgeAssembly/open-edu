@@ -1,5 +1,6 @@
 import { useMemo, type ComponentProps, type ReactElement } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
+import { useTranslation } from '@open-edu/i18n';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -215,6 +216,7 @@ export function MarkdownRenderer({
   className,
   components,
 }: MarkdownRendererProps): JSX.Element {
+  const { t } = useTranslation();
   const rendered = useMemo(() => {
     const merged: ComponentMap = { ...accessibleComponents, ...components };
     const processor = unified()
@@ -233,7 +235,7 @@ export function MarkdownRenderer({
 
   return (
     <div className={className} data-testid="markdown-renderer">
-      {rendered ?? <p>Unable to render content.</p>}
+      {rendered ?? <p>{t('runtime.markdown.render_error')}</p>}
     </div>
   );
 }
