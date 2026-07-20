@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LocalizedSchema, isLocalized, extractLocalized } from './localized.js';
+import { LocalizedSchema, localizedField, isLocalized, extractLocalized } from './localized.js';
 
 describe('LocalizedSchema', () => {
   it('accepts a plain string', () => {
@@ -30,6 +30,35 @@ describe('isLocalized', () => {
 
   it('returns true for localized records', () => {
     expect(isLocalized({ en: 'Hello', hi: 'नमस्ते' })).toBe(true);
+  });
+});
+
+describe('localizedField', () => {
+  it('accepts a plain string', () => {
+    const schema = localizedField();
+    expect(schema.safeParse('Hello').success).toBe(true);
+  });
+
+  it('accepts a localized record', () => {
+    const schema = localizedField();
+    expect(schema.safeParse({ en: 'Hello', hi: 'नमस्ते' }).success).toBe(true);
+  });
+
+  it('rejects empty objects', () => {
+    const schema = localizedField();
+    expect(schema.safeParse({}).success).toBe(false);
+  });
+
+  it('enforces max length on strings', () => {
+    const schema = localizedField(5);
+    expect(schema.safeParse('Hello').success).toBe(true);
+    expect(schema.safeParse('Too long').success).toBe(false);
+  });
+
+  it('enforces max length on record values', () => {
+    const schema = localizedField(5);
+    expect(schema.safeParse({ en: 'Hello' }).success).toBe(true);
+    expect(schema.safeParse({ en: 'Too long' }).success).toBe(false);
   });
 });
 

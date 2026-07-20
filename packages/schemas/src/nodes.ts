@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { SkillsSchema } from './manifest.js';
 import { RemoteWidgetManifestSchema } from './widget-manifest.js';
-import { LocalizedSchema } from './localized.js';
+import { localizedField } from './localized.js';
 
 const OptionSchema = z.object({
   id: z.string().min(1).max(64),
@@ -30,7 +30,7 @@ const ExerciseConfigSchema = z.object({
 });
 
 const NodeFields = {
-  title: z.union([z.string().max(256), z.record(z.string(), z.string().max(256))]).optional(),
+  title: localizedField(256).optional(),
   skills: SkillsSchema.optional(),
 } as const;
 

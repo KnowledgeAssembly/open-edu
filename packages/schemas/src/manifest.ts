@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { localizedField } from './localized.js';
 
 export const PackageManifestSchema = z.object({
   id: z
@@ -6,7 +7,7 @@ export const PackageManifestSchema = z.object({
     .min(1)
     .max(128)
     .regex(/^[a-z0-9][a-z0-9_-]*$/, 'id must be kebab-case (lowercase, hyphens, underscores)'),
-  title: z.union([z.string().min(1).max(256), z.record(z.string(), z.string().min(1).max(256))]),
+  title: localizedField(256),
   version: z
     .string()
     .min(1)

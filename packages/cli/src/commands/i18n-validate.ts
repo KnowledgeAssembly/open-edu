@@ -14,7 +14,7 @@ export async function i18nValidate(
     return { success: false, error: 'No locale directories found', code: 1 };
   }
 
-  const referenceLocale = localeDirs[0];
+  const referenceLocale = localeDirs.includes('en') ? 'en' : localeDirs[0];
   const referenceKeys = new Map<string, string[]>();
 
   function collectKeys(filePath: string, prefix: string): void {
@@ -38,7 +38,7 @@ export async function i18nValidate(
     }
   }
 
-  for (const locale of localeDirs.slice(1)) {
+  for (const locale of localeDirs.filter((l) => l !== referenceLocale)) {
     const localeDir = join(localesDir, locale);
     for (const [ns, keys] of referenceKeys) {
       const filePath = join(localeDir, `${ns}.json`);

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { I18nProvider, useTranslation } from './context.js';
 

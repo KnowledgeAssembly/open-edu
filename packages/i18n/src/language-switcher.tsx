@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from './context.js';
 import type { Locale } from './locale.js';
 
@@ -32,14 +31,14 @@ export function LanguageSwitcher({
         <button
           key={loc}
           type="button"
-          role="button"
-          aria-pressed={locale === loc}
+          role="radio"
+          aria-checked={locale === loc}
           aria-label={LOCALE_LABELS[loc] ?? loc}
           onClick={() => setLocale(loc)}
           className={
             locale === loc
-              ? 'font-semibold underline'
-              : ''
+              ? 'rounded-sm px-3 py-1.5 text-sm font-semibold underline underline-offset-2'
+              : 'cursor-pointer rounded-sm px-3 py-1.5 text-sm hover:bg-primary/10'
           }
         >
           {LOCALE_LABELS[loc] ?? loc}

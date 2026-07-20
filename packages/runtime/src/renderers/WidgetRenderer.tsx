@@ -1,6 +1,6 @@
 import { Component, useContext, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
-import { I18nContext } from '@open-edu/i18n';
+import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
@@ -13,7 +13,7 @@ interface WidgetErrorBoundaryState {
 }
 
 class WidgetErrorBoundary extends Component<
-  { widgetId: string; children: ReactNode },
+  { widgetId: string; message: string; children: ReactNode },
   WidgetErrorBoundaryState
 > {
   state: WidgetErrorBoundaryState = { hasError: false };
@@ -35,7 +35,7 @@ class WidgetErrorBoundary extends Component<
       return (
         <WidgetErrorFallback
           widgetId={this.props.widgetId}
-          message="This activity couldn't load. Try refreshing the page."
+          message={this.props.message}
           onRetry={this.handleRetry}
           isDevMode={process.env.NODE_ENV === 'development'}
           devDetails={this.state.error?.message}
@@ -66,6 +66,7 @@ export interface WidgetRendererProps {
 
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
+  const { t } = useTranslation();
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale;
@@ -80,7 +81,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   if (!definition) {
     return (
       <div role="status" data-testid="widget-renderer-placeholder">
-        No widget registered for ID &ldquo;{widgetId}&rdquo;
+        {t('runtime.widget.no_registered', { id: widgetId })}
       </div>
     );
   }
@@ -115,7 +116,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   };
 
   return (
-    <WidgetErrorBoundary widgetId={widgetId}>
+    <WidgetErrorBoundary widgetId={widgetId} message={t('runtime.widget.load_error')}>
       <WidgetCanvas widgetId={widgetId} minHeight={200}>
         <WidgetComponent {...widgetProps} />
       </WidgetCanvas>
@@ -125,6 +126,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
 function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
+  const { t } = useTranslation();
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale;
@@ -135,7 +137,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
   if (status === 'loading') {
     return (
       <div role="status" data-testid="remote-widget-loading">
-        Loading remote widget &ldquo;{manifest.id}&rdquo;&hellip;
+        {t('runtime.widget.loading_remote', { id: manifest.id })}
       </div>
     );
   }
@@ -168,7 +170,10 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
           storedState,
         };
         return (
-          <WidgetErrorBoundary widgetId={manifest.fallback}>
+          <WidgetErrorBoundary
+            widgetId={manifest.fallback}
+            message={t('runtime.widget.load_error')}
+          >
             <WidgetCanvas widgetId={manifest.fallback} minHeight={200}>
               <WidgetComponent {...widgetProps} />
             </WidgetCanvas>
@@ -180,7 +185,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     return (
       <WidgetErrorFallback
         widgetId={manifest.id}
-        message={`Failed to load remote widget "${manifest.id}".`}
+        message={t('runtime.widget.remote_load_error', { id: manifest.id })}
         isDevMode={process.env.NODE_ENV === 'development'}
         devDetails={error}
       />
@@ -212,7 +217,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
   };
 
   return (
-    <WidgetErrorBoundary widgetId={manifest.id}>
+    <WidgetErrorBoundary widgetId={manifest.id} message={t('runtime.widget.load_error')}>
       <WidgetCanvas widgetId={manifest.id} minHeight={200}>
         <WidgetComponent {...widgetProps} />
       </WidgetCanvas>

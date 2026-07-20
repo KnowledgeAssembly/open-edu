@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { localizedField } from './localized.js';
 
 export const BundleModuleRefSchema = z.object({
   id: z
@@ -9,7 +10,7 @@ export const BundleModuleRefSchema = z.object({
       /^[a-z0-9][a-z0-9_-]*$/,
       'module id must be kebab-case (lowercase, hyphens, underscores)',
     ),
-  title: z.union([z.string().min(1).max(256), z.record(z.string(), z.string().min(1).max(256))]),
+  title: localizedField(256),
   chapterCode: z.string().optional(),
   path: z.string().min(1).max(512),
   dependsOn: z.array(z.string()).default([]),
@@ -24,10 +25,10 @@ export const BundleManifestSchema = z
       .max(128)
       .regex(/^[a-z0-9][a-z0-9_-]*$/, 'id must be kebab-case (lowercase, hyphens, underscores)'),
     type: z.literal('bundle').default('bundle'),
-    title: z.union([z.string().min(1).max(256), z.record(z.string(), z.string().min(1).max(256))]),
+    title: localizedField(256),
     level: z.string().optional(),
     subject: z.string().optional(),
-    description: z.union([z.string(), z.record(z.string(), z.string())]).optional(),
+    description: localizedField().optional(),
     version: z
       .string()
       .min(1)
