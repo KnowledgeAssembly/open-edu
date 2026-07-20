@@ -35,6 +35,7 @@
     "@open-edu/accessibility": "workspace:*",
     "@open-edu/core": "workspace:*",
     "@open-edu/design-system": "workspace:*",
+    "@open-edu/i18n": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",

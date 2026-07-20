@@ -1,0 +1,17 @@
+{
+  "loading": "Loading…",
+  "quiz.submit": "Submit",
+  "quiz.correct": "Correct! Well done.",
+  "quiz.incorrect": "Incorrect. The correct answer is highlighted.",
+  "quiz.correct_answer": " — Correct answer",
+  "quiz.your_answer_incorrect": " — Your answer (incorrect)",
+  "quiz.answer_options": "Answer options",
+  "widget.load_error": "This activity couldn't load. Try refreshing the page.",
+  "widget.no_registered": "No widget registered for ID: {{id}}",
+  "widget.loading_remote": "Loading remote widget \"{{id}}\"…",
+  "widget.remote_load_error": "Failed to load remote widget \"{{id}}\".",
+  "reflection.char_count": "{{count}} / {{max}}",
+  "reflection.placeholder": "Type your reflection here…",
+  "reflection.saved": "Saved — thank you for your reflection.",
+  "node.loaded": "Loaded {{type}}: {{title}}"
+}

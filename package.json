@@ -26,7 +26,10 @@
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
     "storybook": "pnpm --filter @open-edu/design-system storybook",
-    "build-storybook": "pnpm --filter @open-edu/design-system build-storybook"
+    "build-storybook": "pnpm --filter @open-edu/design-system build-storybook",
+    "i18n:extract": "pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n extract packages/runtime/src packages/i18n/locales/en",
+    "i18n:validate": "pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n validate packages/i18n/locales",
+    "i18n:missing": "pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n missing packages/i18n/locales hi"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

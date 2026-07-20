@@ -12,7 +12,8 @@ import {
   RadioGroupItem,
   Pipili,
 } from '@open-edu/design-system';
-import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
+import { Sun, Eye, Type, Minus, Plus, Languages } from 'lucide-react';
+import { LanguageSwitcher, useTranslation } from '@open-edu/i18n';
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
@@ -28,6 +29,7 @@ export function SettingsPage({
   breakTimer,
 }: SettingsPageProps): JSX.Element {
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
+  const { t } = useTranslation();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
@@ -44,13 +46,13 @@ export function SettingsPage({
 
   return (
     <div className="p-xl mx-auto max-w-3xl" data-testid="settings-page">
-      <PageHeader eyebrow="Settings" title="Settings" className="mb-xl" />
+      <PageHeader eyebrow={t('learner.nav.settings')} title={t('learner.nav.settings')} className="mb-xl" />
 
       <div className="gap-lg flex flex-col">
         <Card>
           <CardHeader>
             <h2 className="text-h2 font-display flex items-center gap-2">
-              <Sun className="h-5 w-5" /> Theme
+              <Sun className="h-5 w-5" /> {t('learner.settings.theme')}
             </h2>
           </CardHeader>
           <CardContent>
@@ -61,7 +63,19 @@ export function SettingsPage({
         <Card>
           <CardHeader>
             <h2 className="text-h2 font-display flex items-center gap-2">
-              <Eye className="h-5 w-5" /> Accessibility
+              <Languages className="h-5 w-5" /> {t('learner.settings.language')}
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <p className="text-on-surface-variant text-sm">{t('learner.settings.language_description')}</p>
+            <LanguageSwitcher />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-h2 font-display flex items-center gap-2">
+              <Eye className="h-5 w-5" /> {t('learner.settings.accessibility')}
             </h2>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -69,8 +83,8 @@ export function SettingsPage({
               <div className="flex items-center gap-2">
                 <Type className="text-on-surface-variant h-4 w-4" />
                 <div>
-                  <p className="text-sm font-medium">Font Size</p>
-                  <p className="text-on-surface-variant text-xs">Adjust text size</p>
+                  <p className="text-sm font-medium">{t('learner.settings.font_size')}</p>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.font_size_description')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -97,28 +111,28 @@ export function SettingsPage({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="text-sm font-medium">Reduced Motion</p>
-                  <p className="text-on-surface-variant text-xs">Minimize animations</p>
+                  <p className="text-sm font-medium">{t('learner.settings.reduced_motion')}</p>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.reduced_motion_description')}</p>
                 </div>
               </div>
               <Switch
                 checked={reducedMotion}
                 onCheckedChange={setReducedMotion}
-                aria-label="Reduced Motion"
+                aria-label={t('learner.settings.reduced_motion')}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="text-sm font-medium">High Contrast</p>
-                  <p className="text-on-surface-variant text-xs">Increase color contrast</p>
+                  <p className="text-sm font-medium">{t('learner.settings.high_contrast')}</p>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.high_contrast_description')}</p>
                 </div>
               </div>
               <Switch
                 checked={highContrast}
                 onCheckedChange={setHighContrast}
-                aria-label="High Contrast"
+                aria-label={t('learner.settings.high_contrast')}
               />
             </div>
           </CardContent>
@@ -127,7 +141,7 @@ export function SettingsPage({
         <Card>
           <CardHeader>
             <h2 className="text-h2 font-display flex items-center gap-2">
-              <Pipili size="sm" mood="content" /> Break Reminder
+              <Pipili size="sm" mood="content" /> {t('learner.settings.break_reminder')}
             </h2>
           </CardHeader>
           <CardContent>
@@ -139,31 +153,29 @@ export function SettingsPage({
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="off" id="break-off" />
                 <label htmlFor="break-off" className="text-sm">
-                  <span className="font-medium">Off</span>
-                  <p className="text-on-surface-variant text-xs">No break reminders</p>
+                  <span className="font-medium">{t('learner.settings.break_off')}</span>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_off_description')}</p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="15" id="break-15" />
                 <label htmlFor="break-15" className="text-sm">
-                  <span className="font-medium">15 min</span>
-                  <p className="text-on-surface-variant text-xs">Quick learning sprints</p>
+                  <span className="font-medium">{t('learner.settings.break_15')}</span>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_15_description')}</p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="30" id="break-30" />
                 <label htmlFor="break-30" className="text-sm">
-                  <span className="font-medium">30 min</span>
-                  <p className="text-on-surface-variant text-xs">
-                    Balanced sessions with regular breaks
-                  </p>
+                  <span className="font-medium">{t('learner.settings.break_30')}</span>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_30_description')}</p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="60" id="break-60" />
                 <label htmlFor="break-60" className="text-sm">
-                  <span className="font-medium">60 min</span>
-                  <p className="text-on-surface-variant text-xs">Deep work sessions</p>
+                  <span className="font-medium">{t('learner.settings.break_60')}</span>
+                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_60_description')}</p>
                 </label>
               </div>
             </RadioGroup>

@@ -3,6 +3,8 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { resolve } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { WorkflowEngine } from '@open-edu/workflow';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import { RuntimeProvider } from './context/RuntimeContext';
 import { LayoutShell } from './layout/LayoutShell';
 
@@ -10,9 +12,11 @@ const fixtureDir = resolve(__dirname, '__fixtures__/integration-package');
 
 function Harness() {
   return (
-    <RuntimeProvider loadedPackage={loadedPkg} engine={engineInstance}>
-      <LayoutShell />
-    </RuntimeProvider>
+    <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+      <RuntimeProvider loadedPackage={loadedPkg} engine={engineInstance}>
+        <LayoutShell />
+      </RuntimeProvider>
+    </I18nProvider>
   );
 }
 

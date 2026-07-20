@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { QuizNode, QuizAnswer } from '@open-edu/schemas';
 import { FocusTrap } from '@open-edu/accessibility';
+import { useTranslation } from '@open-edu/i18n';
 
 export interface QuizRendererProps {
   node: QuizNode;
@@ -23,6 +24,7 @@ export function QuizRenderer({
   onAnswer,
   className,
 }: QuizRendererProps): JSX.Element {
+  const { t } = useTranslation();
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
     storedAnswer?.type === 'quiz' ? storedAnswer.selectedOptionId : null,
   );
@@ -46,8 +48,9 @@ export function QuizRenderer({
 
   const labelText = (option: QuizOption) => {
     if (!submitted) return option.text;
-    if (option.correct) return `${option.text} — Correct answer`;
-    if (option.id === selectedOptionId) return `${option.text} — Your answer (incorrect)`;
+    if (option.correct) return `${option.text}${t('runtime.quiz.correct_answer')}`;
+    if (option.id === selectedOptionId)
+      return `${option.text}${t('runtime.quiz.your_answer_incorrect')}`;
     return option.text;
   };
 
@@ -69,7 +72,7 @@ export function QuizRenderer({
       >
         <legend className="px-2 text-lg font-bold">{node.question}</legend>
 
-        <div role="radiogroup" aria-label="Answer options" className="mt-3">
+        <div role="radiogroup" aria-label={t('runtime.quiz.answer_options')} className="mt-3">
           {options.map((option) => (
             <label
               key={option.id}
@@ -99,7 +102,7 @@ export function QuizRenderer({
             disabled={selectedOptionId === null}
             className="bg-primary text-on-primary mt-3 cursor-pointer rounded-lg border-none px-5 py-2.5 text-base font-semibold disabled:cursor-default"
           >
-            Submit
+            {t('runtime.quiz.submit')}
           </button>
         ) : (
           <div
@@ -109,9 +112,7 @@ export function QuizRenderer({
               score === 100 ? 'text-secondary bg-secondary/15' : 'text-error bg-error/15'
             }`}
           >
-            {score === 100
-              ? 'Correct! Well done.'
-              : 'Incorrect. The correct answer is highlighted.'}
+            {score === 100 ? t('runtime.quiz.correct') : t('runtime.quiz.incorrect')}
           </div>
         )}
       </fieldset>
