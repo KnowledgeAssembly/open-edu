@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
 import { PageHeader, StatsSummary, SectionDivider } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import { KnowledgeCardGrid, KnowledgeCardViewer, ProgressRing } from '@open-edu/runtime';
 import type { KnowledgeCardGridItem } from '@open-edu/runtime';
 import type { LoadedPackage } from '@open-edu/core';
@@ -16,6 +17,7 @@ interface ShelfData {
 }
 
 export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
+  const { t } = useTranslation('learner');
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
   const [savedProgress, setSavedProgress] = useState<CardsData>({});
 
@@ -74,7 +76,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
               />
             </svg>
           </div>
-          <h2 className="text-h2 font-display text-on-surface mb-2">Collection Binder</h2>
+          <h2 className="text-h2 font-display text-on-surface mb-2">{t('learner.collection_binder.title')}</h2>
           <p className="text-on-surface-variant">
             No cards yet. Complete lessons to unlock your first Knowledge Card.
           </p>

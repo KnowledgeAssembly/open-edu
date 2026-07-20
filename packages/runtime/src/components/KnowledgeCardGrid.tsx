@@ -1,6 +1,7 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { type CardDefinition } from '@open-edu/schemas';
 import { cn, StaggerReveal } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import { KnowledgeCard } from './KnowledgeCard.js';
 
 export interface KnowledgeCardGridItem {
@@ -20,6 +21,7 @@ export function KnowledgeCardGrid({
   onCardClick,
   className,
 }: KnowledgeCardGridProps): JSX.Element {
+  const { t } = useTranslation();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const focusCard = useCallback((index: number) => {
@@ -64,7 +66,7 @@ export function KnowledgeCardGrid({
   if (cards.length === 0) {
     return (
       <div className="text-on-surface-variant flex items-center justify-center py-12" role="status">
-        <p className="text-sm">No cards yet. Complete lessons to unlock your first card.</p>
+        <p className="text-sm">{t('runtime.card_grid.empty')}</p>
       </div>
     );
   }

@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 
 export interface CourseExitWarningDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ export function CourseExitWarningDialog({
   onStay,
   onLeave,
 }: CourseExitWarningDialogProps): JSX.Element | null {
+  const { t } = useTranslation('learner');
   return (
     <Dialog
       open={open}
@@ -28,7 +30,7 @@ export function CourseExitWarningDialog({
     >
       <DialogContent data-testid="exit-warning-dialog">
         <DialogHeader>
-          <DialogTitle>Leave this course?</DialogTitle>
+          <DialogTitle>{t('learner.course.leave_warning')}</DialogTitle>
           <DialogDescription>
             Your progress up to this point has been saved. You can resume from where you left off.
           </DialogDescription>

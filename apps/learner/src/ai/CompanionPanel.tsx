@@ -3,6 +3,7 @@ import { AIChat } from '@open-edu/design-system';
 import type { ChatMessage } from '@open-edu/design-system';
 import { cn } from '@open-edu/design-system';
 import { X } from 'lucide-react';
+import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
 import type { ConversationMessage } from '@open-edu/ai-companion';
 
@@ -22,6 +23,7 @@ const suggestedQuestions = [
 ];
 
 export function CompanionPanel(): JSX.Element | null {
+  const { t } = useTranslation('learner');
   const { panelState, setPanelState, messages, isLoading, sendMessage } = useCompanion();
 
   const isOpen = panelState !== 'closed';
@@ -75,10 +77,10 @@ export function CompanionPanel(): JSX.Element | null {
         data-testid="companion-panel"
         role="dialog"
         aria-modal={isOpen}
-        aria-label="AI Companion"
+        aria-label={t('learner.ai.companion')}
       >
         <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-base font-semibold">AI Companion</h2>
+          <h2 className="text-base font-semibold">{t('learner.ai.companion')}</h2>
           <button
             type="button"
             className="hover:bg-surface-container-high text-on-surface-variant rounded-md p-1 transition-colors"

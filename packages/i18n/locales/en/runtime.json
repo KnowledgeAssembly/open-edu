@@ -13,5 +13,11 @@
   "reflection.char_count": "{{count}} / {{max}}",
   "reflection.placeholder": "Type your reflection here…",
   "reflection.saved": "Saved — thank you for your reflection.",
-  "node.loaded": "Loaded {{type}}: {{title}}"
+  "node.loaded": "Loaded {{type}}: {{title}}",
+  "markdown.render_error": "Unable to render content.",
+  "sidebar.no_lessons": "No lessons",
+  "card_grid.empty": "No cards yet. Complete lessons to unlock your first card.",
+  "card_viewer.mastery_levels": "Mastery Levels",
+  "card_viewer.related_lessons": "Related Lessons",
+  "card_viewer.related_quizzes": "Related Quizzes"
 }

@@ -1,5 +1,6 @@
 import { type CardDefinition, type CardType } from '@open-edu/schemas';
 import { cn } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ export function KnowledgeCardViewer({
   onClose,
   onRelatedLessonClick,
 }: KnowledgeCardViewerProps): JSX.Element {
+  const { t } = useTranslation();
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const maxLevel = card.maximumLevel;
 
@@ -109,7 +111,9 @@ export function KnowledgeCardViewer({
         )}
 
         <div className="px-6">
-          <h4 className="text-on-surface mb-3 text-sm font-semibold">Mastery Levels</h4>
+          <h4 className="text-on-surface mb-3 text-sm font-semibold">
+            {t('runtime.card_viewer.mastery_levels')}
+          </h4>
           <div className="flex flex-col gap-2">
             {Array.from({ length: maxLevel }, (_, i) => {
               const lvl = i + 1;
@@ -164,7 +168,9 @@ export function KnowledgeCardViewer({
 
         {card.relatedLessons && card.relatedLessons.length > 0 && (
           <div className="px-6">
-            <h4 className="text-on-surface mb-2 text-sm font-semibold">Related Lessons</h4>
+            <h4 className="text-on-surface mb-2 text-sm font-semibold">
+              {t('runtime.card_viewer.related_lessons')}
+            </h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedLessons.map((lessonId) => (
                 <button
@@ -190,7 +196,9 @@ export function KnowledgeCardViewer({
 
         {card.relatedQuizzes && card.relatedQuizzes.length > 0 && (
           <div className="px-6 pb-6">
-            <h4 className="text-on-surface mb-2 text-sm font-semibold">Related Quizzes</h4>
+            <h4 className="text-on-surface mb-2 text-sm font-semibold">
+              {t('runtime.card_viewer.related_quizzes')}
+            </h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedQuizzes.map((quizId) => (
                 <button

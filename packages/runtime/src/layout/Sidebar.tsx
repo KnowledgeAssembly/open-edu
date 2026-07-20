@@ -1,5 +1,6 @@
 import { useRuntime } from '../context/RuntimeContext.js';
 import type { LoadedNode } from '@open-edu/core';
+import { useTranslation } from '@open-edu/i18n';
 
 export interface SidebarProps {
   nodes: LoadedNode[];
@@ -7,6 +8,7 @@ export interface SidebarProps {
 
 export function Sidebar({ nodes }: SidebarProps): JSX.Element {
   const { loadedPackage, currentNodeId, visitedNodes } = useRuntime();
+  const { t } = useTranslation();
   const title = loadedPackage.manifest.title;
   const total = nodes.length;
 
@@ -18,7 +20,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
     >
       <h2 className="text-on-surface m-0 mb-4 text-lg font-bold">{title}</h2>
       {nodes.length === 0 ? (
-        <p className="text-on-surface-variant mt-4 text-xs">No lessons</p>
+        <p className="text-on-surface-variant mt-4 text-xs">{t('runtime.sidebar.no_lessons')}</p>
       ) : (
         <ol className="m-0 list-none p-0">
           {nodes.map((node) => {
