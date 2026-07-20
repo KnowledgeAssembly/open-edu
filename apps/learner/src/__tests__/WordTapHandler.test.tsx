@@ -2,6 +2,8 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
 import { WordTapHandler } from '../ai/WordTapHandler';
 import type { SearchResponse } from '@open-edu/ai-companion';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const mockSearch = vi.fn() as ReturnType<typeof vi.fn> & ((query: string) => SearchResponse);
 const mockSetPanelState = vi.fn();
@@ -55,7 +57,11 @@ afterEach(() => {
 });
 
 function renderWithWordTap(children: React.ReactNode) {
-  const result = render(<WordTapHandler>{children}</WordTapHandler>);
+  const result = render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      <WordTapHandler>{children}</WordTapHandler>
+    </I18nProvider>,
+  );
   const contentDiv = result.container.firstChild as HTMLElement;
   const wordEl = contentDiv.querySelector('p')!;
   const range = getMockRange(wordEl.firstChild!, wordEl.textContent!.length);
@@ -78,9 +84,11 @@ function singleClick(wordEl: HTMLElement, x = 50, y = 50) {
 describe('WordTapHandler', () => {
   it('renders children', () => {
     render(
-      <WordTapHandler>
-        <p>Hello world</p>
-      </WordTapHandler>,
+      <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+        <WordTapHandler>
+          <p>Hello world</p>
+        </WordTapHandler>
+      </I18nProvider>,
     );
     expect(screen.getByText('Hello world')).toBeInTheDocument();
   });

@@ -2,9 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CompanionPanel } from './CompanionPanel';
 import { CompanionProvider, useCompanion } from './CompanionProvider';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 function renderWithProvider(ui: React.ReactElement) {
-  return render(<CompanionProvider>{ui}</CompanionProvider>);
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      <CompanionProvider>{ui}</CompanionProvider>
+    </I18nProvider>,
+  );
 }
 
 function OpenStateWrapper({ children }: { children: React.ReactNode }): JSX.Element {
@@ -29,11 +35,13 @@ describe('CompanionPanel', () => {
 
   it('renders panel content visible on screen when panel is open', () => {
     render(
-      <CompanionProvider>
-        <OpenStateWrapper>
-          <CompanionPanel />
-        </OpenStateWrapper>
-      </CompanionProvider>,
+      <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+        <CompanionProvider>
+          <OpenStateWrapper>
+            <CompanionPanel />
+          </OpenStateWrapper>
+        </CompanionProvider>
+      </I18nProvider>,
     );
     fireEvent.click(screen.getByTestId('open-panel'));
     const panel = screen.getByTestId('companion-panel');

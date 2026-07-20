@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CourseRuntime } from './CourseRuntime';
 import type { LoadedPackage } from '@open-edu/core';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
+
+function renderWithProvider(ui: React.ReactElement) {
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      {ui}
+    </I18nProvider>,
+  );
+}
 
 function createMockEngine() {
   return {
@@ -121,7 +131,7 @@ describe('CourseRuntime', () => {
   });
 
   it('renders course view with children', () => {
-    render(
+    renderWithProvider(
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
         <div data-testid="child-content">Sidebar content</div>
       </CourseRuntime>,
@@ -132,12 +142,12 @@ describe('CourseRuntime', () => {
 
   it('renders no-workflow fallback when package has no workflow', () => {
     const noWorkflowPkg = { ...samplePackage, workflow: null };
-    render(<CourseRuntime pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
+    renderWithProvider(<CourseRuntime pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
     expect(screen.getByText('Course not available')).toBeInTheDocument();
   });
 
   it('renders children alongside course content', () => {
-    render(
+    renderWithProvider(
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
         <nav data-testid="section2-nav">Step list</nav>
       </CourseRuntime>,
