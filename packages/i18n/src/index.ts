@@ -10,3 +10,5 @@ export { formatDate, formatNumber, formatPercent, formatCurrency } from './forma
 export { NAMESPACES, isValidNamespace } from './namespaces.js';
 export type { Namespace } from './namespaces.js';
 export type { TranslationProvider, TranslationJob, TranslationStatus } from './types.js';
+export { LanguageSwitcher } from './language-switcher.js';
+export type { LanguageSwitcherProps } from './language-switcher.js';
