@@ -33,7 +33,7 @@ export async function i18nMissing(
       continue;
     }
 
-    function checkKeys(obj: Record<string, unknown>, prefix: string): void {
+    const checkKeys = (obj: Record<string, unknown>, prefix: string): void => {
       for (const [key, value] of Object.entries(obj)) {
         const fullKey = prefix ? `${prefix}.${key}` : key;
         if (typeof value === 'object' && value !== null) {
@@ -42,7 +42,7 @@ export async function i18nMissing(
           missing.push(fullKey);
         }
       }
-    }
+    };
 
     checkKeys(refData, '');
   }
