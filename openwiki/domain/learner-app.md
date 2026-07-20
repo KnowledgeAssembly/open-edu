@@ -71,7 +71,7 @@ It derives much of this from local storage and package metadata.
 
 ### Settings and theme switching
 
-`SettingsPage.tsx` connects the learner app to the runtime theme preference system. The selected theme is persisted through `useThemePreference`.
+`SettingsPage.tsx` connects the learner app to the runtime theme preference system. The selected theme is persisted through `useThemePreference`. The settings page also includes a `LanguageSwitcher` component from `@open-edu/i18n` for locale selection, and all section headings use translated strings via `useTranslation()`.
 
 ### AI companion and word lookup
 

@@ -63,6 +63,10 @@ Provides two tiers of UI:
 - primitives for general UI building blocks
 - visual-dna patterns and learning surfaces for Open-Edu-specific pages
 
+### `@open-edu/i18n`
+
+Provides internationalization infrastructure: locale types (en, hi, or), a translation engine with namespace-based dictionary lookup and fallback, a React context provider with `useTranslation` hook, formatting utilities wrapping `Intl` APIs, and a `LanguageSwitcher` radio-group component. CLI commands extract, validate, and diff translation keys across locales. Consumed by `@open-edu/runtime` and `@open-edu/learner` for all user-facing strings.
+
 ### `@open-edu/cli`
 
 Exposes the `edu` command for validation, development, building, packaging, creation, reporting, linting, patching, generation, compilation, and content import.
@@ -138,4 +142,5 @@ The repo is organized to keep learning content portable and the runtime platform
 - IndexedDB persistence: `packages/storage` (6 stores: courses, progress, badges, cards, search-indexes, preferences)
 - PWA infrastructure (install, update, connectivity): `packages/pwa-core`
 - service worker and caching config: `apps/learner/vite.config.ts`
+- internationalization and locale management: `packages/i18n`
 - end-user navigation and app composition: `apps/learner`

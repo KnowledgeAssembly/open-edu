@@ -24,6 +24,9 @@ From the repository root:
 - `pnpm --filter @open-edu/learner dev` — start the learner app
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js ...` — use the CLI after building it
 - `pnpm --filter @open-edu/widgets generate:catalog` — regenerate the widget catalog JSON from the canonical source in `packages/widgets/src/widget-catalog-source.ts`
+- `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales` — extract translatable strings from a package
+- `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales` — validate translation completeness
+- `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang` — find missing translations for a target language
 
 ## Package-local commands
 
@@ -58,6 +61,7 @@ This matters because runtime and dev-server styling are intentionally coupled th
 - Preserve progress persistence and local-storage behavior when changing learner flows.
 - Be careful with bundle navigation, because module-level navigation can bypass some normal exit warnings.
 - When touching widget catalogs, update the canonical source in `packages/widgets/src/widget-catalog-source.ts` and regenerate the derived JSON rather than editing the JSON by hand.
+- When adding new user-facing strings to runtime or learner components, use `t('namespace.key')` via `useTranslation()` from `@open-edu/i18n` and add the English translation to the appropriate locale file in `packages/i18n/locales/en/`.
 
 ## Best starting points by change type
 
@@ -66,3 +70,4 @@ This matters because runtime and dev-server styling are intentionally coupled th
 - learner UI: `apps/learner`, `packages/runtime`, `packages/design-system`
 - CLI behavior: `packages/cli`
 - test coverage and test utilities: the package-level `src/**/*.test.ts[x]` files plus `tests/e2e/`
+- translation and locale management: `packages/i18n`
