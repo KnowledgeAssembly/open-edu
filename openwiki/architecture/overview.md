@@ -35,6 +35,8 @@ The architecture described in `docs/ARCHITECTURE.md` and reflected in package ma
 - RxJS-based telemetry collection
 - Tailwind CSS for styling
 - Radix UI + shadcn/ui-style primitives in the design system
+- vite-plugin-pwa + Workbox for service worker generation
+- IndexedDB via `idb` for offline-first storage
 
 ## Main package responsibilities
 
@@ -85,6 +87,14 @@ Compiles course-spec Markdown or JSON into validated package structures.
 
 Support AI-assisted curriculum generation from PDFs and abstract over model providers.
 
+### `@open-edu/storage`
+
+Provides IndexedDB persistence with 6 typed object stores: courses, progress, badges, cards, search-indexes, and preferences. Built on the `idb` Promise-based wrapper. All learner app persistence (progress, badges, cards, bundle progress, search index) migrated from localStorage to this package.
+
+### `@open-edu/pwa-core`
+
+Framework-agnostic PWA primitives: install prompt detection (`getInstallState`, `promptInstall`), service worker update monitoring (`registerUpdateListener`, `skipWaiting`), connectivity detection (`getOnlineStatus`, `onOnlineStatusChange`), and storage quota queries (`getStorageUsage`). Consumed by the learner app through React hooks.
+
 ## Runtime data flow
 
 A typical course launch looks like this:
@@ -125,4 +135,7 @@ The repo is organized to keep learning content portable and the runtime platform
 - rendering and theme behavior: `packages/runtime`
 - visual structure and reusable UI: `packages/design-system`
 - widget ID resolution and catalog generation: `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, `packages/widgets/scripts/generate-catalog.ts`, plus SVG explorer components under `packages/widgets/src/svg-explorer`
+- IndexedDB persistence: `packages/storage` (6 stores: courses, progress, badges, cards, search-indexes, preferences)
+- PWA infrastructure (install, update, connectivity): `packages/pwa-core`
+- service worker and caching config: `apps/learner/vite.config.ts`
 - end-user navigation and app composition: `apps/learner`

@@ -41,6 +41,8 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 - `packages/cli` — `edu` command-line interface.
 - `packages/course-compiler` — converts course-spec files into validated packages.
 - `packages/pipeline` and `packages/llm-config` — AI-assisted PDF-to-course-spec pipeline and model-provider abstraction.
+- `packages/storage` — IndexedDB persistence layer with 6 typed object stores (courses, progress, badges, cards, search-indexes, preferences).
+- `packages/pwa-core` — framework-agnostic PWA primitives (install prompt, update detection, connectivity monitoring, storage quota queries).
 
 ### Example content
 
@@ -86,7 +88,8 @@ The UI is intentionally split between low-level primitives and opinionated visua
 - Change course progression or mastery rules: start in `packages/workflow` and the example packages that exercise the rule.
 - Change learner-facing UI: start in `apps/learner` and inspect the matching components in `packages/runtime` and `packages/design-system`.
 - Change themes or visual tokens: start in `packages/design-system/src/tokens` and `packages/runtime/src/themes`.
-- Change rewards/cards/progress persistence: inspect `packages/rewards`, `packages/runtime`, and learner app storage helpers.
+- Change rewards/cards/progress persistence: inspect `packages/rewards`, `packages/runtime`, and `packages/storage` (IndexedDB stores).
+- Change PWA behavior (install, update, offline, caching): start in `packages/pwa-core` and `apps/learner/vite.config.ts`.
 - Change widget IDs, catalog entries, or metadata validation: start in `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, and `packages/core/src/widget-catalog.ts`.
 - Change CLI behavior: start in `packages/cli`.
 
