@@ -45,7 +45,7 @@ export function ProgressDashboard({
   catalogPackages = [],
   packageEntries = {},
 }: ProgressDashboardProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [allProgress, setAllProgress] = useState<ProgressData>({});
   const [allBadges, setAllBadges] = useState<BadgesData>({});
   useEffect(() => {

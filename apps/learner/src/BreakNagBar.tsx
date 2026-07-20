@@ -9,7 +9,7 @@ export interface BreakNagBarProps {
 }
 
 export function BreakNagBar({ mode, onTakeBreak, onIgnore }: BreakNagBarProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const minLabel = mode === 'off' ? '' : `${mode}`;
 
   return (

@@ -19,7 +19,7 @@ function formatBytes(bytes: number): string {
 
 export const StorageUsageCard = React.forwardRef<HTMLDivElement, StorageUsageCardProps>(
   ({ usage, quota }, ref) => {
-    const { t } = useTranslation('learner');
+    const { t } = useTranslation();
     const percentage = quota > 0 ? Math.round((usage / quota) * 100) : 0;
 
     return (

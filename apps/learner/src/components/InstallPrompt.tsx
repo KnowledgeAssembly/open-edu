@@ -11,7 +11,7 @@ interface InstallPromptProps {
 
 export const InstallPrompt = React.forwardRef<HTMLDivElement, InstallPromptProps>(
   ({ isInstallable, isInstalled, onInstall }, ref) => {
-    const { t } = useTranslation('learner');
+    const { t } = useTranslation();
     if (isInstalled || !isInstallable) return null;
 
     return (

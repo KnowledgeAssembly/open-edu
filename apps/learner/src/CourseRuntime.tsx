@@ -43,7 +43,7 @@ export function CourseRuntime({
   onProgressUpdate,
   bundleContext,
 }: CourseRuntimeProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);

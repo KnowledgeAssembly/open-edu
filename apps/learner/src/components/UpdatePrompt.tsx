@@ -11,7 +11,7 @@ interface UpdatePromptProps {
 
 export const UpdatePrompt = React.forwardRef<HTMLDivElement, UpdatePromptProps>(
   ({ updateAvailable, onUpdate, onDismiss }, ref) => {
-    const { t } = useTranslation('learner');
+    const { t } = useTranslation();
     if (!updateAvailable) return null;
 
     return (

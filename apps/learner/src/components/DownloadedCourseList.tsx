@@ -16,7 +16,7 @@ function formatDate(iso: string): string {
 
 export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedCourseListProps>(
   ({ courses, onDelete }, ref) => {
-    const { t } = useTranslation('learner');
+    const { t } = useTranslation();
     if (courses.length === 0) {
       return (
         <Card ref={ref}>

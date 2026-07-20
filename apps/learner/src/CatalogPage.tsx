@@ -40,7 +40,7 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const installPrompt = useInstallPrompt();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});

@@ -23,7 +23,7 @@ const suggestedQuestions = [
 ];
 
 export function CompanionPanel(): JSX.Element | null {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const { panelState, setPanelState, messages, isLoading, sendMessage } = useCompanion();
 
   const isOpen = panelState !== 'closed';

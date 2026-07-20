@@ -17,7 +17,7 @@ interface ShelfData {
 }
 
 export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
   const [savedProgress, setSavedProgress] = useState<CardsData>({});
 

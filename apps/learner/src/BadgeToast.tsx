@@ -16,7 +16,7 @@ export function BadgeToast({
   onDismiss,
   autoDismissMs = 4000,
 }: BadgeToastProps): JSX.Element | null {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [shouldRender, setShouldRender] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);

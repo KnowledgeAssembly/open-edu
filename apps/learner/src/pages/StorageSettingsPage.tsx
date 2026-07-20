@@ -7,7 +7,7 @@ import { DownloadedCourseList } from '../components/DownloadedCourseList.js';
 import { getDownloadedCourses, deleteDownloadedCourse } from '../courseDownload.js';
 
 export function StorageSettingsPage() {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const { usage, quota } = useStorageUsage();
   const [courses, setCourses] = useState<StoredCourse[]>([]);
 

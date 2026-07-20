@@ -26,7 +26,7 @@ export function HomePage({
   catalogPackages = [],
   bundleEntries,
 }: HomePageProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   const [bundleProg, setBundleProg] = useState<BundleProgressData>({});

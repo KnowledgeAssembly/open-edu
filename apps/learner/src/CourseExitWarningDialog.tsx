@@ -20,7 +20,7 @@ export function CourseExitWarningDialog({
   onStay,
   onLeave,
 }: CourseExitWarningDialogProps): JSX.Element | null {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   return (
     <Dialog
       open={open}

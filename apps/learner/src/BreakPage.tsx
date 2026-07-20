@@ -13,7 +13,7 @@ const suggestionChips = [
 ];
 
 export function BreakPage({ onBackToLearning }: BreakPageProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   return (
     <div className="bg-surface flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-md" aria-hidden="true">

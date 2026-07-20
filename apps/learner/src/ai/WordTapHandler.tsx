@@ -24,7 +24,7 @@ const DOUBLE_TAP_TIME_MS = 300;
 const DOUBLE_TAP_DISTANCE_PX = 20;
 
 export function WordTapHandler({ children, className }: WordTapHandlerProps): JSX.Element {
-  const { t } = useTranslation('learner');
+  const { t } = useTranslation();
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
