@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, rewards, and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
 
 ## OpenWiki
 
@@ -57,6 +57,9 @@ pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --leve
 pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --format json  # JSON-only pipeline output
 pnpm --filter @open-edu/pipeline test  # Run pipeline tests
 pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-data.json from canonical source
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales  # Extract translatable strings
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales  # Validate translation completeness
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang  # Find missing translations
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -81,7 +84,8 @@ open-edu/
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
-│   └── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
+│   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
+│   └── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/
@@ -129,7 +133,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
-- `@open-edu/pipeline`, `@open-edu/llm-config`
+- `@open-edu/pipeline`, `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
 
 Examples use `@open-edu/example-` prefix.

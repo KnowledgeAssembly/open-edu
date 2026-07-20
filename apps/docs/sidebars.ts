@@ -132,6 +132,7 @@ const sidebars: SidebarsConfig = {
         'pipeline',
         'llm-config',
         'ai-companion',
+        'i18n',
       ],
     },
     {

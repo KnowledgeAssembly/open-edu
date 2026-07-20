@@ -91,6 +91,18 @@ The examples directory is a useful map of supported behaviors:
 - `autism-reading` — accessibility-oriented content
 - `living-vs-nonliving` — rewards/cards-heavy content
 
+## Internationalization
+
+User-facing strings in runtime renderers (quiz buttons, feedback messages, widget errors, reflection prompts) and learner app screens (navigation, settings, catalog) are translated through `@open-edu/i18n`. The package provides:
+
+- namespace-based translation keys (e.g., `runtime.quiz.submit`, `learner.settings.theme`)
+- English locale files in `packages/i18n/locales/en/`
+- a `TranslationEngine` with fallback to the default locale
+- React `I18nProvider` + `useTranslation` hook for component-level access
+- CLI commands (`i18n:extract`, `i18n:validate`, `i18n:missing`) for translation workflow
+
+When adding new user-facing strings to runtime or learner components, use `t('namespace.key')` instead of hardcoded text and add the English translation to the appropriate locale file.
+
 ## Where to start when changing content behavior
 
 - Update schema shape or validation rules in `packages/schemas`

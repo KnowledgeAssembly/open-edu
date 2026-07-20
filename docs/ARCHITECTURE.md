@@ -47,12 +47,12 @@ The architecture prioritizes:
 ┌─────────────────────────────┐
 │ Runtime Renderer           │
 │ React + TypeScript         │
-└───────┬─────────┬──────────┘
-        │         │
-        ▼         ▼
-┌────────────┐ ┌────────────┐
-│ A11y Engine│ │ Widget SDK │
-└─────┬──────┘ └─────┬──────┘
+└───────┬────┬───┬──────────┘
+        │    │   │
+        ▼    ▼   ▼
+┌────────────┐ ┌──────────┐ ┌────────────┐
+│ A11y Engine│ │ i18n     │ │ Widget SDK │
+└─────┬──────┘ └────┬─────┘ └─────┬──────┘
       │              │
       └──────┬───────┘
              ▼
@@ -136,6 +136,7 @@ packages/
 ├── widgets/
 ├── cli/
 ├── course-compiler/
+├── i18n/
 
 examples/
 ├── hello-world/
@@ -418,6 +419,65 @@ Accessibility violations surface immediately.
 
 ---
 
+# Internationalization
+
+## Technology
+
+```text
+React Context
+Intl APIs
+```
+
+The i18n package provides locale-aware translation and formatting.
+
+---
+
+## Responsibilities
+
+### Translation Management
+
+Controls:
+
+- Namespace-based dictionary lookup
+- Fallback to default locale
+- Key interpolation with mustache syntax
+- Missing key detection
+
+---
+
+### Locale Detection
+
+Supports:
+
+- English (en)
+- Hindi (hi)
+- Odia (or)
+
+---
+
+### React Integration
+
+Provides:
+
+- I18nProvider context wrapper
+- useTranslation hook
+- LanguageSwitcher component
+
+---
+
+### Formatting
+
+Wraps:
+
+```text
+Intl.DateTimeFormat
+Intl.NumberFormat
+```
+
+Locale-aware date, number, percent, and currency formatting.
+
+---
+
 # Widget Architecture
 
 ## Purpose
@@ -669,6 +729,30 @@ edu build ./package
 
 ```bash
 edu package ./package
+```
+
+---
+
+### i18n:extract
+
+```bash
+edu i18n:extract ./package ./locales
+```
+
+---
+
+### i18n:validate
+
+```bash
+edu i18n:validate ./package ./locales
+```
+
+---
+
+### i18n:missing
+
+```bash
+edu i18n:missing ./locales ./target-lang
 ```
 
 ---

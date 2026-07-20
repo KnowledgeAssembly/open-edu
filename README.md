@@ -1,6 +1,6 @@
 # Open-Edu Framework
 
-An open runtime for educational experiences that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, skills tracking, and rewards.
+An open runtime for educational experiences that separates content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, skills tracking, and rewards.
 
 > **Vision:** A world where educational experiences are as portable, extensible, observable, and accessible as modern software. — [Full Vision](./docs/VISION.md) — [Package Authoring Guide](./docs/PACKAGE_AUTHORING.md)
 
@@ -37,6 +37,9 @@ edu lint-content ./my-lesson
 edu patch ./my-lesson ./patch.json
 edu generate --prompt
 edu compile ./course-spec.md -o ./output   # Also supports course-spec.json
+edu i18n:extract ./my-lesson ./locales   # Extract translatable strings
+edu i18n:validate ./my-lesson ./locales  # Validate translation completeness
+edu i18n:missing ./locales ./target-lang # Find missing translations
 edu curriculum:generate --pdf ./textbook.pdf --level B --subject math  # PDF → course spec
 ```
 
@@ -205,6 +208,7 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/workflow`        | XState workflow engine — state machines, skill-tracking, mastery-based routing, topology ordering, **BundleEngine** (orchestrates per-module WorkflowEngine instances with prerequisite unlock)                                                                                                                                                                                                                                                                                                           | Done   |
 | `@open-edu/runtime`         | React runtime renderer — context providers, markdown pipeline, quiz/reflection/widget renderers, **3 built-in themes**, **Tailwind-styled layout components** (SideNav, TopAppBar, AITutorPanel, CourseTree), **BundleOverview component**                                                                                                                                                                                                                                                                | Done   |
 | `@open-edu/accessibility`   | Focus traps, live regions, ARIA generation, axe-core validator                                                                                                                                                                                                                                                                                                                                                                                                                                            | Done   |
+| `@open-edu/i18n`            | Internationalization — locale types, translation engine, React I18nProvider, formatters, namespace dictionaries (en/hi/or), LanguageSwitcher component, and CLI extract/validate/missing commands                                                                                                                                                                                                                                                                                                         | Done   |
 | `@open-edu/telemetry`       | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                                                                                                                                                                                                                                 | Done   |
 | `@open-edu/rewards`         | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                                                                                                                                                                             | Done   |
 | `@open-edu/cli`             | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                                                                                                                                                                                                                                              | Done   |
@@ -285,6 +289,8 @@ schemas
   │             ──► dev-server ──► cli
   │             ──► learner
   │             ──► e2e (Playwright)
+  ├──► i18n ──► runtime
+  │             ───► learner
   ├──► widgets ──► runtime
   │             ───► learner
   ├──► storage ──► learner (IndexedDB persistence)
@@ -360,6 +366,8 @@ Educational Package (Markdown + JSON)
    └────────────────────┘
 ```
 
+**Internationalization:** `@open-edu/i18n` provides locale detection, translation engine, React context provider, and formatters — consumed by `@open-edu/runtime` and `@open-edu/learner`.
+
 ## Testing
 
 The framework uses **Vitest** for unit tests (~2,800+ tests across 300+ files) and **Playwright** for E2E integration tests (40+ tests).
@@ -410,6 +418,7 @@ open-edu/
 │   ├── core/                # Package loader, scanner, patcher, validator, lint, generator
 │   ├── workflow/            # XState workflow engine + skill tracking + topology
 │   ├── runtime/             # React runtime + layout components + 3 themes + theme selector
+│   ├── i18n/                # Internationalization — locales, translation engine, React provider, formatters
 │   ├── accessibility/       # Focus traps, live regions, ARIA, axe-core
 │   ├── telemetry/           # RxJS telemetry, JSONL reader + summary
 │   ├── rewards/             # Reward broker, CardBroker, conditions, verification
