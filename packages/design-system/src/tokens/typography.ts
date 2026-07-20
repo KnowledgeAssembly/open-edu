@@ -148,6 +148,16 @@ const expressiveSet: TypographySet = {
   },
 };
 
+export const fontFamilies = {
+  inter: 'Inter, system-ui, -apple-system, sans-serif',
+  sourceSerif4: '"Source Serif 4", Georgia, ui-serif, serif',
+  jetBrainsMono: '"JetBrains Mono", ui-monospace, monospace',
+  notoSans:
+    '"Noto Sans", "Noto Sans Devanagari", "Noto Sans Odia", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Kannada", "Noto Sans Malayalam", sans-serif',
+  notoSerif:
+    '"Noto Serif", "Noto Serif Devanagari", "Noto Serif Odia", "Noto Serif Tamil", "Noto Serif Telugu", "Noto Serif Kannada", "Noto Serif Malayalam", serif',
+} as const;
+
 export const defaultTypography: TypographyTokens = {
   productive: productiveSet,
   expressive: expressiveSet,
