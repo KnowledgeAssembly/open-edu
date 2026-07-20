@@ -72,7 +72,7 @@ function extractTranslationKeys(source: string): string[] {
   const regex = /\bt\(\s*['"]([a-zA-Z][a-zA-Z0-9_.]*?)['"]/g;
   let match;
   while ((match = regex.exec(source)) !== null) {
-    keys.push(match[1]);
+    if (match[1]) keys.push(match[1]);
   }
   return keys;
 }
