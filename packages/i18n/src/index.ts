@@ -7,3 +7,6 @@ export type { TranslationEngineOptions } from './engine.js';
 export { I18nProvider, useTranslation } from './context.js';
 export type { I18nProviderProps, I18nContextValue } from './context.js';
 export { formatDate, formatNumber, formatPercent, formatCurrency } from './formatter.js';
+export { NAMESPACES, isValidNamespace } from './namespaces.js';
+export type { Namespace } from './namespaces.js';
+export type { TranslationProvider, TranslationJob, TranslationStatus } from './types.js';

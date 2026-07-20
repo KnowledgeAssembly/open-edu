@@ -1,0 +1,10 @@
+{
+  "common.loading": "Loading…",
+  "common.error": "Something went wrong",
+  "common.retry": "Retry",
+  "common.submit": "Submit",
+  "common.next": "Next",
+  "common.previous": "Previous",
+  "common.save": "Save",
+  "common.cancel": "Cancel"
+}

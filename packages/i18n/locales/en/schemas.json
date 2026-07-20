@@ -1,0 +1,6 @@
+{
+  "validation.required": "This field is required",
+  "validation.too_short": "Must be at least {{min}} characters",
+  "validation.too_long": "Must be at most {{max}} characters",
+  "validation.invalid_format": "Invalid format"
+}
