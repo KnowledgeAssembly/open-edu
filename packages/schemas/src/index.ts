@@ -112,4 +112,7 @@ export type { CardType, CardDifficulty, CardDefinition, CardDefinitions } from '
 
 export const SCHEMAS_VERSION = '0.1.0';
 
+export { LocalizedSchema, isLocalized, extractLocalized } from './localized.js';
+export type { Localized } from './localized.js';
+
 export { toJsonSchema } from './json-schema.js';
