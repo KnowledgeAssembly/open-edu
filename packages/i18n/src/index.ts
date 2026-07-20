@@ -4,7 +4,7 @@ export type { Direction } from './direction.js';
 export { getDirection } from './direction.js';
 export { TranslationEngine } from './engine.js';
 export type { TranslationEngineOptions } from './engine.js';
-export { I18nProvider, useTranslation } from './context.js';
+export { I18nContext, I18nProvider, useTranslation } from './context.js';
 export type { I18nProviderProps, I18nContextValue } from './context.js';
 export { formatDate, formatNumber, formatPercent, formatCurrency } from './formatter.js';
 export { NAMESPACES, isValidNamespace } from './namespaces.js';

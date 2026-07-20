@@ -21,7 +21,7 @@ export interface I18nProviderProps {
   children: ReactNode;
 }
 
-const I18nContext = createContext<I18nContextValue | null>(null);
+export const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({
   locale: initialLocale = DEFAULT_LOCALE,

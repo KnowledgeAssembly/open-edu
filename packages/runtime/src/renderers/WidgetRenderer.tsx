@@ -1,5 +1,6 @@
-import { Component, type ReactNode } from 'react';
+import { Component, useContext, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
+import { I18nContext } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
@@ -66,6 +67,9 @@ export interface WidgetRendererProps {
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
 
+  const i18nContext = useContext(I18nContext);
+  const locale = i18nContext?.locale;
+
   if (node.remoteWidget) {
     return <RemoteWidgetRenderer node={node} nodeId={nodeId} />;
   }
@@ -92,6 +96,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   const widgetProps: WidgetRenderProps = {
     nodeId,
     config: node.config ?? {},
+    locale,
     emitInteraction,
     complete: (score?: number, state?: unknown) => {
       if (state !== undefined) {
@@ -120,6 +125,10 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
 function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
+
+  const i18nContext = useContext(I18nContext);
+  const locale = i18nContext?.locale;
+
   const manifest = node.remoteWidget!;
   const { widget, status, error } = useRemoteWidget(manifest, widgetRegistry);
 
@@ -141,6 +150,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
         const widgetProps: WidgetRenderProps = {
           nodeId,
           config: node.config ?? {},
+          locale,
           emitInteraction: (data: Record<string, unknown>) => {
             console.debug('[widget:interaction]', manifest.fallback, data);
           },
@@ -183,6 +193,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
   const widgetProps: WidgetRenderProps = {
     nodeId,
     config: node.config ?? {},
+    locale,
     emitInteraction: (data: Record<string, unknown>) => {
       console.debug('[widget:interaction]', manifest.id, data);
     },

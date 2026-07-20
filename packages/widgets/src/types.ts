@@ -12,6 +12,7 @@ export interface WidgetRenderProps<TState = unknown> {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: TState) => void;
   storedState?: TState;
+  locale?: string;
 }
 
 export interface WidgetDefinition {
