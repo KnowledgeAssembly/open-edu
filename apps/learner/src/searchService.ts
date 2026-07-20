@@ -11,6 +11,7 @@ export interface SearchDocument {
   id: string;
   title: string;
   content: string;
+  locale?: string;
 }
 
 let currentIndex: MiniSearch | null = null;
@@ -21,7 +22,7 @@ export async function buildSearchIndex(
 ): Promise<MiniSearch> {
   const index = new MiniSearch({
     fields: ['title', 'content'],
-    storeFields: ['title'],
+    storeFields: ['title', 'locale'],
   });
   index.addAll(documents);
   currentIndex = index;
@@ -44,7 +45,7 @@ export async function loadSearchIndex(locale = 'en'): Promise<MiniSearch | null>
     if (stored?.indexData) {
       currentIndex = MiniSearch.loadJSON(
         JSON.stringify(stored.indexData),
-        { fields: ['title', 'content'], storeFields: ['title'] },
+        { fields: ['title', 'content'], storeFields: ['title', 'locale'] },
       );
       return currentIndex;
     }
