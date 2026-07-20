@@ -193,6 +193,9 @@ importers:
       '@open-edu/llm-config':
         specifier: workspace:*
         version: link:../../packages/llm-config
+      '@open-edu/pwa-core':
+        specifier: workspace:*
+        version: link:../../packages/pwa-core
       '@open-edu/rewards':
         specifier: workspace:*
         version: link:../../packages/rewards
