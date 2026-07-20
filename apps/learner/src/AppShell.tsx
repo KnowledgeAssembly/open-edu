@@ -5,7 +5,10 @@ import {
   TopAppBar,
   useThemePreference,
   useRuntimeOptional,
+  type ThemeId,
 } from '@open-edu/runtime';
+import { I18nProvider, useTranslation } from '@open-edu/i18n';
+import { dictionaries } from './i18n-dictionaries';
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
@@ -117,6 +120,50 @@ export function AppShell({
   catalogBundles,
   bundleEntries,
 }: AppShellProps): JSX.Element {
+  const [themeId, setThemeId] = useThemePreference();
+
+  return (
+    <CompanionProvider>
+      <RuntimeThemeProvider themeId={themeId}>
+        <I18nProvider
+          locale="en"
+          supportedLocales={['en', 'hi', 'or']}
+          dictionaries={dictionaries}
+        >
+          <FontSizeProvider>
+            <AppShellInner
+              catalogPackages={catalogPackages}
+              packageEntries={packageEntries}
+              catalogBundles={catalogBundles}
+              bundleEntries={bundleEntries}
+              themeId={themeId}
+              onThemeChange={setThemeId}
+            />
+          </FontSizeProvider>
+        </I18nProvider>
+      </RuntimeThemeProvider>
+    </CompanionProvider>
+  );
+}
+
+interface AppShellInnerProps {
+  catalogPackages: PackageSummary[];
+  packageEntries: Record<string, LoadedPackage>;
+  catalogBundles: BundleSummary[];
+  bundleEntries: Record<string, LoadedBundle>;
+  themeId: ThemeId;
+  onThemeChange: (id: ThemeId) => void;
+}
+
+function AppShellInner({
+  catalogPackages,
+  packageEntries,
+  catalogBundles,
+  bundleEntries,
+  themeId,
+  onThemeChange,
+}: AppShellInnerProps): JSX.Element {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const courseContentRef = useRef<HTMLDivElement>(null);
@@ -126,7 +173,6 @@ export function AppShell({
     [location.pathname, packageEntries],
   );
 
-  const [themeId, setThemeId] = useThemePreference();
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
 
@@ -259,21 +305,21 @@ export function AppShell({
   const getBreadcrumbs = () => {
     switch (view.view) {
       case 'home':
-        return [{ label: 'Home' }];
+        return [{ label: t('learner.breadcrumb.home') }];
       case 'catalog':
-        return [{ label: 'Course Catalog' }];
+        return [{ label: t('learner.breadcrumb.course_catalog') }];
       case 'progress':
-        return [{ label: 'My Progress' }];
+        return [{ label: t('learner.breadcrumb.my_progress') }];
       case 'settings':
-        return [{ label: 'Settings' }];
+        return [{ label: t('learner.breadcrumb.settings') }];
       case 'bundleOverview': {
         const bundle = bundleEntries[view.bundleId];
-        return [{ label: 'Course Catalog' }, { label: bundle?.manifest.title ?? 'Bundle' }];
+        return [{ label: t('learner.breadcrumb.course_catalog') }, { label: bundle?.manifest.title ?? t('learner.fallback.bundle') }];
       }
       case 'break':
-        return [{ label: 'Break' }];
+        return [{ label: t('learner.breadcrumb.break') }];
       case 'course': {
-        const breadcrumbs = [{ label: coursePkg?.manifest.title ?? 'Course' }];
+        const breadcrumbs = [{ label: coursePkg?.manifest.title ?? t('learner.fallback.course') }];
         if (view.bundleId) {
           const bundle = bundleEntries[view.bundleId];
           if (bundle) {
@@ -283,18 +329,18 @@ export function AppShell({
         return breadcrumbs;
       }
       default:
-        return [{ label: 'Home' }];
+        return [{ label: t('learner.breadcrumb.home') }];
     }
   };
 
   const isCourseView = view.view === 'course';
 
   const navItems: AppSidebarItem[] = [
-    { id: 'home', label: 'Home', icon: <Home className="h-5 w-5" /> },
-    { id: 'progress', label: 'My Progress', icon: <TrendingUp className="h-5 w-5" /> },
-    { id: 'collection', label: 'Collection Binder', icon: <Library className="h-5 w-5" /> },
-    { id: 'catalog', label: 'Course Catalog', icon: <BookOpen className="h-5 w-5" /> },
-    { id: 'settings', label: 'Settings', icon: <Settings className="h-5 w-5" /> },
+    { id: 'home', label: t('learner.nav.home'), icon: <Home className="h-5 w-5" /> },
+    { id: 'progress', label: t('learner.nav.progress'), icon: <TrendingUp className="h-5 w-5" /> },
+    { id: 'collection', label: t('learner.nav.collection'), icon: <Library className="h-5 w-5" /> },
+    { id: 'catalog', label: t('learner.nav.catalog'), icon: <BookOpen className="h-5 w-5" /> },
+    { id: 'settings', label: t('learner.nav.settings'), icon: <Settings className="h-5 w-5" /> },
   ];
 
   const currentNavId =
@@ -354,7 +400,7 @@ export function AppShell({
       };
     });
 
-    const section: AppSidebarSection = { title: 'Course Steps', items };
+    const section: AppSidebarSection = { title: t('learner.sidebar.course_steps'), items };
     return (
       <div className="relative h-full overflow-hidden">
         <AssemblyFlow
@@ -369,17 +415,14 @@ export function AppShell({
           currentItemId={currentNavId}
           onNavigate={handleNavAction}
           sections={[section]}
-          onBack={{ label: 'Back to Catalog', onClick: handleBackToCatalog }}
+          onBack={{ label: t('learner.back_to_catalog'), onClick: handleBackToCatalog }}
         />
       </div>
     );
   }
 
   return (
-    <CompanionProvider>
-      <RuntimeThemeProvider themeId={themeId}>
-        <FontSizeProvider>
-          <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
+    <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
             <OfflineBanner isOnline={isOnline} />
             {isCourseView && coursePkg ? (
               <WordTapHandler className="flex min-w-0 flex-1 flex-col">
@@ -497,7 +540,7 @@ export function AppShell({
                   {view.view === 'settings' && (
                     <SettingsPage
                       currentThemeId={themeId}
-                      onThemeChange={setThemeId}
+                      onThemeChange={onThemeChange}
                       breakTimer={{
                         mode: breakTimer.mode,
                         setMode: breakTimer.setMode,
@@ -521,9 +564,6 @@ export function AppShell({
               onDismiss={updatePrompt.dismiss}
             />
           </div>
-        </FontSizeProvider>
-      </RuntimeThemeProvider>
-    </CompanionProvider>
   );
 }
 

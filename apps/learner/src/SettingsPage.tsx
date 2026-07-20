@@ -12,7 +12,8 @@ import {
   RadioGroupItem,
   Pipili,
 } from '@open-edu/design-system';
-import { Sun, Eye, Type, Minus, Plus } from 'lucide-react';
+import { Sun, Eye, Type, Minus, Plus, Languages } from 'lucide-react';
+import { LanguageSwitcher } from '@open-edu/i18n';
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
@@ -55,6 +56,18 @@ export function SettingsPage({
           </CardHeader>
           <CardContent>
             <ThemeSelector currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-h2 font-display flex items-center gap-2">
+              <Languages className="h-5 w-5" /> Language
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <p className="text-on-surface-variant text-sm">Choose your preferred language</p>
+            <LanguageSwitcher />
           </CardContent>
         </Card>
 
