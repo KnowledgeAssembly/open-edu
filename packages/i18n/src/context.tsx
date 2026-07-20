@@ -90,10 +90,26 @@ export function I18nProvider({
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
-export function useTranslation(): I18nContextValue {
-  const ctx = useContext(I18nContext);
-  if (!ctx) {
-    throw new Error('useTranslation must be used within an I18nProvider');
+const defaultT = (key: string, params?: Record<string, string>): string => {
+  if (params) {
+    return Object.entries(params).reduce(
+      (result, [k, v]) => result.replace(new RegExp(`\\{${k}\\}`, 'g'), v),
+      key,
+    );
   }
-  return ctx;
+  return key;
+};
+
+const defaultEngine = new TranslationEngine({ locales: ['en'], fallbackLocale: 'en' });
+
+const defaultValue: I18nContextValue = {
+  locale: DEFAULT_LOCALE,
+  setLocale: () => {},
+  direction: 'ltr',
+  t: defaultT,
+  engine: defaultEngine,
+};
+
+export function useTranslation(): I18nContextValue {
+  return useContext(I18nContext) ?? defaultValue;
 }

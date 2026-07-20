@@ -118,7 +118,7 @@ describe('WidgetRenderer', () => {
     );
 
     expect(screen.getByTestId('widget-renderer-placeholder')).toBeInTheDocument();
-    expect(screen.getByText(/nonexistent/)).toBeInTheDocument();
+    expect(screen.getByText(/runtime\.widget\.no_registered/)).toBeInTheDocument();
   });
 
   it('renders placeholder when widget registry is undefined', () => {

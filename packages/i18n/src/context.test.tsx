@@ -78,11 +78,8 @@ describe('I18nProvider', () => {
     expect(document.documentElement.lang).toBe('hi');
   });
 
-  it('throws when useTranslation is used outside provider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => render(<NoProviderComponent />)).toThrow(
-      'useTranslation must be used within an I18nProvider'
-    );
-    spy.mockRestore();
+  it('returns defaults when used outside provider', () => {
+    render(<NoProviderComponent />);
+    expect(screen.getByText('a')).toBeInTheDocument();
   });
 });
