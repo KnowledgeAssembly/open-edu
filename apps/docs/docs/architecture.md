@@ -60,11 +60,22 @@ Educational Package / Bundle (Markdown + JSON)
            └──────────┘
                   │
                   ▼
-           ┌────────────────────┐
-           │   Learner App      │  Standalone app
-           │   Catalog · Course  │  · Bundles · Progress · Themes
-           │   shadcn/ui + Radix │  · Lucide icons
-           └────────────────────┘
+   ┌─────────────────────────────────────┐
+   │           PWA Layer                  │
+   │  vite-plugin-pwa · Workbox           │
+   │  Service Worker · Runtime Caching    │
+   ├──────────────┬──────────────────────┤
+   │ pwa-core     │ storage               │
+   │ Install · SW │ IndexedDB (6 stores)  │
+   │ Connectivity │ Courses · Progress    │
+   │ Update       │ Badges · Cards        │
+   └──────┬───────┴──────────┬───────────┘
+          ▼                  ▼
+   ┌────────────────────┐
+   │   Learner App      │  Standalone app
+   │   Catalog · Course  │  · Bundles · Progress · Themes
+   │   shadcn/ui + Radix │  · Lucide icons · Offline-first
+   └────────────────────┘
 ```
 
 ## Technology Stack
@@ -85,6 +96,8 @@ Educational Package / Bundle (Markdown + JSON)
 | CLI             | Commander 12.x                                 |
 | Testing         | Vitest 1.x                                     |
 | E2E             | Playwright 1.x                                 |
+| PWA             | vite-plugin-pwa + Workbox                      |
+| Storage         | IndexedDB via idb                              |
 
 ## Package Architecture
 
