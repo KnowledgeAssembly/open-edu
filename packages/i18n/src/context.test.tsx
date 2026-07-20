@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { I18nProvider, useTranslation } from './context.js';
 
@@ -21,10 +21,10 @@ function NoProviderComponent() {
 
 const Dictionaries = {
   en: {
-    runtime: { 'loading': 'Loading…' },
+    runtime: { loading: 'Loading…' },
   },
   hi: {
-    runtime: { 'loading': 'लोड हो रहा है…' },
+    runtime: { loading: 'लोड हो रहा है…' },
   },
 };
 
@@ -33,7 +33,7 @@ describe('I18nProvider', () => {
     render(
       <I18nProvider locale="en" dictionaries={Dictionaries} supportedLocales={['en', 'hi']}>
         <TestComponent />
-      </I18nProvider>
+      </I18nProvider>,
     );
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
   });
@@ -42,7 +42,7 @@ describe('I18nProvider', () => {
     render(
       <I18nProvider locale="en" dictionaries={Dictionaries} supportedLocales={['en', 'hi']}>
         <TestComponent />
-      </I18nProvider>
+      </I18nProvider>,
     );
     expect(screen.getByTestId('direction')).toHaveTextContent('ltr');
   });
@@ -51,7 +51,7 @@ describe('I18nProvider', () => {
     render(
       <I18nProvider locale="en" dictionaries={Dictionaries} supportedLocales={['en', 'hi']}>
         <TestComponent />
-      </I18nProvider>
+      </I18nProvider>,
     );
     expect(screen.getByTestId('translated')).toHaveTextContent('Loading…');
   });
@@ -60,7 +60,7 @@ describe('I18nProvider', () => {
     render(
       <I18nProvider locale="en" dictionaries={Dictionaries} supportedLocales={['en', 'hi']}>
         <TestComponent />
-      </I18nProvider>
+      </I18nProvider>,
     );
     await act(async () => {
       screen.getByText('Switch').click();
@@ -73,7 +73,7 @@ describe('I18nProvider', () => {
     render(
       <I18nProvider locale="hi" dictionaries={Dictionaries} supportedLocales={['en', 'hi']}>
         <TestComponent />
-      </I18nProvider>
+      </I18nProvider>,
     );
     expect(document.documentElement.lang).toBe('hi');
   });

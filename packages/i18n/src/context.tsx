@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import type { Locale } from './locale.js';
 import { DEFAULT_LOCALE } from './locale.js';
 import { getDirection, type Direction } from './direction.js';
@@ -79,12 +87,12 @@ export function I18nProvider({
 
   const t = useCallback(
     (key: string, params?: Record<string, string>) => engine.t(key, locale, params),
-    [engine, locale]
+    [engine, locale],
   );
 
   const value = useMemo<I18nContextValue>(
     () => ({ locale, setLocale, direction, t, engine }),
-    [locale, setLocale, direction, t, engine]
+    [locale, setLocale, direction, t, engine],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

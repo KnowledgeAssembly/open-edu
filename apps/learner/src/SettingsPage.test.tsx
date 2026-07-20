@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SettingsPage } from './SettingsPage';
 import { FontSizeProvider } from '@open-edu/design-system';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const mockBreakTimer = {
   mode: 'off' as const,
@@ -9,7 +11,11 @@ const mockBreakTimer = {
 };
 
 function renderWithProvider(ui: React.ReactElement) {
-  return render(<FontSizeProvider>{ui}</FontSizeProvider>);
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      <FontSizeProvider>{ui}</FontSizeProvider>
+    </I18nProvider>,
+  );
 }
 
 describe('SettingsPage', () => {
