@@ -12,6 +12,9 @@ import { generatePrompt, generateFromDescription } from './commands/generate.js'
 import { patchPackage } from './commands/patch.js';
 import { importLearnEasyCommand } from './commands/import.js';
 import { createCompileCommand } from '@open-edu/course-compiler';
+import { i18nExtract } from './commands/i18n-extract.js';
+import { i18nValidate } from './commands/i18n-validate.js';
+import { i18nMissing } from './commands/i18n-missing.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
@@ -231,6 +234,49 @@ importCmd
       handleResult(result, json);
     },
   );
+
+const i18n = program.command('i18n').description('Internationalization commands');
+
+i18n
+  .command('extract')
+  .description('Extract translation keys from source files')
+  .argument('<source-dir>', 'Source directory to scan')
+  .argument('[output-dir]', 'Output directory for extracted keys')
+  .action(async (sourceDir: string, outputDir: string | undefined) => {
+    const json = program.optsWithGlobals().json;
+    const result = await i18nExtract(sourceDir, outputDir ?? sourceDir);
+    if (!json) {
+      console.log(result.success ? `Extracted ${result.data!.keysCount} keys to ${result.data!.outputPath}` : result.error);
+    }
+    handleResult(result, json);
+  });
+
+i18n
+  .command('validate')
+  .description('Validate locale files against the reference locale')
+  .argument('<locales-dir>', 'Path to locale files directory')
+  .action(async (localesDir: string) => {
+    const json = program.optsWithGlobals().json;
+    const result = await i18nValidate(localesDir);
+    if (!json) {
+      console.log(result.success ? `All locales are valid` : result.error);
+    }
+    handleResult(result, json);
+  });
+
+i18n
+  .command('missing')
+  .description('Detect missing translations for a target locale')
+  .argument('<locales-dir>', 'Path to locale files directory')
+  .argument('<target-locale>', 'Target locale code (e.g., hi, or)')
+  .action(async (localesDir: string, targetLocale: string) => {
+    const json = program.optsWithGlobals().json;
+    const result = await i18nMissing(localesDir, targetLocale);
+    if (!json) {
+      console.log(result.success ? `No missing keys for "${targetLocale}"` : result.error);
+    }
+    handleResult(result, json);
+  });
 
 function handleResult(result: CliResult, json: boolean | undefined): void {
   if (json) {
