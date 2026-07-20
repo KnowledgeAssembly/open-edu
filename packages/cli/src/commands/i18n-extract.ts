@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, extname } from 'path';
+import { join } from 'path';
 import type { CliResult } from '../utils/json-output.js';
 
 export async function i18nExtract(
@@ -18,7 +18,7 @@ export async function i18nExtract(
         const content = readFileSync(fullPath, 'utf-8');
         let match;
         while ((match = pattern.exec(content)) !== null) {
-          keys.add(match[1]);
+          if (match[1]) keys.add(match[1]);
         }
       }
     }

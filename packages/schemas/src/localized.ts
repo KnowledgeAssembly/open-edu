@@ -16,12 +16,7 @@ export function isLocalized(value: unknown): value is Record<string, string> {
 
 export function localizedField(maxLength?: number) {
   const strSchema = maxLength !== undefined ? z.string().max(maxLength) : z.string();
-  return z
-    .union([strSchema, z.record(z.string(), strSchema)])
-    .refine(
-      (val) => typeof val === 'string' || Object.keys(val).length > 0,
-      { message: 'Localized record must have at least one entry' },
-    );
+  return z.union([strSchema, z.record(z.string(), strSchema)]);
 }
 
 export function extractLocalized(
@@ -33,5 +28,5 @@ export function extractLocalized(
   if (value[locale]) return value[locale];
   if (value[fallbackLocale]) return value[fallbackLocale];
   const firstKey = Object.keys(value)[0];
-  return firstKey ? value[firstKey] : '';
+  return firstKey ? (value[firstKey] ?? '') : '';
 }

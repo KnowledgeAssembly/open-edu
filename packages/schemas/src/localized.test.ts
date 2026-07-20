@@ -44,9 +44,9 @@ describe('localizedField', () => {
     expect(schema.safeParse({ en: 'Hello', hi: 'नमस्ते' }).success).toBe(true);
   });
 
-  it('rejects empty objects', () => {
+  it('accepts an empty record (no refine validation)', () => {
     const schema = localizedField();
-    expect(schema.safeParse({}).success).toBe(false);
+    expect(schema.safeParse({}).success).toBe(true);
   });
 
   it('enforces max length on strings', () => {
