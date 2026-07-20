@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { ProgressDashboard } from './ProgressDashboard';
 
 vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
+  getAllProgress: vi.fn(() => Promise.resolve({})),
 }));
 
 describe('ProgressDashboard', () => {

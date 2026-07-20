@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { PackageSummary, LoadedPackage } from '@open-edu/core';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { type AppView } from './AppShell';
-import { getAllProgress } from './progressStorage';
-import { getAllBadges } from './badgesStorage';
+import { getAllProgress, type ProgressData } from './progressStorage';
+import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
   Button,
   EmptyState,
@@ -44,8 +44,12 @@ export function ProgressDashboard({
   catalogPackages = [],
   packageEntries = {},
 }: ProgressDashboardProps): JSX.Element {
-  const allProgress = getAllProgress();
-  const allBadges = getAllBadges();
+  const [allProgress, setAllProgress] = useState<ProgressData>({});
+  const [allBadges, setAllBadges] = useState<BadgesData>({});
+  useEffect(() => {
+    getAllProgress().then(setAllProgress);
+    getAllBadges().then(setAllBadges);
+  }, []);
   const entries = Object.entries(allProgress);
 
   const nodeTitleMap = useMemo(() => {

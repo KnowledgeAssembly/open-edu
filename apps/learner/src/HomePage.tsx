@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react';
 import type { PackageSummary } from '@open-edu/core';
 import { type AppView } from './AppShell';
-import { getAllProgress } from './progressStorage';
-import { getAllBadges } from './badgesStorage';
-import { getAllBundleProgress } from './bundleProgressStorage';
+import { getAllProgress, type ProgressData } from './progressStorage';
+import { getAllBadges, type BadgesData } from './badgesStorage';
+import { getAllBundleProgress, type BundleProgressData } from './bundleProgressStorage';
 import { OpenModule } from '@open-edu/design-system';
 import {
   Button,
@@ -24,9 +25,14 @@ export function HomePage({
   catalogPackages = [],
   bundleEntries,
 }: HomePageProps): JSX.Element {
-  const progress = getAllProgress();
-  const badgeData = getAllBadges();
-  const bundleProg = getAllBundleProgress();
+  const [progress, setProgress] = useState<ProgressData>({});
+  const [badgeData, setBadgeData] = useState<BadgesData>({});
+  const [bundleProg, setBundleProg] = useState<BundleProgressData>({});
+  useEffect(() => {
+    getAllProgress().then(setProgress);
+    getAllBadges().then(setBadgeData);
+    getAllBundleProgress().then(setBundleProg);
+  }, []);
   const courseCount = catalogPackages.length;
   const bundleCount = bundleEntries ? Object.keys(bundleEntries).length : 0;
   const totalUnits = courseCount + bundleCount;

@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
-import { getAllProgress } from './progressStorage';
-import { getAllBadges } from './badgesStorage';
+import { getAllProgress, type ProgressData } from './progressStorage';
+import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
   BundleCard,
   BundleCardWithModule,
@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from '@open-edu/design-system';
 import type { AppView } from './AppShell';
+import { InstallPrompt } from './components/InstallPrompt.js';
+import { useInstallPrompt } from './hooks/useInstallPrompt.js';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -37,8 +39,13 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
 }: CatalogPageProps): JSX.Element {
-  const progress = getAllProgress();
-  const badgeData = getAllBadges();
+  const installPrompt = useInstallPrompt();
+  const [progress, setProgress] = useState<ProgressData>({});
+  const [badgeData, setBadgeData] = useState<BadgesData>({});
+  useEffect(() => {
+    getAllProgress().then(setProgress);
+    getAllBadges().then(setBadgeData);
+  }, []);
 
   const badgeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -109,6 +116,12 @@ export function CatalogPage({
   return (
     <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
       <PageHeader eyebrow="Catalog" title="Course Catalog" className="mb-xl" />
+
+      <InstallPrompt
+        isInstallable={installPrompt.isInstallable}
+        isInstalled={installPrompt.isInstalled}
+        onInstall={installPrompt.install}
+      />
 
       {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">

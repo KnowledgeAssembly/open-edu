@@ -52,14 +52,31 @@ export function CourseRuntime({
   const [toastCardVisible, setToastCardVisible] = useState(false);
   const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
+  const [savedProgress, setSavedProgress] = useState<ProgressSnapshot | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [progress, bundleSnapshot] = await Promise.all([
+        getProgress(pkg.manifest.id),
+        bundleContext ? getBundleProgress(bundleContext.bundleId) : Promise.resolve(null),
+      ]);
+      if (cancelled) return;
+      setSavedProgress(progress);
+      if (bundleSnapshot) bundleProgressRef.current = bundleSnapshot;
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pkg.manifest.id, bundleContext]);
+
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
-    const saved = getProgress(pkg.manifest.id);
-    const savedNode = saved?.currentNodeId;
+    const savedNode = savedProgress?.currentNodeId;
     const entry = savedNode && savedNode in pkg.workflow.routing ? savedNode : pkg.manifest.entry;
     if (!entry) return null;
     return new WorkflowEngine(pkg.workflow, { entry });
-  }, [pkg]);
+  }, [pkg, savedProgress]);
 
   const orderedNodes = useMemo<LoadedNode[]>(() => {
     if (!pkg.workflow || !pkg.manifest.entry) return [];
@@ -72,15 +89,10 @@ export function CourseRuntime({
   const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
 
   const initialProgress = useMemo(() => {
-    return getProgress(pkg.manifest.id) ?? undefined;
-  }, [pkg]);
+    return savedProgress ?? undefined;
+  }, [savedProgress]);
 
-  const initialBundleSnapshot = useMemo(() => {
-    if (!bundleContext) return null;
-    return getBundleProgress(bundleContext.bundleId);
-  }, [bundleContext]);
-
-  bundleProgressRef.current = initialBundleSnapshot;
+  const cardBrokerRef = useRef<CardBroker | null>(null);
 
   useEffect(() => {
     if (!engine) return;
@@ -98,7 +110,7 @@ export function CourseRuntime({
             if (receipt.status === 'delivered' && receipt.actionType === 'badge.award') {
               const badgeName = receipt.detail ?? receipt.actionKey ?? 'Unknown badge';
               setBadges((prev) => [...prev, badgeName]);
-              addBadge(pkg.manifest.id, badgeName);
+              void addBadge(pkg.manifest.id, badgeName);
               setToastBadgeName(badgeName);
               setToastVisible(true);
             }
@@ -106,31 +118,6 @@ export function CourseRuntime({
         })
       : null;
     broker?.start();
-
-    const cardBroker = pkg.cards?.cards
-      ? new CardBroker({
-          cards: pkg.cards.cards,
-          source: session.events$,
-          initialLevels: Object.fromEntries(
-            Object.entries(getAllCardProgress()).map(([id, p]) => [id, p.level]),
-          ),
-          onCardUnlocked: (card) => {
-            saveCardProgress(card.id, card.level);
-            setToastCard(card);
-            setToastCardLevel(card.level);
-            setToastCardType('unlock');
-            setToastCardVisible(true);
-          },
-          onCardLeveledUp: (card, newLevel) => {
-            saveCardProgress(card.id, newLevel);
-            setToastCard(card);
-            setToastCardLevel(newLevel);
-            setToastCardType('levelUp');
-            setToastCardVisible(true);
-          },
-        })
-      : null;
-    cardBroker?.start();
 
     const engineUnsub = engine.subscribe((event: WorkflowEvent) => {
       if (event.type === 'node.entered' && event.nodeId) {
@@ -140,7 +127,7 @@ export function CourseRuntime({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
-        cardBroker?.updateContext({
+        cardBrokerRef.current?.updateContext({
           scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
           completedNodes: [event.nodeId],
         });
@@ -160,11 +147,44 @@ export function CourseRuntime({
       }
     });
 
+    let cancelled = false;
+    void (async () => {
+      const savedCardProgress = await getAllCardProgress();
+      if (cancelled) return;
+      const cb = pkg.cards?.cards
+        ? new CardBroker({
+            cards: pkg.cards.cards,
+            source: session.events$,
+            initialLevels: Object.fromEntries(
+              Object.entries(savedCardProgress).map(([id, p]) => [id, p.level]),
+            ),
+            onCardUnlocked: (card) => {
+              void saveCardProgress(card.id, card.level);
+              setToastCard(card);
+              setToastCardLevel(card.level);
+              setToastCardType('unlock');
+              setToastCardVisible(true);
+            },
+            onCardLeveledUp: (card, newLevel) => {
+              void saveCardProgress(card.id, newLevel);
+              setToastCard(card);
+              setToastCardLevel(newLevel);
+              setToastCardType('levelUp');
+              setToastCardVisible(true);
+            },
+          })
+        : null;
+      cardBrokerRef.current = cb;
+      cb?.start();
+    })();
+
     return () => {
+      cancelled = true;
       engineUnsub();
       compUnsub();
       broker?.stop();
-      cardBroker?.stop();
+      cardBrokerRef.current?.stop();
+      cardBrokerRef.current = null;
       eventSub.unsubscribe();
       session.stop();
     };
@@ -172,7 +192,7 @@ export function CourseRuntime({
 
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
-      saveProgress(pkg.manifest.id, snapshot);
+      void saveProgress(pkg.manifest.id, snapshot);
 
       if (bundleContext) {
         const existingBundleSnapshot = bundleProgressRef.current;
@@ -199,7 +219,7 @@ export function CourseRuntime({
           updatedAt: snapshot.updatedAt,
         };
 
-        saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
+        void saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
         bundleContext.onBundleSnapshot(bundleSnapshot);
       }
     },

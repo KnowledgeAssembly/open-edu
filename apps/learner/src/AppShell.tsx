@@ -32,7 +32,9 @@ import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
 import { OfflineBanner } from './components/OfflineBanner.js';
+import { UpdatePrompt } from './components/UpdatePrompt.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
+import { useUpdatePrompt } from './hooks/useUpdatePrompt.js';
 import {
   CompanionProvider,
   useCompanion,
@@ -144,15 +146,23 @@ export function AppShell({
   }, [navigate, breakTimer]);
 
   const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
-    () => {
+    {},
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
       const progress: Record<string, BundleProgressSnapshot> = {};
       for (const bundleId of Object.keys(bundleEntries)) {
-        const saved = getBundleProgress(bundleId);
+        const saved = await getBundleProgress(bundleId);
         if (saved) progress[bundleId] = saved;
       }
-      return progress;
-    },
-  );
+      if (!cancelled) setBundleProgress(progress);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bundleEntries]);
 
   const handleProgressUpdate = useCallback((current: number, total: number) => {
     setCourseProgressCurrent(current);
@@ -244,6 +254,7 @@ export function AppShell({
   }, [view, bundleEntries]);
 
   const isOnline = useOnlineStatus();
+  const updatePrompt = useUpdatePrompt();
 
   const getBreadcrumbs = () => {
     switch (view.view) {
@@ -503,6 +514,11 @@ export function AppShell({
               open={showExitWarning}
               onStay={handleExitStay}
               onLeave={handleExitLeave}
+            />
+            <UpdatePrompt
+              updateAvailable={updatePrompt.updateAvailable}
+              onUpdate={updatePrompt.accept}
+              onDismiss={updatePrompt.dismiss}
             />
           </div>
         </FontSizeProvider>

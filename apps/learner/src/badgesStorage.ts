@@ -1,34 +1,37 @@
-const STORAGE_KEY = 'open-edu-badges';
+import { saveBadge, getBadges as getBadgesFromDB, getAllBadgeRecords } from '@open-edu/storage';
 
 export interface BadgesData {
   [packageId: string]: string[];
 }
 
-export function getAllBadges(): BadgesData {
+export async function getAllBadges(): Promise<BadgesData> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as BadgesData;
+    const records = await getAllBadgeRecords();
+    const result: BadgesData = {};
+    for (const record of records) {
+      result[record.courseId] = record.badgeNames;
+    }
+    return result;
   } catch {
     return {};
   }
 }
 
-export function getBadges(packageId: string): string[] {
-  const all = getAllBadges();
-  return all[packageId] ?? [];
+export async function getBadges(packageId: string): Promise<string[]> {
+  try {
+    return await getBadgesFromDB(packageId);
+  } catch {
+    return [];
+  }
 }
 
-export function addBadge(packageId: string, badgeName: string): void {
+export async function addBadge(packageId: string, badgeName: string): Promise<void> {
   try {
-    const all = getAllBadges();
-    const badges = all[packageId] ?? [];
-    if (!badges.includes(badgeName)) {
-      badges.push(badgeName);
-      all[packageId] = badges;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    const existing = await getBadgesFromDB(packageId);
+    if (!existing.includes(badgeName)) {
+      await saveBadge(packageId, [...existing, badgeName]);
     }
   } catch {
-    // localStorage unavailable
+    // IndexedDB unavailable
   }
 }

@@ -61,15 +61,22 @@ vi.mock('@open-edu/accessibility', () => ({
   useLiveRegion: vi.fn(() => ({ announce: vi.fn() })),
 }));
 
+vi.mock('./cardsStorage.js', () => ({
+  getAllCardProgress: vi.fn().mockResolvedValue({}),
+  saveCardProgress: vi.fn().mockResolvedValue(undefined),
+  getCardProgress: vi.fn().mockResolvedValue(null),
+  clearCardProgress: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('./progressStorage', () => ({
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getProgress: vi.fn(() => Promise.resolve(null)),
+  saveProgress: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('./badgesStorage', () => ({
-  addBadge: vi.fn(),
-  getBadges: vi.fn(() => []),
-  getAllBadges: vi.fn(() => ({})),
+  addBadge: vi.fn(() => Promise.resolve()),
+  getBadges: vi.fn(() => Promise.resolve([])),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
 }));
 
 const samplePackage: LoadedPackage = {

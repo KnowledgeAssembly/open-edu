@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export interface StoredCourse {
   id: string;
@@ -18,6 +18,7 @@ export interface LearningProgress {
   completed: boolean;
   score?: number;
   updatedAt: string;
+  data?: Record<string, unknown>;
 }
 
 export interface SearchIndex {
@@ -31,11 +32,24 @@ export interface UserPreferences {
   fontSize: string;
 }
 
+export interface BadgeData {
+  courseId: string;
+  badgeNames: string[];
+}
+
+export interface CardProgressData {
+  cardId: string;
+  level: number;
+  unlockedAt: string;
+}
+
 export interface OpenEduDB {
   courses: StoredCourse;
   progress: LearningProgress;
   'search-indexes': SearchIndex;
   preferences: UserPreferences;
+  badges: BadgeData;
+  cards: CardProgressData;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -59,6 +73,12 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('preferences')) {
           db.createObjectStore('preferences', { keyPath: 'locale' });
+        }
+        if (!db.objectStoreNames.contains('badges')) {
+          db.createObjectStore('badges', { keyPath: 'courseId' });
+        }
+        if (!db.objectStoreNames.contains('cards')) {
+          db.createObjectStore('cards', { keyPath: 'cardId' });
         }
       },
     }).catch((err) => {

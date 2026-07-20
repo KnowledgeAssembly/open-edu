@@ -32,6 +32,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, './src'),
       '@open-edu/storage': resolve(PKGS_DIR, 'storage/src/index.ts'),
+      '@open-edu/pwa-core': resolve(PKGS_DIR, 'pwa-core/src/index.ts'),
     },
   },
   test: {

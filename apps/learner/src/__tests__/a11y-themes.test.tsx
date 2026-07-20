@@ -13,15 +13,30 @@ import { AppSidebar } from '@open-edu/design-system';
 import type { PackageSummary } from '@open-edu/core';
 
 vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
-  getProgress: vi.fn(() => null),
-  saveProgress: vi.fn(),
+  getAllProgress: vi.fn(() => Promise.resolve({})),
+  getProgress: vi.fn(() => Promise.resolve(null)),
+  saveProgress: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../badgesStorage', () => ({
   addBadge: vi.fn(),
-  getBadges: vi.fn(() => []),
-  getAllBadges: vi.fn(() => ({})),
+  getBadges: vi.fn(() => Promise.resolve([])),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
+}));
+
+vi.mock('@open-edu/pwa-core', () => ({
+  getInstallState: vi.fn().mockReturnValue({
+    isInstallable: false,
+    isInstalled: false,
+    platform: 'desktop',
+  }),
+  promptInstall: vi.fn().mockResolvedValue({ outcome: 'dismissed' }),
+  registerUpdateListener: vi.fn().mockResolvedValue(vi.fn()),
+  skipWaiting: vi.fn().mockResolvedValue(undefined),
+  getUpdateState: vi.fn().mockReturnValue({ updateAvailable: false, registration: null }),
+  getOnlineStatus: vi.fn().mockReturnValue(true),
+  onOnlineStatusChange: vi.fn().mockReturnValue(vi.fn()),
+  getStorageUsage: vi.fn().mockReturnValue({ usage: 0, quota: 0 }),
 }));
 
 const mockBreakTimer = {

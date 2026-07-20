@@ -1,4 +1,5 @@
 import MiniSearch from 'minisearch';
+import { saveSearchIndex, getSearchIndex } from '@open-edu/storage';
 
 export interface SearchResult {
   id: string;
@@ -12,13 +13,46 @@ export interface SearchDocument {
   content: string;
 }
 
-export function buildSearchIndex(documents: SearchDocument[]): MiniSearch {
+let currentIndex: MiniSearch | null = null;
+
+export async function buildSearchIndex(
+  documents: SearchDocument[],
+  locale = 'en',
+): Promise<MiniSearch> {
   const index = new MiniSearch({
     fields: ['title', 'content'],
     storeFields: ['title'],
   });
   index.addAll(documents);
+  currentIndex = index;
+
+  try {
+    const serializable = index.toJSON();
+    await saveSearchIndex({ locale, indexData: serializable as unknown as Record<string, unknown> });
+  } catch {
+    // If IndexedDB is unavailable, search still works in-memory
+  }
+
   return index;
+}
+
+export async function loadSearchIndex(locale = 'en'): Promise<MiniSearch | null> {
+  if (currentIndex) return currentIndex;
+
+  try {
+    const stored = await getSearchIndex(locale);
+    if (stored?.indexData) {
+      currentIndex = MiniSearch.loadJSON(
+        JSON.stringify(stored.indexData),
+        { fields: ['title', 'content'], storeFields: ['title'] },
+      );
+      return currentIndex;
+    }
+  } catch {
+    // IndexedDB unavailable
+  }
+
+  return null;
 }
 
 export function searchOffline(
@@ -32,4 +66,8 @@ export function searchOffline(
     title: (r as unknown as { title: string }).title,
     score: r.score,
   }));
+}
+
+export function resetSearchCache(): void {
+  currentIndex = null;
 }

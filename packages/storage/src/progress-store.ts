@@ -19,6 +19,11 @@ export async function getCourseProgress(courseId: string): Promise<LearningProgr
   return all.filter((p) => p.courseId === courseId);
 }
 
+export async function getAllCourseProgress(): Promise<LearningProgress[]> {
+  const db = await openDatabase();
+  return db.getAll('progress');
+}
+
 export async function deleteCourseProgress(courseId: string): Promise<void> {
   const db = await openDatabase();
   const tx = db.transaction('progress', 'readwrite');

@@ -3,11 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { HomePage } from './HomePage';
 
 vi.mock('../progressStorage', () => ({
-  getAllProgress: vi.fn(() => ({})),
+  getAllProgress: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('../badgesStorage', () => ({
-  getAllBadges: vi.fn(() => ({})),
+  getAllBadges: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('../bundleProgressStorage', () => ({
