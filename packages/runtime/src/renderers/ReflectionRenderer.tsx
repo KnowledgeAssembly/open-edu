@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import type { ReflectionNode, ReflectionAnswer } from '@open-edu/schemas';
+import { useTranslation } from '@open-edu/i18n';
 
 export interface ReflectionRendererProps {
   node: ReflectionNode;
@@ -22,6 +23,7 @@ export function ReflectionRenderer({
   maxLength = 4096,
   showCharCount = true,
 }: ReflectionRendererProps): JSX.Element {
+  const { t } = useTranslation();
   const [text, setText] = useState<string>(
     storedAnswer?.type === 'reflection' ? storedAnswer.text : '',
   );
@@ -53,7 +55,7 @@ export function ReflectionRenderer({
         value={text}
         onChange={(e) => setText(e.target.value.slice(0, maxLength))}
         readOnly={submitted}
-        placeholder="Type your reflection here…"
+        placeholder={t('runtime.reflection.placeholder')}
         aria-label={node.prompt}
         aria-describedby={showCharCount ? `${hintId}-count` : undefined}
         className="border-outline-variant font-body-md bg-surface text-on-surface min-h-[8rem] w-full resize-y rounded-[calc(var(--oe-radius-lg)-2px)] border p-2.5 text-base"
@@ -67,7 +69,7 @@ export function ReflectionRenderer({
             disabled={!isValid}
             className="bg-primary text-on-primary rounded-lg border-none px-5 py-2.5 text-base font-semibold enabled:cursor-pointer disabled:cursor-default"
           >
-            Submit
+            {t('runtime.quiz.submit')}
           </button>
         ) : (
           <div
@@ -75,13 +77,16 @@ export function ReflectionRenderer({
             role="status"
             className="text-secondary bg-secondary/15 mt-3 rounded-lg px-4 py-2.5 font-semibold"
           >
-            Saved — thank you for your reflection.
+            {t('runtime.reflection.saved')}
           </div>
         )}
 
         {showCharCount && (
           <span id={`${hintId}-count`} className="text-on-surface-variant text-body-ui">
-            {text.length} / {maxLength}
+            {t('runtime.reflection.char_count', {
+              count: String(text.length),
+              max: String(maxLength),
+            })}
           </span>
         )}
       </div>

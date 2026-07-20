@@ -1,22 +1,35 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { ReflectionRenderer } from './ReflectionRenderer';
 import type { ReflectionNode } from '@open-edu/schemas';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 
 function makeReflection(prompt = 'What did you learn?'): ReflectionNode {
   return { type: 'reflection', prompt };
 }
 
+function renderWithI18n(ui: ReactNode) {
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+      {ui}
+    </I18nProvider>,
+  );
+}
+
 describe('ReflectionRenderer', () => {
   it('renders the prompt as a label', () => {
-    const { getByText } = render(
+    const { getByText } = renderWithI18n(
       <ReflectionRenderer node={makeReflection('Why is this important?')} onSubmit={vi.fn()} />,
     );
     expect(getByText('Why is this important?')).toBeInTheDocument();
   });
 
   it('renders an associated textarea', () => {
-    const { getByRole } = render(<ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />);
+    const { getByRole } = renderWithI18n(
+      <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
+    );
     const textarea = getByRole('textbox');
     expect(textarea).toBeInTheDocument();
     expect(textarea.getAttribute('id')).not.toBeNull();
@@ -25,19 +38,23 @@ describe('ReflectionRenderer', () => {
   });
 
   it('disables submit while textarea is empty', () => {
-    const { getByRole } = render(<ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />);
+    const { getByRole } = renderWithI18n(
+      <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
+    );
     expect(getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 
   it('enables submit after entering text', () => {
-    const { getByRole } = render(<ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />);
+    const { getByRole } = renderWithI18n(
+      <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
+    );
     fireEvent.change(getByRole('textbox'), { target: { value: 'I learned X' } });
     expect(getByRole('button', { name: 'Submit' })).not.toBeDisabled();
   });
 
   it('calls onSubmit with the entered text', () => {
     const onSubmit = vi.fn();
-    const { getByRole } = render(
+    const { getByRole } = renderWithI18n(
       <ReflectionRenderer node={makeReflection()} onSubmit={onSubmit} />,
     );
     fireEvent.change(getByRole('textbox'), { target: { value: 'My reflection' } });
@@ -46,7 +63,7 @@ describe('ReflectionRenderer', () => {
   });
 
   it('makes textarea read-only and shows confirmation after submit', () => {
-    const { getByRole, getByText } = render(
+    const { getByRole, getByText } = renderWithI18n(
       <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
     );
     fireEvent.change(getByRole('textbox'), { target: { value: 'done' } });
@@ -56,13 +73,15 @@ describe('ReflectionRenderer', () => {
   });
 
   it('disables submit for whitespace-only text', () => {
-    const { getByRole } = render(<ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />);
+    const { getByRole } = renderWithI18n(
+      <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
+    );
     fireEvent.change(getByRole('textbox'), { target: { value: '   ' } });
     expect(getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 
   it('shows a character count', () => {
-    const { getByText, getByRole } = render(
+    const { getByText, getByRole } = renderWithI18n(
       <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} maxLength={100} />,
     );
     fireEvent.change(getByRole('textbox'), { target: { value: 'hello' } });
@@ -70,7 +89,7 @@ describe('ReflectionRenderer', () => {
   });
 
   it('hides character count when showCharCount is false', () => {
-    const { queryByText, getByRole } = render(
+    const { queryByText, getByRole } = renderWithI18n(
       <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} showCharCount={false} />,
     );
     fireEvent.change(getByRole('textbox'), { target: { value: 'hello' } });
@@ -78,7 +97,7 @@ describe('ReflectionRenderer', () => {
   });
 
   it('saved confirmation has aria-live polite', () => {
-    const { getByRole, container } = render(
+    const { getByRole, container } = renderWithI18n(
       <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
     );
     fireEvent.change(getByRole('textbox'), { target: { value: 'x' } });

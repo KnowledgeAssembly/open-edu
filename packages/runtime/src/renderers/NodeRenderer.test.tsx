@@ -5,6 +5,8 @@ import { NodeRenderer } from './NodeRenderer';
 import { RuntimeProvider } from '../context/RuntimeContext';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 
 function makeLoadedNode(relativePath: string, node: LoadedNode['node'], content = ''): LoadedNode {
   return {
@@ -72,9 +74,11 @@ function renderWithProvider(
 ) {
   const engineRef = { current: makeEngine(initialNodeId) };
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <RuntimeProvider loadedPackage={pkg} engine={engineRef.current}>
-      {children}
-    </RuntimeProvider>
+    <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+      <RuntimeProvider loadedPackage={pkg} engine={engineRef.current}>
+        {children}
+      </RuntimeProvider>
+    </I18nProvider>
   );
   const utils = render(<NodeRenderer node={node} />, { wrapper });
   return { ...utils, engine: engineRef.current };

@@ -9,6 +9,8 @@
   "widget.load_error": "This activity couldn't load. Try refreshing the page.",
   "widget.no_registered": "No widget registered for ID: {{id}}",
   "widget.loading_remote": "Loading remote widget",
-  "reflection.char_count": "{{count}} / {{max}} characters",
+  "reflection.char_count": "{{count}} / {{max}}",
+  "reflection.placeholder": "Type your reflection here…",
+  "reflection.saved": "Saved — thank you for your reflection.",
   "node.loaded": "Loaded {{type}}: {{title}}"
 }

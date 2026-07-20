@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { QuizRenderer } from './QuizRenderer';
 import type { QuizNode } from '@open-edu/schemas';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 
 function makeQuiz(overrides: Partial<QuizNode> = {}): QuizNode {
   return {
@@ -16,16 +19,24 @@ function makeQuiz(overrides: Partial<QuizNode> = {}): QuizNode {
   } as QuizNode;
 }
 
+function renderWithI18n(ui: ReactNode) {
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+      {ui}
+    </I18nProvider>,
+  );
+}
+
 describe('QuizRenderer', () => {
   it('renders the question as a legend', () => {
     const quiz = makeQuiz();
-    const { getByText } = render(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
+    const { getByText } = renderWithI18n(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
     expect(getByText('What is 2 + 2?')).toBeInTheDocument();
   });
 
   it('renders all options as radio inputs', () => {
     const quiz = makeQuiz();
-    const { container } = render(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
+    const { container } = renderWithI18n(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
     const radios = container.querySelectorAll('input[type="radio"]');
     expect(radios.length).toBe(3);
     expect(container.querySelector('[role="radiogroup"]')).not.toBeNull();
@@ -33,14 +44,16 @@ describe('QuizRenderer', () => {
 
   it('disables submit until an option is selected', () => {
     const quiz = makeQuiz();
-    const { getByRole } = render(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
+    const { getByRole } = renderWithI18n(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
     const button = getByRole('button', { name: 'Submit' });
     expect(button).toBeDisabled();
   });
 
   it('enables submit after selecting an option', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText } = render(<QuizRenderer node={quiz} onSubmit={vi.fn()} />);
+    const { getByRole, getByLabelText } = renderWithI18n(
+      <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
+    );
     fireEvent.click(getByLabelText('4'));
     expect(getByRole('button', { name: 'Submit' })).not.toBeDisabled();
   });
@@ -48,7 +61,9 @@ describe('QuizRenderer', () => {
   it('scores a correct answer as 100 and calls onSubmit', () => {
     const quiz = makeQuiz();
     const onSubmit = vi.fn();
-    const { getByRole, getByLabelText } = render(<QuizRenderer node={quiz} onSubmit={onSubmit} />);
+    const { getByRole, getByLabelText } = renderWithI18n(
+      <QuizRenderer node={quiz} onSubmit={onSubmit} />,
+    );
     fireEvent.click(getByLabelText('4'));
     fireEvent.click(getByRole('button', { name: 'Submit' }));
     expect(onSubmit).toHaveBeenCalledWith(100, 'b');
@@ -57,7 +72,9 @@ describe('QuizRenderer', () => {
   it('scores an incorrect answer as 0 and calls onSubmit', () => {
     const quiz = makeQuiz();
     const onSubmit = vi.fn();
-    const { getByRole, getByLabelText } = render(<QuizRenderer node={quiz} onSubmit={onSubmit} />);
+    const { getByRole, getByLabelText } = renderWithI18n(
+      <QuizRenderer node={quiz} onSubmit={onSubmit} />,
+    );
     fireEvent.click(getByLabelText('3'));
     fireEvent.click(getByRole('button', { name: 'Submit' }));
     expect(onSubmit).toHaveBeenCalledWith(0, 'a');
@@ -65,7 +82,7 @@ describe('QuizRenderer', () => {
 
   it('shows correct feedback message for a correct answer', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, getByText } = render(
+    const { getByRole, getByLabelText, getByText } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('4'));
@@ -75,7 +92,7 @@ describe('QuizRenderer', () => {
 
   it('shows incorrect feedback message for a wrong answer', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, getByText } = render(
+    const { getByRole, getByLabelText, getByText } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('3'));
@@ -85,7 +102,7 @@ describe('QuizRenderer', () => {
 
   it('disables all inputs after submission', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, container } = render(
+    const { getByRole, getByLabelText, container } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('4'));
@@ -96,7 +113,7 @@ describe('QuizRenderer', () => {
 
   it('hides the submit button after submission', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, queryByRole } = render(
+    const { getByRole, getByLabelText, queryByRole } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('4'));
@@ -106,7 +123,7 @@ describe('QuizRenderer', () => {
 
   it('feedback region has aria-live polite for screen readers', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, container } = render(
+    const { getByRole, getByLabelText, container } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('4'));
@@ -118,7 +135,7 @@ describe('QuizRenderer', () => {
 
   it('highlights the correct answer after submission', () => {
     const quiz = makeQuiz();
-    const { getByRole, getByLabelText, container } = render(
+    const { getByRole, getByLabelText, container } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} />,
     );
     fireEvent.click(getByLabelText('3'));
@@ -133,7 +150,7 @@ describe('QuizRenderer', () => {
   it('restores previous answer from storedAnswer prop', () => {
     const quiz = makeQuiz();
     const storedAnswer = { type: 'quiz' as const, selectedOptionId: 'b', score: 100 };
-    const { container, getByText, queryByRole } = render(
+    const { container, getByText, queryByRole } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} storedAnswer={storedAnswer} />,
     );
     const selectedRadio = container.querySelector(
@@ -148,7 +165,7 @@ describe('QuizRenderer', () => {
   it('calls onAnswer when submitting', () => {
     const quiz = makeQuiz();
     const onAnswer = vi.fn();
-    const { getByRole, getByLabelText } = render(
+    const { getByRole, getByLabelText } = renderWithI18n(
       <QuizRenderer node={quiz} onSubmit={vi.fn()} onAnswer={onAnswer} />,
     );
     fireEvent.click(getByLabelText('4'));

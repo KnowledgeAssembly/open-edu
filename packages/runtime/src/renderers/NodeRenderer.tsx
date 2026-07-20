@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { LoadedNode } from '@open-edu/core';
 import { useRuntimeOptional } from '../context/RuntimeContext';
+import { useTranslation } from '@open-edu/i18n';
 import { FocusTrap, useLiveRegion } from '@open-edu/accessibility';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { QuizRenderer } from './QuizRenderer';
@@ -15,6 +16,7 @@ export interface NodeRendererProps {
 }
 
 export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
+  const { t } = useTranslation();
   const runtime = useRuntimeOptional();
   const handleComplete: (score?: number) => void =
     onComplete ?? runtime?.completeNode ?? (() => {});
@@ -29,14 +31,14 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
       announcedRef.current.add(node.relativePath);
       const title =
         node.node.title ?? node.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-      announce(`Loaded ${node.node.type}: ${title}`);
+      announce(t('runtime.node.loaded', { type: node.node.type, title }));
     }
   }, [node, announce]);
 
   if (!node) {
     return (
       <div role="status" aria-live="polite" data-testid="node-renderer-empty">
-        <p>Loading…</p>
+        <p>{t('runtime.loading')}</p>
       </div>
     );
   }
