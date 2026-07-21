@@ -804,6 +804,10 @@
   max-width: 80%;
 }
 
+.max-w-\[800px\] {
+  max-width: 800px;
+}
+
 .max-w-full {
   max-width: 100%;
 }

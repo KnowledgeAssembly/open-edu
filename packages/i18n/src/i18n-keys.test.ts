@@ -94,7 +94,7 @@ describe('i18n key validation', () => {
   const uniqueKeys = [...new Set(allKeys)];
 
   it('all t() keys have a namespace prefix (namespace.key format)', () => {
-    const invalidKeys = uniqueKeys.filter(key => {
+    const invalidKeys = uniqueKeys.filter((key) => {
       const dotIndex = key.indexOf('.');
       if (dotIndex <= 0) return true;
       const namespace = key.slice(0, dotIndex);
@@ -126,7 +126,7 @@ describe('i18n key validation', () => {
     if (missingKeys.length > 0) {
       console.error(
         'Missing i18n keys in locale files:',
-        missingKeys.map(m => `  ${m.key} (namespace: ${m.namespace})`).join('\n'),
+        missingKeys.map((m) => `  ${m.key} (namespace: ${m.namespace})`).join('\n'),
       );
     }
     expect(missingKeys).toEqual([]);

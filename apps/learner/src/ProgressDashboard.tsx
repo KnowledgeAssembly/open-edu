@@ -78,12 +78,18 @@ export function ProgressDashboard({
   if (entries.length === 0) {
     return (
       <div className="p-xl mx-auto max-w-4xl" data-testid="progress-dashboard">
-        <h1 className="text-h1 font-display text-on-surface mb-lg">{t('learner.progress.title')}</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-lg">
+          {t('learner.progress.title')}
+        </h1>
         <EmptyState
           variant="no-progress"
           heading="Your learning journey starts here!"
           description="Begin a course and your progress will appear here."
-          action={<Button onClick={() => onNavigate({ view: 'catalog' })}>{t('learner.progress.browse_courses')}</Button>}
+          action={
+            <Button onClick={() => onNavigate({ view: 'catalog' })}>
+              {t('learner.progress.browse_courses')}
+            </Button>
+          }
         />
       </div>
     );

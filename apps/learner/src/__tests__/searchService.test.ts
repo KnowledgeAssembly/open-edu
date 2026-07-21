@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
-import { buildSearchIndex, searchOffline, loadSearchIndex, resetSearchCache } from '../searchService.js';
+import {
+  buildSearchIndex,
+  searchOffline,
+  loadSearchIndex,
+  resetSearchCache,
+} from '../searchService.js';
 import { resetDatabase } from '@open-edu/storage';
 
 describe('searchService', () => {

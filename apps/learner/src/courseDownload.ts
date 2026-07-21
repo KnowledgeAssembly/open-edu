@@ -1,4 +1,10 @@
-import { saveCourse, getCourse, deleteCourse, listCourses, type StoredCourse } from '@open-edu/storage';
+import {
+  saveCourse,
+  getCourse,
+  deleteCourse,
+  listCourses,
+  type StoredCourse,
+} from '@open-edu/storage';
 
 export interface DownloadResult {
   success: boolean;
@@ -8,10 +14,12 @@ export interface DownloadResult {
 export async function downloadCourse(courseId: string): Promise<DownloadResult> {
   try {
     const { packageEntries } = await import('virtual:edu-data');
-    const entry = (packageEntries as Record<string, unknown>)[courseId] as {
-      manifest: Record<string, unknown>;
-      nodes: unknown[];
-    } | undefined;
+    const entry = (packageEntries as Record<string, unknown>)[courseId] as
+      | {
+          manifest: Record<string, unknown>;
+          nodes: unknown[];
+        }
+      | undefined;
 
     if (!entry) {
       return { success: false, error: `Course "${courseId}" not found` };

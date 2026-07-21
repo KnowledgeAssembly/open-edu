@@ -7,7 +7,7 @@ import { OfflineBanner } from '../components/OfflineBanner';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );
@@ -26,9 +26,7 @@ async function expectNoViolations(container: HTMLElement) {
 
 describe('OfflineBanner accessibility', () => {
   it('has no axe violations when offline', async () => {
-    const { container } = renderWithProviders(
-      <OfflineBanner isOnline={false} />,
-    );
+    const { container } = renderWithProviders(<OfflineBanner isOnline={false} />);
     await expectNoViolations(container);
   });
 });

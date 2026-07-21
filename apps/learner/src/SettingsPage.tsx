@@ -46,7 +46,11 @@ export function SettingsPage({
 
   return (
     <div className="p-xl mx-auto max-w-3xl" data-testid="settings-page">
-      <PageHeader eyebrow={t('learner.nav.settings')} title={t('learner.nav.settings')} className="mb-xl" />
+      <PageHeader
+        eyebrow={t('learner.nav.settings')}
+        title={t('learner.nav.settings')}
+        className="mb-xl"
+      />
 
       <div className="gap-lg flex flex-col">
         <Card>
@@ -67,7 +71,9 @@ export function SettingsPage({
             </h2>
           </CardHeader>
           <CardContent>
-            <p className="text-on-surface-variant text-sm">{t('learner.settings.language_description')}</p>
+            <p className="text-on-surface-variant text-sm">
+              {t('learner.settings.language_description')}
+            </p>
             <LanguageSwitcher />
           </CardContent>
         </Card>
@@ -84,7 +90,9 @@ export function SettingsPage({
                 <Type className="text-on-surface-variant h-4 w-4" />
                 <div>
                   <p className="text-sm font-medium">{t('learner.settings.font_size')}</p>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.font_size_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.font_size_description')}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -112,7 +120,9 @@ export function SettingsPage({
               <div className="flex items-center gap-2">
                 <div>
                   <p className="text-sm font-medium">{t('learner.settings.reduced_motion')}</p>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.reduced_motion_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.reduced_motion_description')}
+                  </p>
                 </div>
               </div>
               <Switch
@@ -126,7 +136,9 @@ export function SettingsPage({
               <div className="flex items-center gap-2">
                 <div>
                   <p className="text-sm font-medium">{t('learner.settings.high_contrast')}</p>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.high_contrast_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.high_contrast_description')}
+                  </p>
                 </div>
               </div>
               <Switch
@@ -154,28 +166,36 @@ export function SettingsPage({
                 <RadioGroupItem value="off" id="break-off" />
                 <label htmlFor="break-off" className="text-sm">
                   <span className="font-medium">{t('learner.settings.break_off')}</span>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_off_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.break_off_description')}
+                  </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="15" id="break-15" />
                 <label htmlFor="break-15" className="text-sm">
                   <span className="font-medium">{t('learner.settings.break_15')}</span>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_15_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.break_15_description')}
+                  </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="30" id="break-30" />
                 <label htmlFor="break-30" className="text-sm">
                   <span className="font-medium">{t('learner.settings.break_30')}</span>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_30_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.break_30_description')}
+                  </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="60" id="break-60" />
                 <label htmlFor="break-60" className="text-sm">
                   <span className="font-medium">{t('learner.settings.break_60')}</span>
-                  <p className="text-on-surface-variant text-xs">{t('learner.settings.break_60_description')}</p>
+                  <p className="text-on-surface-variant text-xs">
+                    {t('learner.settings.break_60_description')}
+                  </p>
                 </label>
               </div>
             </RadioGroup>

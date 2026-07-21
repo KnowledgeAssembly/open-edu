@@ -246,7 +246,11 @@ i18n
     const json = program.optsWithGlobals().json;
     const result = await i18nExtract(sourceDir, outputDir ?? sourceDir);
     if (!json) {
-      console.log(result.success ? `Extracted ${result.data!.keysCount} keys to ${result.data!.outputPath}` : result.error);
+      console.log(
+        result.success
+          ? `Extracted ${result.data!.keysCount} keys to ${result.data!.outputPath}`
+          : result.error,
+      );
     }
     handleResult(result, json);
   });

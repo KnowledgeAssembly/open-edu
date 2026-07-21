@@ -7,7 +7,7 @@ import { UpdatePrompt } from '../components/UpdatePrompt';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );
@@ -27,11 +27,7 @@ async function expectNoViolations(container: HTMLElement) {
 describe('UpdatePrompt accessibility', () => {
   it('has no axe violations when update is available', async () => {
     const { container } = renderWithProviders(
-      <UpdatePrompt
-        updateAvailable={true}
-        onUpdate={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
+      <UpdatePrompt updateAvailable={true} onUpdate={vi.fn()} onDismiss={vi.fn()} />,
     );
     await expectNoViolations(container);
   });

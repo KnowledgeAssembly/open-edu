@@ -30,7 +30,7 @@ export const StorageUsageCard = React.forwardRef<HTMLDivElement, StorageUsageCar
         </CardHeader>
         <CardContent>
           <Progress value={percentage} className="mb-2" aria-label={`${percentage}% used`} />
-          <p className="text-sm text-on-surface/60">
+          <p className="text-on-surface/60 text-sm">
             {formatBytes(usage)} of {formatBytes(quota)} used ({percentage}%)
           </p>
         </CardContent>

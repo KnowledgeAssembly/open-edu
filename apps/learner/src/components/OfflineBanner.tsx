@@ -13,7 +13,7 @@ export const OfflineBanner = React.forwardRef<HTMLDivElement, OfflineBannerProps
       <div
         ref={ref}
         role="alert"
-        className="fixed top-0 left-0 right-0 z-50 bg-surface-container px-4 py-2 text-center text-sm text-on-surface/70 dark:bg-surface-container dark:text-on-surface/70"
+        className="bg-surface-container text-on-surface/70 dark:bg-surface-container dark:text-on-surface/70 fixed left-0 right-0 top-0 z-50 px-4 py-2 text-center text-sm"
       >
         <WifiOff className="mr-2 inline h-4 w-4" aria-hidden="true" />
         You're offline. Some features may be limited.

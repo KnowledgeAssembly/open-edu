@@ -8,11 +8,11 @@ export interface AppLayoutProps {
 
 export function AppLayout({ topBar, sidebar, children }: AppLayoutProps): JSX.Element {
   return (
-    <div className="flex h-screen w-full flex-col">
+    <div className="flex h-full w-full flex-col">
       {topBar && <div className="shrink-0">{topBar}</div>}
       <div className="flex flex-1 overflow-hidden">
         {sidebar && <div className="shrink-0">{sidebar}</div>}
-        <main className="relative z-[1] flex-1 overflow-auto">{children}</main>
+        <main className="relative z-[1] flex h-full w-full flex-col">{children}</main>
       </div>
     </div>
   );

@@ -14,15 +14,15 @@ describe('TranslationEngine', () => {
   describe('loadNamespace', () => {
     it('loads a namespace for a locale', () => {
       engine.loadNamespace('runtime', 'en', {
-        'loading': 'Loading…',
+        loading: 'Loading…',
         'quiz.submit': 'Submit',
       });
       expect(engine.t('runtime.loading', 'en')).toBe('Loading…');
     });
 
     it('overwrites existing namespace data', () => {
-      engine.loadNamespace('runtime', 'en', { 'a': 'old' });
-      engine.loadNamespace('runtime', 'en', { 'a': 'new' });
+      engine.loadNamespace('runtime', 'en', { a: 'old' });
+      engine.loadNamespace('runtime', 'en', { a: 'new' });
       expect(engine.t('runtime.a', 'en')).toBe('new');
     });
   });
@@ -30,13 +30,13 @@ describe('TranslationEngine', () => {
   describe('t() — basic translation', () => {
     beforeEach(() => {
       engine.loadNamespace('runtime', 'en', {
-        'loading': 'Loading…',
+        loading: 'Loading…',
         'quiz.submit': 'Submit',
         'quiz.correct': 'Correct! Well done.',
         'quiz.incorrect': 'Incorrect. The correct answer is highlighted.',
       });
       engine.loadNamespace('runtime', 'hi', {
-        'loading': 'लोड हो रहा है…',
+        loading: 'लोड हो रहा है…',
         'quiz.submit': 'जमा करें',
       });
     });
@@ -62,11 +62,11 @@ describe('TranslationEngine', () => {
   describe('t() — fallback', () => {
     beforeEach(() => {
       engine.loadNamespace('runtime', 'en', {
-        'loading': 'Loading…',
+        loading: 'Loading…',
         'quiz.submit': 'Submit',
       });
       engine.loadNamespace('runtime', 'hi', {
-        'loading': 'लोड हो रहा है…',
+        loading: 'लोड हो रहा है…',
       });
     });
 
@@ -82,8 +82,8 @@ describe('TranslationEngine', () => {
   describe('t() — interpolation', () => {
     beforeEach(() => {
       engine.loadNamespace('learner', 'en', {
-        'welcome': 'Welcome {{name}}',
-        'progress': '{{current}} of {{total}} completed',
+        welcome: 'Welcome {{name}}',
+        progress: '{{current}} of {{total}} completed',
       });
     });
 
@@ -92,7 +92,9 @@ describe('TranslationEngine', () => {
     });
 
     it('interpolates multiple parameters', () => {
-      expect(engine.t('learner.progress', 'en', { current: '3', total: '10' })).toBe('3 of 10 completed');
+      expect(engine.t('learner.progress', 'en', { current: '3', total: '10' })).toBe(
+        '3 of 10 completed',
+      );
     });
 
     it('returns key with missing params as literal', () => {
@@ -102,8 +104,8 @@ describe('TranslationEngine', () => {
 
   describe('t() — locale override', () => {
     beforeEach(() => {
-      engine.loadNamespace('runtime', 'en', { 'a': 'English' });
-      engine.loadNamespace('runtime', 'hi', { 'a': 'Hindi' });
+      engine.loadNamespace('runtime', 'en', { a: 'English' });
+      engine.loadNamespace('runtime', 'hi', { a: 'Hindi' });
     });
 
     it('uses the override locale instead of the engine default', () => {
@@ -130,7 +132,7 @@ describe('TranslationEngine', () => {
         fallbackLocale: 'en',
         onMissing: (key, locale) => missing.push({ key, locale }),
       });
-      engine.loadNamespace('runtime', 'en', { 'a': 'ok' });
+      engine.loadNamespace('runtime', 'en', { a: 'ok' });
       engine.t('runtime.a', 'en');
       expect(missing).toEqual([]);
     });

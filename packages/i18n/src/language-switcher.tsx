@@ -38,7 +38,7 @@ export function LanguageSwitcher({
           className={
             locale === loc
               ? 'rounded-sm px-3 py-1.5 text-sm font-semibold underline underline-offset-2'
-              : 'cursor-pointer rounded-sm px-3 py-1.5 text-sm hover:bg-primary/10'
+              : 'hover:bg-primary/10 cursor-pointer rounded-sm px-3 py-1.5 text-sm'
           }
         >
           {LOCALE_LABELS[loc] ?? loc}

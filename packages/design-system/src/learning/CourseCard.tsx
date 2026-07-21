@@ -1,4 +1,3 @@
-import { Button } from '../primitives/button.js';
 import { Progress } from '../primitives/progress.js';
 import type { JSX, ReactNode } from 'react';
 
@@ -71,20 +70,11 @@ export function CourseCard({
   const isCompleted = progress?.isCompleted ?? false;
   const isStarted = !!progress;
 
-  let buttonLabel: string;
-
-  if (!isStarted) {
-    buttonLabel = 'Start';
-  } else if (isCompleted) {
-    buttonLabel = 'Review';
-  } else {
-    buttonLabel = 'Continue';
-  }
-
   return (
     <article
-      className="bg-surface-container-low shadow-elevation-raised font-body-md hover:shadow-elevation-overlay relative rounded-2xl transition-shadow duration-200"
+      className="bg-surface-container-low shadow-elevation-raised font-body-md hover:shadow-elevation-overlay relative cursor-pointer rounded-2xl transition-shadow duration-200"
       data-testid="course-card"
+      onClick={onStart}
     >
       {indicator && <div className="absolute right-4 top-4 z-10">{indicator}</div>}
       <div className="p-5 pr-16">
@@ -136,15 +126,6 @@ export function CourseCard({
             <span className="text-tertiary text-xs font-semibold">Badge earned</span>
           </div>
         )}
-        <Button
-          variant={isCompleted ? 'secondary' : 'default'}
-          size="sm"
-          className="mt-3 h-8 w-full px-4 text-sm"
-          aria-label={`${buttonLabel} ${manifest.title}`}
-          onClick={() => onStart()}
-        >
-          {buttonLabel}
-        </Button>
       </div>
     </article>
   );

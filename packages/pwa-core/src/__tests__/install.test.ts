@@ -3,7 +3,11 @@ import { getInstallState, promptInstall } from '../install.js';
 
 describe('Install management', () => {
   beforeEach(() => {
-    Object.defineProperty(navigator, 'userAgent', { value: 'Mozilla/5.0 (Linux; Android 13)', configurable: true, writable: true });
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Linux; Android 13)',
+      configurable: true,
+      writable: true,
+    });
     Object.defineProperty(window, 'matchMedia', {
       value: vi.fn().mockImplementation((query: string) => ({
         matches: query === '(display-mode: standalone)' ? false : false,

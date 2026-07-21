@@ -7,7 +7,7 @@ import { InstallPrompt } from '../components/InstallPrompt';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );
@@ -27,11 +27,7 @@ async function expectNoViolations(container: HTMLElement) {
 describe('InstallPrompt accessibility', () => {
   it('has no axe violations when installable', async () => {
     const { container } = renderWithProviders(
-      <InstallPrompt
-        isInstallable={true}
-        isInstalled={false}
-        onInstall={vi.fn()}
-      />,
+      <InstallPrompt isInstallable={true} isInstalled={false} onInstall={vi.fn()} />,
     );
     await expectNoViolations(container);
   });
