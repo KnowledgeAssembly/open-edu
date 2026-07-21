@@ -84,10 +84,10 @@ export function BadgeToast({
             </div>
           </GlowPulse>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-tertiary text-sm font-semibold">
+            <span className="text-tertiary text-body-ui font-semibold">
               {t('learner.badge.achievement_unlocked')}
             </span>
-            <span className="text-on-surface truncate text-sm">{badgeName}</span>
+            <span className="text-on-surface text-body-ui truncate">{badgeName}</span>
           </div>
         </div>
       </div>

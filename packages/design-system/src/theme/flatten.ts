@@ -31,7 +31,8 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
 
   for (const [key, value] of Object.entries(theme.spacing)) {
     if (value !== undefined) {
-      vars[`--oe-space-${key}`] = value;
+      const kebab = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+      vars[`--oe-space-${kebab}`] = value;
     }
   }
 

@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@open-edu/accessibility": "workspace:*",
+    "@open-edu/i18n": "workspace:*",
     "@open-edu/core": "workspace:*",
     "@open-edu/design-system": "workspace:*",
     "@open-edu/rewards": "workspace:*",

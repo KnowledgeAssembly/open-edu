@@ -163,12 +163,12 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-medium leading-tight">{theme.name}</span>
-                  <span className="text-surface-variant-foreground text-xs leading-tight">
+                  <span className="text-body-ui font-medium leading-tight">{theme.name}</span>
+                  <span className="text-surface-variant-foreground text-caption leading-tight">
                     {theme.description}
                   </span>
                   {isSelected && (
-                    <span className="text-primary text-xs font-semibold" aria-label="Selected">
+                    <span className="text-primary text-caption font-semibold" aria-label="Selected">
                       ✓ Selected
                     </span>
                   )}

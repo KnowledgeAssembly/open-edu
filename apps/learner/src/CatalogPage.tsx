@@ -142,7 +142,7 @@ export function CatalogPage({
               <h2 className="text-h2 font-display text-on-surface">
                 {t('learner.catalog.continue_learning')}
               </h2>
-              <span className="bg-surface-container text-on-surface-variant rounded-full px-2 py-0.5 text-xs">
+              <span className="bg-surface-container text-on-surface-variant text-caption rounded-full px-2 py-0.5">
                 {t('learner.catalog.in_progress_count', {
                   count: String(inProgressCourses.length),
                 })}
@@ -150,7 +150,7 @@ export function CatalogPage({
             </div>
             {onNavigate && (
               <button
-                className="text-primary text-xs font-semibold hover:underline"
+                className="text-primary text-caption font-semibold hover:underline"
                 onClick={() => onNavigate({ view: 'progress' })}
               >
                 {t('learner.catalog.view_all')}
@@ -226,7 +226,7 @@ export function CatalogPage({
             className="rounded-full px-3"
             onClick={() => setActiveTag(null)}
           >
-            All
+            {t('learner.catalog.filter_all')}
           </Button>
           {tags.map((tag) => (
             <Button
@@ -243,20 +243,20 @@ export function CatalogPage({
       )}
 
       <div className="gap-md mb-md flex items-center" data-testid="sort-controls">
-        <span className="text-on-surface-variant text-sm font-semibold">
+        <span className="text-on-surface-variant text-body-ui font-semibold">
           {t('learner.catalog.sort_label')}
         </span>
         <Select
           value={sortBy}
           onValueChange={(v) => setSortBy(v as 'newest' | 'inProgress' | 'alphabetical')}
         >
-          <SelectTrigger className="w-[180px]" aria-label="Sort by">
-            <SelectValue placeholder="Sort by" />
+          <SelectTrigger className="w-[180px]" aria-label={t('learner.catalog.sort_by_aria')}>
+            <SelectValue placeholder={t('learner.catalog.sort_by')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
+            <SelectItem value="newest">{t('learner.catalog.sort_newest')}</SelectItem>
             <SelectItem value="inProgress">{t('learner.catalog.in_progress_first')}</SelectItem>
-            <SelectItem value="alphabetical">Alphabetical</SelectItem>
+            <SelectItem value="alphabetical">{t('learner.catalog.sort_alphabetical')}</SelectItem>
           </SelectContent>
         </Select>
       </div>

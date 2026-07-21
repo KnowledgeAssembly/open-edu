@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { QuizNode, QuizAnswer } from '@open-edu/schemas';
 import { FocusTrap } from '@open-edu/accessibility';
 import { useTranslation } from '@open-edu/i18n';
+import { Button } from '@open-edu/design-system';
 
 export interface QuizRendererProps {
   node: QuizNode;
@@ -56,10 +57,10 @@ export function QuizRenderer({
 
   const optionBgClass = (option: QuizOption): string => {
     if (!submitted) {
-      return selectedOptionId === option.id ? 'bg-primary/10' : 'bg-transparent';
+      return selectedOptionId === option.id ? 'bg-primary-container' : 'bg-transparent';
     }
-    if (option.correct) return 'bg-secondary/15';
-    if (option.id === selectedOptionId) return 'bg-error/15';
+    if (option.correct) return 'bg-success-container';
+    if (option.id === selectedOptionId) return 'bg-error-container';
     return 'bg-transparent';
   };
 
@@ -70,7 +71,7 @@ export function QuizRenderer({
         data-testid="quiz-renderer"
         disabled={submitted}
       >
-        <legend className="px-2 text-lg font-bold">{node.question}</legend>
+        <legend className="text-h3 font-display px-2">{node.question}</legend>
 
         <div role="radiogroup" aria-label={t('runtime.quiz.answer_options')} className="mt-3">
           {options.map((option) => (
@@ -96,20 +97,22 @@ export function QuizRenderer({
         </div>
 
         {!submitted ? (
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={selectedOptionId === null}
-            className="bg-primary text-on-primary mt-3 cursor-pointer rounded-lg border-none px-5 py-2.5 text-base font-semibold disabled:cursor-default"
+            className="mt-3"
           >
             {t('runtime.quiz.submit')}
-          </button>
+          </Button>
         ) : (
           <div
             aria-live="polite"
             role="status"
             className={`mt-3 rounded-lg px-4 py-3 font-semibold ${
-              score === 100 ? 'text-secondary bg-secondary/15' : 'text-error bg-error/15'
+              score === 100
+                ? 'text-on-success-container bg-success-container'
+                : 'text-on-error-container bg-error-container'
             }`}
           >
             {score === 100 ? t('runtime.quiz.correct') : t('runtime.quiz.incorrect')}

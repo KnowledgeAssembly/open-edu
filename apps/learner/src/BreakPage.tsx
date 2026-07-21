@@ -38,18 +38,18 @@ export function BreakPage({ onBackToLearning }: BreakPageProps): JSX.Element {
         <Pipili size="xl" mood="content" animated />
       </div>
 
-      <h1 className="font-display text-primary text-3xl font-semibold">
+      <h1 className="font-display text-primary text-display-sm">
         {t('learner.break.time_to_recharge')}
       </h1>
-      <p className="text-on-surface-variant mt-2 text-center text-base">
-        Take a moment for yourself. Your brain will thank you.
+      <p className="text-on-surface-variant text-body-ui mt-2 text-center">
+        {t('learner.break.subtitle')}
       </p>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {suggestionChips.map((chip) => (
           <div
             key={chip.label}
-            className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm"
+            className="text-body-ui inline-flex items-center gap-2 rounded-full border px-4 py-2"
           >
             <span className={`h-2 w-2 rounded-full ${chip.color}`} />
             {chip.label}
@@ -84,11 +84,13 @@ export function BreakPage({ onBackToLearning }: BreakPageProps): JSX.Element {
             style={{ opacity: 0.6 }}
           />
         </svg>
-        <span className="text-on-surface-variant font-mono text-lg">2:00</span>
+        <span className="text-on-surface-variant text-display-sm font-mono">
+          {t('learner.break.timer')}
+        </span>
       </div>
 
       <Button className="mt-8" onClick={onBackToLearning}>
-        Back to Learning
+        {t('learner.break.resume')}
       </Button>
 
       <div className="mt-auto w-full max-w-md" aria-hidden="true">

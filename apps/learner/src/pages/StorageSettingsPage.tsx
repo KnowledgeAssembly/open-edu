@@ -30,7 +30,7 @@ export function StorageSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('learner.storage.settings')}</h1>
+      <h1 className="text-h1 font-display">{t('learner.storage.settings')}</h1>
       <StorageUsageCard usage={usage} quota={quota} />
       <DownloadedCourseList courses={courses} onDelete={handleDelete} />
     </div>

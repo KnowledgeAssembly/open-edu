@@ -37,9 +37,7 @@ export function WidgetCanvas({
         className={`border-outline-variant bg-surface-container-lowest p-md rounded-xl border ${className}`}
         style={{ minHeight: `${minHeight}px` }}
       >
-        <div className="text-on-surface-variant mb-sm text-xs font-medium uppercase tracking-wider">
-          {displayName}
-        </div>
+        <div className="text-on-surface-variant mb-sm text-label-caps">{displayName}</div>
         {children}
       </div>
     </FocusTrap>

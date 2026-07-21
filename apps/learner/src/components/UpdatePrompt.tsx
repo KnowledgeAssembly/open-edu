@@ -20,7 +20,7 @@ export const UpdatePrompt = React.forwardRef<HTMLDivElement, UpdatePromptProps>(
         role="status"
         className="border-border bg-surface fixed bottom-4 right-4 z-50 rounded-lg border p-4 shadow-lg"
       >
-        <p className="mb-2 text-sm font-medium">{t('learner.update.available')}</p>
+        <p className="text-body-ui mb-2 font-medium">{t('learner.update.available')}</p>
         <div className="flex gap-2">
           <Button size="sm" onClick={onUpdate}>
             <RefreshCw className="mr-1 h-3 w-3" aria-hidden="true" />

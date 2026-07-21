@@ -46,7 +46,7 @@ export function HomePage({
   const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
-    <div className="p-xl mx-auto w-full max-w-6xl" data-testid="home-page">
+    <div className="p-xl mx-auto w-full max-w-4xl" data-testid="home-page">
       <HeroSection variant="editorial" showIllustration className="mb-xl">
         <h1 className="text-display-lg font-display text-on-surface">
           {t('learner.home.welcome_back')}
@@ -62,10 +62,7 @@ export function HomePage({
         </div>
       </HeroSection>
 
-      <div
-        className="pb-md text-caption text-on-surface-variant -mt-md text-center opacity-50"
-        aria-hidden="true"
-      >
+      <div className="pb-md text-caption text-on-surface-variant text-left" aria-hidden="true">
         {t('learner.home.assembled_tagline')}
       </div>
 
@@ -83,17 +80,17 @@ export function HomePage({
             {
               value: totalUnits,
               label: t('learner.home.stat_courses'),
-              icon: <OpenModule size="xs" satellites={3} />,
+              icon: <OpenModule size="xs" satellites={2} />,
             },
             {
               value: inProgressCount,
               label: t('learner.home.stat_in_progress'),
-              icon: <OpenModule size="xs" satellites={3} />,
+              icon: <OpenModule size="xs" satellites={4} />,
             },
             {
               value: badgeCount,
               label: t('learner.home.stat_badges'),
-              icon: <OpenModule size="xs" satellites={3} />,
+              icon: <OpenModule size="xs" satellites={5} />,
             },
           ]}
         />
@@ -111,7 +108,7 @@ export function HomePage({
         <div className="bg-outline-variant h-px flex-1 opacity-30" />
       </div>
 
-      <div className="p-md border-primary/10 relative rounded-xl border-2">
+      <div className="p-md border-outline-variant relative rounded-xl border">
         <div
           className="absolute inset-0 overflow-hidden rounded-xl opacity-[0.04]"
           aria-hidden="true"

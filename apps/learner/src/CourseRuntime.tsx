@@ -272,8 +272,8 @@ export function CourseRuntime({
           {children && (
             <div
               className={cn(
-                'flex-shrink-0 overflow-y-auto transition-[width] duration-200',
-                sidebarCollapsed ? 'w-16' : 'flex-[0_0_var(--oe-space-panelNav,260px)]',
+                'border-outline-variant shrink-0 overflow-y-auto border-r transition-[width] duration-200',
+                sidebarCollapsed ? 'w-16' : 'w-[var(--oe-space-panel-nav)]',
               )}
             >
               {children}

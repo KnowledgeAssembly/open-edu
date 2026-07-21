@@ -80,7 +80,7 @@ export function CompanionPanel(): JSX.Element | null {
         aria-label={t('learner.ai.companion')}
       >
         <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-base font-semibold">{t('learner.ai.companion')}</h2>
+          <h2 className="text-h3 font-display">{t('learner.ai.companion')}</h2>
           <button
             type="button"
             className="hover:bg-surface-container-high text-on-surface-variant rounded-md p-1 transition-colors"

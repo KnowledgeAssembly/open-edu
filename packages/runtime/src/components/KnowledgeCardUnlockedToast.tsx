@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { type CardDefinition, type CardType } from '@open-edu/schemas';
 import { cn, GlowPulse, ConfettiBurst } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import { BookOpen, Brain, Award, Compass, Heart, Star, X } from 'lucide-react';
 
 const typeIcons: Record<CardType, typeof BookOpen> = {
@@ -30,6 +31,7 @@ export function KnowledgeCardUnlockedToast({
   autoDismissMs = 4000,
   type,
 }: KnowledgeCardUnlockedToastProps): JSX.Element | null {
+  const { t } = useTranslation();
   const IconComponent = typeIcons[card.type] ?? BookOpen;
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
@@ -111,20 +113,23 @@ export function KnowledgeCardUnlockedToast({
           </GlowPulse>
 
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-on-surface text-sm font-semibold">
+            <span className="text-on-surface text-body-ui font-semibold">
               {type === 'levelUp' ? (
                 <span className="flex items-center gap-1">
-                  Level Up! <Star className="size-3.5 fill-amber-400 text-amber-400" /> Level{' '}
-                  {newLevel}
+                  {t('runtime.card_viewer.level_up')}{' '}
+                  <Star className="fill-tertiary text-tertiary size-3.5" />{' '}
+                  {t('runtime.card_viewer.level', { level: String(newLevel) })}
                 </span>
               ) : (
-                'Card Unlocked!'
+                t('runtime.card_viewer.card_unlocked')
               )}
             </span>
-            <span className="text-on-surface-variant truncate text-sm font-medium">
+            <span className="text-on-surface-variant text-body-ui truncate font-medium">
               {card.title}
             </span>
-            <span className="text-on-surface-variant line-clamp-1 text-xs">{card.summary}</span>
+            <span className="text-on-surface-variant text-caption line-clamp-1">
+              {card.summary}
+            </span>
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
@@ -132,12 +137,12 @@ export function KnowledgeCardUnlockedToast({
               <button
                 onClick={onView}
                 className={cn(
-                  'rounded-lg px-2.5 py-1.5 text-xs font-medium',
+                  'text-label rounded-lg px-2.5 py-1.5 font-medium',
                   'bg-primary text-on-primary hover:bg-primary/90',
                   'transition-colors',
                 )}
               >
-                View
+                {t('runtime.card_viewer.view')}
               </button>
             )}
             <button
@@ -147,7 +152,7 @@ export function KnowledgeCardUnlockedToast({
                 'text-on-surface-variant hover:text-on-surface hover:bg-muted/50',
                 'transition-colors',
               )}
-              aria-label="Dismiss"
+              aria-label={t('runtime.card_viewer.dismiss')}
             >
               <X className="size-4" />
             </button>

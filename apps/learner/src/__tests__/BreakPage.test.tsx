@@ -36,13 +36,13 @@ describe('BreakPage', () => {
 
   it('renders Back to Learning button', () => {
     renderWithProvider(<BreakPage onBackToLearning={vi.fn()} />);
-    expect(screen.getByText('Back to Learning')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /back to learning/i })).toBeInTheDocument();
   });
 
   it('clicking Back to Learning calls onBackToLearning', () => {
     const onBackToLearning = vi.fn();
     renderWithProvider(<BreakPage onBackToLearning={onBackToLearning} />);
-    fireEvent.click(screen.getByText('Back to Learning'));
+    fireEvent.click(screen.getByRole('button', { name: /back to learning/i }));
     expect(onBackToLearning).toHaveBeenCalledTimes(1);
   });
 

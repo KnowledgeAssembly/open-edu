@@ -37,6 +37,8 @@ export const luminaScholastica: ThemeDefinition = {
     ['on-error']: '#ffffff',
     ['error-container']: '#ffdad6',
     ['on-error-container']: '#93000a',
+    ['on-success']: '#ffffff',
+    ['on-success-container']: '#003914',
     ['primary-fixed']: '#ede2ff',
     ['primary-fixed-dim']: '#d4c4ff',
     ['on-primary-fixed']: '#2a104d',
@@ -72,7 +74,7 @@ export const luminaScholastica: ThemeDefinition = {
       heading: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '28px',
-        fontWeight: '650',
+        fontWeight: '600',
         lineHeight: '1.3',
         letterSpacing: '-0.01em',
       },
@@ -109,7 +111,7 @@ export const luminaScholastica: ThemeDefinition = {
       body: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '14px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.6',
       },
       label: {
@@ -122,7 +124,7 @@ export const luminaScholastica: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.5',
       },
       code: {
@@ -179,7 +181,7 @@ export const luminaScholastica: ThemeDefinition = {
       body: {
         fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '18px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.7',
         letterSpacing: '0.01em',
       },
@@ -193,7 +195,7 @@ export const luminaScholastica: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.5',
       },
       code: {
@@ -215,7 +217,7 @@ export const luminaScholastica: ThemeDefinition = {
     marginDesktop: '48px',
     marginMobile: '20px',
     containerMax: '720px',
-    panelNav: '240px',
+    panelNav: '260px',
     panelExplorer: '320px',
     readingWidth: '68ch',
     paragraphSpacing: '1.5rem',

@@ -1,5 +1,5 @@
 import { type CardDefinition, type CardType } from '@open-edu/schemas';
-import { cn } from '@open-edu/design-system';
+import { cn, Button } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import {
   Dialog,
@@ -66,24 +66,24 @@ export function KnowledgeCardViewer({
                 {card.title}
               </DialogTitle>
               {card.subtitle && (
-                <span className="text-on-surface-variant text-sm">{card.subtitle}</span>
+                <span className="text-on-surface-variant text-body-ui">{card.subtitle}</span>
               )}
             </div>
           </div>
-          <DialogDescription className="text-on-surface-variant text-sm leading-relaxed">
+          <DialogDescription className="text-on-surface-variant text-body-ui leading-relaxed">
             {card.summary}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-wrap gap-2 px-6">
-          <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium capitalize">
+          <span className="bg-primary-container text-on-primary-container text-label rounded-full px-2.5 py-1 font-medium capitalize">
             {card.type}
           </span>
-          <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium">
+          <span className="bg-primary-container text-on-primary-container text-label rounded-full px-2.5 py-1 font-medium">
             {card.category}
           </span>
           {card.difficulty && (
-            <span className="bg-muted text-on-surface-variant rounded-full px-2.5 py-1 text-xs font-medium">
+            <span className="bg-primary-container text-on-primary-container text-label rounded-full px-2.5 py-1 font-medium">
               {card.difficulty}
             </span>
           )}
@@ -91,7 +91,7 @@ export function KnowledgeCardViewer({
 
         {card.detailedExplanation && (
           <div className="px-6">
-            <p className="text-on-surface text-sm leading-relaxed">{card.detailedExplanation}</p>
+            <p className="text-on-surface text-body-reading">{card.detailedExplanation}</p>
           </div>
         )}
 
@@ -101,7 +101,7 @@ export function KnowledgeCardViewer({
               {card.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="bg-surface-container-high text-on-surface-variant rounded px-2 py-0.5 text-[10px] font-medium"
+                  className="bg-surface-container-high text-on-surface-variant text-label rounded px-2 py-0.5 font-medium"
                 >
                   #{tag}
                 </span>
@@ -111,7 +111,7 @@ export function KnowledgeCardViewer({
         )}
 
         <div className="px-6">
-          <h4 className="text-on-surface mb-3 text-sm font-semibold">
+          <h4 className="text-on-surface text-h4 font-display mb-3">
             {t('runtime.card_viewer.mastery_levels')}
           </h4>
           <div className="flex flex-col gap-2">
@@ -134,7 +134,7 @@ export function KnowledgeCardViewer({
                 >
                   <div
                     className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                      'text-label flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-bold',
                       isUnlocked
                         ? 'bg-primary text-on-primary'
                         : 'bg-muted text-on-surface-variant',
@@ -146,19 +146,21 @@ export function KnowledgeCardViewer({
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          'text-sm font-medium',
+                          'text-body-ui font-medium',
                           isUnlocked ? 'text-on-surface' : 'text-on-surface-variant',
                         )}
                       >
-                        {isUnlocked ? 'Unlocked' : 'Locked'}
+                        {isUnlocked
+                          ? t('runtime.card_viewer.unlocked')
+                          : t('runtime.card_viewer.locked')}
                       </span>
                       {isCurrent && (
-                        <span className="text-primary bg-primary/10 rounded-full px-2 py-0.5 text-[10px] font-medium">
-                          Current
+                        <span className="text-on-primary-container bg-primary-container text-label rounded-full px-2 py-0.5 font-medium">
+                          {t('runtime.card_viewer.current')}
                         </span>
                       )}
                     </div>
-                    <p className="text-on-surface-variant text-xs">{defaults[0]}</p>
+                    <p className="text-on-surface-variant text-caption">{defaults[0]}</p>
                   </div>
                 </div>
               );
@@ -168,18 +170,16 @@ export function KnowledgeCardViewer({
 
         {card.relatedLessons && card.relatedLessons.length > 0 && (
           <div className="px-6">
-            <h4 className="text-on-surface mb-2 text-sm font-semibold">
+            <h4 className="text-on-surface text-h4 font-display mb-2">
               {t('runtime.card_viewer.related_lessons')}
             </h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedLessons.map((lessonId) => (
-                <button
+                <Button
                   key={lessonId}
+                  variant="link"
+                  size="sm"
                   onClick={() => onRelatedLessonClick?.(lessonId)}
-                  className={cn(
-                    'text-primary hover:text-primary/80 flex items-center gap-2 text-sm',
-                    'text-left transition-colors',
-                  )}
                 >
                   <ExternalLink className="size-3.5 shrink-0" />
                   <span className="truncate">
@@ -188,7 +188,7 @@ export function KnowledgeCardViewer({
                       .replace(/\.(md|json)$/, '')
                       .replace(/[-_]/g, ' ')}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -196,18 +196,16 @@ export function KnowledgeCardViewer({
 
         {card.relatedQuizzes && card.relatedQuizzes.length > 0 && (
           <div className="px-6 pb-6">
-            <h4 className="text-on-surface mb-2 text-sm font-semibold">
+            <h4 className="text-on-surface text-h4 font-display mb-2">
               {t('runtime.card_viewer.related_quizzes')}
             </h4>
             <div className="flex flex-col gap-1.5">
               {card.relatedQuizzes.map((quizId) => (
-                <button
+                <Button
                   key={quizId}
+                  variant="link"
+                  size="sm"
                   onClick={() => onRelatedLessonClick?.(quizId)}
-                  className={cn(
-                    'text-primary hover:text-primary/80 flex items-center gap-2 text-sm',
-                    'text-left transition-colors',
-                  )}
                 >
                   <ExternalLink className="size-3.5 shrink-0" />
                   <span className="truncate">
@@ -216,7 +214,7 @@ export function KnowledgeCardViewer({
                       .replace(/\.(md|json)$/, '')
                       .replace(/[-_]/g, ' ')}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
