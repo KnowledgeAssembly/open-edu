@@ -29,6 +29,9 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 async function expectNoViolations(container: HTMLElement) {
+  // TagFilterBar uses role="group" with aria-label on a wrapper div that
+  // axe-core considers a prohibited attribute combination for that role.
+  // The attribute is semantically appropriate for grouping tag controls.
   const result = await axe.run(container, {
     rules: { 'aria-prohibited-attr': { enabled: false } },
   });

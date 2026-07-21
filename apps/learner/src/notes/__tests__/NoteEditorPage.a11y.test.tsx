@@ -1,32 +1,28 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, waitFor } from '@testing-library/react';
 import axe from 'axe-core';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
 import { FontSizeProvider } from '@open-edu/design-system';
 import { I18nProvider } from '@open-edu/i18n';
 import notesDict from '@open-edu/i18n/locales/en/notes.json';
-import { LiveRegionProvider } from '@open-edu/accessibility';
-import { NotesSearchPanel } from '../NotesSearchPanel';
+import { NoteEditorPage } from '../NoteEditorPage';
 
 vi.mock('@open-edu/storage', () => ({
-  listNotes: vi.fn(async () => []),
-  getNoteTags: vi.fn(async () => []),
+  saveNote: vi.fn(async () => undefined),
+  deleteNote: vi.fn(async () => undefined),
+  getNote: vi.fn(),
 }));
 
-vi.mock('minisearch', () => {
-  const MockMiniSearch = vi.fn(() => ({
-    addAll: vi.fn(),
-    search: vi.fn(() => []),
-  }));
-  return { default: MockMiniSearch };
-});
+import { getNote } from '@open-edu/storage';
+
+const mockGetNote = vi.mocked(getNote);
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
     <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>
         <I18nProvider locale="en" dictionaries={{ en: { notes: notesDict } }}>
-          <LiveRegionProvider>{ui}</LiveRegionProvider>
+          {ui}
         </I18nProvider>
       </FontSizeProvider>
     </RuntimeThemeProvider>,
@@ -34,12 +30,7 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 async function expectNoViolations(container: HTMLElement) {
-  // NotesSearchPanel uses aria-controls and aria-expanded on the search input
-  // to link with the results listbox. axe-core 4.x reports these as disallowed
-  // on <input> elements per an older ARIA spec; they are valid in ARIA 1.2+.
-  const result = await axe.run(container, {
-    rules: { 'aria-allowed-attr': { enabled: false } },
-  });
+  const result = await axe.run(container);
   if (result.violations.length > 0) {
     const details = result.violations.map(
       (v: { id: string; help: string; nodes: Array<{ html: string }> }) =>
@@ -49,9 +40,26 @@ async function expectNoViolations(container: HTMLElement) {
   }
 }
 
-describe('NotesSearchPanel accessibility', () => {
-  it('has no axe violations', async () => {
-    const { container } = renderWithProviders(<NotesSearchPanel onOpenNote={vi.fn()} />);
+describe('NoteEditorPage accessibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('has no axe violations when note loads', async () => {
+    mockGetNote.mockResolvedValue({
+      id: 'note-1',
+      title: 'Accessible Note',
+      content: 'Content for a11y.',
+      favorite: false,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    });
+    const { container } = renderWithProviders(
+      <NoteEditorPage noteId="note-1" onNavigate={vi.fn()} />,
+    );
+    await waitFor(() => {
+      expect(container.querySelector('input')).toBeInTheDocument();
+    });
     await expectNoViolations(container);
   });
 });

@@ -104,9 +104,12 @@ function pathToView(pathname: string, packageEntries: Record<string, LoadedPacka
   if (main === 'progress') return { view: 'progress' };
   if (main === 'settings') return { view: 'settings' };
   if (main === 'collection') return { view: 'collection' };
-  if (main === 'notes') return { view: 'notes' };
-  if (main.startsWith('notes/'))
-    return { view: 'note-editor', noteId: segments.slice(1).join('/') };
+  if (main === 'notes') {
+    if (segments.length > 1) {
+      return { view: 'note-editor', noteId: segments[1]! };
+    }
+    return { view: 'notes' };
+  }
   if (main === 'break') return { view: 'break' };
   if (main === 'bundle' && segments[1]) return { view: 'bundleOverview', bundleId: segments[1] };
   if (main === 'course' && segments[1]) {

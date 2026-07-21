@@ -21,6 +21,9 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 async function expectNoViolations(container: HTMLElement) {
+  // NoteRow uses role="button" on a <div> containing <button> children (star, trash).
+  // axe-core flags nested interactive elements; this is intentional design —
+  // the outer div is the primary click target, inner buttons handle specific actions.
   const result = await axe.run(container, {
     rules: { 'nested-interactive': { enabled: false } },
   });
