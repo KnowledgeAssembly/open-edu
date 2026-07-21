@@ -29,7 +29,7 @@ test.describe.serial('Notes Feature', () => {
     await page.locator('[data-testid="appsidebar-nav-notes"]').click();
     await expect(page.locator('[data-testid="notes-page"]')).toBeVisible({ timeout: 10000 });
 
-    await page.getByRole('button', { name: 'New note' }).click();
+    await page.getByRole('button', { name: 'New note' }).first().click();
 
     await expect(page).toHaveURL(/\/notes\/(.+)$/);
     const match = page.url().match(/\/notes\/(.+)$/);
