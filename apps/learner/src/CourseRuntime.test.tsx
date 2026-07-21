@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { CourseRuntime } from './CourseRuntime';
 import type { LoadedPackage } from '@open-edu/core';
 import { I18nProvider } from '@open-edu/i18n';
@@ -130,29 +130,35 @@ describe('CourseRuntime', () => {
     mockGetOrderedNodes.mockReturnValue(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
   });
 
-  it('renders course view with children', () => {
+  it('renders course view with children', async () => {
     renderWithProvider(
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
         <div data-testid="child-content">Sidebar content</div>
       </CourseRuntime>,
     );
+    await waitFor(() => {
+      expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    });
     expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
-    expect(screen.getByTestId('child-content')).toBeInTheDocument();
   });
 
-  it('renders no-workflow fallback when package has no workflow', () => {
+  it('renders no-workflow fallback when package has no workflow', async () => {
     const noWorkflowPkg = { ...samplePackage, workflow: null };
     renderWithProvider(<CourseRuntime pkg={noWorkflowPkg} onBackToCatalog={vi.fn()} />);
-    expect(screen.getByText('Course not available')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Course not available')).toBeInTheDocument();
+    });
   });
 
-  it('renders children alongside course content', () => {
+  it('renders children alongside course content', async () => {
     renderWithProvider(
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()}>
         <nav data-testid="section2-nav">Step list</nav>
       </CourseRuntime>,
     );
-    expect(screen.getByTestId('section2-nav')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('section2-nav')).toBeInTheDocument();
+    });
     expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
   });
 });
