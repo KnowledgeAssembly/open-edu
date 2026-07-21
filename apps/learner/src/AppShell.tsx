@@ -12,7 +12,7 @@ import { dictionaries } from './i18n-dictionaries';
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { getOrderedNodes } from '@open-edu/workflow';
-import { Home, TrendingUp, BookOpen, Settings, Library } from 'lucide-react';
+import { Home, TrendingUp, BookOpen, Settings, Library, StickyNote } from 'lucide-react';
 import {
   AppSidebar,
   AppLayout,
@@ -33,6 +33,8 @@ import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
+import { NotesDashboardPage } from './notes/NotesDashboardPage';
+import { NoteEditorPage } from './notes/NoteEditorPage';
 import { Pipili } from './components/Pipili';
 import { OfflineBanner } from './components/OfflineBanner.js';
 import { CourseRightSidebar } from './CourseRightSidebar';
@@ -61,6 +63,8 @@ export type AppView =
   | { view: 'course'; packageId: string; bundleId?: string; moduleId?: string }
   | { view: 'bundleOverview'; bundleId: string }
   | { view: 'collection' }
+  | { view: 'notes' }
+  | { view: 'note-editor'; noteId: string }
   | { view: 'break' };
 
 function viewToPath(view: AppView): string {
@@ -75,6 +79,10 @@ function viewToPath(view: AppView): string {
       return '/settings';
     case 'collection':
       return '/collection';
+    case 'notes':
+      return '/notes';
+    case 'note-editor':
+      return `/notes/${view.noteId}`;
     case 'break':
       return '/break';
     case 'bundleOverview':
@@ -91,10 +99,17 @@ function pathToView(pathname: string, packageEntries: Record<string, LoadedPacka
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return { view: 'home' };
   const main = segments[0];
+  if (!main) return { view: 'home' };
   if (main === 'catalog') return { view: 'catalog' };
   if (main === 'progress') return { view: 'progress' };
   if (main === 'settings') return { view: 'settings' };
   if (main === 'collection') return { view: 'collection' };
+  if (main === 'notes') {
+    if (segments.length > 1) {
+      return { view: 'note-editor', noteId: segments[1]! };
+    }
+    return { view: 'notes' };
+  }
   if (main === 'break') return { view: 'break' };
   if (main === 'bundle' && segments[1]) return { view: 'bundleOverview', bundleId: segments[1] };
   if (main === 'course' && segments[1]) {
@@ -345,6 +360,7 @@ function AppShellInner({
   const navItems: AppSidebarItem[] = [
     { id: 'home', label: t('learner.nav.home'), icon: <Home className="h-5 w-5" /> },
     { id: 'progress', label: t('learner.nav.progress'), icon: <TrendingUp className="h-5 w-5" /> },
+    { id: 'notes', label: t('learner.nav.notes'), icon: <StickyNote className="h-5 w-5" /> },
     { id: 'collection', label: t('learner.nav.collection'), icon: <Library className="h-5 w-5" /> },
     { id: 'catalog', label: t('learner.nav.catalog'), icon: <BookOpen className="h-5 w-5" /> },
     { id: 'settings', label: t('learner.nav.settings'), icon: <Settings className="h-5 w-5" /> },
@@ -355,7 +371,9 @@ function AppShellInner({
       ? 'catalog'
       : view.view === 'collection'
         ? 'collection'
-        : view.view;
+        : view.view === 'notes' || view.view === 'note-editor'
+          ? 'notes'
+          : view.view;
 
   const handleNavAction = useCallback(
     (id: string) => {
@@ -371,6 +389,9 @@ function AppShellInner({
           break;
         case 'collection':
           handleNavigate({ view: 'collection' });
+          break;
+        case 'notes':
+          handleNavigate({ view: 'notes' });
           break;
         case 'settings':
           handleNavigate({ view: 'settings' });
@@ -518,10 +539,10 @@ function AppShellInner({
               <div className="shrink-0">
                 <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col">
                 <div
                   key={location.pathname}
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  className="animate-in fade-in slide-in-from-bottom-4 flex min-h-0 flex-1 flex-col overflow-y-auto duration-500"
                 >
                   {view.view === 'catalog' && (
                     <CatalogPage
@@ -571,6 +592,10 @@ function AppShellInner({
                     />
                   )}
                   {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                  {view.view === 'notes' && <NotesDashboardPage onNavigate={handleNavigate} />}
+                  {view.view === 'note-editor' && view.noteId && (
+                    <NoteEditorPage noteId={view.noteId} onNavigate={handleNavigate} />
+                  )}
                   {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
                 </div>
               </div>
@@ -578,7 +603,7 @@ function AppShellInner({
           </AppLayout>
         )}
       </div>
-      <CourseRightSidebar />
+      <CourseRightSidebar onNavigate={handleNavigate} />
       <CompanionFloatingUI view={view} />
       <CourseExitWarningDialog
         open={showExitWarning}

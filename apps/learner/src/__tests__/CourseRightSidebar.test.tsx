@@ -1,14 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseRightSidebar } from '../CourseRightSidebar';
 import { CompanionProvider } from '../ai';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
+import notesDict from '@open-edu/i18n/locales/en/notes.json';
+
+vi.mock('@open-edu/runtime', () => ({
+  RuntimeThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useRuntimeOptional: () => null,
+}));
 
 function renderWithProvider(ui: React.ReactElement) {
   return render(
-    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict, notes: notesDict } }}>
       <CompanionProvider>{ui}</CompanionProvider>
     </I18nProvider>,
   );
@@ -22,14 +28,7 @@ describe('CourseRightSidebar', () => {
   });
 
   it('renders expanded sidebar with tabs when panel is open', () => {
-    renderWithProvider(
-      <>
-        <button data-testid="open-panel" onClick={() => {}}>
-          Open
-        </button>
-        <CourseRightSidebar />
-      </>,
-    );
+    renderWithProvider(<CourseRightSidebar />);
     const openBtn = screen.getByRole('button', { name: /open sidebar/i });
     fireEvent.click(openBtn);
 
@@ -53,14 +52,14 @@ describe('CourseRightSidebar', () => {
     expect(notepadTab).toHaveAttribute('aria-selected', 'false');
   });
 
-  it('switches to notepad tab on click', async () => {
+  it('renders note panel in notepad tab on click', async () => {
     const user = userEvent.setup();
     renderWithProvider(<CourseRightSidebar />);
     fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
 
     await user.click(screen.getByRole('tab', { name: /notepad/i }));
 
-    expect(screen.getByText('Notepad feature coming soon.')).toBeInTheDocument();
+    expect(await screen.findByText('My Notes')).toBeInTheDocument();
   });
 
   it('renders tabpanel for active tab', () => {
