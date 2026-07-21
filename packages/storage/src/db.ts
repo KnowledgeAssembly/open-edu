@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export interface StoredCourse {
   id: string;
@@ -43,6 +43,22 @@ export interface CardProgressData {
   unlockedAt: string;
 }
 
+export interface NoteRecord {
+  id: string;
+  title: string;
+  content: string;
+  favorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+  courseId?: string;
+  lessonId?: string;
+}
+
+export interface NoteTagRecord {
+  noteId: string;
+  tag: string;
+}
+
 export interface OpenEduDB {
   courses: StoredCourse;
   progress: LearningProgress;
@@ -50,6 +66,8 @@ export interface OpenEduDB {
   preferences: UserPreferences;
   badges: BadgeData;
   cards: CardProgressData;
+  notes: NoteRecord;
+  'note-tags': NoteTagRecord;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -79,6 +97,13 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('cards')) {
           db.createObjectStore('cards', { keyPath: 'cardId' });
+        }
+        if (!db.objectStoreNames.contains('notes')) {
+          db.createObjectStore('notes', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('note-tags')) {
+          const tagStore = db.createObjectStore('note-tags', { keyPath: ['noteId', 'tag'] });
+          tagStore.createIndex('byNoteId', 'noteId', { unique: false });
         }
       },
     }).catch((err) => {

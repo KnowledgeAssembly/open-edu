@@ -3,8 +3,11 @@ import { AIChat, Tabs, TabsList, TabsTrigger, TabsContent } from '@open-edu/desi
 import type { ChatMessage } from '@open-edu/design-system';
 import { FileText, Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
+import { useRuntimeOptional } from '@open-edu/runtime';
 import { useCompanion } from './ai';
 import type { ConversationMessage } from '@open-edu/ai-companion';
+import { NotePanel } from './notes/NotePanel';
+import type { AppView } from './AppShell';
 
 function toChatMessage(msg: ConversationMessage): ChatMessage {
   return {
@@ -14,10 +17,18 @@ function toChatMessage(msg: ConversationMessage): ChatMessage {
   };
 }
 
-export function CourseRightSidebar(): JSX.Element | null {
+export interface CourseRightSidebarProps {
+  onNavigate?: (view: AppView) => void;
+}
+
+export function CourseRightSidebar({ onNavigate }: CourseRightSidebarProps): JSX.Element | null {
   const { t } = useTranslation();
+  const runtime = useRuntimeOptional();
   const { messages, isLoading, sendMessage, panelState, setPanelState } = useCompanion();
   const [activeTab, setActiveTab] = useState<'pipili' | 'notepad'>('pipili');
+
+  const courseId = runtime?.loadedPackage.manifest.id ?? '';
+  const lessonId = runtime?.currentNodeId ?? '';
 
   const isOpen = panelState !== 'closed';
 
@@ -89,7 +100,10 @@ export function CourseRightSidebar(): JSX.Element | null {
           </button>
         </div>
 
-        <TabsContent value="pipili" className="data-[state=inactive]:hidden flex min-h-0 flex-1 flex-col">
+        <TabsContent
+          value="pipili"
+          className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
+        >
           <AIChat
             messages={messages.map(toChatMessage)}
             onSend={handleSend}
@@ -102,11 +116,13 @@ export function CourseRightSidebar(): JSX.Element | null {
         </TabsContent>
         <TabsContent
           value="notepad"
-          className="data-[state=inactive]:hidden flex flex-1 items-center justify-center p-6 text-center"
+          className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
-          <p className="text-on-surface-variant text-body-ui">
-            {t('learner.right_sidebar.notepad_coming_soon')}
-          </p>
+          <NotePanel
+            courseId={courseId}
+            lessonId={lessonId}
+            onOpenInNotes={onNavigate ? () => onNavigate({ view: 'notes' }) : undefined}
+          />
         </TabsContent>
       </Tabs>
     </aside>

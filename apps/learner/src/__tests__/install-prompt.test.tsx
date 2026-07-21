@@ -14,7 +14,9 @@ function renderWithProvider(ui: React.ReactElement) {
 
 describe('InstallPrompt', () => {
   it('renders install button when installable and not installed', () => {
-    renderWithProvider(<InstallPrompt isInstallable={true} isInstalled={false} onInstall={vi.fn()} />);
+    renderWithProvider(
+      <InstallPrompt isInstallable={true} isInstalled={false} onInstall={vi.fn()} />,
+    );
     expect(screen.getByText('Install App')).toBeInTheDocument();
   });
 
@@ -34,13 +36,17 @@ describe('InstallPrompt', () => {
 
   it('calls onInstall when button clicked', () => {
     const onInstall = vi.fn();
-    renderWithProvider(<InstallPrompt isInstallable={true} isInstalled={false} onInstall={onInstall} />);
+    renderWithProvider(
+      <InstallPrompt isInstallable={true} isInstalled={false} onInstall={onInstall} />,
+    );
     fireEvent.click(screen.getByText('Install App'));
     expect(onInstall).toHaveBeenCalledOnce();
   });
 
   it('has accessible role and aria-label', () => {
-    renderWithProvider(<InstallPrompt isInstallable={true} isInstalled={false} onInstall={vi.fn()} />);
+    renderWithProvider(
+      <InstallPrompt isInstallable={true} isInstalled={false} onInstall={vi.fn()} />,
+    );
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /install openedu app/i })).toBeInTheDocument();
   });

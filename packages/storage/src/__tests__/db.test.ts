@@ -8,7 +8,7 @@ describe('IndexedDB database setup', () => {
 
   it('exports correct DB_NAME and DB_VERSION', () => {
     expect(DB_NAME).toBe('open-edu');
-    expect(DB_VERSION).toBe(2);
+    expect(DB_VERSION).toBe(3);
   });
 
   it('opens database with all required object stores', async () => {
@@ -20,6 +20,8 @@ describe('IndexedDB database setup', () => {
     expect(storeNames).toContain('preferences');
     expect(storeNames).toContain('badges');
     expect(storeNames).toContain('cards');
+    expect(storeNames).toContain('notes');
+    expect(storeNames).toContain('note-tags');
     db.close();
   });
 

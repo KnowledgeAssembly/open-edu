@@ -26,3 +26,17 @@ export {
   deleteAllBadges,
 } from './badge-store.js';
 export { saveCard, getCard, getAllCards, deleteAllCards } from './card-store.js';
+export { type NoteRecord, type NoteTagRecord } from './db.js';
+export {
+  saveNote,
+  getNote,
+  listNotes,
+  deleteNote,
+  setNoteFavorite,
+  addNoteTag,
+  removeNoteTag,
+  getNoteTags,
+  listAllTags,
+  bulkPutNotes,
+  deleteNotesByLesson,
+} from './note-store.js';
