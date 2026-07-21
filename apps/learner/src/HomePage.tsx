@@ -52,7 +52,7 @@ export function HomePage({
           {t('learner.home.welcome_back')}
         </h1>
         <p className="text-body-reading text-on-surface-variant mt-md max-w-prose">
-          Continue where you left off, or explore new courses in the catalog.
+          {t('learner.home.subtitle')}
         </p>
         <div className="mt-md gap-md flex items-center">
           <Button onClick={() => onNavigate({ view: 'catalog' })}>
@@ -66,7 +66,7 @@ export function HomePage({
         className="pb-md text-caption text-on-surface-variant -mt-md text-center opacity-50"
         aria-hidden="true"
       >
-        — assembled from parts —
+        {t('learner.home.assembled_tagline')}
       </div>
 
       <div className="relative">
@@ -80,13 +80,21 @@ export function HomePage({
         <StatsSummary
           animated
           items={[
-            { value: totalUnits, label: 'courses', icon: <OpenModule size="xs" satellites={3} /> },
             {
-              value: inProgressCount,
-              label: 'in progress',
+              value: totalUnits,
+              label: t('learner.home.stat_courses'),
               icon: <OpenModule size="xs" satellites={3} />,
             },
-            { value: badgeCount, label: 'badges', icon: <OpenModule size="xs" satellites={3} /> },
+            {
+              value: inProgressCount,
+              label: t('learner.home.stat_in_progress'),
+              icon: <OpenModule size="xs" satellites={3} />,
+            },
+            {
+              value: badgeCount,
+              label: t('learner.home.stat_badges'),
+              icon: <OpenModule size="xs" satellites={3} />,
+            },
           ]}
         />
       </div>
@@ -112,17 +120,17 @@ export function HomePage({
         </div>
         <div className="relative z-10">
           <p className="text-body-reading text-on-surface-variant mb-md">
-            Ready to continue your learning journey?
+            {t('learner.home.cta_prompt')}
           </p>
           <div className="gap-sm flex flex-wrap">
             <Button onClick={() => onNavigate({ view: 'catalog' })}>
               {t('learner.home.browse_courses')}
             </Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
-              View Progress
+              {t('learner.home.view_progress')}
             </Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'settings' })}>
-              Settings
+              {t('learner.home.settings')}
             </Button>
           </div>
         </div>

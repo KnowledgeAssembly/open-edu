@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
 import type { PackageSummary } from '@open-edu/core';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const { getAllProgressMock, getAllBadgesMock } = vi.hoisted(() => ({
   getAllProgressMock: vi.fn().mockResolvedValue({}),
@@ -24,6 +26,14 @@ vi.mock('@open-edu/pwa-core', () => ({
   }),
   promptInstall: vi.fn().mockResolvedValue({ outcome: 'dismissed' }),
 }));
+
+function renderWithI18n(ui: React.ReactElement) {
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      {ui}
+    </I18nProvider>,
+  );
+}
 
 const samplePackages: PackageSummary[] = [
   {
@@ -59,25 +69,25 @@ describe('CatalogPage', () => {
   });
 
   it('renders course cards', () => {
-    render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     const cards = screen.getAllByTestId('course-card');
     expect(cards).toHaveLength(2);
   });
 
   it('renders empty state when no packages', () => {
-    render(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
+    renderWithI18n(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
     expect(screen.getByText('No courses yet')).toBeInTheDocument();
   });
 
   it('renders package titles', () => {
-    render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     expect(screen.getByText('Course One')).toBeInTheDocument();
     expect(screen.getByText('Course Two')).toBeInTheDocument();
   });
 
   it('fires onStartCourse with correct rootDir per package', () => {
     const onStart = vi.fn();
-    render(<CatalogPage packages={samplePackages} onStartCourse={onStart} />);
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={onStart} />);
     const cards = screen.getAllByTestId('course-card');
     fireEvent.click(cards[0]!);
     expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
@@ -99,7 +109,7 @@ describe('CatalogPage', () => {
     });
 
     it('shows in-progress count badge', async () => {
-      render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+      renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
       await waitFor(() => {
         expect(screen.getByText('1 in progress')).toBeInTheDocument();
       });
@@ -107,7 +117,7 @@ describe('CatalogPage', () => {
 
     it('shows "View all →" button that navigates to progress', async () => {
       const onNavigate = vi.fn();
-      render(
+      renderWithI18n(
         <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} onNavigate={onNavigate} />,
       );
       const viewAll = await screen.findByText('View all →');
@@ -136,7 +146,7 @@ describe('CatalogPage', () => {
     });
 
     it('shows OpenModule indicator on completed card', () => {
-      const { container } = render(
+      const { container } = renderWithI18n(
         <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />,
       );
       const svgs = container.querySelectorAll('[data-testid="course-card"] svg');
@@ -144,7 +154,7 @@ describe('CatalogPage', () => {
     });
 
     it('shows "Completed" text on completed course', async () => {
-      render(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+      renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
       await waitFor(() => {
         expect(screen.getByText('Completed')).toBeInTheDocument();
       });

@@ -104,11 +104,13 @@ export function CatalogPage({
   if (packages.length === 0) {
     return (
       <div className="p-xl">
-        <h1 className="text-h1 font-display text-on-surface mb-lg">Courses</h1>
+        <h1 className="text-h1 font-display text-on-surface mb-lg">
+          {t('learner.catalog.courses_heading')}
+        </h1>
         <EmptyState
           variant="no-courses"
-          heading="No courses yet"
-          description="Start exploring to build your learning path."
+          heading={t('learner.catalog.empty_heading')}
+          description={t('learner.catalog.empty_description')}
           action={
             <Button onClick={() => onNavigate?.({ view: 'catalog' })}>
               {t('learner.catalog.browse')}
@@ -121,7 +123,11 @@ export function CatalogPage({
 
   return (
     <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
-      <PageHeader eyebrow="Catalog" title="Course Catalog" className="mb-xl" />
+      <PageHeader
+        eyebrow={t('learner.catalog.eyebrow')}
+        title={t('learner.catalog.page_title')}
+        className="mb-xl"
+      />
 
       <InstallPrompt
         isInstallable={installPrompt.isInstallable}
@@ -137,7 +143,9 @@ export function CatalogPage({
                 {t('learner.catalog.continue_learning')}
               </h2>
               <span className="bg-surface-container text-on-surface-variant rounded-full px-2 py-0.5 text-xs">
-                {inProgressCourses.length} in progress
+                {t('learner.catalog.in_progress_count', {
+                  count: String(inProgressCourses.length),
+                })}
               </span>
             </div>
             {onNavigate && (
@@ -145,7 +153,7 @@ export function CatalogPage({
                 className="text-primary text-xs font-semibold hover:underline"
                 onClick={() => onNavigate({ view: 'progress' })}
               >
-                View all →
+                {t('learner.catalog.view_all')}
               </button>
             )}
           </div>
@@ -256,11 +264,11 @@ export function CatalogPage({
       {sorted.length === 0 ? (
         <EmptyState
           variant="no-results"
-          heading="No matches found"
-          description="Try different keywords or browse the full catalog."
+          heading={t('learner.catalog.no_results_heading')}
+          description={t('learner.catalog.no_results_description')}
           action={
             <Button variant="outline" onClick={() => setActiveTag(null)}>
-              Clear Filter
+              {t('learner.catalog.clear_filter')}
             </Button>
           }
         />

@@ -309,7 +309,10 @@ function AppShellInner({
         return [{ label: t('learner.breadcrumb.settings') }];
       case 'bundleOverview': {
         const bundle = bundleEntries[view.bundleId];
-        return [{ label: t('learner.breadcrumb.course_catalog') }, { label: bundle?.manifest.title ?? t('learner.fallback.bundle') }];
+        return [
+          { label: t('learner.breadcrumb.course_catalog') },
+          { label: bundle?.manifest.title ?? t('learner.fallback.bundle') },
+        ];
       }
       case 'break':
         return [{ label: t('learner.breadcrumb.break') }];
@@ -439,22 +442,22 @@ function AppShellInner({
                   />
                 )}
                 <CourseRuntime
-                    pkg={coursePkg}
-                    onBackToCatalog={handleBackToCatalog}
-                    hideLayoutShellHeader
-                    sidebarCollapsed={sidebarCollapsed}
-                    onProgressUpdate={handleProgressUpdate}
-                    header={
-                      <TopAppBar
-                        breadcrumbs={getBreadcrumbs()}
-                        isCourseView
-                        courseTitle={coursePkg.manifest.title}
-                        showA11yControls
-                        progressCurrent={courseProgressCurrent}
-                        progressTotal={courseProgressTotal}
-                      />
-                    }
-                    bundleContext={
+                  pkg={coursePkg}
+                  onBackToCatalog={handleBackToCatalog}
+                  hideLayoutShellHeader
+                  sidebarCollapsed={sidebarCollapsed}
+                  onProgressUpdate={handleProgressUpdate}
+                  header={
+                    <TopAppBar
+                      breadcrumbs={getBreadcrumbs()}
+                      isCourseView
+                      courseTitle={coursePkg.manifest.title}
+                      showA11yControls
+                      progressCurrent={courseProgressCurrent}
+                      progressTotal={courseProgressTotal}
+                    />
+                  }
+                  bundleContext={
                     courseBundle
                       ? {
                           bundleId: courseBundle.manifest.id,
@@ -507,60 +510,60 @@ function AppShellInner({
                 <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
-              <div
-                key={location.pathname}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-              >
-                {view.view === 'catalog' && (
-                  <CatalogPage
-                    packages={catalogPackages}
-                    bundleSummaries={catalogBundles}
-                    bundleProgress={bundleProgress}
-                    onStartCourse={handleStartCourse}
-                    onStartBundle={handleStartBundle}
-                    onNavigate={handleNavigate}
-                  />
-                )}
-                {view.view === 'home' && (
-                  <HomePage
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    bundleEntries={bundleEntries}
-                  />
-                )}
-                {(() => {
-                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                  const bundle = bundleEntries[view.bundleId];
-                  if (!bundle) return null;
-                  return (
-                    <BundleOverviewPage
-                      bundle={bundle}
-                      bundleProgress={bundleProgress[view.bundleId] ?? null}
-                      onStartModule={handleStartBundleModule}
-                      onBackToCatalog={handleBackToCatalog}
+                <div
+                  key={location.pathname}
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                >
+                  {view.view === 'catalog' && (
+                    <CatalogPage
+                      packages={catalogPackages}
+                      bundleSummaries={catalogBundles}
+                      bundleProgress={bundleProgress}
+                      onStartCourse={handleStartCourse}
+                      onStartBundle={handleStartBundle}
+                      onNavigate={handleNavigate}
                     />
-                  );
-                })()}
-                {view.view === 'progress' && (
-                  <ProgressDashboard
-                    onNavigate={handleNavigate}
-                    catalogPackages={catalogPackages}
-                    packageEntries={packageEntries}
-                  />
-                )}
-                {view.view === 'settings' && (
-                  <SettingsPage
-                    currentThemeId={themeId}
-                    onThemeChange={onThemeChange}
-                    breakTimer={{
-                      mode: breakTimer.mode,
-                      setMode: breakTimer.setMode,
-                    }}
-                  />
-                )}
-                {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
-                {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
-              </div>
+                  )}
+                  {view.view === 'home' && (
+                    <HomePage
+                      onNavigate={handleNavigate}
+                      catalogPackages={catalogPackages}
+                      bundleEntries={bundleEntries}
+                    />
+                  )}
+                  {(() => {
+                    if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                    const bundle = bundleEntries[view.bundleId];
+                    if (!bundle) return null;
+                    return (
+                      <BundleOverviewPage
+                        bundle={bundle}
+                        bundleProgress={bundleProgress[view.bundleId] ?? null}
+                        onStartModule={handleStartBundleModule}
+                        onBackToCatalog={handleBackToCatalog}
+                      />
+                    );
+                  })()}
+                  {view.view === 'progress' && (
+                    <ProgressDashboard
+                      onNavigate={handleNavigate}
+                      catalogPackages={catalogPackages}
+                      packageEntries={packageEntries}
+                    />
+                  )}
+                  {view.view === 'settings' && (
+                    <SettingsPage
+                      currentThemeId={themeId}
+                      onThemeChange={onThemeChange}
+                      breakTimer={{
+                        mode: breakTimer.mode,
+                        setMode: breakTimer.setMode,
+                      }}
+                    />
+                  )}
+                  {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                  {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
+                </div>
               </div>
             </div>
           </AppLayout>

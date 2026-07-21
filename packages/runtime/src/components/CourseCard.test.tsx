@@ -27,7 +27,8 @@ describe('CourseCard', () => {
     expect(screen.getByText(/Test Author/)).toBeInTheDocument();
   });
 
-  it('shows "Start" button when no progress', () => {
+  it('is clickable and fires onStart on click', () => {
+    const onStart = vi.fn();
     render(
       <CourseCard
         manifest={manifest}
@@ -35,13 +36,16 @@ describe('CourseCard', () => {
         badgeCount={0}
         earnedBadgeCount={0}
         progress={null}
-        onStart={vi.fn()}
+        onStart={onStart}
       />,
     );
-    expect(screen.getByRole('button', { name: /Start/ })).toBeInTheDocument();
+    const card = screen.getByTestId('course-card');
+    expect(card).toHaveClass('cursor-pointer');
+    fireEvent.click(card);
+    expect(onStart).toHaveBeenCalledOnce();
   });
 
-  it('shows "Continue" button when in progress', () => {
+  it('shows progress bar when in progress', () => {
     const progress: ProgressSnapshot = {
       packageId: 'test',
       packageVersion: '1.0.0',
@@ -52,7 +56,7 @@ describe('CourseCard', () => {
       isCompleted: false,
       updatedAt: '2024-01-01T00:00:00.000Z',
     };
-    render(
+    const { container } = render(
       <CourseCard
         manifest={manifest}
         nodeCount={5}
@@ -62,10 +66,10 @@ describe('CourseCard', () => {
         onStart={vi.fn()}
       />,
     );
-    expect(screen.getByRole('button', { name: /Continue/ })).toBeInTheDocument();
+    expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
-  it('shows "Review" button when completed', () => {
+  it('shows completed text when completed', () => {
     const progress: ProgressSnapshot = {
       packageId: 'test',
       packageVersion: '1.0.0',
@@ -86,23 +90,6 @@ describe('CourseCard', () => {
         onStart={vi.fn()}
       />,
     );
-    const button = screen.getByRole('button', { name: /Review/ });
-    expect(button).not.toBeDisabled();
-  });
-
-  it('fires onStart on click', () => {
-    const onStart = vi.fn();
-    render(
-      <CourseCard
-        manifest={manifest}
-        nodeCount={5}
-        badgeCount={0}
-        earnedBadgeCount={0}
-        progress={null}
-        onStart={onStart}
-      />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: /Start/ }));
-    expect(onStart).toHaveBeenCalledWith();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 });

@@ -267,18 +267,18 @@ export function CourseRuntime({
               {children}
             </div>
           )}
-          <div className="relative min-w-0 flex-1 flex flex-col">
+          <div className="relative flex min-w-0 flex-1 flex-col">
             {header && <div className="shrink-0">{header}</div>}
             <div className="min-h-0 flex-1 overflow-y-auto">
-            {isCompleted ? (
-              <CompletionScreen badges={badges} onBack={onBackToCatalog} />
-            ) : (
-              <LayoutShellWithBack
-                orderedNodes={orderedNodes}
-                hideHeader={hideLayoutShellHeader}
-                onProgressUpdate={onProgressUpdate}
-              />
-            )}
+              {isCompleted ? (
+                <CompletionScreen badges={badges} onBack={onBackToCatalog} />
+              ) : (
+                <LayoutShellWithBack
+                  orderedNodes={orderedNodes}
+                  hideHeader={hideLayoutShellHeader}
+                  onProgressUpdate={onProgressUpdate}
+                />
+              )}
             </div>
             <div className="pointer-events-none fixed right-4 top-4 z-[9999] flex flex-col gap-2">
               {toastBadgeName && (
