@@ -119,7 +119,7 @@ test('add tag; reload; Tags section shows it', async ({ page }) => {
   await page.locator('[data-testid="note-body"]').fill('Tagged note');
   await expect(page.locator('span[aria-live="polite"]')).toContainText('Saved', { timeout: 5000 });
 
-  const tagInput = page.getByLabel('Add tag');
+  const tagInput = page.getByRole('textbox', { name: 'Add tag' });
   await expect(tagInput).toBeVisible({ timeout: 10000 });
   await tagInput.fill('revision');
   await tagInput.press('Enter');
@@ -146,7 +146,7 @@ test('export single note as Markdown; download triggered', async ({ page }) => {
   await page.getByLabel('Export').click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 
-  await page.getByRole('button', { name: 'Export' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Export' }).click();
 
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/\.md$/);
