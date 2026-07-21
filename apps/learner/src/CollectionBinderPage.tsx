@@ -74,7 +74,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   }
 
   return (
-    <div className="p-xl mx-auto max-w-6xl" data-testid="collection-binder">
+    <div className="p-xl mx-auto w-full max-w-content" data-testid="collection-binder">
       <PageHeader
         eyebrow={t('learner.collection_binder.eyebrow')}
         title={t('learner.collection_binder.title')}

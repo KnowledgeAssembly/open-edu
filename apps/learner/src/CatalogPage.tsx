@@ -122,7 +122,7 @@ export function CatalogPage({
   }
 
   return (
-    <div className="p-xl mx-auto max-w-7xl" data-testid="catalog-page">
+    <div className="p-xl mx-auto w-full max-w-content" data-testid="catalog-page">
       <PageHeader
         eyebrow={t('learner.catalog.eyebrow')}
         title={t('learner.catalog.page_title')}
