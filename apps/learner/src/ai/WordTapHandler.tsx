@@ -250,14 +250,18 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
               {popover.entry?.synonyms && popover.entry.synonyms.length > 0 && (
                 <div className="mt-3">
-                  <span className="text-on-surface-variant text-xs font-medium">{t('learner.ai.synonyms')} </span>
+                  <span className="text-on-surface-variant text-xs font-medium">
+                    {t('learner.ai.synonyms')}{' '}
+                  </span>
                   <span className="text-xs">{popover.entry.synonyms.slice(0, 5).join(', ')}</span>
                 </div>
               )}
 
               {popover.suggestions.length > 0 && !popover.entry && (
                 <div>
-                  <p className="text-on-surface-variant mb-1 text-xs font-medium">{t('learner.ai.did_you_mean')}</p>
+                  <p className="text-on-surface-variant mb-1 text-xs font-medium">
+                    {t('learner.ai.did_you_mean')}
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {popover.suggestions.map((s) => (
                       <span

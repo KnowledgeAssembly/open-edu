@@ -1,11 +1,7 @@
 export interface TranslationProvider {
   readonly id: string;
   readonly name: string;
-  translate(
-    text: string,
-    sourceLocale: string,
-    targetLocale: string
-  ): Promise<string>;
+  translate(text: string, sourceLocale: string, targetLocale: string): Promise<string>;
 }
 
 export interface TranslationJob {

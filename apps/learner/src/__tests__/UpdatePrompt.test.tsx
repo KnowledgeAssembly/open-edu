@@ -20,7 +20,9 @@ describe('UpdatePrompt', () => {
   });
 
   it('does not show when no update', () => {
-    const { container } = renderWithProvider(<UpdatePrompt updateAvailable={false} onUpdate={vi.fn()} />);
+    const { container } = renderWithProvider(
+      <UpdatePrompt updateAvailable={false} onUpdate={vi.fn()} />,
+    );
     expect(container.firstChild).toBeNull();
   });
 
@@ -36,7 +38,9 @@ describe('UpdatePrompt', () => {
   it('calls onDismiss when dismiss button clicked', async () => {
     const onDismiss = vi.fn();
     const user = userEvent.setup();
-    renderWithProvider(<UpdatePrompt updateAvailable={true} onDismiss={onDismiss} onUpdate={vi.fn()} />);
+    renderWithProvider(
+      <UpdatePrompt updateAvailable={true} onDismiss={onDismiss} onUpdate={vi.fn()} />,
+    );
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(onDismiss).toHaveBeenCalledOnce();

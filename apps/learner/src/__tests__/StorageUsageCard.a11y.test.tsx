@@ -7,7 +7,7 @@ import { StorageUsageCard } from '../components/StorageUsageCard';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );

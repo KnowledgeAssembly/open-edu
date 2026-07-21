@@ -29,7 +29,10 @@ export async function buildSearchIndex(
 
   try {
     const serializable = index.toJSON();
-    await saveSearchIndex({ locale, indexData: serializable as unknown as Record<string, unknown> });
+    await saveSearchIndex({
+      locale,
+      indexData: serializable as unknown as Record<string, unknown>,
+    });
   } catch {
     // If IndexedDB is unavailable, search still works in-memory
   }
@@ -43,10 +46,10 @@ export async function loadSearchIndex(locale = 'en'): Promise<MiniSearch | null>
   try {
     const stored = await getSearchIndex(locale);
     if (stored?.indexData) {
-      currentIndex = MiniSearch.loadJSON(
-        JSON.stringify(stored.indexData),
-        { fields: ['title', 'content'], storeFields: ['title', 'locale'] },
-      );
+      currentIndex = MiniSearch.loadJSON(JSON.stringify(stored.indexData), {
+        fields: ['title', 'content'],
+        storeFields: ['title', 'locale'],
+      });
       return currentIndex;
     }
   } catch {
@@ -56,11 +59,7 @@ export async function loadSearchIndex(locale = 'en'): Promise<MiniSearch | null>
   return null;
 }
 
-export function searchOffline(
-  index: MiniSearch,
-  query: string,
-  limit = 10,
-): SearchResult[] {
+export function searchOffline(index: MiniSearch, query: string, limit = 10): SearchResult[] {
   const results = index.search(query, { prefix: true, fuzzy: 0.2 });
   return results.slice(0, limit).map((r) => ({
     id: r.id as string,

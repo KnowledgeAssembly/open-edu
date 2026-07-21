@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { saveProgress, getProgress, getCourseProgress, deleteCourseProgress } from '../progress-store.js';
+import {
+  saveProgress,
+  getProgress,
+  getCourseProgress,
+  deleteCourseProgress,
+} from '../progress-store.js';
 import { openDatabase, resetDatabase, type LearningProgress } from '../db.js';
 
 const mockProgress: LearningProgress = {

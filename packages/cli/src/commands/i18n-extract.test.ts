@@ -28,10 +28,7 @@ describe('i18nExtract', () => {
   });
 
   it('deduplicates keys', async () => {
-    writeFileSync(
-      join(TMP_DIR, 'src', 'a.ts'),
-      `t('runtime.loading'); t('runtime.loading');`,
-    );
+    writeFileSync(join(TMP_DIR, 'src', 'a.ts'), `t('runtime.loading'); t('runtime.loading');`);
     writeFileSync(join(TMP_DIR, 'src', 'b.ts'), `t('runtime.loading');`);
     const result = await i18nExtract(join(TMP_DIR, 'src'), TMP_DIR);
     expect(result.success).toBe(true);

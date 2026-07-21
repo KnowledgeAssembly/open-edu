@@ -2,9 +2,7 @@ import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function i18nValidate(
-  localesDir: string,
-): Promise<CliResult> {
+export async function i18nValidate(localesDir: string): Promise<CliResult> {
   const errors: string[] = [];
   const localeDirs = readdirSync(localesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -62,6 +60,9 @@ export async function i18nValidate(
 
   return {
     success: true,
-    data: { validLocales: localeDirs.length, message: `All ${localeDirs.length} locales are valid` },
+    data: {
+      validLocales: localeDirs.length,
+      message: `All ${localeDirs.length} locales are valid`,
+    },
   };
 }

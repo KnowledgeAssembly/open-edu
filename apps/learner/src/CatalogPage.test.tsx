@@ -78,7 +78,8 @@ describe('CatalogPage', () => {
   it('fires onStartCourse with correct rootDir per package', () => {
     const onStart = vi.fn();
     render(<CatalogPage packages={samplePackages} onStartCourse={onStart} />);
-    fireEvent.click(screen.getByRole('button', { name: /Start Course One/ }));
+    const cards = screen.getAllByTestId('course-card');
+    fireEvent.click(cards[0]!);
     expect(onStart).toHaveBeenCalledWith('/test/courses/course-1');
   });
 

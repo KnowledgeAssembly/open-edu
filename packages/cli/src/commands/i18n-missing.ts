@@ -2,20 +2,25 @@ import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function i18nMissing(
-  localesDir: string,
-  targetLocale: string,
-): Promise<CliResult> {
+export async function i18nMissing(localesDir: string, targetLocale: string): Promise<CliResult> {
   const localeDirs = readdirSync(localesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
 
   if (!localeDirs.includes('en')) {
-    return { success: false, error: 'Reference locale "en" not found in locales directory', code: 1 };
+    return {
+      success: false,
+      error: 'Reference locale "en" not found in locales directory',
+      code: 1,
+    };
   }
 
   if (!localeDirs.includes(targetLocale)) {
-    return { success: false, error: `Target locale "${targetLocale}" not found in locales directory`, code: 1 };
+    return {
+      success: false,
+      error: `Target locale "${targetLocale}" not found in locales directory`,
+      code: 1,
+    };
   }
 
   const refDir = join(localesDir, 'en');

@@ -88,7 +88,7 @@ export function AppSidebar({
       data-testid="app-sidebar"
       aria-label="Main navigation"
     >
-      <div className="border-outline-variant truncate border-b px-4 pb-3 pt-5">
+      <div className="border-outline-variant flex h-16 shrink-0 items-center truncate border-b px-4">
         {!collapsed && logo ? (
           logo
         ) : collapsed && logoCollapsed ? (
@@ -115,7 +115,11 @@ export function AppSidebar({
               key={item.id}
               variant={isActive ? 'secondary' : 'ghost'}
               size={collapsed ? 'icon' : 'sm'}
-              className={cn('gap-2', collapsed ? 'w-full justify-center' : 'w-full justify-start')}
+              className={cn(
+                'hover:bg-surface-variant/30 gap-2 transition-colors',
+                !isActive && 'hover:text-on-surface text-on-surface-variant',
+                collapsed ? 'w-full justify-center' : 'w-full justify-start',
+              )}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`appsidebar-nav-${item.id}`}
@@ -164,7 +168,8 @@ export function AppSidebar({
                           size="sm"
                           disabled={isFuture}
                           className={cn(
-                            'w-full gap-2 text-left',
+                            'hover:bg-surface-variant/30 w-full gap-2 text-left transition-colors',
+                            !isCurrent && 'hover:text-on-surface text-on-surface-variant',
                             collapsed ? 'justify-center px-0' : 'justify-start px-3',
                           )}
                           onClick={() => step.onClick?.()}

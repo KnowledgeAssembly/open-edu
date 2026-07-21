@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
-import { getAllCardProgress, getCardProgress, saveCardProgress, clearCardProgress } from '../cardsStorage';
+import {
+  getAllCardProgress,
+  getCardProgress,
+  saveCardProgress,
+  clearCardProgress,
+} from '../cardsStorage';
 import { deleteAllCards } from '@open-edu/storage';
 
 describe('cardsStorage (IndexedDB)', () => {

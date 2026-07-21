@@ -18,7 +18,7 @@ export const UpdatePrompt = React.forwardRef<HTMLDivElement, UpdatePromptProps>(
       <div
         ref={ref}
         role="status"
-        className="fixed bottom-4 right-4 z-50 rounded-lg border border-border bg-surface p-4 shadow-lg"
+        className="border-border bg-surface fixed bottom-4 right-4 z-50 rounded-lg border p-4 shadow-lg"
       >
         <p className="mb-2 text-sm font-medium">{t('learner.update.available')}</p>
         <div className="flex gap-2">

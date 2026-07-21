@@ -15,7 +15,7 @@ import { getProgress, saveProgress } from './progressStorage';
 import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
-import { Button } from '@open-edu/design-system';
+import { Button, cn } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
 import { KnowledgeCardUnlockedToast } from '@open-edu/runtime';
 import { BadgeToast } from './BadgeToast';
@@ -30,7 +30,9 @@ export interface CourseRuntimeProps {
   pkg: LoadedPackage;
   onBackToCatalog: () => void;
   children?: ReactNode;
+  header?: ReactNode;
   hideLayoutShellHeader?: boolean;
+  sidebarCollapsed?: boolean;
   onProgressUpdate?: (current: number, total: number) => void;
   bundleContext?: BundleCourseContext;
 }
@@ -39,7 +41,9 @@ export function CourseRuntime({
   pkg,
   onBackToCatalog,
   children,
+  header,
   hideLayoutShellHeader,
+  sidebarCollapsed = false,
   onProgressUpdate,
   bundleContext,
 }: CourseRuntimeProps): JSX.Element {
@@ -231,7 +235,9 @@ export function CourseRuntime({
   if (!engine) {
     return (
       <div className="p-lg max-w-2xl" data-testid="course-runtime">
-        <h1 className="text-h1 font-display text-error mb-md">{t('learner.course.not_available')}</h1>
+        <h1 className="text-h1 font-display text-error mb-md">
+          {t('learner.course.not_available')}
+        </h1>
         <p className="text-on-surface-variant mb-lg">{t('learner.course.no_workflow')}</p>
         <Button onClick={onBackToCatalog}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -252,11 +258,18 @@ export function CourseRuntime({
           widgetRegistry={widgetRegistry}
         >
           {children && (
-            <div className="border-outline-variant flex-[0_0_280px] overflow-y-auto border-r">
+            <div
+              className={cn(
+                'border-outline-variant flex-shrink-0 overflow-y-auto border-r transition-[width] duration-200',
+                sidebarCollapsed ? 'w-16' : 'flex-[0_0_280px]',
+              )}
+            >
               {children}
             </div>
           )}
-          <div className="relative min-w-0 flex-1 overflow-y-auto">
+          <div className="relative min-w-0 flex-1 flex flex-col">
+            {header && <div className="shrink-0">{header}</div>}
+            <div className="min-h-0 flex-1 overflow-y-auto">
             {isCompleted ? (
               <CompletionScreen badges={badges} onBack={onBackToCatalog} />
             ) : (
@@ -266,6 +279,7 @@ export function CourseRuntime({
                 onProgressUpdate={onProgressUpdate}
               />
             )}
+            </div>
             <div className="pointer-events-none fixed right-4 top-4 z-[9999] flex flex-col gap-2">
               {toastBadgeName && (
                 <div className="pointer-events-auto">

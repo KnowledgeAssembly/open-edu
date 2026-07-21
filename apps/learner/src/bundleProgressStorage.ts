@@ -26,9 +26,7 @@ export async function getAllBundleProgress(): Promise<BundleProgressData> {
   }
 }
 
-export async function getBundleProgress(
-  bundleId: string,
-): Promise<BundleProgressSnapshot | null> {
+export async function getBundleProgress(bundleId: string): Promise<BundleProgressSnapshot | null> {
   try {
     const record = await getProgressFromDB(bundleId, BUNDLE_SENTINEL);
     return (record?.data as unknown as BundleProgressSnapshot) ?? null;

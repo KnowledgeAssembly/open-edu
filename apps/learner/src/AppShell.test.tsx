@@ -78,7 +78,7 @@ describe('AppShell', () => {
     expect(screen.getByTestId('appsidebar-nav-settings')).toBeInTheDocument();
   });
 
-  it('renders the TopAppBar', () => {
+  it('renders the app shell', () => {
     renderWithRouter(
       <AppShell
         catalogPackages={emptyPackages}
@@ -87,7 +87,7 @@ describe('AppShell', () => {
         bundleEntries={emptyBundleEntries}
       />,
     );
-    expect(screen.getByTestId('top-app-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('app-main')).toBeInTheDocument();
   });
 
   it('defaults to home view', () => {

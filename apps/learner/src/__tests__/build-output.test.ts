@@ -4,7 +4,7 @@ import path from 'path';
 
 const distPath = path.resolve(__dirname, '../../dist');
 const swFiles = fs.existsSync(distPath)
-  ? fs.readdirSync(distPath).filter(f => f.startsWith('sw') && f.endsWith('.js'))
+  ? fs.readdirSync(distPath).filter((f) => f.startsWith('sw') && f.endsWith('.js'))
   : [];
 const hasManifest = fs.existsSync(path.resolve(distPath, 'manifest.webmanifest'));
 

@@ -7,7 +7,7 @@ import { DownloadButton } from '../components/DownloadButton';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );
@@ -27,22 +27,14 @@ async function expectNoViolations(container: HTMLElement) {
 describe('DownloadButton accessibility', () => {
   it('has no axe violations in download state', async () => {
     const { container } = renderWithProviders(
-      <DownloadButton
-        courseId="course-1"
-        isDownloaded={false}
-        onDownload={vi.fn()}
-      />,
+      <DownloadButton courseId="course-1" isDownloaded={false} onDownload={vi.fn()} />,
     );
     await expectNoViolations(container);
   });
 
   it('has no axe violations in remove state', async () => {
     const { container } = renderWithProviders(
-      <DownloadButton
-        courseId="course-1"
-        isDownloaded={true}
-        onDelete={vi.fn()}
-      />,
+      <DownloadButton courseId="course-1" isDownloaded={true} onDelete={vi.fn()} />,
     );
     await expectNoViolations(container);
   });

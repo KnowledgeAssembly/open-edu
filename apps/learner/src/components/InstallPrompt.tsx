@@ -15,11 +15,7 @@ export const InstallPrompt = React.forwardRef<HTMLDivElement, InstallPromptProps
     if (isInstalled || !isInstallable) return null;
 
     return (
-      <div
-        ref={ref}
-        role="status"
-        className="rounded-lg border border-border bg-surface p-4"
-      >
+      <div ref={ref} role="status" className="border-border bg-surface rounded-lg border p-4">
         <p className="mb-2 text-sm font-medium">{t('learner.install.prompt')}</p>
         <Button size="sm" onClick={onInstall} aria-label="Install OpenEdu app">
           <Download className="mr-1 h-3 w-3" aria-hidden="true" />

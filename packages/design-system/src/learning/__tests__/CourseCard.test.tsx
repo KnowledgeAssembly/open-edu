@@ -29,12 +29,7 @@ describe('CourseCard', () => {
     expect(screen.getByText('by Jane Doe')).toBeInTheDocument();
   });
 
-  it('shows "Start" when progress is null', () => {
-    render(<CourseCard {...makeProps()} />);
-    expect(screen.getByRole('button')).toHaveTextContent('Start');
-  });
-
-  it('shows "Continue" when progress exists but not completed', () => {
+  it('shows progress indicator when in-progress', () => {
     render(
       <CourseCard
         {...makeProps({
@@ -50,26 +45,8 @@ describe('CourseCard', () => {
         })}
       />,
     );
-    expect(screen.getByRole('button')).toHaveTextContent('Continue');
-  });
-
-  it('shows "Review" when completed', () => {
-    render(
-      <CourseCard
-        {...makeProps({
-          progress: {
-            packageId: 'intro-js',
-            packageVersion: '1.0.0',
-            currentNodeId: 'lesson-10',
-            visitedNodes: Array.from({ length: 10 }, (_, i) => `lesson-${i + 1}`),
-            scores: {},
-            isCompleted: true,
-            updatedAt: '2025-01-01T00:00:00Z',
-          },
-        })}
-      />,
-    );
-    expect(screen.getByRole('button')).toHaveTextContent('Review');
+    const card = screen.getByTestId('course-card');
+    expect(card.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('shows "N of N lessons" and checkmark when completed', () => {
@@ -90,7 +67,6 @@ describe('CourseCard', () => {
     );
     expect(screen.getByText('10 of 10 lessons')).toBeInTheDocument();
     expect(screen.getByText('Completed')).toBeInTheDocument();
-    expect(screen.getByText('Review')).toBeInTheDocument();
   });
 
   it('shows "Badge earned" when completed with badges', () => {
@@ -133,10 +109,13 @@ describe('CourseCard', () => {
     expect(container.querySelector('[role="progressbar"]')).not.toBeInTheDocument();
   });
 
-  it('button has correct aria-label', () => {
-    render(<CourseCard {...makeProps()} />);
-    const btn = screen.getByRole('button');
-    expect(btn).toHaveAttribute('aria-label', 'Start Intro to JavaScript');
+  it('card is clickable', () => {
+    const onStart = vi.fn();
+    render(<CourseCard {...makeProps({ onStart })} />);
+    const card = screen.getByTestId('course-card');
+    expect(card).toHaveClass('cursor-pointer');
+    fireEvent.click(card);
+    expect(onStart).toHaveBeenCalledOnce();
   });
 
   it('renders lesson count', () => {
@@ -144,10 +123,10 @@ describe('CourseCard', () => {
     expect(screen.getByText('10 lessons')).toBeInTheDocument();
   });
 
-  it('calls onStart when button clicked', () => {
+  it('calls onStart when card clicked', () => {
     const onStart = vi.fn();
     render(<CourseCard {...makeProps({ onStart })} />);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByTestId('course-card'));
     expect(onStart).toHaveBeenCalledOnce();
   });
 

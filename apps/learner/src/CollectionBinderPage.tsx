@@ -76,7 +76,9 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
               />
             </svg>
           </div>
-          <h2 className="text-h2 font-display text-on-surface mb-2">{t('learner.collection_binder.title')}</h2>
+          <h2 className="text-h2 font-display text-on-surface mb-2">
+            {t('learner.collection_binder.title')}
+          </h2>
           <p className="text-on-surface-variant">
             No cards yet. Complete lessons to unlock your first Knowledge Card.
           </p>

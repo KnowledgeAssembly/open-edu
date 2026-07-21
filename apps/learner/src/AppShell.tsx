@@ -35,13 +35,13 @@ import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { Pipili } from './components/Pipili';
 import { OfflineBanner } from './components/OfflineBanner.js';
+import { CourseRightSidebar } from './CourseRightSidebar';
 import { UpdatePrompt } from './components/UpdatePrompt.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useUpdatePrompt } from './hooks/useUpdatePrompt.js';
 import {
   CompanionProvider,
   useCompanion,
-  CompanionPanel,
   ContextBridge,
   TextSelectionToolbar,
   WordTapHandler,
@@ -125,11 +125,7 @@ export function AppShell({
   return (
     <CompanionProvider>
       <RuntimeThemeProvider themeId={themeId}>
-        <I18nProvider
-          locale="en"
-          supportedLocales={['en', 'hi', 'or']}
-          dictionaries={dictionaries}
-        >
+        <I18nProvider locale="en" supportedLocales={['en', 'hi', 'or']} dictionaries={dictionaries}>
           <FontSizeProvider>
             <AppShellInner
               catalogPackages={catalogPackages}
@@ -173,6 +169,7 @@ function AppShellInner({
     [location.pathname, packageEntries],
   );
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
 
@@ -191,9 +188,7 @@ function AppShellInner({
     breakTimer.dismiss();
   }, [navigate, breakTimer]);
 
-  const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>(
-    {},
-  );
+  const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -209,11 +204,6 @@ function AppShellInner({
       cancelled = true;
     };
   }, [bundleEntries]);
-
-  const handleProgressUpdate = useCallback((current: number, total: number) => {
-    setCourseProgressCurrent(current);
-    setCourseProgressTotal(total);
-  }, []);
 
   const isCourseInProgress = useMemo(() => {
     if (view.view !== 'course' || !view.packageId) return false;
@@ -301,6 +291,11 @@ function AppShellInner({
 
   const isOnline = useOnlineStatus();
   const updatePrompt = useUpdatePrompt();
+
+  const handleProgressUpdate = useCallback((current: number, total: number) => {
+    setCourseProgressCurrent(current);
+    setCourseProgressTotal(total);
+  }, []);
 
   const getBreadcrumbs = () => {
     switch (view.view) {
@@ -416,6 +411,8 @@ function AppShellInner({
           onNavigate={handleNavAction}
           sections={[section]}
           onBack={{ label: t('learner.back_to_catalog'), onClick: handleBackToCatalog }}
+          collapsed={sidebarCollapsed}
+          onCollapseChange={setSidebarCollapsed}
         />
       </div>
     );
@@ -423,147 +420,165 @@ function AppShellInner({
 
   return (
     <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
-            <OfflineBanner isOnline={isOnline} />
-            {isCourseView && coursePkg ? (
-              <WordTapHandler className="flex min-w-0 flex-1 flex-col">
-                <div
-                  ref={courseContentRef}
-                  className="flex min-h-0 min-w-0 flex-1 flex-col"
-                  data-content-area="true"
-                >
-                  <TopAppBar
-                    breadcrumbs={getBreadcrumbs()}
-                    isCourseView
-                    courseTitle={coursePkg.manifest.title}
-                    showA11yControls
-                    progressCurrent={courseProgressCurrent}
-                    progressTotal={courseProgressTotal}
-                  />
-                  {breakTimer.isTriggered && (
-                    <BreakNagBar
-                      mode={breakTimer.mode}
-                      onTakeBreak={handleTakeBreak}
-                      onIgnore={breakTimer.dismiss}
-                    />
-                  )}
-                  <CourseRuntime
-                    pkg={coursePkg}
-                    onBackToCatalog={handleBackToCatalog}
-                    hideLayoutShellHeader
-                    onProgressUpdate={handleProgressUpdate}
-                    bundleContext={
-                      courseBundle
-                        ? {
-                            bundleId: courseBundle.manifest.id,
-                            bundle: courseBundle,
-                            onBundleSnapshot: (snapshot) => {
-                              setBundleProgress((prev) => ({
-                                ...prev,
-                                [courseBundle.manifest.id]: snapshot,
-                              }));
-                            },
-                          }
-                        : undefined
-                    }
-                  >
-                    <CourseStepWrapper />
-                    <ContextBridgeWithCompanion />
-                  </CourseRuntime>
-                  <TextSelectionToolbar containerRef={courseContentRef} />
-                </div>
-              </WordTapHandler>
-            ) : (
-              <AppLayout
-                sidebar={
-                  <div className="relative h-full overflow-hidden">
-                    <AssemblyFlow
-                      density="dense"
-                      className="pointer-events-none absolute inset-0 opacity-[0.08]"
-                      aria-hidden="true"
-                    />
-                    <AppSidebar
-                      logo={<OpenEduLogo variant="lockup" size="sm" />}
-                      logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
-                      items={navItems}
-                      currentItemId={currentNavId}
-                      onNavigate={handleNavAction}
-                    />
-                  </div>
-                }
-                topBar={<TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />}
-              >
-                {breakTimer.isTriggered && view.view !== 'break' && (
+      <OfflineBanner isOnline={isOnline} />
+      <div className="flex min-w-0 flex-1">
+        {isCourseView && coursePkg ? (
+          <WordTapHandler className="flex min-w-0 flex-1 flex-col">
+            <div
+              key={location.pathname}
+              ref={courseContentRef}
+              className="animate-in fade-in flex min-h-0 min-w-0 flex-1 flex-row duration-500"
+              data-content-area="true"
+            >
+              <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+                {breakTimer.isTriggered && (
                   <BreakNagBar
                     mode={breakTimer.mode}
                     onTakeBreak={handleTakeBreak}
                     onIgnore={breakTimer.dismiss}
                   />
                 )}
-                <main className="bg-surface flex-1 overflow-y-auto" data-testid="app-main">
-                  {view.view === 'catalog' && (
-                    <CatalogPage
-                      packages={catalogPackages}
-                      bundleSummaries={catalogBundles}
-                      bundleProgress={bundleProgress}
-                      onStartCourse={handleStartCourse}
-                      onStartBundle={handleStartBundle}
-                      onNavigate={handleNavigate}
-                    />
-                  )}
-                  {view.view === 'home' && (
-                    <HomePage
-                      onNavigate={handleNavigate}
-                      catalogPackages={catalogPackages}
-                      bundleEntries={bundleEntries}
-                    />
-                  )}
-                  {(() => {
-                    if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                    const bundle = bundleEntries[view.bundleId];
-                    if (!bundle) return null;
-                    return (
-                      <BundleOverviewPage
-                        bundle={bundle}
-                        bundleProgress={bundleProgress[view.bundleId] ?? null}
-                        onStartModule={handleStartBundleModule}
-                        onBackToCatalog={handleBackToCatalog}
+                <CourseRuntime
+                    pkg={coursePkg}
+                    onBackToCatalog={handleBackToCatalog}
+                    hideLayoutShellHeader
+                    sidebarCollapsed={sidebarCollapsed}
+                    onProgressUpdate={handleProgressUpdate}
+                    header={
+                      <TopAppBar
+                        breadcrumbs={getBreadcrumbs()}
+                        isCourseView
+                        courseTitle={coursePkg.manifest.title}
+                        showA11yControls
+                        progressCurrent={courseProgressCurrent}
+                        progressTotal={courseProgressTotal}
                       />
-                    );
-                  })()}
-                  {view.view === 'progress' && (
-                    <ProgressDashboard
-                      onNavigate={handleNavigate}
-                      catalogPackages={catalogPackages}
-                      packageEntries={packageEntries}
-                    />
-                  )}
-                  {view.view === 'settings' && (
-                    <SettingsPage
-                      currentThemeId={themeId}
-                      onThemeChange={onThemeChange}
-                      breakTimer={{
-                        mode: breakTimer.mode,
-                        setMode: breakTimer.setMode,
-                      }}
-                    />
-                  )}
-                  {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
-                  {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
-                </main>
-              </AppLayout>
+                    }
+                    bundleContext={
+                    courseBundle
+                      ? {
+                          bundleId: courseBundle.manifest.id,
+                          bundle: courseBundle,
+                          onBundleSnapshot: (snapshot) => {
+                            setBundleProgress((prev) => ({
+                              ...prev,
+                              [courseBundle.manifest.id]: snapshot,
+                            }));
+                          },
+                        }
+                      : undefined
+                  }
+                >
+                  <CourseStepWrapper />
+                  <ContextBridgeWithCompanion />
+                </CourseRuntime>
+                <TextSelectionToolbar containerRef={courseContentRef} />
+              </div>
+            </div>
+          </WordTapHandler>
+        ) : (
+          <AppLayout
+            sidebar={
+              <div className="relative h-full overflow-hidden">
+                <AssemblyFlow
+                  density="dense"
+                  className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                  aria-hidden="true"
+                />
+                <AppSidebar
+                  logo={<OpenEduLogo variant="lockup" size="sm" />}
+                  logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
+                  items={navItems}
+                  currentItemId={currentNavId}
+                  onNavigate={handleNavAction}
+                />
+              </div>
+            }
+          >
+            {breakTimer.isTriggered && view.view !== 'break' && (
+              <BreakNagBar
+                mode={breakTimer.mode}
+                onTakeBreak={handleTakeBreak}
+                onIgnore={breakTimer.dismiss}
+              />
             )}
-            <CompanionFloatingUI view={view} />
-            <CourseExitWarningDialog
-              open={showExitWarning}
-              onStay={handleExitStay}
-              onLeave={handleExitLeave}
-            />
-            <UpdatePrompt
-              updateAvailable={updatePrompt.updateAvailable}
-              onUpdate={updatePrompt.accept}
-              onDismiss={updatePrompt.dismiss}
-            />
-          </div>
+            <div className="bg-surface flex h-full w-full flex-col" data-testid="app-main">
+              <div className="shrink-0">
+                <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div
+                key={location.pathname}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+              >
+                {view.view === 'catalog' && (
+                  <CatalogPage
+                    packages={catalogPackages}
+                    bundleSummaries={catalogBundles}
+                    bundleProgress={bundleProgress}
+                    onStartCourse={handleStartCourse}
+                    onStartBundle={handleStartBundle}
+                    onNavigate={handleNavigate}
+                  />
+                )}
+                {view.view === 'home' && (
+                  <HomePage
+                    onNavigate={handleNavigate}
+                    catalogPackages={catalogPackages}
+                    bundleEntries={bundleEntries}
+                  />
+                )}
+                {(() => {
+                  if (view.view !== 'bundleOverview' || !view.bundleId) return null;
+                  const bundle = bundleEntries[view.bundleId];
+                  if (!bundle) return null;
+                  return (
+                    <BundleOverviewPage
+                      bundle={bundle}
+                      bundleProgress={bundleProgress[view.bundleId] ?? null}
+                      onStartModule={handleStartBundleModule}
+                      onBackToCatalog={handleBackToCatalog}
+                    />
+                  );
+                })()}
+                {view.view === 'progress' && (
+                  <ProgressDashboard
+                    onNavigate={handleNavigate}
+                    catalogPackages={catalogPackages}
+                    packageEntries={packageEntries}
+                  />
+                )}
+                {view.view === 'settings' && (
+                  <SettingsPage
+                    currentThemeId={themeId}
+                    onThemeChange={onThemeChange}
+                    breakTimer={{
+                      mode: breakTimer.mode,
+                      setMode: breakTimer.setMode,
+                    }}
+                  />
+                )}
+                {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                {view.view === 'break' && <BreakPage onBackToLearning={handleBackToLearning} />}
+              </div>
+              </div>
+            </div>
+          </AppLayout>
+        )}
+      </div>
+      <CourseRightSidebar />
+      <CompanionFloatingUI view={view} />
+      <CourseExitWarningDialog
+        open={showExitWarning}
+        onStay={handleExitStay}
+        onLeave={handleExitLeave}
+      />
+      <UpdatePrompt
+        updateAvailable={updatePrompt.updateAvailable}
+        onUpdate={updatePrompt.accept}
+        onDismiss={updatePrompt.dismiss}
+      />
+    </div>
   );
 }
 
@@ -572,21 +587,22 @@ function ContextBridgeWithCompanion(): JSX.Element | null {
   return <ContextBridge contextManager={contextManager} />;
 }
 
-function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element {
+function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
   const { panelState, setPanelState, messages } = useCompanion();
   const isOpen = panelState !== 'closed';
+
+  if (view.view === 'course') {
+    return null;
+  }
 
   const mood = view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content';
 
   return (
-    <>
-      <Pipili
-        mood={mood}
-        visible
-        hasUnread={messages.length > 0 && !isOpen}
-        onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
-      />
-      <CompanionPanel />
-    </>
+    <Pipili
+      mood={mood}
+      visible={!isOpen}
+      hasUnread={messages.length > 0 && !isOpen}
+      onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
+    />
   );
 }

@@ -31,7 +31,9 @@ export function BreakNagBar({ mode, onTakeBreak, onIgnore }: BreakNagBarProps): 
       <p>
         <strong className="font-semibold">{t('learner.break.time_for_break')}</strong>{' '}
         {minLabel && (
-          <>You've been learning for {minLabel} minutes. {t('learner.break.stand_up')}</>
+          <>
+            You've been learning for {minLabel} minutes. {t('learner.break.stand_up')}
+          </>
         )}
         {!minLabel && <>{t('learner.break.stand_up')}</>}
       </p>

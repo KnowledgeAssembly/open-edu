@@ -50,7 +50,7 @@ export function LayoutShell({
 
   const shellContent = (
     <section
-      className="font-body-md text-on-surface bg-surface flex min-h-full flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
+      className="font-body-md text-on-surface bg-surface mx-auto flex min-h-full w-full max-w-[800px] flex-col gap-6 p-[calc(var(--oe-space-md)*1.5)]"
       data-testid="layout-shell"
     >
       {!hideHeader && (

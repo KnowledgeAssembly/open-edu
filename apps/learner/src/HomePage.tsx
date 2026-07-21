@@ -46,20 +46,24 @@ export function HomePage({
   const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
-    <div className="p-xl mx-auto max-w-4xl" data-testid="home-page">
+    <div className="p-xl mx-auto w-full max-w-6xl" data-testid="home-page">
       <HeroSection variant="editorial" showIllustration className="mb-xl">
-        <h1 className="text-display-lg font-display text-on-surface">{t('learner.home.welcome_back')}</h1>
+        <h1 className="text-display-lg font-display text-on-surface">
+          {t('learner.home.welcome_back')}
+        </h1>
         <p className="text-body-reading text-on-surface-variant mt-md max-w-prose">
           Continue where you left off, or explore new courses in the catalog.
         </p>
-        <div className="mt-md flex items-center gap-4">
-          <Button onClick={() => onNavigate({ view: 'catalog' })}>{t('learner.home.begin_learning')}</Button>
+        <div className="mt-md gap-md flex items-center">
+          <Button onClick={() => onNavigate({ view: 'catalog' })}>
+            {t('learner.home.begin_learning')}
+          </Button>
           <Pipili size="sm" mood="idle" animated />
         </div>
       </HeroSection>
 
       <div
-        className="pb-md text-caption text-on-surface-variant -mt-6 text-center opacity-50"
+        className="pb-md text-caption text-on-surface-variant -mt-md text-center opacity-50"
         aria-hidden="true"
       >
         — assembled from parts —
@@ -67,10 +71,10 @@ export function HomePage({
 
       <div className="relative">
         <div
-          className="absolute -top-6 left-0 right-0 overflow-hidden opacity-[0.08]"
+          className="-top-md absolute left-0 right-0 overflow-hidden opacity-[0.08]"
           aria-hidden="true"
         >
-          <AssemblyFlow density="medium" className="h-5 w-full" />
+          <AssemblyFlow density="medium" className="h-md w-full" />
         </div>
 
         <StatsSummary
@@ -87,7 +91,7 @@ export function HomePage({
         />
       </div>
 
-      <div className="py-md relative flex items-center justify-center gap-4" aria-hidden="true">
+      <div className="py-md gap-md relative flex items-center justify-center" aria-hidden="true">
         <div className="bg-outline-variant h-px flex-1 opacity-30" />
         <SilhouetteGroup
           figures={[
@@ -99,10 +103,7 @@ export function HomePage({
         <div className="bg-outline-variant h-px flex-1 opacity-30" />
       </div>
 
-      <div
-        className="p-md relative rounded-xl"
-        style={{ border: '2px solid color-mix(in srgb, var(--oe-color-primary) 12%, transparent)' }}
-      >
+      <div className="p-md border-primary/10 relative rounded-xl border-2">
         <div
           className="absolute inset-0 overflow-hidden rounded-xl opacity-[0.04]"
           aria-hidden="true"
@@ -113,8 +114,10 @@ export function HomePage({
           <p className="text-body-reading text-on-surface-variant mb-md">
             Ready to continue your learning journey?
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => onNavigate({ view: 'catalog' })}>{t('learner.home.browse_courses')}</Button>
+          <div className="gap-sm flex flex-wrap">
+            <Button onClick={() => onNavigate({ view: 'catalog' })}>
+              {t('learner.home.browse_courses')}
+            </Button>
             <Button variant="outline" onClick={() => onNavigate({ view: 'progress' })}>
               View Progress
             </Button>
@@ -126,7 +129,7 @@ export function HomePage({
       </div>
 
       <div className="w-full overflow-hidden opacity-[0.06]" aria-hidden="true">
-        <AssemblyFlow density="dense" animated className="h-8 w-full" />
+        <AssemblyFlow density="dense" animated className="h-lg w-full" />
       </div>
     </div>
   );

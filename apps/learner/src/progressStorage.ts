@@ -35,10 +35,7 @@ export async function getProgress(packageId: string): Promise<ProgressSnapshot |
   }
 }
 
-export async function saveProgress(
-  packageId: string,
-  snapshot: ProgressSnapshot,
-): Promise<void> {
+export async function saveProgress(packageId: string, snapshot: ProgressSnapshot): Promise<void> {
   try {
     await saveProgressToDB({
       courseId: packageId,

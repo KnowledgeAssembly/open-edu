@@ -27,7 +27,7 @@ const mockCourses: StoredCourse[] = [
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
-      <RuntimeThemeProvider themeId="lumina-scholastica">
+    <RuntimeThemeProvider themeId="lumina-scholastica">
       <FontSizeProvider>{ui}</FontSizeProvider>
     </RuntimeThemeProvider>,
   );
@@ -53,9 +53,7 @@ describe('DownloadedCourseList accessibility', () => {
   });
 
   it('has no axe violations in empty state', async () => {
-    const { container } = renderWithProviders(
-      <DownloadedCourseList courses={[]} />,
-    );
+    const { container } = renderWithProviders(<DownloadedCourseList courses={[]} />);
     await expectNoViolations(container);
   });
 });

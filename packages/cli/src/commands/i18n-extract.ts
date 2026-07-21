@@ -2,10 +2,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { CliResult } from '../utils/json-output.js';
 
-export async function i18nExtract(
-  sourceDir: string,
-  outputDir: string,
-): Promise<CliResult> {
+export async function i18nExtract(sourceDir: string, outputDir: string): Promise<CliResult> {
   const keys = new Set<string>();
   const pattern = /\bt\(\s*['"`]([^'"`]+)['"`]/g;
 
