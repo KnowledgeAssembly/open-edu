@@ -26,9 +26,9 @@ async function navigateToCatalog(page: Page): Promise<void> {
 async function startFirstCourse(page: Page): Promise<void> {
   await navigateToCatalog(page);
   await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
-  const startBtn = page.locator('[data-testid="course-card"] button, article button').first();
-  await expect(startBtn).toBeVisible({ timeout: 10000 });
-  await startBtn.click();
+  const card = page.locator('[data-testid="course-card"]').first();
+  await expect(card).toBeVisible({ timeout: 10000 });
+  await card.click();
 }
 
 async function navigateThroughCourse(page: Page, maxSteps = 30): Promise<void> {
