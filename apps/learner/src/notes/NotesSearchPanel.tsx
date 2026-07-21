@@ -100,7 +100,7 @@ export function NotesSearchPanel({ onOpenNote }: NotesSearchPanelProps): JSX.Ele
           </button>
         ))}
         {searched && results.length === 0 && (
-          <p className="text-on-surface-variant py-2 text-center text-body-ui">
+          <p className="text-on-surface-variant text-body-ui py-2 text-center">
             {t('notes.search.no_results')}
           </p>
         )}
