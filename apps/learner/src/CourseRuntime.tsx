@@ -59,6 +59,7 @@ export function CourseRuntime({
   const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
   const [savedProgress, setSavedProgress] = useState<ProgressSnapshot | null>(null);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +70,7 @@ export function CourseRuntime({
       ]);
       if (cancelled) return;
       setSavedProgress(progress);
+      setIsLoadingProgress(false);
       if (bundleSnapshot) bundleProgressRef.current = bundleSnapshot;
     })();
     return () => {
@@ -232,6 +234,16 @@ export function CourseRuntime({
     [pkg, bundleContext],
   );
 
+  if (isLoadingProgress) {
+    return (
+      <div className="p-lg max-w-2xl" data-testid="course-runtime">
+        <div role="status" aria-live="polite">
+          <p className="text-on-surface-variant">{t('runtime.loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!engine) {
     return (
       <div className="p-lg max-w-2xl" data-testid="course-runtime">
@@ -260,8 +272,8 @@ export function CourseRuntime({
           {children && (
             <div
               className={cn(
-                'border-outline-variant flex-shrink-0 overflow-y-auto border-r transition-[width] duration-200',
-                sidebarCollapsed ? 'w-16' : 'flex-[0_0_280px]',
+                'flex-shrink-0 overflow-y-auto transition-[width] duration-200',
+                sidebarCollapsed ? 'w-16' : 'flex-[0_0_var(--oe-space-panelNav,260px)]',
               )}
             >
               {children}
