@@ -89,7 +89,7 @@ export function CourseRightSidebar(): JSX.Element | null {
           </button>
         </div>
 
-        <TabsContent value="pipili" className="flex min-h-0 flex-1 flex-col">
+        <TabsContent value="pipili" className="data-[state=inactive]:hidden flex min-h-0 flex-1 flex-col">
           <AIChat
             messages={messages.map(toChatMessage)}
             onSend={handleSend}
@@ -102,7 +102,7 @@ export function CourseRightSidebar(): JSX.Element | null {
         </TabsContent>
         <TabsContent
           value="notepad"
-          className="flex flex-1 items-center justify-center p-6 text-center"
+          className="data-[state=inactive]:hidden flex flex-1 items-center justify-center p-6 text-center"
         >
           <p className="text-on-surface-variant text-body-ui">
             {t('learner.right_sidebar.notepad_coming_soon')}

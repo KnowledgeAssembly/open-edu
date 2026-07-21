@@ -720,10 +720,6 @@
   width: 250px;
 }
 
-.w-\[280px\] {
-  width: 280px;
-}
-
 .w-\[300px\] {
   width: 300px;
 }
@@ -822,10 +818,6 @@
 
 .max-w-prose {
   max-width: 65ch;
-}
-
-.max-w-reading {
-  max-width: var(--oe-reading-width);
 }
 
 .max-w-sm {
@@ -1489,10 +1481,6 @@
   --tw-gradient-to: var(--oe-color-surface-container) var(--tw-gradient-to-position);
 }
 
-.fill-amber-400 {
-  fill: #fbbf24;
-}
-
 .fill-current {
   fill: currentColor;
 }
@@ -1640,11 +1628,6 @@
   padding-right: 2rem;
 }
 
-.px-lg {
-  padding-left: var(--oe-space-lg);
-  padding-right: var(--oe-space-lg);
-}
-
 .px-md {
   padding-left: var(--oe-space-md);
   padding-right: var(--oe-space-md);
@@ -1703,11 +1686,6 @@
 .py-lg {
   padding-top: var(--oe-space-lg);
   padding-bottom: var(--oe-space-lg);
-}
-
-.py-sm {
-  padding-top: var(--oe-space-sm);
-  padding-bottom: var(--oe-space-sm);
 }
 
 .py-xl {
@@ -1977,11 +1955,6 @@
 
 .text-accent {
   color: var(--oe-color-accent);
-}
-
-.text-amber-400 {
-  --tw-text-opacity: 1;
-  color: rgb(251 191 36 / var(--tw-text-opacity, 1));
 }
 
 .text-border {
@@ -2758,8 +2731,8 @@
     transition-duration: 300ms;
   }
 
-  .motion-safe\:duration-500 {
-    transition-duration: 500ms;
+  .motion-safe\:duration-700 {
+    transition-duration: 700ms;
   }
 
   .motion-safe\:ease-out {

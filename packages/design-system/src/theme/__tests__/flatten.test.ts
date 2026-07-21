@@ -218,10 +218,10 @@ describe('flattenTheme', () => {
     expect(vars['--oe-spacing']).toBe('12px');
   });
 
-  it('emits readingWidth as --oe-space-readingWidth from spacing loop', () => {
+  it('emits readingWidth as --oe-space-reading-width from spacing loop (kebab-case)', () => {
     const vars = flattenTheme(testTheme);
-    expect(vars['--oe-space-readingWidth']).toBe('68ch');
-    expect(vars['--oe-space-paragraphSpacing']).toBe('1.5rem');
+    expect(vars['--oe-space-reading-width']).toBe('68ch');
+    expect(vars['--oe-space-paragraph-spacing']).toBe('1.5rem');
   });
 
   it('emits spacing vars', () => {
