@@ -287,7 +287,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
                   data-testid="word-popover-ask-ai"
                 >
                   <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  Ask AI about &ldquo;{popover.word}&rdquo;
+                  {t('learner.ai.ask_about', { word: popover.word })}
                 </button>
               </div>
             </>
@@ -297,7 +297,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
             <div>
               <p className="text-body-ui font-medium">{popover.word}</p>
               <p className="text-on-surface-variant text-caption mt-1">
-                No definition found for this word.
+                {t('learner.ai.no_definition')}
               </p>
               <button
                 type="button"
@@ -306,7 +306,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
                 data-testid="word-popover-ask-ai"
               >
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                Ask AI about &ldquo;{popover.word}&rdquo;
+                {t('learner.ai.ask_about', { word: popover.word })}
               </button>
             </div>
           )}

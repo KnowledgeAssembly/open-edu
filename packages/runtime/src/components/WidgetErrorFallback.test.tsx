@@ -5,7 +5,7 @@ import { WidgetErrorFallback } from './WidgetErrorFallback';
 describe('WidgetErrorFallback', () => {
   it('renders default error message', () => {
     render(<WidgetErrorFallback widgetId="test-widget" />);
-    expect(screen.getByText("This activity couldn't load. Try refreshing the page.")).toBeDefined();
+    expect(screen.getByText('runtime.widget.loading_error')).toBeDefined();
   });
 
   it('renders custom message', () => {
@@ -49,7 +49,7 @@ describe('WidgetErrorFallback', () => {
         devDetails="Error: something went wrong"
       />,
     );
-    expect(screen.getByText('Technical details')).toBeDefined();
+    expect(screen.getByText('runtime.widget.technical_details')).toBeDefined();
     expect(screen.getByTestId('widget-error-details')).toBeDefined();
   });
 
@@ -61,11 +61,11 @@ describe('WidgetErrorFallback', () => {
         devDetails="Error: something went wrong"
       />,
     );
-    expect(screen.queryByText('Technical details')).toBeNull();
+    expect(screen.queryByText('runtime.widget.technical_details')).toBeNull();
   });
 
   it('hides dev details when devDetails is not provided', () => {
     render(<WidgetErrorFallback widgetId="test-widget" isDevMode={true} />);
-    expect(screen.queryByText('Technical details')).toBeNull();
+    expect(screen.queryByText('runtime.widget.technical_details')).toBeNull();
   });
 });

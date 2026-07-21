@@ -150,11 +150,13 @@ export function KnowledgeCardViewer({
                           isUnlocked ? 'text-on-surface' : 'text-on-surface-variant',
                         )}
                       >
-                        {isUnlocked ? 'Unlocked' : 'Locked'}
+                        {isUnlocked
+                          ? t('runtime.card_viewer.unlocked')
+                          : t('runtime.card_viewer.locked')}
                       </span>
                       {isCurrent && (
                         <span className="text-on-primary-container bg-primary-container text-label rounded-full px-2 py-0.5 font-medium">
-                          Current
+                          {t('runtime.card_viewer.current')}
                         </span>
                       )}
                     </div>

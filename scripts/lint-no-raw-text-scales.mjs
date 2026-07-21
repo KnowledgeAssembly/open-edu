@@ -8,15 +8,12 @@
 //   text-(xs|sm|base|lg|xl|2xl|3xl|4xl)
 //   text-[\\d+px]
 //
-// Skips matches inside `opacity/10`, `opacity/15` Tailwind opacity suffixes.
-//
 // Usage:
 //   node scripts/lint-no-raw-text-scales.mjs           -- warn mode
 //   node scripts/lint-no-raw-text-scales.mjs --strict  -- fail on violations
 
 import { readFileSync, statSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { readFileSync as readAllowlist } from 'node:fs';
 
 const ROOT = process.cwd();
 const SCAN_ROOTS = [
@@ -34,14 +31,9 @@ const RAW_TEXT_PATTERNS = [
 let allowlist = [];
 try {
   const allowlistPath = join(ROOT, 'scripts/allowlist-raw-text-scales.json');
-  allowlist = JSON.parse(readAllowlist(allowlistPath, 'utf-8'));
+  allowlist = JSON.parse(readFileSync(allowlistPath, 'utf-8'));
 } catch {
   // no allowlist file — treat as empty
-}
-
-function isOpacitySuffix(context) {
-  // Check if the match is followed by */10 or */15 (Tailwind opacity)
-  return /\*\/1[05]|\/10|\/15/.test(context);
 }
 
 function walkDir(dir) {
@@ -93,10 +85,6 @@ function findRawTextScales(filePath) {
 
         // Check if inside className attribute
         if (!isInsideClassName(line, index)) continue;
-
-        // Check if it's an opacity suffix pattern
-        const context = line.slice(Math.max(0, index - 5), index + fullMatch.length + 10);
-        if (isOpacitySuffix(context)) continue;
 
         // Check allowlist
         const relPath = relative(ROOT, filePath);

@@ -38,7 +38,7 @@ export function BreakPage({ onBackToLearning }: BreakPageProps): JSX.Element {
         <Pipili size="xl" mood="content" animated />
       </div>
 
-      <h1 className="font-display text-primary text-display-sm font-display">
+      <h1 className="font-display text-primary text-display-sm">
         {t('learner.break.time_to_recharge')}
       </h1>
       <p className="text-on-surface-variant text-body-ui mt-2 text-center">

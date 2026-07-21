@@ -23,5 +23,15 @@
   "card_grid.empty": "No cards yet. Complete lessons to unlock your first card.",
   "card_viewer.mastery_levels": "Mastery Levels",
   "card_viewer.related_lessons": "Related Lessons",
-  "card_viewer.related_quizzes": "Related Quizzes"
+  "card_viewer.related_quizzes": "Related Quizzes",
+  "card_viewer.unlocked": "Unlocked",
+  "card_viewer.locked": "Locked",
+  "card_viewer.current": "Current",
+  "card_viewer.level_up": "Level Up!",
+  "card_viewer.card_unlocked": "Card Unlocked!",
+  "card_viewer.view": "View",
+  "card_viewer.dismiss": "Dismiss",
+  "card_viewer.level": "Level {{level}}",
+  "widget.retry": "Retry Activity",
+  "widget.technical_details": "Technical details"
 }

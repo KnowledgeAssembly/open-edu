@@ -11,6 +11,10 @@ export function useThemeColorMeta(themeId: ThemeId): void {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
+    const previous = meta.getAttribute('content');
     meta.setAttribute('content', THEME_COLOR_BY_ID[themeId]);
+    return () => {
+      if (previous) meta.setAttribute('content', previous);
+    };
   }, [themeId]);
 }

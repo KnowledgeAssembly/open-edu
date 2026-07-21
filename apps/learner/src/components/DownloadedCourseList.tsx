@@ -32,10 +32,10 @@ export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedC
       <Card ref={ref}>
         <CardHeader className="flex flex-row items-center gap-2 pb-2">
           <BookOpen className="h-5 w-5" aria-hidden="true" />
-          <CardTitle className="text-body-ui">Downloaded Courses ({courses.length})</CardTitle>
+          <CardTitle className="text-body-ui">{t('learner.downloads.title', { count: String(courses.length) })}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="divide-border divide-y" role="list" aria-label="Downloaded courses">
+          <ul className="divide-border divide-y" role="list" aria-label={t('learner.downloads.list_aria')}>
             {courses.map((course) => (
               <li key={course.id} className="flex items-center justify-between py-3">
                 <div>

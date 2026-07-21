@@ -15,7 +15,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
   return (
     <nav
       aria-label="Course outline"
-      className="border-outline-variant p-md font-body-md box-border h-full w-[280px] overflow-y-auto border-r"
+      className="border-outline-variant p-md font-body-md box-border h-full w-[var(--oe-space-panel-nav)] overflow-y-auto border-r"
       data-testid="sidebar"
     >
       <h2 className="text-on-surface text-h3 font-display m-0 mb-4">{title}</h2>

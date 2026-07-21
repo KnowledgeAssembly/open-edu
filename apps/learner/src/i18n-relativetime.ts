@@ -9,11 +9,16 @@ export function relativeTimeHuman(dateStr: string, locale = 'en'): string {
   const dateMs = new Date(dateStr).getTime();
   if (isNaN(dateMs)) return '';
   const diff = dateMs - Date.now();
-  const mins = Math.round(diff / 60000);
-  if (Math.abs(mins) < 60) return getRtf(locale).format(mins, 'minute');
-  const hours = Math.round(mins / 60);
-  if (Math.abs(hours) < 24) return getRtf(locale).format(hours, 'hour');
-  const days = Math.round(hours / 24);
-  if (Math.abs(days) < 7) return getRtf(locale).format(days, 'day');
-  return getRtf(locale).format(Math.round(days / 7), 'week');
+  const absMins = Math.abs(diff / 60000);
+  if (absMins < 1) return getRtf(locale).format(0, 'minute');
+  const mins = diff > 0 ? Math.floor(absMins) : -Math.floor(absMins);
+  if (absMins < 60) return getRtf(locale).format(mins, 'minute');
+  const absHours = absMins / 60;
+  const hours = diff > 0 ? Math.floor(absHours) : -Math.floor(absHours);
+  if (absHours < 24) return getRtf(locale).format(hours, 'hour');
+  const absDays = absHours / 24;
+  const days = diff > 0 ? Math.floor(absDays) : -Math.floor(absDays);
+  if (absDays < 7) return getRtf(locale).format(days, 'day');
+  const weeks = diff > 0 ? Math.floor(absDays / 7) : -Math.floor(absDays / 7);
+  return getRtf(locale).format(weeks, 'week');
 }
