@@ -44,7 +44,7 @@ export function SettingsPage({
   }, [highContrast]);
 
   return (
-    <div className="p-xl mx-auto max-w-content" data-testid="settings-page">
+    <div className="p-xl mx-auto w-full max-w-content" data-testid="settings-page">
       <PageHeader
         eyebrow={t('learner.nav.settings')}
         title={t('learner.nav.settings')}

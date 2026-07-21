@@ -236,7 +236,7 @@ export function CourseRuntime({
 
   if (isLoadingProgress) {
     return (
-      <div className="p-lg max-w-2xl" data-testid="course-runtime">
+      <div className="p-lg mx-auto w-full max-w-content" data-testid="course-runtime">
         <div role="status" aria-live="polite">
           <p className="text-on-surface-variant">{t('runtime.loading')}</p>
         </div>
@@ -246,7 +246,7 @@ export function CourseRuntime({
 
   if (!engine) {
     return (
-      <div className="p-lg max-w-2xl" data-testid="course-runtime">
+      <div className="p-lg mx-auto w-full max-w-content" data-testid="course-runtime">
         <h1 className="text-h1 font-display text-error mb-md">
           {t('learner.course.not_available')}
         </h1>

@@ -76,7 +76,7 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
     props;
 
   return (
-    <div className="p-xl mx-auto max-w-4xl" data-testid="bundle-overview">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="bundle-overview">
       <Button
         variant="link"
         onClick={onBackToCatalog}

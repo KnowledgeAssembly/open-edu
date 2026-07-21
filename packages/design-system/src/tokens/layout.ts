@@ -4,7 +4,7 @@ export const layoutTokens = {
   'header-height': '56px',
   'panel-nav-width': '240px',
   'panel-explorer-width': '300px',
-  'content-max-width': '720px',
+  'content-max-width': '1024px',
   'reading-width': '680px',
   'grid-gap-sm': '8px',
   'grid-gap-md': '16px',

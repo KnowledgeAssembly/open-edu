@@ -63,7 +63,7 @@ export function ProgressDashboard({
 
   if (entries.length === 0) {
     return (
-      <div className="p-xl mx-auto max-w-4xl" data-testid="progress-dashboard">
+<div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
         <h1 className="text-h1 font-display text-on-surface mb-lg">
           {t('learner.progress.title')}
         </h1>
@@ -82,7 +82,7 @@ export function ProgressDashboard({
   }
 
   return (
-    <div className="p-xl mx-auto max-w-5xl" data-testid="progress-dashboard">
+    <div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
       <PageHeader
         eyebrow={t('learner.progress.eyebrow_label')}
         title={t('learner.progress.title')}
