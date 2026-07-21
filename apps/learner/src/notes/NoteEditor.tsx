@@ -130,23 +130,22 @@ export function NoteEditor({ initial, compact, onSaved, onDeleted }: NoteEditorP
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t('notes.editor.title.placeholder')}
-          className="w-full text-body-ui font-medium"
+          className="text-body-ui w-full font-medium"
           aria-label={t('notes.editor.title.placeholder')}
         />
       )}
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="flex min-h-0 flex-1 flex-col">
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={t('notes.editor.body.placeholder')}
           aria-label={t('notes.editor.body.label')}
-          className="bg-surface text-on-surface border-outline-variant min-h-[120px] w-full flex-1 resize-none border-0 p-2 font-mono text-body-ui focus:outline-none"
-          style={{ minHeight: compact ? '80px' : '200px' }}
+          className="bg-surface text-on-surface text-body-ui min-h-[200px] w-full flex-1 resize-none border-0 p-2 font-mono focus:outline-none"
         />
       </div>
 
-      <TagFilterBar mode="edit" noteId={note.id} />
+      <TagFilterBar mode="edit" noteId={note.id} className="shrink-0" />
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>

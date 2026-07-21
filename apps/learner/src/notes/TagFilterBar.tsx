@@ -14,6 +14,7 @@ export interface TagFilterBarProps {
   noteId?: string;
   activeTag?: string;
   onActiveTagChange?: (tag: string | null) => void;
+  className?: string;
 }
 
 export function TagFilterBar({
@@ -21,6 +22,7 @@ export function TagFilterBar({
   noteId,
   activeTag,
   onActiveTagChange,
+  className,
 }: TagFilterBarProps): JSX.Element {
   const { t } = useTranslation();
   const { announce } = useLiveRegion();
@@ -72,7 +74,11 @@ export function TagFilterBar({
 
   if (mode === 'edit') {
     return (
-      <div className="flex flex-col gap-2" role="group" aria-label={t('notes.editor.tags.label')}>
+      <div
+        className={`flex flex-col gap-2 ${className ?? ''}`}
+        role="group"
+        aria-label={t('notes.editor.tags.label')}
+      >
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1" aria-label={t('notes.tag.aria.list')}>
             {tags.map((tag) => (
@@ -88,7 +94,7 @@ export function TagFilterBar({
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={handleTagKeyDown}
             placeholder={t('notes.editor.tags.placeholder')}
-            className="h-8 text-body-ui"
+            className="text-body-ui h-8"
             aria-label={t('notes.editor.tags.add')}
           />
           <Button
@@ -111,7 +117,7 @@ export function TagFilterBar({
           <button
             key={tag}
             onClick={() => onActiveTagChange?.(activeTag === tag ? null : tag)}
-            className={`focus-visible:ring-primary rounded-full px-2.5 py-0.5 text-label-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 ${
+            className={`focus-visible:ring-primary text-label-xs rounded-full px-2.5 py-0.5 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 ${
               activeTag === tag
                 ? 'bg-primary text-on-primary'
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
