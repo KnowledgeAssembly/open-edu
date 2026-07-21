@@ -109,7 +109,7 @@ export function NoteRow({
         {tags.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {tags.map((tag) => (
-              <Tag key={tag} variant="secondary" className="text-label-xs">
+              <Tag key={tag} variant="default" className="text-label-xs">
                 {tag}
               </Tag>
             ))}

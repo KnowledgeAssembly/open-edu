@@ -539,10 +539,10 @@ function AppShellInner({
               <div className="shrink-0">
                 <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col">
                 <div
                   key={location.pathname}
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  className="animate-in fade-in slide-in-from-bottom-4 flex min-h-0 flex-1 flex-col overflow-y-auto duration-500"
                 >
                   {view.view === 'catalog' && (
                     <CatalogPage

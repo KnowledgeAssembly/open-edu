@@ -82,7 +82,7 @@ export function TagFilterBar({
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1" aria-label={t('notes.tag.aria.list')}>
             {tags.map((tag) => (
-              <Tag key={tag} variant="secondary" onRemove={() => void handleRemoveTag(tag)}>
+              <Tag key={tag} variant="default" onRemove={() => void handleRemoveTag(tag)}>
                 {tag}
               </Tag>
             ))}
