@@ -124,7 +124,7 @@ const accessibleComponents: ComponentMap = {
   ),
   pre: ({ children, className, ...props }: ComponentProps<'pre'>) => (
     <pre
-      className={`mb-paragraph-spacing bg-surface-container overflow-x-auto rounded-md p-4 font-mono text-sm${className ? ` ${className}` : ''}`}
+      className={`mb-paragraph-spacing bg-surface-container overflow-x-auto rounded-md p-4 font-mono text-body-ui${className ? ` ${className}` : ''}`}
       {...props}
     >
       {children}
@@ -135,7 +135,7 @@ const accessibleComponents: ComponentMap = {
     if (isInline) {
       return (
         <code
-          className={`bg-surface-container rounded-sm px-1.5 py-0.5 font-mono text-sm${className ? ` ${className}` : ''}`}
+          className={`bg-surface-container rounded-sm px-1.5 py-0.5 font-mono text-body-ui${className ? ` ${className}` : ''}`}
           {...props}
         >
           {children}
@@ -143,7 +143,7 @@ const accessibleComponents: ComponentMap = {
       );
     }
     return (
-      <code className={`font-mono text-sm${className ? ` ${className}` : ''}`} {...props}>
+      <code className={`font-mono text-body-ui${className ? ` ${className}` : ''}`} {...props}>
         {children}
       </code>
     );

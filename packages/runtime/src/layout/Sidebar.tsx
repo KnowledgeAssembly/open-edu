@@ -18,9 +18,11 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
       className="border-outline-variant p-md font-body-md box-border h-full w-[280px] overflow-y-auto border-r"
       data-testid="sidebar"
     >
-      <h2 className="text-on-surface m-0 mb-4 text-lg font-bold">{title}</h2>
+      <h2 className="text-on-surface text-h3 font-display m-0 mb-4">{title}</h2>
       {nodes.length === 0 ? (
-        <p className="text-on-surface-variant mt-4 text-xs">{t('runtime.sidebar.no_lessons')}</p>
+        <p className="text-on-surface-variant text-caption mt-4">
+          {t('runtime.sidebar.no_lessons')}
+        </p>
       ) : (
         <ol className="m-0 list-none p-0">
           {nodes.map((node) => {
@@ -56,7 +58,7 @@ export function Sidebar({ nodes }: SidebarProps): JSX.Element {
           })}
         </ol>
       )}
-      <p className="text-on-surface-variant mt-4 text-xs">
+      <p className="text-on-surface-variant text-caption mt-4">
         {visitedNodes.length} of {total} complete
       </p>
     </nav>

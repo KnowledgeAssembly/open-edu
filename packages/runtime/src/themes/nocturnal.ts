@@ -57,6 +57,8 @@ export const nocturnal: ThemeDefinition = {
     border: '#4b4452',
     success: '#4ade80',
     'success-container': '#052e16',
+    'on-success': '#ffffff',
+    'on-success-container': '#7fff9e',
     accent: '#b0a3c0',
     'primary-light': '#d4c4ff',
   },
@@ -72,7 +74,7 @@ export const nocturnal: ThemeDefinition = {
       heading: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '32px',
-        fontWeight: '650',
+        fontWeight: '600',
         lineHeight: '40px',
         letterSpacing: '-0.01em',
       },
@@ -109,7 +111,7 @@ export const nocturnal: ThemeDefinition = {
       body: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '14px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.6',
       },
       label: {
@@ -122,7 +124,7 @@ export const nocturnal: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '20px',
       },
       code: {
@@ -143,7 +145,7 @@ export const nocturnal: ThemeDefinition = {
       heading: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '20px',
-        fontWeight: '650',
+        fontWeight: '600',
         lineHeight: '28px',
       },
       subheading: {
@@ -179,7 +181,7 @@ export const nocturnal: ThemeDefinition = {
       body: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '16px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.7',
         letterSpacing: '0.01em',
       },
@@ -193,7 +195,7 @@ export const nocturnal: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '20px',
       },
       code: {
@@ -215,6 +217,7 @@ export const nocturnal: ThemeDefinition = {
     marginDesktop: '24px',
     marginMobile: '24px',
     containerMax: '720px',
+    panelNav: '260px',
     readingWidth: '68ch',
     paragraphSpacing: '1.5rem',
   },

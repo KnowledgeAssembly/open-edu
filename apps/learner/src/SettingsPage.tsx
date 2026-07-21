@@ -34,18 +34,17 @@ export function SettingsPage({
   const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--oe-reduced-motion',
-      reducedMotion ? 'reduce' : 'no-preference',
-    );
+    const el = document.querySelector('.open-edu-runtime');
+    if (el) el.setAttribute('data-reduced-motion', reducedMotion ? 'reduce' : 'no-preference');
   }, [reducedMotion]);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--oe-high-contrast', highContrast ? '1' : '0');
+    const el = document.querySelector('.open-edu-runtime');
+    if (el) el.setAttribute('data-high-contrast', highContrast ? '1' : '0');
   }, [highContrast]);
 
   return (
-    <div className="p-xl mx-auto max-w-3xl" data-testid="settings-page">
+    <div className="p-xl mx-auto max-w-2xl" data-testid="settings-page">
       <PageHeader
         eyebrow={t('learner.nav.settings')}
         title={t('learner.nav.settings')}
@@ -71,7 +70,7 @@ export function SettingsPage({
             </h2>
           </CardHeader>
           <CardContent>
-            <p className="text-on-surface-variant text-sm">
+            <p className="text-on-surface-variant text-body-ui">
               {t('learner.settings.language_description')}
             </p>
             <LanguageSwitcher />
@@ -89,8 +88,8 @@ export function SettingsPage({
               <div className="flex items-center gap-2">
                 <Type className="text-on-surface-variant h-4 w-4" />
                 <div>
-                  <p className="text-sm font-medium">{t('learner.settings.font_size')}</p>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-body-ui font-medium">{t('learner.settings.font_size')}</p>
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.font_size_description')}
                   </p>
                 </div>
@@ -100,16 +99,16 @@ export function SettingsPage({
                   variant="outline"
                   size="sm"
                   onClick={decreaseFontSize}
-                  aria-label="Decrease font size"
+                  aria-label={t('learner.settings.aa_decrease_font_aria')}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-12 text-center font-mono text-sm">{fontSize}%</span>
+                <span className="text-body-ui w-12 text-center font-mono">{fontSize}%</span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={increaseFontSize}
-                  aria-label="Increase font size"
+                  aria-label={t('learner.settings.aa_increase_font_aria')}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -119,8 +118,8 @@ export function SettingsPage({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="text-sm font-medium">{t('learner.settings.reduced_motion')}</p>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-body-ui font-medium">{t('learner.settings.reduced_motion')}</p>
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.reduced_motion_description')}
                   </p>
                 </div>
@@ -135,8 +134,8 @@ export function SettingsPage({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="text-sm font-medium">{t('learner.settings.high_contrast')}</p>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-body-ui font-medium">{t('learner.settings.high_contrast')}</p>
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.high_contrast_description')}
                   </p>
                 </div>
@@ -164,36 +163,36 @@ export function SettingsPage({
             >
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="off" id="break-off" />
-                <label htmlFor="break-off" className="text-sm">
+                <label htmlFor="break-off" className="text-body-ui">
                   <span className="font-medium">{t('learner.settings.break_off')}</span>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.break_off_description')}
                   </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="15" id="break-15" />
-                <label htmlFor="break-15" className="text-sm">
+                <label htmlFor="break-15" className="text-body-ui">
                   <span className="font-medium">{t('learner.settings.break_15')}</span>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.break_15_description')}
                   </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="30" id="break-30" />
-                <label htmlFor="break-30" className="text-sm">
+                <label htmlFor="break-30" className="text-body-ui">
                   <span className="font-medium">{t('learner.settings.break_30')}</span>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.break_30_description')}
                   </p>
                 </label>
               </div>
               <div className="flex items-center gap-3">
                 <RadioGroupItem value="60" id="break-60" />
-                <label htmlFor="break-60" className="text-sm">
+                <label htmlFor="break-60" className="text-body-ui">
                   <span className="font-medium">{t('learner.settings.break_60')}</span>
-                  <p className="text-on-surface-variant text-xs">
+                  <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.break_60_description')}
                   </p>
                 </label>

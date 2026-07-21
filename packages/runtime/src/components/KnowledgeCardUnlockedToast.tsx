@@ -111,7 +111,7 @@ export function KnowledgeCardUnlockedToast({
           </GlowPulse>
 
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-on-surface text-sm font-semibold">
+            <span className="text-on-surface text-body-ui font-semibold">
               {type === 'levelUp' ? (
                 <span className="flex items-center gap-1">
                   Level Up! <Star className="size-3.5 fill-amber-400 text-amber-400" /> Level{' '}
@@ -121,10 +121,12 @@ export function KnowledgeCardUnlockedToast({
                 'Card Unlocked!'
               )}
             </span>
-            <span className="text-on-surface-variant truncate text-sm font-medium">
+            <span className="text-on-surface-variant text-body-ui truncate font-medium">
               {card.title}
             </span>
-            <span className="text-on-surface-variant line-clamp-1 text-xs">{card.summary}</span>
+            <span className="text-on-surface-variant text-caption line-clamp-1">
+              {card.summary}
+            </span>
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
@@ -132,7 +134,7 @@ export function KnowledgeCardUnlockedToast({
               <button
                 onClick={onView}
                 className={cn(
-                  'rounded-lg px-2.5 py-1.5 text-xs font-medium',
+                  'text-label rounded-lg px-2.5 py-1.5 font-medium',
                   'bg-primary text-on-primary hover:bg-primary/90',
                   'transition-colors',
                 )}

@@ -221,7 +221,7 @@ export function TextSelectionToolbar({
           onClick={() => handleAction(key)}
           onKeyDown={(e) => handleKeyDown(e, key)}
           className={cn(
-            'hover:bg-surface-container-high-hover text-on-surface-variant flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+            'hover:bg-surface-container-high-hover text-on-surface-variant text-caption flex items-center gap-1 rounded-md px-2 py-1.5 font-medium transition-colors',
             'focus-visible:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
           )}
           aria-label={label}

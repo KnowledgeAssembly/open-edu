@@ -19,7 +19,7 @@ export function PageHeader({
     <div
       className={cn(
         'relative overflow-hidden rounded-xl px-10 py-12',
-        'bg-gradient-to-br from-[var(--oe-color-surface-container-low)] to-[var(--oe-color-surface-container)]',
+        'bg-surface-container-low border-outline-variant border-b',
         className,
       )}
       data-testid="page-header"

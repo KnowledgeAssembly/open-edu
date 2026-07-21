@@ -66,7 +66,7 @@ export function KnowledgeCardGrid({
   if (cards.length === 0) {
     return (
       <div className="text-on-surface-variant flex items-center justify-center py-12" role="status">
-        <p className="text-sm">{t('runtime.card_grid.empty')}</p>
+        <p className="text-body-ui">{t('runtime.card_grid.empty')}</p>
       </div>
     );
   }

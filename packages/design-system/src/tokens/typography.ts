@@ -3,14 +3,14 @@ import type { TypographyToken, TypographyTokens, TypographySet } from '../theme/
 const productiveBody: TypographyToken = {
   fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
   fontSize: '14px',
-  fontWeight: '420',
+  fontWeight: '400',
   lineHeight: '1.6',
 };
 
 const expressiveBody: TypographyToken = {
   fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
   fontSize: '18px',
-  fontWeight: '420',
+  fontWeight: '400',
   lineHeight: '1.7',
   letterSpacing: '0.01em',
 };
@@ -26,7 +26,7 @@ const productiveSet: TypographySet = {
   heading: {
     fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
     fontSize: '28px',
-    fontWeight: '650',
+    fontWeight: '600',
     lineHeight: '1.3',
     letterSpacing: '-0.01em',
   },
@@ -71,7 +71,7 @@ const productiveSet: TypographySet = {
   caption: {
     fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
     fontSize: '13px',
-    fontWeight: '420',
+    fontWeight: '400',
     lineHeight: '1.5',
   },
   code: {
@@ -137,7 +137,7 @@ const expressiveSet: TypographySet = {
   caption: {
     fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
     fontSize: '13px',
-    fontWeight: '420',
+    fontWeight: '400',
     lineHeight: '1.5',
   },
   code: {

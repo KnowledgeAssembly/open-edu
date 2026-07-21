@@ -65,7 +65,7 @@ export function Pipili({
         <PipiliPrimitive size="lg" mood={effectiveMood} />
         {hasUnread && (
           <span
-            className="bg-primary absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-bold text-white"
+            className="bg-primary text-label absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full font-bold text-white"
             aria-label="New messages available"
           >
             !

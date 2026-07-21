@@ -19,14 +19,14 @@ export function WidgetErrorFallback({
       className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       data-testid="widget-error-fallback"
     >
-      <div className="mb-sm text-3xl" aria-hidden="true">
+      <div className="mb-sm text-display-sm" aria-hidden="true">
         ⚠
       </div>
       <p className="text-on-surface mb-sm font-semibold">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="bg-primary text-on-primary px-lg py-sm mt-sm rounded-lg text-sm font-semibold"
+          className="bg-primary text-on-primary px-lg py-sm mt-sm text-body-ui rounded-lg font-semibold"
           data-testid="widget-retry-button"
         >
           Retry Activity
@@ -34,11 +34,11 @@ export function WidgetErrorFallback({
       )}
       {isDevMode && devDetails && (
         <details className="mt-sm text-left">
-          <summary className="text-on-surface-variant cursor-pointer text-xs">
+          <summary className="text-on-surface-variant text-caption cursor-pointer">
             Technical details
           </summary>
           <pre
-            className="text-on-surface-variant mt-xs p-xs bg-surface-variant overflow-auto rounded text-xs"
+            className="text-on-surface-variant mt-xs p-xs bg-surface-variant text-caption overflow-auto rounded"
             data-testid="widget-error-details"
           >
             {devDetails}

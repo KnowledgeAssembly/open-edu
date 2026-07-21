@@ -120,12 +120,10 @@ export function KnowledgeCard({
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-on-surface-variant text-xs font-medium uppercase tracking-wider">
-            {card.type}
-          </span>
+          <span className="text-on-surface-variant text-label-caps">{card.type}</span>
           <h3
             className={cn(
-              'text-on-surface text-sm font-semibold leading-tight',
+              'text-on-surface text-body-ui font-semibold leading-tight',
               isLocked && 'text-on-surface-variant',
             )}
           >
@@ -133,7 +131,7 @@ export function KnowledgeCard({
           </h3>
           <p
             className={cn(
-              'text-on-surface-variant line-clamp-2 text-xs',
+              'text-on-surface-variant text-caption line-clamp-2',
               isLocked && 'text-on-surface-variant opacity-60',
             )}
           >
@@ -142,15 +140,15 @@ export function KnowledgeCard({
         </div>
 
         <div className="mt-1 flex items-center justify-between">
-          <span className="text-on-surface-variant bg-muted/50 rounded-full px-2 py-0.5 text-[10px] font-medium">
+          <span className="text-on-surface-variant bg-muted/50 text-label rounded-full px-2 py-0.5 font-medium">
             {card.category}
           </span>
           {isLocked && level === 0 ? (
-            <span className="text-on-surface-variant flex items-center gap-1 text-[10px]">
+            <span className="text-on-surface-variant text-label flex items-center gap-1">
               <Lock className="size-3" /> Locked
             </span>
           ) : (
-            <span className="text-on-surface-variant text-[10px] font-medium">Lv.{level}</span>
+            <span className="text-on-surface-variant text-label font-medium">Lv.{level}</span>
           )}
         </div>
       </div>

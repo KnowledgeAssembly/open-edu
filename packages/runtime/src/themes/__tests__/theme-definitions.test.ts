@@ -63,6 +63,8 @@ const requiredColorKeys = [
   'border',
   'success',
   'success-container',
+  'on-success',
+  'on-success-container',
   'accent',
   'primary-light',
 ];
@@ -83,6 +85,7 @@ const spacingKeys: Array<keyof ThemeDefinition['spacing']> = [
   'marginMobile',
   'containerMax',
   'readingWidth',
+  'panelNav',
   'paragraphSpacing',
 ];
 

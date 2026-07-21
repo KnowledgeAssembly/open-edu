@@ -217,21 +217,23 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
           {popover.loading && (
             <div className="flex items-center gap-2">
               <div className="bg-primary/20 border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-transparent" />
-              <span className="text-on-surface-variant text-sm">{t('learner.ai.looking_up')}</span>
+              <span className="text-on-surface-variant text-body-ui">
+                {t('learner.ai.looking_up')}
+              </span>
             </div>
           )}
 
           {!popover.loading && hasContent && (
             <>
               <div className="mb-2 flex items-center gap-2">
-                <span className="text-base font-semibold">{popover.word}</span>
+                <span className="text-h3 font-display">{popover.word}</span>
                 {popover.entry?.phonetic && (
-                  <span className="text-on-surface-variant text-sm">
+                  <span className="text-on-surface-variant text-body-ui">
                     /{popover.entry.phonetic}/
                   </span>
                 )}
                 {popover.entry?.partOfSpeech && (
-                  <span className="bg-surface-container text-on-surface-variant rounded px-1.5 py-0.5 text-xs italic">
+                  <span className="bg-surface-container text-on-surface-variant text-caption rounded px-1.5 py-0.5 italic">
                     {popover.entry.partOfSpeech}
                   </span>
                 )}
@@ -239,9 +241,9 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
               {popover.entry?.definitions.map((def, i) => (
                 <div key={i} className="mb-2 last:mb-0">
-                  <p className="text-sm">{def.definition}</p>
+                  <p className="text-body-ui">{def.definition}</p>
                   {def.example && (
-                    <p className="text-on-surface-variant mt-0.5 text-xs italic">
+                    <p className="text-on-surface-variant text-caption mt-0.5 italic">
                       &ldquo;{def.example}&rdquo;
                     </p>
                   )}
@@ -250,23 +252,25 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
               {popover.entry?.synonyms && popover.entry.synonyms.length > 0 && (
                 <div className="mt-3">
-                  <span className="text-on-surface-variant text-xs font-medium">
+                  <span className="text-on-surface-variant text-caption font-medium">
                     {t('learner.ai.synonyms')}{' '}
                   </span>
-                  <span className="text-xs">{popover.entry.synonyms.slice(0, 5).join(', ')}</span>
+                  <span className="text-caption">
+                    {popover.entry.synonyms.slice(0, 5).join(', ')}
+                  </span>
                 </div>
               )}
 
               {popover.suggestions.length > 0 && !popover.entry && (
                 <div>
-                  <p className="text-on-surface-variant mb-1 text-xs font-medium">
+                  <p className="text-on-surface-variant text-caption mb-1 font-medium">
                     {t('learner.ai.did_you_mean')}
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {popover.suggestions.map((s) => (
                       <span
                         key={s}
-                        className="bg-surface-container text-on-surface-variant rounded px-2 py-0.5 text-xs"
+                        className="bg-surface-container text-on-surface-variant text-caption rounded px-2 py-0.5"
                       >
                         {s}
                       </span>
@@ -279,7 +283,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
                 <button
                   type="button"
                   onClick={handleAskAi}
-                  className="text-primary hover:text-primary-hover flex items-center gap-1 text-xs font-medium transition-colors"
+                  className="text-primary hover:text-primary-hover text-caption flex items-center gap-1 font-medium transition-colors"
                   data-testid="word-popover-ask-ai"
                 >
                   <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
@@ -291,14 +295,14 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
 
           {!popover.loading && !hasContent && (
             <div>
-              <p className="text-sm font-medium">{popover.word}</p>
-              <p className="text-on-surface-variant mt-1 text-xs">
+              <p className="text-body-ui font-medium">{popover.word}</p>
+              <p className="text-on-surface-variant text-caption mt-1">
                 No definition found for this word.
               </p>
               <button
                 type="button"
                 onClick={handleAskAi}
-                className="text-primary hover:text-primary-hover mt-2 flex items-center gap-1 text-xs font-medium transition-colors"
+                className="text-primary hover:text-primary-hover text-caption mt-2 flex items-center gap-1 font-medium transition-colors"
                 data-testid="word-popover-ask-ai"
               >
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />

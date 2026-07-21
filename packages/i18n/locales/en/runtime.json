@@ -1,5 +1,9 @@
 {
   "loading": "Loading…",
+  "layout.next": "Next",
+  "layout.back": "Back",
+  "layout.completed": "You have completed this learning experience.",
+  "layout.submit_to_continue": "Submit your answer above to continue",
   "quiz.submit": "Submit",
   "quiz.correct": "Correct! Well done.",
   "quiz.incorrect": "Incorrect. The correct answer is highlighted.",

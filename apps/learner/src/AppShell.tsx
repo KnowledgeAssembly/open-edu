@@ -50,6 +50,8 @@ import { getBundleProgress } from './bundleProgressStorage';
 import { useBreakTimer } from './useBreakTimer';
 import { BreakNagBar } from './BreakNagBar';
 import { BreakPage } from './BreakPage';
+import { loadLocaleFonts } from './i18n-fonts';
+import { useThemeColorMeta } from './hooks/useThemeColorMeta';
 
 export type AppView =
   | { view: 'home' }
@@ -159,7 +161,14 @@ function AppShellInner({
   themeId,
   onThemeChange,
 }: AppShellInnerProps): JSX.Element {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+
+  useEffect(() => {
+    void loadLocaleFonts(locale);
+  }, [locale]);
+
+  useThemeColorMeta(themeId);
+
   const navigate = useNavigate();
   const location = useLocation();
   const courseContentRef = useRef<HTMLDivElement>(null);

@@ -57,6 +57,8 @@ export const zen: ThemeDefinition = {
     border: '#c6c3bd',
     success: '#16a34a',
     'success-container': '#dafbe3',
+    'on-success': '#ffffff',
+    'on-success-container': '#2c4a32',
     accent: '#726e68',
     'primary-light': '#a89fb2',
   },
@@ -109,7 +111,7 @@ export const zen: ThemeDefinition = {
       body: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '14px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.6',
       },
       label: {
@@ -122,7 +124,7 @@ export const zen: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.5',
       },
       code: {
@@ -179,7 +181,7 @@ export const zen: ThemeDefinition = {
       body: {
         fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
         fontSize: '17px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.7',
         letterSpacing: '0.01em',
       },
@@ -193,7 +195,7 @@ export const zen: ThemeDefinition = {
       caption: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontSize: '13px',
-        fontWeight: '420',
+        fontWeight: '400',
         lineHeight: '1.5',
       },
       code: {
@@ -215,7 +217,7 @@ export const zen: ThemeDefinition = {
     marginDesktop: '48px',
     marginMobile: '16px',
     containerMax: '720px',
-    panelNav: '240px',
+    panelNav: '260px',
     panelExplorer: '300px',
     readingWidth: '68ch',
     paragraphSpacing: '1.5rem',

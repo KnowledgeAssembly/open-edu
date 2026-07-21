@@ -18,7 +18,7 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
       data-testid="skill-summary"
       className={cn(
         'flex flex-col',
-        compact ? 'gap-1 px-2 py-1 text-xs' : 'gap-2 px-3 py-2 text-sm',
+        compact ? 'text-caption gap-1 px-2 py-1' : 'text-body-ui gap-2 px-3 py-2',
       )}
     >
       {skillGraph.skills.map((skill) => {
@@ -44,7 +44,7 @@ export function SkillSummary({ compact = false }: SkillSummaryProps): JSX.Elemen
             />
             <span className="font-medium">{skill.name}</span>
             {!compact && (
-              <span className="text-on-surface-variant text-xs">
+              <span className="text-on-surface-variant text-caption">
                 {score}% &middot; {getMasteryLabel(mastery)}
               </span>
             )}

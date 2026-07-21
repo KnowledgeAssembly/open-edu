@@ -26,11 +26,11 @@ export const StorageUsageCard = React.forwardRef<HTMLDivElement, StorageUsageCar
       <Card ref={ref}>
         <CardHeader className="flex flex-row items-center gap-2 pb-2">
           <HardDrive className="h-5 w-5" aria-hidden="true" />
-          <CardTitle className="text-base">{t('learner.storage.usage')}</CardTitle>
+          <CardTitle className="text-body-ui">{t('learner.storage.usage')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Progress value={percentage} className="mb-2" aria-label={`${percentage}% used`} />
-          <p className="text-on-surface/60 text-sm">
+          <p className="text-on-surface/60 text-body-ui">
             {formatBytes(usage)} of {formatBytes(quota)} used ({percentage}%)
           </p>
         </CardContent>

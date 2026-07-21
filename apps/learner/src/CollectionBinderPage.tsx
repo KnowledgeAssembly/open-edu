@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import type { CardDefinition } from '@open-edu/schemas';
-import { PageHeader, StatsSummary, SectionDivider } from '@open-edu/design-system';
+import { PageHeader, StatsSummary, SectionDivider, Pipili } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { KnowledgeCardGrid, KnowledgeCardViewer, ProgressRing } from '@open-edu/runtime';
 import type { KnowledgeCardGridItem } from '@open-edu/runtime';
@@ -50,37 +50,23 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
       .map(([category, cards]) => ({ category, cards }));
   }, [allCardItems]);
 
-  const handleRelatedLessonClick = useCallback((nodeId: string) => {
-    console.log('Navigate to:', nodeId);
+  const handleRelatedLessonClick = useCallback((_nodeId: string) => {
+    // TODO: navigate to lesson node via onNavigate({ view: 'course', packageId: ... })
   }, []);
 
   if (allCardItems.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center px-4 py-16"
+        className="px-md py-xl flex flex-col items-center justify-center"
         data-testid="collection-binder"
       >
         <div className="max-w-md text-center">
-          <div className="mb-6 text-6xl opacity-30">
-            <svg
-              className="text-on-surface-variant mx-auto h-24 w-24"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
+          <Pipili size="md" mood="curious" className="mb-lg mx-auto" />
           <h2 className="text-h2 font-display text-on-surface mb-2">
             {t('learner.collection_binder.title')}
           </h2>
           <p className="text-on-surface-variant">
-            No cards yet. Complete lessons to unlock your first Knowledge Card.
+            {t('learner.collection_binder.empty_description')}
           </p>
         </div>
       </div>
@@ -88,12 +74,15 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-6" data-testid="collection-binder">
+    <div className="p-xl mx-auto max-w-6xl" data-testid="collection-binder">
       <PageHeader
-        eyebrow="Collection"
-        title="Collection Binder"
-        subtitle={`Your museum of knowledge — ${allCardItems.filter((c) => !c.isLocked).length} / ${allCardItems.length} cards collected`}
-        className="mb-8"
+        eyebrow={t('learner.collection_binder.eyebrow')}
+        title={t('learner.collection_binder.title')}
+        subtitle={t('learner.collection_binder.subtitle_format', {
+          unlocked: String(allCardItems.filter((c) => !c.isLocked).length),
+          total: String(allCardItems.length),
+        })}
+        className="mb-xl"
       />
 
       <StatsSummary
@@ -101,17 +90,21 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
         items={[
           {
             value: allCardItems.filter((c) => !c.isLocked).length,
-            label: 'unlocked',
+            label: t('learner.collection_binder.stat_unlocked'),
             color: 'primary',
           },
-          { value: allCardItems.length, label: 'total cards' },
-          { value: shelves.length, label: 'categories', color: 'tertiary' },
+          { value: allCardItems.length, label: t('learner.collection_binder.stat_total_cards') },
+          {
+            value: shelves.length,
+            label: t('learner.collection_binder.stat_categories'),
+            color: 'tertiary',
+          },
         ]}
       />
 
       <SectionDivider density="minimal" className="mb-xl" />
 
-      <div className="flex flex-col gap-8">
+      <div className="gap-xl flex flex-col">
         {shelves.map((shelf) => {
           const unlockedCount = shelf.cards.filter((c) => !c.isLocked).length;
           return (
@@ -129,7 +122,7 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
                 />
                 <div className="flex flex-col">
                   <h2 className="text-h3 font-display text-on-surface">{shelf.category}</h2>
-                  <span className="text-on-surface-variant text-sm">
+                  <span className="text-on-surface-variant text-body-ui">
                     {unlockedCount} / {shelf.cards.length} cards
                   </span>
                 </div>

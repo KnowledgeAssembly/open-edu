@@ -83,7 +83,7 @@ export function AppSidebar({
     <aside
       className={cn(
         'bg-surface-container border-outline-variant flex h-full flex-col overflow-hidden border-r transition-[width] duration-200',
-        collapsed ? 'w-16' : 'w-[var(--oe-space-panelNav,260px)]',
+        collapsed ? 'w-16' : 'w-[var(--oe-space-panel-nav)]',
       )}
       data-testid="app-sidebar"
       aria-label="Main navigation"
