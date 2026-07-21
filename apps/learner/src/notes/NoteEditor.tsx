@@ -137,6 +137,7 @@ export function NoteEditor({ initial, compact, onSaved, onDeleted }: NoteEditorP
 
       <div className="flex min-h-0 flex-1 flex-col">
         <textarea
+          data-testid="note-body"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={t('notes.editor.body.placeholder')}

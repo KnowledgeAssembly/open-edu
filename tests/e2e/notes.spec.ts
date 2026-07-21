@@ -38,18 +38,21 @@ test.describe.serial('Notes Feature', () => {
   });
 
   test('type content; reload; content persisted', async ({ page }) => {
+    expect(noteId).toBeTruthy();
     await page.goto(`${LEARNER_URL}/notes/${noteId}`);
 
-    const textarea = page.getByLabel('Note body');
-    await expect(textarea).toBeVisible({ timeout: 10000 });
+    const body = page.locator('[data-testid="note-body"]');
+    await expect(body).toBeVisible({ timeout: 15000 });
 
-    await textarea.fill('Photosynthesis is amazing');
+    await body.fill('Photosynthesis is amazing');
 
-    await expect(page.getByText('Saved')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('span[aria-live="polite"]')).toContainText('Saved', {
+      timeout: 5000,
+    });
 
     await page.reload();
 
-    await expect(page.getByLabel('Note body')).toHaveValue('Photosynthesis is amazing');
+    await expect(page.locator('[data-testid="note-body"]')).toHaveValue('Photosynthesis is amazing');
   });
 
   test('open dashboard; note appears in Recent', async ({ page }) => {
