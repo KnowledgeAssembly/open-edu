@@ -65,7 +65,7 @@ export function ProgressDashboard({
 
   if (entries.length === 0) {
     return (
-<div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
+      <div className="p-xl max-w-content mx-auto w-full" data-testid="progress-dashboard">
         <h1 className="text-h1 font-display text-on-surface mb-lg">
           {t('learner.progress.title')}
         </h1>
@@ -84,7 +84,7 @@ export function ProgressDashboard({
   }
 
   return (
-    <div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="progress-dashboard">
       <PageHeader
         eyebrow={t('learner.progress.eyebrow_label')}
         title={t('learner.progress.title')}
@@ -157,7 +157,7 @@ export function ProgressDashboard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRequestReset?.(packageId, title, false);

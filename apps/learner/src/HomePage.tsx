@@ -46,7 +46,7 @@ export function HomePage({
   const badgeCount = Object.values(badgeData).reduce((sum, badges) => sum + badges.length, 0);
 
   return (
-    <div className="p-xl mx-auto w-full max-w-content" data-testid="home-page">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="home-page">
       <HeroSection variant="editorial" showIllustration className="mb-xl">
         <h1 className="text-display-lg font-display text-on-surface">
           {t('learner.home.welcome_back')}

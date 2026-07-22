@@ -6,7 +6,9 @@ import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 import { ResetConfirmDialog } from '../ResetConfirmDialog';
 
-function renderDialog(props: Partial<{ open: boolean; isBundle: boolean; courseTitle: string }> = {}) {
+function renderDialog(
+  props: Partial<{ open: boolean; isBundle: boolean; courseTitle: string }> = {},
+) {
   const onConfirm = vi.fn();
   const onCancel = vi.fn();
 

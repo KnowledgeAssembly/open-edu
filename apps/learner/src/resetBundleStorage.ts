@@ -7,9 +7,7 @@ import {
 } from '@open-edu/storage';
 
 export async function resetBundle(bundle: LoadedBundle): Promise<void> {
-  const operations: Promise<void>[] = [
-    deleteCourseProgress(bundle.manifest.id),
-  ];
+  const operations: Promise<void>[] = [deleteCourseProgress(bundle.manifest.id)];
 
   for (const mod of bundle.manifest.modules) {
     operations.push(deleteCourseProgress(mod.id));

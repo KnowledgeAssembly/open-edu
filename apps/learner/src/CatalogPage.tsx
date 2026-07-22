@@ -125,7 +125,7 @@ export function CatalogPage({
   }
 
   return (
-    <div className="p-xl mx-auto w-full max-w-content" data-testid="catalog-page">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="catalog-page">
       <PageHeader
         eyebrow={t('learner.catalog.eyebrow')}
         title={t('learner.catalog.page_title')}
@@ -180,7 +180,7 @@ export function CatalogPage({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
@@ -232,7 +232,7 @@ export function CatalogPage({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true);
@@ -328,7 +328,7 @@ export function CatalogPage({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);

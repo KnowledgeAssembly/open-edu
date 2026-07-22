@@ -311,12 +311,9 @@ function AppShellInner({
     navigate('/catalog');
   }, [navigate]);
 
-  const handleRequestReset = useCallback(
-    (id: string, title: string, isBundle: boolean) => {
-      setResetTarget({ id, title, isBundle });
-    },
-    [],
-  );
+  const handleRequestReset = useCallback((id: string, title: string, isBundle: boolean) => {
+    setResetTarget({ id, title, isBundle });
+  }, []);
 
   const handleResetConfirm = useCallback(async () => {
     if (!resetTarget) return;
@@ -526,8 +523,7 @@ function AppShellInner({
                       ? {
                           bundleId: courseBundle.manifest.id,
                           bundle: courseBundle,
-                          currentBundleProgress:
-                            bundleProgress[courseBundle.manifest.id] ?? null,
+                          currentBundleProgress: bundleProgress[courseBundle.manifest.id] ?? null,
                           onBundleSnapshot: (snapshot) => {
                             setBundleProgress((prev) => ({
                               ...prev,

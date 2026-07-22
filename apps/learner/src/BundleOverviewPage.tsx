@@ -76,7 +76,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
           onClick={() => onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true)}
         >
           <RotateCcw className="h-4 w-4" />

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { openDatabase } from '../db.js';
-import { saveBadge, getBadges, deleteBadges, deleteAllBadges } from '../badge-store.js';
+import { saveBadge, getBadges, deleteBadges } from '../badge-store.js';
 
 describe('badge-store', () => {
   beforeEach(async () => {

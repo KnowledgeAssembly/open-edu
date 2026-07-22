@@ -14,7 +14,7 @@ import { AlertTriangle } from 'lucide-react';
 export interface ResetConfirmDialogProps {
   open: boolean;
   isBundle: boolean;
-  courseTitle: string;
+  courseTitle?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,7 +22,7 @@ export interface ResetConfirmDialogProps {
 export function ResetConfirmDialog({
   open,
   isBundle,
-  courseTitle,
+  courseTitle: _courseTitle,
   onConfirm,
   onCancel,
 }: ResetConfirmDialogProps): JSX.Element {
@@ -40,7 +40,12 @@ export function ResetConfirmDialog({
     : 'reset.confirm_description';
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onCancel(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onCancel();
+      }}
+    >
       <DialogContent
         role="alertdialog"
         aria-labelledby="reset-dialog-title"
@@ -69,11 +74,7 @@ export function ResetConfirmDialog({
           >
             {t('reset.cancel')}
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            data-testid="reset-confirm-button"
-          >
+          <Button variant="destructive" onClick={onConfirm} data-testid="reset-confirm-button">
             {t('reset.confirm_button')}
           </Button>
         </DialogFooter>

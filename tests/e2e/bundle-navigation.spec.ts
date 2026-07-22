@@ -52,9 +52,15 @@ test.describe('Bundle navigation', () => {
     await navigateToCatalog(page);
     await page.locator('[data-testid="bundle-card"]').first().click();
     await page.waitForSelector('[data-testid="bundle-overview"]', { timeout: 5000 });
-    const completedCards = await page.locator('[data-testid="module-card"][data-status="completed"]').count();
-    const unlockedCards = await page.locator('[data-testid="module-card"][data-status="unlocked"]').count();
-    const lockedCards = await page.locator('[data-testid="module-card"][data-status="locked"]').count();
+    const completedCards = await page
+      .locator('[data-testid="module-card"][data-status="completed"]')
+      .count();
+    const unlockedCards = await page
+      .locator('[data-testid="module-card"][data-status="unlocked"]')
+      .count();
+    const lockedCards = await page
+      .locator('[data-testid="module-card"][data-status="locked"]')
+      .count();
     const total = completedCards + unlockedCards + lockedCards;
     expect(total).toBeGreaterThanOrEqual(1);
   });
