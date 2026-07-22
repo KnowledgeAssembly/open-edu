@@ -19,9 +19,13 @@ function toChatMessage(msg: ConversationMessage): ChatMessage {
 
 export interface CourseRightSidebarProps {
   onNavigate?: (view: AppView) => void;
+  width?: number;
 }
 
-export function CourseRightSidebar({ onNavigate }: CourseRightSidebarProps): JSX.Element | null {
+export function CourseRightSidebar({
+  onNavigate,
+  width = 320,
+}: CourseRightSidebarProps): JSX.Element | null {
   const { t } = useTranslation();
   const runtime = useRuntimeOptional();
   const { messages, isLoading, sendMessage, panelState, setPanelState } = useCompanion();
@@ -72,7 +76,8 @@ export function CourseRightSidebar({ onNavigate }: CourseRightSidebarProps): JSX
 
   return (
     <aside
-      className="border-outline-variant bg-surface flex w-80 flex-col border-l shadow-sm transition-all duration-300"
+      className="border-outline-variant bg-surface flex flex-col border-l shadow-sm"
+      style={{ width: `${width}px` }}
       aria-label={t('learner.right_sidebar.label')}
     >
       <Tabs

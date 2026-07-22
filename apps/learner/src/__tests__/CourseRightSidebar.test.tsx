@@ -75,4 +75,24 @@ describe('CourseRightSidebar', () => {
     const aside = screen.getByRole('complementary');
     expect(aside).toBeInTheDocument();
   });
+
+  it('uses default width of 320px when no width prop provided', () => {
+    renderWithProvider(<CourseRightSidebar />);
+    fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveStyle('width: 320px');
+  });
+
+  it('accepts custom width prop', () => {
+    renderWithProvider(<CourseRightSidebar width={400} />);
+    fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveStyle('width: 400px');
+  });
+
+  it('collapsed sidebar has fixed w-12 width regardless of width prop', () => {
+    renderWithProvider(<CourseRightSidebar width={500} />);
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveClass('w-12');
+  });
 });
