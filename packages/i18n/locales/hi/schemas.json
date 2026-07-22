@@ -1,0 +1,6 @@
+{
+  "validation.required": "यह फ़ील्ड अनिवार्य है",
+  "validation.too_short": "कम से कम {{min}} अक्षर होने चाहिए",
+  "validation.too_long": "अधिकतम {{max}} अक्षर हो सकते हैं",
+  "validation.invalid_format": "अमान्य प्रारूप (फॉर्मेट)"
+}
