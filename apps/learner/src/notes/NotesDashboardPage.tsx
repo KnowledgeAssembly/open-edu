@@ -82,7 +82,7 @@ export function NotesDashboardPage({ onNavigate }: NotesDashboardPageProps): JSX
     return (
       <div
         data-testid="notes-page"
-        className="p-xl mx-auto flex w-full max-w-content items-center justify-center"
+        className="p-xl max-w-content mx-auto flex w-full items-center justify-center"
       >
         <p className="text-on-surface-variant text-body-ui">{t('notes.editor.save.saving')}</p>
       </div>
@@ -90,7 +90,7 @@ export function NotesDashboardPage({ onNavigate }: NotesDashboardPageProps): JSX
   }
 
   return (
-    <div data-testid="notes-page" className="p-xl mx-auto flex w-full max-w-content flex-col">
+    <div data-testid="notes-page" className="p-xl max-w-content mx-auto flex w-full flex-col">
       <PageHeader
         title={t('notes.dashboard.title')}
         subtitle={t('notes.dashboard.subtitle')}

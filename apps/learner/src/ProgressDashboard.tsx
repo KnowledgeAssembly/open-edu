@@ -14,12 +14,13 @@ import {
   StatsSummary,
   SectionDivider,
 } from '@open-edu/design-system';
-import { BookOpen, TrendingUp, Award } from 'lucide-react';
+import { BookOpen, TrendingUp, Award, RotateCcw } from 'lucide-react';
 
 export interface ProgressDashboardProps {
   onNavigate: (view: AppView) => void;
   catalogPackages?: PackageSummary[];
   packageEntries?: Record<string, LoadedPackage>;
+  onRequestReset?: (id: string, title: string, isBundle: boolean) => void;
 }
 
 function humanizeNodeId(nodeId: string): string {
@@ -30,6 +31,7 @@ export function ProgressDashboard({
   onNavigate,
   catalogPackages = [],
   packageEntries = {},
+  onRequestReset,
 }: ProgressDashboardProps): JSX.Element {
   const { t, locale } = useTranslation();
   const [allProgress, setAllProgress] = useState<ProgressData>({});
@@ -63,7 +65,7 @@ export function ProgressDashboard({
 
   if (entries.length === 0) {
     return (
-<div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
+      <div className="p-xl max-w-content mx-auto w-full" data-testid="progress-dashboard">
         <h1 className="text-h1 font-display text-on-surface mb-lg">
           {t('learner.progress.title')}
         </h1>
@@ -82,7 +84,7 @@ export function ProgressDashboard({
   }
 
   return (
-    <div className="p-xl mx-auto w-full max-w-content" data-testid="progress-dashboard">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="progress-dashboard">
       <PageHeader
         eyebrow={t('learner.progress.eyebrow_label')}
         title={t('learner.progress.title')}
@@ -139,19 +141,33 @@ export function ProgressDashboard({
           const isCompleted = snap.isCompleted;
 
           return (
-            <ProgressCard
-              key={packageId}
-              title={title}
-              status={isCompleted ? 'completed' : 'in-progress'}
-              currentSteps={uniqueVisited}
-              totalSteps={totalNodes}
-              percent={percent}
-              lastTitle={lastTitle}
-              lastStudied={lastStudied}
-              badgeCount={badgeCount}
-              onContinue={() => onNavigate({ view: 'course', packageId })}
-              onReview={isCompleted ? () => onNavigate({ view: 'course', packageId }) : undefined}
-            />
+            <div key={packageId} className="group relative overflow-hidden">
+              <ProgressCard
+                title={title}
+                status={isCompleted ? 'completed' : 'in-progress'}
+                currentSteps={uniqueVisited}
+                totalSteps={totalNodes}
+                percent={percent}
+                lastTitle={lastTitle}
+                lastStudied={lastStudied}
+                badgeCount={badgeCount}
+                onContinue={() => onNavigate({ view: 'course', packageId })}
+                onReview={isCompleted ? () => onNavigate({ view: 'course', packageId }) : undefined}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                data-testid="reset-button"
+                className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRequestReset?.(packageId, title, false);
+                }}
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span className="sr-only">{t('learner.reset.button')}</span>
+              </Button>
+            </div>
           );
         })}
       </div>

@@ -22,6 +22,7 @@ import {
 import type { AppView } from './AppShell';
 import { InstallPrompt } from './components/InstallPrompt.js';
 import { useInstallPrompt } from './hooks/useInstallPrompt.js';
+import { RotateCcw } from 'lucide-react';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -30,6 +31,7 @@ export interface CatalogPageProps {
   onStartCourse: (packageDir: string) => void;
   onStartBundle?: (bundleId: string) => void;
   onNavigate?: (view: AppView) => void;
+  onRequestReset?: (id: string, title: string, isBundle: boolean) => void;
 }
 
 export function CatalogPage({
@@ -39,6 +41,7 @@ export function CatalogPage({
   onStartCourse,
   onStartBundle,
   onNavigate,
+  onRequestReset,
 }: CatalogPageProps): JSX.Element {
   const { t } = useTranslation();
   const installPrompt = useInstallPrompt();
@@ -122,7 +125,7 @@ export function CatalogPage({
   }
 
   return (
-    <div className="p-xl mx-auto w-full max-w-content" data-testid="catalog-page">
+    <div className="p-xl max-w-content mx-auto w-full" data-testid="catalog-page">
       <PageHeader
         eyebrow={t('learner.catalog.eyebrow')}
         title={t('learner.catalog.page_title')}
@@ -159,20 +162,36 @@ export function CatalogPage({
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {continueList.map((pkg) => (
-              <CourseCardWithModule
-                key={pkg.manifest.id}
-                progress={progress[pkg.manifest.id] ?? null}
-                badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-              >
-                <CourseCard
-                  manifest={pkg.manifest}
-                  nodeCount={pkg.nodeCount}
-                  badgeCount={pkg.availableBadges}
-                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+              <div key={pkg.manifest.id} className="group relative overflow-hidden">
+                <CourseCardWithModule
                   progress={progress[pkg.manifest.id] ?? null}
-                  onStart={() => onStartCourse(pkg.rootDir)}
-                />
-              </CourseCardWithModule>
+                  badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                >
+                  <CourseCard
+                    manifest={pkg.manifest}
+                    nodeCount={pkg.nodeCount}
+                    badgeCount={pkg.availableBadges}
+                    earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                    progress={progress[pkg.manifest.id] ?? null}
+                    onStart={() => onStartCourse(pkg.rootDir)}
+                  />
+                </CourseCardWithModule>
+                {progress[pkg.manifest.id] && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="reset-button"
+                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    <span className="sr-only">{t('learner.reset.button')}</span>
+                  </Button>
+                )}
+              </div>
             ))}
           </div>
         </section>
@@ -194,22 +213,38 @@ export function CatalogPage({
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
                 : 0;
               return (
-                <BundleCardWithModule
-                  key={bundle.manifest.id}
-                  completedModules={completedModules}
-                  totalModules={bundle.moduleCount}
-                >
-                  <BundleCard
-                    title={bundle.manifest.title}
-                    description={bundle.manifest.description}
-                    moduleCount={bundle.moduleCount}
-                    activityCount={bundle.totalNodeCount}
+                <div key={bundle.manifest.id} className="group relative overflow-hidden">
+                  <BundleCardWithModule
                     completedModules={completedModules}
                     totalModules={bundle.moduleCount}
-                    isStarted={prog !== undefined}
-                    onStart={() => onStartBundle?.(bundle.manifest.id)}
-                  />
-                </BundleCardWithModule>
+                  >
+                    <BundleCard
+                      title={bundle.manifest.title}
+                      description={bundle.manifest.description}
+                      moduleCount={bundle.moduleCount}
+                      activityCount={bundle.totalNodeCount}
+                      completedModules={completedModules}
+                      totalModules={bundle.moduleCount}
+                      isStarted={prog !== undefined}
+                      onStart={() => onStartBundle?.(bundle.manifest.id)}
+                    />
+                  </BundleCardWithModule>
+                  {prog && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      data-testid="reset-button"
+                      className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true);
+                      }}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      <span className="sr-only">{t('learner.reset.button')}</span>
+                    </Button>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -277,20 +312,36 @@ export function CatalogPage({
           {sorted.map((pkg) => {
             const prog = progress[pkg.manifest.id] ?? null;
             return (
-              <CourseCardWithModule
-                key={pkg.manifest.id}
-                progress={prog}
-                badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-              >
-                <CourseCard
-                  manifest={pkg.manifest}
-                  nodeCount={pkg.nodeCount}
-                  badgeCount={pkg.availableBadges}
-                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+              <div key={pkg.manifest.id} className="group relative overflow-hidden">
+                <CourseCardWithModule
                   progress={prog}
-                  onStart={() => onStartCourse(pkg.rootDir)}
-                />
-              </CourseCardWithModule>
+                  badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                >
+                  <CourseCard
+                    manifest={pkg.manifest}
+                    nodeCount={pkg.nodeCount}
+                    badgeCount={pkg.availableBadges}
+                    earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
+                    progress={prog}
+                    onStart={() => onStartCourse(pkg.rootDir)}
+                  />
+                </CourseCardWithModule>
+                {progress[pkg.manifest.id] && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="reset-button"
+                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    <span className="sr-only">{t('learner.reset.button')}</span>
+                  </Button>
+                )}
+              </div>
             );
           })}
         </div>

@@ -46,7 +46,7 @@ export function NoteEditorPage({ noteId, onNavigate }: NoteEditorPageProps): JSX
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-content flex-col p-4 sm:p-6">
+    <div className="max-w-content mx-auto flex h-full w-full flex-col p-4 sm:p-6">
       <NoteEditor initial={note} onDeleted={() => onNavigate({ view: 'notes' })} />
     </div>
   );

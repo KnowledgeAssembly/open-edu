@@ -32,15 +32,15 @@ export function CourseExitWarningDialog({
         <DialogHeader>
           <DialogTitle>{t('learner.course.leave_warning')}</DialogTitle>
           <DialogDescription>
-            Your progress up to this point has been saved. You can resume from where you left off.
+            {t('learner.course.leave_warning_description')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onStay} data-testid="exit-warning-stay">
-            Stay
+            {t('learner.course.leave_warning_stay')}
           </Button>
           <Button variant="destructive" onClick={onLeave} data-testid="exit-warning-leave">
-            Leave Course
+            {t('learner.course.leave_warning_leave')}
           </Button>
         </DialogFooter>
       </DialogContent>

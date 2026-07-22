@@ -24,6 +24,7 @@ export {
   getBadges,
   getAllBadges as getAllBadgeRecords,
   deleteAllBadges,
+  deleteBadges,
 } from './badge-store.js';
 export { saveCard, getCard, getAllCards, deleteAllCards } from './card-store.js';
 export { type NoteRecord, type NoteTagRecord } from './db.js';
@@ -39,4 +40,5 @@ export {
   listAllTags,
   bulkPutNotes,
   deleteNotesByLesson,
+  deleteNotesByCourse,
 } from './note-store.js';

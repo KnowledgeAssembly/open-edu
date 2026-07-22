@@ -3,16 +3,21 @@ import { BundleOverview } from '@open-edu/runtime';
 import type { BundleOverviewModule } from '@open-edu/runtime';
 import type { LoadedBundle } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
+import { Button } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
+import { RotateCcw } from 'lucide-react';
 
 export interface BundleOverviewPageProps {
   bundle: LoadedBundle;
   bundleProgress: BundleProgressSnapshot | null;
   onStartModule: (bundleId: string, moduleId: string) => void;
   onBackToCatalog: () => void;
+  onRequestReset?: (id: string, title: string, isBundle: boolean) => void;
 }
 
 export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element {
-  const { bundle, bundleProgress, onStartModule, onBackToCatalog } = props;
+  const { bundle, bundleProgress, onStartModule, onBackToCatalog, onRequestReset } = props;
+  const { t } = useTranslation();
 
   const nodeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -57,14 +62,28 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
   }, [bundle, bundleProgress, nodeCounts]);
 
   return (
-    <BundleOverview
-      bundleTitle={bundle.manifest.title}
-      bundleId={bundle.manifest.id}
-      description={bundle.manifest.description}
-      modules={overviewModules}
-      onStartModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
-      onContinueModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
-      onBackToCatalog={onBackToCatalog}
-    />
+    <div className="group relative overflow-hidden">
+      <BundleOverview
+        bundleTitle={bundle.manifest.title}
+        bundleId={bundle.manifest.id}
+        description={bundle.manifest.description}
+        modules={overviewModules}
+        onStartModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
+        onContinueModule={(moduleId) => onStartModule(bundle.manifest.id, moduleId)}
+        onBackToCatalog={onBackToCatalog}
+      />
+      {bundleProgress && (
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="reset-button"
+          className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+          onClick={() => onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true)}
+        >
+          <RotateCcw className="h-4 w-4" />
+          <span className="sr-only">{t('learner.reset.button')}</span>
+        </Button>
+      )}
+    </div>
   );
 }
