@@ -123,9 +123,9 @@ export function ProgressDashboard({
           const totalNodes =
             pkg?.workflow && pkg?.manifest.entry
               ? getOrderedNodes(pkg.workflow, pkg.manifest.entry).length
-              : snap.visitedNodes.length;
-          const percent =
-            totalNodes > 0 ? Math.round((snap.visitedNodes.length / totalNodes) * 100) : 0;
+              : new Set(snap.visitedNodes).size;
+          const uniqueVisited = new Set(snap.visitedNodes).size;
+          const percent = totalNodes > 0 ? Math.round((uniqueVisited / totalNodes) * 100) : 0;
 
           const lastTitle = snap.currentNodeId
             ? (nodeTitleMap[snap.currentNodeId] ?? humanizeNodeId(snap.currentNodeId))
@@ -143,7 +143,7 @@ export function ProgressDashboard({
               key={packageId}
               title={title}
               status={isCompleted ? 'completed' : 'in-progress'}
-              currentSteps={snap.visitedNodes.length}
+              currentSteps={uniqueVisited}
               totalSteps={totalNodes}
               percent={percent}
               lastTitle={lastTitle}

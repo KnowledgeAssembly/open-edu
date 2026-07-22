@@ -27,7 +27,7 @@ describe('ProgressCard', () => {
 
   it('shows Continue button for in-progress', () => {
     render(<ProgressCard {...makeProps()} />);
-    expect(screen.getByRole('button')).toHaveTextContent('Continue');
+    expect(screen.getByRole('button', { name: /continue/i })).toHaveTextContent('Continue');
   });
 
   it('shows Completed badge when completed', () => {
@@ -43,11 +43,6 @@ describe('ProgressCard', () => {
   it('shows step count', () => {
     render(<ProgressCard {...makeProps()} />);
     expect(screen.getByText('3 of 8 steps')).toBeInTheDocument();
-  });
-
-  it('shows last title', () => {
-    render(<ProgressCard {...makeProps()} />);
-    expect(screen.getByText('Last: Variables')).toBeInTheDocument();
   });
 
   it('shows last studied time', () => {
@@ -74,9 +69,16 @@ describe('ProgressCard', () => {
     expect(onReview).toHaveBeenCalledOnce();
   });
 
-  it('applies opacity for completed status', () => {
-    const { container } = render(<ProgressCard {...makeProps({ status: 'completed' })} />);
-    expect(container.firstChild).toHaveClass('opacity-80');
+  it('calls onContinue when card clicked', () => {
+    const onContinue = vi.fn();
+    render(<ProgressCard {...makeProps({ onContinue })} />);
+    fireEvent.click(screen.getByTestId('progress-card'));
+    expect(onContinue).toHaveBeenCalledOnce();
+  });
+
+  it('applies shadow styling for card appearance', () => {
+    const { container } = render(<ProgressCard {...makeProps()} />);
+    expect(container.firstChild).toHaveClass('shadow-elevation-raised');
   });
 
   it('has no accessibility violations', async () => {

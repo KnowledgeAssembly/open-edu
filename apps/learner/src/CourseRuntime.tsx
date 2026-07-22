@@ -12,7 +12,7 @@ import type { CardDefinition } from '@open-edu/schemas';
 import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
-import { getBundleProgress, saveBundleProgress } from './bundleProgressStorage';
+import { saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button, cn } from '@open-edu/design-system';
@@ -23,6 +23,7 @@ import { BadgeToast } from './BadgeToast';
 export interface BundleCourseContext {
   bundleId: string;
   bundle: LoadedBundle;
+  currentBundleProgress: BundleProgressSnapshot | null;
   onBundleSnapshot: (snapshot: BundleProgressSnapshot) => void;
 }
 
@@ -64,19 +65,15 @@ export function CourseRuntime({
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [progress, bundleSnapshot] = await Promise.all([
-        getProgress(pkg.manifest.id),
-        bundleContext ? getBundleProgress(bundleContext.bundleId) : Promise.resolve(null),
-      ]);
+      const progress = await getProgress(pkg.manifest.id);
       if (cancelled) return;
       setSavedProgress(progress);
       setIsLoadingProgress(false);
-      if (bundleSnapshot) bundleProgressRef.current = bundleSnapshot;
     })();
     return () => {
       cancelled = true;
     };
-  }, [pkg.manifest.id, bundleContext]);
+  }, [pkg.manifest.id]);
 
   const engine = useMemo(() => {
     if (!pkg.workflow) return null;
@@ -203,7 +200,8 @@ export function CourseRuntime({
       void saveProgress(pkg.manifest.id, snapshot);
 
       if (bundleContext) {
-        const existingBundleSnapshot = bundleProgressRef.current;
+        const existingBundleSnapshot =
+          bundleContext.currentBundleProgress ?? bundleProgressRef.current;
         const bundleSnapshot: BundleProgressSnapshot = {
           bundleId: bundleContext.bundleId,
           bundleVersion: bundleContext.bundle.manifest.version ?? '0.0.0',
@@ -227,6 +225,7 @@ export function CourseRuntime({
           updatedAt: snapshot.updatedAt,
         };
 
+        bundleProgressRef.current = bundleSnapshot;
         void saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
         bundleContext.onBundleSnapshot(bundleSnapshot);
       }
