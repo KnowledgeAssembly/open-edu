@@ -57,6 +57,7 @@ import { BreakNagBar } from './BreakNagBar';
 import { BreakPage } from './BreakPage';
 import { loadLocaleFonts } from './i18n-fonts';
 import { useThemeColorMeta } from './hooks/useThemeColorMeta';
+import { useResizablePanel } from './hooks/useResizablePanel';
 
 export type AppView =
   | { view: 'home' }
@@ -223,6 +224,27 @@ function AppShellInner({
     isBundle: boolean;
   } | null>(null);
   const [resetCounter, setResetCounter] = useState(0);
+
+  const { panelState } = useCompanion();
+
+  const handleWidthChange = useCallback((width: number) => {
+    try {
+      localStorage.setItem('oe-right-sidebar-width', String(width));
+    } catch {
+      // localStorage may not be available
+    }
+  }, []);
+
+  const {
+    width: sidebarWidth,
+    isDragging: isResizing,
+    handleProps: resizeHandleProps,
+  } = useResizablePanel({
+    initialWidth: 320,
+    minWidth: 280,
+    maxWidth: 600,
+    onWidthChange: handleWidthChange,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -642,7 +664,17 @@ function AppShellInner({
           </AppLayout>
         )}
       </div>
-      <CourseRightSidebar onNavigate={handleNavigate} />
+      <div className="flex shrink-0">
+        {panelState !== 'closed' && (
+          <div
+            className={`w-1.5 shrink-0 cursor-col-resize transition-colors ${
+              isResizing ? 'bg-outline-variant' : 'hover:bg-outline-variant bg-transparent'
+            }`}
+            {...resizeHandleProps}
+          />
+        )}
+        <CourseRightSidebar onNavigate={handleNavigate} width={sidebarWidth} />
+      </div>
       <CompanionFloatingUI view={view} />
       <ResetConfirmDialog
         open={resetTarget !== null}
