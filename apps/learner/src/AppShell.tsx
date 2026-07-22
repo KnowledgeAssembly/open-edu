@@ -31,6 +31,9 @@ import { CatalogPage } from './CatalogPage';
 import { ProgressDashboard } from './ProgressDashboard';
 import { SettingsPage } from './SettingsPage';
 import { CourseExitWarningDialog } from './CourseExitWarningDialog';
+import { ResetConfirmDialog } from './ResetConfirmDialog';
+import { resetCourse } from './resetCourseStorage';
+import { resetBundle } from './resetBundleStorage';
 import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { NotesDashboardPage } from './notes/NotesDashboardPage';
@@ -214,6 +217,13 @@ function AppShellInner({
 
   const [bundleProgress, setBundleProgress] = useState<Record<string, BundleProgressSnapshot>>({});
 
+  const [resetTarget, setResetTarget] = useState<{
+    id: string;
+    title: string;
+    isBundle: boolean;
+  } | null>(null);
+  const [resetCounter, setResetCounter] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -300,6 +310,30 @@ function AppShellInner({
   const handleBackToCatalog = useCallback(() => {
     navigate('/catalog');
   }, [navigate]);
+
+  const handleRequestReset = useCallback(
+    (id: string, title: string, isBundle: boolean) => {
+      setResetTarget({ id, title, isBundle });
+    },
+    [],
+  );
+
+  const handleResetConfirm = useCallback(async () => {
+    if (!resetTarget) return;
+    if (resetTarget.isBundle) {
+      const bundle = bundleEntries[resetTarget.id];
+      if (bundle) await resetBundle(bundle);
+    } else {
+      await resetCourse(resetTarget.id);
+    }
+    setResetTarget(null);
+    setBundleProgress({});
+    setResetCounter((c) => c + 1);
+  }, [resetTarget, bundleEntries]);
+
+  const handleResetCancel = useCallback(() => {
+    setResetTarget(null);
+  }, []);
 
   const coursePkg = useMemo<LoadedPackage | undefined>(() => {
     if (view.view !== 'course' || !view.packageId) return undefined;
@@ -458,7 +492,7 @@ function AppShellInner({
         {isCourseView && coursePkg ? (
           <WordTapHandler className="flex min-w-0 flex-1 flex-col">
             <div
-              key={location.pathname}
+              key={`${location.pathname}-${resetCounter}`}
               ref={courseContentRef}
               className="animate-in fade-in flex min-h-0 min-w-0 flex-1 flex-row duration-500"
               data-content-area="true"
@@ -543,7 +577,7 @@ function AppShellInner({
               </div>
               <div className="flex min-h-0 flex-1 flex-col">
                 <div
-                  key={location.pathname}
+                  key={`${location.pathname}-${resetCounter}`}
                   className="animate-in fade-in slide-in-from-bottom-4 flex min-h-0 flex-1 flex-col overflow-y-auto duration-500"
                 >
                   {view.view === 'catalog' && (
@@ -554,6 +588,7 @@ function AppShellInner({
                       onStartCourse={handleStartCourse}
                       onStartBundle={handleStartBundle}
                       onNavigate={handleNavigate}
+                      onRequestReset={handleRequestReset}
                     />
                   )}
                   {view.view === 'home' && (
@@ -573,6 +608,7 @@ function AppShellInner({
                         bundleProgress={bundleProgress[view.bundleId] ?? null}
                         onStartModule={handleStartBundleModule}
                         onBackToCatalog={handleBackToCatalog}
+                        onRequestReset={handleRequestReset}
                       />
                     );
                   })()}
@@ -581,6 +617,7 @@ function AppShellInner({
                       onNavigate={handleNavigate}
                       catalogPackages={catalogPackages}
                       packageEntries={packageEntries}
+                      onRequestReset={handleRequestReset}
                     />
                   )}
                   {view.view === 'settings' && (
@@ -607,6 +644,13 @@ function AppShellInner({
       </div>
       <CourseRightSidebar onNavigate={handleNavigate} />
       <CompanionFloatingUI view={view} />
+      <ResetConfirmDialog
+        open={resetTarget !== null}
+        isBundle={resetTarget?.isBundle ?? false}
+        courseTitle={resetTarget?.title ?? ''}
+        onConfirm={handleResetConfirm}
+        onCancel={handleResetCancel}
+      />
       <CourseExitWarningDialog
         open={showExitWarning}
         onStay={handleExitStay}
