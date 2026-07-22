@@ -157,13 +157,13 @@ export function ProgressDashboard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRequestReset?.(packageId, title, false);
                 }}
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-4 w-4 text-error" />
                 <span className="sr-only">{t('reset.button')}</span>
               </Button>
             </div>
