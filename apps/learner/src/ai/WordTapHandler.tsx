@@ -168,6 +168,8 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
     [getWordAtPoint, lookupWord],
   );
 
+  const lastInputWasTouch = useRef(false);
+
   const closePopover = useCallback(() => {
     setPopover(null);
   }, []);
@@ -319,9 +321,22 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
   return (
     <div
       className={className}
-      onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
-      onMouseUp={(e) => handlePointerUp(e.clientX, e.clientY)}
+      onMouseDown={(e) => {
+        if (lastInputWasTouch.current) {
+          lastInputWasTouch.current = false;
+          return;
+        }
+        handlePointerDown(e.clientX, e.clientY);
+      }}
+      onMouseUp={(e) => {
+        if (lastInputWasTouch.current) {
+          lastInputWasTouch.current = false;
+          return;
+        }
+        handlePointerUp(e.clientX, e.clientY);
+      }}
       onTouchStart={(e: TouchEvent<HTMLDivElement>) => {
+        lastInputWasTouch.current = true;
         const touch = e.touches[0];
         if (touch) handlePointerDown(touch.clientX, touch.clientY);
       }}
