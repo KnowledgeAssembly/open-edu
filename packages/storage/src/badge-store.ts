@@ -22,3 +22,8 @@ export async function deleteAllBadges(): Promise<void> {
   await tx.objectStore('badges').clear();
   await tx.done;
 }
+
+export async function deleteBadges(courseId: string): Promise<void> {
+  const db = await openDatabase();
+  await db.delete('badges', courseId);
+}
