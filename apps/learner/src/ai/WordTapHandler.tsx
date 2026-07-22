@@ -28,6 +28,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
+  const lastInputWasTouch = useRef(false);
   const { search, setPanelState, sendMessage } = useCompanion();
 
   const getRangeAtPoint = useCallback((x: number, y: number): Range | null => {
@@ -167,8 +168,6 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
     },
     [getWordAtPoint, lookupWord],
   );
-
-  const lastInputWasTouch = useRef(false);
 
   const closePopover = useCallback(() => {
     setPopover(null);
@@ -343,6 +342,9 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
       onTouchEnd={(e: TouchEvent<HTMLDivElement>) => {
         const touch = e.changedTouches[0];
         if (touch) handlePointerUp(touch.clientX, touch.clientY);
+        setTimeout(() => {
+          lastInputWasTouch.current = false;
+        }, 0);
       }}
       data-testid="word-tap-container"
     >

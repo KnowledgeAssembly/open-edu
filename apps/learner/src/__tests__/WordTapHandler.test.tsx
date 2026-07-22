@@ -377,4 +377,102 @@ describe('WordTapHandler', () => {
     });
     expect(results.violations).toHaveLength(0);
   });
+
+  it('does not show popover on single touch tap', () => {
+    mockSearch.mockReturnValue({
+      query: 'gravity',
+      instant: {
+        entry: {
+          word: 'gravity',
+          definitions: [{ definition: 'The force that attracts a body' }],
+        },
+        suggestions: [],
+      },
+      enriched: Promise.resolve({
+        ftsResults: [],
+        cachedAiResponse: null,
+        courseReferences: [],
+      }),
+    });
+
+    const { wordEl } = renderWithWordTap(<p>gravity</p>);
+
+    const touch = new Touch({ identifier: 0, target: wordEl, clientX: 50, clientY: 50 });
+
+    fireEvent.touchStart(wordEl, { touches: [touch] });
+    fireEvent.touchEnd(wordEl, { changedTouches: [touch] });
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    expect(screen.queryByTestId('word-tap-popover')).not.toBeInTheDocument();
+  });
+
+  it('shows popover on double touch tap', () => {
+    mockSearch.mockReturnValue({
+      query: 'gravity',
+      instant: {
+        entry: {
+          word: 'gravity',
+          definitions: [{ definition: 'The force that attracts a body' }],
+        },
+        suggestions: [],
+      },
+      enriched: Promise.resolve({
+        ftsResults: [],
+        cachedAiResponse: null,
+        courseReferences: [],
+      }),
+    });
+
+    const { wordEl } = renderWithWordTap(<p>gravity</p>);
+
+    const touch1 = new Touch({ identifier: 0, target: wordEl, clientX: 50, clientY: 50 });
+    const touch2 = new Touch({ identifier: 0, target: wordEl, clientX: 50, clientY: 50 });
+
+    fireEvent.touchStart(wordEl, { touches: [touch1] });
+    fireEvent.touchEnd(wordEl, { changedTouches: [touch1] });
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    fireEvent.touchStart(wordEl, { touches: [touch2] });
+    fireEvent.touchEnd(wordEl, { changedTouches: [touch2] });
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    expect(screen.getByTestId('word-tap-popover')).toBeInTheDocument();
+  });
+
+  it('mouse double-click still works after a touch interaction', () => {
+    mockSearch.mockReturnValue({
+      query: 'gravity',
+      instant: {
+        entry: {
+          word: 'gravity',
+          definitions: [{ definition: 'The force that attracts a body' }],
+        },
+        suggestions: [],
+      },
+      enriched: Promise.resolve({
+        ftsResults: [],
+        cachedAiResponse: null,
+        courseReferences: [],
+      }),
+    });
+
+    const { wordEl } = renderWithWordTap(<p>gravity</p>);
+
+    const touch = new Touch({ identifier: 0, target: wordEl, clientX: 50, clientY: 50 });
+
+    fireEvent.touchStart(wordEl, { touches: [touch] });
+    fireEvent.touchEnd(wordEl, { changedTouches: [touch] });
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    expect(screen.getByTestId('word-tap-popover')).toBeInTheDocument();
+  });
 });
