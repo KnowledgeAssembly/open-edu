@@ -58,12 +58,12 @@ export function ResetConfirmDialog({
               <AlertTriangle className="text-error h-5 w-5" />
             </div>
             <DialogTitle id="reset-dialog-title" className="text-h2 font-display">
-              {t('reset.confirm_title')}
+              {t('learner.reset.confirm_title')}
             </DialogTitle>
           </div>
         </DialogHeader>
         <DialogDescription id="reset-dialog-description" data-testid="reset-dialog-description">
-          {t(descriptionKey, { courseTitle })}
+            {t(`learner.${descriptionKey}`, { courseTitle })}
         </DialogDescription>
         <DialogFooter className="mt-6">
           <Button
@@ -72,10 +72,10 @@ export function ResetConfirmDialog({
             onClick={onCancel}
             data-testid="reset-cancel-button"
           >
-            {t('reset.cancel')}
+            {t('learner.reset.cancel')}
           </Button>
           <Button variant="destructive" onClick={onConfirm} data-testid="reset-confirm-button">
-            {t('reset.confirm_button')}
+            {t('learner.reset.confirm_button')}
           </Button>
         </DialogFooter>
       </DialogContent>
