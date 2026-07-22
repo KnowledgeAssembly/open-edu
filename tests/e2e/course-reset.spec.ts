@@ -8,25 +8,19 @@
 
 import { test, expect, type Page } from '@playwright/test';
 
-const LEARNER_URL = 'http://localhost:4001';
+const BASE_URL = 'http://localhost:4001';
 
-async function navigateToCatalog(page: Page): Promise<void> {
-  const browseBtn = page.getByText('Browse Courses');
-  if (await browseBtn.isVisible().catch(() => false)) {
-    await browseBtn.click();
-  } else {
-    const catalogNav = page.locator('[data-testid="appsidebar-nav-catalog"]');
-    if (await catalogNav.isVisible().catch(() => false)) {
-      await catalogNav.click();
-    }
-  }
+async function goToCatalog(page: Page): Promise<void> {
+  await page.goto(BASE_URL);
+  await page.waitForSelector('[data-testid="home-page"]', { timeout: 10000 });
+  await page.getByRole('button', { name: 'Browse Courses' }).click();
+  await page.waitForSelector('[data-testid="catalog-page"]', { timeout: 10000 });
 }
 
 async function startFirstCourse(page: Page): Promise<void> {
-  await navigateToCatalog(page);
-  await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+  await goToCatalog(page);
   const card = page.locator('[data-testid="course-card"]').first();
-  await expect(card).toBeVisible({ timeout: 10000 });
+  await card.waitFor({ state: 'visible', timeout: 10000 });
   await card.click();
 }
 
@@ -60,48 +54,39 @@ async function navigateThroughSteps(page: Page, steps = 3): Promise<void> {
 
 test.describe('Course Reset', () => {
   test('reset button appears on hover for courses with progress', async ({ page }) => {
-    await page.goto(LEARNER_URL);
+    await goToCatalog(page);
 
     await startFirstCourse(page);
     await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
 
-    // Navigate a few steps to create progress
     await navigateThroughSteps(page, 2);
 
-    // Go back to catalog
-    const backBtn = page.locator('[data-testid="app-sidebar"]').getByText('Back to Catalog');
-    if (await backBtn.isVisible().catch(() => false)) {
-      await backBtn.click();
-    } else {
-      await page.goto(`${LEARNER_URL}/catalog`);
-    }
-
-    await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+    // Return to catalog via full page navigation
+    await goToCatalog(page);
 
     // Hover over a course card to reveal the reset button
     const courseCard = page.locator('[data-testid="course-card"]').first();
     await courseCard.hover();
 
-    // The reset button should now be visible
     const resetButton = page.getByTestId('reset-button').first();
     await expect(resetButton).toBeVisible({ timeout: 5000 });
   });
 
   test('reset confirmation dialog opens and can be cancelled', async ({ page }) => {
-    await page.goto(LEARNER_URL);
+    await goToCatalog(page);
 
     await startFirstCourse(page);
     await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
 
     await navigateThroughSteps(page, 2);
 
-    // Go back to catalog
-    await page.goto(`${LEARNER_URL}/catalog`);
-    await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+    await goToCatalog(page);
 
     // Hover and find reset button
+    const courseCard = page.locator('[data-testid="course-card"]').first();
+    await courseCard.hover();
+
     const resetButton = page.getByTestId('reset-button').first();
-    await page.locator('[data-testid="course-card"]').first().hover();
     await expect(resetButton).toBeVisible({ timeout: 5000 });
     await resetButton.click();
 
@@ -116,20 +101,20 @@ test.describe('Course Reset', () => {
   });
 
   test('reset confirmation removes course from progress', async ({ page }) => {
-    await page.goto(LEARNER_URL);
+    await goToCatalog(page);
 
     await startFirstCourse(page);
     await expect(page.locator('[data-testid="course-runtime"]')).toBeVisible({ timeout: 15000 });
 
     await navigateThroughSteps(page, 2);
 
-    // Go back to catalog
-    await page.goto(`${LEARNER_URL}/catalog`);
-    await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
+    await goToCatalog(page);
 
     // Hover and find reset button
+    const courseCard = page.locator('[data-testid="course-card"]').first();
+    await courseCard.hover();
+
     const resetButton = page.getByTestId('reset-button').first();
-    await page.locator('[data-testid="course-card"]').first().hover();
     await expect(resetButton).toBeVisible({ timeout: 5000 });
     await resetButton.click();
 
@@ -140,11 +125,11 @@ test.describe('Course Reset', () => {
     await expect(page.getByRole('alertdialog')).not.toBeVisible({ timeout: 5000 });
 
     // Navigate to progress page and verify the course is no longer listed
-    await page.goto(`${LEARNER_URL}/progress`);
-    await expect(page.locator('[data-testid="progress-dashboard"]')).toBeVisible({ timeout: 10000 });
+    await page.goto(`${BASE_URL}/progress`);
+    await page.waitForSelector('[data-testid="progress-dashboard"]', { timeout: 10000 });
 
     // The reset course should not appear in progress
-    const progressCards = page.getByTestId('reset-button');
-    await expect(progressCards).toHaveCount(0, { timeout: 5000 });
+    const progressButtons = page.getByTestId('reset-button');
+    await expect(progressButtons).toHaveCount(0, { timeout: 5000 });
   });
 });
