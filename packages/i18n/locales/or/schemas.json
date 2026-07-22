@@ -1,0 +1,6 @@
+{
+  "validation.required": "ଏହି ଫିଲ୍ଡଟି ବାଧ୍ୟତାମୂଳକ",
+  "validation.too_short": "ଅତି କମରେ {{min}} ଟି ଅକ୍ଷର ହେବା ଆବଶ୍ୟକ",
+  "validation.too_long": "ସର୍ବାଧିକ {{max}} ଟି ଅକ୍ଷର ହୋଇପାରିବ",
+  "validation.invalid_format": "ଅବୈଧ ଫର୍ମାଟ୍ (Invalid format)"
+}

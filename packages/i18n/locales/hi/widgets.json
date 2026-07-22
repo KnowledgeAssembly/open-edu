@@ -1,0 +1,10 @@
+{
+  "common.loading": "लोड हो रहा है…",
+  "common.error": "कुछ गलत हो गया",
+  "common.retry": "पुनः प्रयास करें",
+  "common.submit": "जमा करें",
+  "common.next": "आगे",
+  "common.previous": "पिछला",
+  "common.save": "सहेजें",
+  "common.cancel": "रद्द करें"
+}
