@@ -119,6 +119,7 @@
   "right_sidebar.label": "AI companion sidebar",
   "right_sidebar.open": "Open sidebar",
   "right_sidebar.close": "Close sidebar",
+  "right_sidebar.resize_handle": "Drag to resize sidebar",
   "right_sidebar.tabs_label": "Sidebar tabs",
   "right_sidebar.tab_pipili": "Pipili",
   "right_sidebar.tab_notepad": "Notepad",

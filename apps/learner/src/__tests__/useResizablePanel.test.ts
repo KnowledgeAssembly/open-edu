@@ -7,16 +7,12 @@ describe('useResizablePanel', () => {
     initialWidth: 320,
     minWidth: 280,
     maxWidth: 600,
+    ariaLabel: 'Resize panel',
   };
 
   it('returns initial width', () => {
     const { result } = renderHook(() => useResizablePanel(defaultOptions));
     expect(result.current.width).toBe(320);
-  });
-
-  it('returns panelStyle with correct width', () => {
-    const { result } = renderHook(() => useResizablePanel(defaultOptions));
-    expect(result.current.panelStyle).toEqual({ width: 320 });
   });
 
   it('isDragging is false initially', () => {
@@ -110,7 +106,7 @@ describe('useResizablePanel', () => {
     expect(result.current.isDragging).toBe(false);
   });
 
-  it('calls onWidthChange after drag end', () => {
+  it('calls onWidthChange on width change via keyboard', () => {
     const onWidthChange = vi.fn();
     const { result } = renderHook(() => useResizablePanel({ ...defaultOptions, onWidthChange }));
     act(() => {
@@ -127,6 +123,7 @@ describe('useResizablePanel', () => {
     const { result } = renderHook(() => useResizablePanel(defaultOptions));
     const props = result.current.handleProps;
     expect(props.role).toBe('separator');
+    expect(props['aria-label']).toBe('Resize panel');
     expect(props['aria-orientation']).toBe('vertical');
     expect(props['aria-valuemin']).toBe(280);
     expect(props['aria-valuemax']).toBe(600);

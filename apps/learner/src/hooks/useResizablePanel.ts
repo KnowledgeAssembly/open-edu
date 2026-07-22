@@ -4,6 +4,7 @@ export interface UseResizablePanelOptions {
   initialWidth: number;
   minWidth: number;
   maxWidth: number;
+  ariaLabel: string;
   onWidthChange?: (width: number) => void;
 }
 
@@ -21,13 +22,13 @@ export interface UseResizablePanelReturn {
     'aria-valuenow': number;
     'aria-orientation': 'vertical';
   };
-  panelStyle: { width: number };
 }
 
 export function useResizablePanel({
   initialWidth,
   minWidth,
   maxWidth,
+  ariaLabel,
   onWidthChange,
 }: UseResizablePanelOptions): UseResizablePanelReturn {
   const [width, setWidth] = useState(initialWidth);
@@ -94,21 +95,13 @@ export function useResizablePanel({
       const step = e.shiftKey ? 40 : 10;
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setWidth((prev) => {
-          const next = clamp(prev - step);
-          onWidthChange?.(next);
-          return next;
-        });
+        setWidth((prev) => clamp(prev - step));
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setWidth((prev) => {
-          const next = clamp(prev + step);
-          onWidthChange?.(next);
-          return next;
-        });
+        setWidth((prev) => clamp(prev + step));
       }
     },
-    [clamp, onWidthChange],
+    [clamp],
   );
 
   useEffect(() => {
@@ -125,12 +118,11 @@ export function useResizablePanel({
       onKeyDown: handleKeyDown,
       tabIndex: 0,
       role: 'separator',
-      'aria-label': 'Resize sidebar',
+      'aria-label': ariaLabel,
       'aria-valuemin': minWidth,
       'aria-valuemax': maxWidth,
       'aria-valuenow': width,
       'aria-orientation': 'vertical',
     },
-    panelStyle: { width },
   };
 }

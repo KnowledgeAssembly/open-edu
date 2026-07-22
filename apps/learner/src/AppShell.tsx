@@ -227,6 +227,19 @@ function AppShellInner({
 
   const { panelState } = useCompanion();
 
+  const initialSidebarWidth = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('oe-right-sidebar-width');
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (parsed >= 280 && parsed <= 600) return parsed;
+      }
+    } catch {
+      // localStorage may not be available
+    }
+    return 320;
+  }, []);
+
   const handleWidthChange = useCallback((width: number) => {
     try {
       localStorage.setItem('oe-right-sidebar-width', String(width));
@@ -240,9 +253,10 @@ function AppShellInner({
     isDragging: isResizing,
     handleProps: resizeHandleProps,
   } = useResizablePanel({
-    initialWidth: 320,
+    initialWidth: initialSidebarWidth,
     minWidth: 280,
     maxWidth: 600,
+    ariaLabel: t('learner.right_sidebar.resize_handle'),
     onWidthChange: handleWidthChange,
   });
 
