@@ -92,15 +92,18 @@ describe('BundleOverview', () => {
     expect(screen.queryByTestId('continue-module-mod-2')).toBeNull();
   });
 
-  it('shows "Completed" for completed modules', () => {
+  it('shows completed status for completed modules', () => {
     renderDefault();
-    expect(screen.getByTestId('completed-module-mod-3')).toHaveTextContent('Completed');
+    expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
   it('shows locked state with prerequisite label', () => {
     renderDefault();
     expect(screen.getByText('Complete Module 3 first')).toBeInTheDocument();
-    expect(screen.getByTestId('module-status-locked')).toBeInTheDocument();
+    const lockedCard = screen
+      .getAllByTestId('module-card')
+      .find((el) => el.getAttribute('data-status') === 'locked');
+    expect(lockedCard).toHaveClass('opacity-40');
   });
 
   it('shows empty state when no modules', () => {
@@ -131,7 +134,36 @@ describe('BundleOverview', () => {
 
   it('shows estimated duration and activity count for unlocked modules', () => {
     renderDefault();
-    expect(screen.getByText('~15 min · 5 activities')).toBeInTheDocument();
+    expect(screen.getByText('~15 min')).toBeInTheDocument();
+    expect(screen.getByText('0 of 5 activities')).toBeInTheDocument();
+  });
+
+  it('applies shadow styling for card appearance', () => {
+    renderDefault();
+    const cards = screen.getAllByTestId('module-card');
+    cards.forEach((card) => {
+      expect(card).toHaveClass('shadow-elevation-raised');
+    });
+  });
+
+  it('calls onStartModule when unlocked card clicked', () => {
+    const onStartModule = vi.fn();
+    renderDefault({ onStartModule });
+    const card = screen
+      .getAllByTestId('module-card')
+      .find((el) => el.getAttribute('data-status') === 'unlocked');
+    fireEvent.click(card!);
+    expect(onStartModule).toHaveBeenCalledWith('mod-1');
+  });
+
+  it('calls onStartModule when completed card clicked for review', () => {
+    const onStartModule = vi.fn();
+    renderDefault({ onStartModule });
+    const card = screen
+      .getAllByTestId('module-card')
+      .find((el) => el.getAttribute('data-status') === 'completed');
+    fireEvent.click(card!);
+    expect(onStartModule).toHaveBeenCalledWith('mod-3');
   });
 
   it('does not show estimated duration for completed modules', () => {

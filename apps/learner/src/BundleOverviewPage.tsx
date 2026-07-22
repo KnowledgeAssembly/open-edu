@@ -49,7 +49,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         chapterCode: mod.chapterCode,
         status: status as BundleOverviewModule['status'],
         nodeCount: nodeCounts[mod.id] ?? 0,
-        completedNodeCount: progress?.visitedNodes.length ?? 0,
+        completedNodeCount: progress ? new Set(progress.visitedNodes).size : 0,
         estimatedDuration: mod.estimatedDuration,
         prerequisiteLabel,
       };

@@ -87,7 +87,7 @@ export function CourseCard({
         <div className="text-on-surface-variant mb-3 flex items-center gap-3 text-xs">
           {isCompleted ? (
             <span>
-              {progress!.visitedNodes.length} of {nodeCount} lessons
+              {new Set(progress!.visitedNodes).size} of {nodeCount} lessons
             </span>
           ) : (
             <span>{nodeCount} lessons</span>
@@ -114,7 +114,7 @@ export function CourseCard({
         </div>
         {isStarted && !isCompleted && (
           <Progress
-            current={progress.visitedNodes.length}
+            current={new Set(progress.visitedNodes).size}
             total={nodeCount}
             showLabel={false}
             size="xs"

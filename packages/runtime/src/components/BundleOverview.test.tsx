@@ -82,7 +82,7 @@ describe('BundleOverview', () => {
 
   it('shows completed status for completed module', () => {
     render(<BundleOverview {...baseProps} />);
-    expect(screen.getByTestId('completed-module-mod-a')).toBeDefined();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
   it('calls onStartModule when Start is clicked', () => {
@@ -124,7 +124,8 @@ describe('BundleOverview', () => {
 
   it('shows estimated duration and activity count for unlocked modules', () => {
     render(<BundleOverview {...baseProps} />);
-    expect(screen.getByText('~25 min · 4 activities')).toBeDefined();
+    expect(screen.getByText('~25 min')).toBeDefined();
+    expect(screen.getByText('0 of 4 activities')).toBeDefined();
   });
 
   it('does not show estimated duration for in-progress modules', () => {

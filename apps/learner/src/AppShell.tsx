@@ -492,6 +492,8 @@ function AppShellInner({
                       ? {
                           bundleId: courseBundle.manifest.id,
                           bundle: courseBundle,
+                          currentBundleProgress:
+                            bundleProgress[courseBundle.manifest.id] ?? null,
                           onBundleSnapshot: (snapshot) => {
                             setBundleProgress((prev) => ({
                               ...prev,

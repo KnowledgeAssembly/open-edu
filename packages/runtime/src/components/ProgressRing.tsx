@@ -52,7 +52,7 @@ export function ProgressRing({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={`${clampedProgress}% complete`}
-      className={cn('inline-flex items-center justify-center', className)}
+      className={cn('relative inline-flex items-center justify-center', className)}
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} className="-rotate-90">
