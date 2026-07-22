@@ -70,6 +70,23 @@ export async function deleteNotesByLesson(courseId: string, lessonId: string): P
   await tx.done;
 }
 
+export async function deleteNotesByCourse(courseId: string): Promise<void> {
+  const db = await openDatabase();
+  const notes = await listNotes({ courseId });
+  const tx = db.transaction(['notes', 'note-tags'], 'readwrite');
+  for (const note of notes) {
+    await tx.objectStore('notes').delete(note.id);
+    const tagStore = tx.objectStore('note-tags');
+    const byNoteId = tagStore.index('byNoteId');
+    let cursor = await byNoteId.openCursor(IDBKeyRange.only(note.id));
+    while (cursor) {
+      await cursor.delete();
+      cursor = await cursor.continue();
+    }
+  }
+  await tx.done;
+}
+
 export async function setNoteFavorite(id: string, favorite: boolean): Promise<void> {
   const db = await openDatabase();
   const note = await db.get('notes', id);

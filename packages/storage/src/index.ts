@@ -40,4 +40,5 @@ export {
   listAllTags,
   bulkPutNotes,
   deleteNotesByLesson,
+  deleteNotesByCourse,
 } from './note-store.js';
