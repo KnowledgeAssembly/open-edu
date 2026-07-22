@@ -162,7 +162,7 @@ export function CatalogPage({
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {continueList.map((pkg) => (
-              <div key={pkg.manifest.id} className="group relative">
+              <div key={pkg.manifest.id} className="group relative overflow-hidden">
                 <CourseCardWithModule
                   progress={progress[pkg.manifest.id] ?? null}
                   badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
@@ -186,7 +186,7 @@ export function CatalogPage({
                       onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
                     }}
                   >
-                    <RotateCcw className="h-4 w-4 text-error" />
+                    <RotateCcw className="h-4 w-4" />
                     <span className="sr-only">{t('learner.reset.button')}</span>
                   </Button>
                 )}
@@ -212,7 +212,7 @@ export function CatalogPage({
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
                 : 0;
               return (
-                <div key={bundle.manifest.id} className="group relative">
+                <div key={bundle.manifest.id} className="group relative overflow-hidden">
                   <BundleCardWithModule
                     completedModules={completedModules}
                     totalModules={bundle.moduleCount}
@@ -238,7 +238,7 @@ export function CatalogPage({
                         onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true);
                       }}
                     >
-                      <RotateCcw className="h-4 w-4 text-error" />
+                      <RotateCcw className="h-4 w-4" />
                       <span className="sr-only">{t('learner.reset.button')}</span>
                     </Button>
                   )}
@@ -310,7 +310,7 @@ export function CatalogPage({
           {sorted.map((pkg) => {
             const prog = progress[pkg.manifest.id] ?? null;
             return (
-              <div key={pkg.manifest.id} className="group relative">
+              <div key={pkg.manifest.id} className="group relative overflow-hidden">
                 <CourseCardWithModule
                   progress={prog}
                   badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
@@ -334,7 +334,7 @@ export function CatalogPage({
                       onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
                     }}
                   >
-                    <RotateCcw className="h-4 w-4 text-error" />
+                    <RotateCcw className="h-4 w-4" />
                     <span className="sr-only">{t('learner.reset.button')}</span>
                   </Button>
                 )}

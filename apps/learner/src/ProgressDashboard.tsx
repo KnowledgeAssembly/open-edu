@@ -141,7 +141,7 @@ export function ProgressDashboard({
           const isCompleted = snap.isCompleted;
 
           return (
-            <div key={packageId} className="group relative">
+            <div key={packageId} className="group relative overflow-hidden">
               <ProgressCard
                 title={title}
                 status={isCompleted ? 'completed' : 'in-progress'}
@@ -163,7 +163,7 @@ export function ProgressDashboard({
                   onRequestReset?.(packageId, title, false);
                 }}
               >
-                <RotateCcw className="h-4 w-4 text-error" />
+                <RotateCcw className="h-4 w-4" />
                 <span className="sr-only">{t('learner.reset.button')}</span>
               </Button>
             </div>
