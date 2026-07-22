@@ -5,14 +5,12 @@ import type { LoadedBundle } from '@open-edu/core';
 vi.mock('@open-edu/storage', () => ({
   deleteCourseProgress: vi.fn().mockResolvedValue(undefined),
   deleteBadges: vi.fn().mockResolvedValue(undefined),
-  deleteAllCards: vi.fn().mockResolvedValue(undefined),
   deleteNotesByCourse: vi.fn().mockResolvedValue(undefined),
 }));
 
 import {
   deleteCourseProgress,
   deleteBadges,
-  deleteAllCards,
   deleteNotesByCourse,
 } from '@open-edu/storage';
 
@@ -42,7 +40,7 @@ function makeBundle(moduleIds: string[]): LoadedBundle {
 }
 
 describe('resetBundle', () => {
-  it('deletes bundle progress and all module progress/badges/notes and cards', async () => {
+  it('deletes bundle progress, module progress, badges, and notes', async () => {
     const bundle = makeBundle(['mod-a', 'mod-b']);
 
     await resetBundle(bundle);
@@ -52,9 +50,17 @@ describe('resetBundle', () => {
     expect(deleteCourseProgress).toHaveBeenCalledWith('mod-b');
     expect(deleteBadges).toHaveBeenCalledWith('mod-a');
     expect(deleteBadges).toHaveBeenCalledWith('mod-b');
-    expect(deleteAllCards).toHaveBeenCalled();
     expect(deleteNotesByCourse).toHaveBeenCalledWith('mod-a');
     expect(deleteNotesByCourse).toHaveBeenCalledWith('mod-b');
+  });
+
+  it('does not call deleteAllCards (cards are not course-scoped)', async () => {
+    const bundle = makeBundle(['mod-a']);
+    await resetBundle(bundle);
+
+    expect(deleteCourseProgress).toHaveBeenCalled();
+    expect(deleteBadges).toHaveBeenCalled();
+    expect(deleteNotesByCourse).toHaveBeenCalled();
   });
 
   it('succeeds even when some deletions throw', async () => {

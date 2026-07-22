@@ -4,14 +4,12 @@ import { resetCourse } from '../resetCourseStorage';
 vi.mock('@open-edu/storage', () => ({
   deleteCourseProgress: vi.fn().mockResolvedValue(undefined),
   deleteBadges: vi.fn().mockResolvedValue(undefined),
-  deleteAllCards: vi.fn().mockResolvedValue(undefined),
   deleteNotesByCourse: vi.fn().mockResolvedValue(undefined),
 }));
 
 import {
   deleteCourseProgress,
   deleteBadges,
-  deleteAllCards,
   deleteNotesByCourse,
 } from '@open-edu/storage';
 
@@ -20,12 +18,11 @@ beforeEach(() => {
 });
 
 describe('resetCourse', () => {
-  it('deletes progress, badges, cards, and notes for the given courseId', async () => {
+  it('deletes progress, badges, and notes for the given courseId', async () => {
     await resetCourse('my-course');
 
     expect(deleteCourseProgress).toHaveBeenCalledWith('my-course');
     expect(deleteBadges).toHaveBeenCalledWith('my-course');
-    expect(deleteAllCards).toHaveBeenCalled();
     expect(deleteNotesByCourse).toHaveBeenCalledWith('my-course');
   });
 

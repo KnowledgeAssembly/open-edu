@@ -317,11 +317,15 @@ function AppShellInner({
 
   const handleResetConfirm = useCallback(async () => {
     if (!resetTarget) return;
-    if (resetTarget.isBundle) {
-      const bundle = bundleEntries[resetTarget.id];
-      if (bundle) await resetBundle(bundle);
-    } else {
-      await resetCourse(resetTarget.id);
+    try {
+      if (resetTarget.isBundle) {
+        const bundle = bundleEntries[resetTarget.id];
+        if (bundle) await resetBundle(bundle);
+      } else {
+        await resetCourse(resetTarget.id);
+      }
+    } catch (e) {
+      console.warn('[AppShell] Reset failed:', e);
     }
     setResetTarget(null);
     setBundleProgress({});

@@ -14,7 +14,7 @@ import { AlertTriangle } from 'lucide-react';
 export interface ResetConfirmDialogProps {
   open: boolean;
   isBundle: boolean;
-  courseTitle?: string;
+  courseTitle: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,7 +22,7 @@ export interface ResetConfirmDialogProps {
 export function ResetConfirmDialog({
   open,
   isBundle,
-  courseTitle: _courseTitle,
+  courseTitle,
   onConfirm,
   onCancel,
 }: ResetConfirmDialogProps): JSX.Element {
@@ -63,7 +63,7 @@ export function ResetConfirmDialog({
           </div>
         </DialogHeader>
         <DialogDescription id="reset-dialog-description" data-testid="reset-dialog-description">
-          {t(descriptionKey)}
+          {t(descriptionKey, { courseTitle })}
         </DialogDescription>
         <DialogFooter className="mt-6">
           <Button

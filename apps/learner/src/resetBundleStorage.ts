@@ -2,7 +2,6 @@ import type { LoadedBundle } from '@open-edu/core';
 import {
   deleteCourseProgress,
   deleteBadges,
-  deleteAllCards,
   deleteNotesByCourse,
 } from '@open-edu/storage';
 
@@ -14,8 +13,6 @@ export async function resetBundle(bundle: LoadedBundle): Promise<void> {
     operations.push(deleteBadges(mod.id));
     operations.push(deleteNotesByCourse(mod.id));
   }
-
-  operations.push(deleteAllCards());
 
   const results = await Promise.allSettled(operations);
 
