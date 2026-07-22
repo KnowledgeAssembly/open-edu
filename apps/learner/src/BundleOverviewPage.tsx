@@ -76,6 +76,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         <Button
           variant="ghost"
           size="sm"
+          data-testid="reset-button"
           className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
           onClick={() => onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true)}
         >

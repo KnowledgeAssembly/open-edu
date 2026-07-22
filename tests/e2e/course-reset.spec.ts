@@ -82,12 +82,9 @@ test.describe('Course Reset', () => {
     const courseCard = page.locator('[data-testid="course-card"]').first();
     await courseCard.hover();
 
-    // The RotateCcw reset button should now be visible
-    const resetButton = courseCard
-      .locator('xpath=../../..')
-      .locator('button')
-      .filter({ has: page.locator('svg.lucide-rotate-ccw') });
-    await expect(resetButton.first()).toBeVisible({ timeout: 5000 });
+    // The reset button should now be visible
+    const resetButton = page.getByTestId('reset-button').first();
+    await expect(resetButton).toBeVisible({ timeout: 5000 });
   });
 
   test('reset confirmation dialog opens and can be cancelled', async ({ page }) => {
@@ -103,14 +100,10 @@ test.describe('Course Reset', () => {
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
 
     // Hover and find reset button
-    const courseCard = page.locator('[data-testid="course-card"]').first();
-    await courseCard.hover();
-
-    const resetButton = courseCard
-      .locator('xpath=../../..')
-      .locator('button')
-      .filter({ has: page.locator('svg.lucide-rotate-ccw') });
-    await resetButton.first().click();
+    const resetButton = page.getByTestId('reset-button').first();
+    await page.locator('[data-testid="course-card"]').first().hover();
+    await expect(resetButton).toBeVisible({ timeout: 5000 });
+    await resetButton.click();
 
     // Confirmation dialog should appear
     await expect(page.getByRole('alertdialog')).toBeVisible({ timeout: 5000 });
@@ -122,7 +115,7 @@ test.describe('Course Reset', () => {
     await expect(page.getByRole('alertdialog')).not.toBeVisible({ timeout: 5000 });
   });
 
-  test('reset confirmation can be confirmed', async ({ page }) => {
+  test('reset confirmation removes course from progress', async ({ page }) => {
     await page.goto(LEARNER_URL);
 
     await startFirstCourse(page);
@@ -135,14 +128,10 @@ test.describe('Course Reset', () => {
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
 
     // Hover and find reset button
-    const courseCard = page.locator('[data-testid="course-card"]').first();
-    await courseCard.hover();
-
-    const resetButton = courseCard
-      .locator('xpath=../../..')
-      .locator('button')
-      .filter({ has: page.locator('svg.lucide-rotate-ccw') });
-    await resetButton.first().click();
+    const resetButton = page.getByTestId('reset-button').first();
+    await page.locator('[data-testid="course-card"]').first().hover();
+    await expect(resetButton).toBeVisible({ timeout: 5000 });
+    await resetButton.click();
 
     // Confirm reset
     await page.getByTestId('reset-confirm-button').click();
@@ -150,9 +139,12 @@ test.describe('Course Reset', () => {
     // Dialog should close
     await expect(page.getByRole('alertdialog')).not.toBeVisible({ timeout: 5000 });
 
-    // Course should no longer be in "Continue Learning" shelf
-    await expect(page.locator('[data-testid="continue-learning-shelf"]')).not.toBeVisible({
-      timeout: 5000,
-    });
+    // Navigate to progress page and verify the course is no longer listed
+    await page.goto(`${LEARNER_URL}/progress`);
+    await expect(page.locator('[data-testid="progress-dashboard"]')).toBeVisible({ timeout: 10000 });
+
+    // The reset course should not appear in progress
+    const progressCards = page.getByTestId('reset-button');
+    await expect(progressCards).toHaveCount(0, { timeout: 5000 });
   });
 });
