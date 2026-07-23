@@ -28,6 +28,7 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
+  const lastInputWasTouch = useRef(false);
   const { search, setPanelState, sendMessage } = useCompanion();
 
   const getRangeAtPoint = useCallback((x: number, y: number): Range | null => {
@@ -319,15 +320,31 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
   return (
     <div
       className={className}
-      onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
-      onMouseUp={(e) => handlePointerUp(e.clientX, e.clientY)}
+      onMouseDown={(e) => {
+        if (lastInputWasTouch.current) {
+          lastInputWasTouch.current = false;
+          return;
+        }
+        handlePointerDown(e.clientX, e.clientY);
+      }}
+      onMouseUp={(e) => {
+        if (lastInputWasTouch.current) {
+          lastInputWasTouch.current = false;
+          return;
+        }
+        handlePointerUp(e.clientX, e.clientY);
+      }}
       onTouchStart={(e: TouchEvent<HTMLDivElement>) => {
+        lastInputWasTouch.current = true;
         const touch = e.touches[0];
         if (touch) handlePointerDown(touch.clientX, touch.clientY);
       }}
       onTouchEnd={(e: TouchEvent<HTMLDivElement>) => {
         const touch = e.changedTouches[0];
         if (touch) handlePointerUp(touch.clientX, touch.clientY);
+        setTimeout(() => {
+          lastInputWasTouch.current = false;
+        }, 0);
       }}
       data-testid="word-tap-container"
     >
