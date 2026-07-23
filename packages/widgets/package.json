@@ -19,6 +19,7 @@
   "scripts": {
     "build": "tsc",
     "generate:catalog": "tsx scripts/generate-catalog.ts",
+    "generate:widget-docs": "tsx scripts/generate-widget-docs.ts",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
