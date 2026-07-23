@@ -1,3 +1,22 @@
+export interface WidgetGuideConfigField {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+}
+
+export interface WidgetGuideData {
+  oneLiner: string;
+  whatItDoes: string;
+  whenToUse: string[];
+  setupSteps: string[];
+  configFields: WidgetGuideConfigField[];
+  exampleJson: string;
+  tips: string[];
+  sidebarPosition: number;
+  relatedWidgets?: Array<{ id: string; name: string; domain: string; slug: string }>;
+}
+
 export interface WidgetCatalogEntry {
   id: string;
   name?: string;
@@ -24,6 +43,7 @@ export interface WidgetCatalogEntry {
     commonMisconceptions?: string[];
     generationHints?: string[];
   };
+  guide?: WidgetGuideData;
 }
 
 export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
@@ -80,6 +100,57 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Keep text labels short (2-4 words)',
       ],
     },
+    guide: {
+      oneLiner: 'Match pairs of items by dragging or selecting.',
+      whatItDoes: 'The Matching widget shows two columns of items. Students connect each item from the left column to its corresponding match in the right column. It supports keyboard navigation, touch, and screen readers.',
+      whenToUse: [
+        'Teaching vocabulary and definitions',
+        'Matching causes to effects',
+        'Pairing items with their categories',
+        'Connecting concepts to examples',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.matching"',
+        'Define your pairs in the config — each pair has an itemA and itemB',
+        'Add an optional description to guide students',
+        'Optionally add hints to help students who get stuck',
+      ],
+      configFields: [
+        { name: 'pairs', type: 'array of objects', required: true, description: 'The matching pairs. Each object has an itemA (string) and itemB (string).' },
+        { name: 'pairs[].itemA', type: 'string', required: true, description: 'The left-side item text.' },
+        { name: 'pairs[].itemB', type: 'string', required: true, description: 'The right-side item text.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the matching activity.' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints shown when students need help.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the activity in observe mode with correct matches pre-connected. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Fruit Color Matching",
+  "widget": "core.matching",
+  "config": {
+    "description": "Match each fruit to its color.",
+    "pairs": [
+      { "itemA": "Apple", "itemB": "Red" },
+      { "itemA": "Banana", "itemB": "Yellow" },
+      { "itemA": "Orange", "itemB": "Orange" },
+      { "itemA": "Grape", "itemB": "Purple" }
+    ],
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Keep itemA and itemB labels short (2-4 words)',
+        'Use 3-6 pairs for younger students, up to 10 for older ones',
+        'Make sure each pair has a clear, unambiguous connection',
+        'Add emoji to item labels for visual reinforcement',
+      ],
+      sidebarPosition: 2,
+      relatedWidgets: [
+        { id: 'core.drag-drop', name: 'Drag & Drop', domain: 'core', slug: 'drag-drop' },
+        { id: 'language.flashcard', name: 'Flashcard', domain: 'language', slug: 'flashcard' },
+      ],
+    },
   },
   {
     id: 'core.multiple-choice',
@@ -133,6 +204,68 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Include one clearly correct answer',
         'Write plausible distractors that reflect common errors',
         'Keep the question stem concise and unambiguous',
+      ],
+    },
+    guide: {
+      oneLiner: 'Ask questions and let students pick from a list of answers.',
+      whatItDoes: 'The Multiple Choice widget presents a question with several answer options. Students select their answer and get immediate feedback. It supports both single-question and multi-question modes with a progress indicator.',
+      whenToUse: [
+        'Checking knowledge after a lesson',
+        'Quick formative assessments',
+        'Practice quizzes with multiple questions',
+        'Pre-assessment before starting a topic',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.multiple-choice"',
+        'Create your questions — each needs a question text, options array, and correctIndex',
+        'Set interactive to true so students can answer',
+        'Optionally add explanations for each question',
+      ],
+      configFields: [
+        { name: 'questions', type: 'array of objects', required: true, description: 'List of questions. Each has question (string), options (string array), correctIndex (number), and optional explanation (string).' },
+        { name: 'questions[].question', type: 'string', required: true, description: 'The question text shown to the student.' },
+        { name: 'questions[].options', type: 'array of strings', required: true, description: 'The answer choices. Must have at least 2 options.' },
+        { name: 'questions[].correctIndex', type: 'number', required: true, description: 'The index (starting from 0) of the correct option.' },
+        { name: 'questions[].explanation', type: 'string', required: false, description: 'Shown after the student answers, explaining why the answer is correct.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows correct answers without requiring student input. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Solar System Quiz",
+  "widget": "core.multiple-choice",
+  "config": {
+    "questions": [
+      {
+        "question": "What is the largest planet in our solar system?",
+        "options": ["Earth", "Mars", "Jupiter", "Saturn"],
+        "correctIndex": 2
+      },
+      {
+        "question": "How many continents are there on Earth?",
+        "options": ["5", "6", "7", "8"],
+        "correctIndex": 2
+      },
+      {
+        "question": "What gas do plants absorb from the air?",
+        "options": ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+        "correctIndex": 1,
+        "explanation": "Plants use carbon dioxide during photosynthesis to make their food."
+      }
+    ],
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Keep questions short and focused on one concept',
+        'Write plausible but clearly incorrect distractors',
+        'Include 3-5 questions per exercise for younger students',
+        'Add explanations to reinforce learning after each answer',
+      ],
+      sidebarPosition: 1,
+      relatedWidgets: [
+        { id: 'core.fill-blank', name: 'Fill in the Blank', domain: 'core', slug: 'fill-blank' },
+        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
       ],
     },
   },
@@ -248,6 +381,53 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Space items clearly in the grid layout',
       ],
     },
+    guide: {
+      oneLiner: 'Display visual objects for students to count and identify quantities.',
+      whatItDoes: 'The Visual Counting widget shows a grid of visual objects (like emoji) and asks students to count them. Students type or select the correct number. It helps early learners build number sense through visual grouping.',
+      whenToUse: [
+        'Teaching counting and quantities to early learners',
+        'Building number recognition skills',
+        'Visual math practice for pre-readers',
+        'Reinforcing one-to-one correspondence',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.visual-counting"',
+        'Choose an emoji or character for the items',
+        'Set the count — how many items to show',
+        'Add a description like "Count the stars!"',
+      ],
+      configFields: [
+        { name: 'items', type: 'array of strings', required: true, description: 'Emoji or characters to display as countable items. Usually a single item repeated.' },
+        { name: 'count', type: 'number', required: true, description: 'How many items to show (1-12 recommended).' },
+        { name: 'text', type: 'string', required: false, description: 'Text shown after the count, e.g. "stars" displays as "5 stars".' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the counting grid.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the correct count. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Count the Stars",
+  "widget": "core.visual-counting",
+  "config": {
+    "description": "How many stars do you see?",
+    "items": ["⭐"],
+    "count": 5,
+    "text": "stars",
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use visually distinct emoji that are easy to count',
+        'Limit counts to 1-12 for young learners',
+        'Space items clearly in the grid — avoid crowding',
+        'Start with small counts and gradually increase',
+      ],
+      sidebarPosition: 3,
+      relatedWidgets: [
+        { id: 'math.number-line', name: 'Number Line', domain: 'math', slug: 'number-line' },
+        { id: 'math.grid-area', name: 'Grid Area', domain: 'math', slug: 'grid-area' },
+      ],
+    },
   },
   {
     id: 'core.drag-drop',
@@ -304,6 +484,67 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Make item labels unambiguous',
         'Ensure target zone labels have distinct meanings',
         'Use 3-6 draggable items for manageable complexity',
+      ],
+    },
+    guide: {
+      oneLiner: 'Drag and drop items into the correct categories or zones.',
+      whatItDoes: 'The Drag & Drop widget lets students sort items into target zones by dragging them with mouse, touch, or keyboard. Each item belongs in one target zone based on the expected positions you define. It works on touch screens, with a mouse, or via keyboard shortcuts.',
+      whenToUse: [
+        'Sorting items into categories',
+        'Classifying animals, objects, or concepts',
+        'Grouping by shared attributes',
+        'Hands-on sorting activities',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.drag-drop"',
+        'Define your items — each needs an id, label, and optional emoji',
+        'Define your target zones — each needs an id and label',
+        'Set expectedPositions to map each item id to its correct target id',
+      ],
+      configFields: [
+        { name: 'items', type: 'array of objects', required: true, description: 'The draggable items. Each has id (string), label (string), and optional emoji (string).' },
+        { name: 'targets', type: 'array of objects', required: true, description: 'The drop zones. Each has id (string) and label (string).' },
+        { name: 'expectedPositions', type: 'object', required: true, description: 'Maps item ids to target ids. e.g. `{"fish": "ocean", "bird": "sky"}`.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows items pre-placed in correct zones. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Habitat Sort",
+  "widget": "core.drag-drop",
+  "config": {
+    "description": "Sort each animal into the correct habitat.",
+    "items": [
+      { "id": "fish", "label": "Fish", "emoji": "🐟" },
+      { "id": "bird", "label": "Bird", "emoji": "🐦" },
+      { "id": "whale", "label": "Whale", "emoji": "🐋" },
+      { "id": "eagle", "label": "Eagle", "emoji": "🦅" }
+    ],
+    "targets": [
+      { "id": "sky", "label": "Sky" },
+      { "id": "ocean", "label": "Ocean" }
+    ],
+    "expectedPositions": {
+      "fish": "ocean",
+      "bird": "sky",
+      "whale": "ocean",
+      "eagle": "sky"
+    },
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use 3-6 items with 2-4 target zones for manageable complexity',
+        'Make item labels unambiguous so placement is clear',
+        'Ensure target zone labels have distinct meanings',
+        'Add emoji to items for visual learners and non-readers',
+      ],
+      sidebarPosition: 4,
+      relatedWidgets: [
+        { id: 'core.matching', name: 'Matching', domain: 'core', slug: 'matching' },
+        { id: 'core.sequencing', name: 'Sequencing', domain: 'core', slug: 'sequencing' },
       ],
     },
   },
@@ -365,6 +606,57 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Keep total steps between 3-8 for manageable complexity',
       ],
     },
+    guide: {
+      oneLiner: 'Arrange items in the correct order by dragging or selecting.',
+      whatItDoes: 'The Sequencing widget presents a scrambled list of items that students must arrange in the correct order. They drag items into position or use keyboard shortcuts. Common uses include ordering story events, life cycle stages, math steps, or historical events.',
+      whenToUse: [
+        'Teaching chronological order',
+        'Story sequencing activities',
+        'Step-by-step process understanding',
+        'Life cycle and growth ordering',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.sequencing"',
+        'Define your items — each needs an id, label, and optional emoji',
+        'Set correctOrder — an array of item ids in the right order',
+        'Optionally add hints to help students',
+      ],
+      configFields: [
+        { name: 'items', type: 'array of objects', required: true, description: 'The items to sequence. Each has id (string), label (string), and optional emoji (string).' },
+        { name: 'correctOrder', type: 'array of strings', required: true, description: 'The correct sequence of item ids, e.g. ["seed", "sprout", "plant", "flower"].' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows items in correct order. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Life Cycle Sequencing",
+  "widget": "core.sequencing",
+  "config": {
+    "description": "Put the life cycle steps in the correct order.",
+    "items": [
+      { "id": "seed", "label": "Seed", "emoji": "🌱" },
+      { "id": "sprout", "label": "Sprout", "emoji": "🌿" },
+      { "id": "plant", "label": "Plant", "emoji": "🌻" },
+      { "id": "flower", "label": "Flower", "emoji": "🌸" }
+    ],
+    "correctOrder": ["seed", "sprout", "plant", "flower"],
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Ensure there is a clear, unambiguous correct order',
+        'Avoid steps that could legitimately be swapped',
+        'Keep total items between 3-8 for manageable complexity',
+        'Add emoji icons to items for visual recognition',
+      ],
+      sidebarPosition: 5,
+      relatedWidgets: [
+        { id: 'core.drag-drop', name: 'Drag & Drop', domain: 'core', slug: 'drag-drop' },
+        { id: 'core.timeline', name: 'Timeline', domain: 'core', slug: 'timeline' },
+      ],
+    },
   },
   {
     id: 'core.fill-blank',
@@ -423,6 +715,58 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Place blanks on key concepts, not filler words',
         'Provide 3-5 options per blank in select mode',
         'Ensure the sentence is grammatically complete with the answer filled in',
+      ],
+    },
+    guide: {
+      oneLiner: 'Complete sentences by filling in missing words or numbers.',
+      whatItDoes: 'The Fill in the Blank widget shows a sentence or paragraph with gaps. Students fill in the blanks by selecting from a dropdown of options or typing their answer. It supports both select mode (choose from options) and type mode (write the answer).',
+      whenToUse: [
+        'Vocabulary practice and word recall',
+        'Cloze reading comprehension exercises',
+        'Math equation completion',
+        'Grammar exercises (verb tenses, prepositions)',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.fill-blank"',
+        'Write your template text with ___ where blanks go',
+        'Define each blank with an id, position, and correct answer',
+        'Choose select mode (dropdown) or type mode (free text)',
+      ],
+      configFields: [
+        { name: 'template', type: 'string', required: true, description: 'The text with ___ placeholders for blanks. e.g. "Water ___ from the ground."' },
+        { name: 'blanks', type: 'array of objects', required: true, description: 'Each blank definition. Has id (string), position (number), correctAnswer (string or number), and optional options array for select mode.' },
+        { name: 'mode', type: 'string', required: false, description: '"select" for dropdown choices (default) or "type" for free text input.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows filled blanks. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Water Cycle Sentences",
+  "widget": "core.fill-blank",
+  "config": {
+    "description": "Complete the sentences about the water cycle.",
+    "template": "Water ___ from the ground into the air. It forms ___ in the sky. Then it falls back down as ___.",
+    "blanks": [
+      { "id": "b1", "position": 0, "correctAnswer": "evaporates", "options": ["evaporates", "freezes", "sinks"] },
+      { "id": "b2", "position": 1, "correctAnswer": "clouds", "options": ["rocks", "clouds", "waves"] },
+      { "id": "b3", "position": 2, "correctAnswer": "rain", "options": ["rain", "sand", "wind"] }
+    ],
+    "mode": "select",
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Place blanks on key vocabulary or concepts, not filler words',
+        'Provide 3-5 options per blank in select mode',
+        'Make sure the sentence reads correctly when the right answer is filled in',
+        'Use type mode only for older students or simple single-word answers',
+      ],
+      sidebarPosition: 6,
+      relatedWidgets: [
+        { id: 'core.multiple-choice', name: 'Multiple Choice', domain: 'core', slug: 'multiple-choice' },
+        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
       ],
     },
   },
@@ -487,6 +831,63 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Make distractors plausible but clearly contradicted by the text',
       ],
     },
+    guide: {
+      oneLiner: 'Present a story or passage followed by comprehension questions.',
+      whatItDoes: 'The Story Question widget shows a short story or reading passage, followed by multiple-choice comprehension questions. Students read the passage and answer questions about key details, inferences, and main ideas.',
+      whenToUse: [
+        'Reading comprehension practice',
+        'Assessing understanding of a passage',
+        'Making inferences from text',
+        'Identifying main ideas and supporting details',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.story-question"',
+        'Write your scenario — a short story or passage',
+        'Create 2-4 comprehension questions with options and correctIndex',
+        'Set interactive to true',
+      ],
+      configFields: [
+        { name: 'scenario', type: 'string', required: true, description: 'The story or reading passage text. Keep under 150 words for best results.' },
+        { name: 'questions', type: 'array of objects', required: true, description: 'List of questions. Each has question (string), options (string array), and correctIndex (number).' },
+        { name: 'questions[].question', type: 'string', required: true, description: 'A comprehension question about the story.' },
+        { name: 'questions[].options', type: 'array of strings', required: true, description: 'Answer choices. Must have at least 2.' },
+        { name: 'questions[].correctIndex', type: 'number', required: true, description: 'The index (starting from 0) of the correct option.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows answers without requiring input. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Maya's Sunflower",
+  "widget": "core.story-question",
+  "config": {
+    "scenario": "Maya planted a sunflower seed in a small pot. She placed it by the window and watered it every morning. After one week, a tiny green sprout appeared. Maya was excited! She continued watering it and gave it plant food. After two months, the sunflower grew taller than Maya. It had a big yellow flower on top that followed the sun across the sky.",
+    "questions": [
+      {
+        "question": "Where did Maya place the pot?",
+        "options": ["In the garden", "By the window", "On the roof", "In the closet"],
+        "correctIndex": 1
+      },
+      {
+        "question": "How often did Maya water the seed?",
+        "options": ["Every morning", "Once a week", "Every day after school", "Only on weekends"],
+        "correctIndex": 0
+      }
+    ],
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Keep stories under 150 words for focused comprehension',
+        'Include a clear beginning, middle, and end',
+        'Make distractors plausible but clearly contradicted by the text',
+        'Use 2-4 questions per story for younger students',
+      ],
+      sidebarPosition: 7,
+      relatedWidgets: [
+        { id: 'core.multiple-choice', name: 'Multiple Choice', domain: 'core', slug: 'multiple-choice' },
+        { id: 'core.fill-blank', name: 'Fill in the Blank', domain: 'core', slug: 'fill-blank' },
+      ],
+    },
   },
   {
     id: 'core.real-world',
@@ -544,6 +945,49 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Use relatable, age-appropriate everyday scenarios',
         'Include an optional expectedAnswer for comparison',
         'Keep the scenario brief and concrete',
+      ],
+    },
+    guide: {
+      oneLiner: 'Apply learning to real-world scenarios with open-ended reflection.',
+      whatItDoes: 'The Real World widget presents a practical scenario and asks students to apply what they learned. Students write their answer and explanation in a text area. It is designed for open-ended thinking rather than right/wrong answers.',
+      whenToUse: [
+        'Applying math concepts to everyday situations',
+        'Connecting science to real-world examples',
+        'Reflective writing after a lesson',
+        'Problem-solving with real-life context',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.real-world"',
+        'Write a relatable, age-appropriate scenario',
+        'Add a task description — what should the student do?',
+        'Optionally provide an expected answer for comparison',
+      ],
+      configFields: [
+        { name: 'scenario', type: 'string', required: true, description: 'A real-world situation the student should think about.' },
+        { name: 'taskDescription', type: 'string', required: false, description: 'Specific instructions for what the student should do or answer.' },
+        { name: 'description', type: 'string', required: false, description: 'Additional context or instructions.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the scenario in read-only mode. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Baking Cookies",
+  "widget": "core.real-world",
+  "config": {
+    "scenario": "You are helping to bake cookies for a school event. The recipe calls for 2 cups of flour, 1 cup of sugar, and 1 teaspoon of vanilla. You need to triple the recipe to make enough for everyone.",
+    "taskDescription": "How many cups of flour will you need in total? Write your answer and explain your thinking.",
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use relatable, age-appropriate everyday scenarios',
+        'Keep the scenario brief and concrete',
+        'Encourage students to explain their reasoning, not just give an answer',
+        'This widget works well at the end of a lesson for application',
+      ],
+      sidebarPosition: 8,
+      relatedWidgets: [
+        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
       ],
     },
   },
@@ -604,6 +1048,60 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Use small, clear datasets with 3-6 items',
         'Ensure bar values are visually distinguishable',
         'Use relevant emoji for pictograph mode',
+      ],
+    },
+    guide: {
+      oneLiner: 'Display bar charts and graphs for students to read and interpret.',
+      whatItDoes: 'The Chart Reader widget shows a bar chart or pictograph that students read to answer questions. It displays clear, color-coded data visualizations with labels and values. Students interpret the chart and answer what they see.',
+      whenToUse: [
+        'Teaching data interpretation and graph reading',
+        'Comparing quantities visually',
+        'Introducing bar charts and pictographs',
+        'Math lessons on data handling',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.chart-reader"',
+        'Provide your data as label-value pairs',
+        'Choose a chart type: bar or pictograph',
+        'Add a description or question about the chart',
+      ],
+      configFields: [
+        { name: 'data', type: 'array of objects', required: true, description: 'Chart data. Each entry has label (string) and value (number).' },
+        { name: 'type', type: 'string', required: false, description: 'Chart type: "bar" (default) or a pictograph variant.' },
+        { name: 'title', type: 'string', required: false, description: 'A title displayed above the chart.' },
+        { name: 'description', type: 'string', required: false, description: 'Question or instructions about the chart.' },
+        { name: 'showValues', type: 'boolean', required: false, description: 'Show numeric values on the chart bars. Defaults to true.' },
+        { name: 'correctLabel', type: 'string', required: false, description: 'The label of the correct answer for quiz mode.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the chart for observation only. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Favorite Sports",
+  "widget": "core.chart-reader",
+  "config": {
+    "description": "Which sport is the most popular based on the chart?",
+    "type": "bar",
+    "data": [
+      { "label": "Cricket", "value": 12 },
+      { "label": "Football", "value": 8 },
+      { "label": "Hockey", "value": 5 }
+    ],
+    "title": "Favorite Sports",
+    "showValues": true,
+    "correctLabel": "Cricket",
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use 3-6 data items with clearly distinguishable values',
+        'Keep labels short and readable',
+        'Use values that are easy to compare visually',
+        'Add a title to give context to the chart',
+      ],
+      sidebarPosition: 9,
+      relatedWidgets: [
+        { id: 'math.grid-area', name: 'Grid Area', domain: 'math', slug: 'grid-area' },
       ],
     },
   },
@@ -667,6 +1165,55 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Always include the fraction notation alongside the visual model',
       ],
     },
+    guide: {
+      oneLiner: 'Visualize and interact with fractions using circle or bar models.',
+      whatItDoes: 'The Fraction Visual widget shows fractions as shaded parts of a circle or bar. Students can see the relationship between numerator and denominator, compare fractions visually, and practice shading the correct portion.',
+      whenToUse: [
+        'Introducing fractions to early learners',
+        'Visualizing equivalent fractions',
+        'Comparing fraction sizes',
+        'Building intuitive understanding of numerator and denominator',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.fraction-visual"',
+        'Set the numerator and denominator',
+        'Choose circle or bar mode',
+        'Set interactive to true if students should shade the fraction themselves',
+      ],
+      configFields: [
+        { name: 'numerator', type: 'number', required: true, description: 'The top number in the fraction (parts shaded).' },
+        { name: 'denominator', type: 'number', required: true, description: 'The bottom number in the fraction (total parts). Keep to 12 or less.' },
+        { name: 'mode', type: 'string', required: false, description: '"circle" (default) or "bar" representation.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
+        { name: 'showLabel', type: 'boolean', required: false, description: 'Show the fraction label as text. Defaults to false.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When true, students shade the fraction themselves. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Fraction Shading",
+  "widget": "math.fraction-visual",
+  "config": {
+    "description": "Shade 3/4 of the circle.",
+    "numerator": 3,
+    "denominator": 4,
+    "mode": "circle",
+    "showLabel": true,
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Limit denominator to 12 or less for clear visualization',
+        'Use circle mode for fractions under 1 whole',
+        'Use bar mode for comparing multiple fractions',
+        'Always show the fraction label for reinforcement',
+      ],
+      sidebarPosition: 1,
+      relatedWidgets: [
+        { id: 'math.number-line', name: 'Number Line', domain: 'math', slug: 'number-line' },
+        { id: 'math.grid-area', name: 'Grid Area', domain: 'math', slug: 'grid-area' },
+      ],
+    },
   },
   {
     id: 'math.place-value-chart',
@@ -725,6 +1272,54 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Use numbers up to 999 for early learners',
         'Include visual separators between columns',
         'Show both expanded and standard forms',
+      ],
+    },
+    guide: {
+      oneLiner: 'Build and explore numbers using an interactive place value chart.',
+      whatItDoes: 'The Place Value Chart widget helps students understand how digits represent different values based on their position. Students drag digits into columns (ones, tens, hundreds, etc.) to build numbers. It supports the Indian number system with lakh and crore places.',
+      whenToUse: [
+        'Teaching place value concepts',
+        'Building multi-digit numbers',
+        'Understanding expanded form',
+        'Comparing numbers using place value',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.place-value-chart"',
+        'Set the target number students should build',
+        'Provide the digits for students to drag',
+        'Choose the max place value level',
+      ],
+      configFields: [
+        { name: 'targetNumber', type: 'number', required: true, description: 'The number students should build on the chart.' },
+        { name: 'draggableDigits', type: 'array of numbers', required: true, description: 'The digits students can use, e.g. [5, 4, 3] for the number 543.' },
+        { name: 'maxPlaces', type: 'string', required: false, description: 'Highest place value shown, e.g. "hundred", "thousand", "lakh".' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
+        { name: 'showLabels', type: 'boolean', required: false, description: 'Show place value labels. Defaults to true.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the completed chart. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Place Value Practice",
+  "widget": "math.place-value-chart",
+  "config": {
+    "description": "Build the number 543 by placing digits in the correct columns.",
+    "maxPlaces": "hundred",
+    "targetNumber": 543,
+    "draggableDigits": [5, 4, 3],
+    "showLabels": true,
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use numbers up to 999 for early learners',
+        'Include visual separators between columns for clarity',
+        'Explain that zero acts as a placeholder',
+        'Start with 2-digit numbers before introducing larger ones',
+      ],
+      sidebarPosition: 2,
+      relatedWidgets: [
+        { id: 'math.number-line', name: 'Number Line', domain: 'math', slug: 'number-line' },
       ],
     },
   },
@@ -787,6 +1382,56 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Provide pre-highlighted shapes for observe/learn mode',
       ],
     },
+    guide: {
+      oneLiner: 'Calculate area by counting and highlighting squares on a grid.',
+      whatItDoes: 'The Grid Area widget shows a rectangular grid where students count or highlight squares to understand area. Students can click individual cells, see the total count, and compare areas of different shapes.',
+      whenToUse: [
+        'Introducing the concept of area',
+        'Teaching that area = rows × columns',
+        'Comparing areas of different shapes',
+        'Distinguishing area from perimeter',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.grid-area"',
+        'Set the number of rows and columns',
+        'Choose area mode for square counting',
+        'Set maxHighlights to limit how many cells can be selected',
+      ],
+      configFields: [
+        { name: 'rows', type: 'number', required: true, description: 'Number of rows in the grid (keep under 10).' },
+        { name: 'cols', type: 'number', required: true, description: 'Number of columns in the grid (keep under 10).' },
+        { name: 'mode', type: 'string', required: false, description: 'Activity mode. "area" is the default for counting squares.' },
+        { name: 'maxHighlights', type: 'number', required: false, description: 'Maximum number of cells a student can highlight.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
+        { name: 'showCount', type: 'boolean', required: false, description: 'Show a running count of highlighted cells. Defaults to true.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a pre-filled grid. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Grid Area Practice",
+  "widget": "math.grid-area",
+  "config": {
+    "description": "Highlight 6 cells to show an area of 6 square units.",
+    "rows": 5,
+    "cols": 5,
+    "mode": "area",
+    "maxHighlights": 25,
+    "showCount": true,
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Keep grids under 10×10 for visual clarity',
+        'Use maxHighlights to limit selections when targeting a specific area',
+        'Explain that each square is one square unit',
+        'Show both the rows × columns formula and the counting method',
+      ],
+      sidebarPosition: 3,
+      relatedWidgets: [
+        { id: 'math.fraction-visual', name: 'Fraction Visual', domain: 'math', slug: 'fraction-visual' },
+      ],
+    },
   },
   {
     id: 'math.clock-time',
@@ -841,6 +1486,56 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Start with hour-only times, then add half-hours',
         'Use clear, large clock faces',
         'Include both analog and digital representations',
+      ],
+    },
+    guide: {
+      oneLiner: 'Read and set time on an interactive analog clock with digital display.',
+      whatItDoes: 'The Clock Time widget shows an analog clock face. Students can read the current time, set the hands to a specific time, or see both analog and digital time together. It supports hour, half-hour, and minute-level precision.',
+      whenToUse: [
+        'Teaching how to read an analog clock',
+        'Practicing time to the hour and half-hour',
+        'Converting between analog and digital time',
+        'Understanding AM and PM',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.clock-time"',
+        'Set the starting time (hour and minute)',
+        'Choose set mode for interactive practice or display mode',
+        'Optionally set a target time for students to match',
+      ],
+      configFields: [
+        { name: 'hour', type: 'number', required: true, description: 'The starting hour (1-12).' },
+        { name: 'minute', type: 'number', required: true, description: 'The starting minute (0-59).' },
+        { name: 'mode', type: 'string', required: false, description: '"set" for interactive time-setting, "display" for reading only.' },
+        { name: 'showDigital', type: 'boolean', required: false, description: 'Show the digital time alongside the analog clock. Defaults to true.' },
+        { name: 'targetTime', type: 'object', required: false, description: 'Target time for students to match. Has hour (number) and minute (number).' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the clock in display mode. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Set the Clock",
+  "widget": "math.clock-time",
+  "config": {
+    "description": "Set the clock to show 7:30.",
+    "hour": 3,
+    "minute": 0,
+    "mode": "set",
+    "showDigital": true,
+    "targetTime": { "hour": 7, "minute": 30 },
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Start with hour-only times (e.g. 3:00) before adding minutes',
+        'Use clear, large clock faces for young learners',
+        'Show both analog and digital representations together',
+        'Explain the difference between the hour and minute hands',
+      ],
+      sidebarPosition: 4,
+      relatedWidgets: [
+        { id: 'math.measurement-scale', name: 'Measurement Scale', domain: 'math', slug: 'measurement-scale' },
       ],
     },
   },
@@ -903,6 +1598,62 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Show both metric and imperial options',
       ],
     },
+    guide: {
+      oneLiner: 'Read and set measurements on interactive rulers, thermometers, and scales.',
+      whatItDoes: 'The Measurement Scale widget shows a labeled scale — like a ruler, thermometer, or measuring jug. Students read the current measurement or set it to a target value. It supports various units and scale types.',
+      whenToUse: [
+        'Teaching how to read a ruler or thermometer',
+        'Measuring length, temperature, or volume',
+        'Comparing measurements',
+        'Practicing estimation before precise measurement',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.measurement-scale"',
+        'Choose the scale type: ruler, thermometer, or measuring jug',
+        'Set the min, max, and step values',
+        'Set a target value for students to match',
+      ],
+      configFields: [
+        { name: 'type', type: 'string', required: true, description: 'Scale type: "ruler", "thermometer", or "jug".' },
+        { name: 'min', type: 'number', required: true, description: 'Minimum value on the scale.' },
+        { name: 'max', type: 'number', required: true, description: 'Maximum value on the scale.' },
+        { name: 'step', type: 'number', required: true, description: 'The increment between markings. Use 1 for whole numbers.' },
+        { name: 'unit', type: 'string', required: false, description: 'Unit label, e.g. "cm", "°C", "ml".' },
+        { name: 'targetValue', type: 'number', required: false, description: 'The target measurement students should set.' },
+        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
+        { name: 'showReading', type: 'boolean', required: false, description: 'Show the numeric reading. Defaults to true.' },
+        { name: 'showLabels', type: 'boolean', required: false, description: 'Show scale labels. Defaults to true.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a static measurement. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Thermometer Reading",
+  "widget": "math.measurement-scale",
+  "config": {
+    "description": "Set the thermometer to 25 degrees Celsius.",
+    "type": "thermometer",
+    "min": -10,
+    "max": 50,
+    "step": 1,
+    "unit": "°C",
+    "targetValue": 25,
+    "showReading": true,
+    "showLabels": true,
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Use whole-number measurements for early learners',
+        'Include both metric and imperial options when relevant',
+        'Explain where to start measuring from (e.g. the 0 mark, not the 1 mark)',
+        'Show labeled markings clearly for readability',
+      ],
+      sidebarPosition: 5,
+      relatedWidgets: [
+        { id: 'math.clock-time', name: 'Clock Time', domain: 'math', slug: 'clock-time' },
+      ],
+    },
   },
   {
     id: 'math.number-line',
@@ -963,6 +1714,67 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Include both whole numbers and simple fractions',
       ],
     },
+    guide: {
+      oneLiner: 'Explore numbers, fractions, and operations on an interactive number line.',
+      whatItDoes: 'The Number Line widget displays an interactive number line where students can place values, compare positions, and explore number relationships. It supports integers, decimals, and fractions with customizable ranges and markers.',
+      whenToUse: [
+        'Teaching number sense and counting',
+        'Visualizing addition and subtraction',
+        'Comparing numbers and fractions',
+        'Understanding negative numbers',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "math.number-line"',
+        'Set the min and max values for the line',
+        'Set the step size between marks',
+        'Optionally add a target value or markers',
+      ],
+      configFields: [
+        { name: 'min', type: 'number', required: true, description: 'The lowest number on the line.' },
+        { name: 'max', type: 'number', required: true, description: 'The highest number on the line.' },
+        { name: 'step', type: 'number', required: true, description: 'The spacing between marks. Use 1 for integers.' },
+        { name: 'target', type: 'number', required: false, description: 'A specific value students should locate on the line.' },
+        { name: 'mode', type: 'string', required: false, description: '"integers" (default) or "decimals" for fractional values.' },
+        { name: 'markers', type: 'array of objects', required: false, description: 'Highlighted markers. Each has value (number), label (string), and optional color (CSS variable).' },
+        { name: 'showLabels', type: 'boolean', required: false, description: 'Show number labels on the line. Defaults to true.' },
+        { name: 'showGrid', type: 'boolean', required: false, description: 'Show vertical grid lines at marks. Defaults to false.' },
+        { name: 'tolerance', type: 'number', required: false, description: 'How close the student needs to be to the target. Defaults to 0.5.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a static number line. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Number Line Explorer",
+  "widget": "math.number-line",
+  "config": {
+    "min": -10,
+    "max": 10,
+    "step": 1,
+    "target": 3.5,
+    "markers": [
+      { "value": -5, "label": "-5" },
+      { "value": 0, "label": "0" },
+      { "value": 7, "label": "7" }
+    ],
+    "showLabels": true,
+    "showGrid": true,
+    "mode": "decimals",
+    "tolerance": 0.5,
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Start with positive integers only for early learners',
+        'Add markers to highlight important reference points',
+        'Use decimals mode only after students master integers',
+        'Clear tick marks help students count between labeled numbers',
+      ],
+      sidebarPosition: 6,
+      relatedWidgets: [
+        { id: 'math.fraction-visual', name: 'Fraction Visual', domain: 'math', slug: 'fraction-visual' },
+        { id: 'math.place-value-chart', name: 'Place Value Chart', domain: 'math', slug: 'place-value-chart' },
+      ],
+    },
   },
   {
     id: 'core.callout',
@@ -993,6 +1805,48 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       learningObjectives: ['Read and absorb key information'],
       commonMisconceptions: [],
       generationHints: ['Keep text concise and scannable', 'Use bold for emphasis'],
+    },
+    guide: {
+      oneLiner: 'Highlight key information with a styled callout card.',
+      whatItDoes: 'The Callout widget displays important information in a visually distinct card. You can choose from different styles — tip, info, warning, or success — and add an optional icon. It is a passive display widget, not interactive.',
+      whenToUse: [
+        'Highlighting key takeaways or important notes',
+        'Displaying fun facts or "Did you know?" boxes',
+        'Showing safety warnings or reminders',
+        'Adding emphasis to critical information',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.callout"',
+        'Choose a type: tip, info, warning, or success',
+        'Write a title and the content text',
+        'Optionally add an emoji icon',
+      ],
+      configFields: [
+        { name: 'type', type: 'string', required: true, description: 'The callout style: "tip", "info", "warning", or "success".' },
+        { name: 'title', type: 'string', required: false, description: 'A heading for the callout card.' },
+        { name: 'content', type: 'string', required: true, description: 'The main text content of the callout.' },
+        { name: 'icon', type: 'string', required: false, description: 'An emoji icon to display with the callout, e.g. "💡" for tips.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Did you know?",
+  "widget": "core.callout",
+  "config": {
+    "type": "tip",
+    "title": "Did you know?",
+    "content": "Plants make their own food using sunlight, water, and carbon dioxide through a process called photosynthesis.",
+    "icon": "🌿"
+  }
+}`,
+      tips: [
+        'Keep content concise — 1-3 sentences is ideal',
+        'Use the right type for your message: tip for helpful hints, warning for important cautions',
+        'Emoji icons add visual appeal but are optional',
+        'Callouts work well between other activities to break up the lesson flow',
+      ],
+      sidebarPosition: 10,
+      relatedWidgets: [],
     },
   },
   {
@@ -1048,6 +1902,59 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Limit differences to 3-5 for manageability',
       ],
     },
+    guide: {
+      oneLiner: 'Compare two images side by side with an interactive slider.',
+      whatItDoes: 'The Image Compare widget places two images side by side (or overlapped with a draggable slider) so students can compare differences and similarities. It supports a slider mode for before/after comparisons and a side-by-side mode.',
+      whenToUse: [
+        'Comparing healthy vs diseased plants or organisms',
+        'Before and after science experiments',
+        'Visual differences and similarities activities',
+        'Art comparison and analysis',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.image-compare"',
+        'Provide paths to your left and right images',
+        'Add labels and alt text for each image',
+        'Choose slider or side-by-side mode',
+      ],
+      configFields: [
+        { name: 'leftImage', type: 'string', required: true, description: 'Path to the left (or top) image file.' },
+        { name: 'rightImage', type: 'string', required: true, description: 'Path to the right (or bottom) image file.' },
+        { name: 'leftLabel', type: 'string', required: false, description: 'Label shown under the left image.' },
+        { name: 'rightLabel', type: 'string', required: false, description: 'Label shown under the right image.' },
+        { name: 'mode', type: 'string', required: false, description: '"slider" for draggable overlay or "side-by-side". Defaults to "slider".' },
+        { name: 'altText', type: 'object', required: false, description: 'Accessibility descriptions: `{ left: string, right: string }`.' },
+        { name: 'caption', type: 'string', required: false, description: 'Caption text shown below both images.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Leaf Comparison",
+  "widget": "core.image-compare",
+  "config": {
+    "leftImage": "assets/images/healthy-leaf.png",
+    "rightImage": "assets/images/diseased-leaf.png",
+    "leftLabel": "Healthy Leaf",
+    "rightLabel": "Diseased Leaf",
+    "mode": "slider",
+    "altText": {
+      "left": "A healthy green leaf",
+      "right": "A diseased leaf with brown spots"
+    },
+    "caption": "Compare a healthy leaf with a diseased one"
+  }
+}`,
+      tips: [
+        'Use clear, high-contrast images for best comparison results',
+        'Always provide alt text for accessibility',
+        'The slider mode works best for before/after comparisons',
+        'Image files should be placed in your lesson package directory',
+      ],
+      sidebarPosition: 11,
+      relatedWidgets: [
+        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
+      ],
+    },
   },
   {
     id: 'core.hotspot',
@@ -1096,6 +2003,59 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       generationHints: [
         'Define clear, non-overlapping hotspot regions',
         'Use descriptive labels for each region',
+      ],
+    },
+    guide: {
+      oneLiner: 'Tap or click specific regions of an image to answer questions.',
+      whatItDoes: 'The Hotspot widget overlays clickable regions on an image. Students tap the correct area to answer a question — like "Find Maharashtra on this map." It supports single-select and multi-select modes with visual feedback for correct and incorrect taps.',
+      whenToUse: [
+        'Identifying locations on maps',
+        'Pointing out parts of a diagram or image',
+        'Geography and anatomy exercises',
+        'Interactive image exploration',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.hotspot"',
+        'Provide an image path and alt text',
+        'Define hotspot regions — each needs id, x/y position (0-100), radius, and label',
+        'Mark the correct hotspot with correct: true',
+      ],
+      configFields: [
+        { name: 'image', type: 'string', required: true, description: 'Path to the image file.' },
+        { name: 'altText', type: 'string', required: true, description: 'Description of the image for screen readers.' },
+        { name: 'hotspots', type: 'array of objects', required: true, description: 'Clickable regions. Each has id (string), x (number 0-100), y (number 0-100), radius (number, default 5), label (string), correct (boolean), and optional description (string).' },
+        { name: 'mode', type: 'string', required: false, description: '"single" for one correct hotspot (default) or "multiple" for selecting several.' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints to help students find the right region.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, highlights hotspots for observation. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Identify Maharashtra",
+  "widget": "core.hotspot",
+  "config": {
+    "image": "assets/images/india-map.png",
+    "altText": "Map of India with states highlighted",
+    "hotspots": [
+      { "id": "mh", "x": 45, "y": 55, "radius": 8, "label": "Maharashtra", "correct": true, "description": "Capital: Mumbai" },
+      { "id": "ka", "x": 42, "y": 65, "radius": 8, "label": "Karnataka", "correct": false },
+      { "id": "dl", "x": 48, "y": 30, "radius": 8, "label": "Delhi", "correct": false }
+    ],
+    "mode": "single",
+    "interactive": true,
+    "hints": ["Look for the western coastal state"]
+  }
+}`,
+      tips: [
+        'Define clear, non-overlapping hotspot regions',
+        'Use x/y values between 0-100 for responsive positioning',
+        'Provide descriptive labels and alt text for each region',
+        'Add hints for students who struggle to find the right area',
+      ],
+      sidebarPosition: 12,
+      relatedWidgets: [
+        { id: 'science.image-label', name: 'Image Label', domain: 'science', slug: 'image-label' },
+        { id: 'science.label-diagram', name: 'Label Diagram', domain: 'science', slug: 'label-diagram' },
       ],
     },
   },
@@ -1149,6 +2109,60 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       commonMisconceptions: ['Confusing earlier and later', 'Ignoring date labels'],
       generationHints: ['Use clear date labels', 'Space events evenly on the line'],
     },
+    guide: {
+      oneLiner: 'Display events in chronological order on an interactive timeline.',
+      whatItDoes: 'The Timeline widget arranges events along a visual timeline. Students can observe events in order or interactively arrange them. It supports horizontal, vertical, and compact layouts with optional dates, images, and descriptions.',
+      whenToUse: [
+        'Teaching historical sequences and chronology',
+        'Showing life cycles and growth stages',
+        'Displaying project milestones or steps',
+        'Visualizing process timelines in science',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.timeline"',
+        'Define your events — each needs an id and title',
+        'Optionally add dates, descriptions, icons, and images',
+        'Choose a layout: horizontal, vertical, or compact',
+      ],
+      configFields: [
+        { name: 'events', type: 'array of objects', required: true, description: 'Timeline events. Each has id (string), title (string), and optional date (string), icon (string), description (string), image (string).' },
+        { name: 'title', type: 'string', required: false, description: 'An overall title for the timeline.' },
+        { name: 'layout', type: 'string', required: false, description: '"horizontal", "vertical" (default), or "compact".' },
+        { name: 'showDates', type: 'boolean', required: false, description: 'Show dates on the timeline. Defaults to true.' },
+        { name: 'showImages', type: 'boolean', required: false, description: 'Show images on the timeline. Defaults to false.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows events for observation only. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "The Water Cycle",
+  "widget": "core.timeline",
+  "config": {
+    "title": "The Water Cycle",
+    "events": [
+      { "id": "evap", "title": "Evaporation", "icon": "☀️", "description": "Water heats up and rises as vapor" },
+      { "id": "cond", "title": "Condensation", "icon": "☁️", "description": "Water vapor cools and forms clouds" },
+      { "id": "rain", "title": "Rain", "icon": "🌧️", "description": "Water falls as precipitation" },
+      { "id": "collect", "title": "Collection", "icon": "🌊", "description": "Water collects in oceans and lakes" }
+    ],
+    "layout": "vertical",
+    "showDates": false,
+    "showImages": false,
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Use clear, descriptive event titles',
+        'Add emoji icons to make events visually distinct',
+        'Keep descriptions short — 1 sentence or less',
+        'For interactive mode, make sure the correct order is unambiguous',
+      ],
+      sidebarPosition: 13,
+      relatedWidgets: [
+        { id: 'core.sequencing', name: 'Sequencing', domain: 'core', slug: 'sequencing' },
+        { id: 'science.process-diagram', name: 'Process Diagram', domain: 'science', slug: 'process-diagram' },
+      ],
+    },
   },
   {
     id: 'science.label-diagram',
@@ -1197,6 +2211,58 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       generationHints: [
         'Use clear, high-contrast diagrams',
         'Provide 4-8 labels for manageable complexity',
+      ],
+    },
+    guide: {
+      oneLiner: 'Label parts of a scientific diagram by dragging labels to the correct spots.',
+      whatItDoes: 'The Label Diagram widget shows a scientific diagram with draggable labels. Students drag each label from a word bank to the correct position on the diagram. Common uses include labeling plant parts, human anatomy, or machine components.',
+      whenToUse: [
+        'Teaching anatomy and biology diagrams',
+        'Labeling parts of a machine or system',
+        'Science vocabulary reinforcement',
+        'Geography and map labeling',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "science.label-diagram"',
+        'Provide a clear diagram image with alt text',
+        'Define each label with id, text, x/y target position, and optional hint',
+        'Set interactive to true for drag-and-label mode',
+      ],
+      configFields: [
+        { name: 'image', type: 'string', required: true, description: 'Path to the diagram image file.' },
+        { name: 'altText', type: 'string', required: true, description: 'Description of the diagram for screen readers.' },
+        { name: 'labels', type: 'array of objects', required: true, description: 'Labels to drag. Each has id (string), text (string), target with x/y (percent), and optional hint (string).' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows labels in position. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Plant Anatomy Labeling",
+  "widget": "science.label-diagram",
+  "config": {
+    "image": "assets/images/plant-anatomy.png",
+    "altText": "Diagram of a plant with parts to label",
+    "labels": [
+      { "id": "roots", "text": "Roots", "target": { "x": 50, "y": 90 }, "hint": "Below the soil" },
+      { "id": "stem", "text": "Stem", "target": { "x": 50, "y": 60 }, "hint": "Supports the plant" },
+      { "id": "leaves", "text": "Leaves", "target": { "x": 30, "y": 40 }, "hint": "Green and flat" },
+      { "id": "flower", "text": "Flower", "target": { "x": 50, "y": 20 }, "hint": "Colorful top" }
+    ],
+    "interactive": true,
+    "hints": ["Roots are found underground", "The stem connects roots to leaves"]
+  }
+}`,
+      tips: [
+        'Use clear, high-contrast diagrams with obvious label areas',
+        'Provide 4-8 labels for manageable complexity',
+        'Add hints to each label for students who get stuck',
+        'Target x/y positions should use percentage values (0-100)',
+      ],
+      sidebarPosition: 1,
+      relatedWidgets: [
+        { id: 'science.image-label', name: 'Image Label', domain: 'science', slug: 'image-label' },
+        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
       ],
     },
   },
@@ -1253,6 +2319,57 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Provide descriptive label text',
       ],
     },
+    guide: {
+      oneLiner: 'Tap regions of an image to identify and learn about them.',
+      whatItDoes: 'The Image Label widget shows an image with tappable regions. When students tap a region, they see its name and description. It works like an interactive exploration tool — great for planetariums, maps, and detailed diagrams.',
+      whenToUse: [
+        'Interactive exploration of labeled images',
+        'Solar system and astronomy activities',
+        'Museum-style exhibit exploration',
+        'Teaching visual identification skills',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "science.image-label"',
+        'Provide an image with alt text',
+        'Define clickable regions with x/y positions, titles, and descriptions',
+        'Optionally add hints for guided exploration',
+      ],
+      configFields: [
+        { name: 'image', type: 'string', required: true, description: 'Path to the image file.' },
+        { name: 'altText', type: 'string', required: true, description: 'Description of the image for screen readers.' },
+        { name: 'regions', type: 'array of objects', required: true, description: 'Clickable regions. Each has id (string), title (string), description (string), x (number), y (number), and optional tooltip (string).' },
+        { name: 'hints', type: 'array of strings', required: false, description: 'Hints to guide exploration.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, regions can still be tapped for information. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Solar System Explorer",
+  "widget": "science.image-label",
+  "config": {
+    "image": "assets/images/solar-system.png",
+    "altText": "Solar system with clickable planets",
+    "regions": [
+      { "id": "mars", "title": "Mars", "description": "The Red Planet, 4th from the Sun", "x": 45, "y": 30, "tooltip": "Click to learn about Mars" },
+      { "id": "jupiter", "title": "Jupiter", "description": "Largest planet in our solar system", "x": 60, "y": 50, "tooltip": "Click to learn about Jupiter" },
+      { "id": "earth", "title": "Earth", "description": "Our home planet, 3rd from the Sun", "x": 35, "y": 40, "tooltip": "Click to learn about Earth" }
+    ],
+    "interactive": false,
+    "hints": ["Mars is known as the Red Planet", "Jupiter is the largest planet"]
+  }
+}`,
+      tips: [
+        'Use images with clearly defined, non-overlapping regions',
+        'Keep region descriptions concise — 1-2 sentences',
+        'Position regions carefully to cover the right part of the image',
+        'Add tooltips to hint at what students will discover',
+      ],
+      sidebarPosition: 2,
+      relatedWidgets: [
+        { id: 'science.label-diagram', name: 'Label Diagram', domain: 'science', slug: 'label-diagram' },
+        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
+      ],
+    },
   },
   {
     id: 'core.audio-player',
@@ -1304,6 +2421,63 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       generationHints: ['Use clear, slow-paced audio', 'Include captions when possible'],
     },
+    guide: {
+      oneLiner: 'Play audio clips with transcripts, captions, and comprehension support.',
+      whatItDoes: 'The Audio Player widget plays an audio file with playback controls. Students can listen to spoken content, read along with a transcript, and view timed captions. It supports bookmarks, waveform visualization, and keyboard controls.',
+      whenToUse: [
+        'Language learning with pronunciation examples',
+        'Listening comprehension exercises',
+        'Audio-based instructions for young learners',
+        'Storytelling and read-aloud activities',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.audio-player"',
+        'Provide the path to your audio file',
+        'Add a title and optional description',
+        'Optionally provide a transcript and timed captions',
+      ],
+      configFields: [
+        { name: 'audio', type: 'string', required: true, description: 'Path to the audio file (MP3, WAV, etc.).' },
+        { name: 'title', type: 'string', required: false, description: 'Title shown above the audio player.' },
+        { name: 'description', type: 'string', required: false, description: 'Additional context about the audio.' },
+        { name: 'transcript', type: 'string', required: false, description: 'Full text transcript of the audio content.' },
+        { name: 'captions', type: 'array of objects', required: false, description: 'Timed captions. Each has start (number, seconds), end (number, seconds), and text (string).' },
+        { name: 'showTranscript', type: 'boolean', required: false, description: 'Show the transcript panel. Defaults to true.' },
+        { name: 'waveform', type: 'boolean', required: false, description: 'Show audio waveform visualization. Defaults to false.' },
+        { name: 'bookmarks', type: 'boolean', required: false, description: 'Allow students to bookmark positions. Defaults to true.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, plays in observe mode. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Listen to Bird Sounds",
+  "widget": "core.audio-player",
+  "config": {
+    "audio": "assets/audio/birdsong.mp3",
+    "title": "Morning Birdsong",
+    "description": "Listen to the sounds of birds in the morning.",
+    "transcript": "You can hear a variety of bird calls: chirping, whistling, and trilling.",
+    "captions": [
+      { "start": 0, "end": 3, "text": "Chirping sounds begin" },
+      { "start": 3, "end": 6, "text": "Whistling melodies join in" },
+      { "start": 6, "end": 10, "text": "A chorus of bird calls" }
+    ],
+    "showTranscript": true,
+    "bookmarks": true,
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Always provide a transcript for accessibility',
+        'Use short audio clips (1-3 minutes) for focused listening',
+        'Timed captions help students follow along',
+        'Audio files should be placed in your lesson package directory',
+      ],
+      sidebarPosition: 14,
+      relatedWidgets: [
+        { id: 'core.video-player', name: 'Video Player', domain: 'core', slug: 'video-player' },
+      ],
+    },
   },
   {
     id: 'core.video-player',
@@ -1352,6 +2526,60 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       commonMisconceptions: ['Missing visual details', 'Focusing on audio and ignoring visuals'],
       generationHints: ['Use short, focused clips (1-3 min)', 'Include clear visual content'],
     },
+    guide: {
+      oneLiner: 'Play video clips with chapters, captions, and transcripts.',
+      whatItDoes: 'The Video Player widget plays a video file with full playback controls. Students can watch educational videos with chapter navigation, timed captions, and a transcript panel. It supports fullscreen mode and keyboard shortcuts.',
+      whenToUse: [
+        'Showing educational animations and demonstrations',
+        'Video-based science experiments',
+        'Visual explanations of complex concepts',
+        'Documentary-style content for older students',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.video-player"',
+        'Provide the path to your video file',
+        'Optionally add a poster image for the thumbnail',
+        'Add chapters for easy navigation, captions for accessibility',
+      ],
+      configFields: [
+        { name: 'video', type: 'string', required: true, description: 'Path to the video file (MP4 recommended).' },
+        { name: 'title', type: 'string', required: false, description: 'Title shown above the video player.' },
+        { name: 'poster', type: 'string', required: false, description: 'Path to a poster image shown before the video plays.' },
+        { name: 'chapters', type: 'array of objects', required: false, description: 'Video chapters. Each has time (number, seconds) and title (string).' },
+        { name: 'captions', type: 'array of objects', required: false, description: 'Timed captions. Each has start (number), end (number), and text (string).' },
+        { name: 'transcript', type: 'string', required: false, description: 'Full text transcript of the video content.' },
+        { name: 'showTranscript', type: 'boolean', required: false, description: 'Show the transcript panel. Defaults to true.' },
+        { name: 'allowFullscreen', type: 'boolean', required: false, description: 'Allow fullscreen mode. Defaults to true.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, plays in observe mode. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Photosynthesis Video",
+  "widget": "core.video-player",
+  "config": {
+    "video": "assets/video/photosynthesis.mp4",
+    "title": "Understanding Photosynthesis",
+    "chapters": [
+      { "time": 0, "title": "Introduction" },
+      { "time": 60, "title": "Light Reactions" },
+      { "time": 180, "title": "Calvin Cycle" }
+    ],
+    "showTranscript": true,
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Use short, focused clips (1-5 minutes)',
+        'Always add captions for accessibility',
+        'Chapters help students navigate to specific sections',
+        'Video files should be placed in your lesson package directory',
+      ],
+      sidebarPosition: 15,
+      relatedWidgets: [
+        { id: 'core.audio-player', name: 'Audio Player', domain: 'core', slug: 'audio-player' },
+      ],
+    },
   },
   {
     id: 'language.flashcard',
@@ -1398,6 +2626,56 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Keep front text concise',
         'Use clear, detailed back text',
         'Group related cards together',
+      ],
+    },
+    guide: {
+      oneLiner: 'Study terms and concepts with interactive flip-card flashcards.',
+      whatItDoes: 'The Flashcard widget shows cards with a front and back — tap to flip and reveal the answer. Students can rate their confidence (easy/medium/hard), shuffle the deck, and track their progress. It supports flip, multiple-choice, and spaced repetition modes.',
+      whenToUse: [
+        'Vocabulary and spelling practice',
+        'Memorizing key terms and definitions',
+        'Language learning',
+        'Quick revision before assessments',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "language.flashcard"',
+        'Create your cards — each needs a front and back',
+        'Optionally add hints, categories, and difficulty levels',
+        'Choose a study mode: flip, multiple, or spaced',
+      ],
+      configFields: [
+        { name: 'cards', type: 'array of objects', required: true, description: 'Flashcards. Each has front (string), back (string), and optional hint (string), category (string), difficulty ("easy"/"medium"/"hard"), image (string), and audio (string).' },
+        { name: 'mode', type: 'string', required: false, description: 'Study mode: "flip" (default), "multiple" for multiple-choice, or "spaced" for spaced repetition.' },
+        { name: 'shuffle', type: 'boolean', required: false, description: 'Randomize card order. Defaults to false.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows cards in view-only mode. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Spanish Vocabulary",
+  "widget": "language.flashcard",
+  "config": {
+    "cards": [
+      { "front": "Hola", "back": "Hello", "hint": "Common greeting", "category": "Greetings" },
+      { "front": "Gracias", "back": "Thank you", "category": "Politeness" },
+      { "front": "Adios", "back": "Goodbye", "category": "Greetings" },
+      { "front": "Por favor", "back": "Please", "category": "Politeness" }
+    ],
+    "mode": "flip",
+    "shuffle": true,
+    "interactive": true
+  }
+}`,
+      tips: [
+        'Keep front text short — one word or phrase',
+        'Use detailed back text for definitions and context',
+        'Add categories to help students organize their study',
+        'Group related cards together (e.g., all greetings, all food words)',
+      ],
+      sidebarPosition: 1,
+      relatedWidgets: [
+        { id: 'core.matching', name: 'Matching', domain: 'core', slug: 'matching' },
+        { id: 'core.fill-blank', name: 'Fill in the Blank', domain: 'core', slug: 'fill-blank' },
       ],
     },
   },
@@ -1455,6 +2733,65 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Include brief descriptions for each step',
       ],
     },
+    guide: {
+      oneLiner: 'Explore step-by-step scientific processes with connected diagrams.',
+      whatItDoes: 'The Process Diagram widget shows a connected diagram of a scientific process — like the water cycle, food chain, or rock cycle. Nodes represent steps, and connections show the flow. It supports cycle, linear, and custom layouts with step-by-step reveal.',
+      whenToUse: [
+        'Teaching the water cycle or rock cycle',
+        'Explaining food chains and food webs',
+        'Showing cause-and-effect processes',
+        'Visualizing life cycles with stages',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "science.process-diagram"',
+        'Define process nodes — each has an id and title',
+        'Define connections between nodes with optional labels',
+        'Choose a layout: cycle, linear, or tree',
+      ],
+      configFields: [
+        { name: 'nodes', type: 'array of objects', required: true, description: 'Process steps. Each has id (string), title (string), and optional description (string) and icon (string).' },
+        { name: 'connections', type: 'array of objects', required: true, description: 'Connections between nodes. Each has from (node id), to (node id), and optional label (string) and type ("arrow", "loop", "dashed").' },
+        { name: 'layout', type: 'string', required: false, description: 'Layout style: "cycle", "linear", "tree", or "flow". Defaults to "cycle".' },
+        { name: 'title', type: 'string', required: false, description: 'An overall title for the diagram.' },
+        { name: 'stepByStep', type: 'boolean', required: false, description: 'Reveal nodes one at a time. Defaults to false.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the complete diagram. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "The Water Cycle",
+  "widget": "science.process-diagram",
+  "config": {
+    "nodes": [
+      { "id": "evaporation", "title": "Evaporation", "description": "Sun heats water, turning it into vapor", "icon": "☀️" },
+      { "id": "condensation", "title": "Condensation", "description": "Water vapor cools and forms clouds", "icon": "☁️" },
+      { "id": "precipitation", "title": "Precipitation", "description": "Water falls as rain, snow, or hail", "icon": "🌧️" },
+      { "id": "collection", "title": "Collection", "description": "Water gathers in oceans and lakes", "icon": "🌊" }
+    ],
+    "connections": [
+      { "from": "evaporation", "to": "condensation", "label": "vapor rises" },
+      { "from": "condensation", "to": "precipitation", "label": "clouds form" },
+      { "from": "precipitation", "to": "collection", "label": "water falls" },
+      { "from": "collection", "to": "evaporation", "type": "loop", "label": "cycle repeats" }
+    ],
+    "layout": "cycle",
+    "title": "The Water Cycle",
+    "stepByStep": true,
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Use clear step labels that students can read easily',
+        'Show arrows to indicate the direction of the process',
+        'Add brief descriptions for each step',
+        'Cycle layout works best for repeating processes',
+      ],
+      sidebarPosition: 3,
+      relatedWidgets: [
+        { id: 'core.sequencing', name: 'Sequencing', domain: 'core', slug: 'sequencing' },
+        { id: 'core.timeline', name: 'Timeline', domain: 'core', slug: 'timeline' },
+      ],
+    },
   },
   {
     id: 'social.map',
@@ -1504,6 +2841,67 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Use clear, labeled maps',
         'Include a legend when needed',
         'Start with simple geographic features',
+      ],
+    },
+    guide: {
+      oneLiner: 'Explore geographic and social concepts on an interactive map.',
+      whatItDoes: 'The Social Map widget shows an interactive map with regions, markers, and a legend. Students can explore regions, read descriptions, and find specific locations. It supports zooming, labels, and region highlighting.',
+      whenToUse: [
+        'Teaching geography and map reading',
+        'Exploring continents and countries',
+        'Social studies and history map activities',
+        'Community and neighborhood mapping',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "social.map"',
+        'Define map regions with id, name, color, and description',
+        'Optionally add markers for specific locations',
+        'Add a legend to explain region colors',
+      ],
+      configFields: [
+        { name: 'regions', type: 'array of objects', required: true, description: 'Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string).' },
+        { name: 'title', type: 'string', required: false, description: 'A title shown above the map.' },
+        { name: 'labels', type: 'boolean', required: false, description: 'Show region name labels. Defaults to true.' },
+        { name: 'zoom', type: 'boolean', required: false, description: 'Allow zooming in and out. Defaults to false.' },
+        { name: 'legend', type: 'array of objects', required: false, description: 'Legend entries. Each has color (string) and label (string).' },
+        { name: 'markers', type: 'array of objects', required: false, description: 'Point markers. Each has id (string), label (string), x (number), y (number), and optional icon (string).' },
+        { name: 'targetRegion', type: 'string', required: false, description: 'ID of a region to highlight for quiz mode.' },
+        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the map for exploration. Defaults to false.' },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "World Continents",
+  "widget": "social.map",
+  "config": {
+    "regions": [
+      { "id": "north", "name": "North America", "description": "Third largest continent by area", "color": "var(--oe-color-primary)" },
+      { "id": "europe", "name": "Europe", "description": "Sixth largest continent", "color": "var(--oe-color-warning)" },
+      { "id": "africa", "name": "Africa", "description": "Second largest continent by area", "color": "var(--oe-color-error)" },
+      { "id": "asia", "name": "Asia", "description": "Largest and most populous continent", "color": "var(--oe-color-accent)" }
+    ],
+    "legend": [
+      { "color": "var(--oe-color-primary)", "label": "North America" },
+      { "color": "var(--oe-color-warning)", "label": "Europe" },
+      { "color": "var(--oe-color-error)", "label": "Africa" },
+      { "color": "var(--oe-color-accent)", "label": "Asia" }
+    ],
+    "title": "World Continents",
+    "labels": true,
+    "zoom": true,
+    "interactive": false,
+    "targetRegion": "asia"
+  }
+}`,
+      tips: [
+        'Use clear, labeled maps for readability',
+        'Include a legend when using multiple colors',
+        'Keep region descriptions brief and informative',
+        'Start with simple geographic features before complex ones',
+      ],
+      sidebarPosition: 1,
+      relatedWidgets: [
+        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
       ],
     },
   },
