@@ -73,7 +73,7 @@ describe('RuntimeProvider', () => {
     engine = makeEngine();
   });
 
-  it('starts the engine on mount and stops on unmount', () => {
+  it('starts the engine on mount and does not stop on unmount', () => {
     const { unmount } = render(
       <RuntimeProvider loadedPackage={pkg} engine={engine}>
         <span>child</span>
@@ -81,7 +81,7 @@ describe('RuntimeProvider', () => {
     );
     expect(engine.start).toHaveBeenCalledTimes(1);
     unmount();
-    expect(engine.stop).toHaveBeenCalledTimes(1);
+    expect(engine.stop).not.toHaveBeenCalled();
   });
 
   it('subscribes to workflow events and unsubscribes on unmount', () => {
