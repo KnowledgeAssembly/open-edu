@@ -294,6 +294,29 @@ export function extractMathQuestions(activities: GeneratedActivity[]): MathQuest
   const questions: MathQuestion[] = [];
 
   for (const activity of activities) {
+    const wc = activity.widgetConfig as Record<string, unknown> | undefined;
+    if (wc?.math) {
+      const mathData = wc.math as Record<string, unknown>;
+      if (mathData.operation && mathData.inputs && mathData.expectedAnswer !== undefined) {
+        questions.push({
+          questionId: `${activity.step}-math-${questions.length}`,
+          operation: mathData.operation as MathQuestion['operation'],
+          inputs: mathData.inputs as Record<string, number | number[] | string>,
+          expectedAnswer: mathData.expectedAnswer as number | string | number[],
+          unit: (mathData.unit as string) || '',
+          tolerance: (mathData.tolerance as number) || 0.001,
+        });
+      }
+    }
+  }
+
+  return questions;
+}
+
+export function extractMCQValidationErrors(activities: GeneratedActivity[]): string[] {
+  const errors: string[] = [];
+
+  for (const activity of activities) {
     const qs = activity.content.questions;
     if (activity.courseSpecType === 'quiz' && qs) {
       for (let i = 0; i < qs.length; i++) {
@@ -302,23 +325,13 @@ export function extractMathQuestions(activities: GeneratedActivity[]): MathQuest
         const { question, options, correctIndex } = mcq;
         if (question && options && correctIndex !== undefined) {
           const mcqErrors = validateMCQOptions({ question, options, correctIndex });
-          if (mcqErrors.length === 0) {
-            const opt = options[correctIndex];
-            if (opt) {
-              questions.push({
-                questionId: `${activity.step}-q${i}`,
-                operation: 'add',
-                inputs: { numbers: [parseFloat(opt)] },
-                expectedAnswer: correctIndex,
-                unit: '',
-                tolerance: 0.001,
-              });
-            }
+          if (mcqErrors.length > 0) {
+            errors.push(...mcqErrors.map(e => `[${activity.step}-q${i}] ${e}`));
           }
         }
       }
     }
   }
 
-  return questions;
+  return errors;
 }

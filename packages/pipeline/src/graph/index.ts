@@ -9,7 +9,7 @@ import type { Concept } from '../concepts/types.js';
 import { generateLessonBlueprints } from '../blueprint/index.js';
 import type { LessonBlueprint } from '../blueprint/types.js';
 import { generateActivitiesForConcept } from '../generate-activities/index.js';
-import { validateAllMath, extractMathQuestions } from '../validation/math.js';
+import { validateAllMath, extractMathQuestions, extractMCQValidationErrors } from '../validation/math.js';
 import { validateWidgetConfig, type WidgetValidationResult } from '../validation/widgets.js';
 import { buildCoverageLedger } from '../coverage/index.js';
 import { generateQualityReport, type QualityReport } from '../validation/report.js';
@@ -70,7 +70,7 @@ export async function runPipelineV2(
 
   function canResume(filename: string): boolean {
     if (!options.resume) return false;
-    if (previousHash !== configHash) return false;
+    if (previousHash && previousHash !== configHash) return false;
     return existsSync(join(options.outputDir, filename));
   }
 
@@ -180,6 +180,8 @@ export async function runPipelineV2(
   const allActivities = conceptActivityPairs.flatMap(p => p.activities);
   const mathQuestions = extractMathQuestions(allActivities);
   const mathResults = validateAllMath(mathQuestions);
+  const mcqErrors = extractMCQValidationErrors(allActivities);
+  reviewItems.push(...mcqErrors);
 
   const widgetResults: WidgetValidationResult[] = [];
   for (const activity of allActivities) {
