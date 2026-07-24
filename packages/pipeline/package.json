@@ -17,8 +17,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc && mkdir -p dist/chunk/prompts dist/generate-concept/prompts && cp src/chunk/prompts/*.txt dist/chunk/prompts/ && cp src/generate-concept/prompts/*.txt dist/generate-concept/prompts/",
+    "build": "tsc && mkdir -p dist/chunk/prompts dist/generate-concept/prompts dist/source dist/concepts dist/blueprint dist/validation && cp src/chunk/prompts/*.txt dist/chunk/prompts/ && cp src/generate-concept/prompts/*.txt dist/generate-concept/prompts/ && cp src/source/inventory-prompt.ts dist/source/ 2>/dev/null; cp src/concepts/prompt.ts dist/concepts/ 2>/dev/null; cp src/blueprint/prompt.ts dist/blueprint/ 2>/dev/null",
     "test": "vitest run",
+    "test:fixture": "vitest run -- math-level-b-lesson1",
+    "validate:generated": "node dist/cli/validate.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",

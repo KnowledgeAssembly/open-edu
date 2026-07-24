@@ -263,4 +263,159 @@ export const EXEMPLARS: Exemplar[] = [
     },
     widgetId: 'core.sequencing',
   },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'indian_place_value — Indian place value chart for large numbers',
+    content: {
+      description: 'Indian Place Value Chart',
+      instructions: 'Observe how digits are grouped in the Indian place value system: ones, tens, hundreds, thousands, ten thousands, lakhs, crores.',
+      widgetConfig: {
+        maxPlaces: 7,
+        targetNumber: 352648,
+        interactive: false,
+      },
+    },
+    widgetId: 'math.place-value-chart',
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'fractions_intro — Visual fraction representation',
+    content: {
+      description: 'Fraction Visual',
+      instructions: 'Observe the shaded portion representing the fraction.',
+      widgetConfig: {
+        numerator: 3,
+        denominator: 4,
+        mode: 'bar',
+        interactive: false,
+      },
+    },
+    widgetId: 'math.fraction-visual',
+  },
+  {
+    type: 'widget',
+    step: 'observe',
+    conceptDescription: 'number_line — Number line from 0 to 10',
+    content: {
+      description: 'Number Line',
+      instructions: 'Observe the position of the target number on the number line.',
+      widgetConfig: {
+        min: 0,
+        max: 10,
+        target: 7,
+        markers: [3, 5, 7],
+        interactive: false,
+      },
+    },
+    widgetId: 'math.number-line',
+  },
+  {
+    type: 'widget',
+    step: 'guided_practice',
+    conceptDescription: 'decimal_place_value — Decimal grid showing tenths and hundredths',
+    content: {
+      description: 'Decimal Grid Practice',
+      instructions: 'Shade the correct number of squares to represent the decimal. Hint: 1 full row = 1 tenth.',
+      widgetConfig: {
+        whole: 0,
+        tenths: 2,
+        hundredths: 5,
+        interactive: true,
+        hints: ['Each row has 10 squares', 'Count the shaded squares carefully'],
+      },
+    },
+    widgetId: 'math.measurement-scale',
+  },
+  {
+    type: 'widget',
+    step: 'guided_practice',
+    conceptDescription: 'measurement — Measuring with a ruler',
+    content: {
+      description: 'Ruler Measurement',
+      instructions: 'Find the measurement marked on the ruler.',
+      widgetConfig: {
+        type: 'ruler',
+        min: 0,
+        max: 15,
+        step: 1,
+        unit: 'cm',
+        interactive: true,
+      },
+    },
+    widgetId: 'math.measurement-scale',
+  },
+  {
+    type: 'widget',
+    step: 'independent_practice',
+    conceptDescription: 'area_counting — Counting grid squares to find area',
+    content: {
+      description: 'Area Grid Practice',
+      instructions: 'Count the shaded squares to find the area. No hints — solve independently.',
+      widgetConfig: {
+        rows: 5,
+        cols: 4,
+        mode: 'area',
+        shadedCells: [0, 1, 2, 3, 4, 5, 6, 7],
+        interactive: true,
+      },
+    },
+    widgetId: 'math.grid-area',
+  },
+  {
+    type: 'widget',
+    step: 'independent_practice',
+    conceptDescription: 'chart_reading — Bar chart interpretation',
+    content: {
+      description: 'Bar Chart Practice',
+      instructions: 'Study the bar chart and answer the questions independently.',
+      widgetConfig: {
+        type: 'bar',
+        data: [
+          { label: 'Apples', value: 12 },
+          { label: 'Oranges', value: 8 },
+          { label: 'Bananas', value: 15 },
+          { label: 'Grapes', value: 10 },
+        ],
+        interactive: true,
+      },
+    },
+    widgetId: 'core.chart-reader',
+  },
+  {
+    type: 'reading',
+    step: 'observe',
+    conceptDescription: 'geometry_basic — Identifying basic shapes and their properties',
+    content: {
+      description: 'Basic Geometry',
+      instructions: 'Observe the properties of common shapes. A square has 4 equal sides. A rectangle has opposite sides equal. A triangle has 3 sides. A circle has no sides.',
+      examples: [
+        'Square: 4 equal sides, 4 corners',
+        'Rectangle: 2 pairs of equal sides, 4 corners',
+        'Triangle: 3 sides, 3 corners',
+        'Circle: curved line, no corners',
+      ],
+    },
+  },
+  {
+    type: 'quiz',
+    step: 'mastery_check',
+    conceptDescription: 'comparison_ordering — Comparing and ordering numbers',
+    content: {
+      description: 'Comparison and Ordering Quiz',
+      questions: [
+        {
+          question: 'Which number is larger: 3,52,648 or 3,25,468?',
+          options: ['3,52,648', '3,25,468', 'They are equal', 'Cannot tell without counting'],
+          correctIndex: 0,
+        },
+        {
+          question: 'Arrange in ascending order: 45,632; 45,362; 46,532; 44,900',
+          options: ['44,900; 45,362; 45,632; 46,532', '45,632; 45,362; 46,532; 44,900', '46,532; 45,632; 45,362; 44,900', '44,900; 45,632; 45,362; 46,532'],
+          correctIndex: 0,
+        },
+      ],
+    },
+  },
 ];

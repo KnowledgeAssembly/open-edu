@@ -23,6 +23,7 @@ interface CLIOptions {
   llmProvider?: string;
   llmModel?: string;
   dryRun: boolean;
+  resume: boolean;
   verbose: boolean;
   outputDir: string;
   maxRetries: number;
@@ -37,6 +38,7 @@ function parseArgs(): CLIOptions {
     subject: 'math',
     force: false,
     dryRun: false,
+    resume: false,
     verbose: false,
     outputDir: join(__dirname, '..', '..', '..', '..', 'output'),
     maxRetries: 3,
@@ -65,6 +67,9 @@ function parseArgs(): CLIOptions {
         break;
       case '--dry-run':
         options.dryRun = true;
+        break;
+      case '--resume':
+        options.resume = true;
         break;
       case '--verbose':
         options.verbose = true;
@@ -112,6 +117,7 @@ Options:
   --llm-model <name>    LLM model override (default: from env)
   --interactive         Enable human-in-the-loop checkpoints
   --dry-run             Validate but don't write files
+  --resume              Resume from intermediate artifacts when possible
   --verbose             Detailed logging per stage
   --output-dir <path>   Custom output directory (default: ./output)
   --max-retries <num>   Max retries per concept (default: 3)
@@ -213,7 +219,7 @@ export async function runPipelineCLI(): Promise<void> {
       outputDir: options.outputDir,
       verbose: options.verbose,
       dryRun: options.dryRun,
-      resume: false,
+      resume: options.resume,
       maxRetries: options.maxRetries,
       format: options.format,
       widgetCategories: [],
