@@ -9,6 +9,9 @@ const NIOS_EXAMPLE_MARKER = /^(?:Example|उदाहरण)\s+(\d+(?:\.\d+)?)\s
 const NIOS_EXERCISE_MARKER = /^(?:Let us see what you have learnt|Exercise|अभ्यास|आइए देखें आपने क्या सीखा)/im;
 const NIOS_REVIEW_MARKER = /^(?:REVIEW|Review|पुनरावृत्ति|What have you learnt|आपने क्या सीखा)/im;
 const NIOS_TEST_MARKER = /^(?:TEST|Test|परीक्षा|Assessment|मूल्यांकन)/im;
+const NIOS_CHAPTER_START = /From this lesson,? you will learn/i;
+const NIOS_CHAPTER_TITLE = /^\s*(\d+)\s*\n+\s*([A-Z][A-Z\s,\-]{4,})/im;
+const TABLE_OF_CONTENTS = /^(?:Sl\.?\s*No\.?|Contents|TABLE\s*OF\s*CONTENTS)/im;
 
 export interface PageContent {
   pageNum: number;
@@ -19,6 +22,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
   const units: SourceUnit[] = [];
   let exerciseMode = false;
   let unitCounter = 0;
+  let lessonCount = 0;
 
   for (const page of pages) {
     const segments = page.text.split(/\n{2,}/).filter(s => s.trim().length > 0);
@@ -29,9 +33,30 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
       const trimmed = segment.trim();
       const location = { pageStart: page.pageNum };
 
+      // Skip table of contents
+      if (TABLE_OF_CONTENTS.test(trimmed)) {
+        units.push({ id, type: 'unclassified', text: trimmed, location, extractionConfidence: 1.0, requiredCoverage: false });
+        continue;
+      }
+
       if (NIOS_LESSON_HEADING.test(trimmed)) {
         exerciseMode = false;
+        lessonCount++;
         units.push({ id, type: 'lesson', text: trimmed, location, extractionConfidence: 1.0, requiredCoverage: true });
+        continue;
+      }
+
+      // NIOS chapter start: "From this lesson, you will learn"
+      if (NIOS_CHAPTER_START.test(trimmed)) {
+        exerciseMode = false;
+        lessonCount++;
+        units.push({ id, type: 'lesson', text: trimmed, location, extractionConfidence: 0.95, requiredCoverage: true });
+        continue;
+      }
+
+      // NIOS chapter title: number followed by all-caps title
+      if (NIOS_CHAPTER_TITLE.test(trimmed)) {
+        units.push({ id, type: 'lesson', text: trimmed, location, extractionConfidence: 0.85, requiredCoverage: true });
         continue;
       }
 
