@@ -9,7 +9,7 @@ const NIOS_EXAMPLE_MARKER = /^(?:Example|उदाहरण)\s+(\d+(?:\.\d+)?)\s
 const NIOS_EXERCISE_MARKER = /^(?:Let us see what you have learnt|Exercise|अभ्यास|आइए देखें आपने क्या सीखा)/im;
 const NIOS_REVIEW_MARKER = /^(?:REVIEW|Review|पुनरावृत्ति|What have you learnt|आपने क्या सीखा)/im;
 const NIOS_TEST_MARKER = /^(?:TEST|Test|परीक्षा|Assessment|मूल्यांकन)/im;
-const NIOS_CHAPTER_START = /From this lesson,? you will learn/i;
+const NIOS_CHAPTER_START = /From\s+this\s+lesson,?\s+you\s+will\s+learn/i;
 const NIOS_CHAPTER_TITLE = /^\s*(\d+)\s*\n+\s*([A-Z][A-Z\s,\-]{4,})/im;
 const TABLE_OF_CONTENTS = /^(?:Sl\.?\s*No\.?|Contents|TABLE\s*OF\s*CONTENTS)/im;
 
