@@ -201,7 +201,7 @@ export function CourseRuntime({
 
       if (bundleContext) {
         const existingBundleSnapshot =
-          bundleContext.currentBundleProgress ?? bundleProgressRef.current;
+          bundleProgressRef.current ?? bundleContext.currentBundleProgress;
         const bundleSnapshot: BundleProgressSnapshot = {
           bundleId: bundleContext.bundleId,
           bundleVersion: bundleContext.bundle.manifest.version ?? '0.0.0',

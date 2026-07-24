@@ -62,7 +62,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
   }, [bundle, bundleProgress, nodeCounts]);
 
   return (
-    <div className="group relative overflow-hidden">
+    <>
       <BundleOverview
         bundleTitle={bundle.manifest.title}
         bundleId={bundle.manifest.id}
@@ -73,17 +73,19 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         onBackToCatalog={onBackToCatalog}
       />
       {bundleProgress && (
-        <Button
-          variant="ghost"
-          size="sm"
-          data-testid="reset-button"
-          className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={() => onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true)}
-        >
-          <RotateCcw className="h-4 w-4" />
-          <span className="sr-only">{t('learner.reset.button')}</span>
-        </Button>
+        <div className="flex justify-end max-w-content mx-auto w-full px-xl pb-xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            data-testid="reset-button"
+            className="opacity-60 transition-opacity hover:opacity-100"
+            onClick={() => onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true)}
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span className="sr-only">{t('learner.reset.button')}</span>
+          </Button>
+        </div>
       )}
-    </div>
+    </>
   );
 }

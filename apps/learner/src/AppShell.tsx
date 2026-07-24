@@ -268,7 +268,7 @@ function AppShellInner({
         const saved = await getBundleProgress(bundleId);
         if (saved) progress[bundleId] = saved;
       }
-      if (!cancelled) setBundleProgress(progress);
+      if (!cancelled) setBundleProgress((prev) => ({ ...progress, ...prev }));
     })();
     return () => {
       cancelled = true;
@@ -383,6 +383,21 @@ function AppShellInner({
     if (!bundle) return undefined;
     return bundle;
   }, [view, bundleEntries]);
+
+  const bundleContextMemo = useMemo(() => {
+    if (!courseBundle) return undefined;
+    return {
+      bundleId: courseBundle.manifest.id,
+      bundle: courseBundle,
+      currentBundleProgress: bundleProgress[courseBundle.manifest.id] ?? null,
+      onBundleSnapshot: (snapshot: BundleProgressSnapshot) => {
+        setBundleProgress((prev) => ({
+          ...prev,
+          [courseBundle.manifest.id]: snapshot,
+        }));
+      },
+    };
+  }, [courseBundle, bundleProgress]);
 
   const isOnline = useOnlineStatus();
   const updatePrompt = useUpdatePrompt();
@@ -558,21 +573,7 @@ function AppShellInner({
                       progressTotal={courseProgressTotal}
                     />
                   }
-                  bundleContext={
-                    courseBundle
-                      ? {
-                          bundleId: courseBundle.manifest.id,
-                          bundle: courseBundle,
-                          currentBundleProgress: bundleProgress[courseBundle.manifest.id] ?? null,
-                          onBundleSnapshot: (snapshot) => {
-                            setBundleProgress((prev) => ({
-                              ...prev,
-                              [courseBundle.manifest.id]: snapshot,
-                            }));
-                          },
-                        }
-                      : undefined
-                  }
+                  bundleContext={bundleContextMemo}
                 >
                   <CourseStepWrapper />
                   <ContextBridgeWithCompanion />
