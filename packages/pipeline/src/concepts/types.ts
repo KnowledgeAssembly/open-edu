@@ -18,7 +18,7 @@ export const ConceptSchema = z.object({
   representations: z.array(z.enum(REPRESENTATION_TYPES)).min(1),
   exerciseFamilies: z.array(z.string()).min(1),
   misconceptionTargets: z.array(z.string()),
-  adultContext: z.string().optional(),
+  adultContext: z.string().nullable().optional(),
   recommendedWidgetCategories: z.array(z.string()),
   estimatedMinutes: z.number().int().min(5).max(60),
 });

@@ -5,6 +5,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
 import { LlmRouter } from '@open-edu/llm-config';
+import { resolveStageConfigs, logStageConfigs, parseStageOverride } from '../config/config.js';
 import { runPipelineV2 } from '../graph/index.js';
 import type { PipelineResult } from '../graph/index.js';
 import * as logger from './logger.js';
@@ -28,6 +29,7 @@ interface CLIOptions {
   outputDir: string;
   maxRetries: number;
   format: 'md' | 'json' | 'both';
+  stageOverrides?: string[];
 }
 
 function parseArgs(): CLIOptions {
@@ -184,24 +186,20 @@ export async function runPipelineCLI(): Promise<void> {
 
   let router: LlmRouter;
   try {
-    const stageOverride = options.llmProvider
-      ? { provider: options.llmProvider, model: options.llmModel || 'gpt-4o-mini' }
-      : undefined;
-    const stageCfg = stageOverride
-      ? { provider: stageOverride.provider, model: stageOverride.model, maxTokens: 4096, temperature: 0.3 }
-      : undefined;
-    const overrideConfigs = stageCfg
-      ? {
-          source_inventory: stageCfg,
-          concept_map: stageCfg,
-          concept_enrichment: stageCfg,
-          lesson_blueprint: stageCfg,
-          asset_plan: stageCfg,
-          activity_generation: stageCfg,
-          review: stageCfg,
-        }
-      : undefined;
-    router = new LlmRouter(overrideConfigs);
+    const stageOverrides = (options.stageOverrides || []).map(parseStageOverride);
+
+    if (options.verbose) {
+      logger.info(`Stage overrides from CLI: ${stageOverrides.length}`);
+    }
+
+    const stageConfigs = resolveStageConfigs(stageOverrides);
+    router = new LlmRouter(stageConfigs);
+
+    if (options.verbose) {
+      logger.verbose('Per-stage configs:', true);
+      logStageConfigs(stageConfigs, (msg: string) => logger.verbose(msg, true));
+    }
+
     logger.success('LLM router initialized');
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -44,5 +44,8 @@ Create a lesson blueprint with:
 - misconceptionTargets.
 
 DO NOT request widget categories not in the available list.
-If the concept has "visual" representation, include at least one assetRequest.`;
+If the concept has "visual" representation, include at least one assetRequest.
+
+IMPORTANT: All array fields (sourceUnitIds, priorKnowledge, representations, questionFamilies, misconceptionTargets) must be JSON arrays, not comma-separated strings.
+Return the blueprint as a single JSON object matching the schema.`;
 }

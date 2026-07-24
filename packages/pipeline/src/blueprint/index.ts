@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { LlmRouter } from '@open-edu/llm-config';
 import type { Concept } from '../concepts/types.js';
 import type { SourceUnit } from '../source/types.js';
@@ -20,17 +19,15 @@ export async function generateLessonBlueprints(
     const result = await router.generateStructuredRaw(
       'lesson_blueprint',
       prompt,
-      z.object({ blueprints: z.array(LessonBlueprintSchema) }),
+      LessonBlueprintSchema,
       { temperature: 0.3 },
     );
 
-    for (const bp of result.blueprints) {
-      const errors = validateBlueprint(bp);
-      if (errors.length > 0) {
-        warnings.push(...errors.map(e => `[${bp.conceptId}] ${e}`));
-      } else {
-        blueprints.push(bp);
-      }
+    const errors = validateBlueprint(result);
+    if (errors.length > 0) {
+      warnings.push(...errors.map(e => `[${result.conceptId}] ${e}`));
+    } else {
+      blueprints.push(result);
     }
   }
 
