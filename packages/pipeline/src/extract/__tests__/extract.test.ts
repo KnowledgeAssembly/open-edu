@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { extractTextFromPDF } from '../index.js';
+import { extractTextFromPDF, extractPDFPages } from '../index.js';
 
 vi.mock('pdf-parse', () => ({
   default: vi.fn().mockResolvedValue({
@@ -40,6 +40,10 @@ describe('parseChapters', () => {
     const match = 'Lesson 2 - Addition'.match(CHAPTER_HEADING);
     expect(match).not.toBeNull();
     expect(match![2]).toBe('2');
+  });
+
+  it('rejects non-existent PDF with extractPDFPages', async () => {
+    await expect(extractPDFPages('/nonexistent/file.pdf')).rejects.toThrow();
   });
 
   it('matches Unit headings', () => {

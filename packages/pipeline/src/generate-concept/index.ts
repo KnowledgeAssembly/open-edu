@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { LlmProvider } from '@open-edu/llm-config';
+import type { LlmProvider, LlmRouter } from '@open-edu/llm-config';
 import type { ConceptCandidate, GeneratedConcept } from '../types.js';
 import { ConceptRegistry } from './concept-registry.js';
 
@@ -118,4 +118,16 @@ export async function generateConcepts(
   }
 
   return { concepts, warnings };
+}
+
+export async function enrichConceptsWithRouter(
+  router: LlmRouter,
+  candidates: ConceptCandidate[],
+): Promise<{ concepts: GeneratedConcept[]; warnings: string[] }> {
+  const adapter = {
+    async generateStructured<T>(prompt: string, schema: any, options?: any): Promise<T> {
+      return router.generateStructuredRaw('concept_enrichment', prompt, schema, options);
+    },
+  };
+  return generateConcepts(adapter, candidates, [], 'B', 'math');
 }

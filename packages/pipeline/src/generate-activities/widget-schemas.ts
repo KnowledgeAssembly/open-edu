@@ -7,7 +7,7 @@ export function registerWidgetSchema(widgetId: string, schema: z.ZodType): void 
 }
 
 export function getWidgetSchema(widgetId: string): z.ZodType | undefined {
-  return widgetSchemaRegistry.get(widgetId);
+  return widgetSchemaRegistry.get(normalizeWidgetId(widgetId));
 }
 
 // Lightweight validation schemas matching widget config shapes.
@@ -296,21 +296,21 @@ const socialMapSchema = z.object({
 
 // Register all widget schemas
 const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
-  'open-edu.matching': matchingSchema,
-  'open-edu.drag-drop': dragDropSchema,
-  'open-edu.sequencing': sequencingSchema,
-  'open-edu.story-question': storyQuestionSchema,
-  'open-edu.fill-blank': fillBlankSchema,
-  'open-edu.visual-counting': visualCountingSchema,
-  'open-edu.fraction-visual': fractionVisualSchema,
-  'open-edu.chart-reader': chartReaderSchema,
-  'open-edu.clock-time': clockTimeSchema,
-  'open-edu.measurement-scale': measurementScaleSchema,
-  'open-edu.place-value-chart': placeValueChartSchema,
-  'open-edu.grid-area': gridAreaSchema,
-  'open-edu.real-world': realWorldSchema,
-  'open-edu.multiple-choice': multipleChoiceSchema,
-  'open-edu.multiple-choice-practice': multipleChoiceSchema,
+  'core.matching': matchingSchema,
+  'core.drag-drop': dragDropSchema,
+  'core.sequencing': sequencingSchema,
+  'core.story-question': storyQuestionSchema,
+  'core.fill-blank': fillBlankSchema,
+  'core.visual-counting': visualCountingSchema,
+  'math.fraction-visual': fractionVisualSchema,
+  'core.chart-reader': chartReaderSchema,
+  'math.clock-time': clockTimeSchema,
+  'math.measurement-scale': measurementScaleSchema,
+  'math.place-value-chart': placeValueChartSchema,
+  'math.grid-area': gridAreaSchema,
+  'core.real-world': realWorldSchema,
+  'core.multiple-choice': multipleChoiceSchema,
+  'core.multiple-choice-practice': multipleChoiceSchema,
   'core.audio-player': audioPlayerSchema,
   'core.video-player': videoPlayerSchema,
   'language.flashcard': flashcardSchema,
@@ -319,8 +319,37 @@ const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
   'social.map': socialMapSchema,
 };
 
+const WIDGET_ALIAS_MAP: Record<string, string> = {
+  'open-edu.matching': 'core.matching',
+  'open-edu.drag-drop': 'core.drag-drop',
+  'open-edu.sequencing': 'core.sequencing',
+  'open-edu.story-question': 'core.story-question',
+  'open-edu.fill-blank': 'core.fill-blank',
+  'open-edu.visual-counting': 'core.visual-counting',
+  'open-edu.fraction-visual': 'math.fraction-visual',
+  'open-edu.chart-reader': 'core.chart-reader',
+  'open-edu.clock-time': 'math.clock-time',
+  'open-edu.measurement-scale': 'math.measurement-scale',
+  'open-edu.place-value-chart': 'math.place-value-chart',
+  'open-edu.grid-area': 'math.grid-area',
+  'open-edu.real-world': 'core.real-world',
+  'open-edu.multiple-choice': 'core.multiple-choice',
+  'open-edu.multiple-choice-practice': 'core.multiple-choice-practice',
+};
+
+export function normalizeWidgetId(widgetId: string): string {
+  return WIDGET_ALIAS_MAP[widgetId] || widgetId;
+}
+
+export function isKnownWidgetId(widgetId: string): boolean {
+  const normalized = normalizeWidgetId(widgetId);
+  return widgetSchemaRegistry.has(normalized);
+}
+
 export function registerAllWidgetSchemas(): void {
   for (const [id, schema] of Object.entries(WIDGET_SCHEMAS)) {
     registerWidgetSchema(id, schema);
   }
 }
+
+registerAllWidgetSchemas();

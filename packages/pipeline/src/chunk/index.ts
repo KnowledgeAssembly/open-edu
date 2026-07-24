@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { LlmProvider } from '@open-edu/llm-config';
+import type { LlmProvider, LlmRouter } from '@open-edu/llm-config';
 import type { ChapterChunk, ConceptCandidate } from '../types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -164,4 +164,28 @@ export async function chunkContent(
   }
 
   return allCandidates;
+}
+
+export async function chunkContentWithRouter(
+  router: LlmRouter,
+  chapters: ChapterChunk[],
+): Promise<ConceptCandidate[]> {
+  const allCandidates: ConceptCandidate[] = [];
+  for (const chapter of chapters) {
+    const candidates = await extractConceptsFromChapterWithRouter(router, chapter);
+    allCandidates.push(...candidates);
+  }
+  return allCandidates;
+}
+
+async function extractConceptsFromChapterWithRouter(
+  router: LlmRouter,
+  chapter: ChapterChunk,
+): Promise<ConceptCandidate[]> {
+  const adapter = {
+    async generateStructured<T>(prompt: string, schema: any, options?: any): Promise<T> {
+      return router.generateStructuredRaw('concept_map', prompt, schema, options);
+    },
+  };
+  return extractConceptsFromChapter(adapter, chapter, [], 'B', 'math');
 }

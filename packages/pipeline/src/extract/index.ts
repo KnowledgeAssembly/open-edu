@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import pdfParse from 'pdf-parse';
 import type { ExtractedPDF, ChapterChunk, SectionChunk } from '../types.js';
+import type { PageContent } from '../source/inventory.js';
 
 const CHAPTER_HEADING = /^(Lesson|Chapter|Unit)\s+(\d+)\s*[:\-–—]\s*(.+)$/im;
 
@@ -223,6 +224,26 @@ function parseChapters(text: string): ChapterChunk[] {
   }
 
   return chapters;
+}
+
+export async function extractPDFPages(pdfPath: string): Promise<PageContent[]> {
+  const pdfBuffer = readFileSync(pdfPath);
+  const pdfData = await pdfParse(pdfBuffer);
+  const fullText = pdfData.text;
+
+  const pages: PageContent[] = [];
+  const pageTexts = fullText.split(/\f/);
+
+  for (let i = 0; i < pageTexts.length; i++) {
+    const pageText = pageTexts[i];
+    if (!pageText) continue;
+    const text = pageText.trim();
+    if (text.length > 0) {
+      pages.push({ pageNum: i + 1, text });
+    }
+  }
+
+  return pages;
 }
 
 export function extractTextFromPDF(pdfPath: string): Promise<string> {

@@ -8,7 +8,7 @@ import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
 import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
 import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
 import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
-import { getWidgetSchema, registerAllWidgetSchemas } from './widget-schemas.js';
+import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId } from './widget-schemas.js';
 
 // Register widget schemas once at module load
 registerAllWidgetSchemas();
@@ -177,9 +177,11 @@ async function generateStep(
       const responseType = (result.type as string) || type;
 
       // Validate widget config if widget type
+      let validatedWidgetId: string | undefined;
       let validatedWidgetConfig: Record<string, unknown> | undefined;
       if (responseType === 'widget') {
-        const widgetId = result.widgetId as string;
+        const widgetId = normalizeWidgetId(result.widgetId as string);
+        validatedWidgetId = widgetId;
         const rawConfig = result.widgetConfig as Record<string, unknown> | undefined;
         const widgetSchema = getWidgetSchema(widgetId);
         if (widgetSchema && rawConfig) {
@@ -221,7 +223,7 @@ async function generateStep(
           (result.content as Record<string, unknown>) || {},
           validatedWidgetConfig,
         ),
-        widgetId: responseType === 'widget' ? (result.widgetId as string) : undefined,
+        widgetId: responseType === 'widget' ? (validatedWidgetId || result.widgetId as string) : undefined,
         widgetConfig: validatedWidgetConfig,
       };
 

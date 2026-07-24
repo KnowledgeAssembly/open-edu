@@ -1,36 +1,15 @@
-You are analyzing a textbook chapter from a Level {LEVEL} {SUBJECT} curriculum. Your task is to identify discrete, teachable concepts within this chapter.
+You are an expert curriculum designer analyzing a textbook lesson to identify teachable concepts.
 
-## Chapter Content
+Given the lesson text below containing source units (each marked with an ID and type), identify discrete concepts that can be taught independently.
 
-Chapter {CHAPTER_NUMBER}: {CHAPTER_TITLE}
+Rules:
+- Every concept MUST cite at least one source unit ID as evidence.
+- You MUST cover every learning objective found in the source.
+- You MUST cover every worked example family and exercise family.
+- Generate ONE concept per independently teachable skill (let content determine count, not a fixed 3-8).
+- conceptId must be lowercase with underscores (e.g. indian_place_value).
 
-```
-{CHAPTER_TEXT}
-```
-
-## Existing Prerequisite Concepts
-
-The learner has already mastered these concepts (available as prerequisites):
-{EXISTING_CONCEPTS}
-
-## Guidelines for Learning Objectives
-
-- Use plain, concrete language (no jargon).
-- Focus on what the learner will DO, not what they'll understand.
-- Keep to 12 words or fewer.
-- Start with an action verb (Identify, Count, Add, Compare, etc.).
-
-## Output Requirements
-
-For each concept you identify, provide:
-
-1. **conceptId**: Lowercase with underscores (e.g., "fractions_intro")
-2. **learningObjective**: What the learner will do (≤12 words)
-3. **coreIdea**: The key takeaway in one sentence
-4. **examples**: 2-3 concrete examples from the chapter text
-5. **misconceptions**: 1-2 common mistakes (infer from exercises if possible)
-6. **suggestedDependencies**: conceptIds this concept depends on (use IDs from the existing concepts list, or suggest new ones)
-7. **estimatedDuration**: Minutes (10-30 based on content density)
-8. **sourceSections**: Which sections of the chapter text this concept comes from
-
-Identify between 3 and 8 concepts per chapter. Each concept must be distinct and teachable on its own. Do not combine concepts that should be taught separately.
+For each concept, return:
+- conceptId, learningObjective (action verb, <=12 words), coreIdea (2-4 sentences)
+- examples (2-3 from source), misconceptions (1-2), suggestedDependencies
+- sourceSections (sourceUnitIds that provide evidence), estimatedDuration (5-60 min)

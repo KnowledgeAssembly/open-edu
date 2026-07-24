@@ -175,7 +175,7 @@ describe('generateStep widget validation', () => {
     expect(result.activities).toHaveLength(5);
     const widgetActivity = result.activities.find((a) => a.courseSpecType === 'widget');
     expect(widgetActivity).toBeDefined();
-    expect(widgetActivity!.widgetId).toBe('open-edu.matching');
+    expect(widgetActivity!.widgetId).toBe('core.matching');
     expect(widgetActivity!.widgetConfig).toBeDefined();
   });
 

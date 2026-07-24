@@ -218,7 +218,7 @@ export const EXEMPLARS: Exemplar[] = [
         ],
       },
     },
-    widgetId: 'open-edu.matching',
+    widgetId: 'core.matching',
   },
   {
     type: 'widget',
@@ -241,7 +241,7 @@ export const EXEMPLARS: Exemplar[] = [
         interactive: true,
       },
     },
-    widgetId: 'open-edu.drag-drop',
+    widgetId: 'core.drag-drop',
   },
   {
     type: 'widget',
@@ -261,6 +261,6 @@ export const EXEMPLARS: Exemplar[] = [
         interactive: true,
       },
     },
-    widgetId: 'open-edu.sequencing',
+    widgetId: 'core.sequencing',
   },
 ];
