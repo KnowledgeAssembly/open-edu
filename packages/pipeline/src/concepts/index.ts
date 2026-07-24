@@ -1,6 +1,6 @@
 import type { LlmRouter } from '@open-edu/llm-config';
 import type { SourceUnit } from '../source/types.js';
-import type { Concept, ConceptMap } from './types.js';
+import type { Concept } from './types.js';
 import { ConceptSchema, ConceptMapSchema } from './types.js';
 import { buildConceptMapPrompt } from './prompt.js';
 

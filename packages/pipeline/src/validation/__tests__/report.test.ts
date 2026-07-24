@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateQualityReport, getPublishStatus } from '../report.js';
+import { generateQualityReport } from '../report.js';
 
 describe('generateQualityReport', () => {
   const baseParams = {

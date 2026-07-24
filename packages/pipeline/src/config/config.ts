@@ -1,4 +1,4 @@
-import type { LlmStage, LlmStageConfigs } from '@open-edu/llm-config';
+import type { LlmStageConfigs } from '@open-edu/llm-config';
 import { LLM_STAGES, DEFAULT_STAGE_CONFIGS } from '@open-edu/llm-config';
 
 export interface StageOverride {

@@ -1,4 +1,3 @@
-import type { LlmStage } from '@open-edu/llm-config';
 import type { CoverageLedger } from '../coverage/types.js';
 import type { MathValidationResult } from './math.js';
 import type { WidgetValidationResult } from './widgets.js';

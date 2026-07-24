@@ -1,24 +1,24 @@
 import { createHash } from 'node:crypto';
-import { LlmRouter, legacyAdapter, type LlmStage } from '@open-edu/llm-config';
-import { resolveStageConfigs, logStageConfigs, type StageOverride } from '../config/config.js';
+import type { LlmRouter } from '@open-edu/llm-config';
+import { legacyAdapter, type LlmStage } from '@open-edu/llm-config';
 import { extractPDFPages, extractPDF } from '../extract/index.js';
 import { buildSourceInventory } from '../source/inventory.js';
-import type { SourceInventory, SourceUnit } from '../source/types.js';
-import { generateConceptMap, validateConceptGraph } from '../concepts/index.js';
+import type { SourceInventory } from '../source/types.js';
+import { generateConceptMap } from '../concepts/index.js';
 import type { Concept } from '../concepts/types.js';
 import { generateLessonBlueprints } from '../blueprint/index.js';
 import type { LessonBlueprint } from '../blueprint/types.js';
 import { generateActivitiesForConcept } from '../generate-activities/index.js';
-import { validateAllMath, validateMCQOptions, extractMathQuestions, type MathQuestion } from '../validation/math.js';
+import { validateAllMath, extractMathQuestions } from '../validation/math.js';
 import { validateWidgetConfig, type WidgetValidationResult } from '../validation/widgets.js';
 import { buildCoverageLedger } from '../coverage/index.js';
 import { generateQualityReport, type QualityReport } from '../validation/report.js';
 import { writeCourseSpecOutput, writeCourseSpecJSONOutput } from '../output/index.js';
 import { generateAssetFiles } from '../assets/manifest.js';
 import type { AssetManifest } from '../assets/types.js';
-import type { GeneratedActivity, GeneratedConcept, ConceptActivityPair } from '../types.js';
-import { writeFileSync, existsSync, readFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
+import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 export interface PipelineResult {
   report: QualityReport;
@@ -47,7 +47,7 @@ export async function runPipelineV2(
   const startTime = Date.now();
   const outputPaths: string[] = [];
   const reviewItems: string[] = [];
-  let retries = 0;
+  const retries = 0;
 
   if (!existsSync(options.outputDir)) mkdirSync(options.outputDir, { recursive: true });
 
@@ -145,7 +145,7 @@ export async function runPipelineV2(
   }
 
   // Stage 5: Generate activities from blueprints
-  let conceptActivityPairs: ConceptActivityPair[] = [];
+  const conceptActivityPairs: ConceptActivityPair[] = [];
   const conceptActivityMap = new Map<string, GeneratedActivity[]>();
   if (canResume('course-spec.json')) {
     if (options.verbose) console.log('[5/8] Activities already generated (resuming)');
@@ -167,10 +167,10 @@ export async function runPipelineV2(
   }
 
   // Stage 6: Generate assets (deterministic SVGs)
-  let assetManifest: AssetManifest = { version: 1, generatedAt: new Date().toISOString(), assets: [] };
+  const assetManifest: AssetManifest = { version: 1, generatedAt: new Date().toISOString(), assets: [] };
   if (options.verbose) console.log('[6/8] Generating visual assets...');
   if (!options.dryRun) {
-    const { written } = generateAssetFiles(assetManifest, options.outputDir);
+    const { written: _written } = generateAssetFiles(assetManifest, options.outputDir);
   }
   const assetsPath = join(options.outputDir, 'assets', 'manifest.json');
   outputPaths.push(assetsPath);
