@@ -106,6 +106,23 @@ export async function runPipelineV2(
     maybeWrite(invPath, JSON.stringify(inventory, null, 2));
   }
 
+  // Apply chapter filter: keep only units for the requested lesson
+  if (options.chapterFilter !== undefined) {
+    const lessonUnits = inventory.units.filter(u => u.type === 'lesson');
+    const chapterStartIdx = inventory.units.findIndex(
+      u => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! - 1,
+    );
+    const chapterEndIdx = inventory.units.findIndex(
+      (u, i) => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! && i > chapterStartIdx,
+    );
+    if (chapterStartIdx >= 0) {
+      const endIdx = chapterEndIdx >= 0 ? chapterEndIdx : inventory.units.length;
+      inventory.units = inventory.units.slice(chapterStartIdx, endIdx);
+      inventory.warnings.push(`Filtered to chapter ${options.chapterFilter} (${inventory.units.length} units)`);
+      if (options.verbose) console.log(`Chapter filter: keeping ${inventory.units.length} units for chapter ${options.chapterFilter}`);
+    }
+  }
+
   // Stage 3: Generate concept map
   const cmPath = join(options.outputDir, 'concept-map.json');
   let concepts: Concept[] = [];

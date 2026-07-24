@@ -228,18 +228,39 @@ function parseChapters(text: string): ChapterChunk[] {
 
 export async function extractPDFPages(pdfPath: string): Promise<PageContent[]> {
   const pdfBuffer = readFileSync(pdfPath);
-  const pdfData = await pdfParse(pdfBuffer);
-  const fullText = pdfData.text;
-
   const pages: PageContent[] = [];
-  const pageTexts = fullText.split(/\f/);
 
-  for (let i = 0; i < pageTexts.length; i++) {
-    const pageText = pageTexts[i];
-    if (!pageText) continue;
-    const text = pageText.trim();
-    if (text.length > 0) {
-      pages.push({ pageNum: i + 1, text });
+  const pdfData = await pdfParse(pdfBuffer, {
+    pagerender: function (pageData: unknown) {
+      const pd = pageData as { getTextContent: () => Promise<{ items: Array<{ str: string }> }> };
+      return pd.getTextContent().then(function (textContent) {
+        return textContent.items
+          .map(function (item) {
+            return item.str;
+          })
+          .join(' ');
+      });
+    },
+  });
+
+  const allText = pdfData.text;
+  const pageTexts = allText.split(/\f/);
+  if (pageTexts.length <= 1 && pdfData.numpages > 1) {
+    const chunkSize = Math.ceil(allText.length / pdfData.numpages);
+    for (let i = 0; i < pdfData.numpages; i++) {
+      const chunk = allText.slice(i * chunkSize, (i + 1) * chunkSize).trim();
+      if (chunk.length > 0) {
+        pages.push({ pageNum: i + 1, text: chunk });
+      }
+    }
+  } else {
+    for (let i = 0; i < pageTexts.length; i++) {
+      const pageText = pageTexts[i];
+      if (!pageText) continue;
+      const text = pageText.trim();
+      if (text.length > 0) {
+        pages.push({ pageNum: i + 1, text });
+      }
     }
   }
 
