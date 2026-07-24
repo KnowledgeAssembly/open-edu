@@ -232,35 +232,29 @@ export async function extractPDFPages(pdfPath: string): Promise<PageContent[]> {
 
   const pdfData = await pdfParse(pdfBuffer, {
     pagerender: function (pageData: unknown) {
-      const pd = pageData as { getTextContent: () => Promise<{ items: Array<{ str: string }> }> };
+      const pd = pageData as {
+        getTextContent: () => Promise<{
+          items: Array<{ str: string; transform?: number[] }>;
+        }>;
+      };
       return pd.getTextContent().then(function (textContent) {
-        return textContent.items
-          .map(function (item) {
-            return item.str;
-          })
-          .join(' ');
+        let text = '';
+        for (const item of textContent.items) {
+          text += item.str;
+        }
+        return text + '\n\f';
       });
     },
   });
 
-  const allText = pdfData.text;
-  const pageTexts = allText.split(/\f/);
-  if (pageTexts.length <= 1 && pdfData.numpages > 1) {
-    const chunkSize = Math.ceil(allText.length / pdfData.numpages);
-    for (let i = 0; i < pdfData.numpages; i++) {
-      const chunk = allText.slice(i * chunkSize, (i + 1) * chunkSize).trim();
-      if (chunk.length > 0) {
-        pages.push({ pageNum: i + 1, text: chunk });
-      }
-    }
-  } else {
-    for (let i = 0; i < pageTexts.length; i++) {
-      const pageText = pageTexts[i];
-      if (!pageText) continue;
-      const text = pageText.trim();
-      if (text.length > 0) {
-        pages.push({ pageNum: i + 1, text });
-      }
+  const pageTexts = pdfData.text.split(/\f/);
+
+  for (let i = 0; i < pageTexts.length; i++) {
+    const pt = pageTexts[i];
+    if (!pt) continue;
+    const text = pt.trim();
+    if (text.length > 0) {
+      pages.push({ pageNum: i + 1, text });
     }
   }
 
