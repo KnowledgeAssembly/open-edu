@@ -152,7 +152,6 @@ export function RuntimeProvider({
 
     return () => {
       unsubscribe();
-      engine.stop();
     };
   }, [engine]);
 

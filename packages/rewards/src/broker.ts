@@ -77,11 +77,12 @@ export class RewardBroker {
     })}`;
   }
 
-  private toReceipt(result: RewardResult, actionType: string): RewardReceipt {
+  private toReceipt(result: RewardResult, actionType: string, actionKey?: string): RewardReceipt {
     const now = Date.now();
     return {
       actionId: this.generateActionId(),
       actionType,
+      actionKey,
       dispatchedAt: now,
       status: result.success ? 'delivered' : 'failed',
       detail: result.detail,
@@ -120,6 +121,7 @@ export class RewardBroker {
           this.toReceipt(
             handleBadgeAction(action as BadgeAction, this.badgeTracker),
             action.action,
+            (action as BadgeAction).badge,
           ),
         );
         break;

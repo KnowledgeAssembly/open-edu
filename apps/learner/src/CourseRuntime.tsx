@@ -113,7 +113,7 @@ export function CourseRuntime({
           source: session.events$,
           onReceipt: (receipt: RewardReceipt) => {
             if (receipt.status === 'delivered' && receipt.actionType === 'badge.award') {
-              const badgeName = receipt.detail ?? receipt.actionKey ?? 'Unknown badge';
+              const badgeName = receipt.actionKey ?? receipt.detail ?? 'Unknown badge';
               setBadges((prev) => [...prev, badgeName]);
               void addBadge(pkg.manifest.id, badgeName);
               setToastBadgeName(badgeName);

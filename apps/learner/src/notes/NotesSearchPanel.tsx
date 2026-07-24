@@ -17,11 +17,13 @@ export function NotesSearchPanel({ onOpenNote }: NotesSearchPanelProps): JSX.Ele
   const [results, setResults] = useState<NoteSearchResult[]>([]);
   const [searched, setSearched] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const announceRef = useRef(announce);
+  announceRef.current = announce;
 
   useEffect(() => {
     if (!query.trim()) {
-      setResults([]);
-      setSearched(false);
+      if (results.length > 0) setResults([]);
+      if (searched) setSearched(false);
       return;
     }
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -41,12 +43,12 @@ export function NotesSearchPanel({ onOpenNote }: NotesSearchPanelProps): JSX.Ele
       const hits = queryNotes(index, query);
       setResults(hits);
       setSearched(true);
-      announce(t('notes.search.results.aria', { count: String(hits.length) }));
+      announceRef.current(t('notes.search.results.aria', { count: String(hits.length) }));
     }, 200);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [query, announce, t]);
+  }, [query, t]);
 
   const handleSelect = useCallback(
     (id: string) => {
