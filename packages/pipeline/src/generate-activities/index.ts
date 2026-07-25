@@ -316,12 +316,12 @@ function conceptToGeneratedConcept(concept: Concept, blueprint: LessonBlueprint)
     learningObjective: concept.learningObjective,
     coreIdea: concept.coreIdea,
     examples: [],
-    misconceptions: concept.misconceptionTargets,
+    misconceptions: concept.misconceptionTargets ?? [],
     supports: { visual: concept.representations.includes('visual') },
     masteryCriteria: concept.masteryThreshold,
-    difficulty: concept.difficulty,
-    estimatedDuration: concept.estimatedMinutes,
-    dependencies: concept.prerequisites,
+    difficulty: concept.difficulty as GeneratedConcept['difficulty'],
+    estimatedDuration: concept.estimatedMinutes ?? 30,
+    dependencies: concept.prerequisites ?? [],
   };
 }
 

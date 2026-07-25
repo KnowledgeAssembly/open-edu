@@ -19,3 +19,6 @@ apps/docs/.docusaurus/
 packages/ai-companion/src/data/external/
 apps/learner/public/dictionary
 .worktrees
+
+# Pipeline generated output
+output/

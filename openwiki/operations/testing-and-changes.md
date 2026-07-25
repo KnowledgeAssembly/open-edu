@@ -27,9 +27,14 @@ From the repository root:
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales` — extract translatable strings from a package
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales` — validate translation completeness
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang` — find missing translations for a target language
-- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --level B --subject math` — run the PDF-to-OpenEdu pipeline with per-stage LLM routing
-- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --stage-model source_inventory=gpt-5.4-mini --stage-model concept_map=gpt-5.4` — override model per stage
-- `pnpm --filter @open-edu/pipeline test:fixture` — run the Lesson 1 golden fixture test
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --level B --subject math` — run the PDF-to-OpenEdu pipeline (auto-resolves profile from subject)
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --profile math --scope chapter-index:1` — generate a single chapter with explicit profile
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --subject science --profile science` — generate with science profile
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --format json` — JSON-only pipeline output
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --resume --verbose` — resume from intermediate artifacts
+- `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --stage-model source_inventory=gpt-4o-mini --stage-model concept_map=gpt-4o` — override model per stage
+- `pnpm --filter @open-edu/pipeline test -- generic-pipeline` — run generic pipeline acceptance tests
+- `pnpm --filter @open-edu/pipeline test -- registry` — run profile registry tests
 
 ## Package-local commands
 

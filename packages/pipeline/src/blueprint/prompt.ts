@@ -24,7 +24,7 @@ ${JSON.stringify(
     coreIdea: concept.coreIdea,
     difficulty: concept.difficulty,
     representations: concept.representations,
-    misconceptionTargets: concept.misconceptionTargets,
+    misconceptionTargets: concept.misconceptionTargets ?? [],
     prerequisites: concept.prerequisites,
     adultContext: concept.adultContext,
     recommendedWidgetCategories: concept.recommendedWidgetCategories,

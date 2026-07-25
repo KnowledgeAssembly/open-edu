@@ -490,7 +490,7 @@ export const MathValidator: SubjectValidator = {
   validateConcepts: (ctx: ValidationContext): ValidationIssue[] => {
     const issues: ValidationIssue[] = [];
     for (const concept of ctx.concepts) {
-      if (concept.exerciseFamilies.length === 0) {
+      if (!concept.exerciseFamilies || concept.exerciseFamilies.length === 0) {
         issues.push({
           id: `no-exercise-${concept.conceptId}`,
           severity: 'warning',
