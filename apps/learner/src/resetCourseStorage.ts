@@ -1,8 +1,4 @@
-import {
-  deleteCourseProgress,
-  deleteBadges,
-  deleteNotesByCourse,
-} from '@open-edu/storage';
+import { deleteCourseProgress, deleteBadges, deleteNotesByCourse } from '@open-edu/storage';
 
 export async function resetCourse(courseId: string): Promise<void> {
   const operations = [

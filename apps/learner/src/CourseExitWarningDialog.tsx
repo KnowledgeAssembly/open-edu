@@ -31,9 +31,7 @@ export function CourseExitWarningDialog({
       <DialogContent data-testid="exit-warning-dialog">
         <DialogHeader>
           <DialogTitle>{t('learner.course.leave_warning')}</DialogTitle>
-          <DialogDescription>
-            {t('learner.course.leave_warning_description')}
-          </DialogDescription>
+          <DialogDescription>{t('learner.course.leave_warning_description')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onStay} data-testid="exit-warning-stay">

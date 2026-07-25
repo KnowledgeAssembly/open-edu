@@ -13,13 +13,13 @@ Generate a JSON object with:
 {
   "type": "reflection",
   "content": {
-    "description": "Encouraging title (e.g., 'Great work!', 'Excellent!')",
+    "description": "Encouraging title (e.g., 'Great work!', 'Excellent!', 'Well done!')",
     "instructions": "A positive message congratulating the learner and a question prompting them to reflect on what they learned."
   }
 }
 
 The instructions should include:
-- A congratulatory message
-- A reflection question about the concept
-- A suggestion for a real-world visual activity the learner can do (e.g., 'Draw a family tree showing the different types of families you learned about', 'Create a bar chart of your weekly schedule')
+- A congratulatory message acknowledging the specific concept mastered
+- A reflection question about the concept that connects to daily life
+- A suggestion for a real-world activity the learner can do (e.g., 'Draw a place value chart for your family telephone numbers', 'Create a bar chart of your weekly schedule', 'Measure 5 objects at home and record their lengths')
 `;

@@ -2,6 +2,10 @@ export type { LlmConfig, LlmProvider } from './types.js';
 export { loadConfig } from './types.js';
 export { OpenAIProvider } from './providers/openai-provider.js';
 export { OpenRouterProvider } from './providers/openrouter-provider.js';
+export { LlmRouter, legacyAdapter } from './router.js';
+export type { StructuredResult } from './router.js';
+export { LLM_STAGES, DEFAULT_STAGE_CONFIGS, isLlmStage, assertLlmStage } from './stages.js';
+export type { LlmStage, LlmStageConfig, LlmStageConfigs } from './stages.js';
 
 import type { LlmConfig } from './types.js';
 import { loadConfig } from './types.js';

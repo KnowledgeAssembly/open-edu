@@ -1,9 +1,5 @@
 import type { LoadedBundle } from '@open-edu/core';
-import {
-  deleteCourseProgress,
-  deleteBadges,
-  deleteNotesByCourse,
-} from '@open-edu/storage';
+import { deleteCourseProgress, deleteBadges, deleteNotesByCourse } from '@open-edu/storage';
 
 export async function resetBundle(bundle: LoadedBundle): Promise<void> {
   const operations: Promise<void>[] = [deleteCourseProgress(bundle.manifest.id)];

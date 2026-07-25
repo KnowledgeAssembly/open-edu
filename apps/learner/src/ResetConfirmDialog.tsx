@@ -63,7 +63,7 @@ export function ResetConfirmDialog({
           </div>
         </DialogHeader>
         <DialogDescription id="reset-dialog-description" data-testid="reset-dialog-description">
-            {t(`learner.${descriptionKey}`, { courseTitle })}
+          {t(`learner.${descriptionKey}`, { courseTitle })}
         </DialogDescription>
         <DialogFooter className="mt-6">
           <Button

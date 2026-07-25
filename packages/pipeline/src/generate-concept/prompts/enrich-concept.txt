@@ -1,41 +1,15 @@
-You are a curriculum designer for a Level {LEVEL} {SUBJECT} course. Your task is to enrich concept candidates with full pedagogical metadata.
+You are adding pedagogical metadata to existing concepts from a mathematics curriculum.
 
-## Concept Candidate
+Given the concept and its source evidence, enrich it with:
+1. difficulty: "beginner", "intermediate", or "advanced"
+2. masteryCriteria: 0.5-0.95 target threshold
+3. supports: whether visual representation is beneficial (true/false)
+4. representations: "concrete", "visual", "symbolic"
+5. adultContext: real-world adult-life application
+6. recommendedWidgets: widget categories for teaching this concept
+7. misconceptionTargets: refined list of likely student errors
+8. dependencies: resolved prerequisite conceptIds
 
-- **conceptId:** {CONCEPT_ID}
-- **Learning Objective:** {LEARNING_OBJECTIVE}
-- **Core Idea:** {CORE_IDEA}
-- **Examples:** {EXAMPLES}
-- **Source Text:** {SOURCE_TEXT}
-
-## Available Prerequisite Concepts
-
-{KNOWN_CONCEPTS}
-
-## Difficulty Guidelines
-
-| Difficulty | Description | Typical Concept |
-|---|---|---|
-| beginner | Introduces a new skill with concrete, visual support | Introducing fractions, place value basics |
-| intermediate | Builds on a beginner concept with slightly more abstraction | Comparing fractions, operations |
-| advanced | Requires multiple prerequisite concepts and abstract reasoning | Complex estimation, multi-step operations |
-
-For Level {LEVEL}, most concepts should be "beginner" or "intermediate".
-
-## Mastery Criteria Guidelines
-
-- beginner: 0.75-0.80
-- intermediate: 0.80-0.85
-- advanced: 0.85
-
-## Output Requirements
-
-For the given concept candidate, fill in:
-
-1. **masteryCriteria**: A number between 0.70 and 0.85 based on difficulty
-2. **difficulty**: "beginner", "intermediate", or "advanced"
-3. **supports**: { "visual": true } for all {SUBJECT} concepts
-4. **dependencies**: Array of conceptIds that are prerequisites. Choose ONLY from the available concepts list. If a concept in the candidate's suggestedDependencies is NOT in the available list, exclude it.
-5. **misconceptions**: Refine the candidate's misconceptions to be specific and clear (up to 3)
-6. **chapterCode**: The chapter code (e.g., "CH1", "CH2")
-7. **chapterName**: The chapter name
+Rules:
+- Do NOT change the conceptId or coreIdea.
+- Visual concepts (place value, fractions, geometry) MUST have supports.visual = true.

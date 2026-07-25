@@ -28,20 +28,20 @@ describe('widget schema registry', () => {
 
   it('registers all built-in widget schemas', () => {
     const expectedIds = [
-      'open-edu.matching',
-      'open-edu.drag-drop',
-      'open-edu.sequencing',
-      'open-edu.story-question',
-      'open-edu.fill-blank',
-      'open-edu.visual-counting',
-      'open-edu.fraction-visual',
-      'open-edu.chart-reader',
-      'open-edu.clock-time',
-      'open-edu.measurement-scale',
-      'open-edu.place-value-chart',
-      'open-edu.grid-area',
-      'open-edu.real-world',
-      'open-edu.multiple-choice',
+      'core.matching',
+      'core.drag-drop',
+      'core.sequencing',
+      'core.story-question',
+      'core.fill-blank',
+      'core.visual-counting',
+      'math.fraction-visual',
+      'core.chart-reader',
+      'math.clock-time',
+      'math.measurement-scale',
+      'math.place-value-chart',
+      'math.grid-area',
+      'core.real-world',
+      'core.multiple-choice',
     ];
     for (const id of expectedIds) {
       expect(getWidgetSchema(id)).toBeDefined();
@@ -51,7 +51,7 @@ describe('widget schema registry', () => {
 
 describe('widget schema validation', () => {
   it('matchingSchema accepts valid config', () => {
-    const schema = getWidgetSchema('open-edu.matching')!;
+    const schema = getWidgetSchema('core.matching')!;
     const result = schema.safeParse({
       pairs: [{ itemA: 'Term A', itemB: 'Definition B' }],
     });
@@ -59,31 +59,31 @@ describe('widget schema validation', () => {
   });
 
   it('matchingSchema rejects config missing required pairs', () => {
-    const schema = getWidgetSchema('open-edu.matching')!;
+    const schema = getWidgetSchema('core.matching')!;
     const result = schema.safeParse({});
     expect(result.success).toBe(false);
   });
 
   it('matchingSchema rejects config with empty pairs', () => {
-    const schema = getWidgetSchema('open-edu.matching')!;
+    const schema = getWidgetSchema('core.matching')!;
     const result = schema.safeParse({ pairs: [] });
     expect(result.success).toBe(false);
   });
 
   it('fractionVisualSchema accepts valid config', () => {
-    const schema = getWidgetSchema('open-edu.fraction-visual')!;
+    const schema = getWidgetSchema('math.fraction-visual')!;
     const result = schema.safeParse({ numerator: 1, denominator: 4 });
     expect(result.success).toBe(true);
   });
 
   it('fractionVisualSchema rejects zero denominator', () => {
-    const schema = getWidgetSchema('open-edu.fraction-visual')!;
+    const schema = getWidgetSchema('math.fraction-visual')!;
     const result = schema.safeParse({ numerator: 1, denominator: 0 });
     expect(result.success).toBe(false);
   });
 
   it('dragDropSchema accepts valid config', () => {
-    const schema = getWidgetSchema('open-edu.drag-drop')!;
+    const schema = getWidgetSchema('core.drag-drop')!;
     const result = schema.safeParse({
       items: [{ id: 'i1', label: 'Item' }],
       targets: [{ id: 't1', label: 'Target' }],
@@ -93,13 +93,13 @@ describe('widget schema validation', () => {
   });
 
   it('clockTimeSchema accepts valid config', () => {
-    const schema = getWidgetSchema('open-edu.clock-time')!;
+    const schema = getWidgetSchema('math.clock-time')!;
     const result = schema.safeParse({ hour: 10, minute: 30 });
     expect(result.success).toBe(true);
   });
 
   it('clockTimeSchema rejects invalid hour', () => {
-    const schema = getWidgetSchema('open-edu.clock-time')!;
+    const schema = getWidgetSchema('math.clock-time')!;
     const result = schema.safeParse({ hour: 25, minute: 30 });
     expect(result.success).toBe(false);
   });
@@ -143,7 +143,7 @@ describe('generateStep widget validation', () => {
           description: 'Family Matching',
           instructions: 'Match each family type.',
         },
-        widgetId: 'open-edu.matching',
+        widgetId: 'core.matching',
         widgetConfig: {
           pairs: [{ itemA: 'Joint', itemB: 'Multiple generations' }],
         },
@@ -175,7 +175,7 @@ describe('generateStep widget validation', () => {
     expect(result.activities).toHaveLength(5);
     const widgetActivity = result.activities.find((a) => a.courseSpecType === 'widget');
     expect(widgetActivity).toBeDefined();
-    expect(widgetActivity!.widgetId).toBe('open-edu.matching');
+    expect(widgetActivity!.widgetId).toBe('core.matching');
     expect(widgetActivity!.widgetConfig).toBeDefined();
   });
 
@@ -189,7 +189,7 @@ describe('generateStep widget validation', () => {
           description: 'Clock Activity',
           instructions: 'Read the clock.',
         },
-        widgetId: 'open-edu.clock-time',
+        widgetId: 'math.clock-time',
         widgetConfig: { hour: 25, minute: 30 },
       },
       // Step 0 (observe) attempt 1: valid reading fallback

@@ -1,312 +1,381 @@
-import type { LlmProvider } from '@open-edu/llm-config';
-import { extractPDF } from '../extract/index.js';
-import { chunkContent } from '../chunk/index.js';
-import { generateConcepts } from '../generate-concept/index.js';
+import { createHash } from 'node:crypto';
+import type { LlmRouter } from '@open-edu/llm-config';
+import { legacyAdapter, type LlmStage } from '@open-edu/llm-config';
+import { extractPDFPages, extractPDF } from '../extract/index.js';
+import { buildSourceInventory } from '../source/inventory.js';
+import type { SourceInventory } from '../source/types.js';
+import { generateConceptMap } from '../concepts/index.js';
+import type { Concept } from '../concepts/types.js';
+import { generateLessonBlueprints } from '../blueprint/index.js';
+import type { LessonBlueprint } from '../blueprint/types.js';
+import { generateActivitiesForConcept } from '../generate-activities/index.js';
 import {
-  generateAllActivities,
-  generateActivitiesForConcept,
-} from '../generate-activities/index.js';
-import { validateWithRetry } from '../validate/index.js';
+  validateAllMath,
+  extractMathQuestions,
+  extractMCQValidationErrors,
+} from '../validation/math.js';
+import { validateWidgetConfig, type WidgetValidationResult } from '../validation/widgets.js';
+import { buildCoverageLedger } from '../coverage/index.js';
+import { generateQualityReport, type QualityReport } from '../validation/report.js';
 import { writeCourseSpecOutput, writeCourseSpecJSONOutput } from '../output/index.js';
-import type {
-  ConceptCandidate,
-  GeneratedConcept,
-  GeneratedActivity,
-  ConceptActivityPair,
-  ValidatedOutput,
-} from '../types.js';
+import { generateAssetFiles } from '../assets/manifest.js';
+import type { AssetManifest } from '../assets/types.js';
+import { AssetPlanResponseSchema } from '../assets/types.js';
+import { buildAssetPlanPrompt } from '../assets/asset-plan-prompt.js';
+import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
+import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-export interface PipelineOptions {
-  pdfPath: string;
-  levelCode: string;
-  subject: string;
-  force: boolean;
-  chapterFilter?: number;
-  outputDir: string;
-  llmProvider: string;
-  llmModel: string;
-  interactive: boolean;
-  dryRun: boolean;
-  verbose: boolean;
-  maxRetries: number;
-  levelAConceptIds: string[];
-  format: 'md' | 'json' | 'both';
-}
-
-export interface PipelineReport {
-  status: 'complete' | 'partial' | 'failed';
-  chaptersProcessed: number;
-  conceptsGenerated: number;
-  activitiesGenerated: number;
-  filesWritten: number;
-  filesSkipped: number;
-  validationErrors: number;
-  retriesNeeded: number;
-  failedConcepts: number;
-  warnings: string[];
-  errors: string[];
-  duration: number;
+export interface PipelineResult {
+  report: QualityReport;
   outputPaths: string[];
+  coverageLedger: any;
+  assetManifest: AssetManifest | null;
 }
 
-function log(verbose: boolean, ...args: unknown[]): void {
-  if (verbose) {
-    console.log(...args);
-  }
-}
-
-export async function runPipeline(
-  llm: LlmProvider,
-  options: PipelineOptions,
-): Promise<PipelineReport> {
+export async function runPipelineV2(
+  router: LlmRouter,
+  options: {
+    pdfPath: string;
+    levelCode: string;
+    subject: string;
+    force: boolean;
+    chapterFilter?: number;
+    outputDir: string;
+    verbose: boolean;
+    dryRun: boolean;
+    resume: boolean;
+    maxRetries: number;
+    format: 'md' | 'json' | 'both';
+    widgetCategories: string[];
+  },
+): Promise<PipelineResult> {
   const startTime = Date.now();
-  const errors: string[] = [];
-  const warnings: string[] = [];
+  const outputPaths: string[] = [];
+  const reviewItems: string[] = [];
+  const retries = 0;
 
-  log(options.verbose, '[Pipeline] Starting curriculum generation...');
-  log(options.verbose, `  PDF:   ${options.pdfPath}`);
-  log(options.verbose, `  Level: ${options.levelCode}`);
-  log(options.verbose, `  Subject: ${options.subject}`);
+  if (!existsSync(options.outputDir)) mkdirSync(options.outputDir, { recursive: true });
 
-  // 1. Extract
-  log(options.verbose, '\n[1/6] Extracting PDF...');
-  let chapters;
-  try {
-    const pdf = await extractPDF(options.pdfPath);
-    chapters = pdf.chapters;
-    log(options.verbose, `  ✓ ${chapters.length} chapters found`);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return {
-      status: 'failed',
-      chaptersProcessed: 0,
-      conceptsGenerated: 0,
-      activitiesGenerated: 0,
-      filesWritten: 0,
-      filesSkipped: 0,
-      validationErrors: 1,
-      retriesNeeded: 0,
-      failedConcepts: 0,
-      warnings: [],
-      errors: [`Extraction failed: ${msg}`],
-      duration: Date.now() - startTime,
-      outputPaths: [],
-    };
+  function computeConfigHash(): string {
+    const hash = createHash('sha256');
+    const cfg = JSON.stringify({
+      pdfPath: options.pdfPath,
+      levelCode: options.levelCode,
+      subject: options.subject,
+      stages: [
+        'source_inventory',
+        'concept_map',
+        'concept_enrichment',
+        'lesson_blueprint',
+        'asset_plan',
+        'activity_generation',
+        'review',
+      ].map((s: string) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
+    });
+    hash.update(cfg);
+    return hash.digest('hex').slice(0, 12);
   }
 
-  if (options.chapterFilter) {
-    const originalCount = chapters.length;
-    chapters = chapters.filter((ch) => ch.chapterNumber === options.chapterFilter);
-    if (chapters.length === 0) {
-      return {
-        status: 'failed',
-        chaptersProcessed: 0,
-        conceptsGenerated: 0,
-        activitiesGenerated: 0,
-        filesWritten: 0,
-        filesSkipped: 0,
-        validationErrors: 1,
-        retriesNeeded: 0,
-        failedConcepts: 0,
-        warnings: [],
-        errors: [
-          `Chapter ${options.chapterFilter} not found. Available: ${Array.from({ length: originalCount }, (_, i) => i + 1).join(', ')}`,
-        ],
-        duration: Date.now() - startTime,
-        outputPaths: [],
-      };
+  const configHash = computeConfigHash();
+  const hashPath = join(options.outputDir, '.pipeline-hash');
+  const previousHash =
+    options.resume && existsSync(hashPath) ? readFileSync(hashPath, 'utf-8').trim() : '';
+
+  function canResume(filename: string): boolean {
+    if (!options.resume) return false;
+    if (previousHash && previousHash !== configHash) return false;
+    return existsSync(join(options.outputDir, filename));
+  }
+
+  if (options.force) {
+    if (options.verbose) console.log('--force set: regenerating all artifacts');
+  } else if (options.resume && previousHash !== configHash) {
+    if (options.verbose) console.log('Config changed since last run. Regenerating all artifacts.');
+  }
+
+  const shouldRun = !options.dryRun;
+  function maybeWrite(path: string, content: string, force?: boolean): void {
+    if (shouldRun || force) {
+      writeFileSync(path, content, 'utf-8');
+      outputPaths.push(path);
     }
-    log(options.verbose, `  → Filtered to chapter ${options.chapterFilter} (of ${originalCount})`);
+  }
+  if (options.dryRun && options.verbose)
+    console.log('--dry-run: skipping LLM calls and file writes');
+
+  // Stage 1: Extract PDF pages
+  if (options.verbose) console.log('[1/8] Extracting PDF pages...');
+  const pages = !options.dryRun ? await extractPDFPages(options.pdfPath) : [];
+  const pdfMeta = !options.dryRun
+    ? await extractPDF(options.pdfPath)
+    : { metadata: { title: options.subject } };
+
+  // Stage 2: Build source inventory
+  const invPath = join(options.outputDir, 'source-inventory.json');
+  let inventory: SourceInventory;
+  if (canResume('source-inventory.json')) {
+    inventory = JSON.parse(readFileSync(invPath, 'utf-8'));
+    if (options.verbose) console.log('[2/8] Resumed source inventory from cache');
+  } else {
+    if (options.verbose) console.log('[2/8] Building source inventory...');
+    inventory = !options.dryRun
+      ? await buildSourceInventory(router, pages, pdfMeta.metadata.title)
+      : { documentId: 'dry-run', title: 'Dry Run', totalPages: 0, units: [], warnings: [] };
+    maybeWrite(invPath, JSON.stringify(inventory, null, 2));
   }
 
-  // 2. Chunk
-  log(options.verbose, '\n[2/6] Chunking content...');
-  let candidates: ConceptCandidate[] = [];
-  try {
-    candidates = await chunkContent(
-      llm,
-      chapters,
-      options.levelAConceptIds,
-      options.levelCode,
-      options.subject,
+  // Apply chapter filter: keep only units for the requested lesson
+  if (options.chapterFilter !== undefined) {
+    const lessonUnits = inventory.units.filter((u) => u.type === 'lesson');
+    const chapterStartIdx = inventory.units.findIndex(
+      (u) => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! - 1,
     );
-    log(options.verbose, `  ✓ ${candidates.length} concept candidates identified`);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Chunking failed: ${msg}`);
-    log(options.verbose, `  ✗ ${msg}`);
-  }
-
-  if (candidates.length === 0 && errors.length > 0) {
-    return {
-      status: 'failed',
-      chaptersProcessed: chapters?.length ?? 0,
-      conceptsGenerated: 0,
-      activitiesGenerated: 0,
-      filesWritten: 0,
-      filesSkipped: 0,
-      validationErrors: errors.length,
-      retriesNeeded: 0,
-      failedConcepts: 0,
-      warnings,
-      errors,
-      duration: Date.now() - startTime,
-      outputPaths: [],
-    };
-  }
-
-  // 3. Generate Concepts
-  log(options.verbose, '\n[3/6] Generating concepts...');
-  let concepts: GeneratedConcept[] = [];
-  try {
-    const result = await generateConcepts(
-      llm,
-      candidates,
-      options.levelAConceptIds,
-      options.levelCode,
-      options.subject,
+    const chapterEndIdx = inventory.units.findIndex(
+      (u, i) =>
+        u.type === 'lesson' &&
+        lessonUnits.indexOf(u) === options.chapterFilter! &&
+        i > chapterStartIdx,
     );
-    concepts = result.concepts;
-    warnings.push(...result.warnings);
-    log(options.verbose, `  ✓ ${concepts.length} concepts generated`);
-    if (result.warnings.length > 0) {
-      log(options.verbose, `  ⚠ ${result.warnings.length} warnings`);
+    if (chapterStartIdx >= 0) {
+      const endIdx = chapterEndIdx >= 0 ? chapterEndIdx : inventory.units.length;
+      inventory.units = inventory.units.slice(chapterStartIdx, endIdx);
+      inventory.warnings.push(
+        `Filtered to chapter ${options.chapterFilter} (${inventory.units.length} units)`,
+      );
+      if (options.verbose)
+        console.log(
+          `Chapter filter: keeping ${inventory.units.length} units for chapter ${options.chapterFilter}`,
+        );
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Concept generation failed: ${msg}`);
-    log(options.verbose, `  ✗ ${msg}`);
   }
 
-  // 4. Generate Activities
-  log(options.verbose, '\n[4/6] Generating activities...');
-  let activitiesMap = new Map<string, GeneratedActivity[]>();
-  try {
-    const result = await generateAllActivities(llm, concepts);
-    activitiesMap = result.activitiesMap;
-    warnings.push(...result.warnings);
-    errors.push(...result.errors);
-    log(options.verbose, `  ✓ ${activitiesMap.size} concepts have activities`);
-    if (result.errors.length > 0) {
-      log(options.verbose, `  ✗ ${result.errors.length} activity generation errors`);
+  // Stage 3: Generate concept map
+  const cmPath = join(options.outputDir, 'concept-map.json');
+  let concepts: Concept[] = [];
+  let conceptWarnings: string[] = [];
+  if (canResume('concept-map.json')) {
+    const cm = JSON.parse(readFileSync(cmPath, 'utf-8'));
+    concepts = cm.concepts;
+    conceptWarnings = cm.warnings || [];
+    if (options.verbose) console.log('[3/8] Resumed concept map from cache');
+  } else {
+    if (options.verbose) console.log('[3/8] Generating concept map...');
+    if (!options.dryRun) {
+      const result = await generateConceptMap(
+        router,
+        inventory.units,
+        `${options.subject} ${options.levelCode}`,
+      );
+      concepts = result.concepts;
+      conceptWarnings = result.warnings;
+      reviewItems.push(...conceptWarnings);
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Activity generation failed: ${msg}`);
-    log(options.verbose, `  ✗ ${msg}`);
+    maybeWrite(cmPath, JSON.stringify({ concepts, warnings: conceptWarnings }, null, 2));
   }
 
-  // Build pairs
-  const pairs: ConceptActivityPair[] = concepts
-    .filter((c) => activitiesMap.has(c.conceptId))
-    .map((c) => ({
-      concept: c,
-      activities: activitiesMap.get(c.conceptId)!,
-    }));
-
-  // 5. Validate
-  log(options.verbose, '\n[5/6] Validating...');
-  let validated: ValidatedOutput;
-  let retryCount = 0;
-  try {
-    validated = await validateWithRetry(
-      {
-        regenerateConcept: async (conceptId, validationErrors) => {
-          const concept = concepts.find((c) => c.conceptId === conceptId);
-          if (!concept) return null;
-          const result = await generateActivitiesForConcept(llm, concept, validationErrors);
-          if (result.errors.length > 0) return null;
-          const pair: ConceptActivityPair = { concept, activities: result.activities };
-          return pair;
-        },
-      },
-      pairs,
-      options.maxRetries,
-    );
-    retryCount = validated.failed.reduce((sum, f) => sum + f.retries, 0);
-    log(
-      options.verbose,
-      `  ✓ ${validated.passed.length}/${pairs.length} passed (${retryCount} retries)`,
-    );
-    if (validated.failed.length > 0) {
-      log(options.verbose, `  ✗ ${validated.failed.length} concepts failed validation`);
+  // Stage 4: Generate lesson blueprints
+  const bpPath = join(options.outputDir, 'lesson-blueprints.json');
+  let blueprints: LessonBlueprint[] = [];
+  let bpWarnings: string[] = [];
+  if (canResume('lesson-blueprints.json')) {
+    blueprints = JSON.parse(readFileSync(bpPath, 'utf-8'));
+    if (options.verbose) console.log('[4/8] Resumed lesson blueprints from cache');
+  } else {
+    if (options.verbose) console.log('[4/8] Generating lesson blueprints...');
+    if (!options.dryRun) {
+      const result = await generateLessonBlueprints(
+        router,
+        concepts,
+        inventory.units,
+        options.widgetCategories,
+      );
+      blueprints = result.blueprints;
+      bpWarnings = result.warnings;
+      reviewItems.push(...bpWarnings);
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Validation failed: ${msg}`);
-    validated = { passed: pairs, failed: [], warnings: [] };
-    log(options.verbose, `  ✗ ${msg}`);
+    maybeWrite(bpPath, JSON.stringify(blueprints, null, 2));
   }
 
-  warnings.push(...validated.warnings.map((w) => `${w.conceptId}: ${w.warnings.join(', ')}`));
+  // Stage 5: Generate activities from blueprints
+  const conceptActivityPairs: ConceptActivityPair[] = [];
+  const conceptActivityMap = new Map<string, GeneratedActivity[]>();
+  if (canResume('course-spec.json')) {
+    if (options.verbose) console.log('[5/8] Activities already generated (resuming)');
+  } else {
+    if (options.verbose) console.log('[5/8] Generating activities from blueprints...');
+    if (!options.dryRun) {
+      const llmAdapter = legacyAdapter(router, 'activity_generation');
+      for (const bp of blueprints) {
+        const result = await generateActivitiesForConcept(
+          llmAdapter,
+          {
+            conceptId: bp.conceptId,
+            chapterCode: 'CH1',
+            chapterName: options.subject,
+            learningObjective: bp.objective,
+            coreIdea: '',
+            examples: [],
+            misconceptions: bp.misconceptionTargets,
+            supports: { visual: bp.representations.includes('visual') },
+            masteryCriteria: 0.8,
+            difficulty: 'beginner',
+            estimatedDuration: 30,
+            dependencies: bp.priorKnowledge,
+          },
+          [],
+        );
+        const pair: ConceptActivityPair = {
+          concept: {
+            conceptId: bp.conceptId,
+            chapterCode: 'CH1',
+            chapterName: options.subject,
+            learningObjective: bp.objective,
+            coreIdea: '',
+            examples: [],
+            misconceptions: bp.misconceptionTargets,
+            supports: { visual: bp.representations.includes('visual') },
+            masteryCriteria: 0.8,
+            difficulty: 'beginner',
+            estimatedDuration: 30,
+            dependencies: bp.priorKnowledge,
+          },
+          activities: result.activities,
+        };
+        conceptActivityPairs.push(pair);
+        conceptActivityMap.set(bp.conceptId, result.activities);
+      }
+    }
+  }
 
-  // 6. Write output
-  const filePaths: string[] = [];
+  // Stage 6: Generate assets from blueprints via asset_plan
+  let assetManifest: AssetManifest = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    assets: [],
+  };
+  if (canResume('asset-manifest.json')) {
+    const am = JSON.parse(readFileSync(join(options.outputDir, 'asset-manifest.json'), 'utf-8'));
+    assetManifest = am;
+    if (options.verbose) console.log('[6/8] Resumed asset manifest from cache');
+  } else {
+    if (options.verbose) console.log('[6/8] Generating assets from blueprints...');
+    if (!options.dryRun && blueprints.length > 0) {
+      try {
+        const prompt = buildAssetPlanPrompt(blueprints);
+        const plan = await router.generateStructuredRaw(
+          'asset_plan',
+          prompt,
+          AssetPlanResponseSchema,
+          { temperature: 0.2 },
+        );
+        assetManifest = {
+          version: 1,
+          generatedAt: new Date().toISOString(),
+          assets: plan.assets,
+        };
+      } catch (err) {
+        reviewItems.push(
+          'Asset plan generation failed: ' + (err instanceof Error ? err.message : String(err)),
+        );
+      }
+    }
+    maybeWrite(
+      join(options.outputDir, 'asset-manifest.json'),
+      JSON.stringify(assetManifest, null, 2),
+    );
+  }
 
   if (!options.dryRun) {
-    log(options.verbose, '\n[6/6] Writing output...');
-    const prefix = `${options.levelCode?.toLowerCase() || ''}-${options.subject || ''}-`;
+    const { written: _written } = generateAssetFiles(assetManifest, options.outputDir);
+  }
+  const assetsPath = join(options.outputDir, 'assets', 'manifest.json');
+  outputPaths.push(assetsPath);
 
-    if (options.format === 'md' || options.format === 'both') {
-      try {
-        const result = writeCourseSpecOutput(
-          options.outputDir,
-          prefix,
-          validated.passed,
-          options.force,
-        );
-        filePaths.push(result.filePath);
-        log(options.verbose, `  ✓ ${result.concepts} concepts written to course-spec.md`);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        errors.push(`Markdown file writing failed: ${msg}`);
-        log(options.verbose, `  ✗ ${msg}`);
-      }
-    }
+  // Stage 7: Validate math + widgets + coverage
+  if (options.verbose) console.log('[7/8] Running validation...');
+  const allActivities = conceptActivityPairs.flatMap((p) => p.activities);
+  const mathQuestions = extractMathQuestions(allActivities);
+  const mathResults = validateAllMath(mathQuestions);
+  const mcqErrors = extractMCQValidationErrors(allActivities);
+  reviewItems.push(...mcqErrors);
 
-    if (options.format === 'json' || options.format === 'both') {
-      try {
-        const result = writeCourseSpecJSONOutput(
-          options.outputDir,
-          prefix,
-          validated.passed,
-          options.force,
-        );
-        filePaths.push(result.filePath);
-        log(options.verbose, `  ✓ ${result.concepts} concepts written to course-spec.json`);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        errors.push(`JSON file writing failed: ${msg}`);
-        log(options.verbose, `  ✗ ${msg}`);
-      }
+  const widgetResults: WidgetValidationResult[] = [];
+  for (const activity of allActivities) {
+    if (activity.courseSpecType === 'widget' && activity.widgetId && activity.widgetConfig) {
+      widgetResults.push(validateWidgetConfig(activity.widgetId, activity.widgetConfig));
     }
-  } else {
-    log(options.verbose, '\n[6/6] Dry run — files not written');
   }
 
-  const activitiesGenCount = Array.from(activitiesMap.values()).reduce(
-    (sum, acts) => sum + acts.length,
-    0,
+  const activityIdMap = new Map<string, string[]>();
+  for (const [key, acts] of conceptActivityMap) {
+    activityIdMap.set(
+      key,
+      acts.map((a) => `${a.step}-${a.order}`),
+    );
+  }
+  const coverageLedger = buildCoverageLedger(
+    inventory.units,
+    concepts,
+    blueprints,
+    assetManifest.assets,
+    activityIdMap,
   );
 
-  return {
-    status:
-      errors.length === 0
-        ? 'complete'
-        : filePaths.length > 0 && validated.passed.length > 0
-          ? 'partial'
-          : 'failed',
-    chaptersProcessed: chapters?.length ?? 0,
-    conceptsGenerated: concepts.length,
-    activitiesGenerated: activitiesGenCount,
-    filesWritten: filePaths.length,
-    filesSkipped: 0,
-    validationErrors: validated.failed.length,
-    retriesNeeded: retryCount,
-    failedConcepts: validated.failed.length,
-    warnings,
-    errors,
-    duration: Date.now() - startTime,
-    outputPaths: filePaths,
-  };
+  const clPath = join(options.outputDir, 'coverage-ledger.json');
+  maybeWrite(clPath, JSON.stringify(coverageLedger, null, 2));
+
+  // Stage 8: Write course-spec artifacts + quality report
+  if (options.verbose) console.log('[8/8] Generating outputs and quality report...');
+  if (!options.dryRun) {
+    const filenamePrefix = `${options.levelCode}-${options.subject}`.toLowerCase();
+    if (options.format === 'md' || options.format === 'both') {
+      writeCourseSpecOutput(options.outputDir, filenamePrefix, conceptActivityPairs, options.force);
+      outputPaths.push(join(options.outputDir, `${filenamePrefix}-course-spec.md`));
+    }
+    if (options.format === 'json' || options.format === 'both') {
+      writeCourseSpecJSONOutput(
+        options.outputDir,
+        filenamePrefix,
+        conceptActivityPairs,
+        options.force,
+      );
+      outputPaths.push(join(options.outputDir, `${filenamePrefix}-course-spec.json`));
+    }
+  }
+
+  maybeWrite(hashPath, configHash, true);
+
+  const durationMs = Date.now() - startTime;
+  const stageUsage: Record<string, { provider: string; model: string }> = {};
+  for (const stage of [
+    'source_inventory',
+    'concept_map',
+    'concept_enrichment',
+    'lesson_blueprint',
+    'asset_plan',
+    'activity_generation',
+    'review',
+  ] as const) {
+    const cfg = router.getStageConfig(stage as LlmStage);
+    stageUsage[stage] = { provider: cfg.provider, model: cfg.model };
+  }
+
+  const report = generateQualityReport({
+    stageUsage,
+    retries,
+    durationMs,
+    coverage: coverageLedger.summary,
+    mathResults,
+    widgetResults,
+    reviewItems,
+    assetCount: assetManifest.assets.length,
+    conceptCount: concepts.length,
+    hasCycles: conceptWarnings.some((w) => w.includes('cycle')),
+  });
+
+  const qrPath = join(options.outputDir, 'quality-report.json');
+  maybeWrite(qrPath, JSON.stringify(report, null, 2), true);
+
+  return { report, outputPaths, coverageLedger, assetManifest };
 }

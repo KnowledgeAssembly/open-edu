@@ -73,7 +73,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         onBackToCatalog={onBackToCatalog}
       />
       {bundleProgress && (
-        <div className="flex justify-end max-w-content mx-auto w-full px-xl pb-xl">
+        <div className="max-w-content px-xl pb-xl mx-auto flex w-full justify-end">
           <Button
             variant="ghost"
             size="sm"

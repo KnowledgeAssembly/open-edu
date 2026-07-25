@@ -8,7 +8,7 @@ import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
 import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
 import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
 import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
-import { getWidgetSchema, registerAllWidgetSchemas } from './widget-schemas.js';
+import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId } from './widget-schemas.js';
 
 // Register widget schemas once at module load
 registerAllWidgetSchemas();
@@ -24,13 +24,13 @@ const STEP_PROMPTS: Record<string, string> = {
 const readingContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 const exerciseContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 const quizContentSchema = z.object({
@@ -52,7 +52,7 @@ const reflectionContentSchema = z.object({
 const widgetContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 function stepOutputSchema(type: string): z.ZodType {
@@ -177,9 +177,11 @@ async function generateStep(
       const responseType = (result.type as string) || type;
 
       // Validate widget config if widget type
+      let validatedWidgetId: string | undefined;
       let validatedWidgetConfig: Record<string, unknown> | undefined;
       if (responseType === 'widget') {
-        const widgetId = result.widgetId as string;
+        const widgetId = normalizeWidgetId(result.widgetId as string);
+        validatedWidgetId = widgetId;
         const rawConfig = result.widgetConfig as Record<string, unknown> | undefined;
         const widgetSchema = getWidgetSchema(widgetId);
         if (widgetSchema && rawConfig) {
@@ -221,9 +223,30 @@ async function generateStep(
           (result.content as Record<string, unknown>) || {},
           validatedWidgetConfig,
         ),
-        widgetId: responseType === 'widget' ? (result.widgetId as string) : undefined,
+        widgetId:
+          responseType === 'widget' ? validatedWidgetId || (result.widgetId as string) : undefined,
         widgetConfig: validatedWidgetConfig,
       };
+
+      // Post-process: dedupe MCQ options if duplicates detected
+      if (activity.courseSpecType === 'quiz' && activity.content.questions) {
+        for (const q of activity.content.questions) {
+          if (q && q.options) {
+            const uniqueOpts = new Set<string>(q.options);
+            if (uniqueOpts.size !== q.options.length) {
+              const seen = new Map<string, number>();
+              for (let i = 0; i < q.options.length; i++) {
+                const opt = q.options[i];
+                if (opt === undefined) continue;
+                if (seen.has(opt)) {
+                  q.options[i] = opt + ' (option ' + (i + 1) + ')';
+                }
+                seen.set(opt, i);
+              }
+            }
+          }
+        }
+      }
 
       return { activity, errors: [] };
     } catch (err) {

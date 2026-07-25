@@ -4,17 +4,16 @@ import { existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
-import { createLlmProvider } from '@open-edu/llm-config';
-import { runPipeline } from '../graph/index.js';
-import type { PipelineReport } from '../graph/index.js';
+import { LlmRouter } from '@open-edu/llm-config';
+import { resolveStageConfigs, logStageConfigs, parseStageOverride } from '../config/config.js';
+import { runPipelineV2 } from '../graph/index.js';
+import type { PipelineResult } from '../graph/index.js';
 import * as logger from './logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 config();
 config({ path: join(__dirname, '..', '..', '..', '..', '.env') });
-
-const LEVEL_A_CONCEPT_IDS: string[] = [];
 
 interface CLIOptions {
   pdf: string;
@@ -24,12 +23,13 @@ interface CLIOptions {
   chapter?: number;
   llmProvider?: string;
   llmModel?: string;
-  interactive: boolean;
   dryRun: boolean;
+  resume: boolean;
   verbose: boolean;
   outputDir: string;
   maxRetries: number;
   format: 'md' | 'json' | 'both';
+  stageOverrides?: string[];
 }
 
 function parseArgs(): CLIOptions {
@@ -39,8 +39,8 @@ function parseArgs(): CLIOptions {
     level: 'B',
     subject: 'math',
     force: false,
-    interactive: false,
     dryRun: false,
+    resume: false,
     verbose: false,
     outputDir: join(__dirname, '..', '..', '..', '..', 'output'),
     maxRetries: 3,
@@ -67,11 +67,11 @@ function parseArgs(): CLIOptions {
       case '--llm-model':
         options.llmModel = args[++i];
         break;
-      case '--interactive':
-        options.interactive = true;
-        break;
       case '--dry-run':
         options.dryRun = true;
+        break;
+      case '--resume':
+        options.resume = true;
         break;
       case '--verbose':
         options.verbose = true;
@@ -119,6 +119,7 @@ Options:
   --llm-model <name>    LLM model override (default: from env)
   --interactive         Enable human-in-the-loop checkpoints
   --dry-run             Validate but don't write files
+  --resume              Resume from intermediate artifacts when possible
   --verbose             Detailed logging per stage
   --output-dir <path>   Custom output directory (default: ./output)
   --max-retries <num>   Max retries per concept (default: 3)
@@ -183,103 +184,91 @@ export async function runPipelineCLI(): Promise<void> {
 
   logger.info('');
 
-  let llm;
+  let router: LlmRouter;
   try {
-    llm = createLlmProvider(
-      options.llmProvider
-        ? {
-            provider: options.llmProvider,
-            model: options.llmModel || 'gpt-4o-mini',
-            apiKey: process.env.OPENAI_API_KEY || '',
-            maxTokens: 4096,
-            temperature: 0.3,
-          }
-        : undefined,
-    );
-    logger.success('LLM provider initialized');
+    const stageOverrides = (options.stageOverrides || []).map(parseStageOverride);
+
+    if (options.verbose) {
+      logger.info(`Stage overrides from CLI: ${stageOverrides.length}`);
+    }
+
+    const stageConfigs = resolveStageConfigs(stageOverrides);
+    router = new LlmRouter(stageConfigs);
+
+    if (options.verbose) {
+      logger.verbose('Per-stage configs:', true);
+      logStageConfigs(stageConfigs, (msg: string) => logger.verbose(msg, true));
+    }
+
+    logger.success('LLM router initialized');
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    logger.error(`Failed to initialize LLM provider: ${msg}`);
+    logger.error(`Failed to initialize LLM router: ${msg}`);
     process.exit(1);
   }
 
   try {
-    const report: PipelineReport = await runPipeline(llm, {
+    const result: PipelineResult = await runPipelineV2(router, {
       pdfPath: options.pdf,
       levelCode: options.level.toUpperCase(),
       subject: options.subject,
       force: options.force,
       chapterFilter: options.chapter,
       outputDir: options.outputDir,
-      llmProvider: options.llmProvider || process.env.LLM_PROVIDER || 'openai',
-      llmModel: options.llmModel || process.env.LLM_MODEL || 'gpt-4o-mini',
-      interactive: options.interactive,
-      dryRun: options.dryRun,
       verbose: options.verbose,
+      dryRun: options.dryRun,
+      resume: options.resume,
       maxRetries: options.maxRetries,
-      levelAConceptIds: LEVEL_A_CONCEPT_IDS,
       format: options.format,
+      widgetCategories: [],
     });
 
+    const r = result.report;
+    const durationSec = (r.durationMs / 1000).toFixed(1);
+
     logger.divider();
-    logger.info('Summary');
+    logger.info(`Summary — ${r.status} (${durationSec}s)`);
     logger.divider();
 
     logger.reportTable([
       {
-        label: 'Chapters Processed',
-        value: report.chaptersProcessed,
-        status: report.chaptersProcessed > 0 ? 'ok' : 'fail',
+        label: 'Concepts',
+        value: r.conceptCount,
+        status: r.conceptCount > 0 ? 'ok' : 'fail',
       },
       {
-        label: 'Concepts Generated',
-        value: report.conceptsGenerated,
-        status: report.conceptsGenerated > 0 ? 'ok' : 'fail',
+        label: 'Math Validation',
+        value: `${r.mathValidation.passed}/${r.mathValidation.totalChecked}`,
+        status: r.mathValidation.failed === 0 ? 'ok' : 'fail',
       },
       {
-        label: 'Activities Generated',
-        value: report.activitiesGenerated,
-        status: report.activitiesGenerated > 0 ? 'ok' : 'fail',
+        label: 'Widget Validation',
+        value: `${r.widgetValidation.passed}/${r.widgetValidation.totalChecked}`,
+        status: r.widgetValidation.failed === 0 ? 'ok' : 'fail',
       },
       {
-        label: 'Course Spec Written',
-        value: report.filesWritten,
-        status: report.status !== 'failed' ? 'ok' : 'fail',
+        label: 'Assets Generated',
+        value: r.assetCount,
+        status: r.assetCount > 0 ? 'ok' : 'fail',
       },
       {
-        label: 'Validation Errors',
-        value: report.validationErrors,
-        status: report.validationErrors === 0 ? 'ok' : 'fail',
-      },
-      { label: 'Retries Needed', value: report.retriesNeeded, status: 'warn' },
-      {
-        label: 'Failed Concepts',
-        value: report.failedConcepts,
-        status: report.failedConcepts === 0 ? 'ok' : 'fail',
+        label: 'Dependency Cycles',
+        value: r.hasCycles ? 'yes' : 'no',
+        status: r.hasCycles ? 'fail' : 'ok',
       },
     ]);
 
-    const durationSec = (report.duration / 1000).toFixed(1);
-    logger.info(`Done in ${durationSec}s`);
-
-    if (report.errors.length > 0) {
-      logger.error(`\nErrors (${report.errors.length}):`);
-      for (const err of report.errors) {
-        logger.error(`  • ${err}`);
+    if (r.reviewItems.length > 0) {
+      logger.warn(`\nReview items (${r.reviewItems.length}):`);
+      for (const item of r.reviewItems.slice(0, 10)) {
+        logger.warn(`  • ${item}`);
+      }
+      if (r.reviewItems.length > 10) {
+        logger.warn(`  ... and ${r.reviewItems.length - 10} more`);
       }
     }
 
-    if (report.warnings.length > 0) {
-      logger.warn(`\nWarnings (${report.warnings.length}):`);
-      for (const w of report.warnings.slice(0, 10)) {
-        logger.warn(`  • ${w}`);
-      }
-      if (report.warnings.length > 10) {
-        logger.warn(`  ... and ${report.warnings.length - 10} more`);
-      }
-    }
-
-    process.exit(report.status === 'complete' ? 0 : 1);
+    process.exit(r.status === 'complete' ? 0 : 1);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     logger.error(`Pipeline failed: ${msg}`);
