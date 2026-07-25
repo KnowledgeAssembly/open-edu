@@ -1,4 +1,7 @@
 import type { GeneratedActivity } from '../types.js';
+import type { SubjectValidator, ValidationContext, ValidationIssue } from './registry.js';
+import { registerValidator } from './registry.js';
+import type { CurriculumProfile } from '../profile/types.js';
 
 export interface MathQuestion {
   questionId: string;
@@ -480,3 +483,45 @@ export function extractMCQValidationErrors(activities: GeneratedActivity[]): str
 
   return errors;
 }
+
+export const MathValidator: SubjectValidator = {
+  id: 'math',
+  supports: (profile: CurriculumProfile) => profile.validatorIds.includes('math'),
+  validateConcepts: (ctx: ValidationContext): ValidationIssue[] => {
+    const issues: ValidationIssue[] = [];
+    for (const concept of ctx.concepts) {
+      if (concept.exerciseFamilies.length === 0) {
+        issues.push({
+          id: `no-exercise-${concept.conceptId}`,
+          severity: 'warning',
+          message: `Math concept "${concept.conceptId}" has no exercise families`,
+          source: 'math',
+        });
+      }
+    }
+    return issues;
+  },
+  validateActivities: (ctx: ValidationContext): ValidationIssue[] => {
+    const issues: ValidationIssue[] = [];
+    for (const activity of ctx.activities) {
+      if (activity.courseSpecType === 'quiz' && activity.content.questions) {
+        for (const q of activity.content.questions) {
+          if (q && q.options) {
+            const mcqErrors = validateMCQOptions({ question: q.question, options: q.options, correctIndex: q.correctIndex });
+            for (const e of mcqErrors) {
+              issues.push({
+                id: `mcq-${activity.step}`,
+                severity: 'error',
+                message: `MCQ validation: ${e}`,
+                source: 'math',
+              });
+            }
+          }
+        }
+      }
+    }
+    return issues;
+  },
+};
+
+registerValidator(MathValidator);

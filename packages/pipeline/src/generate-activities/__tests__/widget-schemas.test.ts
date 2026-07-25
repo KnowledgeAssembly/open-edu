@@ -4,10 +4,40 @@ import {
   registerWidgetSchema,
   getWidgetSchema,
   registerAllWidgetSchemas,
+  getAllowedWidgetIdsForProfile,
+  isWidgetAllowedForProfile,
 } from '../widget-schemas.js';
 import type { LlmProvider } from '@open-edu/llm-config';
 import type { GeneratedConcept } from '../../types.js';
+import type { CurriculumProfile } from '../../profile/types.js';
 import { generateActivitiesForConcept } from '../index.js';
+
+function makeProfile(overrides: Partial<CurriculumProfile> = {}): CurriculumProfile {
+  return {
+    id: 'test',
+    subject: 'test',
+    locale: 'en-IN',
+    language: 'en',
+    sourceTaxonomy: {
+      lessonLabels: ['Lesson'],
+      sectionLabels: ['Section'],
+      objectiveLabels: ['Objectives'],
+      definitionLabels: ['Definition'],
+      exampleLabels: ['Example'],
+      exerciseLabels: ['Exercise'],
+      reviewLabels: ['Review'],
+      assessmentLabels: ['Assessment'],
+    },
+    conceptKinds: ['knowledge'],
+    representations: ['visual'],
+    questionFamilies: ['direct_question'],
+    widgetCategories: ['core'],
+    assetRendererTypes: [],
+    validatorIds: [],
+    promptContext: {},
+    ...overrides,
+  };
+}
 
 describe('widget schema registry', () => {
   beforeEach(() => {
@@ -177,6 +207,43 @@ describe('generateStep widget validation', () => {
     expect(widgetActivity).toBeDefined();
     expect(widgetActivity!.widgetId).toBe('core.matching');
     expect(widgetActivity!.widgetConfig).toBeDefined();
+  });
+
+  describe('profile-aware widget filtering', () => {
+    it('getAllowedWidgetIdsForProfile with math profile includes math.* widgets', () => {
+      const mathProfile = makeProfile({ id: 'math', widgetCategories: ['core', 'math'] });
+      const ids = getAllowedWidgetIdsForProfile(mathProfile);
+      expect(ids).toContain('math.fraction-visual');
+      expect(ids).toContain('math.clock-time');
+      expect(ids).toContain('core.matching');
+    });
+
+    it('getAllowedWidgetIdsForProfile with generic profile includes only core.*', () => {
+      const ids = getAllowedWidgetIdsForProfile(makeProfile());
+      expect(ids).toContain('core.matching');
+      expect(ids).not.toContain('math.fraction-visual');
+    });
+
+    it('getAllowedWidgetIdsForProfile with science profile includes core + science', () => {
+      const scienceProfile = makeProfile({ id: 'science', widgetCategories: ['core', 'science'] });
+      const ids = getAllowedWidgetIdsForProfile(scienceProfile);
+      expect(ids).toContain('core.matching');
+    });
+
+    it('getAllowedWidgetIdsForProfile with empty categories returns empty', () => {
+      const ids = getAllowedWidgetIdsForProfile(makeProfile({ widgetCategories: [] }));
+      expect(ids).toEqual([]);
+    });
+
+    it('isWidgetAllowedForProfile rejects math widget for generic profile', () => {
+      const profile = makeProfile();
+      expect(isWidgetAllowedForProfile('math.fraction-visual', profile)).toBe(false);
+    });
+
+    it('isWidgetAllowedForProfile accepts core widget for any profile with core', () => {
+      const profile = makeProfile();
+      expect(isWidgetAllowedForProfile('core.matching', profile)).toBe(true);
+    });
   });
 
   it('falls back to reading when widget config validation fails', async () => {

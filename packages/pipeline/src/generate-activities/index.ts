@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import type { LlmProvider } from '@open-edu/llm-config';
+import type { Concept } from '../concepts/types.js';
+import type { LessonBlueprint } from '../blueprint/types.js';
+import type { CurriculumProfile } from '../profile/types.js';
+import type { SourceUnit } from '../source/types.js';
 import type { GeneratedConcept, GeneratedActivity, ActivityContent } from '../types.js';
 
 import { EXEMPLARS } from './exemplars.js';
@@ -8,9 +12,8 @@ import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
 import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
 import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
 import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
-import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId } from './widget-schemas.js';
+import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId, isWidgetAllowedForProfile } from './widget-schemas.js';
 
-// Register widget schemas once at module load
 registerAllWidgetSchemas();
 
 const STEP_PROMPTS: Record<string, string> = {
@@ -89,6 +92,7 @@ function buildStepPrompt(
   step: string,
   type: string,
   concept: GeneratedConcept,
+  profile: CurriculumProfile,
   validationErrors?: string[],
 ): string {
   const template = STEP_PROMPTS[step];
@@ -112,7 +116,10 @@ function buildStepPrompt(
     .replace(/{LEARNING_OBJECTIVE}/g, concept.learningObjective)
     .replace(/{CORE_IDEA}/g, concept.coreIdea)
     .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
-    .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'));
+    .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'))
+    .replace(/{PROFILE_SUBJECT}/g, profile.subject)
+    .replace(/{PROFILE_STYLE}/g, (profile.promptContext?.teachingStyle as string) || 'scaffolded discovery')
+    .replace(/{QUESTION_FAMILIES}/g, profile.questionFamilies.join(', '));
 
   return `${prompt}\n\nGenerate the ${step} activity now as a JSON object. You may use "${type}" for text or "widget" for an interactive activity from the catalog — choose whichever suits the concept best.${exemplarSection}${retrySection}`;
 }
@@ -151,6 +158,7 @@ async function generateStep(
   step: string,
   type: string,
   concept: GeneratedConcept,
+  profile: CurriculumProfile,
   order: number,
   maxRetries: number,
   validationErrors?: string[],
@@ -158,7 +166,7 @@ async function generateStep(
   activity: GeneratedActivity | null;
   errors: string[];
 }> {
-  const basePrompt = buildStepPrompt(step, type, concept, validationErrors);
+  const basePrompt = buildStepPrompt(step, type, concept, profile, validationErrors);
   const outputSchema = stepOutputSchema(type);
 
   let lastErrors: string[] = [];
@@ -173,10 +181,8 @@ async function generateStep(
         maxTokens: 4096,
       });
 
-      // Determine the actual type from the LLM response (may differ from the initial type)
       const responseType = (result.type as string) || type;
 
-      // Validate widget config if widget type
       let validatedWidgetId: string | undefined;
       let validatedWidgetConfig: Record<string, unknown> | undefined;
       if (responseType === 'widget') {
@@ -194,7 +200,6 @@ async function generateStep(
               lastAttempt = result;
               continue;
             }
-            // Fall back to reading type
             const content = result.content as Record<string, unknown> | undefined;
             const fallbackActivity: GeneratedActivity = {
               step: step as GeneratedActivity['step'],
@@ -212,6 +217,21 @@ async function generateStep(
         } else {
           validatedWidgetConfig = rawConfig;
         }
+
+        if (!isWidgetAllowedForProfile(widgetId, profile)) {
+          const content = result.content as Record<string, unknown> | undefined;
+          const fallbackActivity: GeneratedActivity = {
+            step: step as GeneratedActivity['step'],
+            courseSpecType: 'reading',
+            order,
+            content: {
+              description: (content?.description as string) || '',
+              instructions: (content?.instructions as string) || '',
+              examples: content?.examples as string[] | undefined,
+            },
+          };
+          return { activity: fallbackActivity, errors: [] };
+        }
       }
 
       const activity: GeneratedActivity = {
@@ -228,7 +248,6 @@ async function generateStep(
         widgetConfig: validatedWidgetConfig,
       };
 
-      // Post-process: dedupe MCQ options if duplicates detected
       if (activity.courseSpecType === 'quiz' && activity.content.questions) {
         for (const q of activity.content.questions) {
           if (q && q.options) {
@@ -280,6 +299,69 @@ const DEFAULT_TYPES: Record<string, string> = {
 
 const MAX_RETRIES = 3;
 
+export interface ActivityGenerationInput {
+  concept: Concept;
+  blueprint: LessonBlueprint;
+  profile: CurriculumProfile;
+  sourceUnits: SourceUnit[];
+}
+
+function conceptToGeneratedConcept(concept: Concept, blueprint: LessonBlueprint): GeneratedConcept {
+  return {
+    conceptId: concept.conceptId,
+    chapterCode: blueprint.lessonArc[0]?.step || 'hook',
+    chapterName: concept.label,
+    learningObjective: concept.learningObjective,
+    coreIdea: concept.coreIdea,
+    examples: [],
+    misconceptions: concept.misconceptionTargets,
+    supports: { visual: concept.representations.includes('visual') },
+    masteryCriteria: concept.masteryThreshold,
+    difficulty: concept.difficulty,
+    estimatedDuration: concept.estimatedMinutes,
+    dependencies: concept.prerequisites,
+  };
+}
+
+export async function generateActivitiesFromBlueprint(
+  llm: LlmProvider,
+  input: ActivityGenerationInput,
+  validationErrors?: string[],
+): Promise<{
+  activities: GeneratedActivity[];
+  warnings: string[];
+  errors: string[];
+}> {
+  const generatedConcept = conceptToGeneratedConcept(input.concept, input.blueprint);
+  const activities: GeneratedActivity[] = [];
+  const allWarnings: string[] = [];
+  const allErrors: string[] = [];
+
+  for (let i = 0; i < STEP_ORDER.length; i++) {
+    const step = STEP_ORDER[i]!;
+    const type = DEFAULT_TYPES[step]!;
+
+    const result = await generateStep(
+      llm,
+      step,
+      type,
+      generatedConcept,
+      input.profile,
+      i + 1,
+      MAX_RETRIES,
+      validationErrors,
+    );
+
+    if (result.activity) {
+      activities.push(result.activity);
+    } else {
+      allErrors.push(...result.errors);
+    }
+  }
+
+  return { activities, warnings: allWarnings, errors: allErrors };
+}
+
 export async function generateActivitiesForConcept(
   llm: LlmProvider,
   concept: GeneratedConcept,
@@ -289,6 +371,30 @@ export async function generateActivitiesForConcept(
   warnings: string[];
   errors: string[];
 }> {
+  const profile: CurriculumProfile = {
+    id: 'legacy',
+    subject: 'mathematics',
+    locale: 'en-IN',
+    language: 'en',
+    sourceTaxonomy: {
+      lessonLabels: ['Lesson', 'Chapter'],
+      sectionLabels: ['Section'],
+      objectiveLabels: ['Objectives'],
+      definitionLabels: ['Definition'],
+      exampleLabels: ['Example'],
+      exerciseLabels: ['Exercise'],
+      reviewLabels: ['Review'],
+      assessmentLabels: ['Assessment'],
+    },
+    conceptKinds: ['skill', 'knowledge', 'procedure', 'application'],
+    representations: ['concrete', 'visual', 'symbolic'],
+    questionFamilies: ['direct_question', 'word_problems'],
+    widgetCategories: ['core', 'math'],
+    assetRendererTypes: [],
+    validatorIds: [],
+    promptContext: { teachingStyle: 'scaffolded discovery' },
+  };
+
   const activities: GeneratedActivity[] = [];
   const allWarnings: string[] = [];
   const allErrors: string[] = [];
@@ -302,6 +408,7 @@ export async function generateActivitiesForConcept(
       step,
       type,
       concept,
+      profile,
       i + 1,
       MAX_RETRIES,
       validationErrors,

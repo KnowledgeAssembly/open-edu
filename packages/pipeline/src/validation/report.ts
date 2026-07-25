@@ -1,6 +1,7 @@
 import type { CoverageLedger } from '../coverage/types.js';
 import type { MathValidationResult } from './math.js';
 import type { WidgetValidationResult } from './widgets.js';
+import type { ValidationIssue } from './registry.js';
 
 export interface QualityReport {
   version: 1;
@@ -19,6 +20,12 @@ export interface QualityReport {
     failed: number;
     failures: MathValidationResult[];
   };
+  validationResults: Record<string, {
+    totalChecked: number;
+    passed: number;
+    failed: number;
+    failures: ValidationIssue[];
+  }>;
   widgetValidation: {
     totalChecked: number;
     passed: number;
@@ -62,7 +69,27 @@ export function generateQualityReport(params: {
   assetCount: number;
   conceptCount: number;
   hasCycles: boolean;
+  validationIssues?: ValidationIssue[];
 }): QualityReport {
+  const validationResults: Record<string, { totalChecked: number; passed: number; failed: number; failures: ValidationIssue[] }> = {};
+  if (params.validationIssues) {
+    const grouped = new Map<string, ValidationIssue[]>();
+    for (const issue of params.validationIssues) {
+      const arr = grouped.get(issue.source) || [];
+      arr.push(issue);
+      grouped.set(issue.source, arr);
+    }
+    for (const [source, issues] of grouped) {
+      const failed = issues.filter(i => i.severity === 'error');
+      validationResults[source] = {
+        totalChecked: issues.length,
+        passed: issues.filter(i => i.severity === 'warning').length,
+        failed: failed.length,
+        failures: failed,
+      };
+    }
+  }
+
   const report: QualityReport = {
     version: 1,
     generatedAt: new Date().toISOString(),
@@ -80,6 +107,7 @@ export function generateQualityReport(params: {
       failed: params.mathResults.filter((r) => !r.valid).length,
       failures: params.mathResults.filter((r) => !r.valid),
     },
+    validationResults,
     widgetValidation: {
       totalChecked: params.widgetResults.length,
       passed: params.widgetResults.filter((r) => r.valid).length,

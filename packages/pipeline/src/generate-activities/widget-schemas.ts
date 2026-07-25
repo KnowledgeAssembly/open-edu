@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { CurriculumProfile } from '../profile/types.js';
 
 const widgetSchemaRegistry = new Map<string, z.ZodType>();
 
@@ -379,3 +380,31 @@ export function registerAllWidgetSchemas(): void {
 }
 
 registerAllWidgetSchemas();
+
+export function getAllowedWidgetIdsForProfile(profile: CurriculumProfile): string[] {
+  const allowed: string[] = [];
+  for (const [id] of widgetSchemaRegistry) {
+    const category = id.split('.')[0] || '';
+    if (profile.widgetCategories.includes(category)) {
+      allowed.push(id);
+    }
+  }
+  return allowed;
+}
+
+export function getWidgetContextForProfile(
+  profile: CurriculumProfile,
+): { id: string; category: string }[] {
+  return getAllowedWidgetIdsForProfile(profile).map(id => ({
+    id,
+    category: id.split('.')[0] || '',
+  }));
+}
+
+export function isWidgetAllowedForProfile(
+  widgetId: string,
+  profile: CurriculumProfile,
+): boolean {
+  const category = widgetId.split('.')[0] || '';
+  return profile.widgetCategories.includes(category);
+}

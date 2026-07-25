@@ -2,16 +2,12 @@ import type { LlmRouter } from '@open-edu/llm-config';
 import type { SourceUnit, SourceInventory } from './types.js';
 import { SourceInventorySchema, InventoryLLMResponseSchema } from './types.js';
 import { buildInventoryPrompt } from './inventory-prompt.js';
+import type { SourceTaxonomy } from '../profile/types.js';
 
-const NIOS_LESSON_HEADING = /^(?:Lesson|पाठ)\s+(\d+)\s*[:\-\u2013\u2014]\s*(.+)$/im;
-const NIOS_OBJECTIVE_MARKER = /^(?:LEARNING\s*OUTCOMES|Objectives|OBJECTIVES|सीखने के परिणाम)/im;
-const NIOS_EXAMPLE_MARKER = /^(?:Example|उदाहरण)\s+(\d+(?:\.\d+)?)\s*[:\-\u2013\u2014]/im;
-const NIOS_EXERCISE_MARKER =
-  /^(?:Let us see what you have learnt|Exercise|अभ्यास|आइए देखें आपने क्या सीखा)/im;
-const NIOS_REVIEW_MARKER = /^(?:REVIEW|Review|पुनरावृत्ति|What have you learnt|आपने क्या सीखा)/im;
-const NIOS_TEST_MARKER = /^(?:TEST|Test|परीक्षा|Assessment|मूल्यांकन)/im;
-const NIOS_CHAPTER_START = /From\s+this\s+lesson,?\s+you\s+will\s+learn/i;
-const NIOS_CHAPTER_TITLE = /^\s*\d*\s*\n*\s*([A-Z][A-Z\s,-]{4,})/m;
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const TABLE_OF_CONTENTS = /^(?:Sl\.?\s*No\.?|Contents|TABLE\s*OF\s*CONTENTS)/im;
 
 export interface PageContent {
@@ -19,11 +15,28 @@ export interface PageContent {
   text: string;
 }
 
-function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
+function splitIntoSegments(pages: PageContent[], taxonomy: SourceTaxonomy): SourceUnit[] {
   const units: SourceUnit[] = [];
   let exerciseMode = false;
   let unitCounter = 0;
-  let _lessonCount = 0;
+
+  const lessonLabelPattern = taxonomy.lessonLabels.map(escapeRegex).join('|');
+  const LESSON_HEADING = new RegExp(`^(?:${lessonLabelPattern})\\s+(\\d+)\\s*[:\\-\\u2013\\u2014]\\s*(.+)$`, 'im');
+
+  const objectivePattern = taxonomy.objectiveLabels.map(escapeRegex).join('|');
+  const OBJECTIVE_MARKER = new RegExp(`^(?:${objectivePattern})`, 'im');
+
+  const examplePattern = taxonomy.exampleLabels.map(escapeRegex).join('|');
+  const EXAMPLE_MARKER = new RegExp(`^(?:${examplePattern})\\s+(\\d+(?:\\.\\d+)?)\\s*[:\\-\\u2013\\u2014]`, 'im');
+
+  const exercisePattern = taxonomy.exerciseLabels.map(escapeRegex).join('|');
+  const EXERCISE_MARKER = new RegExp(`^(?:${exercisePattern})`, 'im');
+
+  const reviewPattern = taxonomy.reviewLabels.map(escapeRegex).join('|');
+  const REVIEW_MARKER = new RegExp(`^(?:${reviewPattern})`, 'im');
+
+  const assessmentPattern = taxonomy.assessmentLabels.map(escapeRegex).join('|');
+  const TEST_MARKER = new RegExp(`^(?:${assessmentPattern})`, 'im');
 
   for (const page of pages) {
     const segments = page.text.split(/\n{2,}/).filter((s) => s.trim().length > 0);
@@ -34,7 +47,6 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
       const trimmed = segment.trim();
       const location = { pageStart: page.pageNum };
 
-      // Skip table of contents
       if (TABLE_OF_CONTENTS.test(trimmed)) {
         units.push({
           id,
@@ -47,9 +59,8 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      if (NIOS_LESSON_HEADING.test(trimmed)) {
+      if (LESSON_HEADING.test(trimmed)) {
         exerciseMode = false;
-        _lessonCount++;
         units.push({
           id,
           type: 'lesson',
@@ -61,37 +72,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      // NIOS chapter start: "From this lesson, you will learn"
-      if (NIOS_CHAPTER_START.test(trimmed)) {
-        exerciseMode = false;
-        _lessonCount++;
-        units.push({
-          id,
-          type: 'lesson',
-          text: trimmed,
-          location,
-          extractionConfidence: 0.95,
-          requiredCoverage: true,
-        });
-        continue;
-      }
-
-      // NIOS chapter title: number followed by all-caps title
-      if (NIOS_CHAPTER_TITLE.test(trimmed)) {
-        exerciseMode = false;
-        _lessonCount++;
-        units.push({
-          id,
-          type: 'lesson',
-          text: trimmed,
-          location,
-          extractionConfidence: 0.85,
-          requiredCoverage: true,
-        });
-        continue;
-      }
-
-      if (NIOS_EXERCISE_MARKER.test(trimmed)) {
+      if (EXERCISE_MARKER.test(trimmed)) {
         exerciseMode = true;
         units.push({
           id,
@@ -104,7 +85,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      if (NIOS_OBJECTIVE_MARKER.test(trimmed)) {
+      if (OBJECTIVE_MARKER.test(trimmed)) {
         units.push({
           id,
           type: 'objective',
@@ -116,7 +97,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      if (NIOS_REVIEW_MARKER.test(trimmed)) {
+      if (REVIEW_MARKER.test(trimmed)) {
         exerciseMode = false;
         units.push({
           id,
@@ -129,7 +110,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      if (NIOS_TEST_MARKER.test(trimmed)) {
+      if (TEST_MARKER.test(trimmed)) {
         exerciseMode = false;
         units.push({
           id,
@@ -142,7 +123,7 @@ function splitIntoSegments(pages: PageContent[]): SourceUnit[] {
         continue;
       }
 
-      if (NIOS_EXAMPLE_MARKER.test(trimmed)) {
+      if (EXAMPLE_MARKER.test(trimmed)) {
         units.push({
           id,
           type: 'worked_example',
@@ -172,8 +153,20 @@ export async function buildSourceInventory(
   router: LlmRouter,
   pages: PageContent[],
   documentTitle: string,
+  taxonomy?: SourceTaxonomy,
 ): Promise<SourceInventory> {
-  const rawUnits = splitIntoSegments(pages);
+  const activeTaxonomy: SourceTaxonomy = taxonomy || {
+    lessonLabels: ['Lesson', 'Chapter', 'Unit', 'Module'],
+    sectionLabels: ['Section'],
+    objectiveLabels: ['Learning Objectives', 'Objectives', 'Goals'],
+    definitionLabels: ['Definition', 'Key Terms'],
+    exampleLabels: ['Example'],
+    exerciseLabels: ['Exercise', 'Practice', 'Questions'],
+    reviewLabels: ['Review', 'Summary', 'Key Points'],
+    assessmentLabels: ['Test', 'Assessment', 'Quiz'],
+  };
+
+  const rawUnits = splitIntoSegments(pages, activeTaxonomy);
 
   const unclassifiedUnits = rawUnits.filter((u) => u.type === 'unclassified');
 

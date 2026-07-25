@@ -51,7 +51,7 @@ export const LessonBlueprintSchema = z.object({
 
 export type LessonBlueprint = z.infer<typeof LessonBlueprintSchema>;
 
-export function validateBlueprint(blueprint: LessonBlueprint): string[] {
+export function validateBlueprint(blueprint: LessonBlueprint, profile?: { assetRendererTypes: string[] }): string[] {
   const errors: string[] = [];
 
   if (blueprint.sourceUnitIds.length === 0) {
@@ -72,6 +72,16 @@ export function validateBlueprint(blueprint: LessonBlueprint): string[] {
       errors.push(
         `Blueprint for "${blueprint.conceptId}" has widget request for unsupported step "${wr.step}"`,
       );
+    }
+  }
+
+  if (profile && profile.assetRendererTypes.length > 0) {
+    for (const ar of blueprint.assetRequests) {
+      if (!profile.assetRendererTypes.includes(ar.rendererType)) {
+        errors.push(
+          `Blueprint for "${blueprint.conceptId}" uses unsupported renderer type "${ar.rendererType}"`,
+        );
+      }
     }
   }
 

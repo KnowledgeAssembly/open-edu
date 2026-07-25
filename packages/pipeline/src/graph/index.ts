@@ -8,7 +8,8 @@ import { generateConceptMap } from '../concepts/index.js';
 import type { Concept } from '../concepts/types.js';
 import { generateLessonBlueprints } from '../blueprint/index.js';
 import type { LessonBlueprint } from '../blueprint/types.js';
-import { generateActivitiesForConcept } from '../generate-activities/index.js';
+import { generateActivitiesFromBlueprint } from '../generate-activities/index.js';
+import type { CurriculumProfile } from '../profile/types.js';
 import {
   validateAllMath,
   extractMathQuestions,
@@ -23,6 +24,8 @@ import type { AssetManifest } from '../assets/types.js';
 import { AssetPlanResponseSchema } from '../assets/types.js';
 import { buildAssetPlanPrompt } from '../assets/asset-plan-prompt.js';
 import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
+import { resolveScope } from '../scope/resolve.js';
+import { scopeToString, type DocumentScope } from '../scope/types.js';
 import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -40,7 +43,8 @@ export async function runPipelineV2(
     levelCode: string;
     subject: string;
     force: boolean;
-    chapterFilter?: number;
+    scope?: DocumentScope;
+    profile: CurriculumProfile;
     outputDir: string;
     verbose: boolean;
     dryRun: boolean;
@@ -48,33 +52,43 @@ export async function runPipelineV2(
     maxRetries: number;
     format: 'md' | 'json' | 'both';
     widgetCategories: string[];
+    language?: string;
+    locale?: string;
   },
 ): Promise<PipelineResult> {
   const startTime = Date.now();
   const outputPaths: string[] = [];
   const reviewItems: string[] = [];
   const retries = 0;
+  const profile = options.profile;
 
   if (!existsSync(options.outputDir)) mkdirSync(options.outputDir, { recursive: true });
 
   function computeConfigHash(): string {
     const hash = createHash('sha256');
+    try {
+      const pdfContent = readFileSync(options.pdfPath);
+      const pdfHash = createHash('sha256').update(pdfContent).digest('hex');
+      hash.update(pdfHash);
+    } catch {
+      hash.update(options.pdfPath);
+    }
     const cfg = JSON.stringify({
       pdfPath: options.pdfPath,
-      levelCode: options.levelCode,
+      profileId: profile.id,
       subject: options.subject,
+      levelCode: options.levelCode,
+      language: options.language || 'en',
+      locale: options.locale || 'en-IN',
+      scope: options.scope ? scopeToString(options.scope) : 'all',
+      promptVersion: '2.0',
       stages: [
-        'source_inventory',
-        'concept_map',
-        'concept_enrichment',
-        'lesson_blueprint',
-        'asset_plan',
-        'activity_generation',
-        'review',
-      ].map((s: string) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
+        'source_inventory', 'concept_map', 'concept_enrichment',
+        'lesson_blueprint', 'asset_plan', 'activity_generation', 'review',
+      ].map((s) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
     });
     hash.update(cfg);
-    return hash.digest('hex').slice(0, 12);
+    return hash.digest('hex').slice(0, 16);
   }
 
   const configHash = computeConfigHash();
@@ -85,6 +99,17 @@ export async function runPipelineV2(
   function canResume(filename: string): boolean {
     if (!options.resume) return false;
     if (previousHash && previousHash !== configHash) return false;
+    const manifestPath = join(options.outputDir, 'pipeline-manifest.json');
+    if (existsSync(manifestPath)) {
+      try {
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+        const currentScope = options.scope ? scopeToString(options.scope) : 'all';
+        if (manifest.scope !== currentScope) return false;
+        if (manifest.profileId !== profile.id) return false;
+      } catch {
+        return false;
+      }
+    }
     return existsSync(join(options.outputDir, filename));
   }
 
@@ -120,33 +145,19 @@ export async function runPipelineV2(
   } else {
     if (options.verbose) console.log('[2/8] Building source inventory...');
     inventory = !options.dryRun
-      ? await buildSourceInventory(router, pages, pdfMeta.metadata.title)
+      ? await buildSourceInventory(router, pages, pdfMeta.metadata.title, profile.sourceTaxonomy)
       : { documentId: 'dry-run', title: 'Dry Run', totalPages: 0, units: [], warnings: [] };
     maybeWrite(invPath, JSON.stringify(inventory, null, 2));
   }
 
-  // Apply chapter filter: keep only units for the requested lesson
-  if (options.chapterFilter !== undefined) {
-    const lessonUnits = inventory.units.filter((u) => u.type === 'lesson');
-    const chapterStartIdx = inventory.units.findIndex(
-      (u) => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! - 1,
-    );
-    const chapterEndIdx = inventory.units.findIndex(
-      (u, i) =>
-        u.type === 'lesson' &&
-        lessonUnits.indexOf(u) === options.chapterFilter! &&
-        i > chapterStartIdx,
-    );
-    if (chapterStartIdx >= 0) {
-      const endIdx = chapterEndIdx >= 0 ? chapterEndIdx : inventory.units.length;
-      inventory.units = inventory.units.slice(chapterStartIdx, endIdx);
-      inventory.warnings.push(
-        `Filtered to chapter ${options.chapterFilter} (${inventory.units.length} units)`,
-      );
-      if (options.verbose)
-        console.log(
-          `Chapter filter: keeping ${inventory.units.length} units for chapter ${options.chapterFilter}`,
-        );
+  // Apply scope filter
+  if (options.scope) {
+    const resolvedScope = resolveScope(options.scope, inventory);
+    inventory.units = resolvedScope.filteredUnits;
+    inventory.warnings.push(...resolvedScope.warnings);
+    if (options.verbose) {
+      console.log(`Scope filter: keeping ${inventory.units.length} units`);
+      for (const w of resolvedScope.warnings) console.log(`  Warning: ${w}`);
     }
   }
 
@@ -166,6 +177,7 @@ export async function runPipelineV2(
         router,
         inventory.units,
         `${options.subject} ${options.levelCode}`,
+        profile,
       );
       concepts = result.concepts;
       conceptWarnings = result.warnings;
@@ -188,7 +200,7 @@ export async function runPipelineV2(
         router,
         concepts,
         inventory.units,
-        options.widgetCategories,
+        profile,
       );
       blueprints = result.blueprints;
       bpWarnings = result.warnings;
@@ -197,7 +209,7 @@ export async function runPipelineV2(
     maybeWrite(bpPath, JSON.stringify(blueprints, null, 2));
   }
 
-  // Stage 5: Generate activities from blueprints
+  // Stage 5: Generate activities from blueprints using real concepts
   const conceptActivityPairs: ConceptActivityPair[] = [];
   const conceptActivityMap = new Map<string, GeneratedActivity[]>();
   if (canResume('course-spec.json')) {
@@ -207,43 +219,40 @@ export async function runPipelineV2(
     if (!options.dryRun) {
       const llmAdapter = legacyAdapter(router, 'activity_generation');
       for (const bp of blueprints) {
-        const result = await generateActivitiesForConcept(
+        const concept = concepts.find(c => c.conceptId === bp.conceptId);
+        if (!concept) {
+          reviewItems.push(`No concept found for blueprint: ${bp.conceptId}`);
+          continue;
+        }
+        const result = await generateActivitiesFromBlueprint(
           llmAdapter,
           {
-            conceptId: bp.conceptId,
-            chapterCode: 'CH1',
-            chapterName: options.subject,
-            learningObjective: bp.objective,
-            coreIdea: '',
-            examples: [],
-            misconceptions: bp.misconceptionTargets,
-            supports: { visual: bp.representations.includes('visual') },
-            masteryCriteria: 0.8,
-            difficulty: 'beginner',
-            estimatedDuration: 30,
-            dependencies: bp.priorKnowledge,
+            concept,
+            blueprint: bp,
+            profile,
+            sourceUnits: inventory.units,
           },
-          [],
         );
         const pair: ConceptActivityPair = {
           concept: {
-            conceptId: bp.conceptId,
-            chapterCode: 'CH1',
-            chapterName: options.subject,
-            learningObjective: bp.objective,
-            coreIdea: '',
+            conceptId: concept.conceptId,
+            chapterCode: bp.lessonArc[0]?.step || 'hook',
+            chapterName: concept.label,
+            learningObjective: concept.learningObjective,
+            coreIdea: concept.coreIdea,
             examples: [],
-            misconceptions: bp.misconceptionTargets,
-            supports: { visual: bp.representations.includes('visual') },
-            masteryCriteria: 0.8,
-            difficulty: 'beginner',
-            estimatedDuration: 30,
-            dependencies: bp.priorKnowledge,
+            misconceptions: concept.misconceptionTargets,
+            supports: { visual: concept.representations.includes('visual') },
+            masteryCriteria: concept.masteryThreshold,
+            difficulty: concept.difficulty,
+            estimatedDuration: concept.estimatedMinutes,
+            dependencies: concept.prerequisites,
           },
           activities: result.activities,
         };
         conceptActivityPairs.push(pair);
         conceptActivityMap.set(bp.conceptId, result.activities);
+        reviewItems.push(...result.errors);
       }
     }
   }
@@ -262,7 +271,7 @@ export async function runPipelineV2(
     if (options.verbose) console.log('[6/8] Generating assets from blueprints...');
     if (!options.dryRun && blueprints.length > 0) {
       try {
-        const prompt = buildAssetPlanPrompt(blueprints);
+        const prompt = buildAssetPlanPrompt(blueprints, profile);
         const plan = await router.generateStructuredRaw(
           'asset_plan',
           prompt,
@@ -343,6 +352,23 @@ export async function runPipelineV2(
       outputPaths.push(join(options.outputDir, `${filenamePrefix}-course-spec.json`));
     }
   }
+
+  // Write pipeline manifest
+  const pipelineManifest = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    configHash,
+    pdfPath: options.pdfPath,
+    profileId: profile.id,
+    subject: options.subject,
+    levelCode: options.levelCode,
+    scope: options.scope ? scopeToString(options.scope) : 'all',
+  };
+  maybeWrite(
+    join(options.outputDir, 'pipeline-manifest.json'),
+    JSON.stringify(pipelineManifest, null, 2),
+    true,
+  );
 
   maybeWrite(hashPath, configHash, true);
 

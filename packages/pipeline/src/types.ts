@@ -116,6 +116,8 @@ export interface ActivityContext {
   misconceptions: string[];
 }
 
+export type { CurriculumProfile, SourceTaxonomy } from './profile/types.js';
+
 export interface ValidatedOutput {
   passed: ConceptActivityPair[];
   failed: FailedConcept[];

@@ -25,7 +25,7 @@ export const AssetManifestEntrySchema = z.object({
   mediaType: z.literal('image/svg+xml'),
   altText: z.string().min(1),
   caption: z.string().optional(),
-  rendererType: z.enum(SVG_RENDERER_TYPES),
+  rendererType: z.string().min(1),
   conceptIds: z.array(z.string()).min(1),
   sourceUnitIds: z.array(z.string()),
   parameters: z.record(z.unknown()),

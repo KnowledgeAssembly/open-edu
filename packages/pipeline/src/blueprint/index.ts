@@ -1,6 +1,7 @@
 import type { LlmRouter } from '@open-edu/llm-config';
 import type { Concept } from '../concepts/types.js';
 import type { SourceUnit } from '../source/types.js';
+import type { CurriculumProfile } from '../profile/types.js';
 import type { LessonBlueprint } from './types.js';
 import { LessonBlueprintSchema, validateBlueprint } from './types.js';
 import { buildBlueprintPrompt } from './prompt.js';
@@ -9,13 +10,13 @@ export async function generateLessonBlueprints(
   router: LlmRouter,
   concepts: Concept[],
   sourceUnits: SourceUnit[],
-  widgetCategories: string[],
+  profile: CurriculumProfile,
 ): Promise<{ blueprints: LessonBlueprint[]; warnings: string[] }> {
   const warnings: string[] = [];
   const blueprints: LessonBlueprint[] = [];
 
   for (const concept of concepts) {
-    const prompt = buildBlueprintPrompt(concept, sourceUnits, widgetCategories);
+    const prompt = buildBlueprintPrompt(concept, sourceUnits, profile);
     const result = await router.generateStructuredRaw(
       'lesson_blueprint',
       prompt,
