@@ -10,14 +10,11 @@ import { generateLessonBlueprints } from '../blueprint/index.js';
 import type { LessonBlueprint } from '../blueprint/types.js';
 import { generateActivitiesFromBlueprint } from '../generate-activities/index.js';
 import type { CurriculumProfile } from '../profile/types.js';
-import {
-  validateAllMath,
-  extractMathQuestions,
-  extractMCQValidationErrors,
-} from '../validation/math.js';
 import { validateWidgetConfig, type WidgetValidationResult } from '../validation/widgets.js';
 import { buildCoverageLedger } from '../coverage/index.js';
 import { generateQualityReport, type QualityReport } from '../validation/report.js';
+import { getValidatorsForProfile, type ValidationIssue } from '../validation/registry.js';
+import '../validation/math.js';
 import { writeCourseSpecOutput, writeCourseSpecJSONOutput } from '../output/index.js';
 import { generateAssetFiles } from '../assets/manifest.js';
 import type { AssetManifest } from '../assets/types.js';
@@ -217,7 +214,7 @@ export async function runPipelineV2(
   } else {
     if (options.verbose) console.log('[5/8] Generating activities from blueprints...');
     if (!options.dryRun) {
-      const llmAdapter = legacyAdapter(router, 'activity_generation');
+      const provider = legacyAdapter(router, 'activity_generation');
       for (const bp of blueprints) {
         const concept = concepts.find(c => c.conceptId === bp.conceptId);
         if (!concept) {
@@ -225,7 +222,7 @@ export async function runPipelineV2(
           continue;
         }
         const result = await generateActivitiesFromBlueprint(
-          llmAdapter,
+          provider,
           {
             concept,
             blueprint: bp,
@@ -301,13 +298,31 @@ export async function runPipelineV2(
   const assetsPath = join(options.outputDir, 'assets', 'manifest.json');
   outputPaths.push(assetsPath);
 
-  // Stage 7: Validate math + widgets + coverage
+  // Stage 7: Validate via validator registry
   if (options.verbose) console.log('[7/8] Running validation...');
   const allActivities = conceptActivityPairs.flatMap((p) => p.activities);
-  const mathQuestions = extractMathQuestions(allActivities);
-  const mathResults = validateAllMath(mathQuestions);
-  const mcqErrors = extractMCQValidationErrors(allActivities);
-  reviewItems.push(...mcqErrors);
+
+  const allValidationIssues: ValidationIssue[] = [];
+  const validators = getValidatorsForProfile(profile);
+  for (const validator of validators) {
+    const conceptIssues = validator.validateConcepts({
+      concepts,
+      blueprints,
+      activities: allActivities,
+      assets: assetManifest.assets,
+      sourceUnits: inventory.units,
+      profile,
+    });
+    const activityIssues = validator.validateActivities({
+      concepts,
+      blueprints,
+      activities: allActivities,
+      assets: assetManifest.assets,
+      sourceUnits: inventory.units,
+      profile,
+    });
+    allValidationIssues.push(...conceptIssues, ...activityIssues);
+  }
 
   const widgetResults: WidgetValidationResult[] = [];
   for (const activity of allActivities) {
@@ -392,7 +407,7 @@ export async function runPipelineV2(
     retries,
     durationMs,
     coverage: coverageLedger.summary,
-    mathResults,
+    validationIssues: allValidationIssues,
     widgetResults,
     reviewItems,
     assetCount: assetManifest.assets.length,

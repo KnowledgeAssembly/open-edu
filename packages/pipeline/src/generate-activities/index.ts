@@ -16,12 +16,30 @@ import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId, isWidgetA
 
 registerAllWidgetSchemas();
 
-const STEP_PROMPTS: Record<string, string> = {
+const ARC_STEP_TO_PROMPT: Record<string, string> = {
+  hook: OBSERVE_PROMPT,
   observe: OBSERVE_PROMPT,
+  worked_example: OBSERVE_PROMPT,
   guided_practice: GUIDED_PRACTICE_PROMPT,
+  widget_practice: GUIDED_PRACTICE_PROMPT,
   independent_practice: INDEPENDENT_PRACTICE_PROMPT,
   mastery_check: MASTERY_CHECK_PROMPT,
+  remediation: OBSERVE_PROMPT,
+  extension: INDEPENDENT_PRACTICE_PROMPT,
   positive_completion: POSITIVE_COMPLETION_PROMPT,
+};
+
+const ARC_STEP_TO_TYPE: Record<string, string> = {
+  hook: 'reading',
+  observe: 'reading',
+  worked_example: 'reading',
+  guided_practice: 'exercise',
+  widget_practice: 'widget',
+  independent_practice: 'exercise',
+  mastery_check: 'quiz',
+  remediation: 'reading',
+  extension: 'exercise',
+  positive_completion: 'reflection',
 };
 
 const readingContentSchema = z.object({
@@ -95,7 +113,7 @@ function buildStepPrompt(
   profile: CurriculumProfile,
   validationErrors?: string[],
 ): string {
-  const template = STEP_PROMPTS[step];
+  const template = ARC_STEP_TO_PROMPT[step];
   if (!template) throw new Error(`Unknown step: ${step}`);
 
   const defaultExemplars = EXEMPLARS.filter((e) => e.type === type && e.step === step);
@@ -281,22 +299,6 @@ async function generateStep(
   };
 }
 
-const STEP_ORDER = [
-  'observe',
-  'guided_practice',
-  'independent_practice',
-  'mastery_check',
-  'positive_completion',
-] as const;
-
-const DEFAULT_TYPES: Record<string, string> = {
-  observe: 'reading',
-  guided_practice: 'exercise',
-  independent_practice: 'exercise',
-  mastery_check: 'quiz',
-  positive_completion: 'reflection',
-};
-
 const MAX_RETRIES = 3;
 
 export interface ActivityGenerationInput {
@@ -337,9 +339,11 @@ export async function generateActivitiesFromBlueprint(
   const allWarnings: string[] = [];
   const allErrors: string[] = [];
 
-  for (let i = 0; i < STEP_ORDER.length; i++) {
-    const step = STEP_ORDER[i]!;
-    const type = DEFAULT_TYPES[step]!;
+  const arc = input.blueprint.lessonArc;
+  for (let i = 0; i < arc.length; i++) {
+    const arcStep = arc[i]!;
+    const step = arcStep.step;
+    const type = ARC_STEP_TO_TYPE[step] || 'reading';
 
     const result = await generateStep(
       llm,
@@ -360,93 +364,4 @@ export async function generateActivitiesFromBlueprint(
   }
 
   return { activities, warnings: allWarnings, errors: allErrors };
-}
-
-export async function generateActivitiesForConcept(
-  llm: LlmProvider,
-  concept: GeneratedConcept,
-  validationErrors?: string[],
-): Promise<{
-  activities: GeneratedActivity[];
-  warnings: string[];
-  errors: string[];
-}> {
-  const profile: CurriculumProfile = {
-    id: 'legacy',
-    subject: 'mathematics',
-    locale: 'en-IN',
-    language: 'en',
-    sourceTaxonomy: {
-      lessonLabels: ['Lesson', 'Chapter'],
-      sectionLabels: ['Section'],
-      objectiveLabels: ['Objectives'],
-      definitionLabels: ['Definition'],
-      exampleLabels: ['Example'],
-      exerciseLabels: ['Exercise'],
-      reviewLabels: ['Review'],
-      assessmentLabels: ['Assessment'],
-    },
-    conceptKinds: ['skill', 'knowledge', 'procedure', 'application'],
-    representations: ['concrete', 'visual', 'symbolic'],
-    questionFamilies: ['direct_question', 'word_problems'],
-    widgetCategories: ['core', 'math'],
-    assetRendererTypes: [],
-    validatorIds: [],
-    promptContext: { teachingStyle: 'scaffolded discovery' },
-  };
-
-  const activities: GeneratedActivity[] = [];
-  const allWarnings: string[] = [];
-  const allErrors: string[] = [];
-
-  for (let i = 0; i < STEP_ORDER.length; i++) {
-    const step = STEP_ORDER[i]!;
-    const type = DEFAULT_TYPES[step]!;
-
-    const result = await generateStep(
-      llm,
-      step,
-      type,
-      concept,
-      profile,
-      i + 1,
-      MAX_RETRIES,
-      validationErrors,
-    );
-
-    if (result.activity) {
-      activities.push(result.activity);
-    } else {
-      allErrors.push(...result.errors);
-    }
-  }
-
-  return { activities, warnings: allWarnings, errors: allErrors };
-}
-
-export async function generateAllActivities(
-  llm: LlmProvider,
-  concepts: GeneratedConcept[],
-): Promise<{
-  activitiesMap: Map<string, GeneratedActivity[]>;
-  warnings: string[];
-  errors: string[];
-}> {
-  const activitiesMap = new Map<string, GeneratedActivity[]>();
-  const warnings: string[] = [];
-  const errors: string[] = [];
-
-  for (const concept of concepts) {
-    const result = await generateActivitiesForConcept(llm, concept);
-
-    if (result.errors.length > 0) {
-      errors.push(...result.errors);
-      continue;
-    }
-
-    activitiesMap.set(concept.conceptId, result.activities);
-    warnings.push(...result.warnings);
-  }
-
-  return { activitiesMap, warnings, errors };
 }

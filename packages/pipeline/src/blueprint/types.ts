@@ -10,6 +10,7 @@ export const LESSON_ARC_STEPS = [
   'mastery_check',
   'remediation',
   'extension',
+  'positive_completion',
 ] as const;
 
 export type LessonArcStep = (typeof LESSON_ARC_STEPS)[number];

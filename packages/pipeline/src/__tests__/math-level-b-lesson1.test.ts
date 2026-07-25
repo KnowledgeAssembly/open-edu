@@ -280,7 +280,7 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
         activityCount: 25,
         assetCount: 3,
       },
-      mathResults: [],
+      validationIssues: [],
       widgetResults: [],
       reviewItems: [],
       assetCount: 3,

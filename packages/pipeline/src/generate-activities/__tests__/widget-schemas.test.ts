@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
+import type { LlmProvider } from '@open-edu/llm-config';
+import type { CurriculumProfile } from '../../types.js';
+import type { Concept } from '../../concepts/types.js';
+import type { LessonBlueprint } from '../../blueprint/types.js';
 import {
   registerWidgetSchema,
   getWidgetSchema,
@@ -7,10 +11,7 @@ import {
   getAllowedWidgetIdsForProfile,
   isWidgetAllowedForProfile,
 } from '../widget-schemas.js';
-import type { LlmProvider } from '@open-edu/llm-config';
-import type { GeneratedConcept } from '../../types.js';
-import type { CurriculumProfile } from '../../profile/types.js';
-import { generateActivitiesForConcept } from '../index.js';
+import { generateActivitiesFromBlueprint } from '../index.js';
 
 function makeProfile(overrides: Partial<CurriculumProfile> = {}): CurriculumProfile {
   return {
@@ -36,6 +37,57 @@ function makeProfile(overrides: Partial<CurriculumProfile> = {}): CurriculumProf
     validatorIds: [],
     promptContext: {},
     ...overrides,
+  };
+}
+
+function makeConcept(): Concept {
+  return {
+    conceptId: 'test_concept',
+    label: 'Test Concept',
+    kind: 'knowledge',
+    sourceUnitIds: ['src-1'],
+    learningObjective: 'Test objective with sufficient length for validation',
+    coreIdea: 'A core idea for testing purposes.',
+    difficulty: 'beginner',
+    masteryThreshold: 0.8,
+    prerequisites: [],
+    representations: ['visual'],
+    exerciseFamilies: ['direct_question'],
+    misconceptionTargets: ['Misconception one'],
+    recommendedWidgetCategories: ['core'],
+    estimatedMinutes: 15,
+  };
+}
+
+function makeBlueprint(conceptId: string, overrides: Partial<LessonBlueprint> = {}): LessonBlueprint {
+  return {
+    conceptId,
+    sourceUnitIds: ['src-1'],
+    objective: 'Test objective with sufficient length for validation',
+    priorKnowledge: [],
+    representations: ['visual'],
+    lessonArc: [
+      { step: 'observe', description: 'Observe the concept', durationMinutes: 5 },
+      { step: 'guided_practice', description: 'Guided practice', durationMinutes: 10 },
+      { step: 'independent_practice', description: 'Independent practice', durationMinutes: 10 },
+      { step: 'mastery_check', description: 'Mastery check', durationMinutes: 5 },
+      { step: 'positive_completion', description: 'Reflection', durationMinutes: 5 },
+    ],
+    assetRequests: [],
+    widgetRequests: [],
+    questionFamilies: ['direct_question'],
+    misconceptionTargets: [],
+    ...overrides,
+  };
+}
+
+function makeInput(): { concept: Concept; blueprint: LessonBlueprint; profile: CurriculumProfile; sourceUnits: any[] } {
+  const concept = makeConcept();
+  return {
+    concept,
+    blueprint: makeBlueprint(concept.conceptId),
+    profile: makeProfile(),
+    sourceUnits: [],
   };
 }
 
@@ -148,23 +200,6 @@ describe('generateStep widget validation', () => {
     };
   }
 
-  function makeConcept(): GeneratedConcept {
-    return {
-      conceptId: 'test_concept',
-      chapterCode: 'CH1',
-      chapterName: 'Test Chapter',
-      learningObjective: 'Test objective with sufficient length for validation',
-      coreIdea: 'A core idea for testing purposes.',
-      examples: ['Example one', 'Example two'],
-      misconceptions: ['Misconception one'],
-      supports: { visual: true },
-      masteryCriteria: 0.8,
-      difficulty: 'beginner',
-      estimatedDuration: 15,
-      dependencies: [],
-    };
-  }
-
   it('produces widget activity when LLM returns valid widget output', async () => {
     const llm = makeMockLlm([
       {
@@ -200,7 +235,7 @@ describe('generateStep widget validation', () => {
       },
     ]);
 
-    const result = await generateActivitiesForConcept(llm, makeConcept());
+    const result = await generateActivitiesFromBlueprint(llm, makeInput());
     expect(result.errors).toHaveLength(0);
     expect(result.activities).toHaveLength(5);
     const widgetActivity = result.activities.find((a) => a.courseSpecType === 'widget');
@@ -287,7 +322,7 @@ describe('generateStep widget validation', () => {
     ]);
 
     registerAllWidgetSchemas();
-    const result = await generateActivitiesForConcept(llm, makeConcept());
+    const result = await generateActivitiesFromBlueprint(llm, makeInput());
     expect(result.errors).toHaveLength(0);
     const widgetActivity = result.activities.find((a) => a.courseSpecType === 'widget');
     expect(widgetActivity).toBeUndefined();

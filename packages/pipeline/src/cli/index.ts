@@ -28,7 +28,6 @@ interface CLIOptions {
   language: string;
   locale: string;
   widgetCategories: string[];
-  chapter?: number;
   llmProvider?: string;
   llmModel?: string;
   dryRun: boolean;
@@ -112,9 +111,6 @@ function parseArgs(): CLIOptions {
       case '--max-retries':
         options.maxRetries = parseInt(args[++i] || '3', 10);
         break;
-      case '--chapter':
-        options.scope = `chapter-index:${args[++i] || '1'}`;
-        break;
       case '--format': {
         const formatVal = args[++i] || 'both';
         if (!['md', 'json', 'both'].includes(formatVal)) {
@@ -159,7 +155,6 @@ Options:
   --verbose               Detailed logging per stage
   --output-dir <path>     Custom output directory (default: ./output)
   --max-retries <num>     Max retries per concept (default: 3)
-  --chapter <num>         Process only a single chapter (use --scope instead)
   --format <type>         Output format: md, json, both (default: both)
   --help, -h              Show this help message
 
