@@ -114,3 +114,34 @@ When adding new user-facing strings to runtime or learner components, use `t('na
 ## Widget catalog and ID resolution
 
 Widget-based exercises depend on the registry and catalog pipeline. The canonical widget metadata is defined in `packages/widgets/src/widget-catalog-source.ts`, resolved through `packages/widgets/src/domains.ts`, and consumed by `packages/core/src/widget-catalog.ts` when the CLI builds prompt/catalog output. That separation keeps author-facing widget IDs stable while allowing legacy `open-edu.*` IDs to be migrated automatically. The SVG explorer widget family also lives under `packages/widgets/src/svg-explorer/` and extends the same catalog pathway for interactive content.
+
+## Pipeline: PDF-to-course-spec generation
+
+The `@open-edu/pipeline` package generates course specifications from PDF textbooks through an 8-stage AI-driven pipeline.
+
+### Profiles
+
+Curriculum profiles adapt generation behavior per subject. Each profile declares its taxonomy labels, concept kinds, widget categories, asset renderers, validators, and prompt context. Four built-in profiles ship with the pipeline:
+
+- **generic** — fallback for any unknown subject, uses core widgets only
+- **math** — mathematics with CPA teaching style, 11 SVG renderers, math-specific widgets and validators
+- **science** — observation→classification→explanation style, process diagrams, classification questions
+- **nios** — NIOS curriculum adapter with Hindi/English bilingual taxonomy labels
+
+Profiles are resolved automatically from the `--subject` flag or explicitly via `--profile`. Subject-specific behavior (NIOS markers, math widgets, science validators) lives entirely in profiles — the pipeline core is profile-agnostic.
+
+### Document scope
+
+The `--scope` option controls which portion of the PDF is processed: entire document, a single chapter by index or ID, a page range, or specific source unit IDs.
+
+### Resume & artifact identity
+
+The pipeline computes a config hash from PDF content, profile, scope, and stage model configs. On `--resume`, intermediate artifacts are reused if the hash matches. Cross-scope reuse is prevented.
+
+### Adding a new subject
+
+To add a new subject without changing pipeline orchestration:
+
+1. Create a profile in `packages/pipeline/src/profile/builtins/`
+2. Register it in `packages/pipeline/src/profile/registry.ts`
+3. Optionally add validators (`validation/`) and renderers (`assets/registry.ts`)

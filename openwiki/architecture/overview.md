@@ -91,6 +91,27 @@ Compiles course-spec Markdown or JSON into validated package structures.
 
 Support AI-assisted curriculum generation from PDFs and abstract over model providers.
 
+**Pipeline** (`@open-edu/pipeline`) implements an 8-stage PDF-to-course-spec pipeline:
+
+1. **Extract** — PDF text extraction with `pdf-parse`
+2. **Source Inventory** — Taxonomy-driven unit classification + LLM reclassification
+3. **Concept Map** — LLM generates teachable concepts with profile-aware prompts
+4. **Lesson Blueprints** — Per-concept blueprints with arcs, widget requests, asset requests
+5. **Activity Generation** — Activities generated from blueprint lesson arcs
+6. **Asset Plan** — LLM-planned visual assets rendered by SVG registry
+7. **Validation** — Pluggable validators (structure, math, science), widget configs, coverage
+8. **Output** — Renders course-spec.json + course-spec.md
+
+Key architecture:
+
+- **Curriculum profiles** (`profile/`) — generic, math, science, nios profiles control widgets, renderers, validators, and prompt context. Unknown subjects fall back to generic.
+- **Document scope** (`scope/`) — Supports `all`, `chapter-index:N`, `chapter-id:ID`, `pages:A-B`, `source-units:id,id`.
+- **Renderer registry** (`assets/registry.ts`) — 11 built-in SVG renderers, extensible per profile.
+- **Validator registry** (`validation/registry.ts`) — Pluggable subject validators run only when profile enables them.
+- **Resume & artifact identity** — Config hash includes PDF content, profile, scope, language, locale; `pipeline-manifest.json` prevents cross-scope reuse.
+
+**LLM Config** (`@open-edu/llm-config`) provides per-stage model routing with environment variable and CLI override support. Stages with low reasoning needs (classification, generation) use `gpt-4o-mini`; structural stages (concept design, blueprinting, review) use stronger reasoning models like `gpt-4o`.
+
 ### `@open-edu/storage`
 
 Provides IndexedDB persistence with 6 typed object stores: courses, progress, badges, cards, search-indexes, and preferences. Built on the `idb` Promise-based wrapper. All learner app persistence (progress, badges, cards, bundle progress, search index) migrated from localStorage to this package.
