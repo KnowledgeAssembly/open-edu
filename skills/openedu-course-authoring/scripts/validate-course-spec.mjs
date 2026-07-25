@@ -11,10 +11,9 @@ const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
  * attempts to invoke the course-compiler for deeper validation.
  * @param {string} specPath - path to course-spec.json
  * @param {string} outputDir - directory for quality-report.json
- * @param {string|null} compilerPath - path to packages/course-compiler (or null)
  * @returns {ValidationResult}
  */
-export function validateCourseSpec(specPath, outputDir, compilerPath) {
+export function validateCourseSpec(specPath, outputDir) {
   /** @type {ValidationDiagnostic[]} */
   const errors = [];
   /** @type {ValidationDiagnostic[]} */
@@ -279,7 +278,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('Usage: node validate-course-spec.mjs <course-spec.json> [output-dir]');
     process.exit(1);
   }
-  const result = validateCourseSpec(specPath, outputDir, null);
+  const result = validateCourseSpec(specPath, outputDir);
   console.log(JSON.stringify(result, null, 2));
   process.exit(result.success ? 0 : 1);
 }

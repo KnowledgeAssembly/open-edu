@@ -51,21 +51,12 @@ function makeValidationResult(overrides = {}) {
   };
 }
 
-const canonicalIds = new Set([
-  'core.matching', 'core.multiple-choice', 'core.visual-counting', 'core.drag-drop',
-  'core.sequencing', 'core.fill-blank', 'core.story-question', 'core.real-world',
-  'core.chart-reader', 'core.audio-player', 'core.video-player',
-  'math.fraction-visual', 'math.place-value-chart', 'math.grid-area',
-  'math.clock-time', 'math.measurement-scale', 'math.number-line',
-  'science.process-diagram', 'language.flashcard', 'social.map',
-]);
-
 describe('summarize-quality', () => {
   it('reports success for fully aligned course', () => {
     const dir = createTempDir();
     try {
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      const result = summarizeQuality(dir, makeValidationResult(), null);
+      const result = summarizeQuality(dir, makeValidationResult());
       strictEqual(result.success, true);
       ok(result.findings.length > 0);
     } finally {
@@ -98,7 +89,7 @@ describe('summarize-quality', () => {
     const dir = createTempDir();
     try {
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      const result = summarizeQuality(dir, makeValidationResult(), null);
+      const result = summarizeQuality(dir, makeValidationResult());
       const durFindings = result.findings.filter((f) => f.checkId === 'QC-DUR-02');
       ok(durFindings.length > 0, 'should flag the 60-minute lesson');
     } finally {
@@ -121,7 +112,7 @@ describe('summarize-quality', () => {
         },
       ];
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult(), null);
+      const result = summarizeQuality(dir, makeValidationResult());
       const wdgFindings = result.findings.filter((f) => f.checkId === 'QC-WDG-01');
       ok(wdgFindings.length > 0, 'should flag legacy widget ID');
     } finally {
@@ -144,7 +135,7 @@ describe('summarize-quality', () => {
         },
       ];
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult(), null);
+      const result = summarizeQuality(dir, makeValidationResult());
       const depWarnings = result.findings.filter((f) => f.checkId === 'QC-WDG-02');
       ok(depWarnings.length > 0, 'should flag deprecated widget');
     } finally {
@@ -180,7 +171,7 @@ describe('summarize-quality', () => {
     const dir = createTempDir();
     try {
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      summarizeQuality(dir, makeValidationResult(), null);
+      summarizeQuality(dir, makeValidationResult());
       const report = JSON.parse(readFileSync(join(dir, 'quality-report.json'), 'utf-8'));
       ok(report.findings.length > 0);
       ok(typeof report.summary === 'object');

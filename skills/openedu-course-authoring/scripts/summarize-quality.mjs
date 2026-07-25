@@ -43,10 +43,9 @@ const nonMeasurableVerbs = [
  * Combines validation diagnostics with a lesson blueprint to produce a quality report.
  * @param {string} outputDir - directory containing blueprint and report artifacts
  * @param {object} validationResult - result from validateCourseSpec
- * @param {string|null} catalogPath - path to widget-catalog-data.json (or null)
  * @returns {QualityResult}
  */
-export function summarizeQuality(outputDir, validationResult, catalogPath) {
+export function summarizeQuality(outputDir, validationResult) {
   /** @type {QualityFinding[]} */
   const findings = [];
 
@@ -262,7 +261,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       validationResult = JSON.parse(readFileSync(vrPath, 'utf-8'));
     } catch { /* ignore */ }
   }
-  const result = summarizeQuality(outputDir, validationResult || { errors: [], warnings: [], data: null }, null);
+  const result = summarizeQuality(outputDir, validationResult || { errors: [], warnings: [], data: null });
   console.log(JSON.stringify(result, null, 2));
   process.exit(result.success ? 0 : 1);
 }

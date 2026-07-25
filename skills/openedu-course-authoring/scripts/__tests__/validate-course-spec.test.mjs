@@ -62,7 +62,7 @@ describe('validate-course-spec (structural)', () => {
     const dir = createTempDir();
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, true);
       strictEqual(result.errors.length, 0);
     } finally {
@@ -73,7 +73,7 @@ describe('validate-course-spec (structural)', () => {
   it('rejects missing file', () => {
     const dir = createTempDir();
     try {
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
       ok(result.errors.some((e) => e.code === 'FILE_NOT_FOUND'));
     } finally {
@@ -85,7 +85,7 @@ describe('validate-course-spec (structural)', () => {
     const dir = createTempDir();
     try {
       writeFileSync(join(dir, 'course-spec.json'), '{ not valid json }');
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
       ok(result.errors.some((e) => e.code === 'JSON_PARSE_ERROR'));
     } finally {
@@ -99,7 +99,7 @@ describe('validate-course-spec (structural)', () => {
       const spec = makeValidSpec();
       delete spec.metadata.title;
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
       ok(result.errors.length > 0, 'should have at least one error');
     } finally {
@@ -113,7 +113,7 @@ describe('validate-course-spec (structural)', () => {
       const spec = makeValidSpec();
       spec.lessons[0].activities[0].type = 'INVALID_TYPE';
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -126,7 +126,7 @@ describe('validate-course-spec (structural)', () => {
       const spec = makeValidSpec();
       spec.lessons.push({ ...spec.lessons[0] });
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
       ok(result.errors.some((e) => e.code === 'DUPLICATE_LESSON_ID'));
     } finally {
@@ -145,7 +145,7 @@ describe('validate-course-spec (structural)', () => {
         description: 'A widget activity',
       });
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, false);
       ok(result.errors.some((e) => e.code === 'MISSING_WIDGET_ID'));
     } finally {
@@ -157,7 +157,7 @@ describe('validate-course-spec (structural)', () => {
     const dir = createTempDir();
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.compilerAvailable, false);
       strictEqual(result.success, true, 'structural-only validation should succeed for valid spec');
     } finally {
@@ -171,7 +171,7 @@ describe('validate-course-spec (structural)', () => {
       const spec = makeValidSpec();
       spec.lessons[0].objectives = [];
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       ok(result.warnings.some((w) => w.code === 'MISSING_OBJECTIVES'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -184,7 +184,7 @@ describe('validate-course-spec (structural)', () => {
       const spec = makeValidSpec();
       spec.lessons[0].activities = [];
       writeJSON(dir, 'course-spec.json', spec);
-      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       ok(result.warnings.some((w) => w.code === 'NO_ACTIVITIES'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -195,7 +195,7 @@ describe('validate-course-spec (structural)', () => {
     const dir = createTempDir();
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
-      validateCourseSpec(join(dir, 'course-spec.json'), dir, null);
+      validateCourseSpec(join(dir, 'course-spec.json'), dir);
       ok(existsSync(join(dir, 'quality-report.json')), 'quality-report.json should be written');
       const report = JSON.parse(readFileSync(join(dir, 'quality-report.json'), 'utf-8'));
       strictEqual(report.success, true);
