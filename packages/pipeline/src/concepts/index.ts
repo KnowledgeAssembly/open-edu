@@ -6,7 +6,7 @@ import { buildConceptMapPrompt } from './prompt.js';
 
 export function validateConceptGraph(concepts: Concept[]): string[] {
   const errors: string[] = [];
-  const ids = new Set(concepts.map(c => c.conceptId));
+  const ids = new Set(concepts.map((c) => c.conceptId));
 
   for (const concept of concepts) {
     if (concept.prerequisites.includes(concept.conceptId)) {
@@ -25,7 +25,10 @@ export function validateConceptGraph(concepts: Concept[]): string[] {
   for (const c of concepts) adj.set(c.conceptId, c.prerequisites);
 
   function detectCycle(nodeId: string): boolean {
-    if (inStack.has(nodeId)) { errors.push(`Dependency cycle detected via "${nodeId}"`); return true; }
+    if (inStack.has(nodeId)) {
+      errors.push(`Dependency cycle detected via "${nodeId}"`);
+      return true;
+    }
     if (visited.has(nodeId)) return false;
     visited.add(nodeId);
     inStack.add(nodeId);
@@ -36,7 +39,8 @@ export function validateConceptGraph(concepts: Concept[]): string[] {
   for (const c of concepts) detectCycle(c.conceptId);
 
   for (const c of concepts) {
-    if (c.sourceUnitIds.length === 0) errors.push(`Concept "${c.conceptId}" has no source evidence`);
+    if (c.sourceUnitIds.length === 0)
+      errors.push(`Concept "${c.conceptId}" has no source evidence`);
   }
 
   return errors;
@@ -48,13 +52,15 @@ export async function generateConceptMap(
   lessonName: string,
 ): Promise<{ concepts: Concept[]; warnings: string[] }> {
   const prompt = buildConceptMapPrompt(sourceUnits, lessonName);
-  const result = await router.generateStructuredRaw('concept_map', prompt, ConceptMapSchema, { temperature: 0.2 });
+  const result = await router.generateStructuredRaw('concept_map', prompt, ConceptMapSchema, {
+    temperature: 0.2,
+  });
 
   const warnings: string[] = [];
   const graphErrors = validateConceptGraph(result.concepts);
   if (graphErrors.length > 0) warnings.push(...graphErrors);
 
-  const validConcepts = result.concepts.filter(c => {
+  const validConcepts = result.concepts.filter((c) => {
     const r = ConceptSchema.safeParse(c);
     if (!r.success) warnings.push(`Concept "${c.conceptId}" failed validation: ${r.error.message}`);
     return r.success;

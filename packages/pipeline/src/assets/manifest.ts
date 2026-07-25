@@ -40,7 +40,9 @@ export function generateAssetFiles(
       writeFileSync(filePath, svgContent, 'utf-8');
       written.push(entry.filename);
     } catch (err: unknown) {
-      errors.push(`Asset "${entry.id}" render failed: ${err instanceof Error ? err.message : String(err)}`);
+      errors.push(
+        `Asset "${entry.id}" render failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 
@@ -48,6 +50,10 @@ export function generateAssetFiles(
   if (!existsSync(dirname(manifestPath))) {
     mkdirSync(dirname(manifestPath), { recursive: true });
   }
-  writeFileSync(manifestPath, JSON.stringify(AssetManifestSchema.parse(manifest), null, 2), 'utf-8');
+  writeFileSync(
+    manifestPath,
+    JSON.stringify(AssetManifestSchema.parse(manifest), null, 2),
+    'utf-8',
+  );
   return { written, errors };
 }

@@ -102,7 +102,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Match pairs of items by dragging or selecting.',
-      whatItDoes: 'The Matching widget shows two columns of items. Students connect each item from the left column to its corresponding match in the right column. It supports keyboard navigation, touch, and screen readers.',
+      whatItDoes:
+        'The Matching widget shows two columns of items. Students connect each item from the left column to its corresponding match in the right column. It supports keyboard navigation, touch, and screen readers.',
       whenToUse: [
         'Teaching vocabulary and definitions',
         'Matching causes to effects',
@@ -117,12 +118,43 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally add hints to help students who get stuck',
       ],
       configFields: [
-        { name: 'pairs', type: 'array of objects', required: true, description: 'The matching pairs. Each object has an itemA (string) and itemB (string).' },
-        { name: 'pairs[].itemA', type: 'string', required: true, description: 'The left-side item text.' },
-        { name: 'pairs[].itemB', type: 'string', required: true, description: 'The right-side item text.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the matching activity.' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints shown when students need help.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the activity in observe mode with correct matches pre-connected. Defaults to false.' },
+        {
+          name: 'pairs',
+          type: 'array of objects',
+          required: true,
+          description: 'The matching pairs. Each object has an itemA (string) and itemB (string).',
+        },
+        {
+          name: 'pairs[].itemA',
+          type: 'string',
+          required: true,
+          description: 'The left-side item text.',
+        },
+        {
+          name: 'pairs[].itemB',
+          type: 'string',
+          required: true,
+          description: 'The right-side item text.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions shown above the matching activity.',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints shown when students need help.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description:
+            'When false, shows the activity in observe mode with correct matches pre-connected. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -208,7 +240,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Ask questions and let students pick from a list of answers.',
-      whatItDoes: 'The Multiple Choice widget presents a question with several answer options. Students select their answer and get immediate feedback. It supports both single-question and multi-question modes with a progress indicator.',
+      whatItDoes:
+        'The Multiple Choice widget presents a question with several answer options. Students select their answer and get immediate feedback. It supports both single-question and multi-question modes with a progress indicator.',
       whenToUse: [
         'Checking knowledge after a lesson',
         'Quick formative assessments',
@@ -223,12 +256,44 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally add explanations for each question',
       ],
       configFields: [
-        { name: 'questions', type: 'array of objects', required: true, description: 'List of questions. Each has question (string), options (string array), correctIndex (number), and optional explanation (string).' },
-        { name: 'questions[].question', type: 'string', required: true, description: 'The question text shown to the student.' },
-        { name: 'questions[].options', type: 'array of strings', required: true, description: 'The answer choices. Must have at least 2 options.' },
-        { name: 'questions[].correctIndex', type: 'number', required: true, description: 'The index (starting from 0) of the correct option.' },
-        { name: 'questions[].explanation', type: 'string', required: false, description: 'Shown after the student answers, explaining why the answer is correct.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows correct answers without requiring student input. Defaults to false.' },
+        {
+          name: 'questions',
+          type: 'array of objects',
+          required: true,
+          description:
+            'List of questions. Each has question (string), options (string array), correctIndex (number), and optional explanation (string).',
+        },
+        {
+          name: 'questions[].question',
+          type: 'string',
+          required: true,
+          description: 'The question text shown to the student.',
+        },
+        {
+          name: 'questions[].options',
+          type: 'array of strings',
+          required: true,
+          description: 'The answer choices. Must have at least 2 options.',
+        },
+        {
+          name: 'questions[].correctIndex',
+          type: 'number',
+          required: true,
+          description: 'The index (starting from 0) of the correct option.',
+        },
+        {
+          name: 'questions[].explanation',
+          type: 'string',
+          required: false,
+          description: 'Shown after the student answers, explaining why the answer is correct.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description:
+            'When false, shows correct answers without requiring student input. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -265,7 +330,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       sidebarPosition: 1,
       relatedWidgets: [
         { id: 'core.fill-blank', name: 'Fill in the Blank', domain: 'core', slug: 'fill-blank' },
-        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
+        {
+          id: 'core.story-question',
+          name: 'Story Question',
+          domain: 'core',
+          slug: 'story-question',
+        },
       ],
     },
   },
@@ -383,7 +453,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Display visual objects for students to count and identify quantities.',
-      whatItDoes: 'The Visual Counting widget shows a grid of visual objects (like emoji) and asks students to count them. Students type or select the correct number. It helps early learners build number sense through visual grouping.',
+      whatItDoes:
+        'The Visual Counting widget shows a grid of visual objects (like emoji) and asks students to count them. Students type or select the correct number. It helps early learners build number sense through visual grouping.',
       whenToUse: [
         'Teaching counting and quantities to early learners',
         'Building number recognition skills',
@@ -398,11 +469,37 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Add a description like "Count the stars!"',
       ],
       configFields: [
-        { name: 'items', type: 'array of strings', required: true, description: 'Emoji or characters to display as countable items. Usually a single item repeated.' },
-        { name: 'count', type: 'number', required: true, description: 'How many items to show (1-12 recommended).' },
-        { name: 'text', type: 'string', required: false, description: 'Text shown after the count, e.g. "stars" displays as "5 stars".' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the counting grid.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the correct count. Defaults to false.' },
+        {
+          name: 'items',
+          type: 'array of strings',
+          required: true,
+          description:
+            'Emoji or characters to display as countable items. Usually a single item repeated.',
+        },
+        {
+          name: 'count',
+          type: 'number',
+          required: true,
+          description: 'How many items to show (1-12 recommended).',
+        },
+        {
+          name: 'text',
+          type: 'string',
+          required: false,
+          description: 'Text shown after the count, e.g. "stars" displays as "5 stars".',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions shown above the counting grid.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the correct count. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -488,7 +585,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Drag and drop items into the correct categories or zones.',
-      whatItDoes: 'The Drag & Drop widget lets students sort items into target zones by dragging them with mouse, touch, or keyboard. Each item belongs in one target zone based on the expected positions you define. It works on touch screens, with a mouse, or via keyboard shortcuts.',
+      whatItDoes:
+        'The Drag & Drop widget lets students sort items into target zones by dragging them with mouse, touch, or keyboard. Each item belongs in one target zone based on the expected positions you define. It works on touch screens, with a mouse, or via keyboard shortcuts.',
       whenToUse: [
         'Sorting items into categories',
         'Classifying animals, objects, or concepts',
@@ -503,12 +601,43 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set expectedPositions to map each item id to its correct target id',
       ],
       configFields: [
-        { name: 'items', type: 'array of objects', required: true, description: 'The draggable items. Each has id (string), label (string), and optional emoji (string).' },
-        { name: 'targets', type: 'array of objects', required: true, description: 'The drop zones. Each has id (string) and label (string).' },
-        { name: 'expectedPositions', type: 'object', required: true, description: 'Maps item ids to target ids. e.g. `{"fish": "ocean", "bird": "sky"}`.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows items pre-placed in correct zones. Defaults to false.' },
+        {
+          name: 'items',
+          type: 'array of objects',
+          required: true,
+          description:
+            'The draggable items. Each has id (string), label (string), and optional emoji (string).',
+        },
+        {
+          name: 'targets',
+          type: 'array of objects',
+          required: true,
+          description: 'The drop zones. Each has id (string) and label (string).',
+        },
+        {
+          name: 'expectedPositions',
+          type: 'object',
+          required: true,
+          description: 'Maps item ids to target ids. e.g. `{"fish": "ocean", "bird": "sky"}`.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions shown above the activity.',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints for students who need help.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows items pre-placed in correct zones. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -608,7 +737,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Arrange items in the correct order by dragging or selecting.',
-      whatItDoes: 'The Sequencing widget presents a scrambled list of items that students must arrange in the correct order. They drag items into position or use keyboard shortcuts. Common uses include ordering story events, life cycle stages, math steps, or historical events.',
+      whatItDoes:
+        'The Sequencing widget presents a scrambled list of items that students must arrange in the correct order. They drag items into position or use keyboard shortcuts. Common uses include ordering story events, life cycle stages, math steps, or historical events.',
       whenToUse: [
         'Teaching chronological order',
         'Story sequencing activities',
@@ -623,11 +753,38 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally add hints to help students',
       ],
       configFields: [
-        { name: 'items', type: 'array of objects', required: true, description: 'The items to sequence. Each has id (string), label (string), and optional emoji (string).' },
-        { name: 'correctOrder', type: 'array of strings', required: true, description: 'The correct sequence of item ids, e.g. ["seed", "sprout", "plant", "flower"].' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows items in correct order. Defaults to false.' },
+        {
+          name: 'items',
+          type: 'array of objects',
+          required: true,
+          description:
+            'The items to sequence. Each has id (string), label (string), and optional emoji (string).',
+        },
+        {
+          name: 'correctOrder',
+          type: 'array of strings',
+          required: true,
+          description:
+            'The correct sequence of item ids, e.g. ["seed", "sprout", "plant", "flower"].',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions shown above the activity.',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints for students who need help.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows items in correct order. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -719,7 +876,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Complete sentences by filling in missing words or numbers.',
-      whatItDoes: 'The Fill in the Blank widget shows a sentence or paragraph with gaps. Students fill in the blanks by selecting from a dropdown of options or typing their answer. It supports both select mode (choose from options) and type mode (write the answer).',
+      whatItDoes:
+        'The Fill in the Blank widget shows a sentence or paragraph with gaps. Students fill in the blanks by selecting from a dropdown of options or typing their answer. It supports both select mode (choose from options) and type mode (write the answer).',
       whenToUse: [
         'Vocabulary practice and word recall',
         'Cloze reading comprehension exercises',
@@ -734,12 +892,44 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose select mode (dropdown) or type mode (free text)',
       ],
       configFields: [
-        { name: 'template', type: 'string', required: true, description: 'The text with ___ placeholders for blanks. e.g. "Water ___ from the ground."' },
-        { name: 'blanks', type: 'array of objects', required: true, description: 'Each blank definition. Has id (string), position (number), correctAnswer (string or number), and optional options array for select mode.' },
-        { name: 'mode', type: 'string', required: false, description: '"select" for dropdown choices (default) or "type" for free text input.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions shown above the activity.' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows filled blanks. Defaults to false.' },
+        {
+          name: 'template',
+          type: 'string',
+          required: true,
+          description:
+            'The text with ___ placeholders for blanks. e.g. "Water ___ from the ground."',
+        },
+        {
+          name: 'blanks',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Each blank definition. Has id (string), position (number), correctAnswer (string or number), and optional options array for select mode.',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"select" for dropdown choices (default) or "type" for free text input.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions shown above the activity.',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints for students who need help.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows filled blanks. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -765,8 +955,18 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 6,
       relatedWidgets: [
-        { id: 'core.multiple-choice', name: 'Multiple Choice', domain: 'core', slug: 'multiple-choice' },
-        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
+        {
+          id: 'core.multiple-choice',
+          name: 'Multiple Choice',
+          domain: 'core',
+          slug: 'multiple-choice',
+        },
+        {
+          id: 'core.story-question',
+          name: 'Story Question',
+          domain: 'core',
+          slug: 'story-question',
+        },
       ],
     },
   },
@@ -833,7 +1033,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Present a story or passage followed by comprehension questions.',
-      whatItDoes: 'The Story Question widget shows a short story or reading passage, followed by multiple-choice comprehension questions. Students read the passage and answer questions about key details, inferences, and main ideas.',
+      whatItDoes:
+        'The Story Question widget shows a short story or reading passage, followed by multiple-choice comprehension questions. Students read the passage and answer questions about key details, inferences, and main ideas.',
       whenToUse: [
         'Reading comprehension practice',
         'Assessing understanding of a passage',
@@ -848,12 +1049,43 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set interactive to true',
       ],
       configFields: [
-        { name: 'scenario', type: 'string', required: true, description: 'The story or reading passage text. Keep under 150 words for best results.' },
-        { name: 'questions', type: 'array of objects', required: true, description: 'List of questions. Each has question (string), options (string array), and correctIndex (number).' },
-        { name: 'questions[].question', type: 'string', required: true, description: 'A comprehension question about the story.' },
-        { name: 'questions[].options', type: 'array of strings', required: true, description: 'Answer choices. Must have at least 2.' },
-        { name: 'questions[].correctIndex', type: 'number', required: true, description: 'The index (starting from 0) of the correct option.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows answers without requiring input. Defaults to false.' },
+        {
+          name: 'scenario',
+          type: 'string',
+          required: true,
+          description: 'The story or reading passage text. Keep under 150 words for best results.',
+        },
+        {
+          name: 'questions',
+          type: 'array of objects',
+          required: true,
+          description:
+            'List of questions. Each has question (string), options (string array), and correctIndex (number).',
+        },
+        {
+          name: 'questions[].question',
+          type: 'string',
+          required: true,
+          description: 'A comprehension question about the story.',
+        },
+        {
+          name: 'questions[].options',
+          type: 'array of strings',
+          required: true,
+          description: 'Answer choices. Must have at least 2.',
+        },
+        {
+          name: 'questions[].correctIndex',
+          type: 'number',
+          required: true,
+          description: 'The index (starting from 0) of the correct option.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows answers without requiring input. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -884,7 +1116,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 7,
       relatedWidgets: [
-        { id: 'core.multiple-choice', name: 'Multiple Choice', domain: 'core', slug: 'multiple-choice' },
+        {
+          id: 'core.multiple-choice',
+          name: 'Multiple Choice',
+          domain: 'core',
+          slug: 'multiple-choice',
+        },
         { id: 'core.fill-blank', name: 'Fill in the Blank', domain: 'core', slug: 'fill-blank' },
       ],
     },
@@ -949,7 +1186,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Apply learning to real-world scenarios with open-ended reflection.',
-      whatItDoes: 'The Real World widget presents a practical scenario and asks students to apply what they learned. Students write their answer and explanation in a text area. It is designed for open-ended thinking rather than right/wrong answers.',
+      whatItDoes:
+        'The Real World widget presents a practical scenario and asks students to apply what they learned. Students write their answer and explanation in a text area. It is designed for open-ended thinking rather than right/wrong answers.',
       whenToUse: [
         'Applying math concepts to everyday situations',
         'Connecting science to real-world examples',
@@ -964,10 +1202,30 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally provide an expected answer for comparison',
       ],
       configFields: [
-        { name: 'scenario', type: 'string', required: true, description: 'A real-world situation the student should think about.' },
-        { name: 'taskDescription', type: 'string', required: false, description: 'Specific instructions for what the student should do or answer.' },
-        { name: 'description', type: 'string', required: false, description: 'Additional context or instructions.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the scenario in read-only mode. Defaults to false.' },
+        {
+          name: 'scenario',
+          type: 'string',
+          required: true,
+          description: 'A real-world situation the student should think about.',
+        },
+        {
+          name: 'taskDescription',
+          type: 'string',
+          required: false,
+          description: 'Specific instructions for what the student should do or answer.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Additional context or instructions.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the scenario in read-only mode. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -987,7 +1245,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 8,
       relatedWidgets: [
-        { id: 'core.story-question', name: 'Story Question', domain: 'core', slug: 'story-question' },
+        {
+          id: 'core.story-question',
+          name: 'Story Question',
+          domain: 'core',
+          slug: 'story-question',
+        },
       ],
     },
   },
@@ -1052,7 +1315,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Display bar charts and graphs for students to read and interpret.',
-      whatItDoes: 'The Chart Reader widget shows a bar chart or pictograph that students read to answer questions. It displays clear, color-coded data visualizations with labels and values. Students interpret the chart and answer what they see.',
+      whatItDoes:
+        'The Chart Reader widget shows a bar chart or pictograph that students read to answer questions. It displays clear, color-coded data visualizations with labels and values. Students interpret the chart and answer what they see.',
       whenToUse: [
         'Teaching data interpretation and graph reading',
         'Comparing quantities visually',
@@ -1067,13 +1331,48 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Add a description or question about the chart',
       ],
       configFields: [
-        { name: 'data', type: 'array of objects', required: true, description: 'Chart data. Each entry has label (string) and value (number).' },
-        { name: 'type', type: 'string', required: false, description: 'Chart type: "bar" (default) or a pictograph variant.' },
-        { name: 'title', type: 'string', required: false, description: 'A title displayed above the chart.' },
-        { name: 'description', type: 'string', required: false, description: 'Question or instructions about the chart.' },
-        { name: 'showValues', type: 'boolean', required: false, description: 'Show numeric values on the chart bars. Defaults to true.' },
-        { name: 'correctLabel', type: 'string', required: false, description: 'The label of the correct answer for quiz mode.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the chart for observation only. Defaults to false.' },
+        {
+          name: 'data',
+          type: 'array of objects',
+          required: true,
+          description: 'Chart data. Each entry has label (string) and value (number).',
+        },
+        {
+          name: 'type',
+          type: 'string',
+          required: false,
+          description: 'Chart type: "bar" (default) or a pictograph variant.',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'A title displayed above the chart.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Question or instructions about the chart.',
+        },
+        {
+          name: 'showValues',
+          type: 'boolean',
+          required: false,
+          description: 'Show numeric values on the chart bars. Defaults to true.',
+        },
+        {
+          name: 'correctLabel',
+          type: 'string',
+          required: false,
+          description: 'The label of the correct answer for quiz mode.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the chart for observation only. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1167,7 +1466,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Visualize and interact with fractions using circle or bar models.',
-      whatItDoes: 'The Fraction Visual widget shows fractions as shaded parts of a circle or bar. Students can see the relationship between numerator and denominator, compare fractions visually, and practice shading the correct portion.',
+      whatItDoes:
+        'The Fraction Visual widget shows fractions as shaded parts of a circle or bar. Students can see the relationship between numerator and denominator, compare fractions visually, and practice shading the correct portion.',
       whenToUse: [
         'Introducing fractions to early learners',
         'Visualizing equivalent fractions',
@@ -1182,12 +1482,42 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set interactive to true if students should shade the fraction themselves',
       ],
       configFields: [
-        { name: 'numerator', type: 'number', required: true, description: 'The top number in the fraction (parts shaded).' },
-        { name: 'denominator', type: 'number', required: true, description: 'The bottom number in the fraction (total parts). Keep to 12 or less.' },
-        { name: 'mode', type: 'string', required: false, description: '"circle" (default) or "bar" representation.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
-        { name: 'showLabel', type: 'boolean', required: false, description: 'Show the fraction label as text. Defaults to false.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When true, students shade the fraction themselves. Defaults to false.' },
+        {
+          name: 'numerator',
+          type: 'number',
+          required: true,
+          description: 'The top number in the fraction (parts shaded).',
+        },
+        {
+          name: 'denominator',
+          type: 'number',
+          required: true,
+          description: 'The bottom number in the fraction (total parts). Keep to 12 or less.',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"circle" (default) or "bar" representation.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions for the student.',
+        },
+        {
+          name: 'showLabel',
+          type: 'boolean',
+          required: false,
+          description: 'Show the fraction label as text. Defaults to false.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When true, students shade the fraction themselves. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1276,7 +1606,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Build and explore numbers using an interactive place value chart.',
-      whatItDoes: 'The Place Value Chart widget helps students understand how digits represent different values based on their position. Students drag digits into columns (ones, tens, hundreds, etc.) to build numbers. It supports the Indian number system with lakh and crore places.',
+      whatItDoes:
+        'The Place Value Chart widget helps students understand how digits represent different values based on their position. Students drag digits into columns (ones, tens, hundreds, etc.) to build numbers. It supports the Indian number system with lakh and crore places.',
       whenToUse: [
         'Teaching place value concepts',
         'Building multi-digit numbers',
@@ -1291,12 +1622,42 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose the max place value level',
       ],
       configFields: [
-        { name: 'targetNumber', type: 'number', required: true, description: 'The number students should build on the chart.' },
-        { name: 'draggableDigits', type: 'array of numbers', required: true, description: 'The digits students can use, e.g. [5, 4, 3] for the number 543.' },
-        { name: 'maxPlaces', type: 'string', required: false, description: 'Highest place value shown, e.g. "hundred", "thousand", "lakh".' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
-        { name: 'showLabels', type: 'boolean', required: false, description: 'Show place value labels. Defaults to true.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the completed chart. Defaults to false.' },
+        {
+          name: 'targetNumber',
+          type: 'number',
+          required: true,
+          description: 'The number students should build on the chart.',
+        },
+        {
+          name: 'draggableDigits',
+          type: 'array of numbers',
+          required: true,
+          description: 'The digits students can use, e.g. [5, 4, 3] for the number 543.',
+        },
+        {
+          name: 'maxPlaces',
+          type: 'string',
+          required: false,
+          description: 'Highest place value shown, e.g. "hundred", "thousand", "lakh".',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions for the student.',
+        },
+        {
+          name: 'showLabels',
+          type: 'boolean',
+          required: false,
+          description: 'Show place value labels. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the completed chart. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1384,7 +1745,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Calculate area by counting and highlighting squares on a grid.',
-      whatItDoes: 'The Grid Area widget shows a rectangular grid where students count or highlight squares to understand area. Students can click individual cells, see the total count, and compare areas of different shapes.',
+      whatItDoes:
+        'The Grid Area widget shows a rectangular grid where students count or highlight squares to understand area. Students can click individual cells, see the total count, and compare areas of different shapes.',
       whenToUse: [
         'Introducing the concept of area',
         'Teaching that area = rows × columns',
@@ -1399,13 +1761,48 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set maxHighlights to limit how many cells can be selected',
       ],
       configFields: [
-        { name: 'rows', type: 'number', required: true, description: 'Number of rows in the grid (keep under 10).' },
-        { name: 'cols', type: 'number', required: true, description: 'Number of columns in the grid (keep under 10).' },
-        { name: 'mode', type: 'string', required: false, description: 'Activity mode. "area" is the default for counting squares.' },
-        { name: 'maxHighlights', type: 'number', required: false, description: 'Maximum number of cells a student can highlight.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
-        { name: 'showCount', type: 'boolean', required: false, description: 'Show a running count of highlighted cells. Defaults to true.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a pre-filled grid. Defaults to false.' },
+        {
+          name: 'rows',
+          type: 'number',
+          required: true,
+          description: 'Number of rows in the grid (keep under 10).',
+        },
+        {
+          name: 'cols',
+          type: 'number',
+          required: true,
+          description: 'Number of columns in the grid (keep under 10).',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: 'Activity mode. "area" is the default for counting squares.',
+        },
+        {
+          name: 'maxHighlights',
+          type: 'number',
+          required: false,
+          description: 'Maximum number of cells a student can highlight.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions for the student.',
+        },
+        {
+          name: 'showCount',
+          type: 'boolean',
+          required: false,
+          description: 'Show a running count of highlighted cells. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows a pre-filled grid. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1429,7 +1826,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 3,
       relatedWidgets: [
-        { id: 'math.fraction-visual', name: 'Fraction Visual', domain: 'math', slug: 'fraction-visual' },
+        {
+          id: 'math.fraction-visual',
+          name: 'Fraction Visual',
+          domain: 'math',
+          slug: 'fraction-visual',
+        },
       ],
     },
   },
@@ -1490,7 +1892,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Read and set time on an interactive analog clock with digital display.',
-      whatItDoes: 'The Clock Time widget shows an analog clock face. Students can read the current time, set the hands to a specific time, or see both analog and digital time together. It supports hour, half-hour, and minute-level precision.',
+      whatItDoes:
+        'The Clock Time widget shows an analog clock face. Students can read the current time, set the hands to a specific time, or see both analog and digital time together. It supports hour, half-hour, and minute-level precision.',
       whenToUse: [
         'Teaching how to read an analog clock',
         'Practicing time to the hour and half-hour',
@@ -1506,12 +1909,42 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       configFields: [
         { name: 'hour', type: 'number', required: true, description: 'The starting hour (1-12).' },
-        { name: 'minute', type: 'number', required: true, description: 'The starting minute (0-59).' },
-        { name: 'mode', type: 'string', required: false, description: '"set" for interactive time-setting, "display" for reading only.' },
-        { name: 'showDigital', type: 'boolean', required: false, description: 'Show the digital time alongside the analog clock. Defaults to true.' },
-        { name: 'targetTime', type: 'object', required: false, description: 'Target time for students to match. Has hour (number) and minute (number).' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the clock in display mode. Defaults to false.' },
+        {
+          name: 'minute',
+          type: 'number',
+          required: true,
+          description: 'The starting minute (0-59).',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"set" for interactive time-setting, "display" for reading only.',
+        },
+        {
+          name: 'showDigital',
+          type: 'boolean',
+          required: false,
+          description: 'Show the digital time alongside the analog clock. Defaults to true.',
+        },
+        {
+          name: 'targetTime',
+          type: 'object',
+          required: false,
+          description: 'Target time for students to match. Has hour (number) and minute (number).',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions for the student.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the clock in display mode. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1535,7 +1968,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 4,
       relatedWidgets: [
-        { id: 'math.measurement-scale', name: 'Measurement Scale', domain: 'math', slug: 'measurement-scale' },
+        {
+          id: 'math.measurement-scale',
+          name: 'Measurement Scale',
+          domain: 'math',
+          slug: 'measurement-scale',
+        },
       ],
     },
   },
@@ -1600,7 +2038,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Read and set measurements on interactive rulers, thermometers, and scales.',
-      whatItDoes: 'The Measurement Scale widget shows a labeled scale — like a ruler, thermometer, or measuring jug. Students read the current measurement or set it to a target value. It supports various units and scale types.',
+      whatItDoes:
+        'The Measurement Scale widget shows a labeled scale — like a ruler, thermometer, or measuring jug. Students read the current measurement or set it to a target value. It supports various units and scale types.',
       whenToUse: [
         'Teaching how to read a ruler or thermometer',
         'Measuring length, temperature, or volume',
@@ -1615,16 +2054,56 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set a target value for students to match',
       ],
       configFields: [
-        { name: 'type', type: 'string', required: true, description: 'Scale type: "ruler", "thermometer", or "jug".' },
+        {
+          name: 'type',
+          type: 'string',
+          required: true,
+          description: 'Scale type: "ruler", "thermometer", or "jug".',
+        },
         { name: 'min', type: 'number', required: true, description: 'Minimum value on the scale.' },
         { name: 'max', type: 'number', required: true, description: 'Maximum value on the scale.' },
-        { name: 'step', type: 'number', required: true, description: 'The increment between markings. Use 1 for whole numbers.' },
-        { name: 'unit', type: 'string', required: false, description: 'Unit label, e.g. "cm", "°C", "ml".' },
-        { name: 'targetValue', type: 'number', required: false, description: 'The target measurement students should set.' },
-        { name: 'description', type: 'string', required: false, description: 'Instructions for the student.' },
-        { name: 'showReading', type: 'boolean', required: false, description: 'Show the numeric reading. Defaults to true.' },
-        { name: 'showLabels', type: 'boolean', required: false, description: 'Show scale labels. Defaults to true.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a static measurement. Defaults to false.' },
+        {
+          name: 'step',
+          type: 'number',
+          required: true,
+          description: 'The increment between markings. Use 1 for whole numbers.',
+        },
+        {
+          name: 'unit',
+          type: 'string',
+          required: false,
+          description: 'Unit label, e.g. "cm", "°C", "ml".',
+        },
+        {
+          name: 'targetValue',
+          type: 'number',
+          required: false,
+          description: 'The target measurement students should set.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Instructions for the student.',
+        },
+        {
+          name: 'showReading',
+          type: 'boolean',
+          required: false,
+          description: 'Show the numeric reading. Defaults to true.',
+        },
+        {
+          name: 'showLabels',
+          type: 'boolean',
+          required: false,
+          description: 'Show scale labels. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows a static measurement. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1716,7 +2195,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Explore numbers, fractions, and operations on an interactive number line.',
-      whatItDoes: 'The Number Line widget displays an interactive number line where students can place values, compare positions, and explore number relationships. It supports integers, decimals, and fractions with customizable ranges and markers.',
+      whatItDoes:
+        'The Number Line widget displays an interactive number line where students can place values, compare positions, and explore number relationships. It supports integers, decimals, and fractions with customizable ranges and markers.',
       whenToUse: [
         'Teaching number sense and counting',
         'Visualizing addition and subtraction',
@@ -1731,16 +2211,67 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally add a target value or markers',
       ],
       configFields: [
-        { name: 'min', type: 'number', required: true, description: 'The lowest number on the line.' },
-        { name: 'max', type: 'number', required: true, description: 'The highest number on the line.' },
-        { name: 'step', type: 'number', required: true, description: 'The spacing between marks. Use 1 for integers.' },
-        { name: 'target', type: 'number', required: false, description: 'A specific value students should locate on the line.' },
-        { name: 'mode', type: 'string', required: false, description: '"integers" (default) or "decimals" for fractional values.' },
-        { name: 'markers', type: 'array of objects', required: false, description: 'Highlighted markers. Each has value (number), label (string), and optional color (CSS variable).' },
-        { name: 'showLabels', type: 'boolean', required: false, description: 'Show number labels on the line. Defaults to true.' },
-        { name: 'showGrid', type: 'boolean', required: false, description: 'Show vertical grid lines at marks. Defaults to false.' },
-        { name: 'tolerance', type: 'number', required: false, description: 'How close the student needs to be to the target. Defaults to 0.5.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows a static number line. Defaults to false.' },
+        {
+          name: 'min',
+          type: 'number',
+          required: true,
+          description: 'The lowest number on the line.',
+        },
+        {
+          name: 'max',
+          type: 'number',
+          required: true,
+          description: 'The highest number on the line.',
+        },
+        {
+          name: 'step',
+          type: 'number',
+          required: true,
+          description: 'The spacing between marks. Use 1 for integers.',
+        },
+        {
+          name: 'target',
+          type: 'number',
+          required: false,
+          description: 'A specific value students should locate on the line.',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"integers" (default) or "decimals" for fractional values.',
+        },
+        {
+          name: 'markers',
+          type: 'array of objects',
+          required: false,
+          description:
+            'Highlighted markers. Each has value (number), label (string), and optional color (CSS variable).',
+        },
+        {
+          name: 'showLabels',
+          type: 'boolean',
+          required: false,
+          description: 'Show number labels on the line. Defaults to true.',
+        },
+        {
+          name: 'showGrid',
+          type: 'boolean',
+          required: false,
+          description: 'Show vertical grid lines at marks. Defaults to false.',
+        },
+        {
+          name: 'tolerance',
+          type: 'number',
+          required: false,
+          description: 'How close the student needs to be to the target. Defaults to 0.5.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows a static number line. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1771,8 +2302,18 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 6,
       relatedWidgets: [
-        { id: 'math.fraction-visual', name: 'Fraction Visual', domain: 'math', slug: 'fraction-visual' },
-        { id: 'math.place-value-chart', name: 'Place Value Chart', domain: 'math', slug: 'place-value-chart' },
+        {
+          id: 'math.fraction-visual',
+          name: 'Fraction Visual',
+          domain: 'math',
+          slug: 'fraction-visual',
+        },
+        {
+          id: 'math.place-value-chart',
+          name: 'Place Value Chart',
+          domain: 'math',
+          slug: 'place-value-chart',
+        },
       ],
     },
   },
@@ -1808,7 +2349,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Highlight key information with a styled callout card.',
-      whatItDoes: 'The Callout widget displays important information in a visually distinct card. You can choose from different styles — tip, info, warning, or success — and add an optional icon. It is a passive display widget, not interactive.',
+      whatItDoes:
+        'The Callout widget displays important information in a visually distinct card. You can choose from different styles — tip, info, warning, or success — and add an optional icon. It is a passive display widget, not interactive.',
       whenToUse: [
         'Highlighting key takeaways or important notes',
         'Displaying fun facts or "Did you know?" boxes',
@@ -1823,10 +2365,30 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally add an emoji icon',
       ],
       configFields: [
-        { name: 'type', type: 'string', required: true, description: 'The callout style: "tip", "info", "warning", or "success".' },
-        { name: 'title', type: 'string', required: false, description: 'A heading for the callout card.' },
-        { name: 'content', type: 'string', required: true, description: 'The main text content of the callout.' },
-        { name: 'icon', type: 'string', required: false, description: 'An emoji icon to display with the callout, e.g. "💡" for tips.' },
+        {
+          name: 'type',
+          type: 'string',
+          required: true,
+          description: 'The callout style: "tip", "info", "warning", or "success".',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'A heading for the callout card.',
+        },
+        {
+          name: 'content',
+          type: 'string',
+          required: true,
+          description: 'The main text content of the callout.',
+        },
+        {
+          name: 'icon',
+          type: 'string',
+          required: false,
+          description: 'An emoji icon to display with the callout, e.g. "💡" for tips.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1904,7 +2466,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Compare two images side by side with an interactive slider.',
-      whatItDoes: 'The Image Compare widget places two images side by side (or overlapped with a draggable slider) so students can compare differences and similarities. It supports a slider mode for before/after comparisons and a side-by-side mode.',
+      whatItDoes:
+        'The Image Compare widget places two images side by side (or overlapped with a draggable slider) so students can compare differences and similarities. It supports a slider mode for before/after comparisons and a side-by-side mode.',
       whenToUse: [
         'Comparing healthy vs diseased plants or organisms',
         'Before and after science experiments',
@@ -1919,13 +2482,48 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose slider or side-by-side mode',
       ],
       configFields: [
-        { name: 'leftImage', type: 'string', required: true, description: 'Path to the left (or top) image file.' },
-        { name: 'rightImage', type: 'string', required: true, description: 'Path to the right (or bottom) image file.' },
-        { name: 'leftLabel', type: 'string', required: false, description: 'Label shown under the left image.' },
-        { name: 'rightLabel', type: 'string', required: false, description: 'Label shown under the right image.' },
-        { name: 'mode', type: 'string', required: false, description: '"slider" for draggable overlay or "side-by-side". Defaults to "slider".' },
-        { name: 'altText', type: 'object', required: false, description: 'Accessibility descriptions: `{ left: string, right: string }`.' },
-        { name: 'caption', type: 'string', required: false, description: 'Caption text shown below both images.' },
+        {
+          name: 'leftImage',
+          type: 'string',
+          required: true,
+          description: 'Path to the left (or top) image file.',
+        },
+        {
+          name: 'rightImage',
+          type: 'string',
+          required: true,
+          description: 'Path to the right (or bottom) image file.',
+        },
+        {
+          name: 'leftLabel',
+          type: 'string',
+          required: false,
+          description: 'Label shown under the left image.',
+        },
+        {
+          name: 'rightLabel',
+          type: 'string',
+          required: false,
+          description: 'Label shown under the right image.',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"slider" for draggable overlay or "side-by-side". Defaults to "slider".',
+        },
+        {
+          name: 'altText',
+          type: 'object',
+          required: false,
+          description: 'Accessibility descriptions: `{ left: string, right: string }`.',
+        },
+        {
+          name: 'caption',
+          type: 'string',
+          required: false,
+          description: 'Caption text shown below both images.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -1951,9 +2549,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Image files should be placed in your lesson package directory',
       ],
       sidebarPosition: 11,
-      relatedWidgets: [
-        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
-      ],
+      relatedWidgets: [{ id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' }],
     },
   },
   {
@@ -2007,7 +2603,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Tap or click specific regions of an image to answer questions.',
-      whatItDoes: 'The Hotspot widget overlays clickable regions on an image. Students tap the correct area to answer a question — like "Find Maharashtra on this map." It supports single-select and multi-select modes with visual feedback for correct and incorrect taps.',
+      whatItDoes:
+        'The Hotspot widget overlays clickable regions on an image. Students tap the correct area to answer a question — like "Find Maharashtra on this map." It supports single-select and multi-select modes with visual feedback for correct and incorrect taps.',
       whenToUse: [
         'Identifying locations on maps',
         'Pointing out parts of a diagram or image',
@@ -2023,11 +2620,38 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       configFields: [
         { name: 'image', type: 'string', required: true, description: 'Path to the image file.' },
-        { name: 'altText', type: 'string', required: true, description: 'Description of the image for screen readers.' },
-        { name: 'hotspots', type: 'array of objects', required: true, description: 'Clickable regions. Each has id (string), x (number 0-100), y (number 0-100), radius (number, default 5), label (string), correct (boolean), and optional description (string).' },
-        { name: 'mode', type: 'string', required: false, description: '"single" for one correct hotspot (default) or "multiple" for selecting several.' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints to help students find the right region.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, highlights hotspots for observation. Defaults to false.' },
+        {
+          name: 'altText',
+          type: 'string',
+          required: true,
+          description: 'Description of the image for screen readers.',
+        },
+        {
+          name: 'hotspots',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Clickable regions. Each has id (string), x (number 0-100), y (number 0-100), radius (number, default 5), label (string), correct (boolean), and optional description (string).',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description:
+            '"single" for one correct hotspot (default) or "multiple" for selecting several.',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints to help students find the right region.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, highlights hotspots for observation. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2055,7 +2679,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       sidebarPosition: 12,
       relatedWidgets: [
         { id: 'science.image-label', name: 'Image Label', domain: 'science', slug: 'image-label' },
-        { id: 'science.label-diagram', name: 'Label Diagram', domain: 'science', slug: 'label-diagram' },
+        {
+          id: 'science.label-diagram',
+          name: 'Label Diagram',
+          domain: 'science',
+          slug: 'label-diagram',
+        },
       ],
     },
   },
@@ -2111,7 +2740,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Display events in chronological order on an interactive timeline.',
-      whatItDoes: 'The Timeline widget arranges events along a visual timeline. Students can observe events in order or interactively arrange them. It supports horizontal, vertical, and compact layouts with optional dates, images, and descriptions.',
+      whatItDoes:
+        'The Timeline widget arranges events along a visual timeline. Students can observe events in order or interactively arrange them. It supports horizontal, vertical, and compact layouts with optional dates, images, and descriptions.',
       whenToUse: [
         'Teaching historical sequences and chronology',
         'Showing life cycles and growth stages',
@@ -2126,12 +2756,43 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose a layout: horizontal, vertical, or compact',
       ],
       configFields: [
-        { name: 'events', type: 'array of objects', required: true, description: 'Timeline events. Each has id (string), title (string), and optional date (string), icon (string), description (string), image (string).' },
-        { name: 'title', type: 'string', required: false, description: 'An overall title for the timeline.' },
-        { name: 'layout', type: 'string', required: false, description: '"horizontal", "vertical" (default), or "compact".' },
-        { name: 'showDates', type: 'boolean', required: false, description: 'Show dates on the timeline. Defaults to true.' },
-        { name: 'showImages', type: 'boolean', required: false, description: 'Show images on the timeline. Defaults to false.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows events for observation only. Defaults to false.' },
+        {
+          name: 'events',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Timeline events. Each has id (string), title (string), and optional date (string), icon (string), description (string), image (string).',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'An overall title for the timeline.',
+        },
+        {
+          name: 'layout',
+          type: 'string',
+          required: false,
+          description: '"horizontal", "vertical" (default), or "compact".',
+        },
+        {
+          name: 'showDates',
+          type: 'boolean',
+          required: false,
+          description: 'Show dates on the timeline. Defaults to true.',
+        },
+        {
+          name: 'showImages',
+          type: 'boolean',
+          required: false,
+          description: 'Show images on the timeline. Defaults to false.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows events for observation only. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2160,7 +2821,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       sidebarPosition: 13,
       relatedWidgets: [
         { id: 'core.sequencing', name: 'Sequencing', domain: 'core', slug: 'sequencing' },
-        { id: 'science.process-diagram', name: 'Process Diagram', domain: 'science', slug: 'process-diagram' },
+        {
+          id: 'science.process-diagram',
+          name: 'Process Diagram',
+          domain: 'science',
+          slug: 'process-diagram',
+        },
       ],
     },
   },
@@ -2215,7 +2881,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Label parts of a scientific diagram by dragging labels to the correct spots.',
-      whatItDoes: 'The Label Diagram widget shows a scientific diagram with draggable labels. Students drag each label from a word bank to the correct position on the diagram. Common uses include labeling plant parts, human anatomy, or machine components.',
+      whatItDoes:
+        'The Label Diagram widget shows a scientific diagram with draggable labels. Students drag each label from a word bank to the correct position on the diagram. Common uses include labeling plant parts, human anatomy, or machine components.',
       whenToUse: [
         'Teaching anatomy and biology diagrams',
         'Labeling parts of a machine or system',
@@ -2230,11 +2897,37 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Set interactive to true for drag-and-label mode',
       ],
       configFields: [
-        { name: 'image', type: 'string', required: true, description: 'Path to the diagram image file.' },
-        { name: 'altText', type: 'string', required: true, description: 'Description of the diagram for screen readers.' },
-        { name: 'labels', type: 'array of objects', required: true, description: 'Labels to drag. Each has id (string), text (string), target with x/y (percent), and optional hint (string).' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Progressive hints for students who need help.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows labels in position. Defaults to false.' },
+        {
+          name: 'image',
+          type: 'string',
+          required: true,
+          description: 'Path to the diagram image file.',
+        },
+        {
+          name: 'altText',
+          type: 'string',
+          required: true,
+          description: 'Description of the diagram for screen readers.',
+        },
+        {
+          name: 'labels',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Labels to drag. Each has id (string), text (string), target with x/y (percent), and optional hint (string).',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Progressive hints for students who need help.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows labels in position. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2321,7 +3014,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Tap regions of an image to identify and learn about them.',
-      whatItDoes: 'The Image Label widget shows an image with tappable regions. When students tap a region, they see its name and description. It works like an interactive exploration tool — great for planetariums, maps, and detailed diagrams.',
+      whatItDoes:
+        'The Image Label widget shows an image with tappable regions. When students tap a region, they see its name and description. It works like an interactive exploration tool — great for planetariums, maps, and detailed diagrams.',
       whenToUse: [
         'Interactive exploration of labeled images',
         'Solar system and astronomy activities',
@@ -2337,10 +3031,32 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       configFields: [
         { name: 'image', type: 'string', required: true, description: 'Path to the image file.' },
-        { name: 'altText', type: 'string', required: true, description: 'Description of the image for screen readers.' },
-        { name: 'regions', type: 'array of objects', required: true, description: 'Clickable regions. Each has id (string), title (string), description (string), x (number), y (number), and optional tooltip (string).' },
-        { name: 'hints', type: 'array of strings', required: false, description: 'Hints to guide exploration.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, regions can still be tapped for information. Defaults to false.' },
+        {
+          name: 'altText',
+          type: 'string',
+          required: true,
+          description: 'Description of the image for screen readers.',
+        },
+        {
+          name: 'regions',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Clickable regions. Each has id (string), title (string), description (string), x (number), y (number), and optional tooltip (string).',
+        },
+        {
+          name: 'hints',
+          type: 'array of strings',
+          required: false,
+          description: 'Hints to guide exploration.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description:
+            'When false, regions can still be tapped for information. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2366,7 +3082,12 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 2,
       relatedWidgets: [
-        { id: 'science.label-diagram', name: 'Label Diagram', domain: 'science', slug: 'label-diagram' },
+        {
+          id: 'science.label-diagram',
+          name: 'Label Diagram',
+          domain: 'science',
+          slug: 'label-diagram',
+        },
         { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
       ],
     },
@@ -2423,7 +3144,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Play audio clips with transcripts, captions, and comprehension support.',
-      whatItDoes: 'The Audio Player widget plays an audio file with playback controls. Students can listen to spoken content, read along with a transcript, and view timed captions. It supports bookmarks, waveform visualization, and keyboard controls.',
+      whatItDoes:
+        'The Audio Player widget plays an audio file with playback controls. Students can listen to spoken content, read along with a transcript, and view timed captions. It supports bookmarks, waveform visualization, and keyboard controls.',
       whenToUse: [
         'Language learning with pronunciation examples',
         'Listening comprehension exercises',
@@ -2438,15 +3160,61 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Optionally provide a transcript and timed captions',
       ],
       configFields: [
-        { name: 'audio', type: 'string', required: true, description: 'Path to the audio file (MP3, WAV, etc.).' },
-        { name: 'title', type: 'string', required: false, description: 'Title shown above the audio player.' },
-        { name: 'description', type: 'string', required: false, description: 'Additional context about the audio.' },
-        { name: 'transcript', type: 'string', required: false, description: 'Full text transcript of the audio content.' },
-        { name: 'captions', type: 'array of objects', required: false, description: 'Timed captions. Each has start (number, seconds), end (number, seconds), and text (string).' },
-        { name: 'showTranscript', type: 'boolean', required: false, description: 'Show the transcript panel. Defaults to true.' },
-        { name: 'waveform', type: 'boolean', required: false, description: 'Show audio waveform visualization. Defaults to false.' },
-        { name: 'bookmarks', type: 'boolean', required: false, description: 'Allow students to bookmark positions. Defaults to true.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, plays in observe mode. Defaults to false.' },
+        {
+          name: 'audio',
+          type: 'string',
+          required: true,
+          description: 'Path to the audio file (MP3, WAV, etc.).',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Title shown above the audio player.',
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Additional context about the audio.',
+        },
+        {
+          name: 'transcript',
+          type: 'string',
+          required: false,
+          description: 'Full text transcript of the audio content.',
+        },
+        {
+          name: 'captions',
+          type: 'array of objects',
+          required: false,
+          description:
+            'Timed captions. Each has start (number, seconds), end (number, seconds), and text (string).',
+        },
+        {
+          name: 'showTranscript',
+          type: 'boolean',
+          required: false,
+          description: 'Show the transcript panel. Defaults to true.',
+        },
+        {
+          name: 'waveform',
+          type: 'boolean',
+          required: false,
+          description: 'Show audio waveform visualization. Defaults to false.',
+        },
+        {
+          name: 'bookmarks',
+          type: 'boolean',
+          required: false,
+          description: 'Allow students to bookmark positions. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, plays in observe mode. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2528,7 +3296,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Play video clips with chapters, captions, and transcripts.',
-      whatItDoes: 'The Video Player widget plays a video file with full playback controls. Students can watch educational videos with chapter navigation, timed captions, and a transcript panel. It supports fullscreen mode and keyboard shortcuts.',
+      whatItDoes:
+        'The Video Player widget plays a video file with full playback controls. Students can watch educational videos with chapter navigation, timed captions, and a transcript panel. It supports fullscreen mode and keyboard shortcuts.',
       whenToUse: [
         'Showing educational animations and demonstrations',
         'Video-based science experiments',
@@ -2543,15 +3312,60 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Add chapters for easy navigation, captions for accessibility',
       ],
       configFields: [
-        { name: 'video', type: 'string', required: true, description: 'Path to the video file (MP4 recommended).' },
-        { name: 'title', type: 'string', required: false, description: 'Title shown above the video player.' },
-        { name: 'poster', type: 'string', required: false, description: 'Path to a poster image shown before the video plays.' },
-        { name: 'chapters', type: 'array of objects', required: false, description: 'Video chapters. Each has time (number, seconds) and title (string).' },
-        { name: 'captions', type: 'array of objects', required: false, description: 'Timed captions. Each has start (number), end (number), and text (string).' },
-        { name: 'transcript', type: 'string', required: false, description: 'Full text transcript of the video content.' },
-        { name: 'showTranscript', type: 'boolean', required: false, description: 'Show the transcript panel. Defaults to true.' },
-        { name: 'allowFullscreen', type: 'boolean', required: false, description: 'Allow fullscreen mode. Defaults to true.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, plays in observe mode. Defaults to false.' },
+        {
+          name: 'video',
+          type: 'string',
+          required: true,
+          description: 'Path to the video file (MP4 recommended).',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Title shown above the video player.',
+        },
+        {
+          name: 'poster',
+          type: 'string',
+          required: false,
+          description: 'Path to a poster image shown before the video plays.',
+        },
+        {
+          name: 'chapters',
+          type: 'array of objects',
+          required: false,
+          description: 'Video chapters. Each has time (number, seconds) and title (string).',
+        },
+        {
+          name: 'captions',
+          type: 'array of objects',
+          required: false,
+          description: 'Timed captions. Each has start (number), end (number), and text (string).',
+        },
+        {
+          name: 'transcript',
+          type: 'string',
+          required: false,
+          description: 'Full text transcript of the video content.',
+        },
+        {
+          name: 'showTranscript',
+          type: 'boolean',
+          required: false,
+          description: 'Show the transcript panel. Defaults to true.',
+        },
+        {
+          name: 'allowFullscreen',
+          type: 'boolean',
+          required: false,
+          description: 'Allow fullscreen mode. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, plays in observe mode. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2630,7 +3444,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Study terms and concepts with interactive flip-card flashcards.',
-      whatItDoes: 'The Flashcard widget shows cards with a front and back — tap to flip and reveal the answer. Students can rate their confidence (easy/medium/hard), shuffle the deck, and track their progress. It supports flip, multiple-choice, and spaced repetition modes.',
+      whatItDoes:
+        'The Flashcard widget shows cards with a front and back — tap to flip and reveal the answer. Students can rate their confidence (easy/medium/hard), shuffle the deck, and track their progress. It supports flip, multiple-choice, and spaced repetition modes.',
       whenToUse: [
         'Vocabulary and spelling practice',
         'Memorizing key terms and definitions',
@@ -2645,10 +3460,32 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose a study mode: flip, multiple, or spaced',
       ],
       configFields: [
-        { name: 'cards', type: 'array of objects', required: true, description: 'Flashcards. Each has front (string), back (string), and optional hint (string), category (string), difficulty ("easy"/"medium"/"hard"), image (string), and audio (string).' },
-        { name: 'mode', type: 'string', required: false, description: 'Study mode: "flip" (default), "multiple" for multiple-choice, or "spaced" for spaced repetition.' },
-        { name: 'shuffle', type: 'boolean', required: false, description: 'Randomize card order. Defaults to false.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows cards in view-only mode. Defaults to false.' },
+        {
+          name: 'cards',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Flashcards. Each has front (string), back (string), and optional hint (string), category (string), difficulty ("easy"/"medium"/"hard"), image (string), and audio (string).',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description:
+            'Study mode: "flip" (default), "multiple" for multiple-choice, or "spaced" for spaced repetition.',
+        },
+        {
+          name: 'shuffle',
+          type: 'boolean',
+          required: false,
+          description: 'Randomize card order. Defaults to false.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows cards in view-only mode. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2735,7 +3572,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Explore step-by-step scientific processes with connected diagrams.',
-      whatItDoes: 'The Process Diagram widget shows a connected diagram of a scientific process — like the water cycle, food chain, or rock cycle. Nodes represent steps, and connections show the flow. It supports cycle, linear, and custom layouts with step-by-step reveal.',
+      whatItDoes:
+        'The Process Diagram widget shows a connected diagram of a scientific process — like the water cycle, food chain, or rock cycle. Nodes represent steps, and connections show the flow. It supports cycle, linear, and custom layouts with step-by-step reveal.',
       whenToUse: [
         'Teaching the water cycle or rock cycle',
         'Explaining food chains and food webs',
@@ -2750,12 +3588,44 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Choose a layout: cycle, linear, or tree',
       ],
       configFields: [
-        { name: 'nodes', type: 'array of objects', required: true, description: 'Process steps. Each has id (string), title (string), and optional description (string) and icon (string).' },
-        { name: 'connections', type: 'array of objects', required: true, description: 'Connections between nodes. Each has from (node id), to (node id), and optional label (string) and type ("arrow", "loop", "dashed").' },
-        { name: 'layout', type: 'string', required: false, description: 'Layout style: "cycle", "linear", "tree", or "flow". Defaults to "cycle".' },
-        { name: 'title', type: 'string', required: false, description: 'An overall title for the diagram.' },
-        { name: 'stepByStep', type: 'boolean', required: false, description: 'Reveal nodes one at a time. Defaults to false.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the complete diagram. Defaults to false.' },
+        {
+          name: 'nodes',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Process steps. Each has id (string), title (string), and optional description (string) and icon (string).',
+        },
+        {
+          name: 'connections',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Connections between nodes. Each has from (node id), to (node id), and optional label (string) and type ("arrow", "loop", "dashed").',
+        },
+        {
+          name: 'layout',
+          type: 'string',
+          required: false,
+          description: 'Layout style: "cycle", "linear", "tree", or "flow". Defaults to "cycle".',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'An overall title for the diagram.',
+        },
+        {
+          name: 'stepByStep',
+          type: 'boolean',
+          required: false,
+          description: 'Reveal nodes one at a time. Defaults to false.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the complete diagram. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2845,7 +3715,8 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     },
     guide: {
       oneLiner: 'Explore geographic and social concepts on an interactive map.',
-      whatItDoes: 'The Social Map widget shows an interactive map with regions, markers, and a legend. Students can explore regions, read descriptions, and find specific locations. It supports zooming, labels, and region highlighting.',
+      whatItDoes:
+        'The Social Map widget shows an interactive map with regions, markers, and a legend. Students can explore regions, read descriptions, and find specific locations. It supports zooming, labels, and region highlighting.',
       whenToUse: [
         'Teaching geography and map reading',
         'Exploring continents and countries',
@@ -2860,14 +3731,56 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Add a legend to explain region colors',
       ],
       configFields: [
-        { name: 'regions', type: 'array of objects', required: true, description: 'Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string).' },
-        { name: 'title', type: 'string', required: false, description: 'A title shown above the map.' },
-        { name: 'labels', type: 'boolean', required: false, description: 'Show region name labels. Defaults to true.' },
-        { name: 'zoom', type: 'boolean', required: false, description: 'Allow zooming in and out. Defaults to false.' },
-        { name: 'legend', type: 'array of objects', required: false, description: 'Legend entries. Each has color (string) and label (string).' },
-        { name: 'markers', type: 'array of objects', required: false, description: 'Point markers. Each has id (string), label (string), x (number), y (number), and optional icon (string).' },
-        { name: 'targetRegion', type: 'string', required: false, description: 'ID of a region to highlight for quiz mode.' },
-        { name: 'interactive', type: 'boolean', required: false, description: 'When false, shows the map for exploration. Defaults to false.' },
+        {
+          name: 'regions',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string).',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'A title shown above the map.',
+        },
+        {
+          name: 'labels',
+          type: 'boolean',
+          required: false,
+          description: 'Show region name labels. Defaults to true.',
+        },
+        {
+          name: 'zoom',
+          type: 'boolean',
+          required: false,
+          description: 'Allow zooming in and out. Defaults to false.',
+        },
+        {
+          name: 'legend',
+          type: 'array of objects',
+          required: false,
+          description: 'Legend entries. Each has color (string) and label (string).',
+        },
+        {
+          name: 'markers',
+          type: 'array of objects',
+          required: false,
+          description:
+            'Point markers. Each has id (string), label (string), x (number), y (number), and optional icon (string).',
+        },
+        {
+          name: 'targetRegion',
+          type: 'string',
+          required: false,
+          description: 'ID of a region to highlight for quiz mode.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows the map for exploration. Defaults to false.',
+        },
       ],
       exampleJson: `{
   "type": "exercise",
@@ -2900,9 +3813,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Start with simple geographic features before complex ones',
       ],
       sidebarPosition: 1,
-      relatedWidgets: [
-        { id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' },
-      ],
+      relatedWidgets: [{ id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' }],
     },
   },
 ];

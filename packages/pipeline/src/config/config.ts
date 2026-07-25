@@ -31,7 +31,12 @@ export function resolveStageConfigs(overrides: StageOverride[] = []): LlmStageCo
   const legacyMaxTokens = parseNumeric(process.env.LLM_MAX_TOKENS);
   const legacyTemperature = parseNumeric(process.env.LLM_TEMPERATURE);
 
-  if (legacyProvider || legacyModel || legacyMaxTokens !== undefined || legacyTemperature !== undefined) {
+  if (
+    legacyProvider ||
+    legacyModel ||
+    legacyMaxTokens !== undefined ||
+    legacyTemperature !== undefined
+  ) {
     for (const stage of LLM_STAGES) {
       if (legacyProvider) configs[stage].provider = legacyProvider;
       if (legacyModel) configs[stage].model = legacyModel;
@@ -65,10 +70,14 @@ export function resolveStageConfigs(overrides: StageOverride[] = []): LlmStageCo
     if (!configs[stage].provider) configs[stage].provider = 'openai';
     if (!configs[stage].model) configs[stage].model = 'gpt-5.4-mini';
     if (configs[stage].maxTokens <= 0) {
-      throw new Error(`Invalid maxTokens (${configs[stage].maxTokens}) for stage "${stage}". Must be > 0.`);
+      throw new Error(
+        `Invalid maxTokens (${configs[stage].maxTokens}) for stage "${stage}". Must be > 0.`,
+      );
     }
     if (configs[stage].temperature < 0 || configs[stage].temperature > 2) {
-      throw new Error(`Invalid temperature (${configs[stage].temperature}) for stage "${stage}". Must be 0–2.`);
+      throw new Error(
+        `Invalid temperature (${configs[stage].temperature}) for stage "${stage}". Must be 0–2.`,
+      );
     }
   }
 
@@ -78,7 +87,9 @@ export function resolveStageConfigs(overrides: StageOverride[] = []): LlmStageCo
 export function parseStageOverride(raw: string): StageOverride {
   const eqIdx = raw.indexOf('=');
   if (eqIdx < 1) {
-    throw new Error(`Invalid stage override: "${raw}". Expected format: stage=value or stage:field=value`);
+    throw new Error(
+      `Invalid stage override: "${raw}". Expected format: stage=value or stage:field=value`,
+    );
   }
   const key = raw.slice(0, eqIdx);
   const value = raw.slice(eqIdx + 1);
@@ -111,18 +122,24 @@ export function parseStageOverride(raw: string): StageOverride {
     case 'maxTokens': {
       const n = Number(value);
       if (isNaN(n) || n <= 0 || !Number.isInteger(n)) {
-        throw new Error(`Invalid maxTokens "${value}" for stage "${stage}". Must be a positive integer.`);
+        throw new Error(
+          `Invalid maxTokens "${value}" for stage "${stage}". Must be a positive integer.`,
+        );
       }
       return { stage, maxTokens: n };
     }
     default:
-      throw new Error(`Unknown field "${field}" in stage override "${raw}". Expected: model, provider, temperature, max_tokens.`);
+      throw new Error(
+        `Unknown field "${field}" in stage override "${raw}". Expected: model, provider, temperature, max_tokens.`,
+      );
   }
 }
 
 export function logStageConfigs(configs: LlmStageConfigs, log: (msg: string) => void): void {
   for (const stage of LLM_STAGES) {
     const cfg = configs[stage];
-    log(`  ${stage}: ${cfg.provider}/${cfg.model} (t=${cfg.temperature}, maxTokens=${cfg.maxTokens})`);
+    log(
+      `  ${stage}: ${cfg.provider}/${cfg.model} (t=${cfg.temperature}, maxTokens=${cfg.maxTokens})`,
+    );
   }
 }

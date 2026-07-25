@@ -79,11 +79,15 @@ describe('resolveStageConfigs', () => {
   });
 
   it('rejects invalid maxTokens (zero)', () => {
-    expect(() => resolveStageConfigs([{ stage: 'all', maxTokens: 0 }])).toThrow('Invalid maxTokens');
+    expect(() => resolveStageConfigs([{ stage: 'all', maxTokens: 0 }])).toThrow(
+      'Invalid maxTokens',
+    );
   });
 
   it('rejects invalid temperature', () => {
-    expect(() => resolveStageConfigs([{ stage: 'all', temperature: 3 }])).toThrow('Invalid temperature');
+    expect(() => resolveStageConfigs([{ stage: 'all', temperature: 3 }])).toThrow(
+      'Invalid temperature',
+    );
   });
 });
 
@@ -121,10 +125,14 @@ describe('parseStageOverride', () => {
   });
 
   it('rejects non-numeric temperature', () => {
-    expect(() => parseStageOverride('source_inventory:temperature=hot')).toThrow('Invalid temperature');
+    expect(() => parseStageOverride('source_inventory:temperature=hot')).toThrow(
+      'Invalid temperature',
+    );
   });
 
   it('rejects non-integer maxTokens', () => {
-    expect(() => parseStageOverride('source_inventory:max_tokens=4.5')).toThrow('Invalid maxTokens');
+    expect(() => parseStageOverride('source_inventory:max_tokens=4.5')).toThrow(
+      'Invalid maxTokens',
+    );
   });
 });

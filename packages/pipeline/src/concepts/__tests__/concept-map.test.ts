@@ -5,12 +5,20 @@ import type { Concept } from '../types.js';
 
 function makeConcept(overrides: Partial<Concept>): Concept {
   return {
-    conceptId: 'test_c', label: 'Test', kind: 'knowledge', sourceUnitIds: ['src-1'],
+    conceptId: 'test_c',
+    label: 'Test',
+    kind: 'knowledge',
+    sourceUnitIds: ['src-1'],
     learningObjective: 'Learn the test concept thoroughly',
     coreIdea: 'This is a test concept with enough detail for validation.',
-    difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: [],
-    representations: ['visual'], exerciseFamilies: ['test_ex'],
-    misconceptionTargets: [], recommendedWidgetCategories: [], estimatedMinutes: 10,
+    difficulty: 'beginner',
+    masteryThreshold: 0.8,
+    prerequisites: [],
+    representations: ['visual'],
+    exerciseFamilies: ['test_ex'],
+    misconceptionTargets: [],
+    recommendedWidgetCategories: [],
+    estimatedMinutes: 10,
     ...overrides,
   } as Concept;
 }
@@ -42,17 +50,17 @@ describe('validateConceptGraph', () => {
 
   it('detects self-dependency', () => {
     const a = makeConcept({ conceptId: 'a', prerequisites: ['a'] });
-    expect(validateConceptGraph([a]).some(e => e.includes('itself'))).toBe(true);
+    expect(validateConceptGraph([a]).some((e) => e.includes('itself'))).toBe(true);
   });
 
   it('detects missing dependency', () => {
     const b = makeConcept({ conceptId: 'b', prerequisites: ['a'] });
-    expect(validateConceptGraph([b]).some(e => e.includes('unknown prerequisite'))).toBe(true);
+    expect(validateConceptGraph([b]).some((e) => e.includes('unknown prerequisite'))).toBe(true);
   });
 
   it('detects cycle', () => {
     const a = makeConcept({ conceptId: 'a', prerequisites: ['b'] });
     const b = makeConcept({ conceptId: 'b', prerequisites: ['a'] });
-    expect(validateConceptGraph([a, b]).some(e => e.includes('cycle'))).toBe(true);
+    expect(validateConceptGraph([a, b]).some((e) => e.includes('cycle'))).toBe(true);
   });
 });

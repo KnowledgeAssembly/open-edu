@@ -364,31 +364,12 @@ const WIDGET_SCHEMAS: Record<string, z.ZodType> = {
   'social.map': socialMapSchema,
 };
 
-const WIDGET_ALIAS_MAP: Record<string, string> = {
-  'open-edu.matching': 'core.matching',
-  'open-edu.drag-drop': 'core.drag-drop',
-  'open-edu.sequencing': 'core.sequencing',
-  'open-edu.story-question': 'core.story-question',
-  'open-edu.fill-blank': 'core.fill-blank',
-  'open-edu.visual-counting': 'core.visual-counting',
-  'open-edu.fraction-visual': 'math.fraction-visual',
-  'open-edu.chart-reader': 'core.chart-reader',
-  'open-edu.clock-time': 'math.clock-time',
-  'open-edu.measurement-scale': 'math.measurement-scale',
-  'open-edu.place-value-chart': 'math.place-value-chart',
-  'open-edu.grid-area': 'math.grid-area',
-  'open-edu.real-world': 'core.real-world',
-  'open-edu.multiple-choice': 'core.multiple-choice',
-  'open-edu.multiple-choice-practice': 'core.multiple-choice-practice',
-};
-
 export function normalizeWidgetId(widgetId: string): string {
-  return WIDGET_ALIAS_MAP[widgetId] || widgetId;
+  return widgetId;
 }
 
 export function isKnownWidgetId(widgetId: string): boolean {
-  const normalized = normalizeWidgetId(widgetId);
-  return widgetSchemaRegistry.has(normalized);
+  return widgetSchemaRegistry.has(widgetId);
 }
 
 export function registerAllWidgetSchemas(): void {

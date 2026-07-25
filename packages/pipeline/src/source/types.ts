@@ -1,8 +1,16 @@
 import { z } from 'zod';
 
 export const SOURCE_UNIT_TYPES = [
-  'lesson', 'section', 'objective', 'definition', 'worked_example',
-  'exercise', 'review', 'assessment', 'diagram', 'unclassified',
+  'lesson',
+  'section',
+  'objective',
+  'definition',
+  'worked_example',
+  'exercise',
+  'review',
+  'assessment',
+  'diagram',
+  'unclassified',
 ] as const;
 
 export type SourceUnitType = (typeof SOURCE_UNIT_TYPES)[number];
@@ -39,9 +47,11 @@ export const SourceInventorySchema = z.object({
 export type SourceInventory = z.infer<typeof SourceInventorySchema>;
 
 export const InventoryLLMResponseSchema = z.object({
-  classifications: z.array(z.object({
-    unitId: z.string(),
-    type: z.enum(SOURCE_UNIT_TYPES),
-    extractionConfidence: z.number().min(0).max(1),
-  })),
+  classifications: z.array(
+    z.object({
+      unitId: z.string(),
+      type: z.enum(SOURCE_UNIT_TYPES),
+      extractionConfidence: z.number().min(0).max(1),
+    }),
+  ),
 });

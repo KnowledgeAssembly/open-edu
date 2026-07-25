@@ -8,11 +8,7 @@ vi.mock('@open-edu/storage', () => ({
   deleteNotesByCourse: vi.fn().mockResolvedValue(undefined),
 }));
 
-import {
-  deleteCourseProgress,
-  deleteBadges,
-  deleteNotesByCourse,
-} from '@open-edu/storage';
+import { deleteCourseProgress, deleteBadges, deleteNotesByCourse } from '@open-edu/storage';
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -105,7 +105,12 @@ export interface ConceptWarning {
 
 export interface ActivityContext {
   sourceExcerpts: Array<{ id: string; type: string; text: string }>;
-  assetManifestEntries: Array<{ id: string; filename: string; altText: string; rendererType: string }>;
+  assetManifestEntries: Array<{
+    id: string;
+    filename: string;
+    altText: string;
+    rendererType: string;
+  }>;
   widgetCatalog: Array<{ id: string; name: string; description: string; capabilities: string[] }>;
   questionFamilies: string[];
   misconceptions: string[];

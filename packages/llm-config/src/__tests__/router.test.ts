@@ -27,7 +27,12 @@ describe('LlmRouter', () => {
 
   it('allows overriding stage configs via constructor', () => {
     const router = new LlmRouter({
-      source_inventory: { provider: 'openai', model: 'custom-mini', maxTokens: 2048, temperature: 0.3 },
+      source_inventory: {
+        provider: 'openai',
+        model: 'custom-mini',
+        maxTokens: 2048,
+        temperature: 0.3,
+      },
     });
     const config = router.getStageConfig('source_inventory');
     expect(config.model).toBe('custom-mini');
@@ -54,7 +59,10 @@ describe('LlmRouter', () => {
     delete process.env.LLM_API_KEY;
     const router = new LlmRouter();
     router.updateStageConfig('source_inventory', {
-      provider: 'openai', model: 'gpt-5.4-mini', maxTokens: 4096, temperature: 0.3,
+      provider: 'openai',
+      model: 'gpt-5.4-mini',
+      maxTokens: 4096,
+      temperature: 0.3,
     } as any);
   });
 

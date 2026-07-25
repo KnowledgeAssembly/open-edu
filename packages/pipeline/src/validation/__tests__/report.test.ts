@@ -7,10 +7,15 @@ describe('generateQualityReport', () => {
     retries: 0,
     durationMs: 1000,
     coverage: {
-      coveredRequired: 10, percentRequiredCovered: 100,
-      percentObjectiveCovered: 100, percentWorkedExampleCovered: 100,
-      percentExerciseCovered: 100, percentAssessmentCovered: 100,
-      conceptCount: 5, activityCount: 25, assetCount: 3,
+      coveredRequired: 10,
+      percentRequiredCovered: 100,
+      percentObjectiveCovered: 100,
+      percentWorkedExampleCovered: 100,
+      percentExerciseCovered: 100,
+      percentAssessmentCovered: 100,
+      conceptCount: 5,
+      activityCount: 25,
+      assetCount: 3,
     },
     mathResults: [],
     widgetResults: [],
@@ -48,7 +53,12 @@ describe('generateQualityReport', () => {
     const report = generateQualityReport({
       ...baseParams,
       conceptCount: 0,
-      coverage: { ...baseParams.coverage, percentRequiredCovered: 0, coveredRequired: 0, conceptCount: 0 },
+      coverage: {
+        ...baseParams.coverage,
+        percentRequiredCovered: 0,
+        coveredRequired: 0,
+        conceptCount: 0,
+      },
     });
     expect(report.status).toBe('failed');
   });

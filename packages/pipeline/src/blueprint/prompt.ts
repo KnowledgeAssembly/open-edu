@@ -9,24 +9,31 @@ export function buildBlueprintPrompt(
   return `Design a lesson blueprint for teaching this mathematics concept.
 
 CONCEPT:
-${JSON.stringify({
-  conceptId: concept.conceptId,
-  label: concept.label,
-  kind: concept.kind,
-  learningObjective: concept.learningObjective,
-  coreIdea: concept.coreIdea,
-  difficulty: concept.difficulty,
-  representations: concept.representations,
-  misconceptionTargets: concept.misconceptionTargets,
-  prerequisites: concept.prerequisites,
-  adultContext: concept.adultContext,
-  recommendedWidgetCategories: concept.recommendedWidgetCategories,
-}, null, 2)}
+${JSON.stringify(
+  {
+    conceptId: concept.conceptId,
+    label: concept.label,
+    kind: concept.kind,
+    learningObjective: concept.learningObjective,
+    coreIdea: concept.coreIdea,
+    difficulty: concept.difficulty,
+    representations: concept.representations,
+    misconceptionTargets: concept.misconceptionTargets,
+    prerequisites: concept.prerequisites,
+    adultContext: concept.adultContext,
+    recommendedWidgetCategories: concept.recommendedWidgetCategories,
+  },
+  null,
+  2,
+)}
 
 SOURCE EVIDENCE (textbook excerpts):
 ${JSON.stringify(
-  sourceUnits.filter(u => concept.sourceUnitIds.includes(u.id)).map(u => ({ id: u.id, type: u.type, text: u.text.slice(0, 1000) })),
-  null, 2,
+  sourceUnits
+    .filter((u) => concept.sourceUnitIds.includes(u.id))
+    .map((u) => ({ id: u.id, type: u.type, text: u.text.slice(0, 1000) })),
+  null,
+  2,
 )}
 
 AVAILABLE WIDGET CATEGORIES: ${activeWidgetCategories.join(', ')}

@@ -1,7 +1,7 @@
 import type { SourceUnit } from '../source/types.js';
 
 export function buildConceptMapPrompt(sourceUnits: SourceUnit[], lessonName: string): string {
-  const inputUnits = sourceUnits.map(u => ({
+  const inputUnits = sourceUnits.map((u) => ({
     unitId: u.id,
     type: u.type,
     pageStart: u.location.pageStart,

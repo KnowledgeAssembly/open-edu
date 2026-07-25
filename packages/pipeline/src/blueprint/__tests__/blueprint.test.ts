@@ -20,8 +20,22 @@ function makeValidBlueprint(overrides: Partial<LessonBlueprint> = {}): LessonBlu
       { step: 'remediation', description: 'Review', durationMinutes: 5 },
       { step: 'extension', description: 'Extend', durationMinutes: 7 },
     ],
-    assetRequests: [{ id: 'chart-1', rendererType: 'place-value-chart', parameters: { maxPlaces: 7, number: 352648 }, description: 'Place value chart' }],
-    widgetRequests: [{ step: 'widget_practice', widgetCategory: 'place-value', mode: 'interactive', description: 'Place value widget' }],
+    assetRequests: [
+      {
+        id: 'chart-1',
+        rendererType: 'place-value-chart',
+        parameters: { maxPlaces: 7, number: 352648 },
+        description: 'Place value chart',
+      },
+    ],
+    widgetRequests: [
+      {
+        step: 'widget_practice',
+        widgetCategory: 'place-value',
+        mode: 'interactive',
+        description: 'Place value widget',
+      },
+    ],
     questionFamilies: ['place_value_identification', 'expanded_form'],
     misconceptionTargets: ['Confusing lakhs with millions'],
     ...overrides,
@@ -42,13 +56,19 @@ describe('LessonBlueprintSchema', () => {
   });
 
   it('rejects empty representations', () => {
-    expect(() => LessonBlueprintSchema.parse(makeValidBlueprint({ representations: [] }))).toThrow();
+    expect(() =>
+      LessonBlueprintSchema.parse(makeValidBlueprint({ representations: [] })),
+    ).toThrow();
   });
 
   it('rejects less than 2 arc steps', () => {
-    expect(() => LessonBlueprintSchema.parse(makeValidBlueprint({
-      lessonArc: [{ step: 'mastery_check', description: 'Quiz', durationMinutes: 5 }],
-    }))).toThrow();
+    expect(() =>
+      LessonBlueprintSchema.parse(
+        makeValidBlueprint({
+          lessonArc: [{ step: 'mastery_check', description: 'Quiz', durationMinutes: 5 }],
+        }),
+      ),
+    ).toThrow();
   });
 });
 
@@ -64,11 +84,13 @@ describe('validateBlueprint', () => {
         { step: 'independent_practice', description: 'IP', durationMinutes: 10 },
       ],
     });
-    expect(validateBlueprint(bp).some(e => e.includes('no mastery_check'))).toBe(true);
+    expect(validateBlueprint(bp).some((e) => e.includes('no mastery_check'))).toBe(true);
   });
 
   it('detects visual concept with no assets', () => {
     const bp = makeValidBlueprint({ assetRequests: [], representations: ['visual'] });
-    expect(validateBlueprint(bp).some(e => e.includes('visual') && e.includes('no asset'))).toBe(true);
+    expect(validateBlueprint(bp).some((e) => e.includes('visual') && e.includes('no asset'))).toBe(
+      true,
+    );
   });
 });

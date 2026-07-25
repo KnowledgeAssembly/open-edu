@@ -2,7 +2,25 @@ import type { GeneratedActivity } from '../types.js';
 
 export interface MathQuestion {
   questionId: string;
-  operation: 'add' | 'subtract' | 'multiply' | 'divide' | 'place_value' | 'expanded_form' | 'compare' | 'order' | 'fraction_equiv' | 'fraction_compare' | 'decimal' | 'unit_convert' | 'area' | 'perimeter' | 'volume' | 'clock' | 'money' | 'chart';
+  operation:
+    | 'add'
+    | 'subtract'
+    | 'multiply'
+    | 'divide'
+    | 'place_value'
+    | 'expanded_form'
+    | 'compare'
+    | 'order'
+    | 'fraction_equiv'
+    | 'fraction_compare'
+    | 'decimal'
+    | 'unit_convert'
+    | 'area'
+    | 'perimeter'
+    | 'volume'
+    | 'clock'
+    | 'money'
+    | 'chart';
   inputs: Record<string, number | number[] | string>;
   expectedAnswer: number | string | number[];
   unit?: string;
@@ -31,42 +49,71 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (Math.abs(sum - expected) > (question.tolerance || 0.001)) {
         errors.push(`Addition: computed ${sum}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: sum };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: sum,
+      };
     }
 
     case 'subtract': {
       const a = question.inputs.a as number;
       const b = question.inputs.b as number;
-      if (a === undefined || b === undefined) { errors.push('Subtraction requires a and b'); break; }
+      if (a === undefined || b === undefined) {
+        errors.push('Subtraction requires a and b');
+        break;
+      }
       const diff = a - b;
       const expected = Number(question.expectedAnswer);
       if (Math.abs(diff - expected) > (question.tolerance || 0.001)) {
         errors.push(`Subtraction: computed ${diff}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: diff };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: diff,
+      };
     }
 
     case 'multiply': {
       const numbers = question.inputs.numbers as number[];
-      if (!numbers || numbers.length < 2) { errors.push('Multiplication requires at least 2 numbers'); break; }
+      if (!numbers || numbers.length < 2) {
+        errors.push('Multiplication requires at least 2 numbers');
+        break;
+      }
       const product = numbers.reduce((a, b) => a * b, 1);
       const expected = Number(question.expectedAnswer);
       if (Math.abs(product - expected) > (question.tolerance || 0.001)) {
         errors.push(`Multiplication: computed ${product}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: product };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: product,
+      };
     }
 
     case 'divide': {
       const a = question.inputs.a as number;
       const b = question.inputs.b as number;
-      if (b === 0) { errors.push('Division by zero'); break; }
+      if (b === 0) {
+        errors.push('Division by zero');
+        break;
+      }
       const quot = a / b;
       const expected = Number(question.expectedAnswer);
       if (Math.abs(quot - expected) > (question.tolerance || 0.001)) {
         errors.push(`Division: computed ${quot}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: quot };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: quot,
+      };
     }
 
     case 'place_value': {
@@ -74,17 +121,31 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       const place = question.inputs.place as string;
       const numStr = String(number);
       const placeValues: Record<string, number> = {
-        ones: numStr.length - 1, tens: numStr.length - 2, hundreds: numStr.length - 3,
-        thousands: numStr.length - 4, lakhs: numStr.length - 6, crores: numStr.length - 8,
+        ones: numStr.length - 1,
+        tens: numStr.length - 2,
+        hundreds: numStr.length - 3,
+        thousands: numStr.length - 4,
+        lakhs: numStr.length - 6,
+        crores: numStr.length - 8,
       };
       const idx: number | undefined = placeValues[place];
-      if (idx === undefined) { errors.push(`Unknown place: ${place}`); break; }
+      if (idx === undefined) {
+        errors.push(`Unknown place: ${place}`);
+        break;
+      }
       const digit = idx >= 0 ? parseInt(numStr[idx] || '0', 10) : 0;
       const expected = Number(question.expectedAnswer);
       if (digit !== expected) {
-        errors.push(`Place value of ${place} in ${number}: computed ${digit}, expected ${expected}`);
+        errors.push(
+          `Place value of ${place} in ${number}: computed ${digit}, expected ${expected}`,
+        );
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: digit };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: digit,
+      };
     }
 
     case 'expanded_form': {
@@ -103,7 +164,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (computedForm !== form) {
         errors.push(`Expanded form of ${num}: computed "${computedForm}", expected "${form}"`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: computedForm };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: computedForm,
+      };
     }
 
     case 'compare': {
@@ -114,18 +180,33 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (actual !== expected) {
         errors.push(`Compare ${a} and ${b}: computed "${actual}", expected "${expected}"`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: actual };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: actual,
+      };
     }
 
     case 'order': {
       const numbers = question.inputs.numbers as number[];
       const order = question.inputs.order as string;
-      const sorted = order === 'ascending' ? [...numbers].sort((a, b) => a - b) : [...numbers].sort((a, b) => b - a);
+      const sorted =
+        order === 'ascending'
+          ? [...numbers].sort((a, b) => a - b)
+          : [...numbers].sort((a, b) => b - a);
       const expected = question.expectedAnswer as number[];
       if (JSON.stringify(sorted) !== JSON.stringify(expected)) {
-        errors.push(`Order (${order}): computed ${JSON.stringify(sorted)}, expected ${JSON.stringify(expected)}`);
+        errors.push(
+          `Order (${order}): computed ${JSON.stringify(sorted)}, expected ${JSON.stringify(expected)}`,
+        );
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: sorted.join(',') };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: sorted.join(','),
+      };
     }
 
     case 'fraction_equiv': {
@@ -136,9 +217,16 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       const equiv = Math.abs(n1 / d1 - n2 / d2) < 0.0001;
       const expected = String(question.expectedAnswer) === 'true';
       if (equiv !== expected) {
-        errors.push(`Fraction equivalence ${n1}/${d1} vs ${n2}/${d2}: computed ${equiv}, expected ${question.expectedAnswer}`);
+        errors.push(
+          `Fraction equivalence ${n1}/${d1} vs ${n2}/${d2}: computed ${equiv}, expected ${question.expectedAnswer}`,
+        );
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: String(equiv) };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: String(equiv),
+      };
     }
 
     case 'fraction_compare': {
@@ -151,9 +239,16 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       const actual = v1 > v2 ? '>' : v1 < v2 ? '<' : '=';
       const expected = question.expectedAnswer as string;
       if (actual !== expected) {
-        errors.push(`Fraction compare ${n1}/${d1} vs ${n2}/${d2}: computed "${actual}", expected "${expected}"`);
+        errors.push(
+          `Fraction compare ${n1}/${d1} vs ${n2}/${d2}: computed "${actual}", expected "${expected}"`,
+        );
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: actual };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: actual,
+      };
     }
 
     case 'decimal': {
@@ -162,16 +257,29 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       const op = question.inputs.op as string;
       let result: number;
       switch (op) {
-        case 'add': result = a + b; break;
-        case 'subtract': result = a - b; break;
-        case 'multiply': result = a * b; break;
-        default: errors.push(`Unknown decimal op: ${op}`); return { questionId: question.questionId, valid: false, errors };
+        case 'add':
+          result = a + b;
+          break;
+        case 'subtract':
+          result = a - b;
+          break;
+        case 'multiply':
+          result = a * b;
+          break;
+        default:
+          errors.push(`Unknown decimal op: ${op}`);
+          return { questionId: question.questionId, valid: false, errors };
       }
       const expected = Number(question.expectedAnswer);
       if (Math.abs(result - expected) > (question.tolerance || 0.01)) {
         errors.push(`Decimal ${op}: computed ${result}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: result };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: result,
+      };
     }
 
     case 'unit_convert': {
@@ -192,13 +300,23 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
         paisa: { rupee: 0.01 },
       };
       const factor = conversions[from]?.[to];
-      if (factor === undefined) { errors.push(`Unknown conversion: ${from} → ${to}`); break; }
+      if (factor === undefined) {
+        errors.push(`Unknown conversion: ${from} → ${to}`);
+        break;
+      }
       const converted = value * factor;
       const expected = Number(question.expectedAnswer);
       if (Math.abs(converted - expected) > (question.tolerance || 0.01)) {
-        errors.push(`Unit conversion ${value} ${from} → ${to}: computed ${converted}, expected ${expected}`);
+        errors.push(
+          `Unit conversion ${value} ${from} → ${to}: computed ${converted}, expected ${expected}`,
+        );
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: converted };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: converted,
+      };
     }
 
     case 'area': {
@@ -209,7 +327,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (Math.abs(area - expected) > (question.tolerance || 0.001)) {
         errors.push(`Area: computed ${area}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: area };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: area,
+      };
     }
 
     case 'perimeter': {
@@ -220,7 +343,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (Math.abs(perimeter - expected) > (question.tolerance || 0.001)) {
         errors.push(`Perimeter: computed ${perimeter}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: perimeter };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: perimeter,
+      };
     }
 
     case 'volume': {
@@ -232,7 +360,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (Math.abs(volume - expected) > (question.tolerance || 0.001)) {
         errors.push(`Volume: computed ${volume}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: volume };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: volume,
+      };
     }
 
     case 'clock': {
@@ -243,7 +376,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (formatted !== expected) {
         errors.push(`Clock: computed ${formatted}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: formatted };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: formatted,
+      };
     }
 
     case 'money': {
@@ -253,7 +391,12 @@ export function validateMathQuestion(question: MathQuestion): MathValidationResu
       if (Math.abs(sum - expected) > (question.tolerance || 0.01)) {
         errors.push(`Money: computed ${sum}, expected ${expected}`);
       }
-      return { questionId: question.questionId, valid: errors.length === 0, errors, computedAnswer: sum };
+      return {
+        questionId: question.questionId,
+        valid: errors.length === 0,
+        errors,
+        computedAnswer: sum,
+      };
     }
 
     default:
@@ -275,7 +418,9 @@ export function validateMCQOptions(question: {
   }
 
   if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
-    errors.push(`Correct index ${question.correctIndex} is out of range (0-${question.options.length - 1})`);
+    errors.push(
+      `Correct index ${question.correctIndex} is out of range (0-${question.options.length - 1})`,
+    );
   }
 
   const uniqueOptions = new Set(question.options);
@@ -326,7 +471,7 @@ export function extractMCQValidationErrors(activities: GeneratedActivity[]): str
         if (question && options && correctIndex !== undefined) {
           const mcqErrors = validateMCQOptions({ question, options, correctIndex });
           if (mcqErrors.length > 0) {
-            errors.push(...mcqErrors.map(e => `[${activity.step}-q${i}] ${e}`));
+            errors.push(...mcqErrors.map((e) => `[${activity.step}-q${i}] ${e}`));
           }
         }
       }

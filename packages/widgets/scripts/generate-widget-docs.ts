@@ -33,7 +33,13 @@ for (const domain of domains) {
 
 for (const entry of entriesWithGuide) {
   const g = entry.guide!;
-  const md = renderPage(entry.id, entry.name ?? entry.id, entry.domain ?? 'core', entry.status ?? 'stable', g);
+  const md = renderPage(
+    entry.id,
+    entry.name ?? entry.id,
+    entry.domain ?? 'core',
+    entry.status ?? 'stable',
+    g,
+  );
   const filename = entry.id.split('.').slice(1).join('-') + '.md';
   const filePath = join(outputBaseDir, entry.domain!, filename);
   writeFileSync(filePath, md, 'utf-8');
@@ -48,56 +54,56 @@ function renderPage(
   status: string,
   g: WidgetGuideData,
 ): string {
-  return [
-    `---`,
-    `sidebar_position: ${g.sidebarPosition}`,
-    `---`,
-    ``,
-    `# ${name}`,
-    ``,
-    `**Widget ID:** \`${id}\` | **Domain:** ${domain} | **Status:** ${status}`,
-    ``,
-    `> ${g.oneLiner}`,
-    ``,
-    `## What it does`,
-    ``,
-    g.whatItDoes,
-    ``,
-    ...(g.whenToUse.length > 0
-      ? [``, `## When to use this widget`, ``, ...g.whenToUse.map((item) => `- ${item}`)]
-      : []),
-    ``,
-    `## Setting it up`,
-    ``,
-    ...g.setupSteps.map((step, i) => `${i + 1}. ${step}`),
-    ``,
-    `## Configuration fields`,
-    ``,
-    `| Field | Type | Required | Description |`,
-    `|-------|------|----------|-------------|`,
-    ...g.configFields.map(
-      (f) => `| \`${f.name}\` | ${f.type} | ${f.required ? 'Yes' : 'No'} | ${f.description} |`,
-    ),
-    ``,
-    `## Example`,
-    ``,
-    '```json',
-    g.exampleJson.trim(),
-    '```',
-    ...(g.tips.length > 0
-      ? [``, `## Tips`, ``, ...g.tips.map((tip) => `- ${tip}`)]
-      : []),
-    ...(g.relatedWidgets && g.relatedWidgets.length > 0
-      ? [
-          ``,
-          `## See also`,
-          ``,
-          ...g.relatedWidgets.map((r) =>
-            r.domain === domain
-              ? `- [${r.name}](${r.slug}.md)`
-              : `- [${r.name}](../${r.domain}/${r.slug}.md)`,
-          ),
-        ]
-      : []),
-  ].join('\n') + '\n';
+  return (
+    [
+      `---`,
+      `sidebar_position: ${g.sidebarPosition}`,
+      `---`,
+      ``,
+      `# ${name}`,
+      ``,
+      `**Widget ID:** \`${id}\` | **Domain:** ${domain} | **Status:** ${status}`,
+      ``,
+      `> ${g.oneLiner}`,
+      ``,
+      `## What it does`,
+      ``,
+      g.whatItDoes,
+      ``,
+      ...(g.whenToUse.length > 0
+        ? [``, `## When to use this widget`, ``, ...g.whenToUse.map((item) => `- ${item}`)]
+        : []),
+      ``,
+      `## Setting it up`,
+      ``,
+      ...g.setupSteps.map((step, i) => `${i + 1}. ${step}`),
+      ``,
+      `## Configuration fields`,
+      ``,
+      `| Field | Type | Required | Description |`,
+      `|-------|------|----------|-------------|`,
+      ...g.configFields.map(
+        (f) => `| \`${f.name}\` | ${f.type} | ${f.required ? 'Yes' : 'No'} | ${f.description} |`,
+      ),
+      ``,
+      `## Example`,
+      ``,
+      '```json',
+      g.exampleJson.trim(),
+      '```',
+      ...(g.tips.length > 0 ? [``, `## Tips`, ``, ...g.tips.map((tip) => `- ${tip}`)] : []),
+      ...(g.relatedWidgets && g.relatedWidgets.length > 0
+        ? [
+            ``,
+            `## See also`,
+            ``,
+            ...g.relatedWidgets.map((r) =>
+              r.domain === domain
+                ? `- [${r.name}](${r.slug}.md)`
+                : `- [${r.name}](../${r.domain}/${r.slug}.md)`,
+            ),
+          ]
+        : []),
+    ].join('\n') + '\n'
+  );
 }

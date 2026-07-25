@@ -27,7 +27,11 @@ class FakeRouter {
     return { provider: 'test', model: 'test-model', maxTokens: 4096, temperature: 0.3 };
   }
 
-  async generateStructuredRaw<T>(stage: LlmStage, prompt: string, _schema: z.ZodType<T>): Promise<T> {
+  async generateStructuredRaw<T>(
+    stage: LlmStage,
+    prompt: string,
+    _schema: z.ZodType<T>,
+  ): Promise<T> {
     this.calls.push({ stage, prompt });
     if (stage === 'source_inventory') {
       return { classifications: [] } as unknown as T;
@@ -35,25 +39,74 @@ class FakeRouter {
     if (stage === 'concept_map') {
       return {
         concepts: [
-          { conceptId: 'indian_place_value', label: 'Indian Place Value', kind: 'knowledge', sourceUnitIds: ['src-3', 'src-5'],
-            learningObjective: 'Identify place values using Indian numbering system', coreIdea: 'Indian numbering groups digits into ones, tens, hundreds, thousands, ten thousands, lakhs, crores.',
-            difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: [], representations: ['visual', 'symbolic'], exerciseFamilies: ['place_value_identification', 'expanded_form'],
-            misconceptionTargets: ['Confusing lakhs with millions'], adultContext: 'Reading currency in lakhs and crores', recommendedWidgetCategories: ['place-value'], estimatedMinutes: 20,
+          {
+            conceptId: 'indian_place_value',
+            label: 'Indian Place Value',
+            kind: 'knowledge',
+            sourceUnitIds: ['src-3', 'src-5'],
+            learningObjective: 'Identify place values using Indian numbering system',
+            coreIdea:
+              'Indian numbering groups digits into ones, tens, hundreds, thousands, ten thousands, lakhs, crores.',
+            difficulty: 'beginner',
+            masteryThreshold: 0.8,
+            prerequisites: [],
+            representations: ['visual', 'symbolic'],
+            exerciseFamilies: ['place_value_identification', 'expanded_form'],
+            misconceptionTargets: ['Confusing lakhs with millions'],
+            adultContext: 'Reading currency in lakhs and crores',
+            recommendedWidgetCategories: ['place-value'],
+            estimatedMinutes: 20,
           },
-          { conceptId: 'comparison', label: 'Comparison of Numbers', kind: 'skill', sourceUnitIds: ['src-7', 'src-8'],
-            learningObjective: 'Compare two large numbers using place value', coreIdea: 'Compare digits from the leftmost place; the first different digit determines which number is larger.',
-            difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: ['indian_place_value'], representations: ['symbolic'], exerciseFamilies: ['comparison'],
-            misconceptionTargets: ['Comparing from rightmost digit instead of leftmost'], recommendedWidgetCategories: ['number-line'], estimatedMinutes: 15,
+          {
+            conceptId: 'comparison',
+            label: 'Comparison of Numbers',
+            kind: 'skill',
+            sourceUnitIds: ['src-7', 'src-8'],
+            learningObjective: 'Compare two large numbers using place value',
+            coreIdea:
+              'Compare digits from the leftmost place; the first different digit determines which number is larger.',
+            difficulty: 'beginner',
+            masteryThreshold: 0.8,
+            prerequisites: ['indian_place_value'],
+            representations: ['symbolic'],
+            exerciseFamilies: ['comparison'],
+            misconceptionTargets: ['Comparing from rightmost digit instead of leftmost'],
+            recommendedWidgetCategories: ['number-line'],
+            estimatedMinutes: 15,
           },
-          { conceptId: 'ordering', label: 'Ordering Numbers', kind: 'skill', sourceUnitIds: ['src-10', 'src-11'],
-            learningObjective: 'Arrange numbers in ascending and descending order', coreIdea: 'Ordering means sorting numbers from smallest to largest (ascending) or largest to smallest (descending).',
-            difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: ['comparison'], representations: ['symbolic'], exerciseFamilies: ['ordering'],
-            misconceptionTargets: ['Misreading large number groups'], recommendedWidgetCategories: ['number-line'], estimatedMinutes: 15,
+          {
+            conceptId: 'ordering',
+            label: 'Ordering Numbers',
+            kind: 'skill',
+            sourceUnitIds: ['src-10', 'src-11'],
+            learningObjective: 'Arrange numbers in ascending and descending order',
+            coreIdea:
+              'Ordering means sorting numbers from smallest to largest (ascending) or largest to smallest (descending).',
+            difficulty: 'beginner',
+            masteryThreshold: 0.8,
+            prerequisites: ['comparison'],
+            representations: ['symbolic'],
+            exerciseFamilies: ['ordering'],
+            misconceptionTargets: ['Misreading large number groups'],
+            recommendedWidgetCategories: ['number-line'],
+            estimatedMinutes: 15,
           },
-          { conceptId: 'expanded_form', label: 'Expanded Form', kind: 'procedure', sourceUnitIds: ['src-5', 'src-6'],
-            learningObjective: 'Write numbers in expanded form by place value', coreIdea: 'Expanded form breaks a number into the sum of each digit multiplied by its place value.',
-            difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: ['indian_place_value'], representations: ['symbolic', 'visual'], exerciseFamilies: ['expanded_form'],
-            misconceptionTargets: ['Forgetting to multiply digit by place value'], recommendedWidgetCategories: ['place-value'], estimatedMinutes: 15,
+          {
+            conceptId: 'expanded_form',
+            label: 'Expanded Form',
+            kind: 'procedure',
+            sourceUnitIds: ['src-5', 'src-6'],
+            learningObjective: 'Write numbers in expanded form by place value',
+            coreIdea:
+              'Expanded form breaks a number into the sum of each digit multiplied by its place value.',
+            difficulty: 'beginner',
+            masteryThreshold: 0.8,
+            prerequisites: ['indian_place_value'],
+            representations: ['symbolic', 'visual'],
+            exerciseFamilies: ['expanded_form'],
+            misconceptionTargets: ['Forgetting to multiply digit by place value'],
+            recommendedWidgetCategories: ['place-value'],
+            estimatedMinutes: 15,
           },
         ],
         documentId: 'math-level-b',
@@ -77,7 +130,7 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
     expect(fixtureInventory.units.length).toBeGreaterThan(10);
     expect(fixtureInventory.totalPages).toBe(203);
 
-    const types = fixtureInventory.units.map(u => u.type);
+    const types = fixtureInventory.units.map((u) => u.type);
     expect(types).toContain('lesson');
     expect(types).toContain('objective');
     expect(types).toContain('worked_example');
@@ -98,34 +151,90 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
   });
 
   it('generates valid concept graph (no cycles)', () => {
-    const { concepts } = { concepts: [
-      { conceptId: 'indian_place_value', label: 'IPV', kind: 'knowledge' as const, sourceUnitIds: ['src-3'],
-        learningObjective: 'Identify place values', coreIdea: 'Place value means digit position determines its value.',
-        difficulty: 'beginner' as const, masteryThreshold: 0.8, prerequisites: [], representations: ['visual' as const, 'symbolic' as const],
-        exerciseFamilies: ['pv_id'], misconceptionTargets: [], recommendedWidgetCategories: [], estimatedMinutes: 20,
-      },
-      { conceptId: 'comparison', label: 'CMP', kind: 'skill' as const, sourceUnitIds: ['src-10'],
-        learningObjective: 'Compare two numbers', coreIdea: 'Compare digits from left to right.',
-        difficulty: 'beginner' as const, masteryThreshold: 0.8, prerequisites: ['indian_place_value'], representations: ['symbolic' as const],
-        exerciseFamilies: ['compare'], misconceptionTargets: [], recommendedWidgetCategories: [], estimatedMinutes: 15,
-      },
-    ]};
+    const { concepts } = {
+      concepts: [
+        {
+          conceptId: 'indian_place_value',
+          label: 'IPV',
+          kind: 'knowledge' as const,
+          sourceUnitIds: ['src-3'],
+          learningObjective: 'Identify place values',
+          coreIdea: 'Place value means digit position determines its value.',
+          difficulty: 'beginner' as const,
+          masteryThreshold: 0.8,
+          prerequisites: [],
+          representations: ['visual' as const, 'symbolic' as const],
+          exerciseFamilies: ['pv_id'],
+          misconceptionTargets: [],
+          recommendedWidgetCategories: [],
+          estimatedMinutes: 20,
+        },
+        {
+          conceptId: 'comparison',
+          label: 'CMP',
+          kind: 'skill' as const,
+          sourceUnitIds: ['src-10'],
+          learningObjective: 'Compare two numbers',
+          coreIdea: 'Compare digits from left to right.',
+          difficulty: 'beginner' as const,
+          masteryThreshold: 0.8,
+          prerequisites: ['indian_place_value'],
+          representations: ['symbolic' as const],
+          exerciseFamilies: ['compare'],
+          misconceptionTargets: [],
+          recommendedWidgetCategories: [],
+          estimatedMinutes: 15,
+        },
+      ],
+    };
     const errors = validateConceptGraph(concepts);
     expect(errors).toEqual([]);
   });
 
   it('builds coverage ledger with 100% required coverage', () => {
-    const concepts: Array<{ conceptId: string; label: string; kind: 'knowledge'; sourceUnitIds: string[]; learningObjective: string; coreIdea: string; difficulty: 'beginner'; masteryThreshold: number; prerequisites: string[]; representations: Array<'visual'>; exerciseFamilies: string[]; misconceptionTargets: string[]; recommendedWidgetCategories: string[]; estimatedMinutes: number }> = [
-      { conceptId: 'indian_place_value', label: 'IPV', kind: 'knowledge', sourceUnitIds: fixtureInventory.units.filter(u => u.requiredCoverage).map(u => u.id),
-        learningObjective: 'Identify place values', coreIdea: 'Place value determines digit value.',
-        difficulty: 'beginner', masteryThreshold: 0.8, prerequisites: [], representations: ['visual'],
-        exerciseFamilies: ['pv_id'], misconceptionTargets: [], recommendedWidgetCategories: [], estimatedMinutes: 20,
+    const concepts: Array<{
+      conceptId: string;
+      label: string;
+      kind: 'knowledge';
+      sourceUnitIds: string[];
+      learningObjective: string;
+      coreIdea: string;
+      difficulty: 'beginner';
+      masteryThreshold: number;
+      prerequisites: string[];
+      representations: Array<'visual'>;
+      exerciseFamilies: string[];
+      misconceptionTargets: string[];
+      recommendedWidgetCategories: string[];
+      estimatedMinutes: number;
+    }> = [
+      {
+        conceptId: 'indian_place_value',
+        label: 'IPV',
+        kind: 'knowledge',
+        sourceUnitIds: fixtureInventory.units.filter((u) => u.requiredCoverage).map((u) => u.id),
+        learningObjective: 'Identify place values',
+        coreIdea: 'Place value determines digit value.',
+        difficulty: 'beginner',
+        masteryThreshold: 0.8,
+        prerequisites: [],
+        representations: ['visual'],
+        exerciseFamilies: ['pv_id'],
+        misconceptionTargets: [],
+        recommendedWidgetCategories: [],
+        estimatedMinutes: 20,
       },
     ];
     const activityMap = new Map<string, string[]>();
     for (const c of concepts) activityMap.set(c.conceptId, ['act-1']);
 
-    const ledger = buildCoverageLedger(fixtureInventory.units, concepts as any, [], [], activityMap);
+    const ledger = buildCoverageLedger(
+      fixtureInventory.units,
+      concepts as any,
+      [],
+      [],
+      activityMap,
+    );
     expect(ledger.summary.percentRequiredCovered).toBe(100);
   });
 
@@ -135,10 +244,15 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
       retries: 0,
       durationMs: 0,
       coverage: {
-        coveredRequired: 10, percentRequiredCovered: 100,
-        percentObjectiveCovered: 100, percentWorkedExampleCovered: 100,
-        percentExerciseCovered: 100, percentAssessmentCovered: 100,
-        conceptCount: 5, activityCount: 25, assetCount: 3,
+        coveredRequired: 10,
+        percentRequiredCovered: 100,
+        percentObjectiveCovered: 100,
+        percentWorkedExampleCovered: 100,
+        percentExerciseCovered: 100,
+        percentAssessmentCovered: 100,
+        conceptCount: 5,
+        activityCount: 25,
+        assetCount: 3,
       },
       mathResults: [],
       widgetResults: [],
@@ -158,13 +272,17 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
     await r.generateStructuredRaw('source_inventory', 'test', z.object({ x: z.number() }));
     await r.generateStructuredRaw('concept_map', 'test', z.object({ x: z.number() }));
     expect(r.calls.length).toBe(2);
-    const stages = r.calls.map(c => c.stage);
+    const stages = r.calls.map((c) => c.stage);
     expect(stages).toContain('concept_map');
   });
 
   it('fake router returns deterministically', async () => {
     const r = new FakeRouter();
-    const a = await r.generateStructuredRaw('source_inventory', 'test', z.object({ x: z.number() }));
+    const a = await r.generateStructuredRaw(
+      'source_inventory',
+      'test',
+      z.object({ x: z.number() }),
+    );
     expect(a).toBeDefined();
   });
 });

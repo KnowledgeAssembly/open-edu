@@ -25,7 +25,7 @@ export async function generateLessonBlueprints(
 
     const errors = validateBlueprint(result);
     if (errors.length > 0) {
-      warnings.push(...errors.map(e => `[${result.conceptId}] ${e}`));
+      warnings.push(...errors.map((e) => `[${result.conceptId}] ${e}`));
     } else {
       blueprints.push(result);
     }

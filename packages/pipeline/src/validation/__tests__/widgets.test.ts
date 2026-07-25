@@ -11,21 +11,25 @@ describe('validateWidgetConfig', () => {
 
   it('validates math.fraction-visual config', () => {
     const result = validateWidgetConfig('math.fraction-visual', {
-      numerator: 1, denominator: 4,
+      numerator: 1,
+      denominator: 4,
     });
     expect(result.valid).toBe(true);
   });
 
   it('validates math.place-value-chart config', () => {
     const result = validateWidgetConfig('math.place-value-chart', {
-      maxPlaces: 'lakh', digits: [3, 5, 2, 6, 4, 8],
+      maxPlaces: 'lakh',
+      digits: [3, 5, 2, 6, 4, 8],
     });
     expect(result.valid).toBe(true);
   });
 
   it('validates math.number-line config', () => {
     const result = validateWidgetConfig('math.number-line', {
-      min: 0, max: 10, target: 5,
+      min: 0,
+      max: 10,
+      target: 5,
     });
     expect(result.valid).toBe(true);
   });

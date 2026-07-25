@@ -20,12 +20,27 @@ export interface LlmStageConfig {
 export type LlmStageConfigs = Record<LlmStage, LlmStageConfig>;
 
 export const DEFAULT_STAGE_CONFIGS: LlmStageConfigs = {
-  source_inventory: { provider: 'openai', model: 'gpt-5.4-mini', maxTokens: 4096, temperature: 0.3 },
+  source_inventory: {
+    provider: 'openai',
+    model: 'gpt-5.4-mini',
+    maxTokens: 4096,
+    temperature: 0.3,
+  },
   concept_map: { provider: 'openai', model: 'gpt-5.4', maxTokens: 4096, temperature: 0.3 },
-  concept_enrichment: { provider: 'openai', model: 'gpt-5.4-mini', maxTokens: 4096, temperature: 0.3 },
+  concept_enrichment: {
+    provider: 'openai',
+    model: 'gpt-5.4-mini',
+    maxTokens: 4096,
+    temperature: 0.3,
+  },
   lesson_blueprint: { provider: 'openai', model: 'gpt-5.4', maxTokens: 4096, temperature: 0.3 },
   asset_plan: { provider: 'openai', model: 'gpt-5.4-mini', maxTokens: 4096, temperature: 0.3 },
-  activity_generation: { provider: 'openai', model: 'gpt-5.4-mini', maxTokens: 4096, temperature: 0.3 },
+  activity_generation: {
+    provider: 'openai',
+    model: 'gpt-5.4-mini',
+    maxTokens: 4096,
+    temperature: 0.3,
+  },
   review: { provider: 'openai', model: 'gpt-5.4', maxTokens: 4096, temperature: 0.3 },
 };
 

@@ -1,8 +1,15 @@
 import { z } from 'zod';
 
 export const LESSON_ARC_STEPS = [
-  'hook', 'observe', 'worked_example', 'guided_practice',
-  'widget_practice', 'independent_practice', 'mastery_check', 'remediation', 'extension',
+  'hook',
+  'observe',
+  'worked_example',
+  'guided_practice',
+  'widget_practice',
+  'independent_practice',
+  'mastery_check',
+  'remediation',
+  'extension',
 ] as const;
 
 export type LessonArcStep = (typeof LESSON_ARC_STEPS)[number];
@@ -27,11 +34,15 @@ export const LessonBlueprintSchema = z.object({
   objective: z.string().min(10),
   priorKnowledge: z.array(z.string()),
   representations: z.array(z.enum(['concrete', 'visual', 'symbolic'])).min(1),
-  lessonArc: z.array(z.object({
-    step: z.enum(LESSON_ARC_STEPS),
-    description: z.string(),
-    durationMinutes: z.number().int().min(1).max(20),
-  })).min(2),
+  lessonArc: z
+    .array(
+      z.object({
+        step: z.enum(LESSON_ARC_STEPS),
+        description: z.string(),
+        durationMinutes: z.number().int().min(1).max(20),
+      }),
+    )
+    .min(2),
   assetRequests: z.array(AssetRequestSchema),
   widgetRequests: z.array(WidgetRequestSchema),
   questionFamilies: z.array(z.string()).min(1),
@@ -47,7 +58,7 @@ export function validateBlueprint(blueprint: LessonBlueprint): string[] {
     errors.push(`Blueprint for "${blueprint.conceptId}" has no source units`);
   }
 
-  if (!blueprint.lessonArc.some(a => a.step === 'mastery_check')) {
+  if (!blueprint.lessonArc.some((a) => a.step === 'mastery_check')) {
     errors.push(`Blueprint for "${blueprint.conceptId}" has no mastery_check step`);
   }
 
@@ -58,7 +69,9 @@ export function validateBlueprint(blueprint: LessonBlueprint): string[] {
   const validSteps = ['observe', 'widget_practice', 'guided_practice', 'independent_practice'];
   for (const wr of blueprint.widgetRequests) {
     if (!validSteps.includes(wr.step)) {
-      errors.push(`Blueprint for "${blueprint.conceptId}" has widget request for unsupported step "${wr.step}"`);
+      errors.push(
+        `Blueprint for "${blueprint.conceptId}" has widget request for unsupported step "${wr.step}"`,
+      );
     }
   }
 

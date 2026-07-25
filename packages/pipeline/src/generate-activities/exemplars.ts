@@ -269,7 +269,8 @@ export const EXEMPLARS: Exemplar[] = [
     conceptDescription: 'indian_place_value — Indian place value chart for large numbers',
     content: {
       description: 'Indian Place Value Chart',
-      instructions: 'Observe how digits are grouped in the Indian place value system: ones, tens, hundreds, thousands, ten thousands, lakhs, crores.',
+      instructions:
+        'Observe how digits are grouped in the Indian place value system: ones, tens, hundreds, thousands, ten thousands, lakhs, crores.',
       widgetConfig: {
         maxPlaces: 7,
         targetNumber: 352648,
@@ -317,7 +318,8 @@ export const EXEMPLARS: Exemplar[] = [
     conceptDescription: 'decimal_place_value — Decimal grid showing tenths and hundredths',
     content: {
       description: 'Decimal Grid Practice',
-      instructions: 'Shade the correct number of squares to represent the decimal. Hint: 1 full row = 1 tenth.',
+      instructions:
+        'Shade the correct number of squares to represent the decimal. Hint: 1 full row = 1 tenth.',
       widgetConfig: {
         whole: 0,
         tenths: 2,
@@ -389,7 +391,8 @@ export const EXEMPLARS: Exemplar[] = [
     conceptDescription: 'geometry_basic — Identifying basic shapes and their properties',
     content: {
       description: 'Basic Geometry',
-      instructions: 'Observe the properties of common shapes. A square has 4 equal sides. A rectangle has opposite sides equal. A triangle has 3 sides. A circle has no sides.',
+      instructions:
+        'Observe the properties of common shapes. A square has 4 equal sides. A rectangle has opposite sides equal. A triangle has 3 sides. A circle has no sides.',
       examples: [
         'Square: 4 equal sides, 4 corners',
         'Rectangle: 2 pairs of equal sides, 4 corners',
@@ -412,7 +415,12 @@ export const EXEMPLARS: Exemplar[] = [
         },
         {
           question: 'Arrange in ascending order: 45,632; 45,362; 46,532; 44,900',
-          options: ['44,900; 45,362; 45,632; 46,532', '45,632; 45,362; 46,532; 44,900', '46,532; 45,632; 45,362; 44,900', '44,900; 45,632; 45,362; 46,532'],
+          options: [
+            '44,900; 45,362; 45,632; 46,532',
+            '45,632; 45,362; 46,532; 44,900',
+            '46,532; 45,632; 45,362; 44,900',
+            '44,900; 45,632; 45,362; 46,532',
+          ],
           correctIndex: 0,
         },
       ],
