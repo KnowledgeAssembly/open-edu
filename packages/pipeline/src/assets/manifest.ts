@@ -2,7 +2,7 @@ import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import type { AssetManifest } from './types.js';
 import { AssetManifestSchema, AssetManifestEntrySchema } from './types.js';
-import { renderSvg } from './svg.js';
+import { getRenderer } from './registry.js';
 
 export function generateAssetFiles(
   manifest: AssetManifest,
@@ -32,8 +32,14 @@ export function generateAssetFiles(
       continue;
     }
 
+    const renderer = getRenderer(entry.rendererType);
+    if (!renderer) {
+      errors.push(`Asset "${entry.id}" has unknown renderer type "${entry.rendererType}"`);
+      continue;
+    }
+
     try {
-      const svgContent = renderSvg(entry);
+      const svgContent = renderer.render(entry);
       if (!existsSync(dirname(filePath))) {
         mkdirSync(dirname(filePath), { recursive: true });
       }

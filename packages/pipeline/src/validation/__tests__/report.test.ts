@@ -17,19 +17,19 @@ describe('generateQualityReport', () => {
       activityCount: 25,
       assetCount: 3,
     },
-    mathResults: [],
     widgetResults: [],
     reviewItems: [],
     assetCount: 3,
     conceptCount: 5,
     hasCycles: false,
+    validationIssues: [],
   };
 
   it('returns complete when all gates pass', () => {
     const report = generateQualityReport(baseParams);
     expect(report.status).toBe('complete');
     expect(report.publishGates.requiredCoverage.passed).toBe(true);
-    expect(report.publishGates.mathCorrectness.passed).toBe(true);
+    expect(report.publishGates.subjectValidation.passed).toBe(true);
     expect(report.publishGates.noDependencyCycles.passed).toBe(true);
   });
 
@@ -41,10 +41,12 @@ describe('generateQualityReport', () => {
     expect(report.status).toBe('partial');
   });
 
-  it('returns partial when math fails', () => {
+  it('returns partial when validation fails', () => {
     const report = generateQualityReport({
       ...baseParams,
-      mathResults: [{ questionId: 'q1', valid: false, errors: ['Wrong'] }],
+      validationIssues: [
+        { id: 'v1', severity: 'error', message: 'Wrong', source: 'math' },
+      ],
     });
     expect(report.status).toBe('partial');
   });

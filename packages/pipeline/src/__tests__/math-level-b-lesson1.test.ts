@@ -8,6 +8,31 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SourceInventory } from '../source/types.js';
+import type { CurriculumProfile } from '../profile/types.js';
+
+const MATH_PROFILE: CurriculumProfile = {
+  id: 'math',
+  subject: 'mathematics',
+  locale: 'en-IN',
+  language: 'en',
+  sourceTaxonomy: {
+    lessonLabels: ['Lesson', 'Chapter'],
+    sectionLabels: ['Section'],
+    objectiveLabels: ['Objectives'],
+    definitionLabels: ['Definition'],
+    exampleLabels: ['Example'],
+    exerciseLabels: ['Exercise'],
+    reviewLabels: ['Review'],
+    assessmentLabels: ['Assessment'],
+  },
+  conceptKinds: ['skill', 'knowledge', 'procedure', 'application'],
+  representations: ['concrete', 'visual', 'symbolic'],
+  questionFamilies: ['direct_question'],
+  widgetCategories: ['core'],
+  assetRendererTypes: [],
+  validatorIds: [],
+  promptContext: { teachingStyle: 'CPA approach' },
+};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -142,6 +167,7 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
       fakeRouter as unknown as LlmRouter,
       fixtureInventory.units,
       'Math Level B - Lesson 1',
+      MATH_PROFILE,
     );
 
     expect(result.concepts.length).toBeGreaterThan(0);
@@ -254,7 +280,7 @@ describe('Math Level B — Lesson 1: Numbers (golden fixture)', () => {
         activityCount: 25,
         assetCount: 3,
       },
-      mathResults: [],
+      validationIssues: [],
       widgetResults: [],
       reviewItems: [],
       assetCount: 3,

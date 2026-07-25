@@ -1,6 +1,6 @@
 import type { CoverageLedger } from '../coverage/types.js';
-import type { MathValidationResult } from './math.js';
 import type { WidgetValidationResult } from './widgets.js';
+import type { ValidationIssue } from './registry.js';
 
 export interface QualityReport {
   version: 1;
@@ -13,12 +13,12 @@ export interface QualityReport {
   assetCount: number;
   hasCycles: boolean;
   coverage: CoverageLedger['summary'];
-  mathValidation: {
+  validationResults: Record<string, {
     totalChecked: number;
     passed: number;
     failed: number;
-    failures: MathValidationResult[];
-  };
+    failures: ValidationIssue[];
+  }>;
   widgetValidation: {
     totalChecked: number;
     passed: number;
@@ -28,7 +28,7 @@ export interface QualityReport {
   reviewItems: string[];
   publishGates: {
     requiredCoverage: { passed: boolean; threshold: number; actual: number };
-    mathCorrectness: { passed: boolean; actual: number };
+    subjectValidation: { passed: boolean; actual: number };
     widgetValidity: { passed: boolean; actual: number };
     assetCompleteness: { passed: boolean; actual: number };
     conceptCoverage: { passed: boolean; actual: number };
@@ -40,7 +40,7 @@ export function getPublishStatus(report: QualityReport): 'complete' | 'partial' 
   const gates = report.publishGates;
   const allPassed =
     gates.requiredCoverage.passed &&
-    gates.mathCorrectness.passed &&
+    gates.subjectValidation.passed &&
     gates.widgetValidity.passed &&
     gates.assetCompleteness.passed &&
     gates.conceptCoverage.passed &&
@@ -56,13 +56,32 @@ export function generateQualityReport(params: {
   retries: number;
   durationMs: number;
   coverage: CoverageLedger['summary'];
-  mathResults: MathValidationResult[];
   widgetResults: WidgetValidationResult[];
   reviewItems: string[];
   assetCount: number;
   conceptCount: number;
   hasCycles: boolean;
+  validationIssues?: ValidationIssue[];
 }): QualityReport {
+  const validationResults: Record<string, { totalChecked: number; passed: number; failed: number; failures: ValidationIssue[] }> = {};
+  if (params.validationIssues) {
+    const grouped = new Map<string, ValidationIssue[]>();
+    for (const issue of params.validationIssues) {
+      const arr = grouped.get(issue.source) || [];
+      arr.push(issue);
+      grouped.set(issue.source, arr);
+    }
+    for (const [source, issues] of grouped) {
+      const failed = issues.filter(i => i.severity === 'error');
+      validationResults[source] = {
+        totalChecked: issues.length,
+        passed: issues.filter(i => i.severity === 'warning').length,
+        failed: failed.length,
+        failures: failed,
+      };
+    }
+  }
+
   const report: QualityReport = {
     version: 1,
     generatedAt: new Date().toISOString(),
@@ -74,12 +93,7 @@ export function generateQualityReport(params: {
     assetCount: params.assetCount,
     hasCycles: params.hasCycles,
     coverage: params.coverage,
-    mathValidation: {
-      totalChecked: params.mathResults.length,
-      passed: params.mathResults.filter((r) => r.valid).length,
-      failed: params.mathResults.filter((r) => !r.valid).length,
-      failures: params.mathResults.filter((r) => !r.valid),
-    },
+    validationResults,
     widgetValidation: {
       totalChecked: params.widgetResults.length,
       passed: params.widgetResults.filter((r) => r.valid).length,
@@ -93,9 +107,9 @@ export function generateQualityReport(params: {
         threshold: 100,
         actual: params.coverage.percentRequiredCovered,
       },
-      mathCorrectness: {
-        passed: params.mathResults.every((r) => r.valid),
-        actual: params.mathResults.filter((r) => r.valid).length,
+      subjectValidation: {
+        passed: !params.validationIssues || params.validationIssues.every(i => i.severity !== 'error'),
+        actual: params.validationIssues ? params.validationIssues.filter(i => i.severity === 'warning').length : 0,
       },
       widgetValidity: {
         passed: params.widgetResults.every((r) => r.valid),

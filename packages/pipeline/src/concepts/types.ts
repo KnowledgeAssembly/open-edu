@@ -21,6 +21,7 @@ export const ConceptSchema = z.object({
   adultContext: z.string().nullable().optional(),
   recommendedWidgetCategories: z.array(z.string()),
   estimatedMinutes: z.number().int().min(5).max(60),
+  extensions: z.record(z.unknown()).optional(),
 });
 
 export type Concept = z.infer<typeof ConceptSchema>;

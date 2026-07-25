@@ -1,8 +1,10 @@
 export function buildInventoryPrompt(
   units: Array<{ id: string; pageStart: number; heading?: string; text: string }>,
+  subject?: string,
 ): string {
   const unitsJson = JSON.stringify(units, null, 2);
-  return `You are classifying source units extracted from a textbook.
+  const subjectText = subject || 'textbook';
+  return `You are classifying source units extracted from a ${subjectText}.
 
 Each unit has an ID, page number, optional heading, and text.
 

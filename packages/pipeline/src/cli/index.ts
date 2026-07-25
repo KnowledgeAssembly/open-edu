@@ -8,6 +8,8 @@ import { LlmRouter } from '@open-edu/llm-config';
 import { resolveStageConfigs, logStageConfigs, parseStageOverride } from '../config/config.js';
 import { runPipelineV2 } from '../graph/index.js';
 import type { PipelineResult } from '../graph/index.js';
+import { resolveProfile } from '../profile/registry.js';
+import { parseScope } from '../scope/types.js';
 import * as logger from './logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,7 +22,12 @@ interface CLIOptions {
   level: string;
   subject: string;
   force: boolean;
-  chapter?: number;
+  profileId?: string;
+  curriculum?: string;
+  scope: string;
+  language: string;
+  locale: string;
+  widgetCategories: string[];
   llmProvider?: string;
   llmModel?: string;
   dryRun: boolean;
@@ -39,6 +46,10 @@ function parseArgs(): CLIOptions {
     level: 'B',
     subject: 'math',
     force: false,
+    scope: 'all',
+    language: 'en',
+    locale: 'en-IN',
+    widgetCategories: [],
     dryRun: false,
     resume: false,
     verbose: false,
@@ -57,6 +68,24 @@ function parseArgs(): CLIOptions {
         break;
       case '--subject':
         options.subject = args[++i] || 'math';
+        break;
+      case '--profile':
+        options.profileId = args[++i];
+        break;
+      case '--curriculum':
+        options.curriculum = args[++i];
+        break;
+      case '--scope':
+        options.scope = args[++i] || 'all';
+        break;
+      case '--language':
+        options.language = args[++i] || 'en';
+        break;
+      case '--locale':
+        options.locale = args[++i] || 'en-IN';
+        break;
+      case '--widget-category':
+        options.widgetCategories.push(args[++i] || '');
         break;
       case '--force':
         options.force = true;
@@ -81,9 +110,6 @@ function parseArgs(): CLIOptions {
         break;
       case '--max-retries':
         options.maxRetries = parseInt(args[++i] || '3', 10);
-        break;
-      case '--chapter':
-        options.chapter = parseInt(args[++i] || '0', 10);
         break;
       case '--format': {
         const formatVal = args[++i] || 'both';
@@ -111,25 +137,31 @@ OpenEdu Pipeline — Curriculum Generator
 Usage: pnpm --filter @open-edu/pipeline curriculum:generate [options]
 
 Options:
-  --pdf <path>          Path to the PDF file (required)
-  --level <code>        Level code (default: B)
-  --subject <name>      Subject name (default: math)
-  --force               Overwrite existing output file
-  --llm-provider <name> LLM provider override (default: from env)
-  --llm-model <name>    LLM model override (default: from env)
-  --interactive         Enable human-in-the-loop checkpoints
-  --dry-run             Validate but don't write files
-  --resume              Resume from intermediate artifacts when possible
-  --verbose             Detailed logging per stage
-  --output-dir <path>   Custom output directory (default: ./output)
-  --max-retries <num>   Max retries per concept (default: 3)
-  --chapter <num>       Process only a single chapter (e.g., --chapter 3)
-  --format <type>       Output format: md, json, both (default: both)
-  --help, -h            Show this help message
+  --pdf <path>            Path to the PDF file (required)
+  --level <code>          Level code (default: B)
+  --subject <name>        Subject name (default: math)
+  --profile <id>          Curriculum profile (generic, math, science, nios)
+  --curriculum <id>       Curriculum adapter (e.g., nios)
+  --scope <value>         Scope: all, chapter-index:N, chapter-id:ID, pages:A-B, source-units:id,id
+  --language <code>       Content language (default: en)
+  --locale <locale>       Locale (default: en-IN)
+  --widget-category <id>  Repeatable widget category filter (core, math, science, etc.)
+  --force                 Overwrite existing output file
+  --llm-provider <name>   LLM provider override (default: from env)
+  --llm-model <name>      LLM model override (default: from env)
+  --interactive           Enable human-in-the-loop checkpoints
+  --dry-run               Validate but don't write files
+  --resume                Resume from intermediate artifacts when possible
+  --verbose               Detailed logging per stage
+  --output-dir <path>     Custom output directory (default: ./output)
+  --max-retries <num>     Max retries per concept (default: 3)
+  --format <type>         Output format: md, json, both (default: both)
+  --help, -h              Show this help message
 
 Examples:
-  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./math.pdf --level B --subject math
-  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./math.pdf --chapter 1 --verbose
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --scope chapter-index:1 --profile math --verbose
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./science.pdf --subject science --profile science
 `);
 }
 
@@ -148,8 +180,8 @@ function validateArgs(options: CLIOptions): string[] {
     errors.push('Level must be alphanumeric (e.g., B, C)');
   }
 
-  if (!options.subject.match(/^[a-z]+$/)) {
-    errors.push('Subject must be lowercase letters (e.g., math, language)');
+  if (!options.subject.match(/.+/)) {
+    errors.push('Subject must not be empty');
   }
 
   return errors;
@@ -168,8 +200,11 @@ export async function runPipelineCLI(): Promise<void> {
   logger.info(`PDF:      ${options.pdf || '(not specified)'}`);
   logger.info(`Level:    ${options.level}`);
   logger.info(`Subject:  ${options.subject.charAt(0).toUpperCase() + options.subject.slice(1)}`);
+  logger.info(`Profile:  ${options.profileId || '(auto)'}`);
+  logger.info(`Scope:    ${options.scope}`);
+  logger.info(`Language: ${options.language}`);
+  logger.info(`Locale:   ${options.locale}`);
   logger.info(`Output:   ${options.outputDir}`);
-  if (options.chapter) logger.info(`Chapter:  ${options.chapter} (single chapter mode)`);
   if (options.dryRun) logger.info('Mode:     Dry run (no files written)');
 
   const validationErrors = validateArgs(options);
@@ -207,20 +242,39 @@ export async function runPipelineCLI(): Promise<void> {
     process.exit(1);
   }
 
+  let resolvedProfile;
+  try {
+    resolvedProfile = resolveProfile({
+      profileId: options.profileId,
+      subject: options.subject,
+      curriculum: options.curriculum,
+    });
+    logger.info(`Using profile: ${resolvedProfile.id} (${resolvedProfile.subject})`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(`Failed to resolve profile: ${msg}`);
+    process.exit(1);
+  }
+
   try {
     const result: PipelineResult = await runPipelineV2(router, {
       pdfPath: options.pdf,
       levelCode: options.level.toUpperCase(),
       subject: options.subject,
       force: options.force,
-      chapterFilter: options.chapter,
+      scope: parseScope(options.scope),
+      profile: resolvedProfile,
       outputDir: options.outputDir,
       verbose: options.verbose,
       dryRun: options.dryRun,
       resume: options.resume,
       maxRetries: options.maxRetries,
       format: options.format,
-      widgetCategories: [],
+      widgetCategories: options.widgetCategories.length > 0
+        ? options.widgetCategories
+        : resolvedProfile.widgetCategories,
+      language: options.language,
+      locale: options.locale,
     });
 
     const r = result.report;
@@ -235,11 +289,6 @@ export async function runPipelineCLI(): Promise<void> {
         label: 'Concepts',
         value: r.conceptCount,
         status: r.conceptCount > 0 ? 'ok' : 'fail',
-      },
-      {
-        label: 'Math Validation',
-        value: `${r.mathValidation.passed}/${r.mathValidation.totalChecked}`,
-        status: r.mathValidation.failed === 0 ? 'ok' : 'fail',
       },
       {
         label: 'Widget Validation',

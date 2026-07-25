@@ -1,5 +1,6 @@
 import type { LlmRouter } from '@open-edu/llm-config';
 import type { SourceUnit } from '../source/types.js';
+import type { CurriculumProfile } from '../profile/types.js';
 import type { Concept } from './types.js';
 import { ConceptSchema, ConceptMapSchema } from './types.js';
 import { buildConceptMapPrompt } from './prompt.js';
@@ -50,8 +51,9 @@ export async function generateConceptMap(
   router: LlmRouter,
   sourceUnits: SourceUnit[],
   lessonName: string,
+  profile: CurriculumProfile,
 ): Promise<{ concepts: Concept[]; warnings: string[] }> {
-  const prompt = buildConceptMapPrompt(sourceUnits, lessonName);
+  const prompt = buildConceptMapPrompt(sourceUnits, lessonName, profile);
   const result = await router.generateStructuredRaw('concept_map', prompt, ConceptMapSchema, {
     temperature: 0.2,
   });
@@ -65,6 +67,17 @@ export async function generateConceptMap(
     if (!r.success) warnings.push(`Concept "${c.conceptId}" failed validation: ${r.error.message}`);
     return r.success;
   });
+
+  for (const c of validConcepts) {
+    if (!profile.conceptKinds.includes(c.kind)) {
+      warnings.push(`Concept "${c.conceptId}" uses unsupported kind "${c.kind}" for profile "${profile.id}"`);
+    }
+    for (const rep of c.representations) {
+      if (!profile.representations.includes(rep)) {
+        warnings.push(`Concept "${c.conceptId}" uses unsupported representation "${rep}" for profile "${profile.id}"`);
+      }
+    }
+  }
 
   return { concepts: validConcepts, warnings };
 }
