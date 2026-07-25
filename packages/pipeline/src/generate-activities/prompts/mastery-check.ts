@@ -43,6 +43,8 @@ Generate a JSON object with:
 Each question has exactly 4 options. correctIndex is 0-based (0-3).
 Create 2-3 questions that test different aspects of the concept.
 Each question should have exactly one correct answer and 3 plausible distractors.
+Each distractor must be a plausible wrong answer. No two options may be identical.
+BAD: ["5", "10", "5", "20"]  GOOD: ["5", "10", "15", "20"]
 All options must be unique (no duplicates).
 At least 1 question should be scenario-based (describe a real-world situation first, then ask).
 `;

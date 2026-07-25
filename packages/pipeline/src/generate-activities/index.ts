@@ -24,13 +24,13 @@ const STEP_PROMPTS: Record<string, string> = {
 const readingContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 const exerciseContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 const quizContentSchema = z.object({
@@ -52,7 +52,7 @@ const reflectionContentSchema = z.object({
 const widgetContentSchema = z.object({
   description: z.string(),
   instructions: z.string(),
-  examples: z.array(z.string()).optional(),
+  examples: z.array(z.string()).nullable().optional(),
 });
 
 function stepOutputSchema(type: string): z.ZodType {
@@ -223,9 +223,30 @@ async function generateStep(
           (result.content as Record<string, unknown>) || {},
           validatedWidgetConfig,
         ),
-        widgetId: responseType === 'widget' ? (validatedWidgetId || result.widgetId as string) : undefined,
+        widgetId:
+          responseType === 'widget' ? validatedWidgetId || (result.widgetId as string) : undefined,
         widgetConfig: validatedWidgetConfig,
       };
+
+      // Post-process: dedupe MCQ options if duplicates detected
+      if (activity.courseSpecType === 'quiz' && activity.content.questions) {
+        for (const q of activity.content.questions) {
+          if (q && q.options) {
+            const uniqueOpts = new Set<string>(q.options);
+            if (uniqueOpts.size !== q.options.length) {
+              const seen = new Map<string, number>();
+              for (let i = 0; i < q.options.length; i++) {
+                const opt = q.options[i];
+                if (opt === undefined) continue;
+                if (seen.has(opt)) {
+                  q.options[i] = opt + ' (option ' + (i + 1) + ')';
+                }
+                seen.set(opt, i);
+              }
+            }
+          }
+        }
+      }
 
       return { activity, errors: [] };
     } catch (err) {

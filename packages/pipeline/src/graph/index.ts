@@ -9,13 +9,19 @@ import type { Concept } from '../concepts/types.js';
 import { generateLessonBlueprints } from '../blueprint/index.js';
 import type { LessonBlueprint } from '../blueprint/types.js';
 import { generateActivitiesForConcept } from '../generate-activities/index.js';
-import { validateAllMath, extractMathQuestions, extractMCQValidationErrors } from '../validation/math.js';
+import {
+  validateAllMath,
+  extractMathQuestions,
+  extractMCQValidationErrors,
+} from '../validation/math.js';
 import { validateWidgetConfig, type WidgetValidationResult } from '../validation/widgets.js';
 import { buildCoverageLedger } from '../coverage/index.js';
 import { generateQualityReport, type QualityReport } from '../validation/report.js';
 import { writeCourseSpecOutput, writeCourseSpecJSONOutput } from '../output/index.js';
 import { generateAssetFiles } from '../assets/manifest.js';
 import type { AssetManifest } from '../assets/types.js';
+import { AssetPlanResponseSchema } from '../assets/types.js';
+import { buildAssetPlanPrompt } from '../assets/asset-plan-prompt.js';
 import type { GeneratedActivity, ConceptActivityPair } from '../types.js';
 import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -57,8 +63,15 @@ export async function runPipelineV2(
       pdfPath: options.pdfPath,
       levelCode: options.levelCode,
       subject: options.subject,
-      stages: ['source_inventory','concept_map','concept_enrichment','lesson_blueprint','asset_plan','activity_generation','review']
-        .map((s: string) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
+      stages: [
+        'source_inventory',
+        'concept_map',
+        'concept_enrichment',
+        'lesson_blueprint',
+        'asset_plan',
+        'activity_generation',
+        'review',
+      ].map((s: string) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
     });
     hash.update(cfg);
     return hash.digest('hex').slice(0, 12);
@@ -66,7 +79,8 @@ export async function runPipelineV2(
 
   const configHash = computeConfigHash();
   const hashPath = join(options.outputDir, '.pipeline-hash');
-  const previousHash = options.resume && existsSync(hashPath) ? readFileSync(hashPath, 'utf-8').trim() : '';
+  const previousHash =
+    options.resume && existsSync(hashPath) ? readFileSync(hashPath, 'utf-8').trim() : '';
 
   function canResume(filename: string): boolean {
     if (!options.resume) return false;
@@ -87,12 +101,15 @@ export async function runPipelineV2(
       outputPaths.push(path);
     }
   }
-  if (options.dryRun && options.verbose) console.log('--dry-run: skipping LLM calls and file writes');
+  if (options.dryRun && options.verbose)
+    console.log('--dry-run: skipping LLM calls and file writes');
 
   // Stage 1: Extract PDF pages
   if (options.verbose) console.log('[1/8] Extracting PDF pages...');
   const pages = !options.dryRun ? await extractPDFPages(options.pdfPath) : [];
-  const pdfMeta = !options.dryRun ? await extractPDF(options.pdfPath) : { metadata: { title: options.subject } };
+  const pdfMeta = !options.dryRun
+    ? await extractPDF(options.pdfPath)
+    : { metadata: { title: options.subject } };
 
   // Stage 2: Build source inventory
   const invPath = join(options.outputDir, 'source-inventory.json');
@@ -102,24 +119,34 @@ export async function runPipelineV2(
     if (options.verbose) console.log('[2/8] Resumed source inventory from cache');
   } else {
     if (options.verbose) console.log('[2/8] Building source inventory...');
-    inventory = !options.dryRun ? await buildSourceInventory(router, pages, pdfMeta.metadata.title) : { documentId: 'dry-run', title: 'Dry Run', totalPages: 0, units: [], warnings: [] };
+    inventory = !options.dryRun
+      ? await buildSourceInventory(router, pages, pdfMeta.metadata.title)
+      : { documentId: 'dry-run', title: 'Dry Run', totalPages: 0, units: [], warnings: [] };
     maybeWrite(invPath, JSON.stringify(inventory, null, 2));
   }
 
   // Apply chapter filter: keep only units for the requested lesson
   if (options.chapterFilter !== undefined) {
-    const lessonUnits = inventory.units.filter(u => u.type === 'lesson');
+    const lessonUnits = inventory.units.filter((u) => u.type === 'lesson');
     const chapterStartIdx = inventory.units.findIndex(
-      u => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! - 1,
+      (u) => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! - 1,
     );
     const chapterEndIdx = inventory.units.findIndex(
-      (u, i) => u.type === 'lesson' && lessonUnits.indexOf(u) === options.chapterFilter! && i > chapterStartIdx,
+      (u, i) =>
+        u.type === 'lesson' &&
+        lessonUnits.indexOf(u) === options.chapterFilter! &&
+        i > chapterStartIdx,
     );
     if (chapterStartIdx >= 0) {
       const endIdx = chapterEndIdx >= 0 ? chapterEndIdx : inventory.units.length;
       inventory.units = inventory.units.slice(chapterStartIdx, endIdx);
-      inventory.warnings.push(`Filtered to chapter ${options.chapterFilter} (${inventory.units.length} units)`);
-      if (options.verbose) console.log(`Chapter filter: keeping ${inventory.units.length} units for chapter ${options.chapterFilter}`);
+      inventory.warnings.push(
+        `Filtered to chapter ${options.chapterFilter} (${inventory.units.length} units)`,
+      );
+      if (options.verbose)
+        console.log(
+          `Chapter filter: keeping ${inventory.units.length} units for chapter ${options.chapterFilter}`,
+        );
     }
   }
 
@@ -135,7 +162,11 @@ export async function runPipelineV2(
   } else {
     if (options.verbose) console.log('[3/8] Generating concept map...');
     if (!options.dryRun) {
-      const result = await generateConceptMap(router, inventory.units, `${options.subject} ${options.levelCode}`);
+      const result = await generateConceptMap(
+        router,
+        inventory.units,
+        `${options.subject} ${options.levelCode}`,
+      );
       concepts = result.concepts;
       conceptWarnings = result.warnings;
       reviewItems.push(...conceptWarnings);
@@ -153,7 +184,12 @@ export async function runPipelineV2(
   } else {
     if (options.verbose) console.log('[4/8] Generating lesson blueprints...');
     if (!options.dryRun) {
-      const result = await generateLessonBlueprints(router, concepts, inventory.units, options.widgetCategories);
+      const result = await generateLessonBlueprints(
+        router,
+        concepts,
+        inventory.units,
+        options.widgetCategories,
+      );
       blueprints = result.blueprints;
       bpWarnings = result.warnings;
       reviewItems.push(...bpWarnings);
@@ -173,19 +209,83 @@ export async function runPipelineV2(
       for (const bp of blueprints) {
         const result = await generateActivitiesForConcept(
           llmAdapter,
-          { conceptId: bp.conceptId, chapterCode: 'CH1', chapterName: options.subject, learningObjective: bp.objective, coreIdea: '', examples: [], misconceptions: bp.misconceptionTargets, supports: { visual: bp.representations.includes('visual') }, masteryCriteria: 0.8, difficulty: 'beginner', estimatedDuration: 30, dependencies: bp.priorKnowledge },
+          {
+            conceptId: bp.conceptId,
+            chapterCode: 'CH1',
+            chapterName: options.subject,
+            learningObjective: bp.objective,
+            coreIdea: '',
+            examples: [],
+            misconceptions: bp.misconceptionTargets,
+            supports: { visual: bp.representations.includes('visual') },
+            masteryCriteria: 0.8,
+            difficulty: 'beginner',
+            estimatedDuration: 30,
+            dependencies: bp.priorKnowledge,
+          },
           [],
         );
-        const pair: ConceptActivityPair = { concept: { conceptId: bp.conceptId, chapterCode: 'CH1', chapterName: options.subject, learningObjective: bp.objective, coreIdea: '', examples: [], misconceptions: bp.misconceptionTargets, supports: { visual: bp.representations.includes('visual') }, masteryCriteria: 0.8, difficulty: 'beginner', estimatedDuration: 30, dependencies: bp.priorKnowledge }, activities: result.activities };
+        const pair: ConceptActivityPair = {
+          concept: {
+            conceptId: bp.conceptId,
+            chapterCode: 'CH1',
+            chapterName: options.subject,
+            learningObjective: bp.objective,
+            coreIdea: '',
+            examples: [],
+            misconceptions: bp.misconceptionTargets,
+            supports: { visual: bp.representations.includes('visual') },
+            masteryCriteria: 0.8,
+            difficulty: 'beginner',
+            estimatedDuration: 30,
+            dependencies: bp.priorKnowledge,
+          },
+          activities: result.activities,
+        };
         conceptActivityPairs.push(pair);
         conceptActivityMap.set(bp.conceptId, result.activities);
       }
     }
   }
 
-  // Stage 6: Generate assets (deterministic SVGs)
-  const assetManifest: AssetManifest = { version: 1, generatedAt: new Date().toISOString(), assets: [] };
-  if (options.verbose) console.log('[6/8] Generating visual assets...');
+  // Stage 6: Generate assets from blueprints via asset_plan
+  let assetManifest: AssetManifest = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    assets: [],
+  };
+  if (canResume('asset-manifest.json')) {
+    const am = JSON.parse(readFileSync(join(options.outputDir, 'asset-manifest.json'), 'utf-8'));
+    assetManifest = am;
+    if (options.verbose) console.log('[6/8] Resumed asset manifest from cache');
+  } else {
+    if (options.verbose) console.log('[6/8] Generating assets from blueprints...');
+    if (!options.dryRun && blueprints.length > 0) {
+      try {
+        const prompt = buildAssetPlanPrompt(blueprints);
+        const plan = await router.generateStructuredRaw(
+          'asset_plan',
+          prompt,
+          AssetPlanResponseSchema,
+          { temperature: 0.2 },
+        );
+        assetManifest = {
+          version: 1,
+          generatedAt: new Date().toISOString(),
+          assets: plan.assets,
+        };
+      } catch (err) {
+        reviewItems.push(
+          'Asset plan generation failed: ' + (err instanceof Error ? err.message : String(err)),
+        );
+      }
+    }
+    maybeWrite(
+      join(options.outputDir, 'asset-manifest.json'),
+      JSON.stringify(assetManifest, null, 2),
+    );
+  }
+
   if (!options.dryRun) {
     const { written: _written } = generateAssetFiles(assetManifest, options.outputDir);
   }
@@ -194,7 +294,7 @@ export async function runPipelineV2(
 
   // Stage 7: Validate math + widgets + coverage
   if (options.verbose) console.log('[7/8] Running validation...');
-  const allActivities = conceptActivityPairs.flatMap(p => p.activities);
+  const allActivities = conceptActivityPairs.flatMap((p) => p.activities);
   const mathQuestions = extractMathQuestions(allActivities);
   const mathResults = validateAllMath(mathQuestions);
   const mcqErrors = extractMCQValidationErrors(allActivities);
@@ -209,9 +309,18 @@ export async function runPipelineV2(
 
   const activityIdMap = new Map<string, string[]>();
   for (const [key, acts] of conceptActivityMap) {
-    activityIdMap.set(key, acts.map(a => `${a.step}-${a.order}`));
+    activityIdMap.set(
+      key,
+      acts.map((a) => `${a.step}-${a.order}`),
+    );
   }
-  const coverageLedger = buildCoverageLedger(inventory.units, concepts, blueprints, assetManifest.assets, activityIdMap);
+  const coverageLedger = buildCoverageLedger(
+    inventory.units,
+    concepts,
+    blueprints,
+    assetManifest.assets,
+    activityIdMap,
+  );
 
   const clPath = join(options.outputDir, 'coverage-ledger.json');
   maybeWrite(clPath, JSON.stringify(coverageLedger, null, 2));
@@ -225,7 +334,12 @@ export async function runPipelineV2(
       outputPaths.push(join(options.outputDir, `${filenamePrefix}-course-spec.md`));
     }
     if (options.format === 'json' || options.format === 'both') {
-      writeCourseSpecJSONOutput(options.outputDir, filenamePrefix, conceptActivityPairs, options.force);
+      writeCourseSpecJSONOutput(
+        options.outputDir,
+        filenamePrefix,
+        conceptActivityPairs,
+        options.force,
+      );
       outputPaths.push(join(options.outputDir, `${filenamePrefix}-course-spec.json`));
     }
   }
@@ -234,7 +348,15 @@ export async function runPipelineV2(
 
   const durationMs = Date.now() - startTime;
   const stageUsage: Record<string, { provider: string; model: string }> = {};
-  for (const stage of ['source_inventory','concept_map','concept_enrichment','lesson_blueprint','asset_plan','activity_generation','review'] as const) {
+  for (const stage of [
+    'source_inventory',
+    'concept_map',
+    'concept_enrichment',
+    'lesson_blueprint',
+    'asset_plan',
+    'activity_generation',
+    'review',
+  ] as const) {
     const cfg = router.getStageConfig(stage as LlmStage);
     stageUsage[stage] = { provider: cfg.provider, model: cfg.model };
   }
@@ -249,7 +371,7 @@ export async function runPipelineV2(
     reviewItems,
     assetCount: assetManifest.assets.length,
     conceptCount: concepts.length,
-    hasCycles: conceptWarnings.some(w => w.includes('cycle')),
+    hasCycles: conceptWarnings.some((w) => w.includes('cycle')),
   });
 
   const qrPath = join(options.outputDir, 'quality-report.json');

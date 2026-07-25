@@ -1,16 +1,27 @@
 import { z } from 'zod';
 
 export const SVG_RENDERER_TYPES = [
-  'place-value-chart', 'number-line', 'fraction-bar', 'fraction-circle',
-  'decimal-grid', 'measurement-scale', 'area-grid', 'perimeter-grid',
-  'geometry-basic', 'bar-chart', 'pictograph',
+  'place-value-chart',
+  'number-line',
+  'fraction-bar',
+  'fraction-circle',
+  'decimal-grid',
+  'measurement-scale',
+  'area-grid',
+  'perimeter-grid',
+  'geometry-basic',
+  'bar-chart',
+  'pictograph',
 ] as const;
 
 export type SvgRendererType = (typeof SVG_RENDERER_TYPES)[number];
 
 export const AssetManifestEntrySchema = z.object({
   id: z.string().min(1),
-  filename: z.string().min(1).regex(/\.svg$/),
+  filename: z
+    .string()
+    .min(1)
+    .regex(/\.svg$/),
   mediaType: z.literal('image/svg+xml'),
   altText: z.string().min(1),
   caption: z.string().optional(),
@@ -29,3 +40,7 @@ export const AssetManifestSchema = z.object({
 });
 
 export type AssetManifest = z.infer<typeof AssetManifestSchema>;
+
+export const AssetPlanResponseSchema = z.object({
+  assets: z.array(AssetManifestEntrySchema),
+});
