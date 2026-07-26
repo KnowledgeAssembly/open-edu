@@ -23,6 +23,11 @@ import type { AppView } from './AppShell';
 import { InstallPrompt } from './components/InstallPrompt.js';
 import { useInstallPrompt } from './hooks/useInstallPrompt.js';
 import { RotateCcw } from 'lucide-react';
+import { InstallCourseDialog } from './components/InstallCourseDialog.js';
+import { installFromSource } from './courseDownload';
+import { AvailableUpdatesList } from './components/AvailableUpdatesList';
+import { fetchCatalog } from '@open-edu/oep-distribution';
+import type { Catalog } from '@open-edu/oep-distribution';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -68,6 +73,17 @@ export function CatalogPage({
 
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'inProgress' | 'alphabetical'>('newest');
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
+  const [remoteCatalog, setRemoteCatalog] = useState<Catalog | null>(null);
+
+  useEffect(() => {
+    const catalogUrl = import.meta.env.VITE_CATALOG_URL as string | undefined;
+    if (catalogUrl) {
+      fetchCatalog(catalogUrl)
+        .then(setRemoteCatalog)
+        .catch(() => {});
+    }
+  }, []);
 
   const filtered = useMemo(() => {
     return activeTag
@@ -130,6 +146,27 @@ export function CatalogPage({
         eyebrow={t('learner.catalog.eyebrow')}
         title={t('learner.catalog.page_title')}
         className="mb-xl"
+      />
+
+      <div className="mb-lg flex items-center gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setShowInstallDialog(true)}
+          data-testid="open-install-dialog-button"
+        >
+          {t('learner.install.title')}
+        </Button>
+        <Button variant="outline" onClick={() => onNavigate?.({ view: 'catalog-install' })}>
+          {t('learner.catalog.btn_catalog_install')}
+        </Button>
+      </div>
+
+      <AvailableUpdatesList catalog={remoteCatalog} />
+
+      <InstallCourseDialog
+        open={showInstallDialog}
+        onClose={() => setShowInstallDialog(false)}
+        onInstall={installFromSource}
       />
 
       <InstallPrompt

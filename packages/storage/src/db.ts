@@ -3,6 +3,14 @@ import { openDB, type IDBPDatabase } from 'idb';
 export const DB_NAME = 'open-edu';
 export const DB_VERSION = 3;
 
+export interface DistributionMeta {
+  sourceKind: string;
+  sourceLabel: string;
+  checksum: string;
+  signatureStatus: string;
+  installedAt: string;
+}
+
 export interface StoredCourse {
   id: string;
   version: string;
@@ -10,6 +18,7 @@ export interface StoredCourse {
   nodes: Record<string, unknown>[];
   assets: { path: string; data: ArrayBuffer }[];
   downloadedAt: string;
+  distributionMeta?: DistributionMeta;
 }
 
 export interface LearningProgress {

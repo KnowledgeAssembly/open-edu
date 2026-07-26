@@ -223,6 +223,9 @@ importers:
       '@open-edu/llm-config':
         specifier: workspace:*
         version: link:../../packages/llm-config
+      '@open-edu/oep-distribution':
+        specifier: workspace:^
+        version: link:../../packages/oep-distribution
       '@open-edu/pwa-core':
         specifier: workspace:*
         version: link:../../packages/pwa-core
@@ -471,6 +474,12 @@ importers:
       '@open-edu/dev-server':
         specifier: workspace:*
         version: link:../../apps/dev-server
+      '@open-edu/oep-distribution':
+        specifier: workspace:^
+        version: link:../oep-distribution
+      '@open-edu/schemas':
+        specifier: workspace:^
+        version: link:../schemas
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -691,6 +700,19 @@ importers:
       zod:
         specifier: ^3.22.0
         version: 3.25.76
+    devDependencies:
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@20.19.43)(jsdom@24.1.3)(terser@5.48.0)
+
+  packages/oep-distribution:
+    dependencies:
+      '@open-edu/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.3
     devDependencies:
       vitest:
         specifier: ^1.0.0
@@ -5585,6 +5607,9 @@ packages:
   feed@4.2.2:
     resolution: {integrity: sha512-u5/sxGfiMfZNtJ3OvQpXcvotFpYkL0n9u9mM2vkui2nGo8b4wvDkJ8gAkYqbA8QpGyFCv3RK0Z+Iv+9veCS9bQ==}
     engines: {node: '>=0.4.0'}
+
+  fflate@0.8.3:
+    resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
 
   file-entry-cache@11.1.5:
     resolution: {integrity: sha512-+PFTHITI08JIGhnNpGNI8T8inUpgZfk3GNEqfT9R2zZV2iFXg3CvqzSl/uEhs7TSGujYRELEANyDvS8Fj7+S7Q==}
@@ -15958,6 +15983,8 @@ snapshots:
   feed@4.2.2:
     dependencies:
       xml-js: 1.6.11
+
+  fflate@0.8.3: {}
 
   file-entry-cache@11.1.5:
     dependencies:
