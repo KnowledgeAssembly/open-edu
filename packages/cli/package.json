@@ -30,6 +30,8 @@
     "@open-edu/core": "workspace:*",
     "@open-edu/course-compiler": "workspace:*",
     "@open-edu/dev-server": "workspace:*",
+    "@open-edu/oep-distribution": "workspace:^",
+    "@open-edu/schemas": "workspace:^",
     "@open-edu/telemetry": "workspace:*",
     "commander": "^12.0.0",
     "tar": "^7.5.16"

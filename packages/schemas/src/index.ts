@@ -80,6 +80,22 @@ export type {
 } from './skills.js';
 
 export { BundleManifestSchema, BundleModuleRefSchema } from './bundle.js';
+
+export {
+  DistributionManifestSchema,
+  ChecksumSchema,
+  SignatureStatusSchema,
+  OEP_FORMAT,
+  OEP_FORMAT_VERSION,
+} from './distribution-manifest.js';
+export type {
+  DistributionManifest,
+  DistributionChecksum,
+  SignatureStatus,
+} from './distribution-manifest.js';
+
+export { CatalogSchema, CatalogPackageEntrySchema, CatalogVersionEntrySchema } from './catalog.js';
+export type { Catalog, CatalogPackageEntry, CatalogVersionEntry } from './catalog.js';
 export type { BundleManifest, BundleModuleRef } from './bundle.js';
 
 export {

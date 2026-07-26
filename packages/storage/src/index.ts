@@ -9,7 +9,8 @@ export {
   type BadgeData,
   type CardProgressData,
 } from './db.js';
-export { saveCourse, getCourse, listCourses, deleteCourse } from './course-store.js';
+export { saveCourse, getCourse, listCourses, deleteCourse, replaceCourse } from './course-store.js';
+export { type DistributionMeta } from './db.js';
 export {
   saveProgress,
   getProgress,

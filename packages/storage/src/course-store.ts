@@ -15,6 +15,18 @@ export async function listCourses(): Promise<StoredCourse[]> {
   return db.getAll('courses');
 }
 
+export async function replaceCourse(courseId: string, course: StoredCourse): Promise<void> {
+  const db = await openDatabase();
+  const tx = db.transaction('courses', 'readwrite');
+  const store = tx.objectStore('courses');
+  const existing = await store.get(courseId);
+  if (!existing) {
+    throw new Error(`Course "${courseId}" is not installed`);
+  }
+  await store.put(course);
+  await tx.done;
+}
+
 export async function deleteCourse(id: string): Promise<void> {
   const db = await openDatabase();
   await db.delete('courses', id);

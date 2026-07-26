@@ -12,6 +12,7 @@ import { generatePrompt, generateFromDescription } from './commands/generate.js'
 import { patchPackage } from './commands/patch.js';
 import { importLearnEasyCommand } from './commands/import.js';
 import { createCompileCommand } from '@open-edu/course-compiler';
+import { buildOep } from './commands/oep-build.js';
 import { i18nExtract } from './commands/i18n-extract.js';
 import { i18nValidate } from './commands/i18n-validate.js';
 import { i18nMissing } from './commands/i18n-missing.js';
@@ -69,6 +70,18 @@ program
     const json = program.optsWithGlobals().json;
     const result = await packagePackage(packageDir, cmdOptions.output, { json });
     handleResult(result, json);
+  });
+
+program
+  .command('oep:build')
+  .description('Build a portable .oep distribution artifact from a course directory')
+  .argument('<package-dir>', 'Path to the course package directory')
+  .option('-o, --output <dir>', 'Output directory (default: cwd)')
+  .option('--json', 'Emit JSON output')
+  .action(async (packageDir: string, options: { output?: string; json?: boolean }) => {
+    const json = program.optsWithGlobals().json ?? options.json;
+    const result = await buildOep(packageDir, options.output, { json });
+    if (!result.success) process.exitCode = 1;
   });
 
 program.addCommand(createCompileCommand());

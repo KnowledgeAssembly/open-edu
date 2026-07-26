@@ -38,6 +38,7 @@ import { BundleOverviewPage } from './BundleOverviewPage';
 import { CollectionBinderPage } from './CollectionBinderPage';
 import { NotesDashboardPage } from './notes/NotesDashboardPage';
 import { NoteEditorPage } from './notes/NoteEditorPage';
+import { CatalogInstallView } from './components/CatalogInstallView';
 import { Pipili } from './components/Pipili';
 import { OfflineBanner } from './components/OfflineBanner.js';
 import { CourseRightSidebar } from './CourseRightSidebar';
@@ -69,7 +70,8 @@ export type AppView =
   | { view: 'collection' }
   | { view: 'notes' }
   | { view: 'note-editor'; noteId: string }
-  | { view: 'break' };
+  | { view: 'break' }
+  | { view: 'catalog-install' };
 
 function viewToPath(view: AppView): string {
   switch (view.view) {
@@ -77,6 +79,8 @@ function viewToPath(view: AppView): string {
       return '/';
     case 'catalog':
       return '/catalog';
+    case 'catalog-install':
+      return '/catalog/install';
     case 'progress':
       return '/progress';
     case 'settings':
@@ -104,7 +108,10 @@ function pathToView(pathname: string, packageEntries: Record<string, LoadedPacka
   if (segments.length === 0) return { view: 'home' };
   const main = segments[0];
   if (!main) return { view: 'home' };
-  if (main === 'catalog') return { view: 'catalog' };
+  if (main === 'catalog') {
+    if (segments[1] === 'install') return { view: 'catalog-install' };
+    return { view: 'catalog' };
+  }
   if (main === 'progress') return { view: 'progress' };
   if (main === 'settings') return { view: 'settings' };
   if (main === 'collection') return { view: 'collection' };
@@ -617,6 +624,7 @@ function AppShellInner({
                   key={`${location.pathname}-${resetCounter}`}
                   className="animate-in fade-in slide-in-from-bottom-4 flex min-h-0 flex-1 flex-col overflow-y-auto duration-500"
                 >
+                  {view.view === 'catalog-install' && <CatalogInstallView />}
                   {view.view === 'catalog' && (
                     <CatalogPage
                       packages={catalogPackages}
