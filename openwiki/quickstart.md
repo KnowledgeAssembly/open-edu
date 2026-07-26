@@ -13,6 +13,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 
 - [Architecture overview](architecture/overview.md)
 - [Content, workflows, and examples](domain/content-and-workflows.md)
+- [Agentic course authoring](domain/content-and-workflows.md#agentic-course-authoring)
 - [Learner app](domain/learner-app.md)
 - [Design system and UI architecture](domain/design-system.md)
 - [Operations, commands, and tests](operations/testing-and-changes.md)
@@ -92,6 +93,7 @@ The UI is intentionally split between low-level primitives and opinionated visua
 - Change PWA behavior (install, update, offline, caching): start in `packages/pwa-core` and `apps/learner/vite.config.ts`.
 - Change widget IDs, catalog entries, or metadata validation: start in `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, and `packages/core/src/widget-catalog.ts`.
 - Change CLI behavior: start in `packages/cli`.
+- Change course-authoring skill behavior: start in `skills/openedu-course-authoring/` — see [agentic course authoring](domain/content-and-workflows.md#agentic-course-authoring).
 
 ## Navigation notes for future agents
 

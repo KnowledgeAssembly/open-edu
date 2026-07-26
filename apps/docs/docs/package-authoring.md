@@ -456,3 +456,7 @@ Each patch is validated atomically — if the result doesn't pass `loadPackage()
 - [ ] All paths use forward slashes
 - [ ] Skill IDs in `dependencies` and `assessments` are defined
 - [ ] Remote widget URLs use HTTPS
+
+## Agentic Authoring
+
+Prefer the agentic course-authoring skill for generating new courses. It auto-generates valid `course-spec.json`, runs structural validation, and (in repository mode) compiles + validates + lints the package. See the [Agentic Course Authoring guide](./agentic-authoring.md) for details.

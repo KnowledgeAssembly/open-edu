@@ -18,7 +18,7 @@ export interface NoteRowProps {
   note: NoteRecord;
   tags: string[];
   onOpen: () => void;
-  onToggleFavorite: () => void;
+  onToggleFavorite: () => void | Promise<void>;
   onDelete: () => void;
 }
 
@@ -51,9 +51,9 @@ export function NoteRow({
   );
 
   const handleToggleFavorite = useCallback(
-    (e: React.MouseEvent) => {
+    async (e: React.MouseEvent) => {
       e.stopPropagation();
-      onToggleFavorite();
+      await onToggleFavorite();
       announce(note.favorite ? t('notes.row.favorite.remove') : t('notes.row.favorite.add'));
     },
     [onToggleFavorite, note.favorite, announce, t],

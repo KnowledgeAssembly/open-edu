@@ -4,24 +4,22 @@ The skill follows a staged generation sequence. Each stage produces an artifact 
 
 ## Modes
 
-### Portable Mode (no Open-Edu repository detected)
+### Portable Mode (no Open-Edu repository detected, or no executable CLI)
 
 1. **Interview** → gather topic, learner level, goals, language, duration, prerequisites, accessibility needs, source materials
 2. **Brief** → `course-brief.md` records all assumptions explicitly
 3. **Objectives** → derive measurable learning objectives from goals
 4. **Lesson Blueprints** → `lesson-blueprints.json` defining each lesson's structure
 5. **Generate Spec** → produce `course-spec.json` and `course-spec.md`
-6. **Quality Report** → `quality-report.json` with structural diagnostics
+6. **Quality Report** → `quality-report.json` via `validate-course-spec.mjs` with `validationMode: "structural-only"`. Compiler/package phases skipped.
 7. **Summary** → agent reports artifact locations and validation instructions
 
-### Repository Mode (Open-Edu tooling detected)
+### Repository Mode (Open-Edu tooling detected with executable CLI)
 
 Same as portable mode, plus:
 5a. **Widget Selection** → choose widgets from discovered catalog by learning intent
-5b. **Compile** → `edu compile course-spec.json --output package --validate`
-5c. **Validate Package** → `edu validate package`
-5d. **Lint Content** → `edu lint-content package`
-6+. **Quality Report** includes compiler/validation/lint diagnostics
+5b. **Package Compilation** → `validate-package.mjs` orchestrates compile → validate → lint in sequence
+5c. **Quality Report** → `quality-report.mjs` merges findings from all phases (structural, compiler, validation, lint) into the central `quality-report.json`
 
 ## Stage Details
 
@@ -122,7 +120,7 @@ Generate `course-spec.md` as a human-readable export.
 
 ### Stage 6: Quality Report
 
-Run structural checks (Task 4) and record in `quality-report.json`.
+Run structural checks via `validate-course-spec.mjs` and record in `quality-report.json`. In repository mode, `quality-report.mjs` is the central orchestrator that merges findings from all phases. In portable mode, `validate-course-spec.mjs` produces structural-only validation (`validationMode: "structural-only"`).
 
 ## Activity Progression
 

@@ -57,7 +57,18 @@ function makeValidSpec() {
   };
 }
 
-describe('validate-course-spec (structural)', () => {
+function makeFakeCompiler(status = 0) {
+  return function fakeCompiler(specPath, outputDir) {
+    return {
+      status,
+      stdout: status === 0 ? 'Compilation successful' : '',
+      stderr: status !== 0 ? 'Compilation failed: invalid spec' : '',
+      durationMs: 5,
+    };
+  };
+}
+
+describe('validate-course-spec (structural-only)', () => {
   it('passes valid spec', () => {
     const dir = createTempDir();
     try {
@@ -65,6 +76,7 @@ describe('validate-course-spec (structural)', () => {
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.success, true);
       strictEqual(result.errors.length, 0);
+      strictEqual(result.validationMode, 'structural-only');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -159,35 +171,165 @@ describe('validate-course-spec (structural)', () => {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
       strictEqual(result.compilerAvailable, false);
-      strictEqual(result.success, true, 'structural-only validation should succeed for valid spec');
+      strictEqual(result.validationMode, 'structural-only');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('warns on lessons with no objectives', () => {
+  it('errors on lessons with no objectives (now a compiler-required field)', () => {
     const dir = createTempDir();
     try {
       const spec = makeValidSpec();
       spec.lessons[0].objectives = [];
       writeJSON(dir, 'course-spec.json', spec);
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
-      ok(result.warnings.some((w) => w.code === 'MISSING_OBJECTIVES'));
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'MISSING_OBJECTIVES'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('warns on lessons with no activities', () => {
+  it('errors on lessons with no activities', () => {
     const dir = createTempDir();
     try {
       const spec = makeValidSpec();
       spec.lessons[0].activities = [];
       writeJSON(dir, 'course-spec.json', spec);
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
-      ok(result.warnings.some((w) => w.code === 'NO_ACTIVITIES'));
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'NO_ACTIVITIES'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('errors on lessons missing coreIdea', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].coreIdea = '';
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'MISSING_CORE_IDEA'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('errors on lessons missing examples', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].examples = [];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'MISSING_EXAMPLES'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('errors on lessons missing misconceptions', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].misconceptions = [];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'MISSING_MISCONCEPTIONS'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('handles null lesson entries without throwing', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons.push(null);
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_LESSON'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('handles null activity entries without throwing', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].activities.push(null);
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_ACTIVITY'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('validates quiz questions with exactly 4 options', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].activities.push({
+        step: 'mastery_check',
+        order: 3,
+        type: 'quiz',
+        description: 'Quiz time',
+        questions: [
+          { question: 'Q', options: ['A', 'B', 'C'], correctIndex: 0 },
+        ],
+      });
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_QUESTION_OPTIONS'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('validates quiz correctIndex is 0-3', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.lessons[0].activities.push({
+        step: 'mastery_check',
+        order: 3,
+        type: 'quiz',
+        description: 'Quiz time',
+        questions: [
+          { question: 'Q', options: ['A', 'B', 'C', 'D'], correctIndex: 5 },
+        ],
+      });
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_CORRECT_INDEX'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('creates output directory recursively if it does not exist', () => {
+    const base = createTempDir();
+    const nestedDir = join(base, 'deeply', 'nested', 'output');
+    try {
+      writeJSON(base, 'course-spec.json', makeValidSpec());
+      const result = validateCourseSpec(join(base, 'course-spec.json'), nestedDir);
+      ok(existsSync(nestedDir), 'nested output directory should be created');
+      const report = JSON.parse(readFileSync(join(nestedDir, 'quality-report.json'), 'utf-8'));
+      ok(report.validationMode);
+    } finally {
+      rmSync(base, { recursive: true, force: true });
     }
   });
 
@@ -199,6 +341,56 @@ describe('validate-course-spec (structural)', () => {
       ok(existsSync(join(dir, 'quality-report.json')), 'quality-report.json should be written');
       const report = JSON.parse(readFileSync(join(dir, 'quality-report.json'), 'utf-8'));
       strictEqual(report.success, true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('validate-course-spec (compiler integration)', () => {
+  it('sets compilerAvailable=true and validationMode=compiler with fake command', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
+        facade: makeFakeCompiler(0),
+      });
+      strictEqual(result.compilerAvailable, true);
+      strictEqual(result.validationMode, 'compiler');
+      strictEqual(result.success, true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('reports failure when fake compiler returns non-zero', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
+        facade: makeFakeCompiler(1),
+      });
+      strictEqual(result.compilerAvailable, true);
+      strictEqual(result.validationMode, 'compiler');
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'COMPILER_FAILED'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('preserves compiler stdout/stderr/status in diagnostics', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
+        facade: makeFakeCompiler(0),
+      });
+      ok(result.compilerResult);
+      strictEqual(result.compilerResult.status, 0);
+      ok(result.compilerResult.stdout.includes('Compilation successful'));
+      ok(result.commands.length > 0);
+      strictEqual(result.commands[0].phase, 'compile');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

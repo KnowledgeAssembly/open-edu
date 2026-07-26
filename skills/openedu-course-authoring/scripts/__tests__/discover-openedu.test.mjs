@@ -45,30 +45,44 @@ describe('discover-openedu', () => {
     }
   });
 
-  it('detects compiler capability when packages/course-compiler exists', () => {
+  it('does not claim compiler capability when only directory exists (no executable)', () => {
     const dir = createTempRepo();
     try {
       addFile(dir, 'pnpm-workspace.yaml');
       addFile(dir, 'packages/course-compiler/package.json', '{"name":"@open-edu/course-compiler"}');
       const result = discoverOpenEdu(dir);
-      strictEqual(result.capabilities.compiler, true);
-      ok(result.paths.compilerRoot !== null);
-      ok(result.commands.compile !== null);
+      strictEqual(result.capabilities.compiler, false, 'compiler should be false without CLI executable');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('detects CLI capability when packages/cli exists', () => {
+  it('detects CLI capability when dist/cli.js exists', () => {
+    const dir = createTempRepo();
+    try {
+      addFile(dir, 'pnpm-workspace.yaml');
+      addFile(dir, 'packages/cli/package.json', '{"name":"@open-edu/cli"}');
+      addFile(dir, 'packages/cli/dist/cli.js', '#!/usr/bin/env node');
+      const result = discoverOpenEdu(dir);
+      strictEqual(result.capabilities.cli, true);
+      strictEqual(result.executable.cli, true);
+      ok(result.commands.validate !== null);
+      ok(result.commands.lintContent !== null);
+      ok(result.commands.dev !== null);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns build prerequisites when CLI package exists but dist is missing', () => {
     const dir = createTempRepo();
     try {
       addFile(dir, 'pnpm-workspace.yaml');
       addFile(dir, 'packages/cli/package.json', '{"name":"@open-edu/cli"}');
       const result = discoverOpenEdu(dir);
-      strictEqual(result.capabilities.cli, true);
-      ok(result.commands.validate !== null);
-      ok(result.commands.lintContent !== null);
-      ok(result.commands.dev !== null);
+      strictEqual(result.capabilities.cli, false, 'cli should not be executable without dist');
+      strictEqual(result.executable.cli, false);
+      ok(result.prerequisites.length > 0, 'should have build prerequisites');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

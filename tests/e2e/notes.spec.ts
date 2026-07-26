@@ -105,6 +105,10 @@ test('toggle favorite; reload; appears in Favorites', async ({ page }) => {
   await expect(starButton).toBeVisible({ timeout: 5000 });
   await starButton.click();
 
+  // Wait for the UI to confirm the favorite toggle completed before reloading.
+  // The async IndexedDB write must finish before the page reloads.
+  await expect(page.getByLabel('Remove favorite')).toBeVisible({ timeout: 5000 });
+
   await page.reload();
   await expect(page.locator('[data-testid="notes-page"]')).toBeVisible({ timeout: 10000 });
 

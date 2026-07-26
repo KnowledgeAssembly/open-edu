@@ -103,6 +103,57 @@ User-facing strings in runtime renderers (quiz buttons, feedback messages, widge
 
 When adding new user-facing strings to runtime or learner components, use `t('namespace.key')` instead of hardcoded text and add the English translation to the appropriate locale file.
 
+## Agentic course authoring
+
+The `openedu-course-authoring` skill (`skills/openedu-course-authoring/`) provides an agentic workflow for generating Open-Edu course specifications without manual XML/JSON authoring. It supports two modes:
+
+- **Portable mode** — works anywhere without an Open-Edu repository. Produces `course-spec.json`, `course-spec.md`, `course-brief.md`, and `quality-report.json` with structural validation only.
+- **Repository mode** — detected when an Open-Edu monorepo is present. Adds full compilation via the course-compiler CLI, package validation (`edu validate`), and content linting (`edu lint-content`). Repository mode requires the CLI to be built (`dist/cli.js` present).
+
+### Key components
+
+| File                               | Role                                                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/openedu-adapter.mjs`      | Shared adapter: repo discovery, command resolution (structured argv, never shell), command execution                                       |
+| `scripts/widget-catalog.mjs`       | Loads live `widget-catalog-data.json`; resolves canonical/deprecated/legacy widget IDs                                                     |
+| `scripts/validate-course-spec.mjs` | Structural preflight checks + optional compiler invocation via `cmdArgv`                                                                   |
+| `scripts/validate-package.mjs`     | Orchestrates compile → validate → lint phases with `runOpenEduCommand`                                                                     |
+| `scripts/quality-report.mjs`       | Central report merger — sole writer of `quality-report.json` during orchestration                                                          |
+| `scripts/summarize-quality.mjs`    | Quality rubric across 7 dimensions (objective coverage, assessment alignment, duration, progression, widgets, accessibility, completeness) |
+
+### Quality rubric
+
+The skill evaluates generated specs against pedagogical dimensions with specific check IDs:
+
+- **Objective Coverage** (`QC-OBJ-01` through `-04`) — every objective mapped to an activity and assessment signal; measurable verbs; max 6 per lesson
+- **Assessment Alignment** (`QC-ASM-01` through `-03`) — assessment concepts are a subset of introduced concepts; difficulty matches course level
+- **Duration** (`QC-DUR-01` through `-03`) — lesson minutes within 20% of `estimatedHours`; no lesson over 45 min or under 5 min
+- **Progression** (`QC-PROG-01` through `-03`) — all 5 pedagogical steps present; sequential ordering; observe-first pattern
+- **Widget** (`QC-WDG-01` through `-04`) — canonical IDs from live catalog; not deprecated; required config fields present; rationale recorded
+- **Accessibility** (`QC-ACC-01` through `-04`) — plain language; keyboard support; non-color-only distinctions; chunked content
+- **Completeness** (`QC-COM-01` through `-03`) — all required schema fields present; no unresolved assumptions; coreIdea/examples/misconceptions
+
+### Command execution
+
+All commands are executed as structured `argv` arrays via `spawnSync` — never shell-interpolated strings. The adapter distinguishes `packagePresent` (directory exists) from `executable` (entrypoint exists). When the CLI is not built, compile/validate/lint phases are skipped with an explicit `cli-unavailable` reason in the report.
+
+### Source materials (PDF pipeline)
+
+When users supply PDF textbooks, the skill routes through `@open-edu/pipeline` with profile-aware generation (generic/math/science/nios). Pipeline artifacts (source inventory, concept map, blueprint, coverage report) are preserved in output.
+
+### Evaluation framework
+
+The skill ships with 9 evaluation scenarios (`evals/evals.json`) — 3 portable, 2 repository, 4 edge cases — validated against the standard skill-creator schema (`evals/schema.test.mjs`, 23 tests).
+
+### Where to start
+
+- Skill workflow: `skills/openedu-course-authoring/SKILL.md`
+- Artifact schema: `skills/openedu-course-authoring/references/artifact-contract.md`
+- Authoring stages: `skills/openedu-course-authoring/references/authoring-workflow.md`
+- Quality rubric spec: `skills/openedu-course-authoring/references/quality-rubric.md`
+- Repository adapter: `skills/openedu-course-authoring/references/repository-adapter.md`
+- Source materials: `skills/openedu-course-authoring/references/source-materials.md`
+
 ## Where to start when changing content behavior
 
 - Update schema shape or validation rules in `packages/schemas`
