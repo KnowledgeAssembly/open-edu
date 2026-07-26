@@ -1,35 +1,51 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { runOpenEduCommand } from './openedu-adapter.mjs';
 
 const VALID_STEPS = ['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion'];
 const VALID_ACTIVITY_TYPES = ['reading', 'exercise', 'quiz', 'reflection', 'widget'];
 const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
 
 /**
- * Validates a course-spec.json file structurally. If `compilerPath` is provided,
- * attempts to invoke the course-compiler for deeper validation.
+ * Validates a course-spec.json file structurally and optionally via the course compiler.
+ *
  * @param {string} specPath - path to course-spec.json
  * @param {string} outputDir - directory for quality-report.json
+ * @param {ValidateOptions} [options]
  * @returns {ValidationResult}
  */
-export function validateCourseSpec(specPath, outputDir) {
+export function validateCourseSpec(specPath, outputDir, options = {}) {
+  const opts = { ...options };
+
   /** @type {ValidationDiagnostic[]} */
   const errors = [];
   /** @type {ValidationDiagnostic[]} */
   const warnings = [];
   let data = null;
   let compilerAvailable = false;
+  let compilerResult = null;
+  let validationMode = 'structural-only';
+  /** @type {Record<string, unknown>[]} */
+  const commands = [];
+
+  // Ensure output directory exists
+  if (outputDir) {
+    mkdirSync(outputDir, { recursive: true });
+  }
 
   // Check file exists
-  if (!existsSync(specPath)) {
+  if (!specPath || !existsSync(specPath)) {
     errors.push({
       severity: 'error',
-      message: `File not found: ${specPath}`,
+      message: `File not found: ${specPath || '(no path provided)'}`,
       code: 'FILE_NOT_FOUND',
     });
-    writeReport(outputDir, false, errors, warnings, data, false);
-    return { success: false, errors, warnings, data, compilerAvailable: false };
+    writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
+    return {
+      success: false, errors, warnings, data, compilerAvailable, compilerResult,
+      validationMode, commands,
+    };
   }
 
   // Parse JSON
@@ -43,8 +59,11 @@ export function validateCourseSpec(specPath, outputDir) {
       message: `JSON parse error: ${err instanceof Error ? err.message : String(err)}`,
       code: 'JSON_PARSE_ERROR',
     });
-    writeReport(outputDir, false, errors, warnings, data, false);
-    return { success: false, errors, warnings, data, compilerAvailable: false };
+    writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
+    return {
+      success: false, errors, warnings, data, compilerAvailable, compilerResult,
+      validationMode, commands,
+    };
   }
 
   // Structural checks
@@ -57,14 +76,95 @@ export function validateCourseSpec(specPath, outputDir) {
     format: spec?.format,
     version: spec?.version,
     lessonCount: spec?.lessons?.length || 0,
-    activityCount: spec?.lessons?.reduce((sum, l) => sum + (l.activities?.length || 0), 0) || 0,
+    activityCount: spec?.lessons?.reduce((sum, l) => {
+      if (!l || typeof l !== 'object') return sum;
+      return sum + (Array.isArray(l.activities) ? l.activities.length : 0);
+    }, 0) || 0,
   };
+
+  // Compiler invocation
+  if (opts.command && typeof opts.command === 'string') {
+    const cmdParts = opts.command.split(/\s+/);
+    compilerAvailable = true;
+
+    const argv = [...cmdParts];
+    for (let i = 0; i < argv.length; i++) {
+      if (argv[i] === '{spec}') argv[i] = specPath;
+      if (argv[i] === '{dir}') argv[i] = outputDir;
+    }
+
+    compilerResult = runOpenEduCommand(argv, { cwd: opts.cwd });
+
+    commands.push({
+      phase: 'compile',
+      name: 'edu compile',
+      command: argv,
+      status: compilerResult.status,
+      stdout: compilerResult.stdout,
+      stderr: compilerResult.stderr,
+      durationMs: compilerResult.durationMs,
+    });
+
+    validationMode = 'compiler';
+
+    if (compilerResult.status !== 0) {
+      errors.push({
+        severity: 'error',
+        message: `Compiler exited with status ${compilerResult.status}`,
+        code: 'COMPILER_FAILED',
+        detail: compilerResult.stderr || compilerResult.stdout,
+      });
+    } else {
+      warnings.push({
+        severity: 'info',
+        message: 'Compiler validation passed',
+        code: 'COMPILER_PASSED',
+      });
+    }
+  } else if (opts.command) {
+    compilerAvailable = true;
+    validationMode = 'compiler';
+
+    if (Array.isArray(opts.command) && typeof opts.command[0] === 'function') {
+      try {
+        compilerResult = opts.command[0](specPath, outputDir);
+
+        commands.push({
+          phase: 'compile',
+          name: 'edu compile (fake)',
+          command: [],
+          status: compilerResult.status,
+          stdout: compilerResult.stdout || '',
+          stderr: compilerResult.stderr || '',
+          durationMs: compilerResult.durationMs || 0,
+        });
+
+        if (compilerResult.status !== 0) {
+          errors.push({
+            severity: 'error',
+            message: `Compiler exited with status ${compilerResult.status}`,
+            code: 'COMPILER_FAILED',
+            detail: compilerResult.stderr || compilerResult.stdout,
+          });
+        }
+      } catch (err) {
+        errors.push({
+          severity: 'error',
+          message: `Compiler invocation error: ${err instanceof Error ? err.message : String(err)}`,
+          code: 'COMPILER_ERROR',
+        });
+      }
+    }
+  }
 
   const success = errors.length === 0;
 
-  writeReport(outputDir, success, errors, warnings, data, compilerAvailable);
+  writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
 
-  return { success, errors, warnings, data, compilerAvailable };
+  return {
+    success, errors, warnings, data, compilerAvailable, compilerResult,
+    validationMode, commands,
+  };
 }
 
 function checkTopLevel(spec, errors) {
@@ -121,10 +221,10 @@ function checkMetadata(spec, errors, warnings) {
       code: 'INVALID_DIFFICULTY',
     });
   }
-  if (meta.estimatedHours !== undefined && (typeof meta.estimatedHours !== 'number' || meta.estimatedHours < 0)) {
+  if (meta.estimatedHours !== undefined && (typeof meta.estimatedHours !== 'number' || !Number.isFinite(meta.estimatedHours) || meta.estimatedHours < 0)) {
     errors.push({
       severity: 'error',
-      message: 'metadata.estimatedHours must be a non-negative number',
+      message: 'metadata.estimatedHours must be a non-negative finite number',
       code: 'INVALID_ESTIMATED_HOURS',
     });
   }
@@ -145,6 +245,10 @@ function checkLessons(spec, errors, warnings) {
     const lesson = lessons[i];
     const prefix = `lessons[${i}]`;
 
+    if (lesson === null || typeof lesson !== 'object') {
+      errors.push({ severity: 'error', message: `${prefix} is not an object`, code: 'INVALID_LESSON' });
+      continue;
+    }
     if (typeof lesson.id !== 'string' || lesson.id.trim().length === 0) {
       errors.push({ severity: 'error', message: `${prefix}.id is missing or empty`, code: 'MISSING_LESSON_ID' });
     }
@@ -152,24 +256,40 @@ function checkLessons(spec, errors, warnings) {
       errors.push({ severity: 'error', message: `${prefix}.title is missing or empty`, code: 'MISSING_LESSON_TITLE' });
     }
     if (!Array.isArray(lesson.objectives) || lesson.objectives.length === 0) {
-      warnings.push({
-        severity: 'warning',
+      errors.push({
+        severity: 'error',
         message: `${prefix} has no objectives`,
         code: 'MISSING_OBJECTIVES',
         detail: `Lesson "${lesson.title || lesson.id}"`,
       });
     }
     if (typeof lesson.coreIdea !== 'string' || lesson.coreIdea.trim().length === 0) {
-      warnings.push({
-        severity: 'warning',
+      errors.push({
+        severity: 'error',
         message: `${prefix} has no coreIdea`,
         code: 'MISSING_CORE_IDEA',
         detail: `Lesson "${lesson.title || lesson.id}"`,
       });
     }
+    if (!Array.isArray(lesson.examples) || lesson.examples.length === 0) {
+      errors.push({
+        severity: 'error',
+        message: `${prefix} has no examples`,
+        code: 'MISSING_EXAMPLES',
+        detail: `Lesson "${lesson.title || lesson.id}"`,
+      });
+    }
+    if (!Array.isArray(lesson.misconceptions) || lesson.misconceptions.length === 0) {
+      errors.push({
+        severity: 'error',
+        message: `${prefix} has no misconceptions`,
+        code: 'MISSING_MISCONCEPTIONS',
+        detail: `Lesson "${lesson.title || lesson.id}"`,
+      });
+    }
     if (!Array.isArray(lesson.activities) || lesson.activities.length === 0) {
-      warnings.push({
-        severity: 'warning',
+      errors.push({
+        severity: 'error',
         message: `${prefix} has no activities`,
         code: 'NO_ACTIVITIES',
         detail: `Lesson "${lesson.title || lesson.id}"`,
@@ -177,12 +297,14 @@ function checkLessons(spec, errors, warnings) {
     } else {
       checkActivities(lesson.activities, i, errors, warnings);
     }
-    if (lesson.estimatedMinutes !== undefined && (typeof lesson.estimatedMinutes !== 'number' || lesson.estimatedMinutes < 0)) {
-      warnings.push({
-        severity: 'warning',
-        message: `${prefix}.estimatedMinutes must be a non-negative number`,
-        code: 'INVALID_ESTIMATED_MINUTES',
-      });
+    if (lesson.estimatedMinutes !== undefined) {
+      if (typeof lesson.estimatedMinutes !== 'number' || !Number.isFinite(lesson.estimatedMinutes) || lesson.estimatedMinutes < 0) {
+        errors.push({
+          severity: 'error',
+          message: `${prefix}.estimatedMinutes must be a non-negative finite number`,
+          code: 'INVALID_ESTIMATED_MINUTES',
+        });
+      }
     }
   }
 }
@@ -192,6 +314,15 @@ function checkActivities(activities, lessonIndex, errors, warnings) {
     const act = activities[j];
     const prefix = `lessons[${lessonIndex}].activities[${j}]`;
 
+    if (act === null || typeof act !== 'object') {
+      errors.push({
+        severity: 'error',
+        message: `${prefix} is not an object`,
+        code: 'INVALID_ACTIVITY',
+      });
+      continue;
+    }
+
     if (!VALID_STEPS.includes(act.step)) {
       errors.push({
         severity: 'error',
@@ -199,10 +330,10 @@ function checkActivities(activities, lessonIndex, errors, warnings) {
         code: 'INVALID_STEP',
       });
     }
-    if (typeof act.order !== 'number') {
+    if (typeof act.order !== 'number' || !Number.isFinite(act.order)) {
       errors.push({
         severity: 'error',
-        message: `${prefix}.order must be a number`,
+        message: `${prefix}.order must be a finite number`,
         code: 'MISSING_ORDER',
       });
     }
@@ -227,12 +358,37 @@ function checkActivities(activities, lessonIndex, errors, warnings) {
         code: 'MISSING_WIDGET_ID',
       });
     }
-    if (act.type === 'quiz' && (!Array.isArray(act.questions) || act.questions.length === 0)) {
-      errors.push({
-        severity: 'error',
-        message: `${prefix} is type "quiz" but has no questions`,
-        code: 'EMPTY_QUIZ',
-      });
+    if (act.type === 'quiz') {
+      if (!Array.isArray(act.questions) || act.questions.length === 0) {
+        errors.push({
+          severity: 'error',
+          message: `${prefix} is type "quiz" but has no questions`,
+          code: 'EMPTY_QUIZ',
+        });
+      } else {
+        for (let k = 0; k < act.questions.length; k++) {
+          const q = act.questions[k];
+          const qPrefix = `${prefix}.questions[${k}]`;
+          if (q === null || typeof q !== 'object') {
+            errors.push({ severity: 'error', message: `${qPrefix} is not an object`, code: 'INVALID_QUESTION' });
+            continue;
+          }
+          if (!Array.isArray(q.options) || q.options.length !== 4) {
+            errors.push({
+              severity: 'error',
+              message: `${qPrefix}.options must be an array of exactly 4`,
+              code: 'INVALID_QUESTION_OPTIONS',
+            });
+          }
+          if (typeof q.correctIndex !== 'number' || !Number.isFinite(q.correctIndex) || q.correctIndex < 0 || q.correctIndex > 3) {
+            errors.push({
+              severity: 'error',
+              message: `${qPrefix}.correctIndex must be 0-3`,
+              code: 'INVALID_CORRECT_INDEX',
+            });
+          }
+        }
+      }
     }
   }
 }
@@ -242,7 +398,8 @@ function checkLessonIdUniqueness(spec, errors) {
   if (!Array.isArray(lessons)) return;
   const seen = new Map();
   for (let i = 0; i < lessons.length; i++) {
-    const id = lessons[i].id;
+    const id = lessons[i]?.id;
+    if (!id) continue;
     if (seen.has(id)) {
       errors.push({
         severity: 'error',
@@ -255,19 +412,28 @@ function checkLessonIdUniqueness(spec, errors) {
   }
 }
 
-function writeReport(outputDir, success, errors, warnings, data, compilerAvailable) {
+function writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult) {
   const report = {
-    success,
+    success: errors.length === 0,
     timestamp: new Date().toISOString(),
+    validationMode,
     compilerAvailable,
     errorCount: errors.length,
     warningCount: warnings.length,
     errors,
     warnings,
     data,
+    commands,
+    compilerOutput: compilerResult ? {
+      status: compilerResult.status,
+      stdout: compilerResult.stdout,
+      stderr: compilerResult.stderr,
+    } : null,
   };
-  const reportPath = join(outputDir, 'quality-report.json');
-  writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  if (outputDir) {
+    const reportPath = join(outputDir, 'quality-report.json');
+    writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  }
 }
 
 // CLI mode
@@ -275,10 +441,41 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const specPath = process.argv[2];
   const outputDir = process.argv[3] || process.cwd();
   if (!specPath) {
-    console.error('Usage: node validate-course-spec.mjs <course-spec.json> [output-dir]');
+    console.error('Usage: node validate-course-spec.mjs <course-spec.json> [output-dir] [--compile <command>]');
     process.exit(1);
   }
-  const result = validateCourseSpec(specPath, outputDir);
+  const compileIdx = process.argv.indexOf('--compile');
+  const options = {};
+  if (compileIdx !== -1 && process.argv[compileIdx + 1]) {
+    options.command = process.argv[compileIdx + 1];
+  }
+  const result = validateCourseSpec(specPath, outputDir, options);
   console.log(JSON.stringify(result, null, 2));
   process.exit(result.success ? 0 : 1);
 }
+
+/**
+ * @typedef {object} ValidateOptions
+ * @property {string|(() => object)} [command] - compile command string or fake runner
+ * @property {string} [cwd]
+ */
+
+/**
+ * @typedef {object} ValidationDiagnostic
+ * @property {'error'|'warning'|'info'} severity
+ * @property {string} message
+ * @property {string} [code]
+ * @property {string} [detail]
+ */
+
+/**
+ * @typedef {object} ValidationResult
+ * @property {boolean} success
+ * @property {ValidationDiagnostic[]} errors
+ * @property {ValidationDiagnostic[]} warnings
+ * @property {object|null} data
+ * @property {boolean} compilerAvailable
+ * @property {import('./openedu-adapter.mjs').CommandResult|null} compilerResult
+ * @property {'structural-only'|'compiler'} validationMode
+ * @property {Record<string, unknown>[]} commands
+ */

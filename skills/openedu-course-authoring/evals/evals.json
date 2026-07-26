@@ -1,163 +1,120 @@
 {
-  "skill": "openedu-course-authoring",
-  "version": 1,
-  "evaluations": [
+  "skill_name": "openedu-course-authoring",
+  "evals": [
     {
-      "id": "eval-portable-fractions",
-      "mode": "portable",
-      "description": "Generate a fractions course in portable mode (no repo)",
+      "id": 1,
       "prompt": "Create an Open-Edu course about fractions for 8-10 year old students. Should have 3 lessons covering: 1) What fractions are, 2) Comparing fractions, 3) Adding fractions with like denominators.",
-      "expectedResult": {
-        "artifacts": [
-          "course-spec.json",
-          "course-spec.md",
-          "course-brief.md",
-          "quality-report.json"
-        ],
-        "checks": [
-          "course-spec.json is valid JSON and parses successfully",
-          "format is 'openedu-course-spec' and version is 1",
-          "metadata.generated is true",
-          "has exactly 3 lessons",
-          "each lesson has objectives, coreIdea, examples, misconceptions",
-          "each lesson has at least one activity",
-          "lesson IDs are unique",
-          "course-brief.md records explicit assumptions",
-          "quality-report.json includes structural checks"
-        ]
-      }
+      "expected_output": "Mode: portable. Generate a fractions course in portable mode (no repo).\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json is valid JSON and parses successfully\n- format is 'openedu-course-spec' and version is 1\n- metadata.generated is true\n- has exactly 3 lessons\n- each lesson has objectives, coreIdea, examples, misconceptions\n- each lesson has at least one activity\n- lesson IDs are unique\n- course-brief.md records explicit assumptions\n- quality-report.json includes structural checks",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON and parses successfully",
+        "format is 'openedu-course-spec' and version is 1",
+        "metadata.generated is true",
+        "has exactly 3 lessons",
+        "each lesson has objectives, coreIdea, examples, misconceptions",
+        "each lesson has at least one activity",
+        "lesson IDs are unique",
+        "course-brief.md records explicit assumptions",
+        "quality-report.json includes structural checks"
+      ]
     },
     {
-      "id": "eval-portable-javascript",
-      "mode": "portable",
-      "description": "Generate an intro JavaScript course in portable mode",
+      "id": 2,
       "prompt": "Create an Open-Edu course for complete beginners learning JavaScript. Cover variables, data types, and basic functions. Target adult learners with no prior programming. 4 lessons, 30 minutes each.",
-      "expectedResult": {
-        "artifacts": [
-          "course-spec.json",
-          "course-spec.md",
-          "course-brief.md",
-          "quality-report.json"
-        ],
-        "checks": [
-          "course-spec.json is valid JSON",
-          "has 4 lessons",
-          "metadata.difficulty is 'beginner'",
-          "each lesson has at least one exercise activity",
-          "lesson IDs are kebab-case and unique",
-          "total estimated minutes is approximately 120"
-        ]
-      }
+      "expected_output": "Mode: portable. Generate an intro JavaScript course in portable mode.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json is valid JSON\n- has 4 lessons\n- metadata.difficulty is 'beginner'\n- each lesson has at least one exercise activity\n- lesson IDs are kebab-case and unique\n- total estimated minutes is approximately 120",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "has 4 lessons",
+        "metadata.difficulty is 'beginner'",
+        "each lesson has at least one exercise activity",
+        "lesson IDs are kebab-case and unique",
+        "total estimated minutes is approximately 120"
+      ]
     },
     {
-      "id": "eval-portable-non-stem",
-      "mode": "portable",
-      "description": "Generate a non-STEM course (language learning)",
+      "id": 3,
       "prompt": "Create an Open-Edu course for learning basic French greetings and introductions. 2 lessons, for adult travelers. Include vocabulary, pronunciation, and practice activities.",
-      "expectedResult": {
-        "artifacts": [
-          "course-spec.json",
-          "course-spec.md",
-          "course-brief.md",
-          "quality-report.json"
-        ],
-        "checks": [
-          "course-spec.json is valid JSON",
-          "has exactly 2 lessons",
-          "activities include reading and exercise types",
-          "each lesson has learning objectives",
-          "course-brief states target audience as adult travelers"
-        ]
-      }
+      "expected_output": "Mode: portable. Generate a non-STEM course (language learning) in portable mode.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json is valid JSON\n- has exactly 2 lessons\n- activities include reading and exercise types\n- each lesson has learning objectives\n- course-brief states target audience as adult travelers",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "has exactly 2 lessons",
+        "activities include reading and exercise types",
+        "each lesson has learning objectives",
+        "course-brief states target audience as adult travelers"
+      ]
     },
     {
-      "id": "eval-repo-package",
-      "mode": "repository",
-      "description": "Generate a complete compiled package inside the Open-Edu repo",
+      "id": 4,
       "prompt": "Create an Open-Edu course about the solar system for 10-12 year olds. 3 lessons. Generate the full package: compile, validate, and lint it. Output to ./course-output/.",
-      "expectedResult": {
-        "artifacts": ["course-spec.json", "quality-report.json", "package/package.json"],
-        "checks": [
-          "course-spec.json compiles without errors",
-          "edu validate succeeds on the package",
-          "edu lint-content passes or reports only warnings",
-          "package/package.json exists with valid manifest",
-          "package/workflow.json exists",
-          "quality-report.json includes compiler output"
-        ]
-      }
+      "expected_output": "Mode: repository. Generate a complete compiled package inside the Open-Edu repo.\nExpected artifacts: course-spec.json, quality-report.json, package/package.json.\nChecks:\n- course-spec.json compiles without errors\n- edu validate succeeds on the package\n- edu lint-content passes or reports only warnings\n- package/package.json exists with valid manifest\n- package/workflow.json exists\n- quality-report.json includes compiler output",
+      "files": ["course-spec.json", "quality-report.json", "package/package.json"],
+      "expectations": [
+        "course-spec.json compiles without errors",
+        "edu validate succeeds on the package",
+        "edu lint-content passes or reports only warnings",
+        "package/package.json exists with valid manifest",
+        "package/workflow.json exists",
+        "quality-report.json includes compiler output"
+      ]
     },
     {
-      "id": "eval-repo-pdf",
-      "mode": "repository",
-      "description": "Generate a course from a supplied PDF textbook chapter",
+      "id": 5,
       "prompt": "I have a PDF textbook at ./textbook.pdf covering basic algebra. Create a course spec for chapter 1 only. Use the pipeline with the math profile.",
-      "expectedResult": {
-        "artifacts": ["course-spec.json", "quality-report.json"],
-        "checks": [
-          "pipeline is invoked with math profile",
-          "pipeline output (course-spec.md) is transformed to course-spec.json",
-          "pipeline artifacts (concept map, blueprint) are preserved",
-          "quality-report references pipeline source"
-        ]
-      }
+      "expected_output": "Mode: repository. Generate a course from a supplied PDF textbook chapter.\nExpected artifacts: course-spec.json, quality-report.json.\nChecks:\n- pipeline is invoked with math profile\n- pipeline output (course-spec.md) is transformed to course-spec.json\n- pipeline artifacts (concept map, blueprint) are preserved\n- quality-report references pipeline source",
+      "files": ["course-spec.json", "quality-report.json"],
+      "expectations": [
+        "pipeline is invoked with math profile",
+        "pipeline output (course-spec.md) is transformed to course-spec.json",
+        "pipeline artifacts (concept map, blueprint) are preserved",
+        "quality-report references pipeline source"
+      ]
     },
     {
-      "id": "eval-edge-missing-level",
-      "mode": "portable",
-      "description": "Handle missing learner level by asking for clarification",
+      "id": 6,
       "prompt": "Create an Open-Edu course about photosynthesis. Make it good.",
-      "expectedBehavior": "ASYMMETRIC: Should ask follow-up questions about learner age/level, duration, and learning goals before generating. Should NOT assume defaults silently.",
-      "expectedResult": {
-        "checks": [
-          "agent asks clarifying questions before generating",
-          "agent does NOT produce course-spec.json without sufficient input",
-          "agent records assumptions when user doesn't specify"
-        ]
-      }
+      "expected_output": "Mode: any (edge case). Handle missing learner level by asking for clarification.\nExpected behavior: ASYMMETRIC — Should ask follow-up questions about learner age/level, duration, and learning goals before generating. Should NOT assume defaults silently.\nChecks:\n- agent asks clarifying questions before generating\n- agent does NOT produce course-spec.json without sufficient input\n- agent records assumptions when user doesn't specify",
+      "files": [],
+      "expectations": [
+        "agent asks clarifying questions before generating",
+        "agent does NOT produce course-spec.json without sufficient input",
+        "agent records assumptions when user doesn't specify"
+      ]
     },
     {
-      "id": "eval-edge-unsupported-widget",
-      "mode": "repository",
-      "description": "Handle a request for an unsupported widget gracefully",
+      "id": 7,
       "prompt": "Create a course about music theory. Use a widget called 'open-edu.piano-simulator' for the practice activities.",
-      "expectedBehavior": "ASYMMETRIC: Should note that 'open-edu.piano-simulator' is not in the catalog and fall back to reading/exercise instead.",
-      "expectedResult": {
-        "checks": [
-          "generated spec does NOT include 'open-edu.piano-simulator' as a widgetId",
-          "quality report warns about unsupported widget request",
-          "appropriate fallback activities are suggested"
-        ]
-      }
+      "expected_output": "Mode: repository (edge case). Handle a request for an unsupported widget gracefully.\nExpected behavior: ASYMMETRIC — Should note that 'open-edu.piano-simulator' is not in the catalog and fall back to reading/exercise instead.\nChecks:\n- generated spec does NOT include 'open-edu.piano-simulator' as a widgetId\n- quality report warns about unsupported widget request\n- appropriate fallback activities are suggested",
+      "files": [],
+      "expectations": [
+        "generated spec does NOT include 'open-edu.piano-simulator' as a widgetId",
+        "quality report warns about unsupported widget request",
+        "appropriate fallback activities are suggested"
+      ]
     },
     {
-      "id": "eval-edge-existing-output",
-      "mode": "any",
-      "description": "Handle existing output directory by asking before overwriting",
+      "id": 8,
       "prompt": "Create a fractions course. Output to an existing directory at ./course-output/ (which already has a previous course-spec.json).",
-      "expectedBehavior": "ASYMMETRIC: Should detect existing output and ask for confirmation before overwriting.",
-      "expectedResult": {
-        "checks": [
-          "agent detects existing output directory",
-          "agent asks for confirmation before overwriting",
-          "agent does NOT auto-overwrite without permission"
-        ]
-      }
+      "expected_output": "Mode: any (edge case). Handle existing output directory by asking before overwriting.\nExpected behavior: ASYMMETRIC — Should detect existing output and ask for confirmation before overwriting.\nChecks:\n- agent detects existing output directory\n- agent asks for confirmation before overwriting\n- agent does NOT auto-overwrite without permission",
+      "files": [],
+      "expectations": [
+        "agent detects existing output directory",
+        "agent asks for confirmation before overwriting",
+        "agent does NOT auto-overwrite without permission"
+      ]
     },
     {
-      "id": "eval-edge-multilingual",
-      "mode": "portable",
-      "description": "Generate course with non-English locale",
+      "id": 9,
       "prompt": "Create an Open-Edu course about basic arithmetic in Spanish (locale es-MX). For 6-8 year olds. 2 lessons.",
-      "expectedResult": {
-        "artifacts": ["course-spec.json", "course-spec.md", "course-brief.md"],
-        "checks": [
-          "course-spec.json uses Spanish content",
-          "course-brief.md notes language/locale as es-MX",
-          "metadata language/locale is recorded",
-          "content is age-appropriate for 6-8 year olds"
-        ]
-      }
+      "expected_output": "Mode: portable (edge case). Generate course with non-English locale.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md.\nChecks:\n- course-spec.json uses Spanish content\n- course-brief.md notes language/locale as es-MX\n- metadata language/locale is recorded\n- content is age-appropriate for 6-8 year olds",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md"],
+      "expectations": [
+        "course-spec.json uses Spanish content",
+        "course-brief.md notes language/locale as es-MX",
+        "metadata language/locale is recorded",
+        "content is age-appropriate for 6-8 year olds"
+      ]
     }
   ]
 }

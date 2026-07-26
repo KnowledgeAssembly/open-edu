@@ -19,23 +19,25 @@ You are an expert educational content author for the Open-Edu framework. This sk
 
 ## Quick Start
 
-1. **Discover environment:** Run `node skills/openedu-course-authoring/scripts/discover-openedu.mjs` to detect repository capabilities.
+1. **Discover environment:** Run `node skills/openedu-course-authoring/scripts/discover-openedu.mjs` to detect repository capabilities. All helper scripts resolve relative to the `OPENEDU_SKILL_DIR` environment variable or the skill directory.
 2. **Interview:** Ask the user for topic, learner level, goals, language, duration, prerequisites, accessibility needs, and source materials. Record unstated inputs as assumptions.
 3. **Generate:** Follow the staged workflow in `references/authoring-workflow.md`.
 4. **Output:** Produce artifacts per `references/artifact-contract.md`.
-5. **Validate:** In repository mode, compile, validate, and lint the package.
+5. **Validate:** In repository mode, run `quality-report.mjs` as the central orchestrator — it produces `quality-report.json` and coordinates compile, validate, and lint via `validate-package.mjs`.
 
 ## Modes
 
-### Portable Mode (no repo detected)
+### Portable Mode (no repo detected, or no executable CLI/compiler)
 
 - Output: `course-spec.json`, `course-spec.md`, `course-brief.md`, `quality-report.json`
-- Validation: structural checks only, report commands the user can run
+- Validation: structural-only via `validate-course-spec.mjs` with `validationMode: "structural-only"`. Compiler/package phases skipped.
+- Report commands the user can run for full validation
 
-### Repository Mode (Open-Edu detected)
+### Repository Mode (Open-Edu detected with executable CLI)
 
+- Requires executable CLI (`dist/cli.js`), not just detected package directories
 - Output: all portable artifacts + compiled `package/` directory
-- Validation: structural checks + `edu compile --validate` + `edu validate` + `edu lint-content`
+- Validation: `quality-report.mjs` orchestrates structural checks + `edu compile --validate` + `edu validate` + `edu lint-content` via `validate-package.mjs`
 
 ## Critical Rules
 
@@ -58,9 +60,13 @@ You are an expert educational content author for the Open-Edu framework. This sk
 
 ## Helper Scripts
 
-- `scripts/discover-openedu.mjs` — detect repository, capabilities, commands, paths
-- `scripts/validate-course-spec.mjs` — validate `course-spec.json` structurally and via compiler
-- `scripts/summarize-quality.mjs` — generate `quality-report.json` from validation + blueprint
+- `scripts/discover-openedu.mjs` — detect repository, capabilities, executable status, commands, paths; distinguishes `packagePresent` from `executable`
+- `scripts/openedu-adapter.mjs` — shared adapter for repo discovery, command execution, path resolution; all helpers import it
+- `scripts/widget-catalog.mjs` — loads the widget catalog from the discovered repo, replacing hardcoded widget IDs
+- `scripts/validate-course-spec.mjs` — validate `course-spec.json` structurally and via compiler; exposes `validationMode` field (`"structural-only"` | `"compiler"`)
+- `scripts/validate-package.mjs` — orchestrates compile → validate → lint in sequence for a compiled package
+- `scripts/quality-report.mjs` — central orchestrator and sole writer of `quality-report.json`; merges findings from all phases
+- `scripts/summarize-quality.mjs` — complete quality rubric (catalog-backed, all dimensions) consumed by `quality-report.mjs`
 
 ## Source Material Pipeline
 
@@ -68,10 +74,13 @@ When source materials (PDFs, textbooks) are provided:
 
 1. Detect pipeline availability via `discover-openedu.mjs`
 2. Resolve the appropriate profile (`generic`, `math`, `science`, or `nios`)
-3. Run: `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <file> --subject <subject>`
+3. Run: `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <file> --subject math` (use `--subject math`, not `--subject mathematics`)
 4. Preserve pipeline artifacts: source inventory, concept map, blueprint, coverage report
 5. Transform pipeline output (`course-spec.md`) into canonical `course-spec.json`
 6. If pipeline unavailable: use material as context, mark extraction as manual
+7. Preserve pipeline command evidence and source-material provenance in the quality report
+
+See `references/source-materials.md` for full profile selection guide and pipeline options.
 
 See `references/source-materials.md` for full profile selection guide and pipeline options.
 

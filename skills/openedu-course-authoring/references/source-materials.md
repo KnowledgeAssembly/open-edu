@@ -17,13 +17,15 @@ Source materials are detected during the input interview. Common signals:
 1. **Resolve Profile:** Use `resolveProfile({ subject, curriculum })` to select the appropriate profile.
    - `--subject math` → math profile
    - `--subject science` → science profile
-   - `--subject nios` or `--curriculum nios` → nios profile
+   - `--curriculum nios` → nios profile
    - anything else → generic profile
+
+   Note: Always use the canonical subject name with `--subject`. For mathematics, use `--subject math` (not `--subject mathematics`).
 
 2. **Run Pipeline:**
 
    ```bash
-   pnpm --filter @open-edu/pipeline curriculum:generate --pdf <file> --subject <subject>
+   pnpm --filter @open-edu/pipeline curriculum:generate --pdf <file> --subject math
    ```
 
 3. **Additional Pipeline Options:**
@@ -61,6 +63,8 @@ Source materials are detected during the input interview. Common signals:
 | NIOS Curriculum | `nios`    | Bilingual (Hindi/English) taxonomy, NIOS structure   |
 | Anything else   | `generic` | Scaffolded discovery, core widgets only              |
 
+For mathematics, use `--subject math` (not `--subject mathematics`).
+
 ## Pipeline Output Integration
 
 When the pipeline produces output:
@@ -69,6 +73,9 @@ When the pipeline produces output:
 2. **Concept map** → use to validate objective coverage
 3. **Blueprint** → save as `lesson-blueprints.json`
 4. **Coverage report** → include in `quality-report.json`
+5. **Pipeline command evidence** → preserve the exact pipeline command and source-material provenance in the quality report
+
+The quality report must record: which source file(s) were provided, which pipeline command was executed (with all flags), the resolved profile, and whether the pipeline ran successfully or fell back to manual extraction.
 
 ## Handling Pipeline Errors
 

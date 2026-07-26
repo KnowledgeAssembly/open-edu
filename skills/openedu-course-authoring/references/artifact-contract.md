@@ -83,3 +83,76 @@ course-output/
 - Compiler errors (schema validation failures, duplicate IDs, broken references) fail the run.
 - Compiler warnings (missing objectives, empty lessons) are reported but do not fail.
 - A run is successful only when `course-spec.json` exists and every required validation gate passes.
+
+## Quality Report Format
+
+`quality-report.json` is produced by `quality-report.mjs` (the central orchestrator and sole writer) and follows this schema:
+
+```json
+{
+  "schemaVersion": 1,
+  "success": true,
+  "mode": "portable|repository",
+  "validationMode": "structural-only|compiler",
+  "capabilities": {
+    "compiler": true | false,
+    "cli": true | false,
+    "executable": true | false,
+    "widgetCatalog": true | false,
+    "pipeline": true | false,
+    "examples": true | false
+  },
+  "artifacts": {
+    "courseSpecJson": "path/to/course-spec.json",
+    "courseSpecMd": "path/to/course-spec.md",
+    "courseBrief": "path/to/course-brief.md",
+    "lessonBlueprints": "path/to/lesson-blueprints.json",
+    "packageDir": "path/to/package" | null,
+    "pipelineArtifacts": []
+  },
+  "phases": [
+    {
+      "name": "structural-validation|compiler-compile|compiler-validate|compiler-lint",
+      "status": "passed|failed|skipped",
+      "durationMs": 1234,
+      "errors": ["..."],
+      "warnings": ["..."],
+      "output": "..."
+    }
+  ],
+  "findings": {
+    "errors": [{"message": "...", "phase": "...", "detail": "..."}],
+    "warnings": [{"message": "...", "phase": "...", "detail": "..."}],
+    "infos": [{"message": "...", "phase": "...", "detail": "..."}]
+  },
+  "summary": {
+    "totalPhases": 4,
+    "phasesPassed": 3,
+    "phasesFailed": 0,
+    "phasesSkipped": 1,
+    "totalErrors": 0,
+    "totalWarnings": 3,
+    "overallStatus": "passed|failed|partial",
+    "widgetCatalogLoaded": true,
+    "rubricDimensions": ["objectives", "alignment", "accessibility", "inclusion", "widgets", "completeness"],
+    "sourceMaterialProvenance": {
+      "sourceFile": "textbook.pdf" | null,
+      "pipelineCommand": "pnpm --filter @open-edu/pipeline ...",
+      "pipelineProfile": "math|science|generic|nios" | null,
+      "pipelineStatus": "executed|fallback|unavailable"
+    }
+  }
+}
+```
+
+### Schema Notes
+
+- `schemaVersion`: always `1`
+- `success`: `true` only if all phases pass (no errors in `findings.errors`)
+- `mode`: matches the discovery mode (`"portable"` or `"repository"`)
+- `validationMode`: `"structural-only"` in portable mode (compiler phases skipped); `"compiler"` in repository mode
+- `capabilities.executable`: distinct from `capabilities.cli` — `cli` means the package directory exists; `executable` means `dist/cli.js` is present
+- `phases`: records each validation gate with timing and output. Portable mode will have `"skipped"` for compiler phases
+- `findings`: deduplicated across all phases, categorized by severity
+- `summary.rubricDimensions`: catalog-backed dimensions evaluated by `summarize-quality.mjs`
+- `summary.sourceMaterialProvenance`: preserves pipeline command evidence and source-material origin

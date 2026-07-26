@@ -11,16 +11,21 @@ function createTempDir() {
   return base;
 }
 
-function makeBlueprint() {
+function makeCompleteBlueprint() {
   return [
     {
       id: 'lesson-01',
       title: 'Lesson One',
       objectives: ['Identify parts of a fraction', 'Compare fractions with same denominator'],
+      coreIdea: 'Fractions represent parts of a whole',
+      examples: ['1/2 of a pizza', '3/4 of a chocolate bar'],
+      misconceptions: ['Larger denominator means larger fraction'],
       activityPlan: [
-        { type: 'reading', step: 'observe' },
-        { type: 'widget', step: 'guided_practice', widgetId: 'math.fraction-visual' },
-        { type: 'quiz', step: 'mastery_check' },
+        { type: 'reading', step: 'observe', order: 1, description: 'Read intro' },
+        { type: 'widget', step: 'guided_practice', order: 2, widgetId: 'math.fraction-visual', description: 'Practice' },
+        { type: 'exercise', step: 'independent_practice', order: 3, description: 'Solo practice' },
+        { type: 'quiz', step: 'mastery_check', order: 4, description: 'Assessment' },
+        { type: 'reflection', step: 'positive_completion', order: 5, description: 'Reflect' },
       ],
       estimatedMinutes: 20,
     },
@@ -28,11 +33,17 @@ function makeBlueprint() {
       id: 'lesson-02',
       title: 'Lesson Two',
       objectives: ['Add fractions with like denominators'],
+      coreIdea: 'Adding fractions with same denominator adds numerators',
+      examples: ['1/5 + 2/5 = 3/5'],
+      misconceptions: ['You add both numerator and denominator'],
       activityPlan: [
-        { type: 'reading', step: 'observe' },
-        { type: 'exercise', step: 'independent_practice' },
+        { type: 'reading', step: 'observe', order: 1, description: 'Read intro' },
+        { type: 'widget', step: 'guided_practice', order: 2, widgetId: 'math.fraction-visual', description: 'Practice' },
+        { type: 'exercise', step: 'independent_practice', order: 3, description: 'Solo' },
+        { type: 'quiz', step: 'mastery_check', order: 4, description: 'Quiz' },
+        { type: 'reflection', step: 'positive_completion', order: 5, description: 'Reflect' },
       ],
-      estimatedMinutes: 60,
+      estimatedMinutes: 20,
     },
   ];
 }
@@ -42,139 +53,430 @@ function makeValidationResult(overrides = {}) {
     success: true,
     errors: [],
     warnings: [],
-    data: {
-      lessonCount: 2,
-      activityCount: 5,
-    },
+    data: { lessonCount: 2, activityCount: 5 },
     compilerAvailable: false,
     ...overrides,
   };
 }
 
-describe('summarize-quality', () => {
-  it('reports success for fully aligned course', () => {
+function makeFixtureCatalog() {
+  return [
+    { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable' },
+    { id: 'core.matching', name: 'Matching', status: 'stable' },
+    { id: 'core.multiple-choice', name: 'Multiple Choice', status: 'stable' },
+  ];
+}
+
+describe('summarize-quality (base)', () => {
+  it('reports success for fully aligned course with catalog', () => {
     const dir = createTempDir();
     try {
-      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      const result = summarizeQuality(dir, makeValidationResult());
-      strictEqual(result.success, true);
-      ok(result.findings.length > 0);
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeCompleteBlueprint()));
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        preloadedCatalog: makeFixtureCatalog(),
+      });
+      strictEqual(result.success, true, `errors: ${result.findings.filter((f) => f.severity === 'error').map((f) => f.message).join('; ')}`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('reports error for uncovered objective when no matching activity exists', () => {
+  it('emits QC-WDG-00 warning in portable mode without catalog', () => {
     const dir = createTempDir();
     try {
-      const blueprint = [
-        {
-          id: 'lesson-01',
-          title: 'L1',
-          objectives: ['Objective with no matching activity type'],
-          activityPlan: [], // no activities
-          estimatedMinutes: 15,
-        },
-      ];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'l1', title: 'L1', objectives: ['obj1'], coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [{ type: 'reading', step: 'observe', order: 1, description: 'Read' }, { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' }],
+        estimatedMinutes: 15,
+      }]));
+      const result = summarizeQuality(dir, makeValidationResult(), { mode: 'portable' });
+      const wdg00 = result.findings.filter((f) => f.checkId === 'QC-WDG-00');
+      ok(wdg00.length > 0);
+      strictEqual(wdg00[0].severity, 'warning');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('emits QC-WDG-00 error in repository mode without catalog', () => {
+    const dir = createTempDir();
+    try {
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'l1', title: 'L1', objectives: ['obj1'], coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [{ type: 'reading', step: 'observe', order: 1, description: 'Read' }, { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' }],
+        estimatedMinutes: 15,
+      }]));
+      const result = summarizeQuality(dir, makeValidationResult(), { mode: 'repository' });
+      const wdg00 = result.findings.filter((f) => f.checkId === 'QC-WDG-00');
+      ok(wdg00.length > 0);
+      strictEqual(wdg00[0].severity, 'error');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('flags legacy widget IDs against catalog', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1',
+        objectives: ['obj1'], coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', widgetId: 'open-edu.multiple-choice', order: 1, description: 'Widget' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult({ data: { lessonCount: 1, activityCount: 0 } }), null);
-      const objErrors = result.findings.filter((f) => f.checkId === 'QC-OBJ-01');
-      ok(objErrors.length > 0, 'should have objective coverage errors');
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  it('flags overlong lesson', () => {
-    const dir = createTempDir();
-    try {
-      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      const result = summarizeQuality(dir, makeValidationResult());
-      const durFindings = result.findings.filter((f) => f.checkId === 'QC-DUR-02');
-      ok(durFindings.length > 0, 'should flag the 60-minute lesson');
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  it('flags legacy widget IDs', () => {
-    const dir = createTempDir();
-    try {
-      const blueprint = [
-        {
-          id: 'lesson-01',
-          title: 'L1',
-          objectives: ['obj1'],
-          activityPlan: [
-            { type: 'widget', step: 'guided_practice', widgetId: 'open-edu.multiple-choice' },
-          ],
-          estimatedMinutes: 15,
-        },
-      ];
-      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult());
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: makeFixtureCatalog(), reportPath: false });
       const wdgFindings = result.findings.filter((f) => f.checkId === 'QC-WDG-01');
-      ok(wdgFindings.length > 0, 'should flag legacy widget ID');
+      ok(wdgFindings.length > 0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('flags deprecated widget IDs', () => {
+  it('flags deprecated widget IDs against catalog', () => {
     const dir = createTempDir();
     try {
-      const blueprint = [
-        {
-          id: 'lesson-01',
-          title: 'L1',
-          objectives: ['obj1'],
-          activityPlan: [
-            { type: 'widget', step: 'guided_practice', widgetId: 'open-edu.multiple-choice-practice' },
-          ],
-          estimatedMinutes: 15,
-        },
+      const catalog = [
+        ...makeFixtureCatalog(),
+        { id: 'open-edu.multiple-choice-practice', name: 'MC Legacy', status: 'deprecated', deprecated: true },
       ];
+      const blueprint = [{
+        id: 'l1', title: 'L1',
+        objectives: ['obj1'], coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', widgetId: 'open-edu.multiple-choice-practice', order: 1, description: 'Widget' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult());
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: catalog, reportPath: false });
       const depWarnings = result.findings.filter((f) => f.checkId === 'QC-WDG-02');
-      ok(depWarnings.length > 0, 'should flag deprecated widget');
+      ok(depWarnings.length > 0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('flags lessons with no mastery_check or quiz', () => {
+  it('accepts new widget IDs without code changes', () => {
     const dir = createTempDir();
     try {
-      const blueprint = [
-        {
-          id: 'lesson-01',
-          title: 'L1',
-          objectives: ['obj1'],
-          activityPlan: [
-            { type: 'reading', step: 'observe' },
-            { type: 'exercise', step: 'independent_practice' },
-          ],
-          estimatedMinutes: 15,
-        },
+      const catalog = [
+        ...makeFixtureCatalog(),
+        { id: 'physics.quantum-simulator', name: 'Quantum Sim', status: 'stable' },
       ];
+      const blueprint = [{
+        id: 'l1', title: 'L1',
+        objectives: ['obj1'], coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', widgetId: 'physics.quantum-simulator', order: 1, description: 'Widget' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
-      const result = summarizeQuality(dir, makeValidationResult({ data: { lessonCount: 1, activityCount: 2 } }), null);
-      const asmFindings = result.findings.filter((f) => f.checkId === 'QC-ASM-02');
-      ok(asmFindings.length > 0, 'should flag missing assessment');
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: catalog, reportPath: false });
+      const wdg01 = result.findings.filter((f) => f.checkId === 'QC-WDG-01');
+      strictEqual(wdg01.length, 0);
+      strictEqual(result.success, true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  it('writes quality-report.json', () => {
+  it('reports QC-OBJ-01 for uncovered objective', () => {
     const dir = createTempDir();
     try {
-      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeBlueprint()));
-      summarizeQuality(dir, makeValidationResult());
-      const report = JSON.parse(readFileSync(join(dir, 'quality-report.json'), 'utf-8'));
-      ok(report.findings.length > 0);
-      ok(typeof report.summary === 'object');
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['Obj without activity'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [], estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult({ data: { lessonCount: 1, activityCount: 0 } }), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-OBJ-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('flags QC-DUR-02 for overlong lesson', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 60,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-DUR-02'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('flags QC-ASM-02 for missing mastery_check', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'exercise', step: 'independent_practice', order: 2, description: 'Practice' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult({ data: { lessonCount: 1, activityCount: 2 } }), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-ASM-02'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('summarize-quality (rubric extension)', () => {
+  it('QC-OBJ-02: flags missing assessment signal when no mastery_check/quiz/feedback', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1', 'obj2'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'exercise', step: 'independent_practice', order: 2, description: 'Practice' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-OBJ-02'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ASM-01: flags assessment concept not in introduced concepts', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        conceptsIntroduced: ['concept-a'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz', conceptRefs: ['concept-b'] },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-ASM-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ASM-01: no error when assessment concepts are subset', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        conceptsIntroduced: ['concept-a', 'concept-b'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz', conceptRefs: ['concept-a'] },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(!result.findings.some((f) => f.checkId === 'QC-ASM-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ASM-03: flags lesson difficulty mismatch', () => {
+    const dir = createTempDir();
+    try {
+      writeFileSync(join(dir, 'course-spec.json'), JSON.stringify({
+        metadata: { difficulty: 'beginner', estimatedHours: 1 },
+      }));
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        difficulty: 'advanced',
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-ASM-03'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-DUR-01: flags duration mismatch vs estimatedHours', () => {
+    const dir = createTempDir();
+    try {
+      writeFileSync(join(dir, 'course-spec.json'), JSON.stringify({
+        metadata: { estimatedHours: 2 },
+      }));
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 10,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-DUR-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-PROG-01: flags missing pedagogical step', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      const prog01 = result.findings.filter((f) => f.checkId === 'QC-PROG-01');
+      ok(prog01.length >= 3, 'should flag missing guided_practice, independent_practice, positive_completion');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-PROG-03: flags when first activity is not observe', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'exercise', step: 'independent_practice', order: 1, description: 'Jump right in' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-PROG-03'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-WDG-03: flags missing required config fields', () => {
+    const dir = createTempDir();
+    try {
+      const catalog = [
+        { id: 'core.quiz-builder', name: 'Quiz Builder', status: 'stable', requiredConfig: ['questionCount', 'timeLimit'] },
+      ];
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', order: 1, widgetId: 'core.quiz-builder', description: 'Widget', widgetConfig: { questionCount: 5 } },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: catalog, reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-WDG-03'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-WDG-03: passes when all required config fields present', () => {
+    const dir = createTempDir();
+    try {
+      const catalog = [
+        { id: 'core.quiz-builder', name: 'Quiz Builder', status: 'stable', requiredConfig: ['questionCount'] },
+      ];
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', order: 1, widgetId: 'core.quiz-builder', description: 'Widget', widgetConfig: { questionCount: 5 } },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: catalog, reportPath: false });
+      ok(!result.findings.some((f) => f.checkId === 'QC-WDG-03'), 'should not flag when config is complete');
+      strictEqual(result.success, true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-WDG-04: includes widget rationale when provided', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'widget', step: 'guided_practice', order: 1, widgetId: 'math.fraction-visual', description: 'Widget', widgetRationale: 'Visual aids help understand fractions' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { preloadedCatalog: makeFixtureCatalog(), reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-WDG-04'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ACC-03: flags color-only wording in descriptions', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Click the red button' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-ACC-03'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
