@@ -3,11 +3,12 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('@ai-sdk/react', () => ({
   useChat: () => ({
     messages: [],
-    append: vi.fn(),
-    reload: vi.fn(),
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
     status: 'ready',
     error: undefined,
     stop: vi.fn(),
+    clearError: vi.fn(),
     setMessages: vi.fn(),
   }),
 }));

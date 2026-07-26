@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import axe from 'axe-core';
 import { PipiliMessage } from '../PipiliMessage.js';
+import { I18nProvider } from '@open-edu/i18n';
+import learnerDict from '@open-edu/i18n/locales/en/learner.json';
+
+function renderWithI18n(ui: React.ReactElement) {
+  return render(
+    <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
+      {ui}
+    </I18nProvider>,
+  );
+}
 
 describe('PipiliMessage', () => {
   const textParts = (text: string): Array<{ type: 'text'; text: string }> => [
@@ -8,17 +19,17 @@ describe('PipiliMessage', () => {
   ];
 
   it('renders user message text parts', () => {
-    render(<PipiliMessage role="user" parts={textParts('Hello user')} />);
+    renderWithI18n(<PipiliMessage role="user" parts={textParts('Hello user')} />);
     expect(screen.getByText('Hello user')).toBeInTheDocument();
   });
 
   it('renders assistant message text parts', () => {
-    render(<PipiliMessage role="assistant" parts={textParts('Hello assistant')} />);
+    renderWithI18n(<PipiliMessage role="assistant" parts={textParts('Hello assistant')} />);
     expect(screen.getByText('Hello assistant')).toBeInTheDocument();
   });
 
   it('shows streaming caret when isStreaming is true', () => {
-    const { container } = render(
+    const { container } = renderWithI18n(
       <PipiliMessage role="assistant" parts={textParts('Streaming')} isStreaming />,
     );
     const caret = container.querySelector('.animate-pulse');
@@ -26,7 +37,7 @@ describe('PipiliMessage', () => {
   });
 
   it('does not show caret when isStreaming is false', () => {
-    const { container } = render(
+    const { container } = renderWithI18n(
       <PipiliMessage role="assistant" parts={textParts('Done')} isStreaming={false} />,
     );
     const caret = container.querySelector('.animate-pulse');
@@ -34,7 +45,7 @@ describe('PipiliMessage', () => {
   });
 
   it('renders citations when metadata.citations provided', () => {
-    render(
+    renderWithI18n(
       <PipiliMessage
         role="assistant"
         parts={textParts('Response with citation')}
@@ -50,7 +61,7 @@ describe('PipiliMessage', () => {
   });
 
   it('renders nothing for citations when metadata.citations is empty', () => {
-    render(
+    renderWithI18n(
       <PipiliMessage
         role="assistant"
         parts={textParts('Response')}
@@ -66,7 +77,7 @@ describe('PipiliMessage', () => {
   });
 
   it('renders hint level indicator when metadata.hintLevel is set', () => {
-    render(
+    renderWithI18n(
       <PipiliMessage
         role="assistant"
         parts={textParts('Hint response')}
@@ -80,10 +91,11 @@ describe('PipiliMessage', () => {
       />,
     );
     expect(screen.getByTestId('pipili-hint-level')).toBeInTheDocument();
+    expect(screen.getByTestId('pipili-hint-level').textContent).toContain('2');
   });
 
   it('renders suggested next steps when provided', () => {
-    render(
+    renderWithI18n(
       <PipiliMessage
         role="assistant"
         parts={textParts('Try the next exercise')}
@@ -99,7 +111,7 @@ describe('PipiliMessage', () => {
   });
 
   it('does not render next steps during streaming', () => {
-    render(
+    renderWithI18n(
       <PipiliMessage
         role="assistant"
         parts={textParts('Streaming...')}
@@ -113,5 +125,23 @@ describe('PipiliMessage', () => {
       />,
     );
     expect(screen.queryByTestId('pipili-next-steps')).not.toBeInTheDocument();
+  });
+
+  it('has no axe violations', async () => {
+    const { container } = renderWithI18n(
+      <PipiliMessage
+        role="assistant"
+        parts={textParts('An accessible assistant message')}
+        metadata={{
+          mode: 'coach',
+          citations: [{ source: 'lesson', text: 'ref', type: 'lesson' }],
+          hintLevel: 1,
+          assessmentSafe: true,
+          suggestedNextSteps: ['Next step'],
+        }}
+      />,
+    );
+    const results = await axe.run(container);
+    expect(results.violations).toHaveLength(0);
   });
 });

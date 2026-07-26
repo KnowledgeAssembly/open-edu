@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
-import type { UIMessage } from 'ai';
+import { DefaultChatTransport, type UIMessage } from 'ai';
 import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
 import { useCompanion } from './CompanionProvider.js';
 import { learningContextToSnapshot } from './context-mapper.js';
 
 export interface PipiliChatState {
-  messages: UIMessage[];
+  messages: UIMessage<PipiliResponseMetadata>[];
   sendMessage: (text: string) => Promise<void>;
   regenerate: () => Promise<void>;
   status: 'submitted' | 'streaming' | 'ready' | 'error';
@@ -14,7 +14,7 @@ export interface PipiliChatState {
   error: Error | undefined;
   stop: () => void;
   clearError: () => void;
-  setMessages: (messages: UIMessage[]) => void;
+  setMessages: (messages: UIMessage<PipiliResponseMetadata>[]) => void;
   clearMessages: () => void;
   conversationId: string;
   requestHint: (level: 1 | 2 | 3 | 4) => Promise<void>;
@@ -37,34 +37,61 @@ export function PipiliChatProvider({
     [initialConversationId],
   );
 
+  // Keep the latest LearningContext in a ref so the transport (created once
+  // below) can read a fresh snapshot on every send/regenerate without being
+  // re-created.
   const contextRef = useRef(companion.context);
   contextRef.current = companion.context;
 
-  const { messages, append, reload, status, error, stop, setMessages } = useChat({
+  // v7 transport: inject conversationId + a fresh context snapshot into the
+  // POST body on every send (and regenerate).
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/api/pipili/chat',
+        prepareSendMessagesRequest: ({ id, messages }) => ({
+          body: {
+            conversationId: id,
+            messages,
+            context: learningContextToSnapshot(contextRef.current),
+          },
+        }),
+      }),
+    [],
+  );
+
+  const {
+    messages,
+    sendMessage: chatSend,
+    regenerate: chatRegenerate,
+    status,
+    error,
+    stop,
+    clearError,
+    setMessages,
+  } = useChat<UIMessage<PipiliResponseMetadata>>({
     id: conversationId,
-    api: '/api/pipili/chat',
-    body: {
-      conversationId,
-    },
+    transport,
     onError: (err) => {
+      // Telemetry only — never log provider internals.
       console.error('Pipili chat error (category only):', err?.name);
     },
-    onFinish: (message) => {
-      if (status === 'ready') {
-        const text = message.content ?? '';
-        if (text) {
-          const annotations = message.annotations;
-          const metadata =
-            Array.isArray(annotations) && annotations.length > 0
-              ? (annotations[annotations.length - 1] as PipiliResponseMetadata | undefined)
-              : undefined;
-          companion.persistAssistantMessage({
-            id: message.id,
-            text,
-            metadata,
-          });
-        }
-      }
+    onFinish: ({ message, isAbort, isError }) => {
+      // Spec orchestration step 10: persist the completed assistant message
+      // through the existing IndexedDB-backed ConversationManager. Only
+      // persist when the stream finished cleanly (an aborted or errored
+      // stream must not be persisted as complete).
+      if (isAbort || isError) return;
+      const text = (message.parts ?? [])
+        .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+        .map((p) => p.text)
+        .join('');
+      if (!text) return;
+      companion.persistAssistantMessage({
+        id: message.id,
+        text,
+        metadata: message.metadata as PipiliResponseMetadata | undefined,
+      });
     },
   });
 
@@ -72,21 +99,12 @@ export function PipiliChatProvider({
 
   const sendMessage = useCallback(
     async (text: string) => {
-      const contextSnapshot = learningContextToSnapshot(contextRef.current);
-      await append(
-        {
-          role: 'user',
-          content: text,
-        },
-        {
-          body: {
-            conversationId,
-            context: contextSnapshot,
-          },
-        },
-      );
+      // Single send path. v7 useChat.sendMessage takes a message object.
+      // The transport's prepareSendMessagesRequest injects
+      // conversationId + context, so the request is course-aware.
+      await chatSend({ text });
     },
-    [append, conversationId],
+    [chatSend],
   );
 
   const clearMessages = useCallback(() => {
@@ -96,6 +114,8 @@ export function PipiliChatProvider({
 
   const requestHint = useCallback(
     async (level: 1 | 2 | 3 | 4) => {
+      // Hint requests are normal user turns; the server routes the
+      // createProgressiveHint tool when it detects a hint request.
       await sendMessage(`I'd like hint level ${level}, please.`);
     },
     [sendMessage],
@@ -104,12 +124,12 @@ export function PipiliChatProvider({
   const value: PipiliChatState = {
     messages,
     sendMessage,
-    regenerate: () => reload().then(() => {}),
+    regenerate: () => chatRegenerate(),
     status,
     isLoading,
     error,
     stop,
-    clearError: () => {},
+    clearError,
     setMessages,
     clearMessages,
     conversationId,

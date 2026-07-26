@@ -1,6 +1,11 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 
+/**
+ * Create the tool registry for Pipili.
+ * Each tool uses explicit Zod `inputSchema` (AI SDK v7) and bounded outputs.
+ * Tools are scoped to the active learner and course context.
+ */
 export function createToolRegistry(
   contextGetter: () => {
     courseId?: string;
@@ -11,7 +16,7 @@ export function createToolRegistry(
   const getCurrentPageContext = tool({
     description:
       'Returns the current page and widget content already authorized by runtime context.',
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       contextGetter();
       return { pageContent: 'Current page content from runtime context' };
@@ -20,20 +25,20 @@ export function createToolRegistry(
 
   const getCurrentLessonContext = tool({
     description: 'Returns objectives, content, and activities for the active lesson.',
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       const ctx = contextGetter();
       return {
         lessonId: ctx.lessonId,
-        objectives: [],
-        content: [],
+        objectives: [] as string[],
+        content: [] as string[],
       };
     },
   });
 
   const searchNotes = tool({
     description: 'Searches learner-owned notes using the existing notes service/storage boundary.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('Search query for notes'),
       maxResults: z.number().default(5).describe('Maximum number of results'),
     }),
@@ -48,7 +53,7 @@ export function createToolRegistry(
 
   const getRelevantNotes = tool({
     description: 'Retrieves bounded note excerpts selected by searchNotes.',
-    parameters: z.object({
+    inputSchema: z.object({
       noteIds: z.array(z.string()).describe('Note IDs to retrieve'),
     }),
     execute: async () => {
@@ -60,7 +65,7 @@ export function createToolRegistry(
 
   const getLearningHistory = tool({
     description: 'Returns only the history fields needed for current guidance.',
-    parameters: z.object({
+    inputSchema: z.object({
       fields: z
         .array(z.enum(['completedLessons', 'strengths', 'weakConcepts']))
         .default(['strengths', 'weakConcepts']),
@@ -77,7 +82,7 @@ export function createToolRegistry(
   const findRelatedConcepts = tool({
     description:
       'Finds concepts related to the given topic using available course/glossary data. Ready for V2 concept graph integration.',
-    parameters: z.object({
+    inputSchema: z.object({
       concept: z.string().describe('The concept to find relations for'),
       maxResults: z.number().default(5),
     }),
@@ -96,7 +101,7 @@ export function createToolRegistry(
   const createProgressiveHint = tool({
     description:
       'Produces or selects a hint level constrained by learner effort and assessment state.',
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string().describe('The topic or problem to hint about'),
       requestedLevel: z
         .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])

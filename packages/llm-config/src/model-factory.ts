@@ -1,7 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import type { LanguageModelV1 } from 'ai';
+import type { LanguageModel } from 'ai';
 import { loadConfig, type LlmConfig } from './types.js';
 
 export type ProviderCapability = 'streaming' | 'structured-output' | 'tool-calling';
@@ -20,38 +20,36 @@ export interface ModelFactoryConfig {
 }
 
 export interface ModelFactory {
-  getModel(tier?: ModelTier): LanguageModelV1;
+  getModel(tier?: ModelTier): LanguageModel;
   getCapabilities(): ProviderCapability[];
   hasCapability(cap: ProviderCapability): boolean;
 }
 
 class ModelFactoryImpl implements ModelFactory {
-  private fastModel: LanguageModelV1 | null = null;
-  private escalationModel: LanguageModelV1 | null = null;
+  private fastModel: LanguageModel | null = null;
+  private escalationModel: LanguageModel | null = null;
   private config: LlmConfig;
 
   constructor(config: LlmConfig) {
     this.config = config;
   }
 
-  private createProvider(): (modelId: string) => LanguageModelV1 {
+  private createProvider(): (modelId: string) => LanguageModel {
     const { provider, apiKey } = this.config;
     switch (provider) {
       case 'openai':
-        return createOpenAI({ apiKey, compatibility: 'strict' }) as (
-          modelId: string,
-        ) => LanguageModelV1;
+        return createOpenAI({ apiKey }) as (modelId: string) => LanguageModel;
       case 'google':
-        return createGoogleGenerativeAI({ apiKey }) as (modelId: string) => LanguageModelV1;
+        return createGoogleGenerativeAI({ apiKey }) as (modelId: string) => LanguageModel;
       case 'openrouter': {
-        return createOpenRouter({ apiKey }) as (modelId: string) => LanguageModelV1;
+        return createOpenRouter({ apiKey }) as (modelId: string) => LanguageModel;
       }
       default:
         throw new Error(`Unknown provider: ${provider}`);
     }
   }
 
-  getModel(tier: ModelTier = 'fast'): LanguageModelV1 {
+  getModel(tier: ModelTier = 'fast'): LanguageModel {
     if (tier === 'fast' && this.fastModel) return this.fastModel;
     if (tier === 'escalation' && this.escalationModel) return this.escalationModel;
 

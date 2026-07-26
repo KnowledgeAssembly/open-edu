@@ -1,4 +1,11 @@
-import { convertToCoreMessages, streamText, pipeDataStreamToResponse } from 'ai';
+import {
+  convertToModelMessages,
+  isStepCount,
+  pipeUIMessageStreamToResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessage,
+} from 'ai';
 import { createModelFactory, loadConfig, type ModelFactory } from '@open-edu/llm-config';
 import { boundContext, pipiliResponseMetadataSchema } from '@open-edu/ai-companion';
 import type { PipiliContextSnapshot } from '@open-edu/ai-companion';
@@ -34,12 +41,15 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
     }
 
     let conversationId: string;
-    let messages: Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string }>;
+    let rawMessages: unknown[];
     let context: PipiliContextSnapshot;
     try {
       const parsed = pipiliRequestSchema.parse(raw);
       conversationId = parsed.conversationId;
-      messages = parsed.messages;
+      // `messages` is validated loosely by pipiliRequestSchema (id/role +
+      // parts-or-content). convertToModelMessages below enforces the real
+      // AI SDK v7 UIMessage shape and converts parts -> CoreMessage[].
+      rawMessages = parsed.messages as unknown[];
       context = pipiliContextSchema.parse(parsed.context) as PipiliContextSnapshot;
 
       if (contextStrLen(parsed.context) > PIPILI_CONFIG.MAX_REQUEST_SIZE_BYTES) {
@@ -71,7 +81,7 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
     });
 
     const factory = getModelFactory();
-    const isComplex = checkComplexity(messages);
+    const isComplex = checkComplexity(rawMessages);
     const model = factory.getModel(isComplex ? 'escalation' : 'fast');
 
     const tools = createToolRegistry(() => ({
@@ -81,54 +91,68 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
 
     const cfg = loadConfig();
 
-    try {
-      let capturedText = '';
-      let capturedToolCalls: Array<{ toolName: string }> = [];
+    // Capture the finished text + tool calls from the model lifecycle so the
+    // messageMetadata callback (fired during stream transformation) can
+    // derive validated PipiliResponseMetadata without trusting model-emitted
+    // JSON. These are populated by streamText's onFinish before the finish
+    // part is emitted into the UI message stream.
+    let capturedText = '';
+    let capturedToolCalls: Array<{ toolName: string }> = [];
 
+    try {
       const result = streamText({
         model,
         system: instructions,
-        messages: await convertToCoreMessages(messages),
+        messages: await convertToModelMessages(rawMessages as UIMessage[]),
         tools,
-        maxSteps: 3,
-        maxTokens: PIPILI_CONFIG.MAX_CONTEXT_SIZE,
+        // v7: multi-step tool looping is controlled by `stopWhen`. Allow up to
+        // 3 steps so chained tools (e.g. searchNotes -> getRelevantNotes) work.
+        stopWhen: isStepCount(3),
+        maxOutputTokens: PIPILI_CONFIG.MAX_CONTEXT_SIZE,
         temperature: cfg.temperature,
-        onFinish: (event) => {
-          capturedText = event.text;
-          capturedToolCalls = (event.toolCalls ?? []) as Array<{ toolName: string }>;
+        onFinish: ({ text, usage, toolCalls }) => {
+          capturedText = text;
+          capturedToolCalls = (toolCalls ?? []) as Array<{ toolName: string }>;
+          // Telemetry seam (V2: InterventionProvider). Never log credentials.
           console.log('Pipili response finished', {
             conversationId,
             assessmentActive,
             isComplex,
-            tokensUsed: event.usage,
+            tokensUsed: usage,
             toolCallCount: capturedToolCalls.length,
           });
         },
       });
 
-      pipeDataStreamToResponse(res, {
-        status: 200,
-        async execute(dataStream) {
-          result.mergeIntoDataStream(dataStream);
-          await result.consumeStream();
-
-          const meta = extractMetadata({
-            text: capturedText,
-            boundedContext: boundedCtx,
-            assessmentActive,
-            toolCalls: capturedToolCalls,
-          });
-          const safe = pipiliResponseMetadataSchema.safeParse(meta);
-          if (safe.success) {
-            dataStream.writeMessageAnnotation(safe.data);
+      const uiStream = toUIMessageStream({
+        stream: result.stream,
+        messageMetadata: ({ part }) => {
+          if (part.type === 'finish') {
+            const meta = extractMetadata({
+              text: capturedText,
+              boundedContext: boundedCtx,
+              assessmentActive,
+              toolCalls: capturedToolCalls,
+            });
+            const safe = pipiliResponseMetadataSchema.safeParse(meta);
+            return safe.success ? safe.data : null;
           }
+          return undefined;
         },
         onError: (error) => {
+          // Never leak provider internals; surface a stable message the UI
+          // can localize. Provider 401/429 are classified by the catch below.
           if (error == null) return 'unknown error';
           if (typeof error === 'string') return error;
           if (error instanceof Error) return error.message;
           return 'internal error';
         },
+      });
+
+      await pipeUIMessageStreamToResponse({
+        response: res,
+        status: 200,
+        stream: uiStream,
       });
     } catch (err: unknown) {
       console.error('Pipili orchestration error:', err);
@@ -181,10 +205,17 @@ function contextStrLen(context: unknown): number {
   }
 }
 
-function checkComplexity(messages: Array<{ role: string; content: string }>): boolean {
-  const last = messages[messages.length - 1];
+function checkComplexity(messages: Array<unknown>): boolean {
+  const last = messages[messages.length - 1] as
+    | { content?: string; parts?: Array<{ type: string; text?: string }> }
+    | undefined;
   if (!last) return false;
-  const text = last.content.toLowerCase();
+  // v7 UIMessage carries text in `parts`; older shapes may still use `content`.
+  const textParts = (last.parts ?? [])
+    .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+    .map((p) => p.text)
+    .join(' ');
+  const text = (textParts || last.content || '').toLowerCase();
 
   if (text.length > 400) return true;
 

@@ -7,6 +7,8 @@ export { TextSelectionToolbar } from './TextSelectionToolbar.js';
 export { WordTapHandler } from './WordTapHandler.js';
 export { PipiliChatProvider, usePipiliChat } from './PipiliChatProvider.js';
 export type { PipiliChatState } from './PipiliChatProvider.js';
+export { PipiliChat } from './PipiliChat.js';
+export type { PipiliChatProps } from './PipiliChat.js';
 export { PipiliMessage } from './PipiliMessage.js';
 export type { PipiliMessageProps } from './PipiliMessage.js';
 export { HintControls } from './HintControls.js';

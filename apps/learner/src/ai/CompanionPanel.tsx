@@ -1,10 +1,10 @@
 import { useCallback, useEffect } from 'react';
-import { AIChat } from '@open-edu/design-system';
-import { cn } from '@open-edu/design-system';
+import { Button, cn } from '@open-edu/design-system';
 import { X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
 import { usePipiliChat } from './PipiliChatProvider';
+import { PipiliChat } from './PipiliChat';
 
 const suggestedQuestions = [
   'Can you explain what I just read?',
@@ -19,7 +19,7 @@ function PipiliCompanionContent(): JSX.Element {
   const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
-  const isLoading = status === 'submitted' || status === 'streaming';
+  const isStreaming = status === 'submitted' || status === 'streaming';
 
   const handleSend = useCallback(
     (text: string) => {
@@ -57,6 +57,8 @@ function PipiliCompanionContent(): JSX.Element {
     };
   }, [isOpen, handleClose]);
 
+  const showSuggestions = companionMessages.length === 0;
+
   return (
     <>
       <div
@@ -79,63 +81,29 @@ function PipiliCompanionContent(): JSX.Element {
       >
         <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
           <h2 className="text-h3 font-display">{t('learner.ai.companion')}</h2>
-          <button
+          <Button
             type="button"
-            className="hover:bg-surface-container-high text-on-surface-variant rounded-md p-1 transition-colors"
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            aria-label="Close companion panel"
+            aria-label={t('learner.right_sidebar.close')}
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center gap-2 px-4 py-2">
-            {isLoading && (
-              <button
-                type="button"
-                onClick={stop}
-                className="text-destructive text-xs"
-                data-testid="pipili-stop"
-              >
-                {t('pipili.stop')}
-              </button>
-            )}
-            {(error || status === 'ready') && messages.length > 0 && (
-              <button
-                type="button"
-                onClick={handleRetry}
-                className="text-xs"
-                data-testid="pipili-retry"
-              >
-                {t('pipili.retry')}
-              </button>
-            )}
-          </div>
-          <AIChat
-            messages={messages.map(
-              (m: { role: string; content: string; annotations?: unknown[] }) => ({
-                role: m.role === 'assistant' ? 'ai' : 'user',
-                text: m.content ?? '',
-                citations:
-                  Array.isArray(m.annotations) && m.annotations.length > 0
-                    ? (
-                        m.annotations[m.annotations.length - 1] as {
-                          citations?: Array<{ source: string; text: string }>;
-                        }
-                      )?.citations
-                    : undefined,
-              }),
-            )}
-            onSend={handleSend}
-            isThinking={isLoading}
-            suggestedQuestions={companionMessages.length === 0 ? suggestedQuestions : undefined}
-            onSuggestedQuestionSelect={
-              companionMessages.length === 0 ? handleSuggestedQuestion : undefined
-            }
-            placeholder="Ask a question about this lesson..."
-            className="min-h-0 flex-1"
-          />
-        </div>
+        <PipiliChat
+          messages={messages}
+          onSend={handleSend}
+          onStop={stop}
+          onRetry={handleRetry}
+          showStop
+          showRetry={Boolean(error || status === 'ready')}
+          isStreaming={isStreaming}
+          suggestedQuestions={showSuggestions ? suggestedQuestions : undefined}
+          onSuggestedQuestionSelect={showSuggestions ? handleSuggestedQuestion : undefined}
+          placeholder={t('learner.right_sidebar.chat_placeholder')}
+          className="min-h-0 flex-1"
+        />
       </div>
     </>
   );

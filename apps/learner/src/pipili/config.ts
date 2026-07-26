@@ -10,11 +10,23 @@ export const PIPILI_CONFIG = {
   ESCALATION_MODEL_TIMEOUT_MS: 60_000,
 } as const;
 
+// AI SDK v7 UIMessage carries text in a `parts` array (no top-level
+// `content`). Some legacy/older clients may still send `content`. Accept both
+// so the transport is forgiving; convertToModelMessages enforces the real
+// UIMessage shape on the server.
 export const pipiliMessageSchema = z.object({
   id: z.string(),
   role: z.enum(['user', 'assistant', 'system']),
-  content: z.string().max(PIPILI_CONFIG.MAX_MESSAGE_LENGTH),
-  timestamp: z.number(),
+  parts: z
+    .array(
+      z.object({
+        type: z.string(),
+        text: z.string().optional(),
+      }),
+    )
+    .optional(),
+  content: z.string().max(PIPILI_CONFIG.MAX_MESSAGE_LENGTH).optional(),
+  timestamp: z.number().optional(),
 });
 
 export const pipiliContextSchema = z.object({
