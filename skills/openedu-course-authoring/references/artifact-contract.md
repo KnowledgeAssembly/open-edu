@@ -1,0 +1,85 @@
+# Artifact Contract
+
+Every run of the Open-Edu Course Authoring skill produces an output directory with these artifacts:
+
+```
+course-output/
+├── course-brief.md
+├── lesson-blueprints.json
+├── course-spec.json
+├── course-spec.md
+├── quality-report.json
+└── package/                 # only when Open-Edu tooling is detected
+```
+
+## Canonical Artifact
+
+`course-spec.json` is the single source of truth. It conforms to the schema defined by `packages/course-compiler/src/parser/json-input.ts`.
+
+### Top-Level Schema
+
+| Field         | Type                    | Required | Description                |
+| ------------- | ----------------------- | -------- | -------------------------- |
+| `format`      | `"openedu-course-spec"` | yes      | Fixed value                |
+| `version`     | `1`                     | yes      | Fixed numeric literal      |
+| `generatedAt` | ISO 8601 string         | yes      | Timestamp of generation    |
+| `metadata`    | object                  | yes      | Course-level metadata      |
+| `lessons`     | `LessonObject[]`        | yes      | Non-empty array of lessons |
+
+### Metadata Schema
+
+| Field            | Type                                         | Required | Description                  |
+| ---------------- | -------------------------------------------- | -------- | ---------------------------- |
+| `title`          | string                                       | yes      | Course title                 |
+| `description`    | string                                       | yes      | Course description           |
+| `author`         | string                                       | no       | Author name                  |
+| `version`        | string                                       | no       | Course version               |
+| `difficulty`     | `"beginner" \| "intermediate" \| "advanced"` | no       | Difficulty level             |
+| `estimatedHours` | number                                       | no       | Total estimated hours        |
+| `generated`      | boolean                                      | yes      | Always `true` for LLM output |
+
+### Lesson Schema
+
+| Field              | Type                | Required | Description                            |
+| ------------------ | ------------------- | -------- | -------------------------------------- |
+| `id`               | string (kebab-case) | yes      | Unique lesson ID                       |
+| `title`            | string              | yes      | Human-readable lesson title            |
+| `objectives`       | `string[]`          | yes      | Non-empty array of learning objectives |
+| `coreIdea`         | string              | yes      | Main concept in 1-3 sentences          |
+| `examples`         | `string[]`          | yes      | Illustrative examples                  |
+| `misconceptions`   | `string[]`          | yes      | Common misconceptions to address       |
+| `estimatedMinutes` | number              | no       | Estimated duration in minutes          |
+| `activities`       | `ActivityObject[]`  | yes      | Ordered array of activities            |
+
+### Activity Schema
+
+| Field          | Type                                                                                                   | Required | Description                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------- |
+| `step`         | `"observe" \| "guided_practice" \| "independent_practice" \| "mastery_check" \| "positive_completion"` | yes      | Pedagogical step role                                   |
+| `order`        | number                                                                                                 | yes      | Sequential order (starting at 1)                        |
+| `type`         | `"reading" \| "exercise" \| "quiz" \| "reflection" \| "widget"`                                        | yes      | Activity type                                           |
+| `description`  | string                                                                                                 | yes      | Short description of the activity                       |
+| `instructions` | string                                                                                                 | no       | For reading/exercise types: the content or instructions |
+| `examples`     | `string[]`                                                                                             | no       | For exercise types: example problems                    |
+| `questions`    | `MCQQuestion[]`                                                                                        | no       | For quiz type: array with exactly 4-option MCQs         |
+| `widgetId`     | string                                                                                                 | no       | For widget type: canonical widget ID                    |
+| `widgetConfig` | `Record<string, unknown>`                                                                              | no       | For widget type: widget-specific config                 |
+
+### MCQQuestion Schema
+
+| Field          | Type        | Required | Description                        |
+| -------------- | ----------- | -------- | ---------------------------------- |
+| `question`     | string      | yes      | Question text                      |
+| `options`      | `string[4]` | yes      | Exactly 4 options                  |
+| `correctIndex` | 0-3         | yes      | Zero-based index of correct answer |
+
+## ID Generation Rules
+
+- Lesson IDs: kebab-case, unique within course. Pattern: `{course-prefix}-{number}` or a descriptive slug.
+- Activity IDs: auto-generated by compiler from step + description. Not manually specified in JSON.
+
+## Failure Semantics
+
+- Compiler errors (schema validation failures, duplicate IDs, broken references) fail the run.
+- Compiler warnings (missing objectives, empty lessons) are reported but do not fail.
+- A run is successful only when `course-spec.json` exists and every required validation gate passes.
