@@ -7,6 +7,7 @@ const sidebars: SidebarsConfig = {
     'learner',
     'package-format',
     'package-authoring',
+    'agentic-authoring',
     {
       type: 'category',
       label: 'Widget Library',

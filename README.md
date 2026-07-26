@@ -43,6 +43,22 @@ edu i18n:missing ./locales ./target-lang # Find missing translations
 edu curriculum:generate --pdf ./textbook.pdf --level B --subject math  # PDF → course spec
 ```
 
+### Agentic Course Authoring
+
+Generate complete course specifications using the `openedu-course-authoring` agent skill — no manual JSON authoring required:
+
+```bash
+# Load the skill in your agent and run:
+# "Create a fractions course for 8-10 year olds with 3 lessons"
+```
+
+The skill auto-detects whether it's running inside an Open-Edu monorepo:
+
+- **Portable mode** (anywhere): produces `course-spec.json` + `quality-report.json` with structural validation
+- **Repository mode** (inside monorepo): adds full compilation + package validation + content linting
+
+See the [Agentic Course Authoring Guide](apps/docs/docs/agentic-authoring.md) for the full workflow, quality rubric, and widget catalog integration. Skill code lives at `skills/openedu-course-authoring/`.
+
 ## Theming System
 
 The framework ships with **3 built-in themes** that control colors, typography, spacing, and border radii via CSS custom properties (`--oe-*`). All runtime components use Tailwind utility classes mapped to these tokens.

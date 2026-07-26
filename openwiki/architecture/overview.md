@@ -87,6 +87,10 @@ Provides the widget registry and built-in widgets used by content nodes and runt
 
 Compiles course-spec Markdown or JSON into validated package structures.
 
+### Agentic Course Authoring Skill
+
+The `skills/openedu-course-authoring/` directory contains the portable agentic course-authoring skill. It uses the course-compiler and CLI as its authoritative validation backend, distinguishing between structural-only validation (portable mode) and full compiler validation (repository mode). See [content and workflows](../domain/content-and-workflows.md#agentic-course-authoring) for the complete reference.
+
 ### `@open-edu/pipeline` and `@open-edu/llm-config`
 
 Support AI-assisted curriculum generation from PDFs and abstract over model providers.
