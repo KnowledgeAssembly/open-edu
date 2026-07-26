@@ -1,3 +1,8 @@
+/**
+ * @deprecated Use server-side Pipili orchestration via usePipiliChat() instead.
+ * This provider will be removed once the migration to the Pipili endpoint is complete.
+ */
+
 import { z } from 'zod';
 import type {
   AIProvider,

@@ -1,19 +1,10 @@
 import { useCallback, useEffect } from 'react';
 import { AIChat } from '@open-edu/design-system';
-import type { ChatMessage } from '@open-edu/design-system';
 import { cn } from '@open-edu/design-system';
 import { X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
-import type { ConversationMessage } from '@open-edu/ai-companion';
-
-function toChatMessage(msg: ConversationMessage): ChatMessage {
-  return {
-    role: msg.role === 'system' ? 'ai' : msg.role,
-    text: msg.text,
-    citations: msg.citations,
-  };
-}
+import { usePipiliChat } from './PipiliChatProvider';
 
 const suggestedQuestions = [
   'Can you explain what I just read?',
@@ -22,11 +13,13 @@ const suggestedQuestions = [
   'What are the key concepts here?',
 ];
 
-export function CompanionPanel(): JSX.Element | null {
+function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
-  const { panelState, setPanelState, messages, isLoading, sendMessage } = useCompanion();
+  const { panelState, setPanelState, messages: companionMessages } = useCompanion();
+  const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
+  const isLoading = status === 'submitted' || status === 'streaming';
 
   const handleSend = useCallback(
     (text: string) => {
@@ -45,6 +38,11 @@ export function CompanionPanel(): JSX.Element | null {
   const handleClose = useCallback(() => {
     setPanelState('closed');
   }, [setPanelState]);
+
+  const handleRetry = useCallback(() => {
+    clearError();
+    void regenerate();
+  }, [clearError, regenerate]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -91,12 +89,49 @@ export function CompanionPanel(): JSX.Element | null {
           </button>
         </div>
         <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex items-center gap-2 px-4 py-2">
+            {isLoading && (
+              <button
+                type="button"
+                onClick={stop}
+                className="text-destructive text-xs"
+                data-testid="pipili-stop"
+              >
+                {t('pipili.stop')}
+              </button>
+            )}
+            {(error || status === 'ready') && messages.length > 0 && (
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="text-xs"
+                data-testid="pipili-retry"
+              >
+                {t('pipili.retry')}
+              </button>
+            )}
+          </div>
           <AIChat
-            messages={messages.map(toChatMessage)}
+            messages={messages.map(
+              (m: { role: string; content: string; annotations?: unknown[] }) => ({
+                role: m.role === 'assistant' ? 'ai' : 'user',
+                text: m.content ?? '',
+                citations:
+                  Array.isArray(m.annotations) && m.annotations.length > 0
+                    ? (
+                        m.annotations[m.annotations.length - 1] as {
+                          citations?: Array<{ source: string; text: string }>;
+                        }
+                      )?.citations
+                    : undefined,
+              }),
+            )}
             onSend={handleSend}
             isThinking={isLoading}
-            suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
-            onSuggestedQuestionSelect={messages.length === 0 ? handleSuggestedQuestion : undefined}
+            suggestedQuestions={companionMessages.length === 0 ? suggestedQuestions : undefined}
+            onSuggestedQuestionSelect={
+              companionMessages.length === 0 ? handleSuggestedQuestion : undefined
+            }
             placeholder="Ask a question about this lesson..."
             className="min-h-0 flex-1"
           />
@@ -104,4 +139,8 @@ export function CompanionPanel(): JSX.Element | null {
       </div>
     </>
   );
+}
+
+export function CompanionPanel(): JSX.Element | null {
+  return <PipiliCompanionContent />;
 }

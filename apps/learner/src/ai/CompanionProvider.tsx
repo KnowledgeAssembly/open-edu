@@ -14,6 +14,7 @@ import type {
   AIResponse,
   SearchResponse,
   EnrichedResult,
+  PipiliResponseMetadata,
 } from '@open-edu/ai-companion';
 import {
   ConversationManager,
@@ -37,6 +38,11 @@ export interface CompanionContextValue {
   search: (query: string) => SearchResponse;
   clearConversation: () => void;
   contextManager: ContextManager;
+  persistAssistantMessage: (msg: {
+    id: string;
+    text: string;
+    metadata?: PipiliResponseMetadata;
+  }) => void;
 }
 
 export interface CompanionProviderProps {
@@ -173,6 +179,28 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
     setMessages([]);
   }, []);
 
+  const persistAssistantMessage = useCallback(
+    (msg: { id: string; text: string; metadata?: PipiliResponseMetadata }) => {
+      const services = servicesRef.current;
+      if (!services) return;
+      const sessionId = services.conversationManager.currentSession;
+      if (!sessionId) return;
+      const aiMsg: ConversationMessage = {
+        id: msg.id,
+        role: 'ai',
+        text: msg.text,
+        timestamp: Date.now(),
+        citations: msg.metadata?.citations?.map((c) => ({
+          source: c.source,
+          text: c.text,
+        })),
+      };
+      services.conversationManager.addMessage(sessionId, aiMsg);
+      setMessages((prev) => [...prev, aiMsg]);
+    },
+    [],
+  );
+
   const value = useMemo<CompanionContextValue>(
     () => ({
       panelState,
@@ -184,8 +212,18 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
       search,
       clearConversation,
       contextManager: contextManagerRef.current,
+      persistAssistantMessage,
     }),
-    [panelState, messages, isLoading, context, sendMessage, search, clearConversation],
+    [
+      panelState,
+      messages,
+      isLoading,
+      context,
+      sendMessage,
+      search,
+      clearConversation,
+      persistAssistantMessage,
+    ],
   );
 
   return <CompanionContext.Provider value={value}>{children}</CompanionContext.Provider>;

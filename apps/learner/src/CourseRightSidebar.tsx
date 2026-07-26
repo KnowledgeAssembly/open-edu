@@ -1,40 +1,29 @@
 import { useState, useCallback } from 'react';
 import { AIChat, Tabs, TabsList, TabsTrigger, TabsContent } from '@open-edu/design-system';
-import type { ChatMessage } from '@open-edu/design-system';
 import { FileText, Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useRuntimeOptional } from '@open-edu/runtime';
-import { useCompanion } from './ai';
-import type { ConversationMessage } from '@open-edu/ai-companion';
+import { useCompanion, usePipiliChat } from './ai';
 import { NotePanel } from './notes/NotePanel';
 import type { AppView } from './AppShell';
-
-function toChatMessage(msg: ConversationMessage): ChatMessage {
-  return {
-    role: msg.role === 'system' ? 'ai' : msg.role,
-    text: msg.text,
-    citations: msg.citations,
-  };
-}
 
 export interface CourseRightSidebarProps {
   onNavigate?: (view: AppView) => void;
   width?: number;
 }
 
-export function CourseRightSidebar({
-  onNavigate,
-  width = 320,
-}: CourseRightSidebarProps): JSX.Element | null {
+function SidebarContent({ onNavigate, width = 320 }: CourseRightSidebarProps): JSX.Element | null {
   const { t } = useTranslation();
   const runtime = useRuntimeOptional();
-  const { messages, isLoading, sendMessage, panelState, setPanelState } = useCompanion();
+  const { panelState, setPanelState } = useCompanion();
+  const { messages, sendMessage, status } = usePipiliChat();
   const [activeTab, setActiveTab] = useState<'pipili' | 'notepad'>('pipili');
 
   const courseId = runtime?.loadedPackage.manifest.id ?? '';
   const lessonId = runtime?.currentNodeId ?? '';
 
   const isOpen = panelState !== 'closed';
+  const isLoading = status === 'submitted' || status === 'streaming';
 
   const suggestedQuestions = [
     t('learner.right_sidebar.suggest_explain'),
@@ -110,7 +99,20 @@ export function CourseRightSidebar({
           className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
           <AIChat
-            messages={messages.map(toChatMessage)}
+            messages={messages.map(
+              (m: { role: string; content: string; annotations?: unknown[] }) => ({
+                role: m.role === 'assistant' ? 'ai' : 'user',
+                text: m.content ?? '',
+                citations:
+                  Array.isArray(m.annotations) && m.annotations.length > 0
+                    ? (
+                        m.annotations[m.annotations.length - 1] as {
+                          citations?: Array<{ source: string; text: string }>;
+                        }
+                      )?.citations
+                    : undefined,
+              }),
+            )}
             onSend={handleSend}
             isThinking={isLoading}
             suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
@@ -132,4 +134,8 @@ export function CourseRightSidebar({
       </Tabs>
     </aside>
   );
+}
+
+export function CourseRightSidebar(props: CourseRightSidebarProps): JSX.Element | null {
+  return <SidebarContent {...props} />;
 }

@@ -1,14 +1,29 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CompanionPanel } from './CompanionPanel';
+
+vi.mock('@ai-sdk/react', () => ({
+  useChat: () => ({
+    messages: [],
+    append: vi.fn(),
+    reload: vi.fn(),
+    status: 'ready',
+    error: undefined,
+    stop: vi.fn(),
+    setMessages: vi.fn(),
+  }),
+}));
 import { CompanionProvider, useCompanion } from './CompanionProvider';
+import { PipiliChatProvider } from './PipiliChatProvider';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 function renderWithProvider(ui: React.ReactElement) {
   return render(
     <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
-      <CompanionProvider>{ui}</CompanionProvider>
+      <CompanionProvider>
+        <PipiliChatProvider>{ui}</PipiliChatProvider>
+      </CompanionProvider>
     </I18nProvider>,
   );
 }
@@ -37,9 +52,11 @@ describe('CompanionPanel', () => {
     render(
       <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
         <CompanionProvider>
-          <OpenStateWrapper>
-            <CompanionPanel />
-          </OpenStateWrapper>
+          <PipiliChatProvider>
+            <OpenStateWrapper>
+              <CompanionPanel />
+            </OpenStateWrapper>
+          </PipiliChatProvider>
         </CompanionProvider>
       </I18nProvider>,
     );

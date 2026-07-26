@@ -8,6 +8,7 @@ import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { llmProxyHandler } from './src/llm-proxy/index.js';
 import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
+import { createPipiliHandler } from './src/pipili/index.js';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -72,6 +73,23 @@ function eduDataPlugin(): Plugin {
     },
     configureServer(server) {
       server.middlewares.use(llmProxyHandler);
+
+      // Pipili AI Companion endpoint
+      const pipiliHandler = createPipiliHandler();
+      server.middlewares.use('/api/pipili', async (req, res, next) => {
+        if (req.url?.startsWith('/chat')) {
+          try {
+            await pipiliHandler(req, res);
+          } catch (err) {
+            if (!res.headersSent) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
+            }
+          }
+          return;
+        }
+        next();
+      });
 
       // Load dictionary on server startup
       const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
