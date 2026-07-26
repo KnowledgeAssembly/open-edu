@@ -481,4 +481,51 @@ describe('summarize-quality (rubric extension)', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('QC-OBJ-02: explicit assessmentObjectiveIds with valid mapping passes', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1',
+        objectives: ['obj-a', 'obj-b'],
+        objectiveIds: ['obj-a', 'obj-b'],
+        assessmentObjectiveIds: ['obj-a', 'obj-b'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      const obj02Errors = result.findings.filter((f) => f.checkId === 'QC-OBJ-02');
+      strictEqual(obj02Errors.length, 0, 'should not flag when assessmentObjectiveIds match objectiveIds');
+      strictEqual(result.success, true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-OBJ-02: explicit assessmentObjectiveIds with mismatched IDs flags', () => {
+    const dir = createTempDir();
+    try {
+      const blueprint = [{
+        id: 'l1', title: 'L1',
+        objectives: ['obj-a'],
+        objectiveIds: ['obj-a'],
+        assessmentObjectiveIds: ['obj-nonexistent'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-OBJ-02'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

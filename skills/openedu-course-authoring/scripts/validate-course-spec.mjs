@@ -17,6 +17,7 @@ const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
  */
 export function validateCourseSpec(specPath, outputDir, options = {}) {
   const opts = { ...options };
+  const skipWrite = opts.skipWrite === true;
 
   /** @type {ValidationDiagnostic[]} */
   const errors = [];
@@ -30,7 +31,7 @@ export function validateCourseSpec(specPath, outputDir, options = {}) {
   const commands = [];
 
   // Ensure output directory exists
-  if (outputDir) {
+  if (outputDir && !skipWrite) {
     mkdirSync(outputDir, { recursive: true });
   }
 
@@ -41,7 +42,7 @@ export function validateCourseSpec(specPath, outputDir, options = {}) {
       message: `File not found: ${specPath || '(no path provided)'}`,
       code: 'FILE_NOT_FOUND',
     });
-    writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
+    if (!skipWrite) writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
     return {
       success: false, errors, warnings, data, compilerAvailable, compilerResult,
       validationMode, commands,
@@ -59,7 +60,7 @@ export function validateCourseSpec(specPath, outputDir, options = {}) {
       message: `JSON parse error: ${err instanceof Error ? err.message : String(err)}`,
       code: 'JSON_PARSE_ERROR',
     });
-    writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
+    if (!skipWrite) writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
     return {
       success: false, errors, warnings, data, compilerAvailable, compilerResult,
       validationMode, commands,
@@ -82,16 +83,15 @@ export function validateCourseSpec(specPath, outputDir, options = {}) {
     }, 0) || 0,
   };
 
-  // Compiler invocation
-  if (opts.command && typeof opts.command === 'string') {
-    const cmdParts = opts.command.split(/\s+/);
+  // Compiler invocation via structured argv or facade function (for tests)
+  if (opts.cmdArgv && Array.isArray(opts.cmdArgv)) {
     compilerAvailable = true;
 
-    const argv = [...cmdParts];
-    for (let i = 0; i < argv.length; i++) {
-      if (argv[i] === '{spec}') argv[i] = specPath;
-      if (argv[i] === '{dir}') argv[i] = outputDir;
-    }
+    const argv = opts.cmdArgv.map((arg) => {
+      if (arg === '{spec}') return specPath;
+      if (arg === '{dir}') return outputDir;
+      return arg;
+    });
 
     compilerResult = runOpenEduCommand(argv, { cwd: opts.cwd });
 
@@ -121,45 +121,43 @@ export function validateCourseSpec(specPath, outputDir, options = {}) {
         code: 'COMPILER_PASSED',
       });
     }
-  } else if (opts.command) {
+  } else if (opts.facade && typeof opts.facade === 'function') {
     compilerAvailable = true;
     validationMode = 'compiler';
 
-    if (Array.isArray(opts.command) && typeof opts.command[0] === 'function') {
-      try {
-        compilerResult = opts.command[0](specPath, outputDir);
+    try {
+      compilerResult = opts.facade(specPath, outputDir);
 
-        commands.push({
-          phase: 'compile',
-          name: 'edu compile (fake)',
-          command: [],
-          status: compilerResult.status,
-          stdout: compilerResult.stdout || '',
-          stderr: compilerResult.stderr || '',
-          durationMs: compilerResult.durationMs || 0,
-        });
+      commands.push({
+        phase: 'compile',
+        name: 'edu compile (facade)',
+        command: [],
+        status: compilerResult.status,
+        stdout: compilerResult.stdout || '',
+        stderr: compilerResult.stderr || '',
+        durationMs: compilerResult.durationMs || 0,
+      });
 
-        if (compilerResult.status !== 0) {
-          errors.push({
-            severity: 'error',
-            message: `Compiler exited with status ${compilerResult.status}`,
-            code: 'COMPILER_FAILED',
-            detail: compilerResult.stderr || compilerResult.stdout,
-          });
-        }
-      } catch (err) {
+      if (compilerResult.status !== 0) {
         errors.push({
           severity: 'error',
-          message: `Compiler invocation error: ${err instanceof Error ? err.message : String(err)}`,
-          code: 'COMPILER_ERROR',
+          message: `Compiler exited with status ${compilerResult.status}`,
+          code: 'COMPILER_FAILED',
+          detail: compilerResult.stderr || compilerResult.stdout,
         });
       }
+    } catch (err) {
+      errors.push({
+        severity: 'error',
+        message: `Compiler invocation error: ${err instanceof Error ? err.message : String(err)}`,
+        code: 'COMPILER_ERROR',
+      });
     }
   }
 
   const success = errors.length === 0;
 
-  writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
+  if (!skipWrite) writeReport(outputDir, errors, warnings, data, commands, validationMode, compilerAvailable, compilerResult);
 
   return {
     success, errors, warnings, data, compilerAvailable, compilerResult,
@@ -447,7 +445,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const compileIdx = process.argv.indexOf('--compile');
   const options = {};
   if (compileIdx !== -1 && process.argv[compileIdx + 1]) {
-    options.command = process.argv[compileIdx + 1];
+    options.cmdArgv = process.argv[compileIdx + 1].split(/\s+/);
   }
   const result = validateCourseSpec(specPath, outputDir, options);
   console.log(JSON.stringify(result, null, 2));
@@ -456,8 +454,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 /**
  * @typedef {object} ValidateOptions
- * @property {string|(() => object)} [command] - compile command string or fake runner
- * @property {string} [cwd]
+ * @property {string[]} [cmdArgv] - structured argv array for compiler invocation
+ * @property {((specPath: string, outputDir: string) => { status: number, stdout: string, stderr: string, durationMs?: number })} [facade] - test-only compiler facade
+ * @property {string} [cwd] - working directory for command execution
+ * @property {boolean} [skipWrite] - skip writing quality-report.json (used during orchestration)
  */
 
 /**

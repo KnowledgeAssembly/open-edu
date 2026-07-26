@@ -62,7 +62,7 @@ export function loadWidgetCatalog(catalogPath) {
  * @returns {WidgetEntry|undefined}
  */
 export function getWidgetById(catalog, id) {
-  return catalog.find((w) => w.id === id);
+  return catalog.find((w) => w && w.id === id);
 }
 
 /**

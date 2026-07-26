@@ -82,8 +82,6 @@ When source materials (PDFs, textbooks) are provided:
 
 See `references/source-materials.md` for full profile selection guide and pipeline options.
 
-See `references/source-materials.md` for full profile selection guide and pipeline options.
-
 ## Output Directory Structure
 
 ```

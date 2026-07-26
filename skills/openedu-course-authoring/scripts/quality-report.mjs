@@ -38,9 +38,9 @@ export function createQualityReport({
   };
 
   // Phase 1: Structural + compiler validation
-  const validationOptions = {};
-  if (qualityOptions?.command) {
-    validationOptions.command = qualityOptions.command;
+  const validationOptions = { skipWrite: true };
+  if (qualityOptions?.cmdArgv) {
+    validationOptions.cmdArgv = qualityOptions.cmdArgv;
   }
   if (cwd) validationOptions.cwd = cwd;
 

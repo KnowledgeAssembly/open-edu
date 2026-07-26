@@ -104,9 +104,6 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
   let totalActivities = 0;
   let totalMinutes = 0;
   let widgetsUsed = 0;
-  // Collect all concepts introduced across lessons for assessment checks
-  /** @type {Map<string, string[]>} */
-  const lessonConcepts = new Map();
 
   for (let lessonIdx = 0; lessonIdx < blueprint.length; lessonIdx++) {
     const lesson = blueprint[lessonIdx];
@@ -132,21 +129,16 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
         (a) => a.step === 'mastery_check' || a.type === 'quiz' || (a.type === 'exercise' && a.feedback),
       );
       const assessmentObjectiveIds = new Set(lesson.assessmentObjectiveIds || []);
-      const activityObjectiveIds = new Set();
-      for (const act of activities) {
-        if (Array.isArray(act.objectiveIds)) {
-          for (const oid of act.objectiveIds) actObjectiveIds.add(oid);
-        }
-      }
+      const objectiveIdSet = new Set(lesson.objectiveIds || lessonObj.map((_, i) => `obj-${i}`));
 
       // With explicit mappings
       if (lesson.assessmentObjectiveIds && lesson.assessmentObjectiveIds.length > 0) {
         for (const oid of lesson.assessmentObjectiveIds) {
-          if (!lessonObj.some((o, i) => (lesson.objectiveIds ? lesson.objectiveIds[i] === oid : false))) {
+          if (!objectiveIdSet.has(oid)) {
             findings.push({
               checkId: 'QC-OBJ-02',
               severity: 'warning',
-              message: `Objective "${oid}" in lesson "${lessonId}" has no assessment signal`,
+              message: `Assessment objective "${oid}" in lesson "${lessonId}" does not match any objective ID`,
             });
           }
         }
@@ -194,7 +186,6 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
         }
       }
     }
-    lessonConcepts.set(lessonId, conceptsIntroduced);
 
     if (assessmentConcepts.length > 0 && conceptsIntroduced.length > 0) {
       const introSet = new Set(conceptsIntroduced);

@@ -208,4 +208,13 @@ describe('widget-catalog getCanonicalWidgetIds', () => {
     const ids = getCanonicalWidgetIds(catalog);
     strictEqual(ids.has('physics.quantum-simulator'), true);
   });
+
+  it('handles null entries in catalog array without throwing', () => {
+    const catalog = [null, { id: 'core.matching', name: 'Matching', status: 'stable' }];
+    const entry = getWidgetById(catalog, 'core.matching');
+    ok(entry);
+    strictEqual(entry.name, 'Matching');
+    // null entries should be skipped, not cause errors
+    strictEqual(isCanonicalWidget(catalog, 'core.matching'), true);
+  });
 });

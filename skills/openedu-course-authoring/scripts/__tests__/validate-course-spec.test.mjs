@@ -353,7 +353,7 @@ describe('validate-course-spec (compiler integration)', () => {
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
-        command: [makeFakeCompiler(0)],
+        facade: makeFakeCompiler(0),
       });
       strictEqual(result.compilerAvailable, true);
       strictEqual(result.validationMode, 'compiler');
@@ -368,7 +368,7 @@ describe('validate-course-spec (compiler integration)', () => {
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
-        command: [makeFakeCompiler(1)],
+        facade: makeFakeCompiler(1),
       });
       strictEqual(result.compilerAvailable, true);
       strictEqual(result.validationMode, 'compiler');
@@ -384,7 +384,7 @@ describe('validate-course-spec (compiler integration)', () => {
     try {
       writeJSON(dir, 'course-spec.json', makeValidSpec());
       const result = validateCourseSpec(join(dir, 'course-spec.json'), dir, {
-        command: [makeFakeCompiler(0)],
+        facade: makeFakeCompiler(0),
       });
       ok(result.compilerResult);
       strictEqual(result.compilerResult.status, 0);
