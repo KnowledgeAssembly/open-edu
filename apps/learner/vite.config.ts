@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, resolve, dirname } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
-import { scanAll, scanPackages, loadPackage, loadBundle } from '@open-edu/core';
+import { scanAll, scanPackages, loadPackage, loadBundle, ASSET_MIME_TYPES } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { llmProxyHandler } from './src/llm-proxy/index.js';
 import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
@@ -18,27 +18,6 @@ const CATALOG_DIR = process.env.EDU_CATALOG_DIR
 const PKGS_DIR = resolve(__dirname, '../../packages');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
-
-const ASSET_MIME_TYPES: Record<string, string> = {
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.ico': 'image/x-icon',
-  '.avif': 'image/avif',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-  '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg',
-  '.ogg': 'audio/ogg',
-  '.pdf': 'application/pdf',
-  '.json': 'application/json',
-  '.json.gz': 'application/gzip',
-  '.gz': 'application/gzip',
-  '.txt': 'text/plain',
-};
 
 function findAssetsDirs(catalogDir: string): string[] {
   const dirs: string[] = [];

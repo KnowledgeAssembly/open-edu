@@ -39,10 +39,12 @@ function InfoCard({
   region,
   onClose,
   cardRef,
+  resolveAsset,
 }: {
   region: z.infer<typeof regionSchema>;
   onClose: () => void;
   cardRef: React.RefObject<HTMLDivElement>;
+  resolveAsset?: (path: string) => string;
 }) {
   const titleId = `image-label-card-title-${region.id}`;
 
@@ -134,7 +136,7 @@ function InfoCard({
         <div style={{ marginTop: '0.5rem' }}>
           {region.image && (
             <img
-              src={`/assets/${region.image.replace(/^assets\//, '')}`}
+              src={resolveAsset?.(region.image) ?? `/assets/${region.image.replace(/^assets\//, '')}`}
               alt={region.title}
               data-testid="info-card-image"
               style={{ width: '100%', height: 'auto', borderRadius: '0.25rem' }}
@@ -152,8 +154,9 @@ function ImageLabelComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = imageLabelSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent = parsed.success && content && content.regions.length > 0;
@@ -374,7 +377,7 @@ function ImageLabelComponent(props: {
         }}
       >
         <img
-          src={`/assets/${content.image.replace(/^assets\//, '')}`}
+          src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
           alt={content.altText || 'Interactive educational image'}
           data-testid="image-label-image"
           style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -501,7 +504,7 @@ function ImageLabelComponent(props: {
                 </div>
               )}
               {isObserve && selectedRegionId === region.id && selectedRegion && (
-                <InfoCard region={selectedRegion} onClose={handleCardClose} cardRef={cardRef} />
+                <InfoCard region={selectedRegion} onClose={handleCardClose} cardRef={cardRef} resolveAsset={resolveAsset} />
               )}
             </div>
           );

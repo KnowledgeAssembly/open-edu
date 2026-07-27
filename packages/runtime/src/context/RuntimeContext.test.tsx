@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, renderHook, act } from '@testing-library/react';
 import { RuntimeProvider, useRuntime } from './RuntimeContext';
 import type { LoadedPackage } from '@open-edu/core';
@@ -412,6 +412,175 @@ describe('RuntimeProvider', () => {
     });
     expect(result.current.progressSnapshot?.answers).toEqual({
       'nodes/quiz-01.md': { type: 'quiz', selectedOptionId: 'b', score: 100 },
+    });
+  });
+
+  describe('resolveAsset', () => {
+    const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    const jpgBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+    const svgText = '<svg></svg>';
+
+    let createObjectURLSpy: ReturnType<typeof vi.fn<any[], string>>;
+    let revokeObjectURLSpy: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      createObjectURLSpy = vi.fn(() => `blob:mock/${Math.random().toString(36).slice(2)}`);
+      revokeObjectURLSpy = vi.fn();
+      vi.stubGlobal('URL', {
+        ...globalThis.URL,
+        createObjectURL: createObjectURLSpy,
+        revokeObjectURL: revokeObjectURLSpy,
+      });
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    function makePackageWithAssets(
+      assets: Array<{ path: string; data: ArrayBuffer }>,
+    ): LoadedPackage {
+      const assetMap = new Map<string, ArrayBuffer>();
+      for (const a of assets) {
+        assetMap.set(a.path, a.data);
+      }
+      return {
+        rootDir: '/tmp/test',
+        manifest: {
+          id: 'test-asset',
+          title: 'Test Asset',
+          version: '1.0.0',
+          author: 'A',
+          entry: 'nodes/lesson-01.md',
+        },
+        workflow: { routing: {} },
+        rewards: null,
+        cards: null,
+        nodes: [
+          {
+            path: '/tmp/nodes/lesson-01.md',
+            relativePath: 'nodes/lesson-01.md',
+            content: '# Hello',
+            node: { type: 'lesson', skills: undefined } as never,
+          },
+        ],
+        assetPaths: assets.map((a) => a.path),
+        assetMap,
+      };
+    }
+
+    it('returns a blob URL for an asset in the map', () => {
+      const assetPkg = makePackageWithAssets([
+        { path: 'images/photo.png', data: pngBytes.buffer as ArrayBuffer },
+      ]);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result } = renderHook(() => useRuntime(), { wrapper });
+      const url = result.current.resolveAsset('images/photo.png');
+      expect(url).toMatch(/^blob:/);
+    });
+
+    it('uses correct MIME type based on extension', () => {
+      const assetPkg = makePackageWithAssets([
+        { path: 'images/photo.png', data: pngBytes.buffer as ArrayBuffer },
+        { path: 'images/cover.jpg', data: jpgBytes.buffer as ArrayBuffer },
+        { path: 'icons/logo.svg', data: new TextEncoder().encode(svgText).buffer as ArrayBuffer },
+      ]);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result } = renderHook(() => useRuntime(), { wrapper });
+      result.current.resolveAsset('images/photo.png');
+      result.current.resolveAsset('images/cover.jpg');
+      result.current.resolveAsset('icons/logo.svg');
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(3);
+      const types = createObjectURLSpy.mock.calls.map(
+        (call: unknown[]) => (call[0] as Blob).type,
+      );
+      expect(types).toEqual(['image/png', 'image/jpeg', 'image/svg+xml']);
+    });
+
+    it('returns the same cached URL on repeated calls for same path', () => {
+      const assetPkg = makePackageWithAssets([
+        { path: 'images/photo.png', data: pngBytes.buffer as ArrayBuffer },
+      ]);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result } = renderHook(() => useRuntime(), { wrapper });
+      const url1 = result.current.resolveAsset('images/photo.png');
+      const url2 = result.current.resolveAsset('images/photo.png');
+      expect(url1).toBe(url2);
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to /assets/<path> for assets not in the map', () => {
+      const assetPkg = makePackageWithAssets([]);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result } = renderHook(() => useRuntime(), { wrapper });
+      const url = result.current.resolveAsset('missing/file.png');
+      expect(url).toBe('/assets/missing/file.png');
+      warnSpy.mockRestore();
+    });
+
+    it('returns /assets/<path> for non-blob fallback with external-looking paths', () => {
+      const assetPkg = makePackageWithAssets([]);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result } = renderHook(() => useRuntime(), { wrapper });
+      const url = result.current.resolveAsset('images/photo.png');
+      expect(url).toBe('/assets/images/photo.png');
+      warnSpy.mockRestore();
+    });
+
+    it('revokes blob URLs on unmount', () => {
+      const assetPkg = makePackageWithAssets([
+        { path: 'images/photo.png', data: pngBytes.buffer as ArrayBuffer },
+      ]);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result, unmount } = renderHook(() => useRuntime(), { wrapper });
+      const url = result.current.resolveAsset('images/photo.png');
+      expect(url).toMatch(/^blob:/);
+      unmount();
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith(url);
+    });
+
+    it('revokes old blob URLs when unmounted after asset resolution', () => {
+      const assetPkg = makePackageWithAssets([
+        { path: 'images/old.png', data: pngBytes.buffer as ArrayBuffer },
+      ]);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={assetPkg} engine={engine}>
+          {children}
+        </RuntimeProvider>
+      );
+      const { result, unmount } = renderHook(() => useRuntime(), { wrapper });
+      const url = result.current.resolveAsset('images/old.png');
+      expect(url).toMatch(/^blob:/);
+      expect(revokeObjectURLSpy).not.toHaveBeenCalledWith(url);
+
+      unmount();
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith(url);
     });
   });
 });

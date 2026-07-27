@@ -239,8 +239,9 @@ function LabelDiagramComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = labelDiagramSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent = parsed.success && content && content.labels.length > 0;
@@ -450,7 +451,7 @@ function LabelDiagramComponent(props: {
           }}
         >
           <img
-            src={`/assets/${content.image.replace(/^assets\//, '')}`}
+            src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
             alt={content.altText || 'Scientific diagram'}
             data-testid="label-diagram-image"
             style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -562,7 +563,7 @@ function LabelDiagramComponent(props: {
           }}
         >
           <img
-            src={`/assets/${content.image.replace(/^assets\//, '')}`}
+            src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
             alt={content.altText || 'Scientific diagram'}
             data-testid="label-diagram-image"
             style={{ width: '100%', height: 'auto', display: 'block' }}

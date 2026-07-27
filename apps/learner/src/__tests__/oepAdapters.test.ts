@@ -113,7 +113,7 @@ describe('storedCourseToLoadedPackage', () => {
     expect(loaded.manifest.id).toBe('test-course');
     expect(loaded.manifest.title).toBe('Test Course');
     expect(loaded.nodes).toHaveLength(2);
-    expect(loaded.assetPaths).toEqual(['assets/img.png']);
+    expect(loaded.assetPaths).toEqual(['img.png']);
     expect(loaded.workflow).toBeNull();
     expect(loaded.rewards).toBeNull();
     expect(loaded.cards).toBeNull();

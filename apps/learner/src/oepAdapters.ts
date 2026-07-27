@@ -122,7 +122,12 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
     };
   });
 
-  const assetPaths = course.assets.map((a) => a.path);
+  const assetPaths = course.assets.map((a) => a.path.replace(/^assets\//, ''));
+  const assetMap = new Map<string, ArrayBuffer>();
+  for (const a of course.assets) {
+    const normalized = a.path.replace(/^assets\//, '');
+    assetMap.set(normalized, a.data);
+  }
 
   return {
     rootDir: `${OEP_PREFIX}${course.id}`,
@@ -132,5 +137,6 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
     cards,
     nodes,
     assetPaths,
+    assetMap,
   };
 }

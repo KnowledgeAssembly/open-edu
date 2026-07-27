@@ -35,8 +35,9 @@ function AudioPlayerComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = useMemo(() => audioPlayerSchema.safeParse(rawConfig), [rawConfig]);
   const parsedState = useMemo(() => {
     const result = AudioPlayerStateSchema.safeParse(storedState);
@@ -155,7 +156,7 @@ function AudioPlayerComponent(props: {
     <div role="group" aria-label={config.title ?? 'Audio player'} data-testid="audio-player">
       <audio
         ref={audioRef}
-        src={config.audio?.replace(/^assets\//, '/assets/')}
+        src={resolveAsset?.(config.audio) ?? config.audio?.replace(/^assets\//, '/assets/')}
         loop={config.loop}
         preload="metadata"
       />

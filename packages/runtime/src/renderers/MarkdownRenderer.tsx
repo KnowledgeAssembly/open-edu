@@ -1,6 +1,7 @@
-import { useMemo, type ComponentProps, type ReactElement } from 'react';
+import { useMemo, useRef, type ComponentProps, type ReactElement } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { useTranslation } from '@open-edu/i18n';
+import { useRuntimeOptional } from '../context/RuntimeContext';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -217,8 +218,21 @@ export function MarkdownRenderer({
   components,
 }: MarkdownRendererProps): JSX.Element {
   const { t } = useTranslation();
+  const runtime = useRuntimeOptional();
+  const resolveAssetRef = useRef(runtime?.resolveAsset);
+  resolveAssetRef.current = runtime?.resolveAsset;
+
   const rendered = useMemo(() => {
     const merged: ComponentMap = { ...accessibleComponents, ...components };
+    if (resolveAssetRef.current) {
+      merged.img = ({ alt, src, ...props }: ComponentProps<'img'>) => {
+        const resolvedSrc = src ? resolveAssetRef.current!(src) : src;
+        if (!alt || alt.trim() === '') {
+          return <img {...props} src={resolvedSrc} alt="" aria-hidden="true" role="presentation" />;
+        }
+        return <img {...props} src={resolvedSrc} alt={alt} />;
+      };
+    }
     const processor = unified()
       .use(remarkParse)
       .use(remarkGfm)

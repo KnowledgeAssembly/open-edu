@@ -40,8 +40,9 @@ function HotspotComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = hotspotSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent = parsed.success && content && content.hotspots.length > 0;
@@ -265,7 +266,7 @@ function HotspotComponent(props: {
             }}
           >
             <img
-              src={`/assets/${content.image.replace(/^assets\//, '')}`}
+              src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
               alt={content.altText}
               data-testid="hotspot-image"
               style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -343,7 +344,7 @@ function HotspotComponent(props: {
         }}
       >
         <img
-          src={`/assets/${content.image.replace(/^assets\//, '')}`}
+          src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
           alt={content.altText}
           data-testid="hotspot-image"
           style={{ width: '100%', height: 'auto', display: 'block' }}

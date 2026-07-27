@@ -22,6 +22,7 @@ export interface LoadedPackage {
   cards: CardDefinitions | null;
   nodes: LoadedNode[];
   assetPaths: string[];
+  assetMap?: Map<string, ArrayBuffer>;
 }
 
 export interface LoadedBundle {

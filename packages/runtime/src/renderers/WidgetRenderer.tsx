@@ -65,7 +65,7 @@ export interface WidgetRendererProps {
 }
 
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
-  const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
   const { t } = useTranslation();
 
   const i18nContext = useContext(I18nContext);
@@ -99,6 +99,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     config: node.config ?? {},
     locale,
     emitInteraction,
+    resolveAsset,
     complete: (score?: number, state?: unknown) => {
       if (state !== undefined) {
         const answer: WidgetAnswer = {
@@ -125,7 +126,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 }
 
 function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
-  const { widgetRegistry, completeNode, answers, saveAnswer } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
   const { t } = useTranslation();
 
   const i18nContext = useContext(I18nContext);
@@ -153,6 +154,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
           nodeId,
           config: node.config ?? {},
           locale,
+          resolveAsset,
           emitInteraction: (data: Record<string, unknown>) => {
             console.debug('[widget:interaction]', manifest.fallback, data);
           },
@@ -199,6 +201,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     nodeId,
     config: node.config ?? {},
     locale,
+    resolveAsset,
     emitInteraction: (data: Record<string, unknown>) => {
       console.debug('[widget:interaction]', manifest.id, data);
     },

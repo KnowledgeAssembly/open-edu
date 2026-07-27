@@ -37,8 +37,9 @@ function VideoPlayerComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = useMemo(() => videoPlayerSchema.safeParse(rawConfig), [rawConfig]);
   const parsedState = useMemo(() => {
     const result = VideoPlayerStateSchema.safeParse(storedState);
@@ -150,8 +151,8 @@ function VideoPlayerComponent(props: {
     <div role="group" aria-label={config.title ?? 'Video player'} data-testid="video-player">
       <video
         ref={videoRef}
-        src={config.video?.replace(/^assets\//, '/assets/')}
-        poster={config.poster?.replace(/^assets\//, '/assets/')}
+        src={(resolveAsset && config.video) ? resolveAsset(config.video) : config.video?.replace(/^assets\//, '/assets/')}
+        poster={(resolveAsset && config.poster) ? resolveAsset(config.poster) : config.poster?.replace(/^assets\//, '/assets/')}
         preload="metadata"
         className="w-full rounded-lg"
       />
