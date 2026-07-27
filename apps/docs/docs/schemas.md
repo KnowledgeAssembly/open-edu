@@ -31,6 +31,10 @@ The schema package is the single source of truth for all data structures in the 
 | `CardDefinitionsSchema`                                                                                | Object wrapper `{ cards: [...] }` for card definitions                                       |
 | `CardTypeSchema`                                                                                       | Enum: `knowledge`, `skill`, `achievement`, `exploration`, `mentor`                           |
 | `CardDifficultySchema`                                                                                 | Enum: `easy`, `medium`, `hard`                                                               |
+| `DistributionManifestSchema`                                                                           | `.oep` archive manifest — format version, identity, checksum, signature status               |
+| `CatalogSchema`                                                                                        | Static registry catalog with package entries and version entries                             |
+| `CatalogPackageEntrySchema`                                                                            | Single catalog package — id, title, description, versions array                              |
+| `CatalogVersionEntrySchema`                                                                            | Version entry — version string, download URL, checksum, size                                 |
 
 ## Usage
 

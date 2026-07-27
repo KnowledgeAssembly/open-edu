@@ -1,7 +1,7 @@
 ---
 type: Architecture Overview
 title: Architecture Overview
-description: High-level map of the Open-Edu monorepo architecture, including content loading, workflow execution, runtime rendering, the widget catalog pipeline used by core and the CLI, and the SVG explorer widget family.
+description: High-level map of the Open-Edu monorepo architecture, including content loading, workflow execution, runtime rendering, the widget catalog pipeline used by core and the CLI, the SVG explorer widget family, course distribution, and the Pipili AI companion.
 tags: [openwiki, architecture, monorepo, runtime]
 ---
 
@@ -114,7 +114,29 @@ Key architecture:
 - **Validator registry** (`validation/registry.ts`) — Pluggable subject validators run only when profile enables them.
 - **Resume & artifact identity** — Config hash includes PDF content, profile, scope, language, locale; `pipeline-manifest.json` prevents cross-scope reuse.
 
-**LLM Config** (`@open-edu/llm-config`) provides per-stage model routing with environment variable and CLI override support. Stages with low reasoning needs (classification, generation) use `gpt-4o-mini`; structural stages (concept design, blueprinting, review) use stronger reasoning models like `gpt-4o`.
+**LLM Config** (`@open-edu/llm-config`) provides per-stage model routing with environment variable and CLI override support. Stages with low reasoning needs (classification, generation) use `gpt-4o-mini`; structural stages (concept design, blueprinting, review) use stronger reasoning models like `gpt-4o`. Also includes a **ModelFactory** with two-tier routing (fast/escalation) for AI SDK v4 streaming, provider capability reporting, and environment variable-driven model resolution.
+
+### `@open-edu/ai-companion`
+
+Provides search, dictionary, conversation, and provider interfaces for the AI companion feature. Includes the **Pipili subsystem**:
+
+- **Context normalization/bounding** (`src/pipili/context-utils.ts`) — priority-based context assembly from page, widget, lesson, module, course, notes, assessment, and learner profile
+- **Hint progression engine** (`src/pipili/hint-utils.ts`) — graduated hint levels (nudge → scaffold → answer) with configurable instructions
+- **Pipili metadata and V2 extension seams** for future capability expansion
+
+The learner app implements the server-side Pipili endpoint using AI SDK v4's `streamText` with `pipeDataStreamToResponse`, including Zod request validation, assessment policy, accessibility profiles, and a 7-tool registry.
+
+### `@open-edu/oep-distribution`
+
+Course distribution system for portable `.oep` (Open-Edu Package) archives:
+
+- **OepWriter** — builds portable `.oep` ZIP archives with SHA-256 content integrity
+- **OepReader** — reads, validates, and extracts `.oep` packages (ZIP security, manifest validation, checksum verification)
+- **InstallCoordinator** — stage-then-activate install flow with version detection (upgrade/downgrade/same-version guards)
+- **ZIP security** — path traversal, absolute path, decompression bomb, archive size limit protection
+- **Source adapters** — file, URL, and catalog source adapters
+- **Catalog loader** — fetch and parse static JSON catalogs
+- **Version comparison** — SEMVER comparison utilities
 
 ### `@open-edu/storage`
 
@@ -168,4 +190,6 @@ The repo is organized to keep learning content portable and the runtime platform
 - PWA infrastructure (install, update, connectivity): `packages/pwa-core`
 - service worker and caching config: `apps/learner/vite.config.ts`
 - internationalization and locale management: `packages/i18n`
+- course distribution (`.oep` build, install, catalog, updates): `packages/oep-distribution`
+- Pipili AI companion (chat, hints, context mapping): `packages/ai-companion/src/pipili/` and `apps/learner/src/pipili/`
 - end-user navigation and app composition: `apps/learner`

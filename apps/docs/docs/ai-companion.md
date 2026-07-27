@@ -4,7 +4,7 @@ sidebar_position: 15
 
 # AI Learning Companion (`@open-edu/ai-companion`)
 
-The AI Learning Companion package provides search, dictionary, conversation, and provider services for the AI companion feature embedded in the learner app.
+The AI Learning Companion package provides search, dictionary, conversation, and provider services for the AI companion feature embedded in the learner app. It also includes the **Pipili subsystem** — a context-aware AI tutoring system with streaming chat, hint progression, and tool-augmented responses.
 
 ## Overview
 
@@ -111,3 +111,44 @@ The learner app wires these services through:
 ## Design Reference
 
 For the full design specification, see `docs/superpowers/specs/2026-07-08-ai-companion-design.md` in the repository root.
+
+## Pipili Subsystem
+
+The Pipili subsystem (`src/pipili/`) provides context-aware AI tutoring with streaming responses:
+
+### Context Normalization & Bounding
+
+Assembles learning context from multiple sources with priority-based bounding:
+
+```typescript
+import { boundContext, CONTEXT_PRIORITY } from '@open-edu/ai-companion';
+
+const bounded = boundContext(rawContext, { maxTokens: 4000 });
+// Priority: page > widget > assessment > lesson > module > course > notes > learner
+```
+
+### Hint Progression Engine
+
+Graduated hint levels from subtle nudges to full answers:
+
+```typescript
+import { resolveHintLevel, HINT_INSTRUCTIONS } from '@open-edu/ai-companion';
+
+const level = resolveHintLevel(attemptCount); // 'nudge' | 'scaffold' | 'answer'
+const instructions = HINT_INSTRUCTIONS[level];
+```
+
+### Context Types
+
+| Type                    | Description                                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| `PipiliContextSnapshot` | Full context state with optional page, widget, lesson, module, course, notes, assessment, learner fields |
+| `PageContext`           | Current page id, title, content, nodeType                                                                |
+| `WidgetContext`         | Widget id, type, state, question, answer, userResponse                                                   |
+| `AssessmentContext`     | Active assessment state with attempt tracking                                                            |
+| `LearnerProfile`        | Language, reading level, accessibility profile                                                           |
+| `LearningHistory`       | Completed lessons, recent pages, strengths, weak concepts                                                |
+
+### V2 Extension Seams
+
+The `v2-seams.ts` module defines interfaces for future capability expansion, allowing new tools and context sources to be added without breaking existing consumers.

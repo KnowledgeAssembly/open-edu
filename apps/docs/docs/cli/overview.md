@@ -136,3 +136,14 @@ Reads JSON module files from the source directory, auto-detects node types from 
 - Per-module directories with `package.json`, `workflow.json`, node files, and `validate.test.ts`
 - Root-level `validate.test.ts` for the bundle
 - Returns JSON output with `--json` flag: `{ bundleDir, moduleCount, nodeCount, warnings }`
+
+### OEP Build
+
+Build a portable `.oep` (Open-Edu Package) distribution artifact:
+
+```bash
+edu oep:build ./my-course -o ./dist
+edu oep:build ./my-course  # defaults to current directory
+```
+
+Produces a `.oep` ZIP archive with SHA-256 content integrity, a distribution manifest, and outputs the archive path, checksum, and file size. The `.oep` format is the standard distribution format for Open-Edu courses, supporting secure installation through the `InstallCoordinator` in `@open-edu/oep-distribution`.

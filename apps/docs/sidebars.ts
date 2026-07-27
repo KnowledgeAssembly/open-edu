@@ -194,6 +194,7 @@ const sidebars: SidebarsConfig = {
         'llm-config',
         'ai-companion',
         'i18n',
+        'oep-distribution',
         'widgets/overview',
       ],
     },

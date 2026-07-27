@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, course distribution (`.oep` format), an AI companion (Pipili), and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
 
 ## OpenWiki
 
@@ -65,6 +65,7 @@ pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang  # Find missing translations
 pnpm lint:hardcoded-strings                       # Scan for hardcoded user-facing strings (part of pnpm lint)
 node packages/i18n/src/i18n-keys.test.ts          # Run i18n key validation test
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js oep:build ./my-course -o ./dist  # Build .oep distribution artifact
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
 ```
@@ -76,7 +77,7 @@ open-edu/
 ├── apps/
 │   ├── dev-server/          # Vite dev server with inspector panels
 │   ├── docs/                # Docusaurus documentation site
-│   └── learner/             # Standalone learner app with 6-page router + theme switching
+│   └── learner/             # Standalone learner app with 8-page router + theme switching + Pipili chat + course install
 ├── packages/
 │   ├── schemas/             # Zod schemas + type generation
 │   ├── core/                # Package loader + validator + scanner + patcher + lint + generator
@@ -90,7 +91,8 @@ open-edu/
 │   ├── pipeline/            # AI-driven PDF → course spec generation pipeline (8-stage, profile-aware)
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
 │   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
-│   └── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
+│   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
+│   └── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/
@@ -141,6 +143,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
 - `@open-edu/pipeline`, `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
+- `@open-edu/oep-distribution`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -180,6 +183,12 @@ Epic 32 (LLM Config)
 
 Epic 298 (Recognition Engine)
   └─► Epics 2, 3, 8, 5, 13 (card schemas, loader, CardBroker, card UI components, Collection Binder learner app integration)
+
+Epic 300 (Course Distribution)
+  └─► Epics 2, 3 (oep-distribution package, schemas, storage extension, CLI oep:build, learner install UI)
+
+Epic 301 (Pipili AI Companion)
+  └─► Epics 2, 3 (ai-companion pipili subsystem, llm-config model-factory, learner server-side endpoint, streaming chat UI)
 
 Epic 5 (Runtime Renderer) consumes @open-edu/design-system for UI primitives, tokens, and patterns.
 Epic 13 (Learner App) consumes @open-edu/ai-companion for AI companion services.
