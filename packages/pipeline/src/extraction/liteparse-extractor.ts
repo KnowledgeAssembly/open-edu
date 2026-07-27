@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import type { Extractor } from './interface.js';
 import type { ExtractionInput, ExtractionResult, ExtractionManifest, AssetInfo } from './types.js';
@@ -84,8 +84,8 @@ export class LiteParseExtractor implements Extractor {
     const ext = this.getExtension(filePath);
     const sourceType = this.getSourceType(ext);
 
-    const litArgs = this.buildLitArgs(filePath, opts);
-    const markdown = execSync(litArgs, {
+    const args = this.buildLitArgs(filePath, opts);
+    const markdown = execFileSync('lit', args, {
       encoding: 'utf-8',
       timeout: 120_000,
       maxBuffer: 50 * 1024 * 1024,
@@ -113,25 +113,27 @@ export class LiteParseExtractor implements Extractor {
     return { contentMd: markdown.trim(), manifest, assets };
   }
 
-  private buildLitArgs(filePath: string, opts?: ExtractionInput['options']): string {
-    const parts = ['lit', 'parse', `"${filePath}"`, '--format', 'markdown'];
+  private buildLitArgs(filePath: string, opts?: ExtractionInput['options']): string[] {
+    const args = ['parse', filePath, '--format', 'markdown'];
 
-    if (opts?.noOcr) parts.push('--no-ocr');
-    if (opts?.ocrLanguage) parts.push('--ocr-language', opts.ocrLanguage);
-    if (opts?.ocrServerUrl) parts.push('--ocr-server-url', opts.ocrServerUrl);
-    if (opts?.extractImages) parts.push('--extract-images');
-    if (opts?.imageMode) parts.push('--image-mode', opts.imageMode);
-    if (opts?.targetPages) parts.push('--target-pages', opts.targetPages);
-    if (opts?.maxPages) parts.push('--max-pages', String(opts.maxPages));
-    parts.push('-q');
+    if (opts?.noOcr) args.push('--no-ocr');
+    if (opts?.ocrLanguage) args.push('--ocr-language', opts.ocrLanguage);
+    if (opts?.ocrServerUrl) args.push('--ocr-server-url', opts.ocrServerUrl);
+    if (opts?.extractImages) args.push('--extract-images');
+    if (opts?.imageMode) args.push('--image-mode', opts.imageMode);
+    if (opts?.targetPages) args.push('--target-pages', opts.targetPages);
+    if (opts?.maxPages) args.push('--max-pages', String(opts.maxPages));
+    args.push('-q');
 
-    return parts.join(' ');
+    return args;
   }
 
   private checkComplexity(filePath: string): ComplexityPage[] {
     try {
-      const cmd = `lit is-complex "${filePath}" --compact -q`;
-      const output = execSync(cmd, { encoding: 'utf-8', timeout: 30_000 });
+      const output = execFileSync('lit', ['is-complex', filePath, '--compact', '-q'], {
+        encoding: 'utf-8',
+        timeout: 30_000,
+      });
       return JSON.parse(output);
     } catch {
       return [];

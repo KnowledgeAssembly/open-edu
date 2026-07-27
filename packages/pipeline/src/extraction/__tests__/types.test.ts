@@ -159,13 +159,13 @@ describe('AssetInfoSchema', () => {
     expect(() => AssetInfoSchema.parse(asset)).not.toThrow();
   });
 
-  it('rejects zero sizeBytes', () => {
+  it('accepts zero sizeBytes (unknown size)', () => {
     const asset = {
       filename: 'img.png',
       originalName: 'img.png',
       mediaType: 'image/png',
       sizeBytes: 0,
     };
-    expect(() => AssetInfoSchema.parse(asset)).toThrow();
+    expect(() => AssetInfoSchema.parse(asset)).not.toThrow();
   });
 });

@@ -140,7 +140,10 @@ export async function runPipelineV2(
     const { runExtraction, toPageContent } = await import('../extraction/index.js');
     const extractionResult = await runExtraction({ filePath: options.pdfPath });
     pages = toPageContent(extractionResult);
-    pdfMeta = { metadata: { title: extractionResult.manifest.sourceType || options.subject } };
+    const firstH1 = extractionResult.contentMd.match(/^#\s+(.+)$/m);
+    pdfMeta = {
+      metadata: { title: firstH1?.[1]?.trim() || options.subject },
+    };
   }
 
   // Stage 2: Build source inventory

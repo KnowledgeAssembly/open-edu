@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LiteParseExtractor } from '../liteparse-extractor.js';
 
 vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
 describe('LiteParseExtractor', () => {
@@ -43,8 +43,8 @@ describe('LiteParseExtractor', () => {
   });
 
   it('extracts PDF via lit parse and produces valid result', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce(
         '# Chapter 1\n\nSome text content\n\n![Diagram](img_p1_1.png)\n\n| A | B |\n|---|---|\n| 1 | 2 |',
       )
@@ -58,8 +58,8 @@ describe('LiteParseExtractor', () => {
   });
 
   it('extracts DOCX via lit parse (converts through LibreOffice)', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce('# DOCX Title\n\nDOCX content here')
       .mockReturnValueOnce(JSON.stringify([{ page_number: 1, needs_ocr: false, reasons: [] }]));
 
@@ -69,8 +69,8 @@ describe('LiteParseExtractor', () => {
   });
 
   it('extracts images via lit parse (native OCR)', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce('Scanned text from image via Tesseract')
       .mockReturnValueOnce(
         JSON.stringify([{ page_number: 1, needs_ocr: true, reasons: ['scanned'] }]),
@@ -96,8 +96,8 @@ describe('LiteParseExtractor', () => {
   });
 
   it('uses complexity data from lit is-complex', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce('Simple content')
       .mockReturnValueOnce(
         JSON.stringify([
@@ -111,8 +111,8 @@ describe('LiteParseExtractor', () => {
   });
 
   it('configures OCR server URL when provided', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce('OCR text')
       .mockReturnValueOnce(
         JSON.stringify([{ page_number: 1, needs_ocr: true, reasons: ['scanned'] }]),
@@ -124,16 +124,17 @@ describe('LiteParseExtractor', () => {
     });
 
     const ocrCall = vi
-      .mocked(execSync)
+      .mocked(execFileSync)
       .mock.calls.find(
-        (call) => typeof call[0] === 'string' && call[0].includes('--ocr-server-url'),
+        (call) =>
+          call[0] === 'lit' && Array.isArray(call[1]) && call[1].includes('--ocr-server-url'),
       );
     expect(ocrCall).toBeTruthy();
   });
 
   it('extracts images to disk when extractImages option is true', async () => {
-    const { execSync } = await import('node:child_process');
-    vi.mocked(execSync)
+    const { execFileSync } = await import('node:child_process');
+    vi.mocked(execFileSync)
       .mockReturnValueOnce('# Doc\n\n![Chart](img_p1_1.png)')
       .mockReturnValueOnce(JSON.stringify([{ page_number: 1, needs_ocr: false, reasons: [] }]));
 
@@ -143,9 +144,10 @@ describe('LiteParseExtractor', () => {
     });
 
     const extractCall = vi
-      .mocked(execSync)
+      .mocked(execFileSync)
       .mock.calls.find(
-        (call) => typeof call[0] === 'string' && call[0].includes('--extract-images'),
+        (call) =>
+          call[0] === 'lit' && Array.isArray(call[1]) && call[1].includes('--extract-images'),
       );
     expect(extractCall).toBeTruthy();
   });

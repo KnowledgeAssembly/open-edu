@@ -2,22 +2,18 @@ import type { ExtractionInput, ExtractionResult } from './types.js';
 import { ExtractionInputSchema } from './types.js';
 import { ExtractorRouter } from './router.js';
 import { LiteParseExtractor } from './liteparse-extractor.js';
-import { OcrExtractor } from './ocr-extractor.js';
 import { ZipHandler } from './zip-handler.js';
 import { MarkdownNormalizer } from './normalizer.js';
-import { ComplexityDetector, type ComplexityInput } from './complexity.js';
 import { ExtractionLogger } from './logger.js';
 import type { Extractor } from './interface.js';
 
 let defaultRouter: ExtractorRouter | null = null;
 let normalizer: MarkdownNormalizer | null = null;
 let logger: ExtractionLogger | null = null;
-let detector: ComplexityDetector | null = null;
 
 export function createDefaultRouter(): ExtractorRouter {
   const router = new ExtractorRouter();
   router.register(new LiteParseExtractor());
-  router.register(new OcrExtractor());
   return router;
 }
 
@@ -50,13 +46,6 @@ export function setLogger(newLogger: ExtractionLogger): void {
   logger = newLogger;
 }
 
-export function getComplexityDetector(): ComplexityDetector {
-  if (!detector) {
-    detector = new ComplexityDetector();
-  }
-  return detector;
-}
-
 export async function runExtraction(input: ExtractionInput): Promise<ExtractionResult> {
   const validatedInput = ExtractionInputSchema.parse(input);
   const router = getDefaultRouter();
@@ -84,23 +73,9 @@ export async function runExtraction(input: ExtractionInput): Promise<ExtractionR
     const durationMs = Date.now() - startTime;
     log.info(extractor.id, validatedInput.filePath, durationMs, 'Extraction complete');
 
-    const normalizedContent = norm.normalize(rawResult.contentMd);
-    const compDetector = getComplexityDetector();
-    const complexity = compDetector.analyze({
-      pageCount: rawResult.manifest.pages,
-      tableCount: rawResult.manifest.tables,
-      imageCount: rawResult.manifest.images,
-      ocrConfidence: 0.9,
-      averagePageLength: normalizedContent.length / Math.max(rawResult.manifest.pages, 1),
-    } satisfies ComplexityInput);
-
     return {
       ...rawResult,
-      contentMd: normalizedContent,
-      manifest: {
-        ...rawResult.manifest,
-        complexity: complexity.complexity,
-      },
+      contentMd: norm.normalize(rawResult.contentMd),
     };
   } catch (err) {
     const durationMs = Date.now() - startTime;
@@ -111,10 +86,8 @@ export async function runExtraction(input: ExtractionInput): Promise<ExtractionR
 
 export { ExtractorRouter } from './router.js';
 export { MarkdownNormalizer } from './normalizer.js';
-export { ComplexityDetector } from './complexity.js';
 export { ExtractionLogger } from './logger.js';
 export { LiteParseExtractor } from './liteparse-extractor.js';
-export { OcrExtractor } from './ocr-extractor.js';
 export { ZipHandler } from './zip-handler.js';
 export { toPageContent } from './adapter.js';
 export type { Extractor } from './interface.js';

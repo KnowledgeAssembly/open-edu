@@ -7,7 +7,6 @@ describe('createDefaultRouter', () => {
     const router = createDefaultRouter();
     const ids = router.listExtractors();
     expect(ids).toContain('liteparse');
-    expect(ids).toContain('ocr');
   });
 });
 

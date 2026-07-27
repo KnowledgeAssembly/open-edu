@@ -39,7 +39,7 @@ export const AssetInfoSchema = z.object({
   filename: z.string().min(1),
   originalName: z.string().min(1),
   mediaType: z.string().min(1),
-  sizeBytes: z.number().int().positive(),
+  sizeBytes: z.number().int().nonnegative(),
 });
 
 export type AssetInfo = z.infer<typeof AssetInfoSchema>;

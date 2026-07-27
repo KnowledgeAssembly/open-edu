@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -17,7 +17,7 @@ export class ZipHandler {
   }
 
   listZipContents(zipPath: string): string[] {
-    const output = execSync(`unzip -l "${zipPath}"`, { encoding: 'utf-8' });
+    const output = execFileSync('unzip', ['-l', zipPath], { encoding: 'utf-8' });
     const lines = output.split('\n');
     const files: string[] = [];
     for (const line of lines) {
@@ -43,7 +43,7 @@ export class ZipHandler {
     mkdirSync(tmpDir, { recursive: true });
 
     try {
-      execSync(`unzip -o "${input.filePath}" -d "${tmpDir}"`, { encoding: 'utf-8' });
+      execFileSync('unzip', ['-o', input.filePath, '-d', tmpDir], { encoding: 'utf-8' });
     } catch {
       throw new Error(`Failed to extract ZIP: ${input.filePath}`);
     }
