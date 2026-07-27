@@ -4,7 +4,7 @@ import type {
   Citation,
   PipiliMode,
   PipiliResponseMetadata,
-} from '@open-edu/ai-companion';
+} from '@open-edu/ai-companion/pipili';
 
 export interface SystemPromptParams {
   boundedContext: BoundedContext;

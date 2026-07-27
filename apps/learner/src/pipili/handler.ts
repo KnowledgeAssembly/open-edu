@@ -7,8 +7,8 @@ import {
   type UIMessage,
 } from 'ai';
 import { createModelFactory, loadConfig, type ModelFactory } from '@open-edu/llm-config';
-import { boundContext, pipiliResponseMetadataSchema } from '@open-edu/ai-companion';
-import type { PipiliContextSnapshot } from '@open-edu/ai-companion';
+import { boundContext, pipiliResponseMetadataSchema } from '@open-edu/ai-companion/pipili';
+import type { PipiliContextSnapshot } from '@open-edu/ai-companion/pipili';
 import { PIPILI_CONFIG, pipiliContextSchema, pipiliRequestSchema } from './config.js';
 import { buildSystemPrompt, isAssessmentActive, extractMetadata } from './policy.js';
 import { createToolRegistry } from './tools.js';

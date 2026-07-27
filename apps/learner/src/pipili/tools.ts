@@ -112,7 +112,7 @@ export function createToolRegistry(
     }),
     execute: async ({ topic, requestedLevel, learnerHasAttempted }) => {
       contextGetter();
-      const { resolveHintLevel, HINT_INSTRUCTIONS } = await import('@open-edu/ai-companion');
+      const { resolveHintLevel, HINT_INSTRUCTIONS } = await import('@open-edu/ai-companion/pipili');
 
       const actualLevel = resolveHintLevel({
         currentLevel: 1,
