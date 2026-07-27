@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
@@ -10,6 +10,12 @@ import {
   BundleCardWithModule,
   Button,
   CourseCardWithModule,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
   EmptyState,
   PageHeader,
   SectionDivider,
@@ -22,12 +28,15 @@ import {
 import type { AppView } from './AppShell';
 import { InstallPrompt } from './components/InstallPrompt.js';
 import { useInstallPrompt } from './hooks/useInstallPrompt.js';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Trash2 } from 'lucide-react';
 import { InstallCourseDialog } from './components/InstallCourseDialog.js';
 import { installFromSource } from './courseDownload';
 import { AvailableUpdatesList } from './components/AvailableUpdatesList';
 import { fetchCatalog } from '@open-edu/oep-distribution';
 import type { Catalog } from '@open-edu/oep-distribution';
+import type { StoredCourse } from '@open-edu/storage';
+import { deleteCourse } from '@open-edu/storage';
+import { isOepCourse } from './oepAdapters';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -37,6 +46,9 @@ export interface CatalogPageProps {
   onStartBundle?: (bundleId: string) => void;
   onNavigate?: (view: AppView) => void;
   onRequestReset?: (id: string, title: string, isBundle: boolean) => void;
+  installedCourses?: StoredCourse[];
+  onRefreshInstalled?: () => Promise<void>;
+  onRemoveInstalled?: () => Promise<void>;
 }
 
 export function CatalogPage({
@@ -47,6 +59,9 @@ export function CatalogPage({
   onStartBundle,
   onNavigate,
   onRequestReset,
+  installedCourses = [],
+  onRefreshInstalled,
+  onRemoveInstalled,
 }: CatalogPageProps): JSX.Element {
   const { t } = useTranslation();
   const installPrompt = useInstallPrompt();
@@ -55,6 +70,45 @@ export function CatalogPage({
   useEffect(() => {
     getAllProgress().then(setProgress);
     getAllBadges().then(setBadgeData);
+  }, []);
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+
+  const installedIds = useMemo(
+    () => new Set(installedCourses.map((c) => c.id)),
+    [installedCourses],
+  );
+
+  const handleInstall = useCallback(
+    async (source: Parameters<typeof installFromSource>[0]) => {
+      const result = await installFromSource(source);
+      if (result.success && onRefreshInstalled) {
+        await onRefreshInstalled();
+      }
+      return result;
+    },
+    [onRefreshInstalled],
+  );
+
+  const handleDeleteInstalled = useCallback(
+    (courseId: string, title: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setDeleteTarget({ id: courseId, title });
+    },
+    [],
+  );
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    await deleteCourse(deleteTarget.id);
+    setDeleteTarget(null);
+    if (onRemoveInstalled) {
+      await onRemoveInstalled();
+    }
+  }, [deleteTarget, onRemoveInstalled]);
+
+  const cancelDelete = useCallback(() => {
+    setDeleteTarget(null);
   }, []);
 
   const badgeCounts = useMemo(() => {
@@ -166,7 +220,7 @@ export function CatalogPage({
       <InstallCourseDialog
         open={showInstallDialog}
         onClose={() => setShowInstallDialog(false)}
-        onInstall={installFromSource}
+        onInstall={handleInstall}
       />
 
       <InstallPrompt
@@ -348,6 +402,8 @@ export function CatalogPage({
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
           {sorted.map((pkg) => {
             const prog = progress[pkg.manifest.id] ?? null;
+            const isInstalled = installedIds.has(pkg.manifest.id);
+            const isOep = isOepCourse(pkg.rootDir);
             return (
               <div key={pkg.manifest.id} className="group relative overflow-hidden">
                 <CourseCardWithModule
@@ -361,9 +417,43 @@ export function CatalogPage({
                     earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                     progress={prog}
                     onStart={() => onStartCourse(pkg.rootDir)}
+                    indicator={
+                      isInstalled ? (
+                        <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium">
+                          {t('learner.catalog.installed_badge')}
+                        </span>
+                      ) : undefined
+                    }
                   />
                 </CourseCardWithModule>
-                {progress[pkg.manifest.id] && (
+                {isOep && progress[pkg.manifest.id] && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="reset-button"
+                    className="absolute bottom-2 right-10 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    <span className="sr-only">{t('learner.reset.button')}</span>
+                  </Button>
+                )}
+                {isOep && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="delete-installed-button"
+                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={(e) => handleDeleteInstalled(pkg.manifest.id, pkg.manifest.title, e)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
+                  </Button>
+                )}
+                {!isOep && progress[pkg.manifest.id] && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -383,6 +473,43 @@ export function CatalogPage({
           })}
         </div>
       )}
+
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) cancelDelete();
+        }}
+      >
+        <DialogContent
+          role="alertdialog"
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+          className="sm:max-w-md"
+        >
+          <DialogHeader>
+            <DialogTitle id="delete-dialog-title" className="text-h2 font-display">
+              {t('learner.catalog.delete_confirm_title')}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription id="delete-dialog-description">
+            {t('learner.catalog.delete_confirm_description', {
+              courseTitle: deleteTarget?.title ?? '',
+            })}
+          </DialogDescription>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={cancelDelete} data-testid="delete-cancel-button">
+              {t('learner.catalog.delete_cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              data-testid="delete-confirm-button"
+            >
+              {t('learner.catalog.delete_confirm_button')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

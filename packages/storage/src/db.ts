@@ -19,6 +19,9 @@ export interface StoredCourse {
   assets: { path: string; data: ArrayBuffer }[];
   downloadedAt: string;
   distributionMeta?: DistributionMeta;
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
 }
 
 export interface LearningProgress {

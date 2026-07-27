@@ -22,6 +22,9 @@ export interface ResolvedInstallData {
   sourceKind: string;
   sourceLabel: string;
   checksum: string;
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
 }
 
 export class InstallCoordinator {
@@ -103,6 +106,7 @@ export class InstallCoordinator {
     let resolved: ResolvedInstallData;
     try {
       const extraction = await this.reader.read(bytes);
+      const contentRoot = extraction.manifest.contentRoot || 'course/';
       resolved = {
         inspection: {
           id: extraction.manifest.id,
@@ -113,16 +117,19 @@ export class InstallCoordinator {
         },
         manifest: extraction.courseManifest,
         nodes: Object.entries(extraction.nodes).map(([path, content]) => ({
-          relativePath: path,
+          relativePath: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
           content,
         })),
         assets: Object.entries(extraction.assets).map(([path, data]) => ({
-          path,
+          path: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
           data,
         })),
         sourceKind: source.kind,
         sourceLabel: source.label,
         checksum: extraction.manifest.checksum.value,
+        workflow: extraction.workflow,
+        rewards: extraction.rewards,
+        cards: extraction.cards,
       };
     } catch (err) {
       const code = (err as { code?: string }).code ?? 'UNKNOWN';
@@ -154,6 +161,9 @@ export class InstallCoordinator {
         signatureStatus: resolved.inspection.signatureStatus,
         installedAt: new Date().toISOString(),
       },
+      ...(resolved.workflow != null ? { workflow: resolved.workflow } : {}),
+      ...(resolved.rewards != null ? { rewards: resolved.rewards } : {}),
+      ...(resolved.cards != null ? { cards: resolved.cards } : {}),
     };
 
     try {

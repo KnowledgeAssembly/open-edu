@@ -140,23 +140,57 @@ export class OepReader {
 
     const nodes: Record<string, string> = {};
     const assets: Record<string, Uint8Array> = {};
+    let workflow: Record<string, unknown> | undefined;
+    let rewards: Record<string, unknown> | undefined;
+    let cards: Record<string, unknown> | undefined;
 
     if (fullExtract) {
       const nodesPrefix = `${contentRoot}nodes/`;
       const assetsPrefix = `${contentRoot}assets/`;
 
       for (const [path, data] of Object.entries(rawEntries)) {
-        if (path.startsWith(nodesPrefix) && path.endsWith('.md') && data.length > 0) {
+        if (
+          path.startsWith(nodesPrefix) &&
+          (path.endsWith('.md') || path.endsWith('.json')) &&
+          data.length > 0
+        ) {
           nodes[path] = strFromU8(data);
         } else if (path.startsWith(assetsPrefix) && data.length > 0) {
           assets[path] = data;
         }
       }
 
+      const workflowRaw = rawEntries[`${contentRoot}workflow.json`];
+      if (workflowRaw && workflowRaw.length > 0) {
+        try {
+          workflow = JSON.parse(strFromU8(workflowRaw));
+        } catch {
+          // ignore malformed workflow.json
+        }
+      }
+
+      const rewardsRaw = rawEntries[`${contentRoot}rewards.json`];
+      if (rewardsRaw && rewardsRaw.length > 0) {
+        try {
+          rewards = JSON.parse(strFromU8(rewardsRaw));
+        } catch {
+          // ignore malformed rewards.json
+        }
+      }
+
+      const cardsRaw = rawEntries[`${contentRoot}cards.json`];
+      if (cardsRaw && cardsRaw.length > 0) {
+        try {
+          cards = JSON.parse(strFromU8(cardsRaw));
+        } catch {
+          // ignore malformed cards.json
+        }
+      }
+
       if (Object.keys(nodes).length === 0) {
         throw new OepReaderError(
           'COURSE_VALIDATION_ERROR',
-          'No markdown nodes found in course/nodes/',
+          'No node files found in course/nodes/ (expected .md or .json files)',
         );
       }
     }
@@ -167,6 +201,9 @@ export class OepReader {
       nodes,
       assets,
       rawEntries,
+      workflow,
+      rewards,
+      cards,
     };
   }
 }

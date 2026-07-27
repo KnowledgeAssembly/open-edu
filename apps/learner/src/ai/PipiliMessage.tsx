@@ -38,16 +38,13 @@ export const PipiliMessage = React.forwardRef<HTMLDivElement, PipiliMessageProps
         </TutorMessage>
 
         {metadata?.hintLevel && (
-          <div className="text-on-surface-muted ml-8 text-caption" data-testid="pipili-hint-level">
+          <div className="text-on-surface-muted text-caption ml-8" data-testid="pipili-hint-level">
             {t('learner.pipili.hint_level', { level: String(metadata.hintLevel) })}
           </div>
         )}
 
         {metadata?.mode && metadata.mode !== 'tutor' && (
-          <div
-            className="text-on-surface-muted ml-8 text-caption italic"
-            data-testid="pipili-mode"
-          >
+          <div className="text-on-surface-muted text-caption ml-8 italic" data-testid="pipili-mode">
             {t(`learner.pipili.mode.${metadata.mode}`)}
           </div>
         )}
@@ -65,7 +62,7 @@ export const PipiliMessage = React.forwardRef<HTMLDivElement, PipiliMessageProps
         {metadata?.suggestedNextSteps && metadata.suggestedNextSteps.length > 0 && !isStreaming && (
           <div className="ml-8 mt-2" data-testid="pipili-next-steps">
             <span className="text-label font-medium">{t('learner.pipili.next_steps')}</span>
-            <ul className="text-on-surface-muted list-disc pl-4 text-caption">
+            <ul className="text-on-surface-muted text-caption list-disc pl-4">
               {metadata.suggestedNextSteps.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}
