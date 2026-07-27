@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
 import type { PackageSummary } from '@open-edu/core';
+import type { StoredCourse } from '@open-edu/storage';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
@@ -158,6 +159,100 @@ describe('CatalogPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Completed')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('installed courses (OEP)', () => {
+    const installedCourses: StoredCourse[] = [
+      {
+        id: 'oep-course-1',
+        version: '1.0.0',
+        manifest: {
+          id: 'oep-course-1',
+          title: 'OEP Course One',
+          version: '1.0.0',
+          author: 'Author',
+          entry: 'nodes/intro.md',
+        },
+        nodes: [],
+        assets: [],
+        downloadedAt: '2026-07-27T00:00:00Z',
+      },
+    ];
+
+    const oepPackages: PackageSummary[] = [
+      {
+        manifest: {
+          id: 'oep-course-1',
+          title: 'OEP Course One',
+          version: '1.0.0',
+          author: 'Author',
+          entry: 'nodes/intro.md',
+        },
+        nodeCount: 0,
+        availableBadges: 0,
+        rootDir: 'oep://oep-course-1',
+      },
+    ];
+
+    it('shows delete button on OEP course card', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={[...samplePackages, ...oepPackages]}
+          onStartCourse={vi.fn()}
+          installedCourses={installedCourses}
+        />,
+      );
+      expect(screen.getByTestId('delete-installed-button')).toBeInTheDocument();
+    });
+
+    it('does not show delete button on non-OEP courses', () => {
+      renderWithI18n(
+        <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} installedCourses={[]} />,
+      );
+      expect(screen.queryByTestId('delete-installed-button')).not.toBeInTheDocument();
+    });
+
+    it('opens delete confirmation dialog when delete button is clicked', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={[...samplePackages, ...oepPackages]}
+          onStartCourse={vi.fn()}
+          installedCourses={installedCourses}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('delete-installed-button'));
+      expect(screen.getByText('Remove course?')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-confirm-button')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-cancel-button')).toBeInTheDocument();
+    });
+
+    it('cancels delete when cancel button is clicked', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={[...samplePackages, ...oepPackages]}
+          onStartCourse={vi.fn()}
+          installedCourses={installedCourses}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('delete-installed-button'));
+      expect(screen.getByText('Remove course?')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('delete-cancel-button'));
+      expect(screen.queryByText('Remove course?')).not.toBeInTheDocument();
+    });
+
+    it('renders OEP course in the catalog grid', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={[...samplePackages, ...oepPackages]}
+          onStartCourse={vi.fn()}
+          installedCourses={installedCourses}
+        />,
+      );
+      const cards = screen.getAllByTestId('course-card');
+      expect(cards).toHaveLength(3);
+      expect(screen.getByText('OEP Course One')).toBeInTheDocument();
     });
   });
 });

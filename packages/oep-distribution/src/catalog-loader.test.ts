@@ -36,7 +36,7 @@ describe('parseCatalog', () => {
   it('parses valid catalog', () => {
     const result = parseCatalog(validCatalog);
     expect(result.packages).toHaveLength(1);
-    expect(result.packages[0].id).toBe('science-grade7');
+    expect(result.packages[0]!.id).toBe('science-grade7');
   });
 
   it('throws on invalid catalog', () => {

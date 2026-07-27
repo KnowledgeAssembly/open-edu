@@ -73,6 +73,9 @@ export async function installFromSource(source: CourseSource): Promise<InstallRe
             assets: course.assets,
             downloadedAt: course.downloadedAt,
             distributionMeta: course.distributionMeta,
+            workflow: course.workflow,
+            rewards: course.rewards,
+            cards: course.cards,
           }
         : undefined;
     },
@@ -99,6 +102,9 @@ export async function installFromSource(source: CourseSource): Promise<InstallRe
               installedAt: string;
             }
           | undefined,
+        workflow: course.workflow as Record<string, unknown> | undefined,
+        rewards: course.rewards as Record<string, unknown> | undefined,
+        cards: course.cards as Record<string, unknown> | undefined,
       });
     },
     replaceCourse: async (_id, _course) => {
@@ -125,6 +131,9 @@ export async function updateFromSource(
             assets: course.assets,
             downloadedAt: course.downloadedAt,
             distributionMeta: course.distributionMeta,
+            workflow: course.workflow,
+            rewards: course.rewards,
+            cards: course.cards,
           }
         : undefined;
     },
@@ -151,6 +160,9 @@ export async function updateFromSource(
               installedAt: string;
             }
           | undefined,
+        workflow: course.workflow as Record<string, unknown> | undefined,
+        rewards: course.rewards as Record<string, unknown> | undefined,
+        cards: course.cards as Record<string, unknown> | undefined,
       });
     },
     replaceCourse: async (id: string, course) => {
@@ -176,6 +188,9 @@ export async function updateFromSource(
               installedAt: string;
             }
           | undefined,
+        workflow: course.workflow as Record<string, unknown> | undefined,
+        rewards: course.rewards as Record<string, unknown> | undefined,
+        cards: course.cards as Record<string, unknown> | undefined,
       });
     },
   });

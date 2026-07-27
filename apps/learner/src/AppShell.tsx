@@ -45,6 +45,7 @@ import { CourseRightSidebar } from './CourseRightSidebar';
 import { UpdatePrompt } from './components/UpdatePrompt.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useUpdatePrompt } from './hooks/useUpdatePrompt.js';
+import { useInstalledCourses } from './hooks/useInstalledCourses.js';
 import {
   CompanionProvider,
   useCompanion,
@@ -60,6 +61,7 @@ import { BreakPage } from './BreakPage';
 import { loadLocaleFonts } from './i18n-fonts';
 import { useThemeColorMeta } from './hooks/useThemeColorMeta';
 import { useResizablePanel } from './hooks/useResizablePanel';
+import { storedCourseToPackageSummary, storedCourseToLoadedPackage } from './oepAdapters';
 
 export type AppView =
   | { view: 'home' }
@@ -206,9 +208,41 @@ function AppShellInner({
   const location = useLocation();
   const courseContentRef = useRef<HTMLDivElement>(null);
 
+  const { panelState } = useCompanion();
+
+  const { installedCourses, refresh: refreshInstalled } = useInstalledCourses();
+
+  useEffect(() => {
+    void refreshInstalled();
+  }, [refreshInstalled]);
+
+  const oepPackageEntries = useMemo(() => {
+    const entries: Record<string, LoadedPackage> = {};
+    for (const course of installedCourses) {
+      if (!packageEntries[course.id]) {
+        entries[course.id] = storedCourseToLoadedPackage(course);
+      }
+    }
+    return entries;
+  }, [installedCourses, packageEntries]);
+
+  const allPackageEntries = useMemo(
+    () => ({ ...packageEntries, ...oepPackageEntries }),
+    [packageEntries, oepPackageEntries],
+  );
+
+  const oepCatalogPackages = useMemo(() => {
+    return installedCourses.filter((c) => !packageEntries[c.id]).map(storedCourseToPackageSummary);
+  }, [installedCourses, packageEntries]);
+
+  const allCatalogPackages = useMemo(
+    () => [...catalogPackages, ...oepCatalogPackages],
+    [catalogPackages, oepCatalogPackages],
+  );
+
   const view = useMemo<AppView>(
-    () => pathToView(location.pathname, packageEntries),
-    [location.pathname, packageEntries],
+    () => pathToView(location.pathname, allPackageEntries),
+    [location.pathname, allPackageEntries],
   );
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -238,8 +272,6 @@ function AppShellInner({
     isBundle: boolean;
   } | null>(null);
   const [resetCounter, setResetCounter] = useState(0);
-
-  const { panelState } = useCompanion();
 
   const initialSidebarWidth = useMemo(() => {
     try {
@@ -291,10 +323,10 @@ function AppShellInner({
 
   const isCourseInProgress = useMemo(() => {
     if (view.view !== 'course' || !view.packageId) return false;
-    const pkg = packageEntries[view.packageId];
+    const pkg = allPackageEntries[view.packageId];
     if (!pkg) return false;
     return true;
-  }, [view, packageEntries]);
+  }, [view, allPackageEntries]);
 
   useEffect(() => {
     if (!isCourseInProgress) return;
@@ -318,11 +350,11 @@ function AppShellInner({
 
   const handleNavigate = useCallback(
     (newView: AppView) => {
-      if (newView.view === 'course' && newView.packageId && !packageEntries[newView.packageId])
+      if (newView.view === 'course' && newView.packageId && !allPackageEntries[newView.packageId])
         return;
       navigate(viewToPath(newView));
     },
-    [packageEntries, navigate],
+    [allPackageEntries, navigate],
   );
 
   const handleExitStay = useCallback(() => {
@@ -335,12 +367,12 @@ function AppShellInner({
 
   const handleStartCourse = useCallback(
     (packageDir: string) => {
-      const pkg = Object.values(packageEntries).find((p) => p.rootDir === packageDir);
+      const pkg = Object.values(allPackageEntries).find((p) => p.rootDir === packageDir);
       if (pkg) {
         navigate(`/course/${pkg.manifest.id}`);
       }
     },
-    [packageEntries, navigate],
+    [allPackageEntries, navigate],
   );
 
   const handleStartBundle = useCallback(
@@ -388,8 +420,8 @@ function AppShellInner({
 
   const coursePkg = useMemo<LoadedPackage | undefined>(() => {
     if (view.view !== 'course' || !view.packageId) return undefined;
-    return packageEntries[view.packageId];
-  }, [view, packageEntries]);
+    return allPackageEntries[view.packageId];
+  }, [view, allPackageEntries]);
 
   const courseBundle = useMemo<LoadedBundle | undefined>(() => {
     if (view.view !== 'course' || !view.bundleId) return undefined;
@@ -634,19 +666,22 @@ function AppShellInner({
                   {view.view === 'catalog-install' && <CatalogInstallView />}
                   {view.view === 'catalog' && (
                     <CatalogPage
-                      packages={catalogPackages}
+                      packages={allCatalogPackages}
                       bundleSummaries={catalogBundles}
                       bundleProgress={bundleProgress}
                       onStartCourse={handleStartCourse}
                       onStartBundle={handleStartBundle}
                       onNavigate={handleNavigate}
                       onRequestReset={handleRequestReset}
+                      installedCourses={installedCourses}
+                      onRefreshInstalled={refreshInstalled}
+                      onRemoveInstalled={refreshInstalled}
                     />
                   )}
                   {view.view === 'home' && (
                     <HomePage
                       onNavigate={handleNavigate}
-                      catalogPackages={catalogPackages}
+                      catalogPackages={allCatalogPackages}
                       bundleEntries={bundleEntries}
                     />
                   )}
@@ -667,8 +702,8 @@ function AppShellInner({
                   {view.view === 'progress' && (
                     <ProgressDashboard
                       onNavigate={handleNavigate}
-                      catalogPackages={catalogPackages}
-                      packageEntries={packageEntries}
+                      catalogPackages={allCatalogPackages}
+                      packageEntries={allPackageEntries}
                       onRequestReset={handleRequestReset}
                     />
                   )}
@@ -682,7 +717,9 @@ function AppShellInner({
                       }}
                     />
                   )}
-                  {view.view === 'collection' && <CollectionBinderPage packages={packageEntries} />}
+                  {view.view === 'collection' && (
+                    <CollectionBinderPage packages={allPackageEntries} />
+                  )}
                   {view.view === 'notes' && <NotesDashboardPage onNavigate={handleNavigate} />}
                   {view.view === 'note-editor' && view.noteId && (
                     <NoteEditorPage noteId={view.noteId} onNavigate={handleNavigate} />

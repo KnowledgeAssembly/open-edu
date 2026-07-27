@@ -9,6 +9,9 @@ export interface OepExtraction {
   nodes: Record<string, string>;
   assets: Record<string, Uint8Array>;
   rawEntries: Record<string, Uint8Array>;
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
 }
 
 export interface PackageInspection {
