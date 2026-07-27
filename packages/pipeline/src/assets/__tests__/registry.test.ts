@@ -38,23 +38,38 @@ describe('Asset Renderer Registry', () => {
 
   it('listRenderers returns all registered', () => {
     registerRenderer({
-      type: 'a', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'a',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     registerRenderer({
-      type: 'b', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'b',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     expect(listRenderers()).toHaveLength(2);
   });
 
   it('getRenderersForProfile filters by allowed types', () => {
     registerRenderer({
-      type: 'math-a', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'math-a',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     registerRenderer({
-      type: 'math-b', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'math-b',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     registerRenderer({
-      type: 'science-c', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'science-c',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     const filtered = getRenderersForProfile(['math-a']);
     expect(filtered).toHaveLength(1);
@@ -63,7 +78,10 @@ describe('Asset Renderer Registry', () => {
 
   it('clearRendererRegistry clears all', () => {
     registerRenderer({
-      type: 'x', mediaType: 'image/svg+xml', render: () => '', validate: () => [],
+      type: 'x',
+      mediaType: 'image/svg+xml',
+      render: () => '',
+      validate: () => [],
     });
     clearRendererRegistry();
     expect(listRenderers()).toHaveLength(0);
@@ -77,7 +95,7 @@ describe('Built-in Renderers', () => {
   });
 
   it('registers all 11 built-in renderers', () => {
-    const types = listRenderers().map(r => r.type);
+    const types = listRenderers().map((r) => r.type);
     expect(types).toContain('place-value-chart');
     expect(types).toContain('number-line');
     expect(types).toContain('fraction-bar');

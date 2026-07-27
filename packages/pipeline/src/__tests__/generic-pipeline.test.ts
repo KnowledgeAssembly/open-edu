@@ -2,11 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  registerBuiltinProfiles,
-  resolveProfile,
-  clearRegistry,
-} from '../profile/registry.js';
+import { registerBuiltinProfiles, resolveProfile, clearRegistry } from '../profile/registry.js';
 import type { SourceInventory } from '../source/types.js';
 import { SourceInventorySchema } from '../source/types.js';
 import { createSyntheticChapter } from '../structure/detect.js';
@@ -52,7 +48,11 @@ describe('Generic Pipeline', () => {
 
   it('source inventory JSON is valid for generic science fixture', () => {
     const inventoryPath = join(
-      __dirname, '..', 'fixtures', 'generic-science', 'source-inventory.json',
+      __dirname,
+      '..',
+      'fixtures',
+      'generic-science',
+      'source-inventory.json',
     );
     const inventory: SourceInventory = JSON.parse(readFileSync(inventoryPath, 'utf-8'));
     expect(inventory.units.length).toBeGreaterThan(0);
@@ -68,11 +68,11 @@ describe('Generic Pipeline', () => {
 
   it('profile-specific validators run only when enabled', () => {
     const validators = getValidatorsForProfile(resolveProfile({ subject: 'history' }));
-    const validatorIds = validators.map(v => v.id);
+    const validatorIds = validators.map((v) => v.id);
     expect(validatorIds).toContain('structure');
 
     const mathValidators = getValidatorsForProfile(resolveProfile({ subject: 'mathematics' }));
-    const mathIds = mathValidators.map(v => v.id);
+    const mathIds = mathValidators.map((v) => v.id);
     expect(mathIds).toContain('math');
   });
 });

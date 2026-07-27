@@ -27,24 +27,26 @@ export const ConceptSchema = z.object({
 export type Concept = z.infer<typeof ConceptSchema>;
 
 export const ConceptMapResponseSchema = z.object({
-  concepts: z.array(z.object({
-    conceptId: z.string(),
-    label: z.string(),
-    kind: z.string(),
-    sourceUnitIds: z.array(z.string()),
-    learningObjective: z.string(),
-    coreIdea: z.string(),
-    difficulty: z.string(),
-    masteryThreshold: z.number(),
-    prerequisites: z.array(z.string()).nullable().optional(),
-    representations: z.array(z.string()),
-    exerciseFamilies: z.array(z.string()).nullable().optional(),
-    misconceptionTargets: z.array(z.string()).nullable().optional(),
-    adultContext: z.string().nullable().optional(),
-    recommendedWidgetCategories: z.array(z.string()).nullable().optional(),
-    estimatedMinutes: z.number().int().nullable().optional(),
-    extensions: z.record(z.unknown()).nullable().optional(),
-  })),
+  concepts: z.array(
+    z.object({
+      conceptId: z.string(),
+      label: z.string(),
+      kind: z.string(),
+      sourceUnitIds: z.array(z.string()),
+      learningObjective: z.string(),
+      coreIdea: z.string(),
+      difficulty: z.string(),
+      masteryThreshold: z.number(),
+      prerequisites: z.array(z.string()).nullable().optional(),
+      representations: z.array(z.string()),
+      exerciseFamilies: z.array(z.string()).nullable().optional(),
+      misconceptionTargets: z.array(z.string()).nullable().optional(),
+      adultContext: z.string().nullable().optional(),
+      recommendedWidgetCategories: z.array(z.string()).nullable().optional(),
+      estimatedMinutes: z.number().int().nullable().optional(),
+      extensions: z.record(z.unknown()).nullable().optional(),
+    }),
+  ),
 });
 
 export type ConceptMapResponse = z.infer<typeof ConceptMapResponseSchema>;

@@ -12,7 +12,12 @@ export const NIOS_PROFILE: CurriculumProfile = {
     objectiveLabels: ['LEARNING OUTCOMES', 'Objectives', 'OBJECTIVES', 'सीखने के परिणाम'],
     definitionLabels: ['Definition', 'Key Terms'],
     exampleLabels: ['Example', 'उदाहरण'],
-    exerciseLabels: ['Let us see what you have learnt', 'Exercise', 'अभ्यास', 'आइए देखें आपने क्या सीखा'],
+    exerciseLabels: [
+      'Let us see what you have learnt',
+      'Exercise',
+      'अभ्यास',
+      'आइए देखें आपने क्या सीखा',
+    ],
     reviewLabels: ['REVIEW', 'Review', 'पुनरावृत्ति', 'What have you learnt', 'आपने क्या सीखा'],
     assessmentLabels: ['TEST', 'Test', 'परीक्षा', 'Assessment', 'मूल्यांकन'],
   },

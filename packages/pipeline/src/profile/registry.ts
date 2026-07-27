@@ -32,9 +32,7 @@ export function resolveProfile(params: {
     return p;
   }
   if (params.curriculum) {
-    const byCurriculum = [...profiles.values()].find(
-      (p) => p.curriculum === params.curriculum,
-    );
+    const byCurriculum = [...profiles.values()].find((p) => p.curriculum === params.curriculum);
     if (byCurriculum) return byCurriculum;
   }
   if (params.subject) {

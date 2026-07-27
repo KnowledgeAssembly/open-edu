@@ -59,7 +59,10 @@ function makeConcept(): Concept {
   };
 }
 
-function makeBlueprint(conceptId: string, overrides: Partial<LessonBlueprint> = {}): LessonBlueprint {
+function makeBlueprint(
+  conceptId: string,
+  overrides: Partial<LessonBlueprint> = {},
+): LessonBlueprint {
   return {
     conceptId,
     sourceUnitIds: ['src-1'],
@@ -81,7 +84,12 @@ function makeBlueprint(conceptId: string, overrides: Partial<LessonBlueprint> = 
   };
 }
 
-function makeInput(): { concept: Concept; blueprint: LessonBlueprint; profile: CurriculumProfile; sourceUnits: any[] } {
+function makeInput(): {
+  concept: Concept;
+  blueprint: LessonBlueprint;
+  profile: CurriculumProfile;
+  sourceUnits: any[];
+} {
   const concept = makeConcept();
   return {
     concept,

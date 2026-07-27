@@ -26,7 +26,7 @@ export function listRenderers(): AssetRenderer[] {
 }
 
 export function getRenderersForProfile(allowedTypes: string[]): AssetRenderer[] {
-  return allowedTypes.map(t => renderers.get(t)).filter(Boolean) as AssetRenderer[];
+  return allowedTypes.map((t) => renderers.get(t)).filter(Boolean) as AssetRenderer[];
 }
 
 export function clearRendererRegistry(): void {
@@ -62,7 +62,8 @@ export function registerBuiltinRenderers(): void {
     validate: (params) => {
       const errors: string[] = [];
       if (typeof (params as any).numerator !== 'number') errors.push('numerator must be a number');
-      if (typeof (params as any).denominator !== 'number') errors.push('denominator must be a number');
+      if (typeof (params as any).denominator !== 'number')
+        errors.push('denominator must be a number');
       return errors;
     },
   });
@@ -73,7 +74,8 @@ export function registerBuiltinRenderers(): void {
     validate: (params) => {
       const errors: string[] = [];
       if (typeof (params as any).numerator !== 'number') errors.push('numerator must be a number');
-      if (typeof (params as any).denominator !== 'number') errors.push('denominator must be a number');
+      if (typeof (params as any).denominator !== 'number')
+        errors.push('denominator must be a number');
       return errors;
     },
   });

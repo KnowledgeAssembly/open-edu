@@ -44,9 +44,7 @@ describe('generateQualityReport', () => {
   it('returns partial when validation fails', () => {
     const report = generateQualityReport({
       ...baseParams,
-      validationIssues: [
-        { id: 'v1', severity: 'error', message: 'Wrong', source: 'math' },
-      ],
+      validationIssues: [{ id: 'v1', severity: 'error', message: 'Wrong', source: 'math' }],
     });
     expect(report.status).toBe('partial');
   });

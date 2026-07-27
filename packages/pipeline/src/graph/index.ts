@@ -80,8 +80,13 @@ export async function runPipelineV2(
       scope: options.scope ? scopeToString(options.scope) : 'all',
       promptVersion: '2.0',
       stages: [
-        'source_inventory', 'concept_map', 'concept_enrichment',
-        'lesson_blueprint', 'asset_plan', 'activity_generation', 'review',
+        'source_inventory',
+        'concept_map',
+        'concept_enrichment',
+        'lesson_blueprint',
+        'asset_plan',
+        'activity_generation',
+        'review',
       ].map((s) => ({ stage: s, ...router.getStageConfig(s as LlmStage) })),
     });
     hash.update(cfg);
@@ -193,12 +198,7 @@ export async function runPipelineV2(
   } else {
     if (options.verbose) console.log('[4/8] Generating lesson blueprints...');
     if (!options.dryRun) {
-      const result = await generateLessonBlueprints(
-        router,
-        concepts,
-        inventory.units,
-        profile,
-      );
+      const result = await generateLessonBlueprints(router, concepts, inventory.units, profile);
       blueprints = result.blueprints;
       bpWarnings = result.warnings;
       reviewItems.push(...bpWarnings);
@@ -216,20 +216,17 @@ export async function runPipelineV2(
     if (!options.dryRun) {
       const provider = legacyAdapter(router, 'activity_generation');
       for (const bp of blueprints) {
-        const concept = concepts.find(c => c.conceptId === bp.conceptId);
+        const concept = concepts.find((c) => c.conceptId === bp.conceptId);
         if (!concept) {
           reviewItems.push(`No concept found for blueprint: ${bp.conceptId}`);
           continue;
         }
-        const result = await generateActivitiesFromBlueprint(
-          provider,
-          {
-            concept,
-            blueprint: bp,
-            profile,
-            sourceUnits: inventory.units,
-          },
-        );
+        const result = await generateActivitiesFromBlueprint(provider, {
+          concept,
+          blueprint: bp,
+          profile,
+          sourceUnits: inventory.units,
+        });
         const pair: ConceptActivityPair = {
           concept: {
             conceptId: concept.conceptId,

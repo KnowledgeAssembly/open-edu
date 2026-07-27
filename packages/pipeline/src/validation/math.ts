@@ -507,7 +507,11 @@ export const MathValidator: SubjectValidator = {
       if (activity.courseSpecType === 'quiz' && activity.content.questions) {
         for (const q of activity.content.questions) {
           if (q && q.options) {
-            const mcqErrors = validateMCQOptions({ question: q.question, options: q.options, correctIndex: q.correctIndex });
+            const mcqErrors = validateMCQOptions({
+              question: q.question,
+              options: q.options,
+              correctIndex: q.correctIndex,
+            });
             for (const e of mcqErrors) {
               issues.push({
                 id: `mcq-${activity.step}`,

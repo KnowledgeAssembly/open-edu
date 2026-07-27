@@ -395,16 +395,13 @@ export function getAllowedWidgetIdsForProfile(profile: CurriculumProfile): strin
 export function getWidgetContextForProfile(
   profile: CurriculumProfile,
 ): { id: string; category: string }[] {
-  return getAllowedWidgetIdsForProfile(profile).map(id => ({
+  return getAllowedWidgetIdsForProfile(profile).map((id) => ({
     id,
     category: id.split('.')[0] || '',
   }));
 }
 
-export function isWidgetAllowedForProfile(
-  widgetId: string,
-  profile: CurriculumProfile,
-): boolean {
+export function isWidgetAllowedForProfile(widgetId: string, profile: CurriculumProfile): boolean {
   const category = widgetId.split('.')[0] || '';
   return profile.widgetCategories.includes(category);
 }
