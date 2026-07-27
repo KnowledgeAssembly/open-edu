@@ -125,7 +125,8 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
   const assetPaths = course.assets.map((a) => a.path);
   const assetMap = new Map<string, ArrayBuffer>();
   for (const a of course.assets) {
-    assetMap.set(a.path, a.data);
+    const normalized = a.path.replace(/^assets\//, '');
+    assetMap.set(normalized, a.data);
   }
 
   return {
