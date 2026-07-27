@@ -49,7 +49,10 @@ saveCourse(course: StoredCourse): Promise<void>
 getCourse(id: string): Promise<StoredCourse | undefined>
 listCourses(): Promise<StoredCourse[]>
 deleteCourse(id: string): Promise<void>
+replaceCourse(course: StoredCourse): Promise<void>
 ```
+
+The `replaceCourse` function performs a transactional swap — it replaces an existing course record in a single transaction, ensuring atomicity for version upgrades.
 
 ### Progress Store
 
@@ -105,6 +108,15 @@ interface StoredCourse {
   nodes: Record<string, unknown>[];
   assets: { path: string; data: ArrayBuffer }[];
   downloadedAt: string;
+  distribution?: DistributionMeta;
+}
+
+interface DistributionMeta {
+  source: 'file' | 'url' | 'catalog';
+  sourceUrl?: string;
+  installedVersion: string;
+  checksum?: string;
+  installedAt: string;
 }
 
 interface LearningProgress {

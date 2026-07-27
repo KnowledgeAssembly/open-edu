@@ -4,7 +4,7 @@ sidebar_position: 10
 
 # LLM Config
 
-The `@open-edu/llm-config` package provides a lightweight abstraction over LLM providers, enabling structured output generation with Zod schema validation.
+The `@open-edu/llm-config` package provides a lightweight abstraction over LLM providers, enabling structured output generation with Zod schema validation, streaming via AI SDK v4, and two-tier model routing.
 
 ## Architecture
 
@@ -17,6 +17,10 @@ The `@open-edu/llm-config` package provides a lightweight abstraction over LLM p
 │ OpenRouterProvider │  Implementation for OpenRouter API with structured output fallback
 ├────────────────────┤
 │  createLlmProvider │  Factory — creates provider from config or env vars
+├────────────────────┤
+│  ModelFactory      │  Two-tier routing (fast/escalation) with AI SDK v4 LanguageModel
+├────────────────────┤
+│  createModelFactory│  Factory — creates ModelFactory from config or env vars
 └────────────────────┘
 ```
 
@@ -113,3 +117,49 @@ const provider = createLlmProvider({
   apiKey: process.env.LLM_API_KEY!,
 });
 ```
+
+## ModelFactory
+
+The `ModelFactory` provides two-tier model routing for AI SDK v4 streaming. It creates `LanguageModel` instances with automatic tier selection:
+
+```typescript
+import { createModelFactory, createModelFactoryFromEnv } from '@open-edu/llm-config';
+
+// From explicit config
+const factory = createModelFactory({
+  config: {
+    provider: 'openai',
+    model: 'gpt-4o-mini',
+    apiKey: '...',
+    maxTokens: 4096,
+    temperature: 0.3,
+  },
+  tier: 'fast',
+});
+
+// From environment variables
+const factory = createModelFactoryFromEnv();
+
+// Get model for a specific tier
+const fastModel = factory.getModel('fast'); // gpt-4o-mini for quick tasks
+const escalationModel = factory.getModel('escalation'); // gpt-4o for complex reasoning
+
+// Check capabilities
+factory.hasCapability('streaming'); // true
+factory.hasCapability('tool-calling'); // true
+```
+
+### Tier Routing
+
+| Tier         | Default Model | Use Case                                    |
+| ------------ | ------------- | ------------------------------------------- |
+| `fast`       | `gpt-4o-mini` | Classification, generation, quick responses |
+| `escalation` | `gpt-4o`      | Concept design, blueprinting, review        |
+
+### Provider Capabilities
+
+| Provider     | Streaming | Structured Output | Tool Calling |
+| ------------ | --------- | ----------------- | ------------ |
+| `openai`     | Yes       | Yes               | Yes          |
+| `google`     | Yes       | Yes               | Yes          |
+| `openrouter` | Yes       | Yes               | Yes          |

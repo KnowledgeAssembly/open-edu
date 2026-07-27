@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Learner App
 
-The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, **bundle overviews**, progress tracking, reward integration, **theme switching**, and a **modernized UI** built on shadcn/ui components with Radix UI primitives and Lucide icons.
+The **learner app** (`@open-edu/learner`) is a standalone application that provides the full course-taking experience — catalog browsing, course navigation, **bundle overviews**, progress tracking, reward integration, **theme switching**, **course distribution** (install from files/URL/catalog), **Pipili AI companion** (streaming chat with contextual hints), and a **modernized UI** built on shadcn/ui components with Radix UI primitives and Lucide icons.
 
 ## Quick Start
 
@@ -30,27 +30,29 @@ The learner app is built on top of the Open-Edu runtime packages:
   ├── @open-edu/accessibility — AccessibilityProvider
   ├── @open-edu/widgets       — createDefaultRegistry
   ├── @open-edu/design-system — AppSidebar, AppLayout, SideNav, TopAppBar, etc.
-  ├── @open-edu/ai-companion  — CompanionProvider, SearchManager, DictionaryService
+  ├── @open-edu/ai-companion  — CompanionProvider, SearchManager, DictionaryService, Pipili subsystem
   ├── @open-edu/schemas       — TypeScript types derived from Zod schemas
   ├── @open-edu/storage       — IndexedDB persistence (courses, progress, badges, cards, search, prefs)
   ├── @open-edu/pwa-core      — Install prompt, update detection, connectivity, storage info
-  └── @open-edu/llm-config    — LLM provider abstraction
+  ├── @open-edu/llm-config    — LLM provider abstraction, ModelFactory
+  └── @open-edu/oep-distribution — .oep install, catalog loader, version comparison
 ```
 
 ## Page Router
 
 The app uses **react-router-dom** 6.x (`useNavigate`, `useLocation`, `useBlocker`) for navigation with an `AppView` union type that drives path-to-view mapping:
 
-| View           | Route         | Description                                                               |
-| -------------- | ------------- | ------------------------------------------------------------------------- |
-| **Home**       | `/`           | Landing page with quick-start actions                                     |
-| **Catalog**    | `/catalog`    | Scans and displays all packages as CourseCards                            |
-| **Progress**   | `/progress`   | Bento-grid dashboard — completion, AI insights, mastery profile, activity |
-| **Settings**   | `/settings`   | Theme switching, preferences, accessibility controls                      |
-| **Course**     | `/course/:id` | 3-panel viewer — SideNav + content canvas + AITutorPanel                  |
-| **Bundle**     | `/bundle/:id` | Multi-module bundle overview page                                         |
-| **Collection** | `/collection` | Collection Binder — Knowledge Cards gallery                               |
-| **Break**      | `/break`      | Break reminder page                                                       |
+| View                | Route              | Description                                                               |
+| ------------------- | ------------------ | ------------------------------------------------------------------------- |
+| **Home**            | `/`                | Landing page with quick-start actions                                     |
+| **Catalog**         | `/catalog`         | Scans and displays all packages as CourseCards                            |
+| **Catalog Install** | `/catalog/install` | Install courses from file, URL, or remote catalog                         |
+| **Progress**        | `/progress`        | Bento-grid dashboard — completion, AI insights, mastery profile, activity |
+| **Settings**        | `/settings`        | Theme switching, preferences, accessibility controls                      |
+| **Course**          | `/course/:id`      | 3-panel viewer — SideNav + content canvas + AITutorPanel (Pipili chat)    |
+| **Bundle**          | `/bundle/:id`      | Multi-module bundle overview page                                         |
+| **Collection**      | `/collection`      | Collection Binder — Knowledge Cards gallery                               |
+| **Break**           | `/break`           | Break reminder page                                                       |
 
 ## Course Catalog
 
@@ -80,6 +82,75 @@ When you click a bundle card, the app loads the bundle via `loadBundle()` and re
 ### Module-to-Module Navigation
 
 When a module is completed within a bundle, the app updates the `BundleProgressSnapshot` (persisted to `localStorage` under `open-edu-bundle-progress`), evaluates prerequisites, and unlocks dependent modules. The exit warning dialog is suppressed when navigating between modules within the same bundle.
+
+## Course Distribution
+
+The learner app supports installing courses from multiple sources through `@open-edu/oep-distribution`:
+
+### InstallCourseDialog
+
+A tabbed dialog for installing `.oep` course archives:
+
+- **File tab** — drag-and-drop or file picker for local `.oep` files
+- **URL tab** — paste a URL to download and install a `.oep` archive
+- Error handling with user-friendly messages for corrupted, incompatible, or duplicate packages
+
+### CatalogInstallView
+
+Fetches a remote JSON catalog and displays available courses for one-click install:
+
+- Loads catalog from a configurable URL
+- Shows package name, version, description
+- Detects already-installed packages and shows upgrade status
+
+### AvailableUpdatesList
+
+Monitors installed courses for available updates from the catalog:
+
+- Compares installed version against catalog entries
+- Shows upgrade/downgrade badges
+- One-click update with transactional swap via `replaceCourse`
+
+### courseDownload.ts
+
+Bridges `@open-edu/oep-distribution` with `@open-edu/storage`:
+
+- `installFromFile()` — install from local `.oep` file
+- `installFromUrl()` — download and install from URL
+- `installFromCatalog()` — install from catalog entry
+- `checkForUpdates()` — compare installed versions against catalog
+
+## Pipili AI Companion
+
+The learner app includes **Pipili** — a context-aware AI tutoring companion powered by AI SDK v4 streaming:
+
+### Server-Side Endpoint
+
+The Pipili endpoint (`src/pipili/`) handles POST requests with:
+
+- Zod request validation
+- Context normalization and bounding (from `@open-edu/ai-companion`)
+- Assessment policy enforcement (respects quiz attempt limits)
+- Accessibility profile awareness (autism, ADHD, dyslexia)
+- 7-tool registry (hint, explain, quiz, summarize, navigate, define, translate)
+- Model tier routing via `ModelFactory` (fast for quick responses, escalation for complex reasoning)
+- Error classification with user-friendly messages
+
+### Client-Side Integration
+
+- **PipiliChatProvider** — wraps `useChat` from `@ai-sdk/react` for streaming message state
+- **PipiliMessage** — renders `UIMessage.parts` with markdown, tool calls, and citations
+- **HintControls** — UI for requesting hints at different levels (nudge → scaffold → answer)
+- **context-mapper.ts** — maps learning context from the runtime to Pipili's context schema
+
+### Integration Points
+
+Pipili is integrated into the learner app through:
+
+- **CompanionProvider** — updated to wrap `PipiliChatProvider`
+- **CompanionPanel** — now includes Pipili chat alongside search/dictionary
+- **CourseRightSidebar** — hosts the companion panel in the course view
+- **AppShell** — provides `PipiliChatProvider` at the app level
 
 ## Course View
 
