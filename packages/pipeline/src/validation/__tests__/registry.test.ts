@@ -56,20 +56,20 @@ describe('Validator Registry', () => {
 
   it('getValidatorsForProfile includes structural validator always', () => {
     const result = getValidatorsForProfile(makeProfile());
-    expect(result.some(v => v.id === 'structure')).toBe(true);
+    expect(result.some((v) => v.id === 'structure')).toBe(true);
   });
 
   it('getValidatorsForProfile for math profile returns structure + math', () => {
     // math validator is registered via math.ts import
     const mathProfile = makeProfile({ id: 'math', validatorIds: ['math'] });
     const result = getValidatorsForProfile(mathProfile);
-    const ids = result.map(v => v.id);
+    const ids = result.map((v) => v.id);
     expect(ids).toContain('structure');
   });
 
   it('getValidatorsForProfile for generic profile returns only structure', () => {
     const result = getValidatorsForProfile(makeProfile());
-    const ids = result.map(v => v.id);
+    const ids = result.map((v) => v.id);
     expect(ids).toContain('structure');
     // math validator is not registered in this test
   });

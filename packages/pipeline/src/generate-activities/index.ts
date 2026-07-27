@@ -12,7 +12,12 @@ import { GUIDED_PRACTICE_PROMPT } from './prompts/guided-practice.js';
 import { INDEPENDENT_PRACTICE_PROMPT } from './prompts/independent-practice.js';
 import { MASTERY_CHECK_PROMPT } from './prompts/mastery-check.js';
 import { POSITIVE_COMPLETION_PROMPT } from './prompts/positive-completion.js';
-import { getWidgetSchema, registerAllWidgetSchemas, normalizeWidgetId, isWidgetAllowedForProfile } from './widget-schemas.js';
+import {
+  getWidgetSchema,
+  registerAllWidgetSchemas,
+  normalizeWidgetId,
+  isWidgetAllowedForProfile,
+} from './widget-schemas.js';
 
 registerAllWidgetSchemas();
 
@@ -136,7 +141,10 @@ function buildStepPrompt(
     .replace(/{EXAMPLES}/g, concept.examples.map((e) => `  - ${e}`).join('\n'))
     .replace(/{MISCONCEPTIONS}/g, concept.misconceptions.map((m) => `  - ${m}`).join('\n'))
     .replace(/{PROFILE_SUBJECT}/g, profile.subject)
-    .replace(/{PROFILE_STYLE}/g, (profile.promptContext?.teachingStyle as string) || 'scaffolded discovery')
+    .replace(
+      /{PROFILE_STYLE}/g,
+      (profile.promptContext?.teachingStyle as string) || 'scaffolded discovery',
+    )
     .replace(/{QUESTION_FAMILIES}/g, profile.questionFamilies.join(', '));
 
   return `${prompt}\n\nGenerate the ${step} activity now as a JSON object. You may use "${type}" for text or "widget" for an interactive activity from the catalog — choose whichever suits the concept best.${exemplarSection}${retrySection}`;

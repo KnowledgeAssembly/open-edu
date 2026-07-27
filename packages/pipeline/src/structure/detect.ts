@@ -10,10 +10,7 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function buildHeadingRegex(
-  labels: string[],
-  pattern: 'chapter' | 'section'
-): RegExp {
+function buildHeadingRegex(labels: string[], pattern: 'chapter' | 'section'): RegExp {
   const alternatives = labels.map(escapeRegex).join('|');
   if (pattern === 'chapter') {
     return new RegExp(`^(?:${alternatives})\\s+(\\d+)\\s*[:\\-\\u2013\\u2014]\\s*(.+)$`, 'im');
@@ -116,14 +113,11 @@ export function createSyntheticChapter(pages: PageContent[]): ChapterStructure {
   };
 }
 
-export function removeRepeatedHeaders(
-  pages: PageContent[],
-  threshold: number = 3,
-): PageContent[] {
+export function removeRepeatedHeaders(pages: PageContent[], threshold: number = 3): PageContent[] {
   if (pages.length < threshold) return pages;
 
-  const firstLines = pages.map(p => p.text.split('\n')[0]?.trim() || '');
-  const lastLines = pages.map(p => {
+  const firstLines = pages.map((p) => p.text.split('\n')[0]?.trim() || '');
+  const lastLines = pages.map((p) => {
     const lines = p.text.split('\n');
     return lines[lines.length - 1]?.trim() || '';
   });
@@ -133,10 +127,14 @@ export function removeRepeatedHeaders(
   for (const line of firstLines) firstLineCounts.set(line, (firstLineCounts.get(line) || 0) + 1);
   for (const line of lastLines) lastLineCounts.set(line, (lastLineCounts.get(line) || 0) + 1);
 
-  const repeatedFirsts = new Set([...firstLineCounts].filter(([, c]) => c >= threshold).map(([l]) => l));
-  const repeatedLasts = new Set([...lastLineCounts].filter(([, c]) => c >= threshold).map(([l]) => l));
+  const repeatedFirsts = new Set(
+    [...firstLineCounts].filter(([, c]) => c >= threshold).map(([l]) => l),
+  );
+  const repeatedLasts = new Set(
+    [...lastLineCounts].filter(([, c]) => c >= threshold).map(([l]) => l),
+  );
 
-  return pages.map(p => {
+  return pages.map((p) => {
     const lines = p.text.split('\n');
     let trimmed = p.text;
     if (lines[0] && repeatedFirsts.has(lines[0].trim())) {

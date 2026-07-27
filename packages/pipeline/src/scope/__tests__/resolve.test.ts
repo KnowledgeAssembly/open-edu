@@ -3,7 +3,9 @@ import { parseScope, scopeToString } from '../types.js';
 import { resolveScope } from '../resolve.js';
 import type { SourceInventory } from '../../source/types.js';
 
-function makeInventory(units: Array<{ id: string; type: string; pageStart: number; heading?: string }>): SourceInventory {
+function makeInventory(
+  units: Array<{ id: string; type: string; pageStart: number; heading?: string }>,
+): SourceInventory {
   return {
     documentId: 'test-doc',
     title: 'Test',
@@ -41,7 +43,10 @@ describe('parseScope', () => {
   it('parses pages', () => {
     const s = parseScope('pages:5-12');
     expect(s.kind).toBe('pages');
-    if (s.kind === 'pages') { expect(s.start).toBe(5); expect(s.end).toBe(12); }
+    if (s.kind === 'pages') {
+      expect(s.start).toBe(5);
+      expect(s.end).toBe(12);
+    }
   });
 
   it('parses source-units', () => {
@@ -107,7 +112,7 @@ describe('resolveScope', () => {
     const result = resolveScope({ kind: 'chapter-id', id: 'l2' }, inventory);
     expect(result.filteredUnits.length).toBeGreaterThan(0);
     expect(result.filteredUnits[0]!.id).toBe('l2');
-    expect(result.filteredUnits.every(u => u.id === 'l2')).toBe(true);
+    expect(result.filteredUnits.every((u) => u.id === 'l2')).toBe(true);
   });
 
   it('chapter-id not found warns', () => {
@@ -118,13 +123,15 @@ describe('resolveScope', () => {
   it('pages mode filters by page range', () => {
     const result = resolveScope({ kind: 'pages', start: 5, end: 6 }, inventory);
     expect(result.filteredUnits.length).toBeGreaterThan(0);
-    expect(result.filteredUnits.every(u => u.location.pageStart >= 5 && u.location.pageStart <= 6)).toBe(true);
+    expect(
+      result.filteredUnits.every((u) => u.location.pageStart >= 5 && u.location.pageStart <= 6),
+    ).toBe(true);
   });
 
   it('source-units filters by IDs', () => {
     const result = resolveScope({ kind: 'source-units', ids: ['l1', 'e1'] }, inventory);
     expect(result.filteredUnits).toHaveLength(2);
-    expect(result.filteredUnits.map(u => u.id).sort()).toEqual(['e1', 'l1']);
+    expect(result.filteredUnits.map((u) => u.id).sort()).toEqual(['e1', 'l1']);
   });
 
   it('source-units warns on unknown IDs', () => {
@@ -136,7 +143,13 @@ describe('resolveScope', () => {
 
 describe('scopeToString', () => {
   it('round-trips with parseScope', () => {
-    const scopes = ['all', 'chapter-index:3', 'chapter-id:foo', 'pages:5-12', 'source-units:src-1,src-5'];
+    const scopes = [
+      'all',
+      'chapter-index:3',
+      'chapter-id:foo',
+      'pages:5-12',
+      'source-units:src-1,src-5',
+    ];
     for (const raw of scopes) {
       const parsed = parseScope(raw);
       expect(scopeToString(parsed)).toBe(raw);

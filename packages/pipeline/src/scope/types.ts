@@ -28,19 +28,31 @@ export function parseScope(raw: string): DocumentScope {
     return { kind: 'pages', start, end };
   }
   if (raw.startsWith('source-units:')) {
-    const ids = raw.slice('source-units:'.length).split(',').map(s => s.trim()).filter(Boolean);
-    if (ids.length === 0) throw new Error(`Invalid source units: ${raw}. Must specify at least one ID.`);
+    const ids = raw
+      .slice('source-units:'.length)
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (ids.length === 0)
+      throw new Error(`Invalid source units: ${raw}. Must specify at least one ID.`);
     return { kind: 'source-units', ids };
   }
-  throw new Error(`Unknown scope format: ${raw}. Valid: all, chapter-index:N, chapter-id:ID, pages:A-B, source-units:id,id`);
+  throw new Error(
+    `Unknown scope format: ${raw}. Valid: all, chapter-index:N, chapter-id:ID, pages:A-B, source-units:id,id`,
+  );
 }
 
 export function scopeToString(scope: DocumentScope): string {
   switch (scope.kind) {
-    case 'all': return 'all';
-    case 'chapter-index': return `chapter-index:${scope.index}`;
-    case 'chapter-id': return `chapter-id:${scope.id}`;
-    case 'pages': return `pages:${scope.start}-${scope.end}`;
-    case 'source-units': return `source-units:${scope.ids.join(',')}`;
+    case 'all':
+      return 'all';
+    case 'chapter-index':
+      return `chapter-index:${scope.index}`;
+    case 'chapter-id':
+      return `chapter-id:${scope.id}`;
+    case 'pages':
+      return `pages:${scope.start}-${scope.end}`;
+    case 'source-units':
+      return `source-units:${scope.ids.join(',')}`;
   }
 }

@@ -36,19 +36,24 @@ export async function evaluateProfile(
   };
 }
 
-export function compareProfiles(
-  results: ProfileEvalResult[],
-): { bestByMetric: Record<string, string>; comparison: ProfileEvalResult[] } {
+export function compareProfiles(results: ProfileEvalResult[]): {
+  bestByMetric: Record<string, string>;
+  comparison: ProfileEvalResult[];
+} {
   const bestByMetric: Record<string, string> = {};
 
   if (results.length > 0) {
     const bestConcept = [...results].sort((a, b) => b.conceptCount - a.conceptCount)[0]!;
     bestByMetric.conceptCount = bestConcept.profileId;
 
-    const bestCoverage = [...results].sort((a, b) => b.sourceCoveragePercent - a.sourceCoveragePercent)[0]!;
+    const bestCoverage = [...results].sort(
+      (a, b) => b.sourceCoveragePercent - a.sourceCoveragePercent,
+    )[0]!;
     bestByMetric.sourceCoverage = bestCoverage.profileId;
 
-    const bestWidget = [...results].sort((a, b) => b.widgetValidityPercent - a.widgetValidityPercent)[0]!;
+    const bestWidget = [...results].sort(
+      (a, b) => b.widgetValidityPercent - a.widgetValidityPercent,
+    )[0]!;
     bestByMetric.widgetValidity = bestWidget.profileId;
 
     const bestLatency = [...results].sort((a, b) => a.latencyMs - b.latencyMs)[0]!;

@@ -18,22 +18,34 @@ function normalizeConcept(raw: Record<string, unknown>): Concept {
     conceptId: (raw.conceptId as string) || 'unknown',
     label: (raw.label as string) || 'Untitled',
     kind: (raw.kind as Concept['kind']) || 'knowledge',
-    sourceUnitIds: Array.isArray(raw.sourceUnitIds) ? raw.sourceUnitIds as string[] : [],
+    sourceUnitIds: Array.isArray(raw.sourceUnitIds) ? (raw.sourceUnitIds as string[]) : [],
     learningObjective: (raw.learningObjective as string) || 'No objective provided',
     coreIdea: (raw.coreIdea as string) || 'No core idea provided',
     difficulty: normalizeDifficulty((raw.difficulty as string) || ''),
-    masteryThreshold: typeof raw.masteryThreshold === 'number'
-      ? Math.min(Math.max(raw.masteryThreshold, 0.5), 1)
-      : 0.8,
-    prerequisites: Array.isArray(raw.prerequisites) ? raw.prerequisites as string[] : [],
+    masteryThreshold:
+      typeof raw.masteryThreshold === 'number'
+        ? Math.min(Math.max(raw.masteryThreshold, 0.5), 1)
+        : 0.8,
+    prerequisites: Array.isArray(raw.prerequisites) ? (raw.prerequisites as string[]) : [],
     representations: (Array.isArray(raw.representations)
-      ? (raw.representations as string[]).filter(r => ['concrete', 'visual', 'symbolic'].includes(r))
+      ? (raw.representations as string[]).filter((r) =>
+          ['concrete', 'visual', 'symbolic'].includes(r),
+        )
       : ['visual']) as Concept['representations'],
-    exerciseFamilies: Array.isArray(raw.exerciseFamilies) ? raw.exerciseFamilies as string[] : ['direct_question'],
-    misconceptionTargets: Array.isArray(raw.misconceptionTargets) ? raw.misconceptionTargets as string[] : [],
+    exerciseFamilies: Array.isArray(raw.exerciseFamilies)
+      ? (raw.exerciseFamilies as string[])
+      : ['direct_question'],
+    misconceptionTargets: Array.isArray(raw.misconceptionTargets)
+      ? (raw.misconceptionTargets as string[])
+      : [],
     adultContext: typeof raw.adultContext === 'string' ? raw.adultContext : null,
-    recommendedWidgetCategories: Array.isArray(raw.recommendedWidgetCategories) ? raw.recommendedWidgetCategories as string[] : [],
-    estimatedMinutes: typeof raw.estimatedMinutes === 'number' ? Math.min(Math.max(raw.estimatedMinutes, 5), 60) : 15,
+    recommendedWidgetCategories: Array.isArray(raw.recommendedWidgetCategories)
+      ? (raw.recommendedWidgetCategories as string[])
+      : [],
+    estimatedMinutes:
+      typeof raw.estimatedMinutes === 'number'
+        ? Math.min(Math.max(raw.estimatedMinutes, 5), 60)
+        : 15,
     extensions: (raw.extensions as Record<string, unknown>) || undefined,
   };
 }
@@ -88,9 +100,14 @@ export async function generateConceptMap(
   profile: CurriculumProfile,
 ): Promise<{ concepts: Concept[]; warnings: string[] }> {
   const prompt = buildConceptMapPrompt(sourceUnits, lessonName, profile);
-  const result = await router.generateStructuredRaw('concept_map', prompt, ConceptMapResponseSchema, {
-    temperature: 0.2,
-  });
+  const result = await router.generateStructuredRaw(
+    'concept_map',
+    prompt,
+    ConceptMapResponseSchema,
+    {
+      temperature: 0.2,
+    },
+  );
 
   const warnings: string[] = [];
 
@@ -110,11 +127,15 @@ export async function generateConceptMap(
 
   for (const c of normalized) {
     if (!profile.conceptKinds.includes(c.kind)) {
-      warnings.push(`Concept "${c.conceptId}" uses unsupported kind "${c.kind}" for profile "${profile.id}"`);
+      warnings.push(
+        `Concept "${c.conceptId}" uses unsupported kind "${c.kind}" for profile "${profile.id}"`,
+      );
     }
     for (const rep of c.representations) {
       if (!profile.representations.includes(rep)) {
-        warnings.push(`Concept "${c.conceptId}" uses unsupported representation "${rep}" for profile "${profile.id}"`);
+        warnings.push(
+          `Concept "${c.conceptId}" uses unsupported representation "${rep}" for profile "${profile.id}"`,
+        );
       }
     }
   }

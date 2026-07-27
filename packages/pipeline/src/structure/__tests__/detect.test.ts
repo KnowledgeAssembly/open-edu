@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { detectDocumentStructure, createSyntheticChapter, removeRepeatedHeaders } from '../detect.js';
+import {
+  detectDocumentStructure,
+  createSyntheticChapter,
+  removeRepeatedHeaders,
+} from '../detect.js';
 import type { SourceTaxonomy } from '../../profile/types.js';
 
 function makePage(text: string, pageNum: number) {

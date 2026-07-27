@@ -66,7 +66,7 @@ export function registerBuiltinValidators(): void {
     supports: () => true,
     validateConcepts: (ctx) => {
       const issues: ValidationIssue[] = [];
-      const coveredIds = new Set(ctx.concepts.flatMap(c => c.sourceUnitIds));
+      const coveredIds = new Set(ctx.concepts.flatMap((c) => c.sourceUnitIds));
       for (const unit of ctx.sourceUnits) {
         if (unit.requiredCoverage && !coveredIds.has(unit.id)) {
           issues.push({
@@ -82,7 +82,7 @@ export function registerBuiltinValidators(): void {
     validateActivities: (ctx) => {
       const issues: ValidationIssue[] = [];
       for (const concept of ctx.concepts) {
-        const hasBlueprint = ctx.blueprints.some(b => b.conceptId === concept.conceptId);
+        const hasBlueprint = ctx.blueprints.some((b) => b.conceptId === concept.conceptId);
         if (!hasBlueprint) {
           issues.push({
             id: `no-blueprint-${concept.conceptId}`,

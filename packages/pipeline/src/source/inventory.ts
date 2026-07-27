@@ -21,13 +21,19 @@ function splitIntoSegments(pages: PageContent[], taxonomy: SourceTaxonomy): Sour
   let unitCounter = 0;
 
   const lessonLabelPattern = taxonomy.lessonLabels.map(escapeRegex).join('|');
-  const LESSON_HEADING = new RegExp(`^(?:${lessonLabelPattern})\\s+(\\d+)\\s*[:\\-\\u2013\\u2014]\\s*(.+)$`, 'im');
+  const LESSON_HEADING = new RegExp(
+    `^(?:${lessonLabelPattern})\\s+(\\d+)\\s*[:\\-\\u2013\\u2014]\\s*(.+)$`,
+    'im',
+  );
 
   const objectivePattern = taxonomy.objectiveLabels.map(escapeRegex).join('|');
   const OBJECTIVE_MARKER = new RegExp(`^(?:${objectivePattern})`, 'im');
 
   const examplePattern = taxonomy.exampleLabels.map(escapeRegex).join('|');
-  const EXAMPLE_MARKER = new RegExp(`^(?:${examplePattern})\\s+(\\d+(?:\\.\\d+)?)\\s*[:\\-\\u2013\\u2014]`, 'im');
+  const EXAMPLE_MARKER = new RegExp(
+    `^(?:${examplePattern})\\s+(\\d+(?:\\.\\d+)?)\\s*[:\\-\\u2013\\u2014]`,
+    'im',
+  );
 
   const exercisePattern = taxonomy.exerciseLabels.map(escapeRegex).join('|');
   const EXERCISE_MARKER = new RegExp(`^(?:${exercisePattern})`, 'im');

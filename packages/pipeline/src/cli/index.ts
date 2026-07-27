@@ -270,9 +270,10 @@ export async function runPipelineCLI(): Promise<void> {
       resume: options.resume,
       maxRetries: options.maxRetries,
       format: options.format,
-      widgetCategories: options.widgetCategories.length > 0
-        ? options.widgetCategories
-        : resolvedProfile.widgetCategories,
+      widgetCategories:
+        options.widgetCategories.length > 0
+          ? options.widgetCategories
+          : resolvedProfile.widgetCategories,
       language: options.language,
       locale: options.locale,
     });

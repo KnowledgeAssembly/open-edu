@@ -13,12 +13,15 @@ export interface QualityReport {
   assetCount: number;
   hasCycles: boolean;
   coverage: CoverageLedger['summary'];
-  validationResults: Record<string, {
-    totalChecked: number;
-    passed: number;
-    failed: number;
-    failures: ValidationIssue[];
-  }>;
+  validationResults: Record<
+    string,
+    {
+      totalChecked: number;
+      passed: number;
+      failed: number;
+      failures: ValidationIssue[];
+    }
+  >;
   widgetValidation: {
     totalChecked: number;
     passed: number;
@@ -63,7 +66,10 @@ export function generateQualityReport(params: {
   hasCycles: boolean;
   validationIssues?: ValidationIssue[];
 }): QualityReport {
-  const validationResults: Record<string, { totalChecked: number; passed: number; failed: number; failures: ValidationIssue[] }> = {};
+  const validationResults: Record<
+    string,
+    { totalChecked: number; passed: number; failed: number; failures: ValidationIssue[] }
+  > = {};
   if (params.validationIssues) {
     const grouped = new Map<string, ValidationIssue[]>();
     for (const issue of params.validationIssues) {
@@ -72,10 +78,10 @@ export function generateQualityReport(params: {
       grouped.set(issue.source, arr);
     }
     for (const [source, issues] of grouped) {
-      const failed = issues.filter(i => i.severity === 'error');
+      const failed = issues.filter((i) => i.severity === 'error');
       validationResults[source] = {
         totalChecked: issues.length,
-        passed: issues.filter(i => i.severity === 'warning').length,
+        passed: issues.filter((i) => i.severity === 'warning').length,
         failed: failed.length,
         failures: failed,
       };
@@ -108,8 +114,11 @@ export function generateQualityReport(params: {
         actual: params.coverage.percentRequiredCovered,
       },
       subjectValidation: {
-        passed: !params.validationIssues || params.validationIssues.every(i => i.severity !== 'error'),
-        actual: params.validationIssues ? params.validationIssues.filter(i => i.severity === 'warning').length : 0,
+        passed:
+          !params.validationIssues || params.validationIssues.every((i) => i.severity !== 'error'),
+        actual: params.validationIssues
+          ? params.validationIssues.filter((i) => i.severity === 'warning').length
+          : 0,
       },
       widgetValidity: {
         passed: params.widgetResults.every((r) => r.valid),
