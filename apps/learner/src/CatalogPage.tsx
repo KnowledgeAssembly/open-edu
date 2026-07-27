@@ -419,7 +419,7 @@ export function CatalogPage({
                     onStart={() => onStartCourse(pkg.rootDir)}
                     indicator={
                       isInstalled ? (
-                        <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium">
+                        <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
                           {t('learner.catalog.installed_badge')}
                         </span>
                       ) : undefined

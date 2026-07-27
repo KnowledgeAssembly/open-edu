@@ -717,7 +717,9 @@ function AppShellInner({
                       }}
                     />
                   )}
-                  {view.view === 'collection' && <CollectionBinderPage packages={allPackageEntries} />}
+                  {view.view === 'collection' && (
+                    <CollectionBinderPage packages={allPackageEntries} />
+                  )}
                   {view.view === 'notes' && <NotesDashboardPage onNavigate={handleNavigate} />}
                   {view.view === 'note-editor' && view.noteId && (
                     <NoteEditorPage noteId={view.noteId} onNavigate={handleNavigate} />
