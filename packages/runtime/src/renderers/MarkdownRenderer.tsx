@@ -1,4 +1,4 @@
-import { useMemo, type ComponentProps, type ReactElement } from 'react';
+import { useMemo, useRef, type ComponentProps, type ReactElement } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { useTranslation } from '@open-edu/i18n';
 import { useRuntimeOptional } from '../context/RuntimeContext';
@@ -219,12 +219,14 @@ export function MarkdownRenderer({
 }: MarkdownRendererProps): JSX.Element {
   const { t } = useTranslation();
   const runtime = useRuntimeOptional();
-  const resolveAsset = runtime?.resolveAsset;
+  const resolveAssetRef = useRef(runtime?.resolveAsset);
+  resolveAssetRef.current = runtime?.resolveAsset;
+
   const rendered = useMemo(() => {
     const merged: ComponentMap = { ...accessibleComponents, ...components };
-    if (resolveAsset) {
+    if (resolveAssetRef.current) {
       merged.img = ({ alt, src, ...props }: ComponentProps<'img'>) => {
-        const resolvedSrc = src ? resolveAsset(src) : src;
+        const resolvedSrc = src ? resolveAssetRef.current!(src) : src;
         if (!alt || alt.trim() === '') {
           return <img {...props} src={resolvedSrc} alt="" aria-hidden="true" role="presentation" />;
         }
@@ -243,7 +245,7 @@ export function MarkdownRenderer({
       });
     const file = processor.processSync(content);
     return file.result as ReactElement;
-  }, [content, components, resolveAsset]);
+  }, [content, components]);
 
   return (
     <div className={className} data-testid="markdown-renderer">

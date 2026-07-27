@@ -9,31 +9,13 @@ import {
   type ReactNode,
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
+import { ASSET_MIME_TYPES } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
 import type { ProgressSnapshot, SkillGraph, MasteryLevel, NodeAnswer } from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
 import { computeSkillScores, getSkillMastery } from './skills';
-
-const ASSET_MIME_TYPES: Record<string, string> = {
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.ico': 'image/x-icon',
-  '.avif': 'image/avif',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-  '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg',
-  '.ogg': 'audio/ogg',
-  '.pdf': 'application/pdf',
-  '.json': 'application/json',
-  '.txt': 'text/plain',
-};
 
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;

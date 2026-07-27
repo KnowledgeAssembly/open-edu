@@ -23,6 +23,7 @@ export { loadRewards } from './rewards.js';
 export { loadCards } from './cards.js';
 export { loadNodes } from './nodes.js';
 export { resolveAssets, resolveAssetPath } from './assets.js';
+export { ASSET_MIME_TYPES } from './asset-mime-types.js';
 export { computeFileHash, verifyIntegrity } from './integrity.js';
 export type {
   IntegrityResult,
