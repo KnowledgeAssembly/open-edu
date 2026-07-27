@@ -29,3 +29,5 @@ export type { SearchResponse, InstantResult, EnrichedResult } from './services/S
 export { CacheService } from './services/CacheService.js';
 export { ContextManager } from './services/ContextManager.js';
 export { ConversationManager } from './services/ConversationManager.js';
+
+export * from './pipili/index.js';

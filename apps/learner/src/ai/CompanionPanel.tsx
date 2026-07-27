@@ -1,19 +1,10 @@
 import { useCallback, useEffect } from 'react';
-import { AIChat } from '@open-edu/design-system';
-import type { ChatMessage } from '@open-edu/design-system';
-import { cn } from '@open-edu/design-system';
+import { Button, cn } from '@open-edu/design-system';
 import { X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
-import type { ConversationMessage } from '@open-edu/ai-companion';
-
-function toChatMessage(msg: ConversationMessage): ChatMessage {
-  return {
-    role: msg.role === 'system' ? 'ai' : msg.role,
-    text: msg.text,
-    citations: msg.citations,
-  };
-}
+import { usePipiliChat } from './PipiliChatProvider';
+import { PipiliChat } from './PipiliChat';
 
 const suggestedQuestions = [
   'Can you explain what I just read?',
@@ -22,11 +13,13 @@ const suggestedQuestions = [
   'What are the key concepts here?',
 ];
 
-export function CompanionPanel(): JSX.Element | null {
+function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
-  const { panelState, setPanelState, messages, isLoading, sendMessage } = useCompanion();
+  const { panelState, setPanelState, messages: companionMessages } = useCompanion();
+  const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
+  const isStreaming = status === 'submitted' || status === 'streaming';
 
   const handleSend = useCallback(
     (text: string) => {
@@ -46,6 +39,11 @@ export function CompanionPanel(): JSX.Element | null {
     setPanelState('closed');
   }, [setPanelState]);
 
+  const handleRetry = useCallback(() => {
+    clearError();
+    void regenerate();
+  }, [clearError, regenerate]);
+
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
@@ -58,6 +56,8 @@ export function CompanionPanel(): JSX.Element | null {
       document.body.style.overflow = '';
     };
   }, [isOpen, handleClose]);
+
+  const showSuggestions = companionMessages.length === 0;
 
   return (
     <>
@@ -81,27 +81,34 @@ export function CompanionPanel(): JSX.Element | null {
       >
         <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
           <h2 className="text-h3 font-display">{t('learner.ai.companion')}</h2>
-          <button
+          <Button
             type="button"
-            className="hover:bg-surface-container-high text-on-surface-variant rounded-md p-1 transition-colors"
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            aria-label="Close companion panel"
+            aria-label={t('learner.right_sidebar.close')}
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col">
-          <AIChat
-            messages={messages.map(toChatMessage)}
-            onSend={handleSend}
-            isThinking={isLoading}
-            suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
-            onSuggestedQuestionSelect={messages.length === 0 ? handleSuggestedQuestion : undefined}
-            placeholder="Ask a question about this lesson..."
-            className="min-h-0 flex-1"
-          />
-        </div>
+        <PipiliChat
+          messages={messages}
+          onSend={handleSend}
+          onStop={stop}
+          onRetry={handleRetry}
+          showStop
+          showRetry={Boolean(error || status === 'ready')}
+          isStreaming={isStreaming}
+          suggestedQuestions={showSuggestions ? suggestedQuestions : undefined}
+          onSuggestedQuestionSelect={showSuggestions ? handleSuggestedQuestion : undefined}
+          placeholder={t('learner.right_sidebar.chat_placeholder')}
+          className="min-h-0 flex-1"
+        />
       </div>
     </>
   );
+}
+
+export function CompanionPanel(): JSX.Element | null {
+  return <PipiliCompanionContent />;
 }

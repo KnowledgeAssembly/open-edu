@@ -1,8 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@ai-sdk/react', () => ({
+  useChat: () => ({
+    messages: [],
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
+    status: 'ready',
+    error: undefined,
+    stop: vi.fn(),
+    clearError: vi.fn(),
+    setMessages: vi.fn(),
+  }),
+}));
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseRightSidebar } from '../CourseRightSidebar';
-import { CompanionProvider } from '../ai';
+import { CompanionProvider, PipiliChatProvider } from '../ai';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 import notesDict from '@open-edu/i18n/locales/en/notes.json';
@@ -15,7 +28,9 @@ vi.mock('@open-edu/runtime', () => ({
 function renderWithProvider(ui: React.ReactElement) {
   return render(
     <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict, notes: notesDict } }}>
-      <CompanionProvider>{ui}</CompanionProvider>
+      <CompanionProvider>
+        <PipiliChatProvider>{ui}</PipiliChatProvider>
+      </CompanionProvider>
     </I18nProvider>,
   );
 }

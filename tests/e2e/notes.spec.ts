@@ -127,6 +127,7 @@ test('add tag; reload; Tags section shows it', async ({ page }) => {
   await expect(tagInput).toBeVisible({ timeout: 10000 });
   await tagInput.fill('revision');
   await tagInput.press('Enter');
+  await expect(tagInput).toHaveValue('');
 
   await page.goto(`${LEARNER_URL}/notes`);
   await expect(page.locator('[data-testid="notes-page"]')).toBeVisible({ timeout: 10000 });

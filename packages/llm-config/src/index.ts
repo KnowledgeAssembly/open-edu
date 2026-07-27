@@ -7,6 +7,15 @@ export type { StructuredResult } from './router.js';
 export { LLM_STAGES, DEFAULT_STAGE_CONFIGS, isLlmStage, assertLlmStage } from './stages.js';
 export type { LlmStage, LlmStageConfig, LlmStageConfigs } from './stages.js';
 
+export { createModelFactory, createModelFactoryFromEnv } from './model-factory.js';
+export type {
+  ModelFactory,
+  ModelFactoryConfig,
+  ModelTier,
+  ProviderCapability,
+} from './model-factory.js';
+export { PROVIDER_CAPABILITIES } from './model-factory.js';
+
 import type { LlmConfig } from './types.js';
 import { loadConfig } from './types.js';
 import { OpenAIProvider } from './providers/openai-provider.js';

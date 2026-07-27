@@ -24,6 +24,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.0",
+    "@ai-sdk/openai": "^4.0.0",
+    "@openrouter/ai-sdk-provider": "^3.0.0",
+    "ai": "^7.0.0",
     "openai": "^4.0.0",
     "zod": "^3.22.0"
   },

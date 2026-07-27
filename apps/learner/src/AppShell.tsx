@@ -51,6 +51,7 @@ import {
   ContextBridge,
   TextSelectionToolbar,
   WordTapHandler,
+  PipiliChatProvider,
 } from './ai';
 import { getBundleProgress } from './bundleProgressStorage';
 import { useBreakTimer } from './useBreakTimer';
@@ -152,20 +153,26 @@ export function AppShell({
 
   return (
     <CompanionProvider>
-      <RuntimeThemeProvider themeId={themeId}>
-        <I18nProvider locale="en" supportedLocales={['en', 'hi', 'or']} dictionaries={dictionaries}>
-          <FontSizeProvider>
-            <AppShellInner
-              catalogPackages={catalogPackages}
-              packageEntries={packageEntries}
-              catalogBundles={catalogBundles}
-              bundleEntries={bundleEntries}
-              themeId={themeId}
-              onThemeChange={setThemeId}
-            />
-          </FontSizeProvider>
-        </I18nProvider>
-      </RuntimeThemeProvider>
+      <PipiliChatProvider>
+        <RuntimeThemeProvider themeId={themeId}>
+          <I18nProvider
+            locale="en"
+            supportedLocales={['en', 'hi', 'or']}
+            dictionaries={dictionaries}
+          >
+            <FontSizeProvider>
+              <AppShellInner
+                catalogPackages={catalogPackages}
+                packageEntries={packageEntries}
+                catalogBundles={catalogBundles}
+                bundleEntries={bundleEntries}
+                themeId={themeId}
+                onThemeChange={setThemeId}
+              />
+            </FontSizeProvider>
+          </I18nProvider>
+        </RuntimeThemeProvider>
+      </PipiliChatProvider>
     </CompanionProvider>
   );
 }
