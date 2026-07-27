@@ -16,6 +16,25 @@ import type { ProgressSnapshot, SkillGraph, MasteryLevel, NodeAnswer } from '@op
 import { buildProgressSnapshot } from './progress';
 import { computeSkillScores, getSkillMastery } from './skills';
 
+const ASSET_MIME_TYPES: Record<string, string> = {
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.wav': 'audio/wav',
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.pdf': 'application/pdf',
+  '.json': 'application/json',
+  '.txt': 'text/plain',
+};
+
 export interface RuntimeContextValue {
   loadedPackage: LoadedPackage;
   currentNode: LoadedNode | null;
@@ -34,6 +53,7 @@ export interface RuntimeContextValue {
   skillScores: Record<string, number>;
   getSkillMastery: (skillId: string) => MasteryLevel;
   skillGraph: SkillGraph | undefined;
+  resolveAsset: (path: string) => string;
 }
 
 export interface RuntimeProviderProps {
@@ -197,6 +217,36 @@ export function RuntimeProvider({
     [skillScores],
   );
 
+  const blobUrlCache = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    const cache = blobUrlCache.current;
+    return () => {
+      for (const url of cache.values()) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [loadedPackage.manifest.id]);
+
+  const resolveAsset = useCallback(
+    (path: string): string => {
+      const normalized = (path ?? '').replace(/^\.\//, '').replace(/^assets\//, '');
+      if (!normalized) return '';
+      const cached = blobUrlCache.current.get(normalized);
+      if (cached) return cached;
+      const data = loadedPackage.assetMap?.get(normalized);
+      if (data) {
+        const ext = normalized.match(/\.[a-z0-9]+$/i)?.[0] ?? '';
+        const mimeType = ASSET_MIME_TYPES[ext] ?? '';
+        const url = URL.createObjectURL(new Blob([data], { type: mimeType }));
+        blobUrlCache.current.set(normalized, url);
+        return url;
+      }
+      return `/assets/${normalized}`;
+    },
+    [loadedPackage.assetMap],
+  );
+
   const value = useMemo<RuntimeContextValue>(
     () => ({
       loadedPackage,
@@ -215,6 +265,7 @@ export function RuntimeProvider({
       skillScores,
       getSkillMastery: getContextSkillMastery,
       skillGraph,
+      resolveAsset,
       progressSnapshot: buildProgressSnapshot(
         packageId ?? loadedPackage.manifest.id,
         packageVersion ?? loadedPackage.manifest.version,
@@ -238,6 +289,7 @@ export function RuntimeProvider({
       skillScores,
       getContextSkillMastery,
       skillGraph,
+      resolveAsset,
       packageId,
       packageVersion,
     ],

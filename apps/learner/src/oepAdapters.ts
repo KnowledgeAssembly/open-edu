@@ -123,6 +123,10 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
   });
 
   const assetPaths = course.assets.map((a) => a.path);
+  const assetMap = new Map<string, ArrayBuffer>();
+  for (const a of course.assets) {
+    assetMap.set(a.path, a.data);
+  }
 
   return {
     rootDir: `${OEP_PREFIX}${course.id}`,
@@ -132,5 +136,6 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
     cards,
     nodes,
     assetPaths,
+    assetMap,
   };
 }

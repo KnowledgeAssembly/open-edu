@@ -31,8 +31,9 @@ function ImageCompareComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = imageCompareSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent = parsed.success && content;
@@ -187,8 +188,8 @@ function ImageCompareComponent(props: {
   }
 
   const mode = content.mode;
-  const leftSrc = `/assets/${content.leftImage.replace(/^assets\//, '')}`;
-  const rightSrc = `/assets/${content.rightImage.replace(/^assets\//, '')}`;
+  const leftSrc = resolveAsset?.(content.leftImage) ?? `/assets/${content.leftImage.replace(/^assets\//, '')}`;
+  const rightSrc = resolveAsset?.(content.rightImage) ?? `/assets/${content.rightImage.replace(/^assets\//, '')}`;
   const compositeAriaLabel = [
     content.caption,
     content.leftLabel && `Left: ${content.leftLabel}`,

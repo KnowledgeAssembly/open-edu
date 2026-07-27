@@ -13,6 +13,7 @@ export interface WidgetRenderProps<TState = unknown> {
   complete: (score?: number, state?: TState) => void;
   storedState?: TState;
   locale?: string;
+  resolveAsset?: (path: string) => string;
 }
 
 export interface WidgetDefinition {

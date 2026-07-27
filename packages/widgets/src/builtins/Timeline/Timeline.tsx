@@ -63,6 +63,7 @@ function SortableTimelineEvent({
   layout,
   showDates,
   showImages,
+  resolveAsset,
 }: {
   event: z.infer<typeof timelineEventSchema>;
   index: number;
@@ -71,6 +72,7 @@ function SortableTimelineEvent({
   layout: string;
   showDates: boolean;
   showImages: boolean;
+  resolveAsset?: (path: string) => string;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: event.id,
@@ -134,7 +136,7 @@ function SortableTimelineEvent({
           )}
           {showImages && event.image && (
             <img
-              src={`/assets/${event.image.replace(/^assets\//, '')}`}
+              src={resolveAsset?.(event.image) ?? `/assets/${event.image.replace(/^assets\//, '')}`}
               alt={event.title}
               style={{
                 maxWidth: '100%',
@@ -162,12 +164,14 @@ function ObserveTimelineEvent({
   layout,
   showDates,
   showImages,
+  resolveAsset,
 }: {
   event: z.infer<typeof timelineEventSchema>;
   index: number;
   layout: string;
   showDates: boolean;
   showImages: boolean;
+  resolveAsset?: (path: string) => string;
 }) {
   return (
     <div
@@ -246,7 +250,7 @@ function ObserveTimelineEvent({
           )}
           {showImages && event.image && (
             <img
-              src={`/assets/${event.image.replace(/^assets\//, '')}`}
+              src={resolveAsset?.(event.image) ?? `/assets/${event.image.replace(/^assets\//, '')}`}
               alt={event.title}
               style={{
                 maxWidth: '100%',
@@ -274,8 +278,9 @@ function TimelineComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = timelineSchema.safeParse(rawConfig);
   const content = parsed.success ? parsed.data : null;
   const hasValidContent = parsed.success && content && content.events.length >= 2;
@@ -473,6 +478,7 @@ function TimelineComponent(props: {
                   layout={layout}
                   showDates={content.showDates ?? true}
                   showImages={content.showImages ?? false}
+                  resolveAsset={resolveAsset}
                 />
               );
             })}
@@ -602,6 +608,7 @@ function TimelineComponent(props: {
                   layout={layout}
                   showDates={content.showDates ?? true}
                   showImages={content.showImages ?? false}
+                  resolveAsset={resolveAsset}
                 />
               );
             })}
