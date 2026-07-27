@@ -51,7 +51,7 @@ export const HintControls = React.forwardRef<HTMLDivElement, HintControlsProps>(
               title={t(HINT_DESCRIPTION_KEYS[level])}
               aria-label={t(HINT_LABEL_KEYS[level])}
               className={cn(
-                'h-auto px-2 py-1 text-xs font-medium',
+                'h-auto px-2 py-1 text-caption font-medium',
                 !isAvailable && 'cursor-not-allowed opacity-40',
                 isNext && 'ring-primary ring-1',
               )}
