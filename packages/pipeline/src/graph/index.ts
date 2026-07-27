@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import type { LlmRouter } from '@open-edu/llm-config';
 import { legacyAdapter, type LlmStage } from '@open-edu/llm-config';
-import { extractPDFPages, extractPDF } from '../extract/index.js';
 import { buildSourceInventory } from '../source/inventory.js';
+import type { PageContent } from '../source/inventory.js';
 import type { SourceInventory } from '../source/types.js';
 import { generateConceptMap } from '../concepts/index.js';
 import type { Concept } from '../concepts/types.js';
@@ -131,12 +131,17 @@ export async function runPipelineV2(
   if (options.dryRun && options.verbose)
     console.log('--dry-run: skipping LLM calls and file writes');
 
-  // Stage 1: Extract PDF pages
-  if (options.verbose) console.log('[1/8] Extracting PDF pages...');
-  const pages = !options.dryRun ? await extractPDFPages(options.pdfPath) : [];
-  const pdfMeta = !options.dryRun
-    ? await extractPDF(options.pdfPath)
-    : { metadata: { title: options.subject } };
+  // Stage 1: Extract (pluggable extraction framework)
+  if (options.verbose) console.log('[1/8] Extracting content...');
+  let pages: PageContent[] = [];
+  let pdfMeta = { metadata: { title: options.subject } };
+
+  if (!options.dryRun) {
+    const { runExtraction, toPageContent } = await import('../extraction/index.js');
+    const extractionResult = await runExtraction({ filePath: options.pdfPath });
+    pages = toPageContent(extractionResult);
+    pdfMeta = { metadata: { title: extractionResult.manifest.sourceType || options.subject } };
+  }
 
   // Stage 2: Build source inventory
   const invPath = join(options.outputDir, 'source-inventory.json');

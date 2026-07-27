@@ -137,7 +137,7 @@ OpenEdu Pipeline — Curriculum Generator
 Usage: pnpm --filter @open-edu/pipeline curriculum:generate [options]
 
 Options:
-  --pdf <path>            Path to the PDF file (required)
+  --pdf <path>            Path to the input file (PDF, DOCX, PPTX, Markdown, ZIP) (required)
   --level <code>          Level code (default: B)
   --subject <name>        Subject name (default: math)
   --profile <id>          Curriculum profile (generic, math, science, nios)
@@ -162,18 +162,22 @@ Examples:
   pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math
   pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --scope chapter-index:1 --profile math --verbose
   pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./science.pdf --subject science --profile science
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./lesson.docx --subject english --profile generic
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./slides.pptx --subject biology --profile science
+  pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./archive.zip --subject history --profile generic
 `);
 }
 
 function validateArgs(options: CLIOptions): string[] {
   const errors: string[] = [];
 
+  const supportedInput = ['.pdf', '.docx', '.pptx', '.md', '.zip'];
   if (!options.pdf) {
     errors.push('Missing required option: --pdf <path>');
   } else if (!existsSync(options.pdf)) {
-    errors.push(`PDF file not found: ${options.pdf}`);
-  } else if (!options.pdf.toLowerCase().endsWith('.pdf')) {
-    errors.push(`File is not a PDF: ${options.pdf}`);
+    errors.push(`Input file not found: ${options.pdf}`);
+  } else if (!supportedInput.some((ext) => options.pdf.toLowerCase().endsWith(ext))) {
+    errors.push(`Unsupported file type: ${options.pdf}. Supported: ${supportedInput.join(', ')}`);
   }
 
   if (!options.level.match(/^[a-zA-Z0-9]+$/)) {

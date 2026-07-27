@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@open-edu/llm-config": "workspace:*",
+    "@llamaindex/liteparse": "^2.8.0",
     "zod": "^3.22.0",
     "dotenv": "^16.0.0",
     "pdf-parse": "^1.1.1"
