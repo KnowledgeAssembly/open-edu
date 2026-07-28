@@ -166,9 +166,9 @@ The skill ships with 9 evaluation scenarios (`evals/evals.json`) — 3 portable,
 
 Widget-based exercises depend on the registry and catalog pipeline. The canonical widget metadata is defined in `packages/widgets/src/widget-catalog-source.ts`, resolved through `packages/widgets/src/domains.ts`, and consumed by `packages/core/src/widget-catalog.ts` when the CLI builds prompt/catalog output. That separation keeps author-facing widget IDs stable while allowing legacy `open-edu.*` IDs to be migrated automatically. The SVG explorer widget family also lives under `packages/widgets/src/svg-explorer/` and extends the same catalog pathway for interactive content.
 
-## Pipeline: PDF-to-course-spec generation
+## Pipeline: content-to-course-spec generation
 
-The `@open-edu/pipeline` package generates course specifications from PDF textbooks through an 8-stage AI-driven pipeline.
+The `@open-edu/pipeline` package generates course specifications from educational source files (PDF, DOCX, PPTX, Markdown, Images, ZIP) through an 8-stage AI-driven pipeline. Extraction is handled by a pluggable `Extractor` interface backed by `@llamaindex/liteparse`.
 
 ### Profiles
 
@@ -183,7 +183,7 @@ Profiles are resolved automatically from the `--subject` flag or explicitly via 
 
 ### Document scope
 
-The `--scope` option controls which portion of the PDF is processed: entire document, a single chapter by index or ID, a page range, or specific source unit IDs.
+The `--scope` option controls which portion of the document is processed: entire document, a single chapter by index or ID, a page range, or specific source unit IDs.
 
 ### Resume & artifact identity
 
