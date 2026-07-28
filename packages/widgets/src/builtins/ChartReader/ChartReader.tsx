@@ -42,6 +42,13 @@ const configSchema = z
 
 const ChartReaderStateSchema = z.object({
   submitted: z.boolean(),
+  lastResult: z
+    .object({
+      selectedLabel: z.string(),
+      correct: z.boolean(),
+    })
+    .nullable()
+    .optional(),
 });
 
 function ChartReaderComponent(props: {
@@ -60,7 +67,9 @@ function ChartReaderComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const [lastResult, setLastResult] = useState<{ selectedLabel: string; correct: boolean } | null>(null);
+  const [lastResult, setLastResult] = useState<{ selectedLabel: string; correct: boolean } | null>(
+    parsedState?.lastResult ?? null,
+  );
 
   const isObserve = parsed.success && !parsed.data.interactive && !parsed.data.correctLabel;
   const isInteractive = parsed.success && parsed.data.interactive && !!parsed.data.correctLabel;
@@ -85,7 +94,7 @@ function ChartReaderComponent(props: {
         selectedLabel: label,
         correct: isCorrect,
       });
-      complete(score, { submitted: true });
+      complete(score, { submitted: true, lastResult: { selectedLabel: label, correct: isCorrect } });
       setSubmitted(true);
     },
     [submitted, parsed, emitInteraction, complete],

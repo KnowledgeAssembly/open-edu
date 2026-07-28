@@ -382,7 +382,7 @@ function ImageCompareComponent(props: {
             width: '100%',
             minHeight: '200px',
             overflow: 'hidden',
-            cursor: isObserve ? 'default' : 'ew-resize',
+            cursor: 'ew-resize',
             userSelect: 'none',
           }}
         >
@@ -480,7 +480,7 @@ function ImageCompareComponent(props: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: isObserve ? 'default' : 'ew-resize',
+              cursor: 'ew-resize',
             }}
           >
             <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>
@@ -522,7 +522,7 @@ function ImageCompareComponent(props: {
           width: '100%',
           minHeight: '200px',
           overflow: 'hidden',
-          cursor: isObserve ? 'default' : 'ew-resize',
+          cursor: 'ew-resize',
           userSelect: 'none',
         }}
       >
@@ -622,7 +622,7 @@ function ImageCompareComponent(props: {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: isObserve ? 'default' : 'ew-resize',
+            cursor: 'ew-resize',
           }}
         >
           <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>

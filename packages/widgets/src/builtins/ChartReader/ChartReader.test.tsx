@@ -237,6 +237,37 @@ describe('ChartReader interactive mode - bar', () => {
     fireEvent.click(bars[1]!);
     expect(screen.getByTestId('chart-submitted')).toBeInTheDocument();
   });
+
+  it('shows correct feedback after selecting correct answer', () => {
+    renderWidget(interactiveBarConfig);
+    const bars = screen.getAllByRole('button');
+    fireEvent.click(bars[1]!);
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Correct! You selected Bananas.');
+  });
+
+  it('shows incorrect feedback with correct answer', () => {
+    renderWidget(interactiveBarConfig);
+    const bars = screen.getAllByRole('button');
+    fireEvent.click(bars[0]!);
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Not quite. The correct answer is Bananas.');
+  });
+
+  it('restores lastResult from storedState', () => {
+    const storedState = {
+      submitted: true,
+      lastResult: { selectedLabel: 'Bananas', correct: true },
+    };
+    render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={interactiveBarConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        storedState={storedState}
+      />,
+    );
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Correct! You selected Bananas.');
+  });
 });
 
 describe('ChartReader interactive mode - pictograph', () => {
