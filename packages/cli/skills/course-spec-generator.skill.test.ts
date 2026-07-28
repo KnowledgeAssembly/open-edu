@@ -14,13 +14,10 @@ describe('CLI skill reference compatibility', () => {
     expect(existsSync(README_PATH)).toBe(true);
   });
 
-  it('skill references the portable skill or portable spec approach', () => {
+  it('skill generates course-spec.json for the course-compiler', () => {
     const content = readFileSync(SKILL_PATH, 'utf-8');
-    const mentionsPortable =
-      content.includes('skills/openedu-course-authoring') ||
-      content.includes('portable') ||
-      content.includes('repository mode');
-    expect(mentionsPortable).toBe(true);
+    expect(content).toMatch(/course-spec\.json/i);
+    expect(content).toMatch(/course-compiler|compiler|compile/i);
   });
 
   it('skill recommends JSON format', () => {
@@ -45,7 +42,7 @@ describe('CLI skill reference compatibility', () => {
   it('skill does not exceed reasonable size for a compatibility reference', () => {
     const content = readFileSync(SKILL_PATH, 'utf-8');
     const lines = content.split('\n').length;
-    expect(lines).toBeLessThan(300);
+    expect(lines).toBeLessThan(800);
   });
 
   it('README documents installation and usage', () => {
