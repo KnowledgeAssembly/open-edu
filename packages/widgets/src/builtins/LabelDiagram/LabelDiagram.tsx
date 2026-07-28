@@ -451,7 +451,9 @@ function LabelDiagramComponent(props: {
           }}
         >
           <img
-            src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
+            src={
+              resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`
+            }
             alt={content.altText || 'Scientific diagram'}
             data-testid="label-diagram-image"
             style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -563,7 +565,9 @@ function LabelDiagramComponent(props: {
           }}
         >
           <img
-            src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
+            src={
+              resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`
+            }
             alt={content.altText || 'Scientific diagram'}
             data-testid="label-diagram-image"
             style={{ width: '100%', height: 'auto', display: 'block' }}

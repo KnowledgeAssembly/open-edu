@@ -95,9 +95,9 @@ The `skills/openedu-course-authoring/` directory contains the portable agentic c
 
 Support AI-assisted curriculum generation from PDFs and abstract over model providers.
 
-**Pipeline** (`@open-edu/pipeline`) implements an 8-stage PDF-to-course-spec pipeline:
+**Pipeline** (`@open-edu/pipeline`) implements an 8-stage content-to-course-spec pipeline:
 
-1. **Extract** — PDF text extraction with `pdf-parse`
+1. **Extract** — Pluggable extraction via `@llamaindex/liteparse` (PDF, DOCX, PPTX, images, Markdown)
 2. **Source Inventory** — Taxonomy-driven unit classification + LLM reclassification
 3. **Concept Map** — LLM generates teachable concepts with profile-aware prompts
 4. **Lesson Blueprints** — Per-concept blueprints with arcs, widget requests, asset requests

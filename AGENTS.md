@@ -88,7 +88,7 @@ open-edu/
 │   ├── rewards/             # Reward broker + CardBroker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
-│   ├── pipeline/            # AI-driven PDF → course spec generation pipeline (8-stage, profile-aware)
+│   ├── pipeline/            # AI-driven content → course spec pipeline (8-stage, pluggable extraction, profile-aware)
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
 │   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher

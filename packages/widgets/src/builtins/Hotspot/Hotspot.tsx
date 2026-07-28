@@ -266,7 +266,9 @@ function HotspotComponent(props: {
             }}
           >
             <img
-              src={resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`}
+              src={
+                resolveAsset?.(content.image) ?? `/assets/${content.image.replace(/^assets\//, '')}`
+              }
               alt={content.altText}
               data-testid="hotspot-image"
               style={{ width: '100%', height: 'auto', display: 'block' }}

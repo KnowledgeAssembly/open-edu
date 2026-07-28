@@ -151,8 +151,16 @@ function VideoPlayerComponent(props: {
     <div role="group" aria-label={config.title ?? 'Video player'} data-testid="video-player">
       <video
         ref={videoRef}
-        src={(resolveAsset && config.video) ? resolveAsset(config.video) : config.video?.replace(/^assets\//, '/assets/')}
-        poster={(resolveAsset && config.poster) ? resolveAsset(config.poster) : config.poster?.replace(/^assets\//, '/assets/')}
+        src={
+          resolveAsset && config.video
+            ? resolveAsset(config.video)
+            : config.video?.replace(/^assets\//, '/assets/')
+        }
+        poster={
+          resolveAsset && config.poster
+            ? resolveAsset(config.poster)
+            : config.poster?.replace(/^assets\//, '/assets/')
+        }
         preload="metadata"
         className="w-full rounded-lg"
       />

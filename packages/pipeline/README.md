@@ -1,15 +1,16 @@
 # @open-edu/pipeline
 
-AI-driven PDF-to-course-spec generation pipeline. Transforms PDF textbooks into validated OpenEdu course specifications through an 8-stage pipeline with profile-aware generation.
+AI-driven content-to-course-spec generation pipeline. Transforms educational source files (PDF, DOCX, PPTX, Markdown, Images, ZIP) into validated OpenEdu course specifications through an 8-stage pipeline with profile-aware generation and pluggable extraction.
 
 ## Pipeline Stages
 
 ```
-PDF Textbook
+Source File (PDF, DOCX, PPTX, Markdown, Images, ZIP)
     │
     ▼
 ┌──────────────────┐
-│  1. Extract      │  PDF parsing (pdf-parse) + page text extraction
+│  1. Extract      │  Pluggable extraction via @llamaindex/liteparse
+│                  │  (PDF, DOCX, PPTX, XLSX, images, Markdown)
 ├──────────────────┤
 │  2. Source       │  Taxonomy-driven unit classification + LLM reclassification
 │     Inventory    │  for unclassified segments
@@ -44,6 +45,18 @@ PDF Textbook
 pnpm --filter @open-edu/pipeline curriculum:generate \
   --pdf ./textbook.pdf --level B --subject math
 
+# Generate from a DOCX file
+pnpm --filter @open-edu/pipeline curriculum:generate \
+  --pdf ./lesson.docx --subject english --profile generic
+
+# Generate from a PowerPoint presentation
+pnpm --filter @open-edu/pipeline curriculum:generate \
+  --pdf ./slides.pptx --subject biology --profile science
+
+# Generate from a ZIP archive containing mixed documents
+pnpm --filter @open-edu/pipeline curriculum:generate \
+  --pdf ./archive.zip --subject history --profile generic
+
 # Specify a profile explicitly
 pnpm --filter @open-edu/pipeline curriculum:generate \
   --pdf ./textbook.pdf --subject science --profile science
@@ -65,7 +78,7 @@ pnpm --filter @open-edu/pipeline curriculum:generate \
 
 | Option                   | Default      | Description                                                        |
 | ------------------------ | ------------ | ------------------------------------------------------------------ |
-| `--pdf <path>`           | _(required)_ | Path to the PDF textbook                                           |
+| `--pdf <path>`           | _(required)_ | Path to the input file (PDF, DOCX, PPTX, Markdown, ZIP)            |
 | `--level <code>`         | `B`          | Level code (e.g., A, B, C)                                         |
 | `--subject <name>`       | `math`       | Subject name (any string)                                          |
 | `--profile <id>`         | _(auto)_     | Curriculum profile: `generic`, `math`, `science`, `nios`           |
@@ -193,7 +206,7 @@ The pipeline computes a config hash from PDF content, profile, scope, language, 
 ## Dependencies
 
 - `@open-edu/llm-config` — LLM provider abstraction (OpenAI + OpenRouter)
-- `pdf-parse` — PDF text extraction
+- `@llamaindex/liteparse` — Document extraction (PDF, DOCX, PPTX, images, Markdown)
 - `zod` — Runtime schema validation
 
 ## Testing

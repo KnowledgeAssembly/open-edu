@@ -188,8 +188,10 @@ function ImageCompareComponent(props: {
   }
 
   const mode = content.mode;
-  const leftSrc = resolveAsset?.(content.leftImage) ?? `/assets/${content.leftImage.replace(/^assets\//, '')}`;
-  const rightSrc = resolveAsset?.(content.rightImage) ?? `/assets/${content.rightImage.replace(/^assets\//, '')}`;
+  const leftSrc =
+    resolveAsset?.(content.leftImage) ?? `/assets/${content.leftImage.replace(/^assets\//, '')}`;
+  const rightSrc =
+    resolveAsset?.(content.rightImage) ?? `/assets/${content.rightImage.replace(/^assets\//, '')}`;
   const compositeAriaLabel = [
     content.caption,
     content.leftLabel && `Left: ${content.leftLabel}`,
