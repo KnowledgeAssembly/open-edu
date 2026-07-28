@@ -1,6 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 import { uploadAsset, deleteFile } from './api';
 import { Upload } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 
 interface AssetManagerProps {
   assets: string[];
@@ -13,6 +20,7 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,15 +47,24 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
 
   const handleDelete = useCallback(
     async (assetPath: string) => {
-      if (!window.confirm(`Delete "${assetPath}"?`)) return;
+      setDeleteTarget(assetPath);
+    },
+    [],
+  );
+
+  const confirmDelete = useCallback(
+    async () => {
+      if (!deleteTarget) return;
       try {
-        await deleteFile(assetPath);
+        await deleteFile(deleteTarget);
         onRefresh();
       } catch (err) {
         setError((err as Error).message);
+      } finally {
+        setDeleteTarget(null);
       }
     },
-    [onRefresh],
+    [deleteTarget, onRefresh],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -166,20 +183,49 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
               <p className="text-on-surface-variant truncate text-[10px]" title={assetPath}>
                 {fileName}
               </p>
-              <button
-                type="button"
-                className="bg-destructive absolute right-1 top-1 rounded px-1 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100"
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute right-1 top-1 h-auto rounded px-1 py-0.5 text-[10px] opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(assetPath);
                 }}
               >
                 Delete
-              </button>
+              </Button>
             </div>
           );
         })}
       </div>
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => {
+        if (!open) setDeleteTarget(null);
+      }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Asset</DialogTitle>
+          </DialogHeader>
+          <p className="text-on-surface-variant text-sm">
+            Are you sure you want to delete "{deleteTarget}"?
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteTarget(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={confirmDelete}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

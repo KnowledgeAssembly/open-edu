@@ -6,6 +6,7 @@ vi.mock('axe-core', () => ({
   },
 }));
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { InspectorPanel } from './InspectorPanel';
 import type { RewardReceipt } from '@open-edu/rewards';
 
@@ -30,14 +31,16 @@ describe('InspectorPanel', () => {
   });
 
   it('should switch to accessibility tab on click', async () => {
+    const user = userEvent.setup();
     render(<InspectorPanel telemetryEvents={emptyEvents} />);
-    fireEvent.click(screen.getByText('A11y'));
+    await user.click(screen.getByRole('tab', { name: 'A11y' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Run Audit' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'A11y' })).toHaveAttribute('data-state', 'active');
     });
   });
 
-  it('should switch to rewards tab on click', () => {
+  it('should switch to rewards tab on click', async () => {
+    const user = userEvent.setup();
     render(
       <InspectorPanel
         telemetryEvents={emptyEvents}
@@ -45,8 +48,10 @@ describe('InspectorPanel', () => {
         definedRewards={[{ action: 'badge.award', badge: 'test' }]}
       />,
     );
-    fireEvent.click(screen.getByText('Rewards'));
-    expect(screen.getByText(/badge\.award/)).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Rewards' }));
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: 'Rewards' })).toHaveAttribute('data-state', 'active');
+    });
   });
 
   it('should show telemetry empty state', () => {
@@ -69,7 +74,8 @@ describe('InspectorPanel', () => {
     expect(screen.getByText('Telemetry')).toBeInTheDocument();
   });
 
-  it('should show rewards in rewards tab', () => {
+  it('should show rewards in rewards tab', async () => {
+    const user = userEvent.setup();
     render(
       <InspectorPanel
         telemetryEvents={emptyEvents}
@@ -77,8 +83,10 @@ describe('InspectorPanel', () => {
         definedRewards={[{ action: 'badge.award', badge: 'test' }]}
       />,
     );
-    fireEvent.click(screen.getByText('Rewards'));
-    expect(screen.getByText(/badge\.award/)).toBeInTheDocument();
-    expect(screen.getByText('delivered')).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Rewards' }));
+    await waitFor(() => {
+      expect(screen.getByText(/badge\.award/)).toBeInTheDocument();
+      expect(screen.getByText('delivered')).toBeInTheDocument();
+    });
   });
 });

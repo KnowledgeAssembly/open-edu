@@ -16,6 +16,13 @@ import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { Button } from './components/ui/button';
 import { Badge } from './components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './components/ui/select';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 import { EditorShell } from './editor/EditorShell';
@@ -206,18 +213,21 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
             <div className="min-w-0 flex-1 overflow-auto">
               <div className="border-outline-variant bg-surface-container-low flex flex-wrap items-center gap-3 border-b px-4 py-2">
                 <Badge>Bundle Mode</Badge>
-                <select
-                  value={selectedModuleId}
-                  onChange={(e) => setSelectedModuleId(e.target.value)}
-                  className="border-outline-variant bg-surface text-on-surface focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1"
-                  aria-label="Select module"
-                >
-                  {bundle.manifest.modules.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.title}
-                    </option>
-                  ))}
-                </select>
+                <Select value={selectedModuleId} onValueChange={setSelectedModuleId}>
+                  <SelectTrigger
+                    className="border-outline-variant bg-surface text-on-surface w-auto min-w-[200px] px-2 py-1 text-sm"
+                    aria-label="Select module"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bundle.manifest.modules.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button variant="outline" size="sm" onClick={() => setShowOverview(true)}>
                   Bundle Overview
                 </Button>

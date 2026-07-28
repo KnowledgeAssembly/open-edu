@@ -4,6 +4,7 @@ import './index.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@open-edu/i18n';
+import { FontSizeProvider } from '@open-edu/design-system';
 import { DevApp } from './DevApp';
 
 import runtimeEn from '@open-edu/i18n/locales/en/runtime.json';
@@ -28,7 +29,9 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <I18nProvider locale="en" dictionaries={dictionaries}>
-      <DevApp />
+      <FontSizeProvider>
+        <DevApp />
+      </FontSizeProvider>
     </I18nProvider>
   </StrictMode>,
 );

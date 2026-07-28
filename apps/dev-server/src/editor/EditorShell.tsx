@@ -44,6 +44,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const [showNewNode, setShowNewNode] = useState(false);
   const [newNodeName, setNewNodeName] = useState('');
   const [newNodeType, setNewNodeType] = useState<string>('lesson');
+  const [pendingModeChange, setPendingModeChange] = useState<EditorMode | null>(null);
 
   const currentFile = selectedPath ? (openFiles.get(selectedPath) ?? null) : null;
 
@@ -65,9 +66,8 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const onModeChange = useCallback(
     (newMode: EditorMode) => {
       if (newMode === 'preview' && dirtyCount > 0) {
-        if (!window.confirm('You have unsaved changes. Save before switching to preview?')) {
-          return;
-        }
+        setPendingModeChange(newMode);
+        return;
       }
       rawOnModeChange(newMode);
     },
@@ -747,6 +747,39 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
             </Button>
             <Button size="sm" onClick={handleCreateNode} disabled={!newNodeName.trim()}>
               Create
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pendingModeChange !== null} onOpenChange={(open) => {
+        if (!open) setPendingModeChange(null);
+      }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Unsaved Changes</DialogTitle>
+          </DialogHeader>
+          <p className="text-on-surface-variant text-sm">
+            You have unsaved changes. Switch to preview anyway?
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPendingModeChange(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (pendingModeChange) {
+                  rawOnModeChange(pendingModeChange);
+                }
+                setPendingModeChange(null);
+              }}
+            >
+              Switch Anyway
             </Button>
           </div>
         </DialogContent>
