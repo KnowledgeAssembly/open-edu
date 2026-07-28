@@ -499,9 +499,7 @@ describe('RuntimeProvider', () => {
       result.current.resolveAsset('images/cover.jpg');
       result.current.resolveAsset('icons/logo.svg');
       expect(createObjectURLSpy).toHaveBeenCalledTimes(3);
-      const types = createObjectURLSpy.mock.calls.map(
-        (call: unknown[]) => (call[0] as Blob).type,
-      );
+      const types = createObjectURLSpy.mock.calls.map((call: unknown[]) => (call[0] as Blob).type);
       expect(types).toEqual(['image/png', 'image/jpeg', 'image/svg+xml']);
     });
 

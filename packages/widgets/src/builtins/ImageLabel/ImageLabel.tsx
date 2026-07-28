@@ -136,7 +136,9 @@ function InfoCard({
         <div style={{ marginTop: '0.5rem' }}>
           {region.image && (
             <img
-              src={resolveAsset?.(region.image) ?? `/assets/${region.image.replace(/^assets\//, '')}`}
+              src={
+                resolveAsset?.(region.image) ?? `/assets/${region.image.replace(/^assets\//, '')}`
+              }
               alt={region.title}
               data-testid="info-card-image"
               style={{ width: '100%', height: 'auto', borderRadius: '0.25rem' }}
@@ -504,7 +506,12 @@ function ImageLabelComponent(props: {
                 </div>
               )}
               {isObserve && selectedRegionId === region.id && selectedRegion && (
-                <InfoCard region={selectedRegion} onClose={handleCardClose} cardRef={cardRef} resolveAsset={resolveAsset} />
+                <InfoCard
+                  region={selectedRegion}
+                  onClose={handleCardClose}
+                  cardRef={cardRef}
+                  resolveAsset={resolveAsset}
+                />
               )}
             </div>
           );
