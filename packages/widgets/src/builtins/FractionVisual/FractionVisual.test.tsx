@@ -38,21 +38,21 @@ describe('FractionVisual schema', () => {
 
 describe('FractionVisual observe mode', () => {
   it('renders a bar fraction with shaded parts', () => {
-    const { container } = renderWidget({ numerator: 3, denominator: 5, mode: 'bar' });
+    const { container } = renderWidget({ numerator: 3, denominator: 5, mode: 'bar', interactive: false });
     expect(screen.getByTestId('fraction-bar')).toBeTruthy();
     expect(screen.getAllByTestId('bar-segment')).toHaveLength(5);
     expect(getShaded(container, 'bar-segment')).toHaveLength(3);
   });
 
   it('renders a circle fraction with shaded parts', () => {
-    const { container } = renderWidget({ numerator: 1, denominator: 4, mode: 'circle' });
+    const { container } = renderWidget({ numerator: 1, denominator: 4, mode: 'circle', interactive: false });
     expect(screen.getByTestId('fraction-circle')).toBeTruthy();
     expect(getShaded(container, 'circle-segment')).toHaveLength(1);
     expect(getUnshaded(container, 'circle-segment')).toHaveLength(3);
   });
 
   it('shows fraction label', () => {
-    renderWidget({ numerator: 3, denominator: 5, mode: 'bar', label: 'My Fraction' });
+    renderWidget({ numerator: 3, denominator: 5, mode: 'bar', label: 'My Fraction', interactive: false });
     expect(screen.getByText('My Fraction')).toBeTruthy();
   });
 
@@ -63,6 +63,7 @@ describe('FractionVisual observe mode', () => {
       mode: 'bar',
       label: 'My Fraction',
       showLabel: false,
+      interactive: false,
     });
     expect(screen.queryByText('My Fraction')).toBeNull();
   });
@@ -72,6 +73,7 @@ describe('FractionVisual observe mode', () => {
       numerator: 1,
       denominator: 4,
       mode: 'bar',
+      interactive: false,
     });
     expect(complete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('observe-acknowledge'));
@@ -83,7 +85,7 @@ describe('FractionVisual observe mode', () => {
   });
 
   it('shows content acknowledged after acknowledge click', () => {
-    renderWidget({ numerator: 1, denominator: 4, mode: 'bar' });
+    renderWidget({ numerator: 1, denominator: 4, mode: 'bar', interactive: false });
     fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
@@ -192,7 +194,7 @@ describe('FractionVisual compare mode', () => {
     expect(screen.getByText('<')).toBeTruthy();
   });
 
-  it('submits with score based on compare result', () => {
+  it('submits with score based on shaded match in compare mode', () => {
     const { complete } = renderWidget({
       numerator: 1,
       denominator: 2,
@@ -200,6 +202,8 @@ describe('FractionVisual compare mode', () => {
       interactive: true,
       compare: { numerator: 2, denominator: 4 },
     });
+    const segments = screen.getAllByTestId('bar-segment');
+    fireEvent.click(segments[0]!);
     fireEvent.click(screen.getByText('Submit'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
@@ -207,7 +211,7 @@ describe('FractionVisual compare mode', () => {
 
 describe('FractionVisual edge cases', () => {
   it('shows "too many parts" message for denominator > 12', () => {
-    renderWidget({ numerator: 5, denominator: 15, mode: 'bar' });
+    renderWidget({ numerator: 5, denominator: 15, mode: 'bar', interactive: false });
     expect(screen.getByText('This fraction has too many parts to display visually.')).toBeTruthy();
   });
 
@@ -298,7 +302,7 @@ describe('FractionVisual hover states', () => {
   });
 
   it('segments do not have cursor-pointer in observe mode', () => {
-    renderWidget({ numerator: 2, denominator: 4, mode: 'bar' });
+    renderWidget({ numerator: 2, denominator: 4, mode: 'bar', interactive: false });
     const segments = screen.getAllByTestId('bar-segment');
     const className = segments[0]?.getAttribute('class');
     expect(className).toBeFalsy();

@@ -11,7 +11,7 @@ export const configSchema = z.object({
   max: z.number(),
   step: z.number().positive(),
   unit: z.string().min(1),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   targetValue: z.number().optional(),
   showReading: z.boolean().optional().default(true),
   showLabels: z.boolean().optional().default(true),

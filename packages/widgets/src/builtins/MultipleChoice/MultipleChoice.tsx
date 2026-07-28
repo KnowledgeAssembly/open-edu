@@ -333,9 +333,38 @@ function MultipleChoiceComponent(props: {
       return (
         <div role="group" aria-label="Multiple choice activity" data-testid="multiple-choice">
           <div role="status" aria-live="assertive" data-testid="multi-result">
-            <p>
+            <p className="text-on-surface font-semibold">
               You got {correctCount} of {totalQuestions} correct.
             </p>
+          </div>
+          <div className="mt-md space-y-sm">
+            {cfg.questions.map((q, idx) => {
+              const selectedIdx = selections[idx];
+              const response = responses[idx];
+              const isCorrect = response?.correct ?? false;
+              const selectedText = selectedIdx != null ? q.options[selectedIdx] : 'No answer';
+              const correctText = q.options[q.correctIndex]!;
+              return (
+                <div
+                  key={idx}
+                  data-testid={`result-question-${idx}`}
+                  className={`rounded-lg border p-sm ${isCorrect ? 'border-success/30 bg-success-container/20' : 'border-error/30 bg-error-container/20'}`}
+                >
+                  <p className="text-on-surface font-medium">{q.question}</p>
+                  <p className="text-on-surface-variant mt-xs text-sm">
+                    Your answer: {selectedText}
+                  </p>
+                  {!isCorrect && (
+                    <p className="text-success mt-xs text-sm font-medium">
+                      Correct answer: {correctText}
+                    </p>
+                  )}
+                  {q.explanation && (
+                    <p className="text-on-surface/70 mt-xs text-sm">{q.explanation}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       );

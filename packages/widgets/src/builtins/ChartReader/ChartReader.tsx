@@ -60,6 +60,7 @@ function ChartReaderComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [lastResult, setLastResult] = useState<{ selectedLabel: string; correct: boolean } | null>(null);
 
   const isObserve = parsed.success && !parsed.data.interactive && !parsed.data.correctLabel;
   const isInteractive = parsed.success && parsed.data.interactive && !!parsed.data.correctLabel;
@@ -76,6 +77,7 @@ function ChartReaderComponent(props: {
       if (submitted || !parsed.success || !parsed.data.correctLabel) return;
       const isCorrect = label === parsed.data.correctLabel;
       const score = isCorrect ? 100 : 0;
+      setLastResult({ selectedLabel: label, correct: isCorrect });
       emitInteraction({
         type: 'widget.interaction',
         widgetId: 'core.chart-reader',
@@ -140,9 +142,25 @@ function ChartReaderComponent(props: {
           </Button>
         </div>
       )}
-      {!showAcknowledgeButton && (submitted || isObserve) && (
+      {!showAcknowledgeButton && isObserve && !submitted && (
         <div role="status" aria-live="assertive" data-testid="chart-submitted">
           <p>Content acknowledged.</p>
+        </div>
+      )}
+      {!showAcknowledgeButton && submitted && lastResult && (
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="chart-submitted"
+          className={`mt-md rounded-lg p-md ${lastResult.correct ? 'bg-success-container text-on-success-container' : 'bg-error-container text-on-error-container'}`}
+        >
+          {lastResult.correct ? (
+            <p className="font-semibold">Correct! You selected {lastResult.selectedLabel}.</p>
+          ) : (
+            <p className="font-semibold">
+              Not quite. The correct answer is {config.correctLabel}.
+            </p>
+          )}
         </div>
       )}
     </div>

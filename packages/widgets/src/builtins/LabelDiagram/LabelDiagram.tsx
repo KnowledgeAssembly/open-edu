@@ -32,7 +32,7 @@ export const labelDiagramSchema = z.object({
   image: z.string().min(1),
   altText: z.string().optional(),
   labels: z.array(labelSchema).min(1),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   hints: z.array(z.string()).optional(),
 });
 

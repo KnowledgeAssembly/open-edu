@@ -30,7 +30,7 @@ describe('PlaceValueChart schema', () => {
 
 describe('PlaceValueChart observe mode', () => {
   it('renders lakh columns by default', () => {
-    renderWidget({ maxPlaces: 'lakh' });
+    renderWidget({ maxPlaces: 'lakh', interactive: false });
     expect(screen.getByTestId('column-L')).toBeTruthy();
     expect(screen.getByTestId('column-TTh')).toBeTruthy();
     expect(screen.getByTestId('column-Th')).toBeTruthy();
@@ -40,7 +40,7 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('renders crore columns', () => {
-    renderWidget({ maxPlaces: 'crore' });
+    renderWidget({ maxPlaces: 'crore', interactive: false });
     expect(screen.getByTestId('column-Cr')).toBeTruthy();
     expect(screen.getByTestId('column-TL')).toBeTruthy();
     expect(screen.getByTestId('column-L')).toBeTruthy();
@@ -52,9 +52,9 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('shows labels by default', () => {
-    renderWidget({ maxPlaces: 'lakh' });
+    renderWidget({ maxPlaces: 'lakh', interactive: false });
     expect(screen.getByText('Lakh')).toBeTruthy();
-    expect(screen.getByText('Ten Thousand')).toBeTruthy();
+    expect(screen.getByText('Ten Th.')).toBeTruthy();
     expect(screen.getByText('Thousand')).toBeTruthy();
     expect(screen.getByText('Hundred')).toBeTruthy();
     expect(screen.getByText('Tens')).toBeTruthy();
@@ -62,12 +62,12 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('hides labels when showLabels is false', () => {
-    renderWidget({ maxPlaces: 'lakh', showLabels: false });
+    renderWidget({ maxPlaces: 'lakh', showLabels: false, interactive: false });
     expect(screen.queryByText('Lakh')).toBeNull();
   });
 
   it('renders pre-placed digits right-aligned in lakh mode', () => {
-    renderWidget({ maxPlaces: 'lakh', digits: [1, 2, 3, 4] });
+    renderWidget({ maxPlaces: 'lakh', digits: [1, 2, 3, 4], interactive: false });
     expect(screen.getByTestId('slot-L')).toHaveTextContent('');
     expect(screen.getByTestId('slot-TTh')).toHaveTextContent('');
     expect(screen.getByTestId('slot-Th')).toHaveTextContent('1');
@@ -77,7 +77,7 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('renders pre-placed digits right-aligned in crore mode', () => {
-    renderWidget({ maxPlaces: 'crore', digits: [1, 2, 3, 4] });
+    renderWidget({ maxPlaces: 'crore', digits: [1, 2, 3, 4], interactive: false });
     expect(screen.getByTestId('slot-Cr')).toHaveTextContent('');
     expect(screen.getByTestId('slot-TL')).toHaveTextContent('');
     expect(screen.getByTestId('slot-L')).toHaveTextContent('');
@@ -89,7 +89,7 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('completes when acknowledge button is clicked', () => {
-    const { complete, emitInteraction } = renderWidget({ maxPlaces: 'lakh', digits: [5] });
+    const { complete, emitInteraction } = renderWidget({ maxPlaces: 'lakh', digits: [5], interactive: false });
     expect(complete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
@@ -100,13 +100,13 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('shows content acknowledged after acknowledge click', () => {
-    renderWidget({ maxPlaces: 'lakh', digits: [5] });
+    renderWidget({ maxPlaces: 'lakh', digits: [5], interactive: false });
     fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(screen.getByTestId('observe-complete')).toBeTruthy();
   });
 
   it('renders description', () => {
-    renderWidget({ maxPlaces: 'lakh', description: 'Place the digits correctly' });
+    renderWidget({ maxPlaces: 'lakh', description: 'Place the digits correctly', interactive: false });
     expect(screen.getByText('Place the digits correctly')).toBeTruthy();
   });
 
@@ -329,7 +329,7 @@ describe('PlaceValueChart keyboard accessibility', () => {
   });
 
   it('slots do not have button role in observe mode', () => {
-    renderWidget({ maxPlaces: 'lakh' });
+    renderWidget({ maxPlaces: 'lakh', interactive: false });
     expect(screen.getByTestId('slot-O').getAttribute('role')).toBeNull();
   });
 
@@ -387,13 +387,13 @@ describe('PlaceValueChart keyboard accessibility', () => {
 });
 
 describe('PlaceValueChart edge cases', () => {
-  it('defaults to observe mode when interactive not specified', () => {
+  it('shows digit bank in interactive mode by default', () => {
     renderWidget({ maxPlaces: 'lakh' });
-    expect(screen.getByTestId('place-value-chart')).toBeTruthy();
+    expect(screen.getByTestId('digit-bank')).toBeTruthy();
   });
 
-  it('does not show digit bank in observe mode', () => {
-    renderWidget({ maxPlaces: 'lakh' });
+  it('does not show digit bank when interactive is false', () => {
+    renderWidget({ maxPlaces: 'lakh', interactive: false });
     expect(screen.queryByTestId('digit-bank')).toBeNull();
   });
 

@@ -10,7 +10,7 @@ export const gridAreaSchema = z.object({
   cols: z.number().min(1).max(20),
   mode: z.enum(['area', 'perimeter']).default('area'),
   highlighted: z.array(z.object({ row: z.number(), col: z.number() })).optional(),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   maxHighlights: z.number().min(1).optional(),
   cellSize: z.number().min(10).max(100).optional().default(40),
   showCount: z.boolean().optional().default(true),

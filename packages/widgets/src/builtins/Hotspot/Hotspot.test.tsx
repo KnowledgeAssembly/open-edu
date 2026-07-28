@@ -306,9 +306,9 @@ describe('Hotspot keyboard accessibility', () => {
 });
 
 describe('Hotspot edge cases', () => {
-  it('defaults to observe mode when interactive not specified', () => {
+  it('defaults to interactive mode when interactive not specified', () => {
     renderWidget({ ...defaultConfig });
-    expect(screen.queryByTestId('hotspot-mh')?.getAttribute('role')).not.toBe('button');
+    expect(screen.getByTestId('hotspot-mh').getAttribute('role')).toBe('button');
   });
 
   it('does not call complete on mount', () => {

@@ -431,11 +431,11 @@ describe('LabelDiagram edge cases', () => {
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
-  it('defaults to observe mode when interactive not specified', () => {
+  it('defaults to interactive mode when interactive not specified', () => {
     const config = { ...defaultConfig };
     delete (config as Record<string, unknown>).interactive;
     renderWidget(config);
-    expect(screen.getByTestId('observe-target-0')).toBeTruthy();
+    expect(screen.getByTestId('label-target-0')).toBeTruthy();
   });
 
   it('does not call complete on mount', () => {

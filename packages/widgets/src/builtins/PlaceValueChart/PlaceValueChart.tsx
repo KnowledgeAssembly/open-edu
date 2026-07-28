@@ -10,9 +10,9 @@ const LAKH_COLUMNS = ['L', 'TTh', 'Th', 'H', 'T', 'O'] as const;
 
 const LABEL_MAP: Record<string, string> = {
   Cr: 'Crore',
-  TL: 'Ten Lakh',
+  TL: 'Ten L.',
   L: 'Lakh',
-  TTh: 'Ten Thousand',
+  TTh: 'Ten Th.',
   Th: 'Thousand',
   H: 'Hundred',
   T: 'Tens',
@@ -23,7 +23,7 @@ export const placeValueChartSchema = z.object({
   maxPlaces: z.enum(['lakh', 'crore']),
   digits: z.array(z.number().nullable()).optional(),
   targetNumber: z.number().optional(),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   draggableDigits: z.array(z.number()).optional(),
   showLabels: z.boolean().optional().default(true),
   description: z.string().optional(),
@@ -227,7 +227,7 @@ function PlaceValueChartComponent(props: {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '4px',
-              width: '56px',
+              width: '64px',
             }}
           >
             {content.showLabels && (
@@ -236,7 +236,6 @@ function PlaceValueChartComponent(props: {
                   fontSize: '11px',
                   fontWeight: 600,
                   color: 'var(--oe-color-on-surface-variant, #6b7280)',
-                  textTransform: 'uppercase',
                   letterSpacing: '0.5px',
                 }}
               >

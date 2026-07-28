@@ -120,11 +120,11 @@ describe('ImageCompare slider mode', () => {
     expect(screen.getByTestId('slider-position')).toHaveTextContent('Position: 50%');
   });
 
-  it('is locked in observe mode', () => {
+  it('slider is draggable even in observe mode', () => {
     renderWidget({ ...defaultConfig, mode: 'slider', interactive: false });
     const slider = screen.getByTestId('image-compare-slider');
     fireEvent.keyDown(slider, { key: 'ArrowRight' });
-    expect(screen.getByTestId('slider-position')).toHaveTextContent('Position: 50%');
+    expect(screen.getByTestId('slider-position')).toHaveTextContent('Position: 55%');
   });
 
   it('respects custom sliderPosition in config', () => {
