@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { X } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
 
 interface SchemaFormProps {
   data: Record<string, unknown>;
@@ -41,8 +43,7 @@ export function SchemaForm({
         if (value === null || value === undefined) {
           return (
             <FieldWrapper key={key} label={label}>
-              <input
-                type="text"
+              <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                 value=""
@@ -57,7 +58,7 @@ export function SchemaForm({
           if (isLongText) {
             return (
               <FieldWrapper key={key} label={label}>
-                <textarea
+                <Textarea
                   className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                   rows={4}
                   placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
@@ -69,8 +70,7 @@ export function SchemaForm({
           }
           return (
             <FieldWrapper key={key} label={label}>
-              <input
-                type="text"
+              <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
                 value={value}
@@ -83,7 +83,7 @@ export function SchemaForm({
         if (typeof value === 'number') {
           return (
             <FieldWrapper key={key} label={label}>
-              <input
+              <Input
                 type="number"
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
@@ -118,7 +118,7 @@ export function SchemaForm({
           if (hasObjectItems) {
             return (
               <FieldWrapper key={key} label={label}>
-                <textarea
+                <Textarea
                   className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
                   rows={4}
                   value={JSON.stringify(value, null, 2)}
@@ -138,16 +138,15 @@ export function SchemaForm({
               <div className="space-y-1">
                 {value.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-1">
-                    <input
-                      type="text"
-                      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
-                      value={typeof item === 'string' ? item : String(item)}
-                      onChange={(e) => {
-                        const newArray = [...value];
-                        newArray[idx] = e.target.value;
-                        handleFieldChange(key, newArray);
-                      }}
-                    />
+                      <Input
+                        className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
+                        value={typeof item === 'string' ? item : String(item)}
+                        onChange={(e) => {
+                          const newArray = [...value];
+                          newArray[idx] = e.target.value;
+                          handleFieldChange(key, newArray);
+                        }}
+                      />
                     <button
                       type="button"
                       className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"
@@ -176,7 +175,7 @@ export function SchemaForm({
         if (typeof value === 'object') {
           return (
             <FieldWrapper key={key} label={label}>
-              <textarea
+              <Textarea
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
                 rows={3}
                 value={JSON.stringify(value, null, 2)}

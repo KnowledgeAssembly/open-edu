@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Button } from '../components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
+import { Textarea } from '../components/ui/textarea';
 
 interface MarkdownEditorProps {
   content: string;
@@ -34,7 +35,7 @@ export function MarkdownEditor({ content, onChange, fileName }: MarkdownEditorPr
         </div>
       </div>
       <div className="flex flex-1 gap-2 overflow-hidden">
-        <textarea
+        <Textarea
           className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 resize-none rounded border p-3 font-mono text-sm leading-relaxed focus:outline-none focus:ring-1"
           value={content}
           onChange={(e) => onChange(e.target.value)}

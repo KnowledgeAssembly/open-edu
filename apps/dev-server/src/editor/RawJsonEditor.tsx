@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Textarea } from '../components/ui/textarea';
 
 interface RawJsonEditorProps {
   content: string;
@@ -16,8 +17,8 @@ export function RawJsonEditor({ content, onChange, fileName }: RawJsonEditorProp
         <span className="text-on-surface-variant text-xs">{lineCount} lines</span>
       </div>
       <div className="border-outline-variant flex-1 overflow-hidden rounded border">
-        <textarea
-          className="h-full w-full resize-none p-3 font-mono text-xs leading-relaxed focus:outline-none"
+        <Textarea
+          className="h-full w-full resize-none rounded-none border-0 p-3 font-mono text-xs leading-relaxed focus:outline-none focus-visible:ring-0"
           value={content}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}

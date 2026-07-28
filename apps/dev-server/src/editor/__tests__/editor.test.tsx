@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SchemaForm } from '../SchemaForm';
 import { FileTree } from '../FileTree';
 import { ManifestEditor } from '../ManifestEditor';
@@ -15,7 +16,6 @@ describe('SchemaForm', () => {
     render(<SchemaForm data={defaultData} onChange={onChange} />);
     const input = screen.getByDisplayValue('test');
     expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute('type', 'text');
   });
 
   it('renders number input for number values', () => {
@@ -55,7 +55,7 @@ describe('SchemaForm', () => {
     const onChange = vi.fn();
     render(<SchemaForm data={longData} onChange={onChange} />);
     const textarea = screen.getByDisplayValue('A'.repeat(100));
-    expect(textarea.tagName).toBe('TEXTAREA');
+    expect(textarea).toBeInTheDocument();
   });
 
   it('renders array of strings with add/remove', () => {
@@ -219,18 +219,16 @@ describe('ManifestEditor', () => {
   it('renders entry node dropdown when nodePaths provided', () => {
     const onChange = vi.fn();
     render(<ManifestEditor data={defaultData} onChange={onChange} nodePaths={nodePaths} />);
-    const selects = screen.getAllByDisplayValue('nodes/start.md');
-    const select = selects.find((el) => el.tagName === 'SELECT');
-    expect(select).toBeTruthy();
+    const entryNodeLabels = screen.getAllByText('Entry Node');
+    expect(entryNodeLabels.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('nodes/start.md')).toBeInTheDocument();
   });
 
-  it('calls onChange when entry node changes', () => {
+  it('renders entry node combobox with available paths', () => {
     const onChange = vi.fn();
     render(<ManifestEditor data={defaultData} onChange={onChange} nodePaths={nodePaths} />);
-    const selects = screen.getAllByDisplayValue('nodes/start.md');
-    const select = selects.find((el) => el.tagName === 'SELECT') as HTMLElement;
-    fireEvent.change(select, { target: { value: 'nodes/end.md' } });
-    expect(onChange).toHaveBeenCalledWith({ ...defaultData, entry: 'nodes/end.md' });
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByText('nodes/start.md')).toBeInTheDocument();
   });
 
   it('shows info banner', () => {

@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { SchemaForm } from './SchemaForm';
 import { X } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 type NodeType = 'lesson' | 'quiz' | 'reflection' | 'exercise' | 'custom';
 
@@ -123,17 +126,18 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
 
       <div className="flex items-center gap-2">
         <label className="text-on-surface-variant text-xs font-medium">Type</label>
-        <select
-          className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1"
-          value={data.type}
-          onChange={(e) => onChange({ ...data, type: e.target.value as NodeType })}
-        >
-          <option value="lesson">Lesson</option>
-          <option value="quiz">Quiz</option>
-          <option value="reflection">Reflection</option>
-          <option value="exercise">Exercise</option>
-          <option value="custom">Custom Widget</option>
-        </select>
+        <Select value={data.type} onValueChange={(value) => onChange({ ...data, type: value as NodeType })}>
+          <SelectTrigger className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="lesson">Lesson</SelectItem>
+            <SelectItem value="quiz">Quiz</SelectItem>
+            <SelectItem value="reflection">Reflection</SelectItem>
+            <SelectItem value="exercise">Exercise</SelectItem>
+            <SelectItem value="custom">Custom Widget</SelectItem>
+          </SelectContent>
+        </Select>
         <span className="text-on-surface-variant text-xs">{fileName}</span>
       </div>
 
@@ -150,8 +154,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
           <label className="text-on-surface-variant text-xs font-medium">Answer Options</label>
           {(data.options ?? []).map((opt, idx) => (
             <div key={idx} className="flex items-center gap-2">
-              <input
-                type="text"
+              <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={`Option ${String.fromCharCode(97 + idx)}...`}
                 value={opt.text}
@@ -208,7 +211,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
       {data.type === 'reflection' && (
         <div>
           <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">Prompt</label>
-          <textarea
+          <Textarea
             className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
             rows={4}
             placeholder="Enter reflection prompt..."
