@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { FileEntry } from './types';
-import { Trash2 } from 'lucide-react';
+import { Trash2, FileJson, FileText, FileImage, File } from 'lucide-react';
+import { cn } from '@open-edu/design-system';
 
 interface FileTreeProps {
   files: FileEntry[];
@@ -107,39 +108,19 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
   );
 }
 
-function FileIcon({ extension }: { extension: string }) {
-  const color = extColor(extension);
-  return (
-    <svg
-      className="h-4 w-4 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-      />
-    </svg>
-  );
-}
+const iconMap: Record<string, { Icon: typeof File; className: string }> = {
+  '.json': { Icon: FileJson, className: 'text-secondary' },
+  '.md': { Icon: FileText, className: 'text-primary' },
+};
 
-function extColor(ext: string): string {
-  switch (ext) {
-    case '.json':
-      return '#f59e0b';
-    case '.md':
-      return '#3b82f6';
-    case '.png':
-    case '.jpg':
-    case '.jpeg':
-    case '.gif':
-    case '.svg':
-    case '.webp':
-      return '#10b981';
-    default:
-      return '#6b7280';
+function FileIcon({ extension }: { extension: string }) {
+  const mapped = iconMap[extension];
+  if (mapped) {
+    const { Icon: MappedIcon, className } = mapped;
+    return <MappedIcon className={cn('h-4 w-4 shrink-0', className)} strokeWidth={1.5} />;
   }
+  if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.avif'].includes(extension)) {
+    return <FileImage className="text-success h-4 w-4 shrink-0" strokeWidth={1.5} />;
+  }
+  return <File className="text-on-surface-variant h-4 w-4 shrink-0" strokeWidth={1.5} />;
 }

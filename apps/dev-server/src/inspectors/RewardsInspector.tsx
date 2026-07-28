@@ -71,7 +71,7 @@ export function RewardsInspector({
                     receipt.status === 'failed' && 'bg-error/20 text-error',
                     receipt.status !== 'delivered' &&
                       receipt.status !== 'failed' &&
-                      'bg-amber-100 text-amber-700',
+                      'bg-muted text-muted-foreground',
                   )}
                 >
                   {receipt.status}

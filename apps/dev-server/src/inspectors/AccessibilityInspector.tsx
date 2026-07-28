@@ -100,9 +100,9 @@ export function AccessibilityInspector(): JSX.Element {
                   className={cn(
                     'ml-1.5 inline-block rounded px-1 py-px text-[0.625rem] font-semibold uppercase text-white',
                     v.impact === 'critical' && 'bg-destructive',
-                    v.impact === 'serious' && 'bg-orange-600',
-                    v.impact === 'moderate' && 'bg-amber-600',
-                    v.impact === 'minor' && 'bg-yellow-600',
+                    v.impact === 'serious' && 'bg-destructive/80',
+                    v.impact === 'moderate' && 'bg-destructive/60',
+                    v.impact === 'minor' && 'bg-destructive/40',
                   )}
                 >
                   {v.impact}
