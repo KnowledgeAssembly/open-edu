@@ -14,6 +14,8 @@ import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
 import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
+import { Button } from './components/ui/button';
+import { Badge } from './components/ui/badge';
 import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 import { EditorShell } from './editor/EditorShell';
@@ -34,16 +36,9 @@ const loadedBundle = rawBundleData
 
 function DevAppFallback({ title, message }: { title: string; message: string }): JSX.Element {
   return (
-    <div
-      style={{
-        padding: '2rem',
-        fontFamily: 'system-ui, sans-serif',
-        color: '#dc2626',
-        maxWidth: '40rem',
-      }}
-    >
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{title}</h1>
-      <p style={{ color: '#6b7280' }}>{message}</p>
+    <div className="text-error max-w-[40rem] p-8 font-sans">
+      <h1 className="mb-2 text-2xl">{title}</h1>
+      <p className="text-on-surface-variant">{message}</p>
     </div>
   );
 }
@@ -207,42 +202,14 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
         >
-          <div style={{ display: 'flex', height: '100vh' }}>
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              <div
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderBottom: '1px solid #e5e7eb',
-                  background: '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    color: '#2563eb',
-                    background: '#dbeafe',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Bundle Mode
-                </span>
+          <div className="flex h-screen">
+            <div className="min-w-0 flex-1 overflow-auto">
+              <div className="border-outline-variant bg-surface-container-low flex flex-wrap items-center gap-3 border-b px-4 py-2">
+                <Badge>Bundle Mode</Badge>
                 <select
                   value={selectedModuleId}
                   onChange={(e) => setSelectedModuleId(e.target.value)}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.875rem',
-                    borderRadius: '4px',
-                    border: '1px solid #d1d5db',
-                  }}
+                  className="border-outline-variant bg-surface text-on-surface focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1"
                   aria-label="Select module"
                 >
                   {bundle.manifest.modules.map((m) => (
@@ -251,53 +218,22 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
                     </option>
                   ))}
                 </select>
-                <button
-                  type="button"
-                  onClick={() => setShowOverview(true)}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    background: '#fff',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                  }}
-                >
+                <Button variant="outline" size="sm" onClick={() => setShowOverview(true)}>
                   Bundle Overview
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-success hover:bg-success/90"
                   onClick={handleEditorToggle}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    background: '#10b981',
-                    border: '1px solid #059669',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    color: '#fff',
-                    fontWeight: 600,
-                  }}
                 >
                   Edit Package
-                </button>
+                </Button>
               </div>
-              <div style={{ position: 'fixed', bottom: '1rem', right: '24rem', zIndex: 50 }}>
-                <button
-                  tabIndex={-1}
-                  onClick={handleReset}
-                  style={{
-                    padding: '0.375rem 0.75rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#fee2e2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '0.25rem',
-                    color: '#dc2626',
-                    cursor: 'pointer',
-                  }}
-                >
+              <div className="fixed bottom-4 right-96 z-50 flex gap-2">
+                <Button variant="destructive" size="sm" tabIndex={-1} onClick={handleReset}>
                   Reset Progress
-                </button>
+                </Button>
               </div>
               <LayoutShell />
             </div>
@@ -459,48 +395,21 @@ function SinglePackageDevApp(): JSX.Element {
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
         >
-          <div style={{ display: 'flex', height: '100vh' }}>
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              <div
-                style={{
-                  position: 'fixed',
-                  bottom: '1rem',
-                  right: '24rem',
-                  zIndex: 50,
-                  display: 'flex',
-                  gap: '0.5rem',
-                }}
-              >
-                <button
+          <div className="flex h-screen">
+            <div className="min-w-0 flex-1 overflow-auto">
+              <div className="fixed bottom-4 right-96 z-50 flex gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-success hover:bg-success/90"
                   tabIndex={-1}
                   onClick={handleEditorToggle}
-                  style={{
-                    padding: '0.375rem 0.75rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#10b981',
-                    border: '1px solid #059669',
-                    borderRadius: '0.25rem',
-                    color: '#fff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
                 >
                   Edit Package
-                </button>
-                <button
-                  onClick={handleReset}
-                  style={{
-                    padding: '0.375rem 0.75rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#fee2e2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '0.25rem',
-                    color: '#dc2626',
-                    cursor: 'pointer',
-                  }}
-                >
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleReset}>
                   Reset Progress
-                </button>
+                </Button>
               </div>
               <LayoutShell />
             </div>

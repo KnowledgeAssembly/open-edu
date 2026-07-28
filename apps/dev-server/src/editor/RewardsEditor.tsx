@@ -1,3 +1,5 @@
+import { X } from 'lucide-react';
+
 interface TriggerData {
   onEvent: string;
   rewards: RewardActionData[];
@@ -130,15 +132,7 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
           onClick={onRemove}
           aria-label="Remove trigger"
         >
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
 
@@ -241,15 +235,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
         onClick={onRemove}
         aria-label="Remove reward"
       >
-        <svg
-          className="h-3 w-3"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );

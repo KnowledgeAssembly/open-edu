@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { Button } from '../components/ui/button';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface MarkdownEditorProps {
   content: string;
@@ -20,17 +22,15 @@ export function MarkdownEditor({ content, onChange, fileName }: MarkdownEditorPr
         <span className="text-on-surface-variant text-xs font-medium">{fileName}</span>
         <div className="flex items-center gap-2">
           <span className="text-on-surface-variant text-xs">Line {content.split('\n').length}</span>
-          <button
-            type="button"
-            className={`rounded px-2 py-1 text-xs font-medium ${
-              showPreview
-                ? 'bg-primary-container text-on-primary-container'
-                : 'bg-surface-variant text-on-surface-variant hover:bg-surface-container'
-            }`}
+          <Button
+            variant={showPreview ? 'default' : 'outline'}
+            size="sm"
+            className="text-xs"
             onClick={() => setShowPreview(!showPreview)}
           >
+            {showPreview ? <EyeOff className="mr-1 h-3 w-3" /> : <Eye className="mr-1 h-3 w-3" />}
             {showPreview ? 'Hide Preview' : 'Show Preview'}
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex flex-1 gap-2 overflow-hidden">
@@ -42,7 +42,7 @@ export function MarkdownEditor({ content, onChange, fileName }: MarkdownEditorPr
           aria-label="Markdown editor"
         />
         {showPreview && (
-          <div className="border-outline-variant w-1/2 min-w-0 overflow-auto rounded border bg-white p-3">
+          <div className="border-outline-variant bg-surface w-1/2 min-w-0 overflow-auto rounded border p-3">
             <div
               className="prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{ __html: renderedPreview }}

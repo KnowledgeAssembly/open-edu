@@ -6,56 +6,6 @@ interface TelemetryInspectorProps {
   events: TelemetryEvent[];
 }
 
-const containerStyle: Record<string, React.CSSProperties> = {
-  empty: {
-    color: '#9ca3af',
-    textAlign: 'center',
-    padding: '2rem 0',
-    fontSize: '0.75rem',
-  },
-  summary: {
-    padding: '0.5rem',
-    backgroundColor: '#f0fdf4',
-    borderBottom: '1px solid #e5e7eb',
-    fontSize: '0.7rem',
-    lineHeight: 1.5,
-  },
-  summaryTitle: {
-    fontWeight: 600,
-    color: '#166534',
-    marginBottom: '0.25rem',
-    fontSize: '0.75rem',
-  },
-  summaryRow: {
-    color: '#374151',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem',
-  },
-  event: {
-    padding: '0.375rem 0.5rem',
-    borderRadius: '4px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #f3f4f6',
-    fontSize: '0.75rem',
-    lineHeight: 1.4,
-    wordBreak: 'break-all',
-  },
-  type: {
-    fontWeight: 600,
-    color: '#2563eb',
-  },
-  meta: {
-    color: '#6b7280',
-  },
-  data: {
-    color: '#374151',
-    marginTop: '0.125rem',
-  },
-};
-
 export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Element {
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -70,31 +20,24 @@ export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Ele
   const currentSessionId = events.find((e) => e.sessionId)?.sessionId;
 
   return (
-    <div
-      ref={listRef}
-      style={{
-        ...containerStyle.list,
-        maxHeight: 'calc(100vh - 120px)',
-        overflow: 'auto',
-      }}
-    >
-      <div style={containerStyle.summary}>
-        <div style={containerStyle.summaryTitle}>Summary</div>
-        <div style={containerStyle.summaryRow}>Events: {summary.totalEvents}</div>
-        <div style={containerStyle.summaryRow}>Node opens: {summary.nodeOpens}</div>
-        <div style={containerStyle.summaryRow}>Node completions: {summary.nodeCompletions}</div>
-        <div style={containerStyle.summaryRow}>
+    <div ref={listRef} className="flex max-h-[calc(100vh-120px)] flex-col gap-1 overflow-auto">
+      <div className="bg-success/10 border-outline-variant space-y-0.5 border-b p-2 text-[0.7rem] leading-relaxed">
+        <div className="text-success mb-1 text-xs font-semibold">Summary</div>
+        <div className="text-on-surface">Events: {summary.totalEvents}</div>
+        <div className="text-on-surface">Node opens: {summary.nodeOpens}</div>
+        <div className="text-on-surface">Node completions: {summary.nodeCompletions}</div>
+        <div className="text-on-surface">
           Avg quiz score:{' '}
           {summary.averageQuizScore !== null ? summary.averageQuizScore.toFixed(1) : 'N/A'}
         </div>
-        <div style={containerStyle.summaryRow}>Session: {currentSessionId ?? 'N/A'}</div>
+        <div className="text-on-surface">Session: {currentSessionId ?? 'N/A'}</div>
         {summary.sessionCount > 1 && (
-          <div style={containerStyle.summaryRow}>Sessions: {summary.sessionCount}</div>
+          <div className="text-on-surface">Sessions: {summary.sessionCount}</div>
         )}
       </div>
 
       {events.length === 0 ? (
-        <div style={containerStyle.empty}>
+        <div className="text-on-surface-variant py-8 text-center text-xs">
           No telemetry events yet. Interact with the content above.
         </div>
       ) : (
@@ -105,18 +48,23 @@ export function TelemetryInspector({ events }: TelemetryInspectorProps): JSX.Ele
           const score = (event as Record<string, unknown>).score as number | undefined;
 
           return (
-            <div key={idx} style={containerStyle.event}>
+            <div
+              key={idx}
+              className="bg-surface border-outline-variant break-all rounded border p-1.5 text-xs leading-snug"
+            >
               <div>
-                <span style={containerStyle.type}>{eventType}</span>
+                <span className="text-primary font-semibold">{eventType}</span>
                 {timestamp && (
-                  <span style={containerStyle.meta}>
+                  <span className="text-on-surface-variant ml-1">
                     {' '}
                     {new Date(timestamp).toLocaleTimeString()}
                   </span>
                 )}
               </div>
-              {nodeId && <div style={containerStyle.data}>node: {nodeId}</div>}
-              {typeof score === 'number' && <div style={containerStyle.data}>score: {score}</div>}
+              {nodeId && <div className="text-on-surface mt-0.5">node: {nodeId}</div>}
+              {typeof score === 'number' && (
+                <div className="text-on-surface mt-0.5">score: {score}</div>
+              )}
             </div>
           );
         })

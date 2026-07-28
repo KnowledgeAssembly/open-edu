@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Plus, X } from 'lucide-react';
 
 interface RouteDef {
   onComplete?: string;
@@ -81,15 +82,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
         className="text-primary hover:bg-primary-container flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddRoute}
       >
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
+        <Plus className="h-3.5 w-3.5" />
         Add Route
       </button>
 
@@ -133,15 +126,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
           onClick={onRemove}
           aria-label="Remove route"
         >
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
 
@@ -216,15 +201,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                   }}
                   aria-label="Remove condition"
                 >
-                  <svg
-                    className="h-3 w-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}

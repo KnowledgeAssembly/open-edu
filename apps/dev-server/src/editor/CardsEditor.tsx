@@ -1,3 +1,5 @@
+import { X } from 'lucide-react';
+
 interface CardData {
   id: string;
   slug?: string;
@@ -129,15 +131,7 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           onClick={onRemove}
           aria-label="Remove card"
         >
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
 

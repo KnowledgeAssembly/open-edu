@@ -1,4 +1,6 @@
 import type { RewardReceipt, RewardCondition } from '@open-edu/rewards';
+import { Button } from '../components/ui/button';
+import { cn } from '@open-edu/design-system';
 
 interface DefinedReward {
   action: string;
@@ -11,96 +13,6 @@ interface RewardsInspectorProps {
   definedRewards: DefinedReward[];
   onResend?: (receipt: RewardReceipt) => void;
 }
-
-const style: Record<string, React.CSSProperties> = {
-  empty: {
-    color: '#9ca3af',
-    textAlign: 'center',
-    padding: '2rem 0',
-    fontSize: '0.75rem',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  card: {
-    padding: '0.5rem',
-    borderRadius: '4px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #f3f4f6',
-    fontSize: '0.75rem',
-  },
-  headerRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '0.25rem',
-  },
-  actionType: {
-    fontWeight: 600,
-    color: '#2563eb',
-  },
-  statusBadge: {
-    display: 'inline-block',
-    padding: '0.125rem 0.375rem',
-    borderRadius: '3px',
-    fontSize: '0.625rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-  },
-  delivered: {
-    backgroundColor: '#dcfce7',
-    color: '#16a34a',
-  },
-  failed: {
-    backgroundColor: '#fef2f2',
-    color: '#dc2626',
-  },
-  skipped: {
-    backgroundColor: '#fef9c3',
-    color: '#a16207',
-  },
-  muted: {
-    color: '#6b7280',
-    marginTop: '0.125rem',
-    fontSize: '0.6875rem',
-  },
-  resendBtn: {
-    marginTop: '0.375rem',
-    padding: '0.25rem 0.5rem',
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
-    borderRadius: '3px',
-    color: '#dc2626',
-    cursor: 'pointer',
-    fontSize: '0.625rem',
-    fontWeight: 600,
-  },
-  sectionTitle: {
-    fontSize: '0.6875rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: '#6b7280',
-    marginBottom: '0.5rem',
-    paddingTop: '0.5rem',
-    borderTop: '1px solid #e5e7eb',
-  },
-  conditionText: {
-    color: '#374151',
-    marginTop: '0.25rem',
-    fontSize: '0.6875rem',
-  },
-  pendingItem: {
-    padding: '0.375rem 0.5rem',
-    borderRadius: '4px',
-    backgroundColor: '#f0f9ff',
-    border: '1px solid #bae6fd',
-    fontSize: '0.75rem',
-    marginBottom: '0.25rem',
-  },
-};
 
 function formatCondition(condition: RewardCondition): string {
   switch (condition.type) {
@@ -119,17 +31,6 @@ function formatCondition(condition: RewardCondition): string {
   }
 }
 
-function statusStyle(status: string): React.CSSProperties {
-  switch (status) {
-    case 'delivered':
-      return { ...style.statusBadge, ...style.delivered };
-    case 'failed':
-      return { ...style.statusBadge, ...style.failed };
-    default:
-      return { ...style.statusBadge, ...style.skipped };
-  }
-}
-
 export function RewardsInspector({
   receipts,
   definedRewards,
@@ -143,38 +44,57 @@ export function RewardsInspector({
 
   if (definedRewards.length === 0) {
     return (
-      <div style={style.empty}>
+      <div className="text-on-surface-variant py-8 text-center text-xs">
         No rewards configured. Add a <code>rewards.json</code> to your package.
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        ...style.list,
-        maxHeight: 'calc(100vh - 120px)',
-        overflow: 'auto',
-      }}
-    >
+    <div className="flex max-h-[calc(100vh-120px)] flex-col gap-2 overflow-auto">
       {receipts.length > 0 && (
         <>
-          <div style={style.sectionTitle}>Dispatched ({receipts.length})</div>
+          <div className="border-outline-variant text-on-surface-variant border-t pt-2 text-[0.6875rem] font-semibold uppercase tracking-wider">
+            Dispatched ({receipts.length})
+          </div>
           {receipts.map((receipt) => (
-            <div key={receipt.actionId} style={style.card}>
-              <div style={style.headerRow}>
-                <span style={style.actionType}>{receipt.actionType}</span>
-                <span style={statusStyle(receipt.status)}>{receipt.status}</span>
+            <div
+              key={receipt.actionId}
+              className="bg-surface border-outline-variant rounded border p-2 text-xs"
+            >
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-primary font-semibold">{receipt.actionType}</span>
+                <span
+                  className={cn(
+                    'inline-block rounded px-1 py-px text-[0.625rem] font-semibold uppercase',
+                    receipt.status === 'delivered' && 'bg-success/20 text-success',
+                    receipt.status === 'failed' && 'bg-error/20 text-error',
+                    receipt.status !== 'delivered' &&
+                      receipt.status !== 'failed' &&
+                      'bg-amber-100 text-amber-700',
+                  )}
+                >
+                  {receipt.status}
+                </span>
               </div>
-              <div style={style.muted}>{new Date(receipt.dispatchedAt).toLocaleTimeString()}</div>
-              {receipt.detail && <div style={style.conditionText}>{receipt.detail}</div>}
+              <div className="text-on-surface-variant text-[0.6875rem]">
+                {new Date(receipt.dispatchedAt).toLocaleTimeString()}
+              </div>
+              {receipt.detail && (
+                <div className="text-on-surface mt-0.5 text-[0.6875rem]">{receipt.detail}</div>
+              )}
               {receipt.error && (
-                <div style={{ ...style.conditionText, color: '#dc2626' }}>{receipt.error}</div>
+                <div className="text-error mt-0.5 text-[0.6875rem]">{receipt.error}</div>
               )}
               {receipt.status === 'failed' && onResend && (
-                <button type="button" style={style.resendBtn} onClick={() => onResend(receipt)}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="mt-1 h-auto px-2 py-1 text-[0.625rem]"
+                  onClick={() => onResend(receipt)}
+                >
                   Re-send
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -183,15 +103,19 @@ export function RewardsInspector({
 
       {pending.length > 0 && (
         <>
-          <div style={style.sectionTitle}>Pending ({pending.length})</div>
+          <div className="border-outline-variant text-on-surface-variant border-t pt-2 text-[0.6875rem] font-semibold uppercase tracking-wider">
+            Pending ({pending.length})
+          </div>
           {pending.map((def, idx) => (
-            <div key={idx} style={style.pendingItem}>
-              <div style={{ fontWeight: 600, color: '#0369a1' }}>
+            <div key={idx} className="bg-primary/10 border-primary/20 rounded border p-1.5 text-xs">
+              <div className="text-primary font-semibold">
                 {def.action}
                 {def.badge ? `: ${def.badge}` : ''}
               </div>
               {def.condition && (
-                <div style={style.conditionText}>Condition: {formatCondition(def.condition)}</div>
+                <div className="text-on-surface mt-1 text-[0.6875rem]">
+                  Condition: {formatCondition(def.condition)}
+                </div>
               )}
             </div>
           ))}
@@ -199,7 +123,9 @@ export function RewardsInspector({
       )}
 
       {receipts.length === 0 && pending.length === 0 && definedRewards.length > 0 && (
-        <div style={style.empty}>No rewards have been triggered yet.</div>
+        <div className="text-on-surface-variant py-8 text-center text-xs">
+          No rewards have been triggered yet.
+        </div>
       )}
     </div>
   );

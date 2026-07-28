@@ -35,6 +35,8 @@
     "@open-edu/workflow": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "axe-core": "^4.7.0",
+    "lucide-react": "^0.400.0",
+    "sonner": "^1.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vite": "^5.1.0",

@@ -1,5 +1,6 @@
 import './index.css';
-import './tailwind.css';
+// Tailwind CSS is now processed by PostCSS at build time (via postcss.config.js).
+// No pre-generated tailwind.css import needed.
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@open-edu/i18n';

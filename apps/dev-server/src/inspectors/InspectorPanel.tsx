@@ -1,9 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { TelemetryInspector } from './TelemetryInspector';
 import { AccessibilityInspector } from './AccessibilityInspector';
 import { RewardsInspector } from './RewardsInspector';
+import { Button } from '../components/ui/button';
+import { PanelRightOpen, PanelRightClose } from 'lucide-react';
 
 type Tab = 'telemetry' | 'accessibility' | 'rewards' | 'bundle';
 
@@ -19,69 +21,6 @@ interface InspectorPanelProps {
   bundleData?: any;
 }
 
-const panelStyle: Record<string, React.CSSProperties> = {
-  container: {
-    width: '360px',
-    borderLeft: '1px solid #e5e7eb',
-    backgroundColor: '#f9fafb',
-    display: 'flex',
-    flexDirection: 'column',
-    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-    fontSize: '0.8125rem',
-  },
-  header: {
-    display: 'flex',
-    borderBottom: '1px solid #e5e7eb',
-    backgroundColor: '#f3f4f6',
-  },
-  tab: {
-    flex: 1,
-    padding: '0.625rem 0.75rem',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: '#6b7280',
-    borderBottom: '2px solid transparent',
-  },
-  activeTab: {
-    color: '#2563eb',
-    borderBottomColor: '#2563eb',
-    backgroundColor: '#ffffff',
-  },
-  content: {
-    flex: 1,
-    overflow: 'auto',
-    padding: '0.5rem',
-  },
-  closeBtn: {
-    padding: '0.5rem 0.75rem',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    color: '#9ca3af',
-    fontSize: '1rem',
-  },
-  toggleBtn: {
-    position: 'fixed' as const,
-    bottom: '1rem',
-    right: '1rem',
-    zIndex: 9999,
-    padding: '0.5rem 0.75rem',
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-  },
-};
-
 export function InspectorPanel({
   telemetryEvents,
   rewardReceipts,
@@ -94,18 +33,20 @@ export function InspectorPanel({
 
   if (!isOpen) {
     return (
-      <button
-        type="button"
-        style={panelStyle.toggleBtn}
+      <Button
+        variant="default"
+        size="sm"
+        className="shadow-elevation-modal fixed bottom-4 right-4 z-[9999]"
         onClick={() => setIsOpen(true)}
         aria-label="Open inspector panel"
       >
+        <PanelRightOpen className="mr-1 h-4 w-4" />
         DevTools
-      </button>
+      </Button>
     );
   }
 
-  let content: ReactNode;
+  let content: React.ReactNode;
   if (activeTab === 'telemetry') {
     content = <TelemetryInspector events={telemetryEvents} />;
   } else if (activeTab === 'rewards') {
@@ -120,58 +61,54 @@ export function InspectorPanel({
     content = <AccessibilityInspector />;
   } else if (activeTab === 'bundle') {
     content = (
-      <div style={{ padding: '0.5rem' }}>
-        <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Bundle Modules</h3>
+      <div className="p-2">
+        <h3 className="mb-2 font-semibold">Bundle Modules</h3>
         {bundleData?.manifest?.modules?.map((mod: any) => (
-          <div
-            key={mod.id}
-            style={{
-              padding: '0.5rem',
-              marginBottom: '0.25rem',
-              background: '#fff',
-              borderRadius: '4px',
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <div style={{ fontWeight: 500 }}>{mod.title}</div>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          <div key={mod.id} className="border-outline-variant bg-surface mb-1 rounded border p-2">
+            <div className="font-medium">{mod.title}</div>
+            <div className="text-on-surface-variant text-xs">
               ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
             </div>
           </div>
         ))}
         {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>No modules loaded.</p>
+          <p className="text-on-surface-variant text-xs">No modules loaded.</p>
         )}
       </div>
     );
   }
 
+  const tabClass = (tab: Tab) =>
+    `flex-1 rounded-none border-0 border-b-2 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer ${
+      activeTab === tab
+        ? 'border-primary text-primary bg-surface'
+        : 'border-transparent text-on-surface-variant bg-transparent hover:bg-surface-container'
+    }`;
+
   return (
-    <div style={panelStyle.container} role="complementary" aria-label="Developer inspector panel">
-      <div style={panelStyle.header}>
+    <div
+      className="bg-surface-container-low border-outline-variant flex w-[360px] flex-col border-l font-mono text-xs"
+      role="complementary"
+      aria-label="Developer inspector panel"
+    >
+      <div className="bg-surface-container border-outline-variant flex border-b">
         <button
           type="button"
-          style={{ ...panelStyle.tab, ...(activeTab === 'telemetry' ? panelStyle.activeTab : {}) }}
+          className={tabClass('telemetry')}
           onClick={() => setActiveTab('telemetry')}
         >
           Telemetry
         </button>
         <button
           type="button"
-          style={{
-            ...panelStyle.tab,
-            ...(activeTab === 'rewards' ? panelStyle.activeTab : {}),
-          }}
+          className={tabClass('rewards')}
           onClick={() => setActiveTab('rewards')}
         >
           Rewards
         </button>
         <button
           type="button"
-          style={{
-            ...panelStyle.tab,
-            ...(activeTab === 'accessibility' ? panelStyle.activeTab : {}),
-          }}
+          className={tabClass('accessibility')}
           onClick={() => setActiveTab('accessibility')}
         >
           A11y
@@ -179,22 +116,23 @@ export function InspectorPanel({
         {bundleData && (
           <button
             type="button"
-            style={{ ...panelStyle.tab, ...(activeTab === 'bundle' ? panelStyle.activeTab : {}) }}
+            className={tabClass('bundle')}
             onClick={() => setActiveTab('bundle')}
           >
             Bundle
           </button>
         )}
-        <button
-          type="button"
-          style={panelStyle.closeBtn}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-on-surface-variant h-auto w-auto rounded-none px-3"
           onClick={() => setIsOpen(false)}
           aria-label="Close inspector panel"
         >
-          ✕
-        </button>
+          <PanelRightClose className="h-4 w-4" />
+        </Button>
       </div>
-      <div style={panelStyle.content}>{content}</div>
+      <div className="flex-1 overflow-auto p-2">{content}</div>
     </div>
   );
 }
