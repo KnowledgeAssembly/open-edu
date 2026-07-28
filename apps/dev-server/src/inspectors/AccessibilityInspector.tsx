@@ -1,4 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { Button } from '../components/ui/button';
+import { cn } from '@open-edu/design-system';
+import { Play } from 'lucide-react';
 
 interface Violation {
   id: string;
@@ -14,115 +17,6 @@ interface Violation {
 
 interface AxeResults {
   violations: Violation[];
-}
-
-const style: Record<string, React.CSSProperties> = {
-  empty: {
-    color: '#16a34a',
-    textAlign: 'center',
-    padding: '2rem 0',
-    fontSize: '0.75rem',
-  },
-  error: {
-    color: '#9ca3af',
-    textAlign: 'center',
-    padding: '2rem 0',
-    fontSize: '0.75rem',
-  },
-  violationList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  violation: {
-    padding: '0.5rem',
-    borderRadius: '4px',
-    backgroundColor: '#fef2f2',
-    border: '1px solid #fecaca',
-    fontSize: '0.75rem',
-  },
-  violationId: {
-    fontWeight: 600,
-    color: '#dc2626',
-  },
-  impact: {
-    display: 'inline-block',
-    padding: '0.125rem 0.375rem',
-    borderRadius: '3px',
-    fontSize: '0.625rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    marginLeft: '0.375rem',
-  },
-  impactCritical: {
-    backgroundColor: '#dc2626',
-    color: '#ffffff',
-  },
-  impactSerious: {
-    backgroundColor: '#ea580c',
-    color: '#ffffff',
-  },
-  impactModerate: {
-    backgroundColor: '#d97706',
-    color: '#ffffff',
-  },
-  impactMinor: {
-    backgroundColor: '#ca8a04',
-    color: '#ffffff',
-  },
-  description: {
-    color: '#374151',
-    marginTop: '0.25rem',
-  },
-  help: {
-    color: '#6b7280',
-    marginTop: '0.125rem',
-    fontSize: '0.6875rem',
-  },
-  node: {
-    marginTop: '0.25rem',
-    padding: '0.25rem 0.375rem',
-    backgroundColor: '#ffffff',
-    borderRadius: '2px',
-    fontSize: '0.6875rem',
-    color: '#4b5563',
-    fontFamily: 'monospace',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  controls: {
-    marginBottom: '0.5rem',
-    display: 'flex',
-    gap: '0.5rem',
-    alignItems: 'center',
-  },
-  runButton: {
-    padding: '0.375rem 0.75rem',
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-  },
-  badge: {
-    fontSize: '0.625rem',
-    color: '#6b7280',
-  },
-};
-
-function impactStyle(impact: string): React.CSSProperties {
-  switch (impact) {
-    case 'critical':
-      return { ...style.impact, ...style.impactCritical };
-    case 'serious':
-      return { ...style.impact, ...style.impactSerious };
-    case 'moderate':
-      return { ...style.impact, ...style.impactModerate };
-    default:
-      return { ...style.impact, ...style.impactMinor };
-  }
 }
 
 export function AccessibilityInspector(): JSX.Element {
@@ -166,16 +60,23 @@ export function AccessibilityInspector(): JSX.Element {
   }, [runAudit]);
 
   if (error) {
-    return <div style={style.error}>{error}</div>;
+    return <div className="text-on-surface-variant py-8 text-center text-xs">{error}</div>;
   }
 
   return (
     <div>
-      <div style={style.controls}>
-        <button type="button" style={style.runButton} onClick={runAudit} disabled={running}>
+      <div className="mb-2 flex items-center gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={runAudit}
+          disabled={running}
+          className="h-auto py-1.5"
+        >
+          <Play className="mr-1 h-3 w-3" />
           {running ? 'Running...' : 'Run Audit'}
-        </button>
-        <span style={style.badge}>
+        </Button>
+        <span className="text-on-surface-variant text-[0.625rem]">
           {violations.length > 0
             ? `${violations.length} violation${violations.length === 1 ? '' : 's'}`
             : 'No violations'}
@@ -183,28 +84,46 @@ export function AccessibilityInspector(): JSX.Element {
       </div>
 
       {violations.length === 0 ? (
-        <div style={style.empty}>✓ No accessibility violations found</div>
+        <div className="text-success py-8 text-center text-xs">
+          No accessibility violations found
+        </div>
       ) : (
-        <div style={style.violationList}>
+        <div className="flex flex-col gap-2">
           {violations.map((v) => (
-            <div key={v.id} style={style.violation}>
+            <div
+              key={v.id}
+              className="bg-error/10 border-error/20 space-y-1 rounded border p-2 text-xs"
+            >
               <div>
-                <span style={style.violationId}>{v.id}</span>
-                <span style={impactStyle(v.impact)}>{v.impact}</span>
+                <span className="text-error font-semibold">{v.id}</span>
+                <span
+                  className={cn(
+                    'ml-1.5 inline-block rounded px-1 py-px text-[0.625rem] font-semibold uppercase text-white',
+                    v.impact === 'critical' && 'bg-destructive',
+                    v.impact === 'serious' && 'bg-destructive/80',
+                    v.impact === 'moderate' && 'bg-destructive/60',
+                    v.impact === 'minor' && 'bg-destructive/40',
+                  )}
+                >
+                  {v.impact}
+                </span>
               </div>
-              <div style={style.description}>{v.description}</div>
-              <div style={style.help}>
+              <div className="text-on-surface mt-1">{v.description}</div>
+              <div className="text-on-surface-variant mt-0.5 text-[0.6875rem]">
                 <a
                   href={v.helpUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#2563eb' }}
+                  className="text-primary hover:underline"
                 >
                   {v.help}
                 </a>
               </div>
               {v.nodes.slice(0, 3).map((node, i) => (
-                <div key={i} style={style.node}>
+                <div
+                  key={i}
+                  className="bg-surface text-on-surface mt-1 overflow-hidden text-ellipsis rounded px-1.5 py-1 font-mono text-[0.6875rem]"
+                >
                   {node.target.join(', ')}
                 </div>
               ))}

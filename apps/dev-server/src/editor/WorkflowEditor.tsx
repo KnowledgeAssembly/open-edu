@@ -1,4 +1,7 @@
 import { useCallback } from 'react';
+import { Plus, X } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 interface RouteDef {
   onComplete?: string;
@@ -81,15 +84,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
         className="text-primary hover:bg-primary-container flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddRoute}
       >
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
+        <Plus className="h-3.5 w-3.5" />
         Add Route
       </button>
 
@@ -119,8 +114,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
       <div className="mb-2 flex items-center justify-between">
         <div className="flex flex-1 items-center gap-2">
           <span className="text-on-surface-variant text-xs font-medium">Node:</span>
-          <input
-            type="text"
+          <Input
             className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
             value={routeKey}
             onChange={(e) => onKeyChange(e.target.value)}
@@ -133,39 +127,34 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
           onClick={onRemove}
           aria-label="Remove route"
         >
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
 
       <div className="flex items-center gap-2">
-        <select
-          className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
+        <Select
           value={isSimple ? 'simple' : 'conditional'}
-          onChange={(e) => {
-            if (e.target.value === 'simple') {
+          onValueChange={(value) => {
+            if (value === 'simple') {
               onRouteChange({ onComplete: COMPLETED_SENTINEL });
             } else {
               onRouteChange({ conditions: [{ if: 'score >= 80', then: 'nodes/next.md' }] });
             }
           }}
         >
-          <option value="simple">Simple Route</option>
-          <option value="conditional">Conditional</option>
-        </select>
+          <SelectTrigger className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="simple">Simple Route</SelectItem>
+            <SelectItem value="conditional">Conditional</SelectItem>
+          </SelectContent>
+        </Select>
 
         {isSimple ? (
           <div className="flex flex-1 items-center gap-2">
             <span className="text-on-surface-variant text-xs">onComplete →</span>
-            <input
-              type="text"
+            <Input
               className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
               value={route.onComplete ?? ''}
               onChange={(e) => onRouteChange({ onComplete: e.target.value })}
@@ -182,8 +171,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
             {(route.conditions ?? []).map((cond, idx) => (
               <div key={idx} className="flex items-center gap-1">
                 <span className="text-on-surface-variant text-xs">if</span>
-                <input
-                  type="text"
+                <Input
                   className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
                   value={cond.if}
                   onChange={(e) => {
@@ -195,8 +183,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                   placeholder="score >= 80"
                 />
                 <span className="text-on-surface-variant text-xs">→</span>
-                <input
-                  type="text"
+                <Input
                   className="border-outline-variant focus:border-primary focus:ring-primary min-w-0 flex-1 rounded border px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1"
                   value={cond.then}
                   onChange={(e) => {
@@ -216,15 +203,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                   }}
                   aria-label="Remove condition"
                 >
-                  <svg
-                    className="h-3 w-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { SchemaForm } from './SchemaForm';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 interface ManifestData {
   id: string;
@@ -57,17 +58,18 @@ export function ManifestEditor({ data, onChange, nodePaths = [] }: ManifestEdito
           <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">
             Entry Node
           </label>
-          <select
-            className="border-outline-variant text-on-surface focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
-            value={data.entry}
-            onChange={(e) => onChange({ ...data, entry: e.target.value })}
-          >
-            {sortedPaths.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
+          <Select value={data.entry} onValueChange={(value) => onChange({ ...data, entry: value })}>
+            <SelectTrigger className="border-outline-variant text-on-surface focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortedPaths.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>

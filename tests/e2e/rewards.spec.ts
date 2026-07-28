@@ -26,7 +26,7 @@ test.describe('living-vs-nonliving (with rewards)', () => {
 
   test('shows DevTools with pending rewards', async ({ page }) => {
     await page.goto(server.url);
-    await page.getByRole('button', { name: 'Rewards' }).click();
+    await page.getByRole('tab', { name: 'Rewards' }).click();
     await expect(page.getByText('Pending (3)')).toBeVisible();
     await expect(page.getByText(/badge.award: living-nonliving-mastery/)).toBeVisible();
   });

@@ -1,9 +1,12 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { TelemetryInspector } from './TelemetryInspector';
 import { AccessibilityInspector } from './AccessibilityInspector';
 import { RewardsInspector } from './RewardsInspector';
+import { Button } from '../components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { PanelRightOpen, PanelRightClose } from 'lucide-react';
 
 type Tab = 'telemetry' | 'accessibility' | 'rewards' | 'bundle';
 
@@ -19,69 +22,6 @@ interface InspectorPanelProps {
   bundleData?: any;
 }
 
-const panelStyle: Record<string, React.CSSProperties> = {
-  container: {
-    width: '360px',
-    borderLeft: '1px solid #e5e7eb',
-    backgroundColor: '#f9fafb',
-    display: 'flex',
-    flexDirection: 'column',
-    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-    fontSize: '0.8125rem',
-  },
-  header: {
-    display: 'flex',
-    borderBottom: '1px solid #e5e7eb',
-    backgroundColor: '#f3f4f6',
-  },
-  tab: {
-    flex: 1,
-    padding: '0.625rem 0.75rem',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: '#6b7280',
-    borderBottom: '2px solid transparent',
-  },
-  activeTab: {
-    color: '#2563eb',
-    borderBottomColor: '#2563eb',
-    backgroundColor: '#ffffff',
-  },
-  content: {
-    flex: 1,
-    overflow: 'auto',
-    padding: '0.5rem',
-  },
-  closeBtn: {
-    padding: '0.5rem 0.75rem',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    color: '#9ca3af',
-    fontSize: '1rem',
-  },
-  toggleBtn: {
-    position: 'fixed' as const,
-    bottom: '1rem',
-    right: '1rem',
-    zIndex: 9999,
-    padding: '0.5rem 0.75rem',
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-  },
-};
-
 export function InspectorPanel({
   telemetryEvents,
   rewardReceipts,
@@ -94,107 +34,105 @@ export function InspectorPanel({
 
   if (!isOpen) {
     return (
-      <button
-        type="button"
-        style={panelStyle.toggleBtn}
+      <Button
+        variant="default"
+        size="sm"
+        className="shadow-elevation-modal fixed bottom-4 right-4 z-[9999]"
         onClick={() => setIsOpen(true)}
         aria-label="Open inspector panel"
       >
+        <PanelRightOpen className="mr-1 h-4 w-4" />
         DevTools
-      </button>
-    );
-  }
-
-  let content: ReactNode;
-  if (activeTab === 'telemetry') {
-    content = <TelemetryInspector events={telemetryEvents} />;
-  } else if (activeTab === 'rewards') {
-    content = (
-      <RewardsInspector
-        receipts={rewardReceipts ?? []}
-        definedRewards={definedRewards ?? []}
-        onResend={onResendReward}
-      />
-    );
-  } else if (activeTab === 'accessibility') {
-    content = <AccessibilityInspector />;
-  } else if (activeTab === 'bundle') {
-    content = (
-      <div style={{ padding: '0.5rem' }}>
-        <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Bundle Modules</h3>
-        {bundleData?.manifest?.modules?.map((mod: any) => (
-          <div
-            key={mod.id}
-            style={{
-              padding: '0.5rem',
-              marginBottom: '0.25rem',
-              background: '#fff',
-              borderRadius: '4px',
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <div style={{ fontWeight: 500 }}>{mod.title}</div>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-              ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
-            </div>
-          </div>
-        ))}
-        {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>No modules loaded.</p>
-        )}
-      </div>
+      </Button>
     );
   }
 
   return (
-    <div style={panelStyle.container} role="complementary" aria-label="Developer inspector panel">
-      <div style={panelStyle.header}>
-        <button
-          type="button"
-          style={{ ...panelStyle.tab, ...(activeTab === 'telemetry' ? panelStyle.activeTab : {}) }}
-          onClick={() => setActiveTab('telemetry')}
-        >
-          Telemetry
-        </button>
-        <button
-          type="button"
-          style={{
-            ...panelStyle.tab,
-            ...(activeTab === 'rewards' ? panelStyle.activeTab : {}),
-          }}
-          onClick={() => setActiveTab('rewards')}
-        >
-          Rewards
-        </button>
-        <button
-          type="button"
-          style={{
-            ...panelStyle.tab,
-            ...(activeTab === 'accessibility' ? panelStyle.activeTab : {}),
-          }}
-          onClick={() => setActiveTab('accessibility')}
-        >
-          A11y
-        </button>
-        {bundleData && (
-          <button
-            type="button"
-            style={{ ...panelStyle.tab, ...(activeTab === 'bundle' ? panelStyle.activeTab : {}) }}
-            onClick={() => setActiveTab('bundle')}
+    <div
+      className="bg-surface-container-low border-outline-variant flex w-[360px] flex-col border-l font-mono text-xs"
+      role="complementary"
+      aria-label="Developer inspector panel"
+    >
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as Tab)}
+        className="flex flex-1 flex-col overflow-hidden"
+      >
+        <div className="bg-surface-container border-outline-variant flex shrink-0 border-b">
+          <TabsList className="flex h-auto flex-1 rounded-none border-0 bg-transparent p-0">
+            <TabsTrigger
+              value="telemetry"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            >
+              Telemetry
+            </TabsTrigger>
+            <TabsTrigger
+              value="rewards"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            >
+              Rewards
+            </TabsTrigger>
+            <TabsTrigger
+              value="accessibility"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            >
+              A11y
+            </TabsTrigger>
+            {bundleData && (
+              <TabsTrigger
+                value="bundle"
+                className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
+              >
+                Bundle
+              </TabsTrigger>
+            )}
+          </TabsList>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-on-surface-variant h-auto w-auto rounded-none px-3"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close inspector panel"
           >
-            Bundle
-          </button>
+            <PanelRightClose className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <TabsContent value="telemetry" className="mt-0 flex-1 overflow-auto border-0 p-2">
+          <TelemetryInspector events={telemetryEvents} />
+        </TabsContent>
+        <TabsContent value="rewards" className="mt-0 flex-1 overflow-auto border-0 p-2">
+          <RewardsInspector
+            receipts={rewardReceipts ?? []}
+            definedRewards={definedRewards ?? []}
+            onResend={onResendReward}
+          />
+        </TabsContent>
+        <TabsContent value="accessibility" className="mt-0 flex-1 overflow-auto border-0 p-2">
+          <AccessibilityInspector />
+        </TabsContent>
+        {bundleData && (
+          <TabsContent value="bundle" className="mt-0 flex-1 overflow-auto border-0 p-2">
+            <div className="p-2">
+              <h3 className="mb-2 font-semibold">Bundle Modules</h3>
+              {bundleData?.manifest?.modules?.map((mod: any) => (
+                <div
+                  key={mod.id}
+                  className="border-outline-variant bg-surface mb-1 rounded border p-2"
+                >
+                  <div className="font-medium">{mod.title}</div>
+                  <div className="text-on-surface-variant text-xs">
+                    ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
+                  </div>
+                </div>
+              ))}
+              {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
+                <p className="text-on-surface-variant text-xs">No modules loaded.</p>
+              )}
+            </div>
+          </TabsContent>
         )}
-        <button
-          type="button"
-          style={panelStyle.closeBtn}
-          onClick={() => setIsOpen(false)}
-          aria-label="Close inspector panel"
-        >
-          ✕
-        </button>
-      </div>
-      <div style={panelStyle.content}>{content}</div>
+      </Tabs>
     </div>
   );
 }

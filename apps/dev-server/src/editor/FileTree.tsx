@@ -1,5 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { FileEntry } from './types';
+import { Trash2, FileJson, FileText, FileImage, File } from 'lucide-react';
+import { cn } from '@open-edu/design-system';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 
 interface FileTreeProps {
   files: FileEntry[];
@@ -44,6 +48,8 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
     return result;
   }, [files]);
 
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
   return (
     <div className="border-outline-variant bg-surface-container-low h-full overflow-auto border-r text-sm">
       <div className="border-outline-variant text-on-surface-variant border-b px-3 py-2 text-xs font-semibold uppercase tracking-wider">
@@ -79,32 +85,19 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
                   {file.label}
                 </span>
               </div>
-              <button
-                type="button"
-                className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-0.5 opacity-0 group-hover:opacity-100"
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-on-surface-variant hover:bg-error-container hover:text-error h-auto w-auto shrink-0 rounded p-0.5 opacity-0 group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (window.confirm(`Delete "${file.path}"?`)) {
-                    onDelete(file.path);
-                  }
+                  setDeleteTarget(file.path);
                 }}
                 aria-label={`Delete ${file.path}`}
                 title="Delete file"
               >
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
           ))}
         </div>
@@ -114,43 +107,56 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
           No editable files found
         </div>
       )}
+
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete File</DialogTitle>
+          </DialogHeader>
+          <p className="text-on-surface-variant text-sm">
+            Are you sure you want to delete "{deleteTarget}"?
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                if (deleteTarget) {
+                  onDelete(deleteTarget);
+                }
+                setDeleteTarget(null);
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function FileIcon({ extension }: { extension: string }) {
-  const color = extColor(extension);
-  return (
-    <svg
-      className="h-4 w-4 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-      />
-    </svg>
-  );
-}
+const iconMap: Record<string, { Icon: typeof File; className: string }> = {
+  '.json': { Icon: FileJson, className: 'text-secondary' },
+  '.md': { Icon: FileText, className: 'text-primary' },
+};
 
-function extColor(ext: string): string {
-  switch (ext) {
-    case '.json':
-      return '#f59e0b';
-    case '.md':
-      return '#3b82f6';
-    case '.png':
-    case '.jpg':
-    case '.jpeg':
-    case '.gif':
-    case '.svg':
-    case '.webp':
-      return '#10b981';
-    default:
-      return '#6b7280';
+function FileIcon({ extension }: { extension: string }) {
+  const mapped = iconMap[extension];
+  if (mapped) {
+    const { Icon: MappedIcon, className } = mapped;
+    return <MappedIcon className={cn('h-4 w-4 shrink-0', className)} strokeWidth={1.5} />;
   }
+  if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.avif'].includes(extension)) {
+    return <FileImage className="text-success h-4 w-4 shrink-0" strokeWidth={1.5} />;
+  }
+  return <File className="text-on-surface-variant h-4 w-4 shrink-0" strokeWidth={1.5} />;
 }
