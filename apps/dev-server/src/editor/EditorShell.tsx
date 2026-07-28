@@ -12,6 +12,7 @@ import { AssetManager } from './AssetManager';
 import { RawJsonEditor } from './RawJsonEditor';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   Select,
@@ -526,8 +527,8 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         <div className="mb-2">
           <span className="text-on-surface-variant text-xs font-medium">{currentFile.path}</span>
         </div>
-        <textarea
-          className="border-outline-variant flex-1 resize-none rounded border p-3 font-mono text-sm focus:outline-none"
+        <Textarea
+          className="border-outline-variant flex-1 resize-none rounded border p-3 font-mono text-sm focus:outline-none focus-visible:ring-0"
           value={currentFile.content}
           onChange={(e) => handleContentChange(e.target.value)}
           spellCheck={false}
