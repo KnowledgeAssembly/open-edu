@@ -1,3 +1,5 @@
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   tailwindAnimationExtensions,
   tailwindColorExtensions,
@@ -18,13 +20,15 @@ import {
   tailwindLayoutExtensions,
 } from '@open-edu/design-system/tokens';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './index.html',
-    './src/**/*.{ts,tsx}',
-    '../../packages/runtime/src/**/*.{ts,tsx}',
-    '../../packages/design-system/src/**/*.{ts,tsx}',
+    resolve(__dirname, './index.html'),
+    resolve(__dirname, './src/**/*.{ts,tsx}'),
+    resolve(__dirname, '../../packages/runtime/src/**/*.{ts,tsx}'),
+    resolve(__dirname, '../../packages/design-system/src/**/*.{ts,tsx}'),
   ],
   theme: {
     extend: {
