@@ -68,7 +68,7 @@ test.describe('accessibility validation', () => {
   test('A11y inspector shows no violations after auto-audit', async ({ page }) => {
     await page.goto(server.url);
 
-    await page.getByRole('button', { name: 'A11y' }).click();
+    await page.getByRole('tab', { name: 'A11y' }).click();
 
     await expect(page.getByText('No accessibility violations found')).toBeVisible({
       timeout: 15000,
@@ -78,7 +78,7 @@ test.describe('accessibility validation', () => {
   test('Run Audit button is present and clickable', async ({ page }) => {
     await page.goto(server.url);
 
-    await page.getByRole('button', { name: 'A11y' }).click();
+    await page.getByRole('tab', { name: 'A11y' }).click();
 
     await expect(page.getByText('No accessibility violations found')).toBeVisible({
       timeout: 15000,
