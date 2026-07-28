@@ -53,31 +53,35 @@ export function InspectorPanel({
       role="complementary"
       aria-label="Developer inspector panel"
     >
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="flex flex-1 flex-col overflow-hidden">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as Tab)}
+        className="flex flex-1 flex-col overflow-hidden"
+      >
         <div className="bg-surface-container border-outline-variant flex shrink-0 border-b">
-          <TabsList className="flex flex-1 rounded-none border-0 bg-transparent p-0 h-auto">
+          <TabsList className="flex h-auto flex-1 rounded-none border-0 bg-transparent p-0">
             <TabsTrigger
               value="telemetry"
-              className="flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
               Telemetry
             </TabsTrigger>
             <TabsTrigger
               value="rewards"
-              className="flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
               Rewards
             </TabsTrigger>
             <TabsTrigger
               value="accessibility"
-              className="flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
               A11y
             </TabsTrigger>
             {bundleData && (
               <TabsTrigger
                 value="bundle"
-                className="flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface"
+                className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
               >
                 Bundle
               </TabsTrigger>
@@ -94,25 +98,28 @@ export function InspectorPanel({
           </Button>
         </div>
 
-        <TabsContent value="telemetry" className="flex-1 overflow-auto p-2 mt-0 border-0">
+        <TabsContent value="telemetry" className="mt-0 flex-1 overflow-auto border-0 p-2">
           <TelemetryInspector events={telemetryEvents} />
         </TabsContent>
-        <TabsContent value="rewards" className="flex-1 overflow-auto p-2 mt-0 border-0">
+        <TabsContent value="rewards" className="mt-0 flex-1 overflow-auto border-0 p-2">
           <RewardsInspector
             receipts={rewardReceipts ?? []}
             definedRewards={definedRewards ?? []}
             onResend={onResendReward}
           />
         </TabsContent>
-        <TabsContent value="accessibility" className="flex-1 overflow-auto p-2 mt-0 border-0">
+        <TabsContent value="accessibility" className="mt-0 flex-1 overflow-auto border-0 p-2">
           <AccessibilityInspector />
         </TabsContent>
         {bundleData && (
-          <TabsContent value="bundle" className="flex-1 overflow-auto p-2 mt-0 border-0">
+          <TabsContent value="bundle" className="mt-0 flex-1 overflow-auto border-0 p-2">
             <div className="p-2">
               <h3 className="mb-2 font-semibold">Bundle Modules</h3>
               {bundleData?.manifest?.modules?.map((mod: any) => (
-                <div key={mod.id} className="border-outline-variant bg-surface mb-1 rounded border p-2">
+                <div
+                  key={mod.id}
+                  className="border-outline-variant bg-surface mb-1 rounded border p-2"
+                >
                   <div className="font-medium">{mod.title}</div>
                   <div className="text-on-surface-variant text-xs">
                     ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}

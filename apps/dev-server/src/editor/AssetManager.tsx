@@ -2,12 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { uploadAsset, deleteFile } from './api';
 import { Upload } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 
 interface AssetManagerProps {
   assets: string[];
@@ -45,27 +40,21 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
     [onRefresh],
   );
 
-  const handleDelete = useCallback(
-    async (assetPath: string) => {
-      setDeleteTarget(assetPath);
-    },
-    [],
-  );
+  const handleDelete = useCallback(async (assetPath: string) => {
+    setDeleteTarget(assetPath);
+  }, []);
 
-  const confirmDelete = useCallback(
-    async () => {
-      if (!deleteTarget) return;
-      try {
-        await deleteFile(deleteTarget);
-        onRefresh();
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setDeleteTarget(null);
-      }
-    },
-    [deleteTarget, onRefresh],
-  );
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteFile(deleteTarget);
+      onRefresh();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, onRefresh]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -198,9 +187,12 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
           );
         })}
       </div>
-      <Dialog open={deleteTarget !== null} onOpenChange={(open) => {
-        if (!open) setDeleteTarget(null);
-      }}>
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Delete Asset</DialogTitle>
@@ -209,18 +201,10 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
             Are you sure you want to delete "{deleteTarget}"?
           </p>
           <div className="mt-4 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDeleteTarget(null)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={confirmDelete}
-            >
+            <Button variant="destructive" size="sm" onClick={confirmDelete}>
               Delete
             </Button>
           </div>

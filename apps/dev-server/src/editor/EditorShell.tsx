@@ -752,9 +752,12 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         </DialogContent>
       </Dialog>
 
-      <Dialog open={pendingModeChange !== null} onOpenChange={(open) => {
-        if (!open) setPendingModeChange(null);
-      }}>
+      <Dialog
+        open={pendingModeChange !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingModeChange(null);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Unsaved Changes</DialogTitle>
@@ -763,11 +766,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
             You have unsaved changes. Switch to preview anyway?
           </p>
           <div className="mt-4 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPendingModeChange(null)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setPendingModeChange(null)}>
               Cancel
             </Button>
             <Button

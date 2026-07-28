@@ -3,12 +3,7 @@ import type { FileEntry } from './types';
 import { Trash2, FileJson, FileText, FileImage, File } from 'lucide-react';
 import { cn } from '@open-edu/design-system';
 import { Button } from '../components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 
 interface FileTreeProps {
   files: FileEntry[];
@@ -113,9 +108,12 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
         </div>
       )}
 
-      <Dialog open={deleteTarget !== null} onOpenChange={(open) => {
-        if (!open) setDeleteTarget(null);
-      }}>
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Delete File</DialogTitle>
@@ -124,11 +122,7 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
             Are you sure you want to delete "{deleteTarget}"?
           </p>
           <div className="mt-4 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDeleteTarget(null)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
             <Button
