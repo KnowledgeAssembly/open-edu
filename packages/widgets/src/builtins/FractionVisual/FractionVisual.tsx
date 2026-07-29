@@ -97,7 +97,8 @@ function FractionVisualComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const initialShadedMask = parsedState?.shadedMask ?? (content?.compare && content?.interactive ? 0 : null);
+  const initialShadedMask =
+    parsedState?.shadedMask ?? (content?.compare && content?.interactive ? 0 : null);
   const [shadedMask, setShadedMask] = useState<number | null>(initialShadedMask);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 

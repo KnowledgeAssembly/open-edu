@@ -3,7 +3,13 @@ import { SchemaForm } from './SchemaForm';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 type NodeType = 'lesson' | 'quiz' | 'reflection' | 'exercise' | 'custom';
 
@@ -126,7 +132,10 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
 
       <div className="flex items-center gap-2">
         <label className="text-on-surface-variant text-xs font-medium">Type</label>
-        <Select value={data.type} onValueChange={(value) => onChange({ ...data, type: value as NodeType })}>
+        <Select
+          value={data.type}
+          onValueChange={(value) => onChange({ ...data, type: value as NodeType })}
+        >
           <SelectTrigger className="border-outline-variant focus:border-primary focus:ring-primary rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1">
             <SelectValue />
           </SelectTrigger>

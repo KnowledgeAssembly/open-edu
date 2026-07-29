@@ -1,7 +1,13 @@
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 interface TriggerData {
   onEvent: string;
@@ -191,7 +197,10 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
   return (
     <div className="border-outline-variant bg-surface-container-low flex items-start gap-2 rounded border p-2">
       <div className="min-w-0 flex-1 space-y-1">
-        <Select value={reward.action} onValueChange={(value) => onChange({ ...reward, action: value })}>
+        <Select
+          value={reward.action}
+          onValueChange={(value) => onChange({ ...reward, action: value })}
+        >
           <SelectTrigger className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1">
             <SelectValue />
           </SelectTrigger>

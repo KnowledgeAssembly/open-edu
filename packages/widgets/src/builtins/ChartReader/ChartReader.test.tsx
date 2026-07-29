@@ -242,14 +242,18 @@ describe('ChartReader interactive mode - bar', () => {
     renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
-    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Correct! You selected Bananas.');
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent(
+      'Correct! You selected Bananas.',
+    );
   });
 
   it('shows incorrect feedback with correct answer', () => {
     renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[0]!);
-    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Not quite. The correct answer is Bananas.');
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent(
+      'Not quite. The correct answer is Bananas.',
+    );
   });
 
   it('restores lastResult from storedState', () => {
@@ -266,7 +270,9 @@ describe('ChartReader interactive mode - bar', () => {
         storedState={storedState}
       />,
     );
-    expect(screen.getByTestId('chart-submitted')).toHaveTextContent('Correct! You selected Bananas.');
+    expect(screen.getByTestId('chart-submitted')).toHaveTextContent(
+      'Correct! You selected Bananas.',
+    );
   });
 });
 

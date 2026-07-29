@@ -70,18 +70,15 @@ function ImageCompareComponent(props: {
     setLocalAcknowledged(true);
   }, [complete, emitInteraction, sliderPos]);
 
-  const updateSliderPosition = useCallback(
-    (clientX: number) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-      const pct = Math.round((x / rect.width) * 100);
-      const newPos = Math.max(0, Math.min(100, pct));
-      setSliderPos(newPos);
-      sliderPosRef.current = newPos;
-    },
-    [],
-  );
+  const updateSliderPosition = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const pct = Math.round((x / rect.width) * 100);
+    const newPos = Math.max(0, Math.min(100, pct));
+    setSliderPos(newPos);
+    sliderPosRef.current = newPos;
+  }, []);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

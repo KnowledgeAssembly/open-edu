@@ -94,7 +94,10 @@ function ChartReaderComponent(props: {
         selectedLabel: label,
         correct: isCorrect,
       });
-      complete(score, { submitted: true, lastResult: { selectedLabel: label, correct: isCorrect } });
+      complete(score, {
+        submitted: true,
+        lastResult: { selectedLabel: label, correct: isCorrect },
+      });
       setSubmitted(true);
     },
     [submitted, parsed, emitInteraction, complete],
@@ -161,14 +164,12 @@ function ChartReaderComponent(props: {
           role="status"
           aria-live="assertive"
           data-testid="chart-submitted"
-          className={`mt-md rounded-lg p-md ${lastResult.correct ? 'bg-success-container text-on-success-container' : 'bg-error-container text-on-error-container'}`}
+          className={`mt-md p-md rounded-lg ${lastResult.correct ? 'bg-success-container text-on-success-container' : 'bg-error-container text-on-error-container'}`}
         >
           {lastResult.correct ? (
             <p className="font-semibold">Correct! You selected {lastResult.selectedLabel}.</p>
           ) : (
-            <p className="font-semibold">
-              Not quite. The correct answer is {config.correctLabel}.
-            </p>
+            <p className="font-semibold">Not quite. The correct answer is {config.correctLabel}.</p>
           )}
         </div>
       )}
