@@ -841,7 +841,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                 <SelectTrigger className="w-full text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[250]">
                   {NODE_TYPES.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t.charAt(0).toUpperCase() + t.slice(1)}
