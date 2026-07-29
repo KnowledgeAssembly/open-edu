@@ -770,7 +770,7 @@ function ContextBridgeWithCompanion(): JSX.Element | null {
 }
 
 function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
-  const { panelState, setPanelState, messages } = useCompanion();
+  const { panelState, setPanelState, messages, pendingReward } = useCompanion();
   const isOpen = panelState !== 'closed';
 
   if (view.view === 'course') {
@@ -784,6 +784,7 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
       mood={mood}
       visible={!isOpen}
       hasUnread={messages.length > 0 && !isOpen}
+      pendingReward={pendingReward}
       onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
     />
   );

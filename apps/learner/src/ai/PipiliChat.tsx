@@ -20,6 +20,8 @@ export interface PipiliChatProps {
   suggestedQuestions?: string[];
   onSuggestedQuestionSelect?: (question: string) => void;
   rewardMessages?: RewardMessage[];
+  onViewBadge?: (badgeName: string) => void;
+  onViewCard?: (cardTitle: string) => void;
   className?: string;
 }
 
@@ -43,6 +45,8 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
     suggestedQuestions,
     onSuggestedQuestionSelect,
     rewardMessages,
+    onViewBadge,
+    onViewCard,
     className,
   },
   ref,
@@ -89,43 +93,74 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
           <div
             key={reward.id}
             className="flex items-start gap-2"
+            role="status"
+            aria-live="polite"
+            aria-label={
+              reward.type === 'badge'
+                ? t('learner.pipili.reward.badgeTitle')
+                : t('learner.pipili.reward.cardTitle')
+            }
             data-testid={`reward-message-${reward.type}`}
           >
             <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
-              <Pipili size="xs" mood="surprised" />
+              <RewardPipiliAvatar />
             </div>
             <div className="bg-surface-container border-outline-variant text-on-surface text-caption max-w-[80%] rounded-[12px_12px_12px_4px] border px-3.5 py-2.5 leading-relaxed">
               {reward.type === 'badge' ? (
-                <div className="flex items-start gap-2">
-                  <Award className="text-tertiary mt-0.5 h-4 w-4 shrink-0" />
-                  <div>
-                    <p className="text-tertiary font-semibold">
-                      {t('learner.pipili.reward.badgeTitle')}
-                    </p>
-                    <p className="text-on-surface mt-0.5">
-                      {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
-                    </p>
+                <div>
+                  <div className="flex items-start gap-2">
+                    <Award className="text-tertiary mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-tertiary font-semibold">
+                        {t('learner.pipili.reward.badgeTitle')}
+                      </p>
+                      <p className="text-on-surface mt-0.5">
+                        {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
+                      </p>
+                    </div>
                   </div>
+                  {onViewBadge && (
+                    <button
+                      type="button"
+                      className="text-label text-primary mt-2 hover:underline"
+                      aria-label={t('learner.pipili.reward.viewBadge')}
+                      onClick={() => onViewBadge(reward.badgeName)}
+                    >
+                      {t('learner.pipili.reward.viewBadge')} →
+                    </button>
+                  )}
                 </div>
               ) : (
-                <div className="flex items-start gap-2">
-                  <BookOpen className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-                  <div>
-                    <p className="text-primary font-semibold">
-                      {reward.type === 'cardLevelUp'
-                        ? t('learner.pipili.reward.cardLevelUp')
-                        : t('learner.pipili.reward.cardTitle')}
-                    </p>
-                    <p className="text-on-surface mt-0.5">{reward.cardTitle}</p>
-                    <p className="text-on-surface-variant text-caption mt-0.5">
-                      {reward.type === 'cardLevelUp'
-                        ? t('learner.pipili.reward.cardLevelUpMessage', {
-                            title: reward.cardTitle,
-                            level: String(reward.cardLevel),
-                          })
-                        : t('learner.pipili.reward.cardMessage')}
-                    </p>
+                <div>
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-primary font-semibold">
+                        {reward.type === 'cardLevelUp'
+                          ? t('learner.pipili.reward.cardLevelUp')
+                          : t('learner.pipili.reward.cardTitle')}
+                      </p>
+                      <p className="text-on-surface mt-0.5">{reward.cardTitle}</p>
+                      <p className="text-on-surface-variant text-caption mt-0.5">
+                        {reward.type === 'cardLevelUp'
+                          ? t('learner.pipili.reward.cardLevelUpMessage', {
+                              title: reward.cardTitle,
+                              level: String(reward.cardLevel),
+                            })
+                          : t('learner.pipili.reward.cardMessage')}
+                      </p>
+                    </div>
                   </div>
+                  {onViewCard && (
+                    <button
+                      type="button"
+                      className="text-label text-primary mt-2 hover:underline"
+                      aria-label={t('learner.pipili.reward.viewCard')}
+                      onClick={() => onViewCard(reward.cardTitle)}
+                    >
+                      {t('learner.pipili.reward.viewCard')} →
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -188,3 +223,14 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
   );
 });
 PipiliChat.displayName = 'PipiliChat';
+
+function RewardPipiliAvatar(): JSX.Element {
+  const [settled, setSettled] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setSettled(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return <Pipili size="xs" mood={settled ? 'content' : 'surprised'} />;
+}

@@ -50,6 +50,11 @@ describe('AITutorPanel', () => {
     expect(screen.getByText('Your notes will appear here.')).toBeInTheDocument();
   });
 
+  it('shows Pipili avatar instead of robot emoji for AI messages', () => {
+    render(<AITutorPanel />);
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Pipili — idle');
+  });
+
   it('has no accessibility violations', async () => {
     await checkAccessibility(<AITutorPanel />);
   });

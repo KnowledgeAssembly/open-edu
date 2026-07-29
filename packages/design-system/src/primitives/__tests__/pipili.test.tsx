@@ -42,6 +42,30 @@ describe('Pipili', () => {
     expect(el.querySelector('[class*="scale-110"]')).toBeInTheDocument();
   });
 
+  it('applies nodding mood animation', () => {
+    render(<Pipili mood="nodding" data-testid="pipili" />);
+    const el = screen.getByTestId('pipili');
+    expect(el.querySelector('[class*="animate-pipili-nod"]')).toBeInTheDocument();
+    expect(el.querySelector('[class*="motion-reduce:animate-none"]')).toBeInTheDocument();
+  });
+
+  it('applies surprised mood animation with motion-reduce fallback', () => {
+    render(<Pipili mood="surprised" data-testid="pipili" />);
+    const el = screen.getByTestId('pipili');
+    expect(el.querySelector('[class*="animate-pipili-surprised"]')).toBeInTheDocument();
+    expect(el.querySelector('[class*="motion-reduce:scale-110"]')).toBeInTheDocument();
+  });
+
+  it('has correct aria-label for nodding mood', () => {
+    render(<Pipili mood="nodding" data-testid="pipili" />);
+    expect(screen.getByTestId('pipili')).toHaveAttribute('aria-label', 'Pipili — nodding');
+  });
+
+  it('has correct aria-label for surprised mood', () => {
+    render(<Pipili mood="surprised" data-testid="pipili" />);
+    expect(screen.getByTestId('pipili')).toHaveAttribute('aria-label', 'Pipili — surprised');
+  });
+
   it('tilts head on curious mood', () => {
     render(<Pipili mood="curious" data-testid="pipili" />);
     const svg = screen.getByTestId('pipili').querySelector('svg');
