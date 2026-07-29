@@ -1,12 +1,4 @@
-import {
-  useCallback,
-  useState,
-  useRef,
-  useEffect,
-  Children,
-  isValidElement,
-  cloneElement,
-} from 'react';
+import { useCallback, useRef, useEffect, Children, isValidElement, cloneElement } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -46,15 +38,6 @@ export function SchemaForm({
     },
     [data, onChange],
   );
-
-  const [localDraft, setLocalDraft] = useState<Record<string, string>>({});
-  const prevDataRef = useRef(data);
-  useEffect(() => {
-    if (prevDataRef.current !== data) {
-      setLocalDraft({});
-      prevDataRef.current = data;
-    }
-  }, [data]);
 
   const visibleKeys = fields ?? Object.keys(data).filter((k) => !hideFields.includes(k));
 
@@ -142,30 +125,12 @@ export function SchemaForm({
         if (Array.isArray(value)) {
           const hasObjectItems = value.some((item) => typeof item === 'object' && item !== null);
           if (hasObjectItems) {
-            const draftValue = localDraft[key];
-            const displayValue =
-              draftValue !== undefined ? draftValue : JSON.stringify(value, null, 2);
             return (
               <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-                <Textarea
-                  className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                  rows={10}
-                  value={displayValue}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    setLocalDraft((prev) => ({ ...prev, [key]: raw }));
-                    try {
-                      const parsed = JSON.parse(raw);
-                      handleFieldChange(key, parsed);
-                      setLocalDraft((prev) => {
-                        const next = { ...prev };
-                        delete next[key];
-                        return next;
-                      });
-                    } catch {
-                      // Keep draft for continued editing of invalid JSON
-                    }
-                  }}
+                <JsonTextarea
+                  value={value}
+                  onChange={(parsed) => handleFieldChange(key, parsed)}
+                  fieldKey={key}
                 />
               </FieldWrapper>
             );
@@ -210,30 +175,12 @@ export function SchemaForm({
         }
 
         if (typeof value === 'object') {
-          const draftValue = localDraft[key];
-          const displayValue =
-            draftValue !== undefined ? draftValue : JSON.stringify(value, null, 2);
           return (
             <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-              <Textarea
-                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                rows={10}
-                value={displayValue}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  setLocalDraft((prev) => ({ ...prev, [key]: raw }));
-                  try {
-                    const parsed = JSON.parse(raw);
-                    handleFieldChange(key, parsed);
-                    setLocalDraft((prev) => {
-                      const next = { ...prev };
-                      delete next[key];
-                      return next;
-                    });
-                  } catch {
-                    // Keep draft for continued editing of invalid JSON
-                  }
-                }}
+              <JsonTextarea
+                value={value}
+                onChange={(parsed) => handleFieldChange(key, parsed)}
+                fieldKey={key}
               />
             </FieldWrapper>
           );
@@ -242,6 +189,43 @@ export function SchemaForm({
         return null;
       })}
     </div>
+  );
+}
+
+function JsonTextarea({
+  value,
+  onChange,
+  fieldKey,
+}: {
+  value: object;
+  onChange: (parsed: object) => void;
+  fieldKey: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.value = JSON.stringify(value, null, 2);
+    }
+  }, [fieldKey]); // only re-sync when the field changes (e.g., user selects a different node)
+
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={JSON.stringify(value, null, 2)}
+      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
+      rows={10}
+      onBlur={(e) => {
+        const raw = e.target.value.trim();
+        if (!raw) return;
+        try {
+          const parsed = JSON.parse(raw);
+          onChange(parsed);
+        } catch {
+          // keep invalid JSON in the textarea, don't overwrite
+        }
+      }}
+    />
   );
 }
 
