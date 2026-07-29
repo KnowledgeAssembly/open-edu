@@ -21,7 +21,7 @@ const hotspotSchema = z.object({
   altText: z.string().min(1),
   hotspots: z.array(hotspotItemSchema).min(1),
   mode: z.enum(['single', 'multiple']).default('single'),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   hints: z.array(z.string()).optional(),
 });
 

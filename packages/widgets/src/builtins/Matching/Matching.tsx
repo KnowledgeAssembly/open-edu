@@ -192,7 +192,7 @@ function MatchingComponent(props: {
     (e: React.PointerEvent, leftPairId: string) => {
       if (submitted || isObserve) return;
       if (!containerRef.current) return;
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      e.preventDefault();
       const coords = getContainerCoords(e.clientX, e.clientY);
       const leftEl = containerRef.current.querySelector(`[data-connector-left="${leftPairId}"]`);
       if (!leftEl) return;
@@ -227,23 +227,6 @@ function MatchingComponent(props: {
         setConnections((prev) => {
           const next = new Map(prev);
           next.set(drawingLine.leftId, rightId);
-          return next;
-        });
-      }
-      setDrawingLine(null);
-    },
-    [drawingLine, findRightItemAtPoint],
-  );
-
-  const handlePointerUpForItem = useCallback(
-    (e: React.PointerEvent, leftPairId: string) => {
-      e.stopPropagation();
-      if (!drawingLine) return;
-      const rightId = findRightItemAtPoint(e.clientX, e.clientY);
-      if (rightId) {
-        setConnections((prev) => {
-          const next = new Map(prev);
-          next.set(leftPairId, rightId);
           return next;
         });
       }
@@ -495,7 +478,6 @@ function MatchingComponent(props: {
                     }
                   }}
                   onPointerDown={(e) => handlePointerDown(e, pairId)}
-                  onPointerUp={(e) => handlePointerUpForItem(e, pairId)}
                   style={{
                     padding: '0.5rem',
                     margin: '0.25rem 0',

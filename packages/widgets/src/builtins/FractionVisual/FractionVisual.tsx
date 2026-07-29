@@ -16,7 +16,7 @@ export const fractionVisualSchema = z.object({
   mode: z.enum(['bar', 'circle']).optional().default('bar'),
   label: z.string().optional(),
   showLabel: z.boolean().optional().default(true),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   compare: compareSchema.optional(),
   size: z.number().optional().default(200),
 });
@@ -97,7 +97,8 @@ function FractionVisualComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
-  const [shadedMask, setShadedMask] = useState<number | null>(parsedState?.shadedMask ?? null);
+  const initialShadedMask = parsedState?.shadedMask ?? (content?.compare && content?.interactive ? 0 : null);
+  const [shadedMask, setShadedMask] = useState<number | null>(initialShadedMask);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const isObserve = content && !content.interactive;

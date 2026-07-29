@@ -50,6 +50,7 @@ describe('ClockTime observe mode', () => {
     hour: 10,
     minute: 30,
     size: 250,
+    interactive: false,
   };
 
   it('renders clock SVG in observe mode', () => {

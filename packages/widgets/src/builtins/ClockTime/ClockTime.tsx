@@ -16,7 +16,7 @@ export const configSchema = z.object({
       minute: z.number().int().min(0).max(59),
     })
     .optional(),
-  interactive: z.boolean().optional().default(false),
+  interactive: z.boolean().optional().default(true),
   size: z.number().positive().optional().default(250),
 });
 

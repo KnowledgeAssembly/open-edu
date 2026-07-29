@@ -261,6 +261,41 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 1 correct.');
   });
 
+  it('shows per-question results after submission', () => {
+    renderWidget(multiConfig);
+    fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('6'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    const result0 = screen.getByTestId('result-question-0');
+    expect(result0).toHaveTextContent('What is 2 + 2?');
+    expect(result0).toHaveTextContent('Your answer: 4');
+    const result1 = screen.getByTestId('result-question-1');
+    expect(result1).toHaveTextContent('What is 3 * 3?');
+    expect(result1).toHaveTextContent('Your answer: 6');
+    expect(result1).toHaveTextContent('Correct answer: 9');
+  });
+
+  it('shows explanation in per-question result', () => {
+    const configWithExplanation = {
+      questions: [
+        { question: 'What is 2 + 2?', options: ['3', '4', '5'], correctIndex: 1, explanation: 'Two plus two equals four.' },
+        { question: 'What is 3 * 3?', options: ['6', '9', '12'], correctIndex: 1 },
+      ],
+      interactive: true,
+    };
+    renderWidget(configWithExplanation);
+    fireEvent.click(screen.getByLabelText('4'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByLabelText('9'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.click(screen.getByTestId('feedback-next'));
+    expect(screen.getByTestId('result-question-0')).toHaveTextContent('Two plus two equals four.');
+  });
+
   it('uses widgetId in interactions', () => {
     const { emitInteraction } = renderWidget(multiConfig);
     fireEvent.click(screen.getByLabelText('4'));

@@ -72,7 +72,7 @@ function ImageCompareComponent(props: {
 
   const updateSliderPosition = useCallback(
     (clientX: number) => {
-      if (!containerRef.current || isObserve) return;
+      if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
       const pct = Math.round((x / rect.width) * 100);
@@ -80,21 +80,20 @@ function ImageCompareComponent(props: {
       setSliderPos(newPos);
       sliderPosRef.current = newPos;
     },
-    [isObserve],
+    [],
   );
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (isObserve) return;
       e.preventDefault();
       setIsDragging(true);
       updateSliderPosition(e.clientX);
     },
-    [isObserve, updateSliderPosition],
+    [updateSliderPosition],
   );
 
   useEffect(() => {
-    if (!isDragging || isObserve) return;
+    if (!isDragging) return;
     const handleMouseMove = (e: MouseEvent) => {
       updateSliderPosition(e.clientX);
     };
@@ -113,18 +112,16 @@ function ImageCompareComponent(props: {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isObserve, updateSliderPosition, emitInteraction]);
+  }, [isDragging, updateSliderPosition, emitInteraction]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (isObserve) return;
       updateSliderPosition(e.touches[0]!.clientX);
     },
-    [isObserve, updateSliderPosition],
+    [updateSliderPosition],
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (isObserve) return;
     setIsDragging(false);
     emitInteraction({
       type: 'widget.interaction',
@@ -132,11 +129,10 @@ function ImageCompareComponent(props: {
       position: sliderPosRef.current,
       widgetId: 'core.image-compare',
     });
-  }, [isObserve, emitInteraction]);
+  }, [emitInteraction]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (isObserve) return;
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
         const newPos = Math.min(100, sliderPosRef.current + 5);
@@ -161,7 +157,7 @@ function ImageCompareComponent(props: {
         });
       }
     },
-    [isObserve, emitInteraction],
+    [emitInteraction],
   );
 
   const handleOverlayChange = useCallback(
@@ -214,7 +210,7 @@ function ImageCompareComponent(props: {
               onClick={handleObserveAcknowledge}
               data-testid="observe-acknowledge"
             >
-              Mark as seen \u2713
+              Mark as seen ✓
             </Button>
           </div>
         );
@@ -234,7 +230,7 @@ function ImageCompareComponent(props: {
       return (
         <div style={{ marginTop: '0.75rem' }}>
           <Button variant="default" onClick={handleGotIt} data-testid="image-compare-got-it">
-            Got it \u2713
+            Got it ✓
           </Button>
         </div>
       );
@@ -356,7 +352,7 @@ function ImageCompareComponent(props: {
     );
   }
 
-  const displaySliderPos = isObserve ? content.sliderPosition : sliderPos;
+  const displaySliderPos = sliderPos;
 
   if (mode === 'before-after') {
     return (
@@ -372,17 +368,13 @@ function ImageCompareComponent(props: {
           aria-valuemax={100}
           aria-valuenow={displaySliderPos}
           aria-label="Image comparison slider"
-          tabIndex={isObserve ? -1 : 0}
+          tabIndex={0}
           onKeyDown={handleKeyDown}
           onMouseDown={handleMouseDown}
-          onTouchStart={
-            isObserve
-              ? undefined
-              : (e) => {
-                  setIsDragging(true);
-                  updateSliderPosition(e.touches[0]!.clientX);
-                }
-          }
+          onTouchStart={(e) => {
+            setIsDragging(true);
+            updateSliderPosition(e.touches[0]!.clientX);
+          }}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{
@@ -390,7 +382,7 @@ function ImageCompareComponent(props: {
             width: '100%',
             minHeight: '200px',
             overflow: 'hidden',
-            cursor: isObserve ? 'default' : 'ew-resize',
+            cursor: 'ew-resize',
             userSelect: 'none',
           }}
         >
@@ -488,7 +480,7 @@ function ImageCompareComponent(props: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: isObserve ? 'default' : 'ew-resize',
+              cursor: 'ew-resize',
             }}
           >
             <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>
@@ -516,17 +508,13 @@ function ImageCompareComponent(props: {
         aria-valuemax={100}
         aria-valuenow={displaySliderPos}
         aria-label="Image comparison slider"
-        tabIndex={isObserve ? -1 : 0}
+        tabIndex={0}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
-        onTouchStart={
-          isObserve
-            ? undefined
-            : (e) => {
-                setIsDragging(true);
-                updateSliderPosition(e.touches[0]!.clientX);
-              }
-        }
+        onTouchStart={(e) => {
+          setIsDragging(true);
+          updateSliderPosition(e.touches[0]!.clientX);
+        }}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{
@@ -534,7 +522,7 @@ function ImageCompareComponent(props: {
           width: '100%',
           minHeight: '200px',
           overflow: 'hidden',
-          cursor: isObserve ? 'default' : 'ew-resize',
+          cursor: 'ew-resize',
           userSelect: 'none',
         }}
       >
@@ -634,8 +622,7 @@ function ImageCompareComponent(props: {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: isObserve ? 'default' : 'ew-resize',
-            pointerEvents: 'none',
+            cursor: 'ew-resize',
           }}
         >
           <span style={{ color: '#333', fontSize: '0.75rem', lineHeight: 1 }}>{'\u2194'}</span>

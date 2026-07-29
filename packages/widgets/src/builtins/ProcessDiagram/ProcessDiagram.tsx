@@ -34,6 +34,7 @@ const processDiagramSchema = z.object({
 const ProcessDiagramStateSchema = z.object({
   revealedNodes: z.array(z.number()),
   currentStep: z.number(),
+  finished: z.boolean().optional(),
 });
 
 const NODE_WIDTH = 140;
@@ -106,6 +107,7 @@ function ProcessDiagramComponent(props: {
         : []),
   );
   const [currentStep, setCurrentStep] = useState(parsedState?.currentStep ?? 0);
+  const [finished, setFinished] = useState(parsedState?.finished ?? false);
 
   const isObserve = parsed.success && !parsed.data.interactive;
   const { handleAcknowledge, showAcknowledgeButton } = useObserveMode({
@@ -141,11 +143,14 @@ function ProcessDiagramComponent(props: {
         nodeIndex: nextIndex,
         nodeId: parsed.data.nodes[nextIndex]?.id,
       });
-      if (nextIndex === parsed.data.nodes.length - 1) {
-        complete(100, { revealedNodes: [...revealedNodes, nextIndex], currentStep: nextIndex });
-      }
     }
-  }, [parsed, revealedNodes, emitInteraction, complete]);
+  }, [parsed, revealedNodes, emitInteraction]);
+
+  const handleFinish = useCallback(() => {
+    if (!parsed.success || finished) return;
+    setFinished(true);
+    complete(100, { revealedNodes, currentStep, finished: true });
+  }, [parsed, finished, revealedNodes, currentStep, complete]);
 
   if (!parsed.success) {
     return <WidgetError />;
@@ -354,14 +359,28 @@ function ProcessDiagramComponent(props: {
         </div>
       )}
 
-      {config.stepByStep && revealedNodes.length >= config.nodes.length && (
+      {config.stepByStep && revealedNodes.length >= config.nodes.length && !finished && (
+        <div className="mt-md text-center">
+          <p className="text-on-surface font-semibold" data-testid="diagram-complete">All steps revealed!</p>
+          <Button
+            variant="default"
+            onClick={handleFinish}
+            data-testid="finish-button"
+            className="mt-sm"
+          >
+            Finish
+          </Button>
+        </div>
+      )}
+
+      {config.stepByStep && finished && (
         <div
           role="status"
           aria-live="assertive"
-          data-testid="diagram-complete"
+          data-testid="diagram-finished"
           className="mt-md text-center"
         >
-          <p className="text-on-surface font-semibold">All steps revealed!</p>
+          <p className="text-on-surface font-semibold">All steps viewed.</p>
         </div>
       )}
     </div>

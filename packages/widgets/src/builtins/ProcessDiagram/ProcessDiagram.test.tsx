@@ -103,20 +103,31 @@ describe('ProcessDiagram step-by-step', () => {
     );
   });
 
-  it('completes after revealing all nodes', () => {
+  it('does not auto-complete after revealing all nodes', () => {
     const { complete } = renderWidget(baseConfig);
     fireEvent.click(screen.getByTestId('reveal-next'));
     fireEvent.click(screen.getByTestId('reveal-next'));
     fireEvent.click(screen.getByTestId('reveal-next'));
+    expect(complete).not.toHaveBeenCalled();
+  });
+
+  it('completes after clicking Finish button', () => {
+    const { complete } = renderWidget(baseConfig);
+    fireEvent.click(screen.getByTestId('reveal-next'));
+    fireEvent.click(screen.getByTestId('reveal-next'));
+    fireEvent.click(screen.getByTestId('reveal-next'));
+    expect(screen.getByTestId('finish-button')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('finish-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
-  it('shows completion message after all revealed', () => {
+  it('shows completion message with Finish button after all revealed', () => {
     renderWidget(baseConfig);
     fireEvent.click(screen.getByTestId('reveal-next'));
     fireEvent.click(screen.getByTestId('reveal-next'));
     fireEvent.click(screen.getByTestId('reveal-next'));
     expect(screen.getByText('All steps revealed!')).toBeInTheDocument();
+    expect(screen.getByTestId('finish-button')).toBeInTheDocument();
   });
 });
 

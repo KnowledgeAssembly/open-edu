@@ -54,6 +54,7 @@ describe('MeasurementScale observe mode', () => {
     unit: 'cm',
     value: 5,
     showReading: true,
+    interactive: false,
   };
 
   it('renders ruler SVG in observe mode', () => {
@@ -93,6 +94,7 @@ describe('MeasurementScale thermometer observe mode', () => {
       step: 1,
       unit: '°C',
       value: 37,
+      interactive: false,
     });
     expect(screen.getByTestId('thermometer-svg')).toBeInTheDocument();
   });
@@ -107,6 +109,7 @@ describe('MeasurementScale cylinder observe mode', () => {
       step: 1,
       unit: 'mL',
       value: 50,
+      interactive: false,
     });
     expect(screen.getByTestId('cylinder-svg')).toBeInTheDocument();
   });

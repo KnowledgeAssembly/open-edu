@@ -458,9 +458,9 @@ describe('GridArea edge cases', () => {
     expect(screen.getByText(/Area count:/)).toBeTruthy();
   });
 
-  it('defaults to observe mode when interactive not specified', () => {
+  it('defaults to interactive mode when interactive not specified', () => {
     renderWidget({ rows: 2, cols: 2 });
-    expect(screen.queryByText('Submit')).toBeNull();
+    expect(screen.getByText('Submit')).toBeTruthy();
   });
 
   it('applies custom cellSize', () => {

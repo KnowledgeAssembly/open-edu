@@ -234,7 +234,7 @@ function CalloutComponent(props: {
           onClick={handleObserveAcknowledge}
           data-testid="observe-acknowledge"
         >
-          Mark as seen \u2713
+          Mark as seen ✓
         </Button>
       </div>
     ) : (
@@ -250,7 +250,7 @@ function CalloutComponent(props: {
   ) : !finalAcknowledged ? (
     <div style={{ marginTop: '0.75rem' }}>
       <Button variant="default" onClick={handleGotIt} data-testid="callout-got-it">
-        Got it \u2713
+        Got it ✓
       </Button>
     </div>
   ) : (
