@@ -105,16 +105,16 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
             <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
               <RewardPipiliAvatar />
             </div>
-            <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-xs leading-snug">
+            <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-caption leading-snug">
               {reward.type === 'badge' ? (
                 <div>
                   <div className="flex items-start gap-1.5">
                     <Award className="text-tertiary mt-px h-3.5 w-3.5 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-tertiary text-xs font-semibold">
+                      <p className="text-tertiary text-caption font-semibold">
                         {t('learner.pipili.reward.badgeTitle')}
                       </p>
-                      <p className="text-on-surface mt-0.5 text-xs">
+                      <p className="text-on-surface mt-0.5 text-caption">
                         {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
                       </p>
                     </div>
@@ -135,13 +135,13 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
                   <div className="flex items-start gap-1.5">
                     <BookOpen className="text-primary mt-px h-3.5 w-3.5 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-primary text-xs font-semibold">
+                      <p className="text-primary text-caption font-semibold">
                         {reward.type === 'cardLevelUp'
                           ? t('learner.pipili.reward.cardLevelUp')
                           : t('learner.pipili.reward.cardTitle')}
                       </p>
-                      <p className="text-on-surface mt-0.5 text-xs">{reward.cardTitle}</p>
-                      <p className="text-on-surface-variant mt-0.5 text-xs">
+                      <p className="text-on-surface mt-0.5 text-caption">{reward.cardTitle}</p>
+                      <p className="text-on-surface-variant mt-0.5 text-caption">
                         {reward.type === 'cardLevelUp'
                           ? t('learner.pipili.reward.cardLevelUpMessage', {
                               title: reward.cardTitle,
