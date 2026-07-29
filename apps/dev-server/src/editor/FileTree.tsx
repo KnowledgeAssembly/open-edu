@@ -205,6 +205,7 @@ export function FileTree({
                         : ''}
                     </span>
                     <input
+                      aria-label="Rename file"
                       className="border-primary bg-surface w-full min-w-0 rounded border px-1 py-0.5 text-xs outline-none"
                       value={renameValue}
                       onChange={(e) => setRenameValue(e.target.value)}
