@@ -37,8 +37,8 @@ const LessonJSONSchema = z.object({
   title: z.string(),
   objectives: z.array(z.string()),
   coreIdea: z.string(),
-  examples: z.array(z.string()),
-  misconceptions: z.array(z.string()),
+  examples: z.array(z.string()).optional(),
+  misconceptions: z.array(z.string()).optional(),
   estimatedMinutes: z.number().optional(),
   activities: z.array(ActivityJSONSchema),
 });
@@ -137,7 +137,8 @@ function mapLesson(jsonLesson: z.infer<typeof LessonJSONSchema>): Lesson {
       id: `obj-${i + 1}`,
       description: obj,
     })),
-    content: jsonLesson.coreIdea + '\n\n' + jsonLesson.examples.map((e) => `- ${e}`).join('\n'),
+    content:
+      jsonLesson.coreIdea + '\n\n' + (jsonLesson.examples ?? []).map((e) => `- ${e}`).join('\n'),
     activities: activities.length > 0 ? activities : undefined,
     quiz: quiz,
     estimatedMinutes: jsonLesson.estimatedMinutes,

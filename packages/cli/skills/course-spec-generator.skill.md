@@ -158,7 +158,7 @@ Widget IDs use domain prefixes. Legacy `open-edu.*` IDs are deprecated and will 
 | `core.video-player`    | Video with questions        | `video` (URL), `poster`, `title`, `transcript?`, `chapters?`, `interactive`                                                                       |
 | `core.callout`         | Highlight key info          | `description`, `interactive` (rarely true)                                                                                                        |
 | `core.image-compare`   | Spot differences            | `description`, `imageA`, `imageB`, `differences: {id, x, y, radius}[]`, `interactive`                                                             |
-| `core.hotspot`         | Tap image regions           | `image` (URL), `hotspots: {id, label, x, y, radius, correct}[]`, `mode: "single"\|"multi"`, `description`, `hints[]`, `interactive`               |
+| `core.hotspot`         | Tap image regions           | `image` (URL), `hotspots: {id, label, x, y, radius, correct}[]`, `mode: "single"\|"multiple"`, `description`, `hints[]`, `interactive`            |
 | `core.timeline`        | Chronological events        | `events: {id, title, icon?, description?, image?}[]`, `layout: "vertical"\|"horizontal"`, `showDates`, `showImages`, `interactive`                |
 
 ### Math Domain (`math.*`)
