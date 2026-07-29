@@ -8,7 +8,6 @@ import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import { useTranslation } from '@open-edu/i18n';
 import type { RewardReceipt } from '@open-edu/rewards';
-import type { CardDefinition } from '@open-edu/schemas';
 import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
@@ -17,8 +16,7 @@ import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button, cn } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
-import { KnowledgeCardUnlockedToast } from '@open-edu/runtime';
-import { BadgeToast } from './BadgeToast';
+import { useCompanion } from './ai';
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -49,14 +47,9 @@ export function CourseRuntime({
   bundleContext,
 }: CourseRuntimeProps): JSX.Element {
   const { t } = useTranslation();
+  const companion = useCompanion();
   const [badges, setBadges] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [toastBadgeName, setToastBadgeName] = useState<string | null>(null);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastCard, setToastCard] = useState<CardDefinition | null>(null);
-  const [toastCardLevel, setToastCardLevel] = useState(0);
-  const [toastCardType, setToastCardType] = useState<'unlock' | 'levelUp'>('unlock');
-  const [toastCardVisible, setToastCardVisible] = useState(false);
   const bundleProgressRef = useRef<BundleProgressSnapshot | null>(null);
 
   const [savedProgress, setSavedProgress] = useState<ProgressSnapshot | null>(null);
@@ -116,8 +109,12 @@ export function CourseRuntime({
               const badgeName = receipt.actionKey ?? receipt.detail ?? 'Unknown badge';
               setBadges((prev) => [...prev, badgeName]);
               void addBadge(pkg.manifest.id, badgeName);
-              setToastBadgeName(badgeName);
-              setToastVisible(true);
+              companion.addRewardMessage({
+                id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                type: 'badge',
+                badgeName,
+                timestamp: Date.now(),
+              });
             }
           },
         })
@@ -165,17 +162,27 @@ export function CourseRuntime({
             ),
             onCardUnlocked: (card) => {
               void saveCardProgress(card.id, card.level);
-              setToastCard(card);
-              setToastCardLevel(card.level);
-              setToastCardType('unlock');
-              setToastCardVisible(true);
+              companion.addRewardMessage({
+                id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                type: 'card',
+                cardTitle: card.title,
+                cardType: card.type,
+                cardLevel: card.level,
+                cardMaxLevel: card.maximumLevel,
+                timestamp: Date.now(),
+              });
             },
             onCardLeveledUp: (card, newLevel) => {
               void saveCardProgress(card.id, newLevel);
-              setToastCard(card);
-              setToastCardLevel(newLevel);
-              setToastCardType('levelUp');
-              setToastCardVisible(true);
+              companion.addRewardMessage({
+                id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                type: 'cardLevelUp',
+                cardTitle: card.title,
+                cardType: card.type,
+                cardLevel: newLevel,
+                cardMaxLevel: card.maximumLevel,
+                timestamp: Date.now(),
+              });
             },
           })
         : null;
@@ -289,31 +296,6 @@ export function CourseRuntime({
                   hideHeader={hideLayoutShellHeader}
                   onProgressUpdate={onProgressUpdate}
                 />
-              )}
-            </div>
-            <div className="pointer-events-none fixed right-4 top-4 z-[9999] flex flex-col gap-2">
-              {toastBadgeName && (
-                <div className="pointer-events-auto">
-                  <BadgeToast
-                    badgeName={toastBadgeName}
-                    visible={toastVisible}
-                    onDismiss={() => setToastVisible(false)}
-                  />
-                </div>
-              )}
-              {toastCard && (
-                <div className="pointer-events-auto">
-                  <KnowledgeCardUnlockedToast
-                    card={toastCard}
-                    newLevel={toastCardLevel}
-                    visible={toastCardVisible}
-                    type={toastCardType}
-                    onDismiss={() => {
-                      setToastCardVisible(false);
-                      setToastCard(null);
-                    }}
-                  />
-                </div>
               )}
             </div>
           </div>

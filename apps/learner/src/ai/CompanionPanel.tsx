@@ -15,7 +15,13 @@ const suggestedQuestions = [
 
 function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
-  const { panelState, setPanelState, messages: companionMessages } = useCompanion();
+  const {
+    panelState,
+    setPanelState,
+    messages: companionMessages,
+    rewardMessages,
+    clearPendingReward,
+  } = useCompanion();
   const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
@@ -46,6 +52,7 @@ function PipiliCompanionContent(): JSX.Element {
 
   useEffect(() => {
     if (!isOpen) return;
+    clearPendingReward();
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
     };
@@ -55,7 +62,7 @@ function PipiliCompanionContent(): JSX.Element {
       document.removeEventListener('keydown', handler);
       document.body.style.overflow = '';
     };
-  }, [isOpen, handleClose]);
+  }, [isOpen, handleClose, clearPendingReward]);
 
   const showSuggestions = companionMessages.length === 0;
 
@@ -101,6 +108,7 @@ function PipiliCompanionContent(): JSX.Element {
           isStreaming={isStreaming}
           suggestedQuestions={showSuggestions ? suggestedQuestions : undefined}
           onSuggestedQuestionSelect={showSuggestions ? handleSuggestedQuestion : undefined}
+          rewardMessages={rewardMessages}
           placeholder={t('learner.right_sidebar.chat_placeholder')}
           className="min-h-0 flex-1"
         />

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../lib/utils.js';
 
-export type PipiliMood = 'idle' | 'thinking' | 'curious' | 'content';
+export type PipiliMood = 'idle' | 'thinking' | 'curious' | 'content' | 'nodding' | 'surprised';
 
 export interface PipiliProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -22,6 +22,8 @@ const moodClasses: Record<PipiliMood, string> = {
   thinking: 'animate-pulse',
   curious: 'animate-bounce',
   content: 'scale-110',
+  nodding: 'animate-pipili-nod motion-reduce:animate-none',
+  surprised: 'animate-pipili-surprised motion-reduce:scale-110',
 };
 
 export const Pipili = React.forwardRef<HTMLDivElement, PipiliProps>(

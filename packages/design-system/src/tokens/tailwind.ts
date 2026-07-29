@@ -187,6 +187,13 @@ export const tailwindFontSizeExtensions: Record<string, [string, Record<string, 
       fontWeight: 'var(--oe-font-productive-body-weight)',
     },
   ],
+  caption: [
+    'var(--oe-font-productive-caption-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-caption-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-caption-weight)',
+    },
+  ],
   'label-caps': [
     'var(--oe-font-productive-label-size)',
     {
@@ -314,6 +321,9 @@ export const tailwindElevationExtensions: Record<string, string> = {
 export const tailwindAnimationExtensions: Record<string, string> = {
   'orbit-float': 'orbit-float 3s ease-in-out infinite',
   'pipili-wave': 'pipili-wave 2s ease-in-out infinite',
+  'pipili-nod': 'pipili-nod 1.5s ease-in-out infinite',
+  'pipili-surprised': 'pipili-surprised 0.6s ease-in-out',
+  'pipili-reward-enter': 'pipili-reward-enter 0.3s ease-out',
   'banner-slide-down': 'banner-slide-down 0.3s ease-out',
 };
 

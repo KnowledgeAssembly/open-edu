@@ -106,5 +106,3 @@ export { KnowledgeCardViewer } from './components/KnowledgeCardViewer.js';
 export type { KnowledgeCardViewerProps } from './components/KnowledgeCardViewer.js';
 export { ProgressRing } from './components/ProgressRing.js';
 export type { ProgressRingProps } from './components/ProgressRing.js';
-export { KnowledgeCardUnlockedToast } from './components/KnowledgeCardUnlockedToast.js';
-export type { KnowledgeCardUnlockedToastProps } from './components/KnowledgeCardUnlockedToast.js';

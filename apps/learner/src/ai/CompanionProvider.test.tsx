@@ -3,12 +3,24 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { CompanionProvider, useCompanion } from './CompanionProvider';
 
 function TestConsumer(): JSX.Element {
-  const { panelState, setPanelState, messages, isLoading, clearConversation } = useCompanion();
+  const {
+    panelState,
+    setPanelState,
+    messages,
+    isLoading,
+    clearConversation,
+    pendingReward,
+    rewardMessages,
+    addRewardMessage,
+    clearPendingReward,
+  } = useCompanion();
   return (
     <div>
       <div data-testid="panel-state">{panelState}</div>
       <div data-testid="msg-count">{messages.length}</div>
       <div data-testid="is-loading">{String(isLoading)}</div>
+      <div data-testid="pending-reward">{String(pendingReward)}</div>
+      <div data-testid="reward-count">{rewardMessages.length}</div>
       <button data-testid="toggle" onClick={() => setPanelState('floating')}>
         Toggle
       </button>
@@ -17,6 +29,38 @@ function TestConsumer(): JSX.Element {
       </button>
       <button data-testid="clear" onClick={clearConversation}>
         Clear
+      </button>
+      <button
+        data-testid="add-badge"
+        onClick={() =>
+          addRewardMessage({
+            id: 'b1',
+            type: 'badge',
+            badgeName: 'Test Badge',
+            timestamp: Date.now(),
+          })
+        }
+      >
+        Add Badge
+      </button>
+      <button
+        data-testid="add-card"
+        onClick={() =>
+          addRewardMessage({
+            id: 'c1',
+            type: 'card',
+            cardTitle: 'Test Card',
+            cardType: 'knowledge',
+            cardLevel: 1,
+            cardMaxLevel: 3,
+            timestamp: Date.now(),
+          })
+        }
+      >
+        Add Card
+      </button>
+      <button data-testid="clear-reward" onClick={clearPendingReward}>
+        Clear Reward
       </button>
     </div>
   );
@@ -62,5 +106,41 @@ describe('CompanionProvider', () => {
     );
     expect(captured).toBeDefined();
     expect(typeof (captured as Record<string, unknown>).getCurrentContext).toBe('function');
+  });
+
+  it('addRewardMessage adds a reward and sets pendingReward to true', () => {
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    expect(screen.getByTestId('pending-reward')).toHaveTextContent('false');
+    expect(screen.getByTestId('reward-count')).toHaveTextContent('0');
+    fireEvent.click(screen.getByTestId('add-badge'));
+    expect(screen.getByTestId('pending-reward')).toHaveTextContent('true');
+    expect(screen.getByTestId('reward-count')).toHaveTextContent('1');
+  });
+
+  it('clearPendingReward resets pendingReward to false', () => {
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    fireEvent.click(screen.getByTestId('add-badge'));
+    expect(screen.getByTestId('pending-reward')).toHaveTextContent('true');
+    fireEvent.click(screen.getByTestId('clear-reward'));
+    expect(screen.getByTestId('pending-reward')).toHaveTextContent('false');
+  });
+
+  it('addRewardMessage supports multiple reward types', () => {
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    fireEvent.click(screen.getByTestId('add-badge'));
+    fireEvent.click(screen.getByTestId('add-card'));
+    expect(screen.getByTestId('reward-count')).toHaveTextContent('2');
   });
 });
