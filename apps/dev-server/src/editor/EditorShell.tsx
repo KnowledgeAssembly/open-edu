@@ -621,14 +621,14 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
 
       {mode === 'edit' ? (
         <div className="flex flex-1 overflow-hidden">
-          <div className="border-outline-variant w-56 shrink-0 overflow-hidden border-r">
+          <div className="border-outline-variant flex w-56 shrink-0 flex-col overflow-hidden border-r">
             <FileTree
               files={files}
               selectedPath={selectedPath}
               onSelect={handleFileSelect}
               onDelete={handleFileDelete}
             />
-            <div className="border-outline-variant border-t px-3 py-2">
+            <div className="border-outline-variant shrink-0 border-t px-3 py-2">
               <Button
                 variant="ghost"
                 size="sm"

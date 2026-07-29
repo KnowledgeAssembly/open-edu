@@ -51,7 +51,7 @@ export function FileTree({ files, selectedPath, onSelect, onDelete }: FileTreePr
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   return (
-    <div className="border-outline-variant bg-surface-container-low h-full overflow-auto border-r text-sm">
+    <div className="border-outline-variant bg-surface-container-low flex-1 overflow-auto border-r text-sm">
       <div className="border-outline-variant text-on-surface-variant border-b px-3 py-2 text-xs font-semibold uppercase tracking-wider">
         Package Files
       </div>
