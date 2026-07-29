@@ -1,4 +1,4 @@
-import { useCallback, Children, isValidElement, cloneElement } from 'react';
+import { useCallback, useRef, useEffect, Children, isValidElement, cloneElement } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -127,17 +127,10 @@ export function SchemaForm({
           if (hasObjectItems) {
             return (
               <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-                <Textarea
-                  className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                  rows={10}
-                  value={JSON.stringify(value, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      handleFieldChange(key, JSON.parse(e.target.value));
-                    } catch {
-                      // Allow invalid JSON during editing
-                    }
-                  }}
+                <JsonTextarea
+                  value={value}
+                  onChange={(parsed) => handleFieldChange(key, parsed)}
+                  fieldKey={key}
                 />
               </FieldWrapper>
             );
@@ -184,18 +177,10 @@ export function SchemaForm({
         if (typeof value === 'object') {
           return (
             <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-              <Textarea
-                className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                rows={10}
-                value={JSON.stringify(value, null, 2)}
-                onChange={(e) => {
-                  try {
-                    const parsed = JSON.parse(e.target.value);
-                    handleFieldChange(key, parsed);
-                  } catch {
-                    // Allow invalid JSON during editing
-                  }
-                }}
+              <JsonTextarea
+                value={value}
+                onChange={(parsed) => handleFieldChange(key, parsed)}
+                fieldKey={key}
               />
             </FieldWrapper>
           );
@@ -204,6 +189,43 @@ export function SchemaForm({
         return null;
       })}
     </div>
+  );
+}
+
+function JsonTextarea({
+  value,
+  onChange,
+  fieldKey,
+}: {
+  value: object;
+  onChange: (parsed: object) => void;
+  fieldKey: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.value = JSON.stringify(value, null, 2);
+    }
+  }, [fieldKey]); // only re-sync when the field changes (e.g., user selects a different node)
+
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={JSON.stringify(value, null, 2)}
+      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
+      rows={10}
+      onBlur={(e) => {
+        const raw = e.target.value.trim();
+        if (!raw) return;
+        try {
+          const parsed = JSON.parse(raw);
+          onChange(parsed);
+        } catch {
+          // keep invalid JSON in the textarea, don't overwrite
+        }
+      }}
+    />
   );
 }
 

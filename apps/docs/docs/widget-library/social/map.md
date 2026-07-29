@@ -29,18 +29,36 @@ The Social Map widget shows an interactive map with regions, markers, and a lege
 
 ## Configuration fields
 
-| Field          | Type             | Required | Description                                                                                                       |
-| -------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `regions`      | array of objects | Yes      | Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string). |
-| `title`        | string           | No       | A title shown above the map.                                                                                      |
-| `labels`       | boolean          | No       | Show region name labels. Defaults to true.                                                                        |
-| `zoom`         | boolean          | No       | Allow zooming in and out. Defaults to false.                                                                      |
-| `legend`       | array of objects | No       | Legend entries. Each has color (string) and label (string).                                                       |
-| `markers`      | array of objects | No       | Point markers. Each has id (string), label (string), x (number), y (number), and optional icon (string).          |
-| `targetRegion` | string           | No       | ID of a region to highlight for quiz mode.                                                                        |
-| `interactive`  | boolean          | No       | When false, shows the map for exploration. Defaults to false.                                                     |
+| Field          | Type             | Required | Description                                                                                                                              |
+| -------------- | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `regions`      | array of objects | Yes      | Map regions. Each has id (string), name (string), and optional color, description, tooltip, image, and path (SVG path data string).      |
+| `title`        | string           | No       | A title shown above the map.                                                                                                             |
+| `labels`       | boolean          | No       | Show region name labels. Defaults to true.                                                                                               |
+| `zoom`         | boolean          | No       | Allow zooming in and out. Defaults to false.                                                                                             |
+| `legend`       | array of objects | No       | Legend entries. Each has color (string) and label (string).                                                                              |
+| `markers`      | array of objects | No       | Point markers. Each has id (string), label (string), x (number), y (number), and optional icon (string).                                 |
+| `targetRegion` | string           | No       | ID of a region to highlight for quiz mode.                                                                                               |
+| `interactive`  | boolean          | No       | When false, shows the map for exploration. Defaults to false.                                                                            |
+| `svgSrc`       | string           | No       | URL to an SVG file used as the map background. When set, regions use SVG paths from the file and regions' own `path` fields are ignored. |
+
+### Region fields
+
+| Field         | Type   | Required | Description                                          |
+| ------------- | ------ | -------- | ---------------------------------------------------- |
+| `id`          | string | Yes      | Unique identifier for the region.                    |
+| `name`        | string | Yes      | Display name shown as a label.                       |
+| `description` | string | No       | Shown in the info panel when the region is hovered.  |
+| `color`       | string | No       | Fill color (CSS variable or hex).                    |
+| `tooltip`     | string | No       | Tooltip text on hover.                               |
+| `image`       | string | No       | Image URL for the region _(reserved, not rendered)_. |
+| `path`        | string | No       | SVG path `d` attribute for the region shape.         |
+
+> **Note:** The `image` field is accepted by the schema but is not currently rendered in the UI.
+> When `svgSrc` is set, region paths come from the SVG file and the `path` field is ignored.
 
 ## Example
+
+### Basic map
 
 ```json
 {
@@ -85,6 +103,32 @@ The Social Map widget shows an interactive map with regions, markers, and a lege
     "zoom": true,
     "interactive": false,
     "targetRegion": "asia"
+  }
+}
+```
+
+### SVG-based map
+
+```json
+{
+  "type": "exercise",
+  "title": "Indian States",
+  "widget": "social.map",
+  "config": {
+    "svgSrc": "/maps/india-states.svg",
+    "regions": [
+      { "id": "mh", "name": "Maharashtra", "description": "Western India" },
+      { "id": "ka", "name": "Karnataka", "description": "Southern India" },
+      { "id": "tn", "name": "Tamil Nadu", "description": "Southeast India" }
+    ],
+    "labels": true,
+    "interactive": true,
+    "targetRegion": "ka",
+    "legend": [
+      { "color": "#e8def8", "label": "Western Region" },
+      { "color": "#d0bcff", "label": "Southern Region" },
+      { "color": "#b69df8", "label": "Southeastern Region" }
+    ]
   }
 }
 ```

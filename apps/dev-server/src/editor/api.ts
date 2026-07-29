@@ -57,6 +57,16 @@ export async function deleteFile(path: string): Promise<{ success: boolean }> {
   });
 }
 
+export async function renameFile(
+  oldPath: string,
+  newPath: string,
+): Promise<{ success: boolean; oldPath: string; newPath: string }> {
+  return await apiRequest<{ success: boolean; oldPath: string; newPath: string }>('/rename', {
+    method: 'POST',
+    body: JSON.stringify({ oldPath, newPath }),
+  });
+}
+
 export async function uploadAsset(
   file: File,
   path?: string,
@@ -95,3 +105,21 @@ export async function validatePackage(): Promise<{
     { method: 'POST' },
   );
 }
+
+export const CONFIG_TEMPLATES: Record<string, string> = {
+  'package.json': JSON.stringify(
+    {
+      name: 'my-package',
+      id: 'my-package',
+      title: 'My Package',
+      version: '0.1.0',
+      private: true,
+      entry: 'nodes/intro.md',
+    },
+    null,
+    2,
+  ),
+  'workflow.json': JSON.stringify({ nodes: [], edges: [] }, null, 2),
+  'rewards.json': JSON.stringify({ rewards: [], triggers: [] }, null, 2),
+  'cards.json': JSON.stringify({ cards: [] }, null, 2),
+};

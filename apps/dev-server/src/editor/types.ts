@@ -5,6 +5,13 @@ export interface FileEntry {
   extension: string;
 }
 
+export interface ContextMenuTarget {
+  x: number;
+  y: number;
+  file: FileEntry | null;
+  section?: string;
+}
+
 export interface FileContent {
   path: string;
   content: string;

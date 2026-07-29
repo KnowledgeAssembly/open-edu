@@ -158,7 +158,7 @@ Widget IDs use domain prefixes. Legacy `open-edu.*` IDs are deprecated and will 
 | `core.video-player`    | Video with questions        | `video` (URL), `poster`, `title`, `transcript?`, `chapters?`, `interactive`                                                                       |
 | `core.callout`         | Highlight key info          | `description`, `interactive` (rarely true)                                                                                                        |
 | `core.image-compare`   | Spot differences            | `description`, `imageA`, `imageB`, `differences: {id, x, y, radius}[]`, `interactive`                                                             |
-| `core.hotspot`         | Tap image regions           | `image` (URL), `hotspots: {id, label, x, y, radius, correct}[]`, `mode: "single"\|"multi"`, `description`, `hints[]`, `interactive`               |
+| `core.hotspot`         | Tap image regions           | `image` (URL), `hotspots: {id, label, x, y, radius, correct}[]`, `mode: "single"\|"multiple"`, `description`, `hints[]`, `interactive`            |
 | `core.timeline`        | Chronological events        | `events: {id, title, icon?, description?, image?}[]`, `layout: "vertical"\|"horizontal"`, `showDates`, `showImages`, `interactive`                |
 
 ### Math Domain (`math.*`)
@@ -188,9 +188,9 @@ Widget IDs use domain prefixes. Legacy `open-edu.*` IDs are deprecated and will 
 
 ### Social Domain (`social.*`)
 
-| Widget ID    | Purpose         | Key Config Fields                                                                                                                                                       |
-| ------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `social.map` | Interactive map | `regions: {id, name, description, color}[]`, `legend: {color, label}[]`, `markers: {id, label, x, y, icon}[]`, `title`, `labels`, `zoom`, `targetRegion`, `interactive` |
+| Widget ID    | Purpose         | Key Config Fields                                                                                                                                                                                                             |
+| ------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `social.map` | Interactive map | `regions: {id, name, description, color, tooltip?, image?, path?}[]`, `svgSrc?` (URL to SVG map), `legend: {color, label}[]`, `markers: {id, label, x, y, icon?}[]`, `title`, `labels`, `zoom`, `targetRegion`, `interactive` |
 
 ## Widget Config Examples (copy & adapt)
 
@@ -573,7 +573,40 @@ Widget IDs use domain prefixes. Legacy `open-edu.*` IDs are deprecated and will 
 }
 ```
 
-### social.map
+### social.map (SVG-backed)
+
+```json
+{
+  "widgetId": "social.map",
+  "widgetConfig": {
+    "svgSrc": "/maps/india-states.svg",
+    "regions": [
+      {
+        "id": "mh",
+        "name": "Maharashtra",
+        "description": "Western India",
+        "tooltip": "Home to Mumbai"
+      },
+      {
+        "id": "ka",
+        "name": "Karnataka",
+        "description": "Southern India"
+      }
+    ],
+    "legend": [
+      { "color": "#e8def8", "label": "Western Region" },
+      { "color": "#d0bcff", "label": "Southern Region" }
+    ],
+    "title": "Indian States",
+    "labels": true,
+    "zoom": true,
+    "targetRegion": "ka",
+    "interactive": true
+  }
+}
+```
+
+### social.map (fallback — SVG paths in `region.path`)
 
 ```json
 {
@@ -584,20 +617,18 @@ Widget IDs use domain prefixes. Legacy `open-edu.*` IDs are deprecated and will 
         "id": "na",
         "name": "North America",
         "description": "Northern continent",
-        "color": "var(--oe-color-primary)"
+        "color": "var(--oe-color-primary)",
+        "path": "M10 10 L100 10 L100 100 Z"
       },
       {
         "id": "sa",
         "name": "South America",
         "description": "Southern continent",
-        "color": "var(--oe-color-success)"
+        "color": "var(--oe-color-success)",
+        "path": "M120 120 L200 120 L200 200 Z"
       }
     ],
-    "legend": [
-      { "color": "var(--oe-color-primary)", "label": "North America" },
-      { "color": "var(--oe-color-success)", "label": "South America" }
-    ],
-    "markers": [{ "id": "nyc", "label": "New York", "x": 25, "y": 35, "icon": "🏙️" }],
+    "markers": [{ "id": "nyc", "label": "New York", "x": 25, "y": 35 }],
     "title": "Continents",
     "labels": true,
     "zoom": true,

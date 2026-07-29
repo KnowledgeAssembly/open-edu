@@ -164,14 +164,24 @@ describe('FileTree', () => {
     expect(selected).toHaveTextContent('Workflow (workflow.json)');
   });
 
-  it('shows delete buttons for all categories', () => {
-    const onSelect = vi.fn();
-    const onDelete = vi.fn();
+  it('calls onContextMenu on right-click', () => {
+    const onContextMenu = vi.fn();
     render(
-      <FileTree files={sampleFiles} selectedPath={null} onSelect={onSelect} onDelete={onDelete} />,
+      <FileTree
+        files={sampleFiles}
+        selectedPath={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        onContextMenu={onContextMenu}
+      />,
     );
-    const deleteButtons = screen.getAllByTitle('Delete file');
-    expect(deleteButtons.length).toBe(sampleFiles.length);
+    const item = screen.getByText('Manifest (package.json)');
+    fireEvent.contextMenu(item);
+    expect(onContextMenu).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file: expect.objectContaining({ path: 'package.json' }),
+      }),
+    );
   });
 
   it('shows empty state when no files', () => {
@@ -193,6 +203,107 @@ describe('FileTree', () => {
       fireEvent.keyDown(item, { key: 'Enter' });
       expect(onSelect).toHaveBeenCalledWith('package.json');
     }
+  });
+
+  it('renders New Node button in nodes section header', () => {
+    const onNewNode = vi.fn();
+    render(
+      <FileTree
+        files={sampleFiles}
+        selectedPath={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        onNewNode={onNewNode}
+      />,
+    );
+    const newBtn = screen.getByTitle('New Content Node');
+    expect(newBtn).toBeInTheDocument();
+    fireEvent.click(newBtn);
+    expect(onNewNode).toHaveBeenCalled();
+  });
+
+  it('renders Upload button in assets section header', () => {
+    const onUploadAsset = vi.fn();
+    render(
+      <FileTree
+        files={sampleFiles}
+        selectedPath={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        onUploadAsset={onUploadAsset}
+      />,
+    );
+    const uploadBtn = screen.getByTitle('Upload Asset');
+    expect(uploadBtn).toBeInTheDocument();
+    fireEvent.click(uploadBtn);
+    expect(onUploadAsset).toHaveBeenCalled();
+  });
+
+  it('shows rename input on double-click', () => {
+    const files: FileEntry[] = [
+      { path: 'nodes/test.md', label: 'test.md', category: 'nodes', extension: '.md' },
+    ];
+    render(<FileTree files={files} selectedPath={null} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    const label = screen.getByText('test.md');
+    fireEvent.doubleClick(label);
+    const input = document.querySelector('input');
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveValue('test.md');
+  });
+
+  it('renders create config rows for missing config files', () => {
+    const onCreateFile = vi.fn();
+    render(
+      <FileTree
+        files={[]}
+        selectedPath={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        onCreateFile={onCreateFile}
+      />,
+    );
+    expect(screen.getByText('Create package.json')).toBeInTheDocument();
+    expect(screen.getByText('Create workflow.json')).toBeInTheDocument();
+    expect(screen.getByText('Create rewards.json')).toBeInTheDocument();
+    expect(screen.getByText('Create cards.json')).toBeInTheDocument();
+  });
+
+  it('calls onRenameFile when rename is confirmed', () => {
+    const onRenameFile = vi.fn();
+    const files: FileEntry[] = [
+      { path: 'nodes/old.md', label: 'old.md', category: 'nodes', extension: '.md' },
+    ];
+    render(
+      <FileTree
+        files={files}
+        selectedPath={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        onRenameFile={onRenameFile}
+      />,
+    );
+    const label = screen.getByText('old.md');
+    fireEvent.doubleClick(label);
+    const input = document.querySelector('input');
+    expect(input).toBeInTheDocument();
+    fireEvent.change(input!, { target: { value: 'new.md' } });
+    fireEvent.keyDown(input!, { key: 'Enter' });
+    expect(onRenameFile).toHaveBeenCalledWith('nodes/old.md', 'nodes/new.md');
+  });
+
+  it('cancels rename on Escape key', () => {
+    const files: FileEntry[] = [
+      { path: 'nodes/test.md', label: 'test.md', category: 'nodes', extension: '.md' },
+    ];
+    const { container } = render(
+      <FileTree files={files} selectedPath={null} onSelect={vi.fn()} onDelete={vi.fn()} />,
+    );
+    const label = screen.getByText('test.md');
+    fireEvent.doubleClick(label);
+    expect(container.querySelector('input')).toBeInTheDocument();
+    const input = container.querySelector('input')!;
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(container.querySelector('input')).not.toBeInTheDocument();
   });
 });
 

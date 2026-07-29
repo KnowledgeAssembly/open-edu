@@ -9,7 +9,7 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, unlink, mkdir, rename } from 'node:fs/promises';
 import { join, extname, dirname, relative, sep } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadPackage, loadBundle } from '@open-edu/core';
@@ -584,6 +584,59 @@ function eduPackageLoader(): Plugin {
             srv.ws.send({ type: 'full-reload' });
 
             res.end(JSON.stringify({ success: true, path: filePath }));
+            return;
+          }
+
+          // POST /api/package/rename — rename a file
+          if (pathname === '/api/package/rename' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              oldPath: string;
+              newPath: string;
+            };
+            const oldPath = toForwardSlashes(body.oldPath);
+            const newPath = toForwardSlashes(body.newPath);
+
+            if (!oldPath || !newPath) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing oldPath or newPath' }));
+              return;
+            }
+
+            const absOldPath = join(currentDir, oldPath);
+            const absNewPath = join(currentDir, newPath);
+
+            if (!absOldPath.startsWith(currentDir) || !absNewPath.startsWith(currentDir)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: 'Forbidden' }));
+              return;
+            }
+
+            if (!existsSync(absOldPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'Source file not found' }));
+              return;
+            }
+
+            if (existsSync(absNewPath)) {
+              res.statusCode = 409;
+              res.end(JSON.stringify({ error: 'Target file already exists' }));
+              return;
+            }
+
+            const newDir = dirname(absNewPath);
+            if (!existsSync(newDir)) {
+              mkdirSync(newDir, { recursive: true });
+            }
+
+            await rename(absOldPath, absNewPath);
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true, oldPath, newPath }));
             return;
           }
 
