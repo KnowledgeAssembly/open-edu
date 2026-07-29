@@ -1,7 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, Children, isValidElement, cloneElement } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
+import type { ValidationError } from './WidgetValidator';
+
+interface FieldErrorMap {
+  [fieldName: string]: ValidationError[];
+}
 
 interface SchemaFormProps {
   data: Record<string, unknown>;
@@ -14,6 +19,8 @@ interface SchemaFormProps {
   placeholders?: Record<string, string>;
   /** Hide fields with these paths */
   hideFields?: string[];
+  /** Field-level validation errors */
+  fieldErrors?: FieldErrorMap;
 }
 
 export function SchemaForm({
@@ -23,6 +30,7 @@ export function SchemaForm({
   fieldLabels = {},
   placeholders = {},
   hideFields = [],
+  fieldErrors = {},
 }: SchemaFormProps) {
   const handleFieldChange = useCallback(
     (key: string, value: unknown) => {
@@ -39,10 +47,11 @@ export function SchemaForm({
         const value = data[key];
         const label = fieldLabels[key] ?? key;
         const placeholder = placeholders[key] ?? '';
+        const fieldErr = fieldErrors[key];
 
         if (value === null || value === undefined) {
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
@@ -57,7 +66,7 @@ export function SchemaForm({
           const isLongText = value.length > 80 || value.includes('\n');
           if (isLongText) {
             return (
-              <FieldWrapper key={key} label={label}>
+              <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
                 <Textarea
                   className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                   rows={4}
@@ -69,7 +78,7 @@ export function SchemaForm({
             );
           }
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
                 placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
@@ -82,7 +91,7 @@ export function SchemaForm({
 
         if (typeof value === 'number') {
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <Input
                 type="number"
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
@@ -96,7 +105,7 @@ export function SchemaForm({
 
         if (typeof value === 'boolean') {
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -117,10 +126,10 @@ export function SchemaForm({
           const hasObjectItems = value.some((item) => typeof item === 'object' && item !== null);
           if (hasObjectItems) {
             return (
-              <FieldWrapper key={key} label={label}>
+              <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
                 <Textarea
                   className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                  rows={4}
+                  rows={10}
                   value={JSON.stringify(value, null, 2)}
                   onChange={(e) => {
                     try {
@@ -134,7 +143,7 @@ export function SchemaForm({
             );
           }
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <div className="space-y-1">
                 {value.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-1">
@@ -174,10 +183,10 @@ export function SchemaForm({
 
         if (typeof value === 'object') {
           return (
-            <FieldWrapper key={key} label={label}>
+            <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <Textarea
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                rows={3}
+                rows={10}
                 value={JSON.stringify(value, null, 2)}
                 onChange={(e) => {
                   try {
@@ -198,11 +207,42 @@ export function SchemaForm({
   );
 }
 
-function FieldWrapper({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldWrapper({
+  label,
+  children,
+  error,
+  id,
+}: {
+  label: string;
+  children: React.ReactNode;
+  error?: ValidationError;
+  id?: string;
+}) {
+  const augmentedChildren = error
+    ? Children.map(children, (child) => {
+        if (isValidElement(child)) {
+          return cloneElement(
+            child as React.ReactElement<{ 'aria-invalid'?: string; 'aria-describedby'?: string }>,
+            {
+              'aria-invalid': 'true',
+              'aria-describedby': `${id}-error`,
+            },
+          );
+        }
+        return child;
+      })
+    : children;
   return (
     <div>
-      <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">{label}</label>
-      {children}
+      <label className="text-on-surface-variant mb-0.5 block text-xs font-medium" htmlFor={id}>
+        {label}
+      </label>
+      <div className={error ? 'relative' : ''}>{augmentedChildren}</div>
+      {error && (
+        <p id={`${id}-error`} className="text-error mt-0.5 text-[11px]" role="alert">
+          {error.message}
+        </p>
+      )}
     </div>
   );
 }

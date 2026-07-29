@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 import { LearningIntent } from '../metadata/learning-intents';
 import type { WidgetDefinition, WidgetDefinitionV2 } from '../types';
 
@@ -54,7 +55,7 @@ describe('WidgetDefinition', () => {
         cognitiveLoad: 'moderate',
         subjectTags: ['general'],
       },
-      schema: {},
+      schema: z.object({}),
       renderer: null,
       icon: 'puzzle',
       keywords: ['match', 'pairs'],

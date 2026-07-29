@@ -451,6 +451,7 @@ const FractionVisualWidget: WidgetDefinitionV2 = {
   description: 'Visualize and manipulate fractions with interactive models',
   domain: 'math',
   version: '1.0.0',
+  schema: fractionVisualSchema,
   render: FractionVisualComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Explore],
   capabilities: {

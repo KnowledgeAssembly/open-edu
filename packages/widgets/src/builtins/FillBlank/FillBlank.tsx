@@ -396,6 +396,7 @@ const FillBlankWidget: WidgetDefinitionV2 = {
   description: 'Complete sentences or equations by filling in missing parts',
   domain: 'core',
   version: '0.1.0',
+  schema: fillBlankSchema,
   render: FillBlankComponent,
   learningIntents: [LearningIntent.Assess, LearningIntent.Practice],
   capabilities: {
@@ -468,5 +469,5 @@ const FillBlankWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { FillBlankWidget as fillBlank };
+export { FillBlankWidget as fillBlank, fillBlankSchema };
 export default FillBlankWidget;

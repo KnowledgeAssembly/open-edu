@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 @layer base {
   :root {
     --background: var(--oe-color-surface);
@@ -32,6 +38,7 @@
 
   .open-edu-runtime {
     color: var(--foreground);
+    height: 100%;
   }
 
   .open-edu-runtime[data-reduced-motion='reduce'] *,

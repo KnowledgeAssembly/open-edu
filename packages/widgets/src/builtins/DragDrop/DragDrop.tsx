@@ -643,6 +643,7 @@ const DragDropWidget: WidgetDefinitionV2 = {
   description: 'Drag items to correct locations or categories',
   domain: 'core',
   version: '0.1.0',
+  schema: dragDropSchema,
   render: DragDropComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Compare],
   capabilities: {

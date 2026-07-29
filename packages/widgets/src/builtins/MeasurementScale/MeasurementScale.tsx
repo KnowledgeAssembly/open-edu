@@ -617,6 +617,7 @@ const MeasurementScaleWidget: WidgetDefinitionV2 = {
   description: 'Measure lengths, weights, and volumes using interactive scales',
   domain: 'math',
   version: '1.0.0',
+  schema: configSchema,
   render: MeasurementScaleComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
   capabilities: {

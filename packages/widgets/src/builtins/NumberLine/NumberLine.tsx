@@ -249,6 +249,7 @@ const NumberLineWidget: WidgetDefinitionV2 = {
   description: 'Visual number reasoning with interactive number line',
   domain: 'math',
   version: '1.0.0',
+  schema: numberLineSchema,
   render: NumberLineComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Practice, LearningIntent.Compare],
   capabilities: {
@@ -333,5 +334,5 @@ const NumberLineWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { NumberLineWidget as numberLine };
+export { NumberLineWidget as numberLine, numberLineSchema };
 export default NumberLineWidget;

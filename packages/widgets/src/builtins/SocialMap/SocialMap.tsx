@@ -335,6 +335,7 @@ const SocialMapWidget: WidgetDefinitionV2 = {
   description: 'Interactive educational maps for geography and history',
   domain: 'social',
   version: '1.0.0',
+  schema: socialMapSchema,
   render: SocialMapComponent,
   learningIntents: [LearningIntent.Explore, LearningIntent.Observe],
   capabilities: {
@@ -418,5 +419,5 @@ const SocialMapWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { SocialMapWidget as socialMap };
+export { SocialMapWidget as socialMap, socialMapSchema };
 export default SocialMapWidget;

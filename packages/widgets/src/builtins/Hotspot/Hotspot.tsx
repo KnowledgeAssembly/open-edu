@@ -483,6 +483,7 @@ function HotspotComponent(props: {
 const HotspotWidget: WidgetDefinitionV2 = {
   id: 'core.hotspot',
   version: '1.0.0',
+  schema: hotspotSchema,
   name: 'Hotspot',
   description: 'Click or tap on specific areas of an image to answer questions',
   domain: 'core',
@@ -562,5 +563,5 @@ const HotspotWidget: WidgetDefinitionV2 = {
   render: HotspotComponent,
 };
 
-export { HotspotWidget as hotspot };
+export { HotspotWidget as hotspot, hotspotSchema };
 export default HotspotWidget;

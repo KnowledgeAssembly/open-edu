@@ -161,6 +161,7 @@ export interface SemanticColorTokens {
   'primary-light': string;
   accent: string;
   success: string;
+  warning: string;
 }
 
 type DeepColorTokens = Record<string, string | Record<string, string>>;

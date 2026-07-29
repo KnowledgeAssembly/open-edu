@@ -387,6 +387,7 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
   description: 'Read and interpret charts, graphs, and data visualizations',
   domain: 'core',
   version: '0.1.0',
+  schema: configSchema,
   render: ChartReaderComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Apply],
   capabilities: {
@@ -470,5 +471,5 @@ const ChartReaderWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { ChartReaderWidget as chartReader };
+export { ChartReaderWidget as chartReader, configSchema as chartReaderConfigSchema };
 export default ChartReaderWidget;

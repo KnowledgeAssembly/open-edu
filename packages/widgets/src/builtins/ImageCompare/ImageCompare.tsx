@@ -636,6 +636,7 @@ function ImageCompareComponent(props: {
 const ImageCompareWidget: WidgetDefinitionV2 = {
   id: 'core.image-compare',
   version: '1.0.0',
+  schema: imageCompareSchema,
   name: 'Image Compare',
   description: 'Compare two images side by side to identify differences or similarities',
   domain: 'core',
@@ -706,5 +707,5 @@ const ImageCompareWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { ImageCompareWidget as imageCompare };
+export { ImageCompareWidget as imageCompare, imageCompareSchema };
 export default ImageCompareWidget;

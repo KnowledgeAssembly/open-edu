@@ -243,6 +243,7 @@ const RealWorldWidget: WidgetDefinitionV2 = {
   description: 'Apply learning to real-world scenarios and contexts',
   domain: 'core',
   version: '0.1.0',
+  schema: realWorldSchema,
   render: RealWorldComponent,
   learningIntents: [LearningIntent.Apply, LearningIntent.Explore],
   capabilities: {
@@ -316,5 +317,5 @@ const RealWorldWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { RealWorldWidget as realWorld };
+export { RealWorldWidget as realWorld, realWorldSchema };
 export default RealWorldWidget;

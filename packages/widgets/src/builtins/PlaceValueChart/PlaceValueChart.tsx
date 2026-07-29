@@ -417,6 +417,7 @@ const PlaceValueChartWidget: WidgetDefinitionV2 = {
   description: 'Understand place value with interactive chart manipulation',
   domain: 'math',
   version: '1.0.0',
+  schema: placeValueChartSchema,
   render: PlaceValueChartComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Practice],
   capabilities: {

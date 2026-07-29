@@ -243,6 +243,7 @@ const VideoPlayerWidget: WidgetDefinitionV2 = {
   description: 'Educational video playback with chapters, captions, and transcript',
   domain: 'core',
   version: '1.0.0',
+  schema: videoPlayerSchema,
   render: VideoPlayerComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Understand],
   capabilities: {
@@ -322,5 +323,5 @@ const VideoPlayerWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { VideoPlayerWidget as videoPlayer };
+export { VideoPlayerWidget as videoPlayer, videoPlayerSchema };
 export default VideoPlayerWidget;
