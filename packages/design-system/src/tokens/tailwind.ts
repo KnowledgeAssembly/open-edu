@@ -187,6 +187,13 @@ export const tailwindFontSizeExtensions: Record<string, [string, Record<string, 
       fontWeight: 'var(--oe-font-productive-body-weight)',
     },
   ],
+  caption: [
+    'var(--oe-font-productive-caption-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-caption-lineHeight)',
+      fontWeight: 'var(--oe-font-productive-caption-weight)',
+    },
+  ],
   'label-caps': [
     'var(--oe-font-productive-label-size)',
     {
