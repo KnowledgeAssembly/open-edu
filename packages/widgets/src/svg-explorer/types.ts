@@ -6,6 +6,7 @@ export const RegionConfigSchema = z.object({
   id: z.string().min(1).max(256),
   name: z.string().min(1).max(512),
   description: z.string().max(2048).optional(),
+  color: z.string().max(128).optional(),
   capital: z.string().max(256).optional(),
   aliases: z.array(z.string().min(1).max(128)).optional(),
   metadata: z.record(z.unknown()).optional(),

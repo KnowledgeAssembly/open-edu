@@ -342,6 +342,29 @@ describe('SvgRegion', () => {
     );
 
     const el = screen.getByRole('button');
-    expect(el).toHaveStyle({ fill: 'transparent' });
+    expect(el).toHaveStyle({ fill: 'var(--oe-color-primary-container, #e8def8)' });
+  });
+
+  it('uses defaultFill when provided', () => {
+    const regionWithFill = makeRegion('r-fill');
+    render(
+      <svg>
+        <SvgRegion
+          region={regionWithFill}
+          selected={false}
+          focused={false}
+          hovered={false}
+          interactive={true}
+          onSelect={() => {}}
+          onHover={() => {}}
+          onFocus={() => {}}
+          ariaLabel="Region 1"
+          defaultFill="#b19469"
+        />
+      </svg>,
+    );
+
+    const el = screen.getByRole('button');
+    expect(el).toHaveStyle({ fill: '#b19469' });
   });
 });

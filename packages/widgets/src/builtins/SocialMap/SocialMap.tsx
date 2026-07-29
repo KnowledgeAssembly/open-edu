@@ -135,6 +135,7 @@ function SocialMapComponent(props: {
             id: r.id,
             name: r.name,
             description: r.description,
+            color: r.color,
           }))}
           selection={config.interactive ? 'single' : 'none'}
           zoom={config.zoom ? { enabled: true } : undefined}
