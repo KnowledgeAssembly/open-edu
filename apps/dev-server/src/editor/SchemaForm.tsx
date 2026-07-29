@@ -129,7 +129,7 @@ export function SchemaForm({
               <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
                 <Textarea
                   className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                  rows={4}
+                  rows={10}
                   value={JSON.stringify(value, null, 2)}
                   onChange={(e) => {
                     try {
@@ -186,7 +186,7 @@ export function SchemaForm({
             <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
               <Textarea
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-                rows={3}
+                rows={10}
                 value={JSON.stringify(value, null, 2)}
                 onChange={(e) => {
                   try {
