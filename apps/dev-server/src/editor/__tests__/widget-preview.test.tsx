@@ -12,7 +12,7 @@ describe('useWidgetConfig', () => {
   it('returns isWidgetNode=true for exercise nodes', () => {
     const content = JSON.stringify({
       type: 'exercise',
-      widgetConfig: { prompt: 'Test' },
+      config: { prompt: 'Test' },
       widget: 'core.multiple-choice',
     });
     const { result } = renderHook(() => useWidgetConfig(content));
@@ -24,7 +24,7 @@ describe('useWidgetConfig', () => {
   it('returns isWidgetNode=true for custom nodes', () => {
     const content = JSON.stringify({
       type: 'custom',
-      widgetConfig: { items: [] },
+      config: { items: [] },
       widget: 'core.drag-drop',
     });
     const { result } = renderHook(() => useWidgetConfig(content));
@@ -53,10 +53,10 @@ describe('useWidgetConfig', () => {
     expect(result.current.widgetConfig).toEqual({});
   });
 
-  it('uses widgetConfig field from the node', () => {
+  it('uses config field from the node', () => {
     const content = JSON.stringify({
       type: 'exercise',
-      widgetConfig: { questions: [] },
+      config: { questions: [] },
       metadata: { widgetType: 'core.matching' },
     });
     const { result } = renderHook(() => useWidgetConfig(content));

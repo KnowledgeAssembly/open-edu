@@ -30,7 +30,10 @@ export function useWidgetConfig(content: string): WidgetConfigResult {
       (metadata && typeof metadata.widgetType === 'string' ? metadata.widgetType : null) ??
       'core.multiple-choice';
 
-    const widgetConfig = (parsed.widgetConfig as Record<string, unknown>) ?? {};
+    const widgetConfig =
+      (parsed.config as Record<string, unknown>) ??
+      (parsed.widgetConfig as Record<string, unknown>) ??
+      {};
 
     return { widgetType, widgetConfig, isWidgetNode: true };
   }, [content]);
