@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
+import { Pipili } from '../primitives/pipili.js';
 
 export interface TutorMessageProps {
   role: 'user' | 'ai';
@@ -18,12 +19,9 @@ export function TutorMessage({ role, children, className }: TutorMessageProps): 
       data-testid="tutor-message"
     >
       {role === 'ai' && (
-        <span
-          className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
-          aria-hidden="true"
-        >
-          {'🤖'}
-        </span>
+        <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
+          <Pipili size="xs" mood="idle" />
+        </div>
       )}
       <div
         className={cn(

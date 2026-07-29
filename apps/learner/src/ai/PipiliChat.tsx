@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Button, Textarea, cn } from '@open-edu/design-system';
+import { Button, Textarea, cn, Pipili } from '@open-edu/design-system';
 import { SuggestedQuestions, ThinkingIndicator } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import type { UIMessage } from 'ai';
 import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
 import { PipiliMessage } from './PipiliMessage.js';
+import type { RewardMessage } from './CompanionProvider.js';
+import { Award, BookOpen } from 'lucide-react';
 
 export interface PipiliChatProps {
   messages: UIMessage<PipiliResponseMetadata>[];
@@ -17,6 +19,7 @@ export interface PipiliChatProps {
   isStreaming?: boolean;
   suggestedQuestions?: string[];
   onSuggestedQuestionSelect?: (question: string) => void;
+  rewardMessages?: RewardMessage[];
   className?: string;
 }
 
@@ -39,6 +42,7 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
     isStreaming = false,
     suggestedQuestions,
     onSuggestedQuestionSelect,
+    rewardMessages,
     className,
   },
   ref,
@@ -80,6 +84,52 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
               isStreaming && message.role === 'assistant' && message.id === lastMessageId
             }
           />
+        ))}
+        {rewardMessages?.map((reward) => (
+          <div
+            key={reward.id}
+            className="flex items-start gap-2"
+            data-testid={`reward-message-${reward.type}`}
+          >
+            <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
+              <Pipili size="xs" mood="surprised" />
+            </div>
+            <div className="bg-surface-container border-outline-variant text-on-surface text-caption max-w-[80%] rounded-[12px_12px_12px_4px] border px-3.5 py-2.5 leading-relaxed">
+              {reward.type === 'badge' ? (
+                <div className="flex items-start gap-2">
+                  <Award className="text-tertiary mt-0.5 h-4 w-4 shrink-0" />
+                  <div>
+                    <p className="text-tertiary font-semibold">
+                      {t('learner.pipili.reward.badgeTitle')}
+                    </p>
+                    <p className="text-on-surface mt-0.5">
+                      {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2">
+                  <BookOpen className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <div>
+                    <p className="text-primary font-semibold">
+                      {reward.type === 'cardLevelUp'
+                        ? t('learner.pipili.reward.cardLevelUp')
+                        : t('learner.pipili.reward.cardTitle')}
+                    </p>
+                    <p className="text-on-surface mt-0.5">{reward.cardTitle}</p>
+                    <p className="text-on-surface-variant text-caption mt-0.5">
+                      {reward.type === 'cardLevelUp'
+                        ? t('learner.pipili.reward.cardLevelUpMessage', {
+                            title: reward.cardTitle,
+                            level: String(reward.cardLevel),
+                          })
+                        : t('learner.pipili.reward.cardMessage')}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
         {isStreaming && <ThinkingIndicator label={t('learner.pipili.thinking')} />}
         {showSuggestedQuestions && (

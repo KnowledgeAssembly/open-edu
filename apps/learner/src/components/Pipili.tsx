@@ -8,6 +8,7 @@ export interface PipiliProps {
   visible?: boolean;
   onClick?: () => void;
   hasUnread?: boolean;
+  pendingReward?: boolean;
   className?: string;
 }
 
@@ -16,6 +17,8 @@ const moodLabels: Record<PipiliMood, string> = {
   thinking: 'Pipili is thinking',
   curious: 'Pipili is curious',
   content: 'Pipili is happy',
+  nodding: 'Pipili has a reward for you',
+  surprised: 'Pipili is surprised',
 };
 
 export function Pipili({
@@ -23,6 +26,7 @@ export function Pipili({
   visible = true,
   onClick,
   hasUnread = false,
+  pendingReward = false,
   className,
 }: PipiliProps): JSX.Element | null {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -39,13 +43,17 @@ export function Pipili({
   if (!visible) return null;
 
   const effectiveMood =
-    prefersReducedMotion && (mood === 'thinking' || mood === 'curious') ? 'idle' : mood;
+    prefersReducedMotion && (mood === 'thinking' || mood === 'curious' || mood === 'nodding')
+      ? 'idle'
+      : pendingReward
+        ? 'nodding'
+        : mood;
 
   return (
     <div
       className={cn('fixed bottom-6 right-6 z-50', onClick && 'cursor-pointer', className)}
       role={onClick ? 'button' : 'status'}
-      aria-label={moodLabels[mood]}
+      aria-label={moodLabels[pendingReward ? 'nodding' : effectiveMood]}
       onClick={onClick}
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -60,10 +68,19 @@ export function Pipili({
           'flex h-14 w-14 items-center justify-center rounded-full',
           'bg-surface-container shadow-md',
           'transition-all duration-300',
+          pendingReward && 'ring-primary/50 ring-2 ring-offset-2',
         )}
       >
-        <PipiliPrimitive size="lg" mood={effectiveMood} />
-        {hasUnread && (
+        <PipiliPrimitive size="lg" mood={effectiveMood} animated={pendingReward} />
+        {pendingReward && (
+          <span
+            className="bg-primary text-label animate-pipili-surprised absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full font-bold text-white motion-reduce:animate-none"
+            aria-label="New reward available"
+          >
+            !
+          </span>
+        )}
+        {!pendingReward && hasUnread && (
           <span
             className="bg-primary text-label absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full font-bold text-white"
             aria-label="New messages available"

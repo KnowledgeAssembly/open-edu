@@ -79,4 +79,27 @@ describe('Pipili (learner wrapper)', () => {
     render(<Pipili visible hasUnread={false} />);
     expect(screen.queryByText('!')).not.toBeInTheDocument();
   });
+
+  it('shows pending reward indicator with glow ring when pendingReward is true', () => {
+    render(<Pipili visible pendingReward />);
+    const rewardIndicator = screen.getByText('!');
+    expect(rewardIndicator).toBeInTheDocument();
+    expect(rewardIndicator).toHaveAttribute('aria-label', 'New reward available');
+  });
+
+  it('shows nodding mood label when pendingReward is true', () => {
+    render(<Pipili visible pendingReward />);
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Pipili has a reward for you');
+  });
+
+  it('shows Pipili primitive with nodding mood when pendingReward is true', () => {
+    render(<Pipili visible pendingReward />);
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Pipili — nodding');
+  });
+
+  it('replaces unread indicator with reward indicator when pendingReward is true', () => {
+    render(<Pipili visible hasUnread pendingReward />);
+    const indicators = screen.getAllByText('!');
+    expect(indicators).toHaveLength(1);
+  });
 });

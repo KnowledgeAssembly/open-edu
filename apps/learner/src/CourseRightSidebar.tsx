@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button, Tabs, TabsList, TabsTrigger, TabsContent } from '@open-edu/design-system';
 import { FileText, Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
@@ -15,7 +15,7 @@ export interface CourseRightSidebarProps {
 function SidebarContent({ onNavigate, width = 320 }: CourseRightSidebarProps): JSX.Element | null {
   const { t } = useTranslation();
   const runtime = useRuntimeOptional();
-  const { panelState, setPanelState } = useCompanion();
+  const { panelState, setPanelState, rewardMessages, clearPendingReward } = useCompanion();
   const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
   const [activeTab, setActiveTab] = useState<'pipili' | 'notepad'>('pipili');
 
@@ -24,6 +24,12 @@ function SidebarContent({ onNavigate, width = 320 }: CourseRightSidebarProps): J
 
   const isOpen = panelState !== 'closed';
   const isStreaming = status === 'submitted' || status === 'streaming';
+
+  useEffect(() => {
+    if (isOpen) {
+      clearPendingReward();
+    }
+  }, [isOpen, clearPendingReward]);
 
   const suggestedQuestions = [
     t('learner.right_sidebar.suggest_explain'),
@@ -115,6 +121,7 @@ function SidebarContent({ onNavigate, width = 320 }: CourseRightSidebarProps): J
             isStreaming={isStreaming}
             suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
             onSuggestedQuestionSelect={messages.length === 0 ? handleSuggestedQuestion : undefined}
+            rewardMessages={rewardMessages}
             placeholder={t('learner.right_sidebar.chat_placeholder')}
             className="min-h-0 flex-1 border-none"
           />

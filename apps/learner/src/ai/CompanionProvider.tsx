@@ -28,6 +28,23 @@ import { AIProviderImpl } from './AIProviderImpl';
 
 export type PanelState = 'closed' | 'floating' | 'expanded' | 'pinned';
 
+export type RewardMessage =
+  | {
+      id: string;
+      type: 'badge';
+      badgeName: string;
+      timestamp: number;
+    }
+  | {
+      id: string;
+      type: 'card' | 'cardLevelUp';
+      cardTitle: string;
+      cardType: string;
+      cardLevel: number;
+      cardMaxLevel: number;
+      timestamp: number;
+    };
+
 export interface CompanionContextValue {
   panelState: PanelState;
   setPanelState: (state: PanelState) => void;
@@ -43,6 +60,10 @@ export interface CompanionContextValue {
     text: string;
     metadata?: PipiliResponseMetadata;
   }) => void;
+  pendingReward: boolean;
+  rewardMessages: RewardMessage[];
+  addRewardMessage: (reward: RewardMessage) => void;
+  clearPendingReward: () => void;
 }
 
 export interface CompanionProviderProps {
@@ -56,6 +77,8 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [context, setContext] = useState<LearningContext>({});
+  const [pendingReward, setPendingReward] = useState(false);
+  const [rewardMessages, setRewardMessages] = useState<RewardMessage[]>([]);
 
   const servicesRef = useRef<{
     conversationManager: ConversationManager;
@@ -179,6 +202,15 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
     setMessages([]);
   }, []);
 
+  const addRewardMessage = useCallback((reward: RewardMessage) => {
+    setRewardMessages((prev) => [...prev, reward]);
+    setPendingReward(true);
+  }, []);
+
+  const clearPendingReward = useCallback(() => {
+    setPendingReward(false);
+  }, []);
+
   const persistAssistantMessage = useCallback(
     (msg: { id: string; text: string; metadata?: PipiliResponseMetadata }) => {
       const services = servicesRef.current;
@@ -213,6 +245,10 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
       clearConversation,
       contextManager: contextManagerRef.current,
       persistAssistantMessage,
+      pendingReward,
+      rewardMessages,
+      addRewardMessage,
+      clearPendingReward,
     }),
     [
       panelState,
@@ -223,6 +259,10 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
       search,
       clearConversation,
       persistAssistantMessage,
+      pendingReward,
+      rewardMessages,
+      addRewardMessage,
+      clearPendingReward,
     ],
   );
 

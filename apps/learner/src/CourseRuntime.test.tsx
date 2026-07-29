@@ -5,6 +5,18 @@ import type { LoadedPackage } from '@open-edu/core';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
+const mockAddRewardMessage = vi.fn();
+const mockClearPendingReward = vi.fn();
+
+vi.mock('./ai', () => ({
+  useCompanion: () => ({
+    pendingReward: false,
+    rewardMessages: [],
+    addRewardMessage: mockAddRewardMessage,
+    clearPendingReward: mockClearPendingReward,
+  }),
+}));
+
 function renderWithProvider(ui: React.ReactElement) {
   return render(
     <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>

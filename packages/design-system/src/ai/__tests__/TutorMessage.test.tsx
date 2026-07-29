@@ -9,9 +9,9 @@ describe('TutorMessage', () => {
     expect(screen.getByText('Hello world')).toBeInTheDocument();
   });
 
-  it('AI messages have bot icon', () => {
+  it('AI messages have Pipili avatar', () => {
     render(<TutorMessage role="ai">AI message</TutorMessage>);
-    expect(screen.getByText('🤖')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Pipili — idle');
   });
 
   it('user messages are right-aligned', () => {

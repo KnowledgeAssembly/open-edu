@@ -1,7 +1,7 @@
 # Rewards & Pipili Integration Design
 
 **Date:** 2026-07-29
-**Status:** Draft
+**Status:** Implemented
 
 ## Summary
 

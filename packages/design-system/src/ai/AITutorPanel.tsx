@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '../lib/utils.js';
 import { Textarea } from '../primitives/textarea.js';
+import { Pipili } from '../primitives/pipili.js';
 
 export interface AITutorPanelProps {
   visible?: boolean;
@@ -128,12 +129,9 @@ export function AITutorPanel({ visible = true }: AITutorPanelProps): JSX.Element
               {messages.map((msg, idx) =>
                 msg.role === 'ai' ? (
                   <div key={idx} className="flex items-start gap-2">
-                    <span
-                      className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
-                      aria-hidden="true"
-                    >
-                      {'🤖'}
-                    </span>
+                    <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
+                      <Pipili size="xs" mood="idle" />
+                    </div>
                     <div className="bg-surface-container text-on-surface max-w-[80%] rounded-[12px_12px_12px_4px] px-3.5 py-2.5 text-xs leading-relaxed">
                       {msg.text}
                     </div>
