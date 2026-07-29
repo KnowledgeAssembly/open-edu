@@ -84,6 +84,7 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   vars['--oe-color-fg'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
   vars['--oe-color-border'] = theme.colors['outline'] ?? '';
   vars['--oe-color-success'] = theme.colors['secondary'] ?? '#16a34a';
+  vars['--oe-color-warning'] = theme.colors['tertiary'] ?? '#b8862d';
   vars['--oe-font-sans'] = theme.typography.productive.body.fontFamily;
   vars['--oe-font-ui-family'] = theme.typography.productive.body.fontFamily;
   vars['--oe-font-content-family'] = theme.typography.expressive.body.fontFamily;

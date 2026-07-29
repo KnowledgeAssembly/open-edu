@@ -66,6 +66,7 @@ export const tailwindColorExtensions: Record<string, string> = {
   // Misc
   'primary-light': 'var(--oe-color-primary-light)',
   success: 'var(--oe-color-success)',
+  warning: 'var(--oe-color-warning)',
 
   // Shadcn/ui semantic aliases — map to design-system tokens
   foreground: 'var(--oe-color-on-surface)',

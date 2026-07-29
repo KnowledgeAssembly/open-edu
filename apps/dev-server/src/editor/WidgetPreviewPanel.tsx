@@ -118,7 +118,10 @@ export function WidgetPreviewPanel({
 
       {/* Validation banner */}
       {validationErrors.length > 0 && (
-        <div className="border-error-container bg-error-container shrink-0 border-b px-3 py-2">
+        <div
+          className="border-error-container bg-error-container shrink-0 border-b px-3 py-2"
+          role="alert"
+        >
           {validationErrors.slice(0, 3).map((err, i) => (
             <p key={i} className="text-error text-[11px] leading-relaxed">
               <span className="font-medium">{err.path}</span>: {err.message}
