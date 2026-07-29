@@ -5,6 +5,7 @@ import {
   writeFile,
   createFile,
   deleteFile,
+  renameFile,
   uploadAsset,
   getPackageDir,
   validatePackage,
@@ -108,6 +109,21 @@ describe('api client', () => {
       }),
     );
     expect(result).toEqual({ success: true });
+  });
+
+  it('renameFile sends POST to /api/package/rename', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ success: true, oldPath: 'nodes/old.json', newPath: 'nodes/new.json' }),
+    );
+    const result = await renameFile('nodes/old.json', 'nodes/new.json');
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/package/rename',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ oldPath: 'nodes/old.json', newPath: 'nodes/new.json' }),
+      }),
+    );
+    expect(result).toEqual({ success: true, oldPath: 'nodes/old.json', newPath: 'nodes/new.json' });
   });
 
   it('getPackageDir fetches /api/package/dir', async () => {

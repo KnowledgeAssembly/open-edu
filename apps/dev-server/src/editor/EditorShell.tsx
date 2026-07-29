@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as api from './api';
-import type { FileEntry, EditorFile, EditorMode, ViewMode } from './types';
+import { renameFile as apiRenameFile, CONFIG_TEMPLATES } from './api';
+import type { FileEntry, EditorFile, EditorMode, ViewMode, ContextMenuTarget } from './types';
 import type { ValidationError } from './WidgetValidator';
 import { FileTree } from './FileTree';
 import { ManifestEditor } from './ManifestEditor';
@@ -22,9 +23,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Toaster } from '@open-edu/design-system';
+import {
+  Toaster,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@open-edu/design-system';
 import { toast } from 'sonner';
-import { Plus, Eye, FileText, EyeOff } from 'lucide-react';
+import { Plus, Eye, FileText, EyeOff, Pencil, Trash2, Upload } from 'lucide-react';
 import { SplitPaneLayout } from './SplitPaneLayout';
 import { WidgetPreviewPanel } from './WidgetPreviewPanel';
 import { useWidgetConfig } from './hooks/useWidgetConfig';
@@ -62,6 +71,9 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const [newNodeType, setNewNodeType] = useState<string>('lesson');
   const [pendingModeChange, setPendingModeChange] = useState<EditorMode | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [contextMenu, setContextMenu] = useState<ContextMenuTarget | null>(null);
+  const [renameTargetFromMenu, setRenameTargetFromMenu] = useState<FileEntry | null>(null);
+  const [deleteTargetFromMenu, setDeleteTargetFromMenu] = useState<FileEntry | null>(null);
 
   const currentFile = selectedPath ? (openFiles.get(selectedPath) ?? null) : null;
 
@@ -303,6 +315,48 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     });
     toast('Reverted to last saved state');
   }, [selectedPath, currentFile]);
+
+  const handleCreateConfigFile = useCallback(
+    async (section: string) => {
+      const fileName = section === 'manifest' ? 'package.json' : `${section}.json`;
+      const template = CONFIG_TEMPLATES[fileName];
+      if (!template) return;
+      try {
+        await api.createFile(fileName, template, true);
+        refreshFiles();
+        setSelectedPath(fileName);
+        toast.success(`Created ${fileName}`);
+      } catch (err) {
+        toast.error('Failed to create config file: ' + (err as Error).message);
+      }
+    },
+    [refreshFiles],
+  );
+
+  const handleRenameFile = useCallback(
+    async (oldPath: string, newPath: string) => {
+      try {
+        await apiRenameFile(oldPath, newPath);
+        refreshFiles();
+        if (selectedPath === oldPath) {
+          setSelectedPath(newPath);
+        }
+        setOpenFiles((prev) => {
+          const next = new Map(prev);
+          const file = next.get(oldPath);
+          if (file) {
+            next.delete(oldPath);
+            next.set(newPath, { ...file, path: newPath });
+          }
+          return next;
+        });
+        toast.success(`Renamed to ${newPath}`);
+      } catch (err) {
+        toast.error('Rename failed: ' + (err as Error).message);
+      }
+    },
+    [selectedPath, refreshFiles],
+  );
 
   const handleCreateNode = useCallback(async () => {
     if (!newNodeName.trim()) return;
@@ -627,18 +681,16 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
               selectedPath={selectedPath}
               onSelect={handleFileSelect}
               onDelete={handleFileDelete}
+              onContextMenu={(target: ContextMenuTarget) => setContextMenu(target)}
+              onNewNode={() => setShowNewNode(true)}
+              onUploadAsset={() => document.getElementById('asset-upload-input')?.click()}
+              onCreateFile={handleCreateConfigFile}
+              onRenameFile={handleRenameFile}
+              externalRenameTarget={renameTargetFromMenu}
+              onExternalRenameHandled={() => setRenameTargetFromMenu(null)}
+              externalDeleteTarget={deleteTargetFromMenu}
+              onExternalDeleteHandled={() => setDeleteTargetFromMenu(null)}
             />
-            <div className="border-outline-variant shrink-0 border-t px-3 py-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-primary hover:bg-primary-container w-full justify-start gap-1 text-xs font-medium"
-                onClick={() => setShowNewNode(true)}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                New Node
-              </Button>
-            </div>
           </div>
 
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -841,6 +893,122 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Context menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setContextMenu(null)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setContextMenu(null);
+            }}
+          />
+          <div style={{ position: 'fixed', left: contextMenu.x, top: contextMenu.y, zIndex: 50 }}>
+            <DropdownMenu
+              open={true}
+              onOpenChange={(open) => {
+                if (!open) setContextMenu(null);
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <span />
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent
+                  align="start"
+                  side="bottom"
+                  sideOffset={0}
+                  className="min-w-[160px]"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                >
+                  {contextMenu.file && (
+                    <>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setRenameTargetFromMenu(contextMenu.file);
+                          setContextMenu(null);
+                        }}
+                      >
+                        <Pencil className="mr-2 h-3.5 w-3.5" />
+                        Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-error focus:bg-error-container focus:text-error"
+                        onSelect={() => {
+                          setDeleteTargetFromMenu(contextMenu.file);
+                          setContextMenu(null);
+                        }}
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {contextMenu.section === 'nodes' && !contextMenu.file && (
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setContextMenu(null);
+                        setShowNewNode(true);
+                      }}
+                    >
+                      <Plus className="mr-2 h-3.5 w-3.5" />
+                      New Content Node
+                    </DropdownMenuItem>
+                  )}
+                  {contextMenu.section === 'assets' && !contextMenu.file && (
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setContextMenu(null);
+                        document.getElementById('asset-upload-input')?.click();
+                      }}
+                    >
+                      <Upload className="mr-2 h-3.5 w-3.5" />
+                      Upload Asset
+                    </DropdownMenuItem>
+                  )}
+                  {contextMenu.section &&
+                    ['manifest', 'workflow', 'rewards', 'cards'].includes(contextMenu.section) &&
+                    !contextMenu.file && (
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setContextMenu(null);
+                          handleCreateConfigFile(contextMenu.section!);
+                        }}
+                      >
+                        <Plus className="mr-2 h-3.5 w-3.5" />
+                        Create{' '}
+                        {contextMenu.section === 'manifest'
+                          ? 'package.json'
+                          : `${contextMenu.section}.json`}
+                      </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
+            </DropdownMenu>
+          </div>
+        </>
+      )}
+
+      <input
+        id="asset-upload-input"
+        type="file"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          try {
+            await api.uploadAsset(file);
+            refreshFiles();
+            toast.success(`Uploaded ${file.name}`);
+          } catch (err) {
+            toast.error('Upload failed: ' + (err as Error).message);
+          }
+          e.target.value = '';
+        }}
+      />
 
       <Toaster position="bottom-right" />
     </div>
