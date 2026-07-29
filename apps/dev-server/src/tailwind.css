@@ -2488,6 +2488,12 @@ video {
   font-weight: var(--oe-font-productive-body-weight);
 }
 
+.text-caption {
+  font-size: var(--oe-font-productive-caption-size);
+  line-height: var(--oe-font-productive-caption-lineHeight);
+  font-weight: var(--oe-font-productive-caption-weight);
+}
+
 .text-h1 {
   font-size: var(--oe-font-productive-heading-size);
   line-height: var(--oe-font-productive-heading-lineHeight);

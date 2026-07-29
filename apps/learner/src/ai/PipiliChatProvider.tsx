@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
@@ -18,6 +26,7 @@ export interface PipiliChatState {
   clearMessages: () => void;
   conversationId: string;
   requestHint: (level: 1 | 2 | 3 | 4) => Promise<void>;
+  getMessageTimestamp: (id: string) => number | undefined;
 }
 
 const PipiliChatContext = createContext<PipiliChatState | null>(null);
@@ -97,6 +106,25 @@ export function PipiliChatProvider({
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
+  const messageTimestampsRef = useRef<Map<string, number>>(new Map());
+  const prevMessageCountRef = useRef(0);
+
+  useEffect(() => {
+    if (messages.length > prevMessageCountRef.current) {
+      for (let i = prevMessageCountRef.current; i < messages.length; i++) {
+        const msg = messages[i]!;
+        if (!messageTimestampsRef.current.has(msg.id)) {
+          messageTimestampsRef.current.set(msg.id, Date.now());
+        }
+      }
+    }
+    prevMessageCountRef.current = messages.length;
+  }, [messages]);
+
+  const getMessageTimestamp = useCallback((id: string): number | undefined => {
+    return messageTimestampsRef.current.get(id);
+  }, []);
+
   const sendMessage = useCallback(
     async (text: string) => {
       // Single send path. v7 useChat.sendMessage takes a message object.
@@ -134,6 +162,7 @@ export function PipiliChatProvider({
     clearMessages,
     conversationId,
     requestHint,
+    getMessageTimestamp,
   };
 
   return <PipiliChatContext.Provider value={value}>{children}</PipiliChatContext.Provider>;

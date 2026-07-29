@@ -773,18 +773,15 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
   const { panelState, setPanelState, messages, pendingReward } = useCompanion();
   const isOpen = panelState !== 'closed';
 
-  if (view.view === 'course' && !pendingReward) {
-    return null;
-  }
-
-  const mood = view.view === 'home' ? 'idle' : view.view === 'catalog' ? 'curious' : 'content';
+  const isCourseView = view.view === 'course';
+  const showRewardState = isCourseView && pendingReward;
 
   return (
     <Pipili
-      mood={mood}
+      mood="idle"
       visible={!isOpen}
       hasUnread={messages.length > 0 && !isOpen}
-      pendingReward={pendingReward}
+      pendingReward={showRewardState}
       onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
     />
   );
