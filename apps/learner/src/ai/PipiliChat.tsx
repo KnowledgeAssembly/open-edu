@@ -75,20 +75,21 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
     onSuggestedQuestionSelect &&
     (messages.length === 0 || !isStreaming);
 
+  const rewardPositionsRef = React.useRef<Map<string, number>>(new Map());
+  const nextRewardPosRef = React.useRef(messages.length);
+
   const sortedItems = React.useMemo(() => {
-    const items: Array<{
-      kind: 'chat';
-      data: UIMessage<PipiliResponseMetadata>;
-      timestamp: number;
-    } | {
-      kind: 'reward';
-      data: RewardMessage;
-      timestamp: number;
-    }> = [
-      ...messages.map((m, i) => ({ kind: 'chat' as const, data: m, timestamp: i })),
-      ...(rewardMessages ?? []).map((r) => ({ kind: 'reward' as const, data: r, timestamp: r.timestamp })),
-    ];
-    items.sort((a, b) => a.timestamp - b.timestamp);
+    const chatItems = messages.map((m, i) => ({ kind: 'chat' as const, data: m, pos: i }));
+    const rewardItems = (rewardMessages ?? []).map((r) => {
+      let pos = rewardPositionsRef.current.get(r.id);
+      if (pos === undefined) {
+        pos = nextRewardPosRef.current++;
+        rewardPositionsRef.current.set(r.id, pos);
+      }
+      return { kind: 'reward' as const, data: r, pos };
+    });
+    const items = [...chatItems, ...rewardItems];
+    items.sort((a, b) => a.pos - b.pos);
     return items;
   }, [messages, rewardMessages]);
 
