@@ -89,7 +89,11 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('completes when acknowledge button is clicked', () => {
-    const { complete, emitInteraction } = renderWidget({ maxPlaces: 'lakh', digits: [5], interactive: false });
+    const { complete, emitInteraction } = renderWidget({
+      maxPlaces: 'lakh',
+      digits: [5],
+      interactive: false,
+    });
     expect(complete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('observe-acknowledge'));
     expect(complete).toHaveBeenCalledTimes(1);
@@ -106,7 +110,11 @@ describe('PlaceValueChart observe mode', () => {
   });
 
   it('renders description', () => {
-    renderWidget({ maxPlaces: 'lakh', description: 'Place the digits correctly', interactive: false });
+    renderWidget({
+      maxPlaces: 'lakh',
+      description: 'Place the digits correctly',
+      interactive: false,
+    });
     expect(screen.getByText('Place the digits correctly')).toBeTruthy();
   });
 

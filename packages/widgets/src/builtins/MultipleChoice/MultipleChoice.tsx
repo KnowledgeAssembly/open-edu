@@ -348,7 +348,7 @@ function MultipleChoiceComponent(props: {
                 <div
                   key={idx}
                   data-testid={`result-question-${idx}`}
-                  className={`rounded-lg border p-sm ${isCorrect ? 'border-success/30 bg-success-container/20' : 'border-error/30 bg-error-container/20'}`}
+                  className={`p-sm rounded-lg border ${isCorrect ? 'border-success/30 bg-success-container/20' : 'border-error/30 bg-error-container/20'}`}
                 >
                   <p className="text-on-surface font-medium">{q.question}</p>
                   <p className="text-on-surface-variant mt-xs text-sm">

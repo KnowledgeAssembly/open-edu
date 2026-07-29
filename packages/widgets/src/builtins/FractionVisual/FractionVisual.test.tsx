@@ -38,21 +38,37 @@ describe('FractionVisual schema', () => {
 
 describe('FractionVisual observe mode', () => {
   it('renders a bar fraction with shaded parts', () => {
-    const { container } = renderWidget({ numerator: 3, denominator: 5, mode: 'bar', interactive: false });
+    const { container } = renderWidget({
+      numerator: 3,
+      denominator: 5,
+      mode: 'bar',
+      interactive: false,
+    });
     expect(screen.getByTestId('fraction-bar')).toBeTruthy();
     expect(screen.getAllByTestId('bar-segment')).toHaveLength(5);
     expect(getShaded(container, 'bar-segment')).toHaveLength(3);
   });
 
   it('renders a circle fraction with shaded parts', () => {
-    const { container } = renderWidget({ numerator: 1, denominator: 4, mode: 'circle', interactive: false });
+    const { container } = renderWidget({
+      numerator: 1,
+      denominator: 4,
+      mode: 'circle',
+      interactive: false,
+    });
     expect(screen.getByTestId('fraction-circle')).toBeTruthy();
     expect(getShaded(container, 'circle-segment')).toHaveLength(1);
     expect(getUnshaded(container, 'circle-segment')).toHaveLength(3);
   });
 
   it('shows fraction label', () => {
-    renderWidget({ numerator: 3, denominator: 5, mode: 'bar', label: 'My Fraction', interactive: false });
+    renderWidget({
+      numerator: 3,
+      denominator: 5,
+      mode: 'bar',
+      label: 'My Fraction',
+      interactive: false,
+    });
     expect(screen.getByText('My Fraction')).toBeTruthy();
   });
 

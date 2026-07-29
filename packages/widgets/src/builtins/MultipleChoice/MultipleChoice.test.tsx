@@ -281,7 +281,12 @@ describe('MultipleChoice multi-question interactive mode', () => {
   it('shows explanation in per-question result', () => {
     const configWithExplanation = {
       questions: [
-        { question: 'What is 2 + 2?', options: ['3', '4', '5'], correctIndex: 1, explanation: 'Two plus two equals four.' },
+        {
+          question: 'What is 2 + 2?',
+          options: ['3', '4', '5'],
+          correctIndex: 1,
+          explanation: 'Two plus two equals four.',
+        },
         { question: 'What is 3 * 3?', options: ['6', '9', '12'], correctIndex: 1 },
       ],
       interactive: true,

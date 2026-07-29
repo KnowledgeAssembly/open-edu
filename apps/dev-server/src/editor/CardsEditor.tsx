@@ -1,7 +1,13 @@
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 interface CardData {
   id: string;
@@ -210,7 +216,10 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           <label className="text-on-surface-variant mb-0.5 block text-[10px] font-medium">
             Difficulty
           </label>
-          <Select value={card.difficulty ?? 'medium'} onValueChange={(value) => onChange({ ...card, difficulty: value })}>
+          <Select
+            value={card.difficulty ?? 'medium'}
+            onValueChange={(value) => onChange({ ...card, difficulty: value })}
+          >
             <SelectTrigger className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1">
               <SelectValue />
             </SelectTrigger>

@@ -361,7 +361,9 @@ function ProcessDiagramComponent(props: {
 
       {config.stepByStep && revealedNodes.length >= config.nodes.length && !finished && (
         <div className="mt-md text-center">
-          <p className="text-on-surface font-semibold" data-testid="diagram-complete">All steps revealed!</p>
+          <p className="text-on-surface font-semibold" data-testid="diagram-complete">
+            All steps revealed!
+          </p>
           <Button
             variant="default"
             onClick={handleFinish}

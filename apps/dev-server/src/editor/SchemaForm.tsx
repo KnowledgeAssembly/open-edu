@@ -138,15 +138,15 @@ export function SchemaForm({
               <div className="space-y-1">
                 {value.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-1">
-                      <Input
-                        className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
-                        value={typeof item === 'string' ? item : String(item)}
-                        onChange={(e) => {
-                          const newArray = [...value];
-                          newArray[idx] = e.target.value;
-                          handleFieldChange(key, newArray);
-                        }}
-                      />
+                    <Input
+                      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
+                      value={typeof item === 'string' ? item : String(item)}
+                      onChange={(e) => {
+                        const newArray = [...value];
+                        newArray[idx] = e.target.value;
+                        handleFieldChange(key, newArray);
+                      }}
+                    />
                     <button
                       type="button"
                       className="text-on-surface-variant hover:bg-error-container hover:text-error shrink-0 rounded p-1"

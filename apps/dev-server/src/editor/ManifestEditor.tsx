@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 import { SchemaForm } from './SchemaForm';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 interface ManifestData {
   id: string;
