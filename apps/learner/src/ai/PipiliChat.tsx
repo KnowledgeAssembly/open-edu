@@ -6,6 +6,7 @@ import type { UIMessage } from 'ai';
 import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
 import { PipiliMessage } from './PipiliMessage.js';
 import type { RewardMessage } from './CompanionProvider.js';
+import { usePipiliChat } from './PipiliChatProvider.js';
 import { Award, BookOpen } from 'lucide-react';
 
 export interface PipiliChatProps {
@@ -75,23 +76,23 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
     onSuggestedQuestionSelect &&
     (messages.length === 0 || !isStreaming);
 
-  const rewardPositionsRef = React.useRef<Map<string, number>>(new Map());
-  const nextRewardPosRef = React.useRef(messages.length);
+  const { getMessageTimestamp } = usePipiliChat();
 
   const sortedItems = React.useMemo(() => {
-    const chatItems = messages.map((m, i) => ({ kind: 'chat' as const, data: m, pos: i }));
-    const rewardItems = (rewardMessages ?? []).map((r) => {
-      let pos = rewardPositionsRef.current.get(r.id);
-      if (pos === undefined) {
-        pos = nextRewardPosRef.current++;
-        rewardPositionsRef.current.set(r.id, pos);
-      }
-      return { kind: 'reward' as const, data: r, pos };
-    });
+    const chatItems = messages.map((m, i) => ({
+      kind: 'chat' as const,
+      data: m,
+      ts: getMessageTimestamp(m.id) ?? Date.now() + i,
+    }));
+    const rewardItems = (rewardMessages ?? []).map((r) => ({
+      kind: 'reward' as const,
+      data: r,
+      ts: r.timestamp,
+    }));
     const items = [...chatItems, ...rewardItems];
-    items.sort((a, b) => a.pos - b.pos);
+    items.sort((a, b) => a.ts - b.ts);
     return items;
-  }, [messages, rewardMessages]);
+  }, [messages, rewardMessages, getMessageTimestamp]);
 
   return (
     <div ref={ref} className={cn('flex flex-col', className)} data-testid="ai-chat">
@@ -123,8 +124,13 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
               <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
                 <RewardPipiliAvatar />
               </div>
-              <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-caption leading-snug">
-                <RewardCardBody reward={item.data} onViewBadge={onViewBadge} onViewCard={onViewCard} t={t} />
+              <div className="bg-surface-container border-outline-variant text-on-surface text-caption max-w-[75%] rounded-lg border px-2.5 py-2 leading-snug">
+                <RewardCardBody
+                  reward={item.data}
+                  onViewBadge={onViewBadge}
+                  onViewCard={onViewCard}
+                  t={t}
+                />
               </div>
             </div>
           ),
@@ -218,7 +224,7 @@ function RewardCardBody({
             <p className="text-tertiary text-caption font-semibold">
               {t('learner.pipili.reward.badgeTitle')}
             </p>
-            <p className="text-on-surface mt-0.5 text-caption">
+            <p className="text-on-surface text-caption mt-0.5">
               {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
             </p>
           </div>
@@ -247,8 +253,8 @@ function RewardCardBody({
               ? t('learner.pipili.reward.cardLevelUp')
               : t('learner.pipili.reward.cardTitle')}
           </p>
-          <p className="text-on-surface mt-0.5 text-caption">{reward.cardTitle}</p>
-          <p className="text-on-surface-variant mt-0.5 text-caption">
+          <p className="text-on-surface text-caption mt-0.5">{reward.cardTitle}</p>
+          <p className="text-on-surface-variant text-caption mt-0.5">
             {reward.type === 'cardLevelUp'
               ? t('learner.pipili.reward.cardLevelUpMessage', {
                   title: reward.cardTitle,
