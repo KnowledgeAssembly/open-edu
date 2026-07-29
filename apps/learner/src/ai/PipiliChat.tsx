@@ -92,7 +92,7 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
         {rewardMessages?.map((reward) => (
           <div
             key={reward.id}
-            className="flex items-start gap-2"
+            className="animate-pipili-reward-enter flex items-start gap-2 motion-reduce:animate-none"
             role="status"
             aria-live="polite"
             aria-label={
@@ -105,16 +105,16 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
             <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
               <RewardPipiliAvatar />
             </div>
-            <div className="bg-surface-container border-outline-variant text-on-surface text-caption max-w-[80%] rounded-[12px_12px_12px_4px] border px-3.5 py-2.5 leading-relaxed">
+            <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-xs leading-snug">
               {reward.type === 'badge' ? (
                 <div>
-                  <div className="flex items-start gap-2">
-                    <Award className="text-tertiary mt-0.5 h-4 w-4 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-tertiary font-semibold">
+                  <div className="flex items-start gap-1.5">
+                    <Award className="text-tertiary mt-px h-3.5 w-3.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-tertiary text-xs font-semibold">
                         {t('learner.pipili.reward.badgeTitle')}
                       </p>
-                      <p className="text-on-surface mt-0.5">
+                      <p className="text-on-surface mt-0.5 text-xs">
                         {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
                       </p>
                     </div>
@@ -122,7 +122,7 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
                   {onViewBadge && (
                     <button
                       type="button"
-                      className="text-label text-primary mt-2 hover:underline"
+                      className="text-label text-primary mt-1.5 hover:underline"
                       aria-label={t('learner.pipili.reward.viewBadge')}
                       onClick={() => onViewBadge(reward.badgeName)}
                     >
@@ -132,16 +132,16 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
                 </div>
               ) : (
                 <div>
-                  <div className="flex items-start gap-2">
-                    <BookOpen className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-primary font-semibold">
+                  <div className="flex items-start gap-1.5">
+                    <BookOpen className="text-primary mt-px h-3.5 w-3.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-primary text-xs font-semibold">
                         {reward.type === 'cardLevelUp'
                           ? t('learner.pipili.reward.cardLevelUp')
                           : t('learner.pipili.reward.cardTitle')}
                       </p>
-                      <p className="text-on-surface mt-0.5">{reward.cardTitle}</p>
-                      <p className="text-on-surface-variant text-caption mt-0.5">
+                      <p className="text-on-surface mt-0.5 text-xs">{reward.cardTitle}</p>
+                      <p className="text-on-surface-variant mt-0.5 text-xs">
                         {reward.type === 'cardLevelUp'
                           ? t('learner.pipili.reward.cardLevelUpMessage', {
                               title: reward.cardTitle,
@@ -154,7 +154,7 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
                   {onViewCard && (
                     <button
                       type="button"
-                      className="text-label text-primary mt-2 hover:underline"
+                      className="text-label text-primary mt-1.5 hover:underline"
                       aria-label={t('learner.pipili.reward.viewCard')}
                       onClick={() => onViewCard(reward.cardTitle)}
                     >

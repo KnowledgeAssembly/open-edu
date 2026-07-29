@@ -316,6 +316,7 @@ export const tailwindAnimationExtensions: Record<string, string> = {
   'pipili-wave': 'pipili-wave 2s ease-in-out infinite',
   'pipili-nod': 'pipili-nod 1.5s ease-in-out infinite',
   'pipili-surprised': 'pipili-surprised 0.6s ease-in-out',
+  'pipili-reward-enter': 'pipili-reward-enter 0.3s ease-out',
   'banner-slide-down': 'banner-slide-down 0.3s ease-out',
 };
 

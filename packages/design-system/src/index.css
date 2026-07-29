@@ -69,6 +69,18 @@
   }
 }
 
+@keyframes pipili-reward-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-orbit-float {
     animation: none !important;
@@ -83,6 +95,10 @@
   }
 
   .animate-pipili-surprised {
+    animation: none !important;
+  }
+
+  .animate-pipili-reward-enter {
     animation: none !important;
   }
 
