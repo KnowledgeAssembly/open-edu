@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { SvgRegion } from '../types.js';
-import { parseSvgRegions } from '../utils/svg-parsing.js';
+import { parseSvgRegions, stripRegionsFromSvg } from '../utils/svg-parsing.js';
 
 export interface UseSvgLoaderOptions {
   src: string;
@@ -13,6 +13,7 @@ export interface UseSvgLoaderResult {
   svgElement: SVGSVGElement | null;
   regions: Map<string, SvgRegion>;
   viewBox: { x: number; y: number; width: number; height: number };
+  backgroundHtml: string | null;
 }
 
 export function useSvgLoader({ src, regionIds }: UseSvgLoaderOptions): UseSvgLoaderResult {
@@ -21,6 +22,7 @@ export function useSvgLoader({ src, regionIds }: UseSvgLoaderOptions): UseSvgLoa
   const [svgElement, setSvgElement] = useState<SVGSVGElement | null>(null);
   const [regions, setRegions] = useState<Map<string, SvgRegion>>(new Map());
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
+  const [backgroundHtml, setBackgroundHtml] = useState<string | null>(null);
   const cancelledRef = useRef(false);
 
   const regionKey = regionIds.join(',');
@@ -52,6 +54,7 @@ export function useSvgLoader({ src, regionIds }: UseSvgLoaderOptions): UseSvgLoa
         setSvgElement(result.svgElement);
         setRegions(result.regions);
         setViewBox(result.viewBox);
+        setBackgroundHtml(stripRegionsFromSvg(result.svgElement, regionIds));
         setError(null);
       } catch (err) {
         if (!cancelledRef.current) {
@@ -71,5 +74,5 @@ export function useSvgLoader({ src, regionIds }: UseSvgLoaderOptions): UseSvgLoa
     };
   }, [src, regionKey]);
 
-  return { loading, error, svgElement, regions, viewBox };
+  return { loading, error, svgElement, regions, viewBox, backgroundHtml };
 }

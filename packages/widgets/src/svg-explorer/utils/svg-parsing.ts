@@ -124,3 +124,20 @@ export function parseSvgRegions(svgString: string, regionIds: string[]): SvgLoad
 
   return { svgElement, regions, viewBox };
 }
+
+export function stripRegionsFromSvg(svgElement: SVGSVGElement, regionIds: string[]): string {
+  const clone = svgElement.cloneNode(true) as SVGSVGElement;
+  const idSet = new Set(regionIds);
+  const toRemove: Element[] = [];
+  const allElements = clone.querySelectorAll('[id]');
+  for (const el of allElements) {
+    const id = el.getAttribute('id');
+    if (id && idSet.has(id)) {
+      toRemove.push(el);
+    }
+  }
+  for (const el of toRemove) {
+    el.remove();
+  }
+  return clone.innerHTML;
+}

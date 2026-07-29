@@ -29,7 +29,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
     [regionConfigs],
   );
 
-  const { loading, error, svgElement, regions, viewBox } = useSvgLoader({ src, regionIds });
+  const { loading, error, svgElement, regions, viewBox, backgroundHtml } = useSvgLoader({ src, regionIds });
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
@@ -130,6 +130,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
           transition: 'transform 200ms ease-in-out',
         }}
       >
+        <g dangerouslySetInnerHTML={{ __html: backgroundHtml ?? '' }} />
         {Array.from(regions.values()).map((region) => {
           const meta = regionMetaMap.get(region.id);
           return (
@@ -145,6 +146,7 @@ export function SvgExplorer(props: SvgExplorerProps) {
               onFocus={setFocusedId}
               ariaLabel={meta?.name ?? region.id}
               ariaDescription={meta?.description}
+              defaultFill={meta?.color}
             />
           );
         })}

@@ -14,6 +14,7 @@ export interface SvgRegionProps {
   ariaLabel: string;
   ariaDescription?: string;
   disabled?: boolean;
+  defaultFill?: string;
 }
 
 function createReactElementFromDom(el: SVGElement): React.ReactElement | null {
@@ -40,6 +41,7 @@ function SvgRegionComponent({
   ariaLabel,
   ariaDescription,
   disabled = false,
+  defaultFill,
 }: SvgRegionProps) {
   const baseElement = useMemo(() => {
     try {
@@ -64,7 +66,7 @@ function SvgRegionComponent({
       ? 'var(--oe-color-primary-container)'
       : focused
         ? 'var(--oe-color-surface-variant)'
-        : 'transparent';
+        : (defaultFill ?? 'var(--oe-color-primary-container, #e8def8)');
 
   const style: Record<string, string> = {
     fill: fillColor,
