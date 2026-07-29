@@ -75,97 +75,59 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
     onSuggestedQuestionSelect &&
     (messages.length === 0 || !isStreaming);
 
+  const sortedItems = React.useMemo(() => {
+    const items: Array<{
+      kind: 'chat';
+      data: UIMessage<PipiliResponseMetadata>;
+      timestamp: number;
+    } | {
+      kind: 'reward';
+      data: RewardMessage;
+      timestamp: number;
+    }> = [
+      ...messages.map((m, i) => ({ kind: 'chat' as const, data: m, timestamp: i })),
+      ...(rewardMessages ?? []).map((r) => ({ kind: 'reward' as const, data: r, timestamp: r.timestamp })),
+    ];
+    items.sort((a, b) => a.timestamp - b.timestamp);
+    return items;
+  }, [messages, rewardMessages]);
+
   return (
     <div ref={ref} className={cn('flex flex-col', className)} data-testid="ai-chat">
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        {messages.map((message) => (
-          <PipiliMessage
-            key={message.id}
-            role={message.role}
-            parts={message.parts}
-            metadata={message.metadata}
-            isStreaming={
-              isStreaming && message.role === 'assistant' && message.id === lastMessageId
-            }
-          />
-        ))}
-        {rewardMessages?.map((reward) => (
-          <div
-            key={reward.id}
-            className="animate-pipili-reward-enter flex items-start gap-2 motion-reduce:animate-none"
-            role="status"
-            aria-live="polite"
-            aria-label={
-              reward.type === 'badge'
-                ? t('learner.pipili.reward.badgeTitle')
-                : t('learner.pipili.reward.cardTitle')
-            }
-            data-testid={`reward-message-${reward.type}`}
-          >
-            <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
-              <RewardPipiliAvatar />
+        {sortedItems.map((item) =>
+          item.kind === 'chat' ? (
+            <PipiliMessage
+              key={item.data.id}
+              role={item.data.role}
+              parts={item.data.parts}
+              metadata={item.data.metadata}
+              isStreaming={
+                isStreaming && item.data.role === 'assistant' && item.data.id === lastMessageId
+              }
+            />
+          ) : (
+            <div
+              key={item.data.id}
+              className="animate-pipili-reward-enter flex items-start gap-2 motion-reduce:animate-none"
+              role="status"
+              aria-live="polite"
+              aria-label={
+                item.data.type === 'badge'
+                  ? t('learner.pipili.reward.badgeTitle')
+                  : t('learner.pipili.reward.cardTitle')
+              }
+              data-testid={`reward-message-${item.data.type}`}
+            >
+              <div className="bg-primary-container flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
+                <RewardPipiliAvatar />
+              </div>
+              <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-caption leading-snug">
+                <RewardCardBody reward={item.data} onViewBadge={onViewBadge} onViewCard={onViewCard} t={t} />
+              </div>
             </div>
-            <div className="bg-surface-container border-outline-variant text-on-surface max-w-[75%] rounded-lg border px-2.5 py-2 text-caption leading-snug">
-              {reward.type === 'badge' ? (
-                <div>
-                  <div className="flex items-start gap-1.5">
-                    <Award className="text-tertiary mt-px h-3.5 w-3.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-tertiary text-caption font-semibold">
-                        {t('learner.pipili.reward.badgeTitle')}
-                      </p>
-                      <p className="text-on-surface mt-0.5 text-caption">
-                        {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
-                      </p>
-                    </div>
-                  </div>
-                  {onViewBadge && (
-                    <button
-                      type="button"
-                      className="text-label text-primary mt-1.5 hover:underline"
-                      aria-label={t('learner.pipili.reward.viewBadge')}
-                      onClick={() => onViewBadge(reward.badgeName)}
-                    >
-                      {t('learner.pipili.reward.viewBadge')} →
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <div className="flex items-start gap-1.5">
-                    <BookOpen className="text-primary mt-px h-3.5 w-3.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-primary text-caption font-semibold">
-                        {reward.type === 'cardLevelUp'
-                          ? t('learner.pipili.reward.cardLevelUp')
-                          : t('learner.pipili.reward.cardTitle')}
-                      </p>
-                      <p className="text-on-surface mt-0.5 text-caption">{reward.cardTitle}</p>
-                      <p className="text-on-surface-variant mt-0.5 text-caption">
-                        {reward.type === 'cardLevelUp'
-                          ? t('learner.pipili.reward.cardLevelUpMessage', {
-                              title: reward.cardTitle,
-                              level: String(reward.cardLevel),
-                            })
-                          : t('learner.pipili.reward.cardMessage')}
-                      </p>
-                    </div>
-                  </div>
-                  {onViewCard && (
-                    <button
-                      type="button"
-                      className="text-label text-primary mt-1.5 hover:underline"
-                      aria-label={t('learner.pipili.reward.viewCard')}
-                      onClick={() => onViewCard(reward.cardTitle)}
-                    >
-                      {t('learner.pipili.reward.viewCard')} →
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          ),
+        )}
         {isStreaming && <ThinkingIndicator label={t('learner.pipili.thinking')} />}
         {showSuggestedQuestions && (
           <SuggestedQuestions questions={suggestedQuestions} onSelect={onSuggestedQuestionSelect} />
@@ -233,4 +195,78 @@ function RewardPipiliAvatar(): JSX.Element {
   }, []);
 
   return <Pipili size="xs" mood={settled ? 'content' : 'surprised'} />;
+}
+
+function RewardCardBody({
+  reward,
+  onViewBadge,
+  onViewCard,
+  t,
+}: {
+  reward: RewardMessage;
+  onViewBadge?: (badgeName: string) => void;
+  onViewCard?: (cardTitle: string) => void;
+  t: (key: string, params?: Record<string, string>) => string;
+}): JSX.Element {
+  if (reward.type === 'badge') {
+    return (
+      <div>
+        <div className="flex items-start gap-1.5">
+          <Award className="text-tertiary mt-px h-3.5 w-3.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-tertiary text-caption font-semibold">
+              {t('learner.pipili.reward.badgeTitle')}
+            </p>
+            <p className="text-on-surface mt-0.5 text-caption">
+              {t('learner.pipili.reward.badgeMessage', { name: reward.badgeName })}
+            </p>
+          </div>
+        </div>
+        {onViewBadge && (
+          <button
+            type="button"
+            className="text-label text-primary mt-1.5 hover:underline"
+            aria-label={t('learner.pipili.reward.viewBadge')}
+            onClick={() => onViewBadge(reward.badgeName)}
+          >
+            {t('learner.pipili.reward.viewBadge')} →
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-start gap-1.5">
+        <BookOpen className="text-primary mt-px h-3.5 w-3.5 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="text-primary text-caption font-semibold">
+            {reward.type === 'cardLevelUp'
+              ? t('learner.pipili.reward.cardLevelUp')
+              : t('learner.pipili.reward.cardTitle')}
+          </p>
+          <p className="text-on-surface mt-0.5 text-caption">{reward.cardTitle}</p>
+          <p className="text-on-surface-variant mt-0.5 text-caption">
+            {reward.type === 'cardLevelUp'
+              ? t('learner.pipili.reward.cardLevelUpMessage', {
+                  title: reward.cardTitle,
+                  level: String(reward.cardLevel),
+                })
+              : t('learner.pipili.reward.cardMessage')}
+          </p>
+        </div>
+      </div>
+      {onViewCard && (
+        <button
+          type="button"
+          className="text-label text-primary mt-1.5 hover:underline"
+          aria-label={t('learner.pipili.reward.viewCard')}
+          onClick={() => onViewCard(reward.cardTitle)}
+        >
+          {t('learner.pipili.reward.viewCard')} →
+        </button>
+      )}
+    </div>
+  );
 }
