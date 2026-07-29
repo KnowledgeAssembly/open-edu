@@ -695,6 +695,7 @@ const MatchingWidget: WidgetDefinitionV2 = {
   description: 'Match pairs of items by dragging or selecting',
   domain: 'core',
   version: '0.1.0',
+  schema: matchingSchema,
   render: MatchingComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Compare],
   capabilities: {

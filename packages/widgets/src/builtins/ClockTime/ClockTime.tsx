@@ -560,6 +560,7 @@ const ClockTimeWidget: WidgetDefinitionV2 = {
   description: 'Read and set time on analog and digital clocks',
   domain: 'math',
   version: '1.0.0',
+  schema: configSchema,
   render: ClockTimeComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
   capabilities: {

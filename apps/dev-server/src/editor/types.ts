@@ -18,6 +18,7 @@ export interface EditorFile {
   originalContent: string;
   isDirty: boolean;
   validationError: string | null;
+  widgetErrors?: Array<{ path: string; message: string; severity: string; code: string }>;
 }
 
 export type EditorMode = 'preview' | 'edit';

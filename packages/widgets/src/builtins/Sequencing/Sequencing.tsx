@@ -448,6 +448,7 @@ const SequencingWidget: WidgetDefinitionV2 = {
   description: 'Arrange items in the correct order',
   domain: 'core',
   version: '0.1.0',
+  schema: sequencingSchema,
   render: SequencingComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
   capabilities: {

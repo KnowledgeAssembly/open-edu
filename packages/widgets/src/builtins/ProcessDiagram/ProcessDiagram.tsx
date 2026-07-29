@@ -395,6 +395,7 @@ const ProcessDiagramWidget: WidgetDefinitionV2 = {
   description: 'Visual explanation of systems and processes with nodes and connections',
   domain: 'science',
   version: '1.0.0',
+  schema: processDiagramSchema,
   render: ProcessDiagramComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Understand],
   capabilities: {
@@ -481,5 +482,5 @@ const ProcessDiagramWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { ProcessDiagramWidget as processDiagram };
+export { ProcessDiagramWidget as processDiagram, processDiagramSchema };
 export default ProcessDiagramWidget;

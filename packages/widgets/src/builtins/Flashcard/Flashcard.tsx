@@ -255,6 +255,7 @@ const FlashcardWidget: WidgetDefinitionV2 = {
   description: 'Vocabulary and memory practice with flip cards',
   domain: 'language',
   version: '1.0.0',
+  schema: flashcardSchema,
   render: FlashcardComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Recall],
   capabilities: {
@@ -336,5 +337,5 @@ const FlashcardWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { FlashcardWidget as flashcard };
+export { FlashcardWidget as flashcard, flashcardSchema };
 export default FlashcardWidget;

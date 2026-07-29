@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as api from './api';
 import type { FileEntry, EditorFile, EditorMode, ViewMode } from './types';
+import type { ValidationError } from './WidgetValidator';
 import { FileTree } from './FileTree';
 import { ManifestEditor } from './ManifestEditor';
 import { MarkdownEditor } from './MarkdownEditor';
@@ -23,9 +24,23 @@ import {
 } from '../components/ui/select';
 import { Toaster } from '@open-edu/design-system';
 import { toast } from 'sonner';
-import { Plus, Eye, FileText } from 'lucide-react';
+import { Plus, Eye, FileText, EyeOff } from 'lucide-react';
+import { SplitPaneLayout } from './SplitPaneLayout';
+import { WidgetPreviewPanel } from './WidgetPreviewPanel';
+import { useWidgetConfig } from './hooks/useWidgetConfig';
+import { validateWidgetConfigForType } from './WidgetValidator';
 
 const NODE_TYPES = ['lesson', 'quiz', 'reflection', 'exercise', 'custom'] as const;
+
+function groupErrorsByField(errors: ValidationError[]): Record<string, ValidationError[]> {
+  const grouped: Record<string, ValidationError[]> = {};
+  for (const err of errors) {
+    const field = err.path.split('.')[0]!;
+    if (!grouped[field]) grouped[field] = [];
+    grouped[field]!.push(err);
+  }
+  return grouped;
+}
 
 interface EditorShellProps {
   isOpen: boolean;
@@ -46,8 +61,16 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const [newNodeName, setNewNodeName] = useState('');
   const [newNodeType, setNewNodeType] = useState<string>('lesson');
   const [pendingModeChange, setPendingModeChange] = useState<EditorMode | null>(null);
+  const [showPreview, setShowPreview] = useState(true);
 
   const currentFile = selectedPath ? (openFiles.get(selectedPath) ?? null) : null;
+
+  const { widgetType, widgetConfig, isWidgetNode } = useWidgetConfig(currentFile?.content ?? '');
+
+  const validationErrors = useMemo(() => {
+    if (!isWidgetNode || widgetType === null || widgetConfig === null) return [];
+    return validateWidgetConfigForType(widgetType, widgetConfig);
+  }, [isWidgetNode, widgetType, widgetConfig]);
 
   const dirtyCount = useMemo(() => {
     let count = 0;
@@ -469,6 +492,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
             fileName={currentFile.path}
+            fieldErrors={validationErrors.length > 0 ? groupErrorsByField(validationErrors) : {}}
           />
         );
       } catch {
@@ -509,6 +533,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
             fileName={currentFile.path}
+            fieldErrors={validationErrors.length > 0 ? groupErrorsByField(validationErrors) : {}}
           />
         );
       } catch {
@@ -543,6 +568,8 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     handleStructuredDataChange,
     isJsonFile,
     currentExtension,
+    files,
+    validationErrors,
   ]);
 
   const assetFiles = useMemo(
@@ -635,6 +662,22 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                 >
                   Undo
                 </Button>
+                {isWidgetNode && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-on-surface-variant text-xs font-medium"
+                    onClick={() => setShowPreview((p) => !p)}
+                    title={showPreview ? 'Hide preview' : 'Show preview'}
+                  >
+                    {showPreview ? (
+                      <EyeOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Eye className="h-3.5 w-3.5" />
+                    )}
+                    <span className="ml-1">{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
+                  </Button>
+                )}
                 <div className="flex-1" />
                 <Button
                   variant="ghost"
@@ -657,19 +700,33 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
               </div>
             )}
 
-            <div className="flex-1 overflow-auto p-3">
+            <div className="flex-1 overflow-hidden">
               {showAssetManager ? (
                 <AssetManager assets={assetFiles} onRefresh={handleRefreshAssets} />
               ) : currentFile ? (
-                <div>
-                  {currentFile.validationError && (
-                    <div className="border-error-container bg-error-container mb-3 rounded-lg border px-3 py-2">
-                      <p className="text-error text-xs font-medium">Validation Error:</p>
-                      <p className="text-error mt-0.5 text-xs">{currentFile.validationError}</p>
+                <SplitPaneLayout
+                  editorContent={
+                    <div className="h-full overflow-auto p-3">
+                      {currentFile.validationError && (
+                        <div className="border-error-container bg-error-container mb-3 rounded-lg border px-3 py-2">
+                          <p className="text-error text-xs font-medium">Validation Error:</p>
+                          <p className="text-error mt-0.5 text-xs">{currentFile.validationError}</p>
+                        </div>
+                      )}
+                      {fileEditorContent}
                     </div>
-                  )}
-                  {fileEditorContent}
-                </div>
+                  }
+                  previewContent={
+                    <WidgetPreviewPanel
+                      widgetType={isWidgetNode ? widgetType : null}
+                      widgetConfig={isWidgetNode ? widgetConfig : null}
+                      validationErrors={validationErrors}
+                      onCollapse={() => setShowPreview(false)}
+                    />
+                  }
+                  showPreview={showPreview && isWidgetNode}
+                  onTogglePreview={() => setShowPreview((p) => !p)}
+                />
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">

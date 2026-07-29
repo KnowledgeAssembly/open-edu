@@ -352,6 +352,7 @@ const GridAreaWidget: WidgetDefinitionV2 = {
   description: 'Calculate and visualize area using grid models',
   domain: 'math',
   version: '1.0.0',
+  schema: gridAreaSchema,
   render: GridAreaComponent,
   learningIntents: [LearningIntent.Practice, LearningIntent.Apply],
   capabilities: {

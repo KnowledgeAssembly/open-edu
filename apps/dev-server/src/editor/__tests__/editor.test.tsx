@@ -5,6 +5,7 @@ import { FileTree } from '../FileTree';
 import { ManifestEditor } from '../ManifestEditor';
 import { RawJsonEditor } from '../RawJsonEditor';
 import { MarkdownEditor } from '../MarkdownEditor';
+import { JSONNodeEditor } from '../JSONNodeEditor';
 import type { FileEntry } from '../types';
 
 describe('SchemaForm', () => {
@@ -259,6 +260,56 @@ describe('RawJsonEditor', () => {
     const content = 'line1\nline2\nline3';
     render(<RawJsonEditor content={content} onChange={onChange} fileName="test.json" />);
     expect(screen.getByText('3 lines')).toBeInTheDocument();
+  });
+});
+
+describe('SchemaForm with field errors', () => {
+  const defaultData = { id: 'test', title: 'Hello', count: 42, active: true };
+
+  it('shows error text beneath fields with errors', () => {
+    const fieldErrors = {
+      id: [
+        { path: 'id', message: 'ID is required', severity: 'error' as const, code: 'invalid_type' },
+      ],
+    };
+    render(<SchemaForm data={defaultData} onChange={() => {}} fieldErrors={fieldErrors} />);
+    expect(screen.getByText('ID is required')).toBeInTheDocument();
+  });
+
+  it('adds aria-invalid to errored fields', () => {
+    const fieldErrors = {
+      title: [
+        {
+          path: 'title',
+          message: 'Title too short',
+          severity: 'error' as const,
+          code: 'too_small',
+        },
+      ],
+    };
+    render(<SchemaForm data={defaultData} onChange={() => {}} fieldErrors={fieldErrors} />);
+    const input = screen.getByDisplayValue('Hello');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby');
+  });
+});
+
+describe('JSONNodeEditor with field errors', () => {
+  it('passes fieldErrors to SchemaForm', () => {
+    const fieldErrors = {
+      title: [
+        { path: 'title', message: 'Required', severity: 'error' as const, code: 'invalid_type' },
+      ],
+    };
+    render(
+      <JSONNodeEditor
+        data={{ type: 'lesson' }}
+        onChange={() => {}}
+        fileName="test.json"
+        fieldErrors={fieldErrors}
+      />,
+    );
+    expect(screen.getByText('Required')).toBeInTheDocument();
   });
 });
 

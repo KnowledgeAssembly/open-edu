@@ -733,6 +733,7 @@ function LabelDiagramComponent(props: {
 const LabelDiagramWidget: WidgetDefinitionV2 = {
   id: 'science.label-diagram',
   version: '1.0.0',
+  schema: labelDiagramSchema,
   name: 'Label Diagram',
   description: 'Label parts of a scientific diagram or illustration',
   domain: 'science',

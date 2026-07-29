@@ -390,6 +390,7 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
   description: 'Reading comprehension with story-based questions',
   domain: 'core',
   version: '0.1.0',
+  schema: storyQuestionSchema,
   render: StoryQuestionComponent,
   learningIntents: [LearningIntent.Assess, LearningIntent.Reflect],
   capabilities: {
@@ -471,5 +472,5 @@ const StoryQuestionWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { StoryQuestionWidget as storyQuestion };
+export { StoryQuestionWidget as storyQuestion, storyQuestionSchema };
 export default StoryQuestionWidget;

@@ -720,6 +720,7 @@ function TimelineComponent(props: {
 const TimelineWidget: WidgetDefinitionV2 = {
   id: 'core.timeline',
   version: '1.0.0',
+  schema: timelineSchema,
   name: 'Timeline',
   description: 'Explore events in chronological order with interactive timeline',
   domain: 'core',
@@ -792,5 +793,5 @@ const TimelineWidget: WidgetDefinitionV2 = {
   render: TimelineComponent,
 };
 
-export { TimelineWidget as timeline };
+export { TimelineWidget as timeline, timelineSchema };
 export default TimelineWidget;

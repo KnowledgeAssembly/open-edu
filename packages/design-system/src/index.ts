@@ -208,6 +208,9 @@ export type { DashboardLayoutProps } from './patterns/DashboardLayout.js';
 export { SplitView } from './patterns/SplitView.js';
 export type { SplitViewProps } from './patterns/SplitView.js';
 
+export { ResizablePanel } from './patterns/ResizablePanel.js';
+export type { ResizablePanelProps } from './patterns/ResizablePanel.js';
+
 export {
   CommandPalette,
   CommandGroup,

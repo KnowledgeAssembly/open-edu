@@ -250,6 +250,7 @@ const AudioPlayerWidget: WidgetDefinitionV2 = {
   description: 'Play educational audio with transcript, captions, and bookmarks',
   domain: 'core',
   version: '1.0.0',
+  schema: audioPlayerSchema,
   render: AudioPlayerComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Listen],
   capabilities: {
@@ -326,5 +327,5 @@ const AudioPlayerWidget: WidgetDefinitionV2 = {
   status: 'stable',
 };
 
-export { AudioPlayerWidget as audioPlayer };
+export { AudioPlayerWidget as audioPlayer, audioPlayerSchema };
 export default AudioPlayerWidget;

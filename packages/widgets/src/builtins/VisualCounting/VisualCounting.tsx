@@ -322,6 +322,7 @@ const VisualCountingWidget: WidgetDefinitionV2 = {
   description: 'Count visual objects and identify quantities',
   domain: 'core',
   version: '0.1.0',
+  schema: visualCountingSchema,
   render: VisualCountingComponent,
   learningIntents: [LearningIntent.Observe, LearningIntent.Practice],
   capabilities: {

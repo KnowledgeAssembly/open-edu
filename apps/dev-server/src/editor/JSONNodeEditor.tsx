@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import type { ValidationError } from './WidgetValidator';
 
 type NodeType = 'lesson' | 'quiz' | 'reflection' | 'exercise' | 'custom';
 
@@ -36,6 +37,7 @@ interface JSONNodeEditorProps {
   data: ContentNodeData;
   onChange: (data: ContentNodeData) => void;
   fileName: string;
+  fieldErrors?: Record<string, ValidationError[]>;
 }
 
 const commonFieldLabels: Record<string, string> = {
@@ -56,7 +58,12 @@ const typeDescriptions: Record<NodeType, string> = {
   custom: 'A custom widget node',
 };
 
-export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps) {
+export function JSONNodeEditor({
+  data,
+  onChange,
+  fileName,
+  fieldErrors = {},
+}: JSONNodeEditorProps) {
   const formContent = useMemo(() => {
     const base: Record<string, unknown> = {
       type: data.type,
@@ -156,6 +163,7 @@ export function JSONNodeEditor({ data, onChange, fileName }: JSONNodeEditorProps
         fields={fields}
         fieldLabels={commonFieldLabels}
         placeholders={commonPlaceholders}
+        fieldErrors={fieldErrors}
       />
 
       {data.type === 'quiz' && (

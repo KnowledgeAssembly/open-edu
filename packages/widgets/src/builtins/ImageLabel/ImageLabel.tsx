@@ -633,6 +633,7 @@ function ImageLabelComponent(props: {
 const ImageLabelWidget: WidgetDefinitionV2 = {
   id: 'science.image-label',
   version: '0.2.0',
+  schema: imageLabelSchema,
   name: 'Image Label',
   description: 'Identify and label parts of an image or photograph',
   domain: 'science',

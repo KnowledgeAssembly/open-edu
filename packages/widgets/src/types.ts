@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { z } from 'zod';
 import type { LearningIntent } from './metadata/learning-intents';
 import type { WidgetCapabilities } from './metadata/capabilities';
 import type { AccessibilityMetadata } from './metadata/accessibility';
@@ -32,7 +33,7 @@ export interface WidgetDefinitionV2 extends WidgetDefinition {
   analytics: AnalyticsMetadata;
   reward: RewardMetadata;
   ai: AIMetadata;
-  schema?: Record<string, unknown>;
+  schema?: z.ZodType<any, any, any>;
   // TODO: refine renderer type (e.g., React.ComponentType or string reference)
   renderer?: unknown;
   // TODO: refine validator type (e.g., a validation function signature)

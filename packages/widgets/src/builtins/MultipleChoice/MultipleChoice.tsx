@@ -29,6 +29,9 @@ const multiConfigSchema = z.object({
   interactive: z.boolean().optional().default(false),
 });
 
+const multipleChoiceConfigSchema = z.union([legacyConfigSchema, multiConfigSchema]);
+export { multipleChoiceConfigSchema };
+
 type FeedbackState = {
   selectedIndex: number;
   correctIndex: number;
@@ -475,6 +478,7 @@ const MultipleChoiceWidget: WidgetDefinitionV2 = {
   description: 'Select the correct answer from a list of options',
   domain: 'core',
   version: '0.1.0',
+  schema: multipleChoiceConfigSchema,
   render: MultipleChoiceComponent,
   learningIntents: [LearningIntent.Assess],
   capabilities: {
@@ -556,6 +560,7 @@ const LegacyChoiceWidget: WidgetDefinitionV2 = {
   description: 'Select the correct answer from a list of options',
   domain: 'core',
   version: '0.1.0',
+  schema: multipleChoiceConfigSchema,
   render: MultipleChoiceComponent,
   learningIntents: [LearningIntent.Practice],
   capabilities: MultipleChoiceWidget.capabilities,
