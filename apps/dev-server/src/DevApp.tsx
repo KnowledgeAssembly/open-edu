@@ -74,10 +74,7 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
   const engine = useMemo(() => {
     if (!currentPkg?.workflow) return null;
     const saved = initialProgress?.currentNodeId;
-    const entry =
-      saved && saved in currentPkg.workflow.routing
-        ? saved
-        : currentPkg.manifest.entry;
+    const entry = saved && saved in currentPkg.workflow.routing ? saved : currentPkg.manifest.entry;
     return new WorkflowEngine(currentPkg.workflow, { entry });
   }, [currentPkg, initialProgress, progressKey]);
 
@@ -281,10 +278,7 @@ function SinglePackageDevApp(): JSX.Element {
   const engine = useMemo(() => {
     if (!loadedPkg?.workflow) return null;
     const saved = initialProgress?.currentNodeId;
-    const entry =
-      saved && saved in loadedPkg.workflow.routing
-        ? saved
-        : loadedPkg.manifest.entry;
+    const entry = saved && saved in loadedPkg.workflow.routing ? saved : loadedPkg.manifest.entry;
     return new WorkflowEngine(loadedPkg.workflow, { entry });
   }, [loadedPkg, initialProgress, progressKey]);
 

@@ -1,6 +1,7 @@
 import { OepReader } from './oep-reader.js';
 import { semverGreaterThan, semverEquals } from './version-compare.js';
 import type { CourseSource, InstallResult, InstallErrorCode, PackageInspection } from './types.js';
+import { BUNDLE_DIR } from './types.js';
 
 export interface StoredCourseRecord {
   id: string;
@@ -14,17 +15,29 @@ export interface StorageAdapter {
   replaceCourse(courseId: string, course: StoredCourseRecord): Promise<void>;
 }
 
-export interface ResolvedInstallData {
-  inspection: PackageInspection;
+export interface ResolvedModuleData {
   manifest: Record<string, unknown>;
   nodes: Array<{ relativePath: string; content: string }>;
   assets: Array<{ path: string; data: Uint8Array }>;
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
+}
+
+export interface ResolvedInstallData {
+  inspection: PackageInspection;
+  manifest?: Record<string, unknown>;
+  nodes?: Array<{ relativePath: string; content: string }>;
+  assets?: Array<{ path: string; data: Uint8Array }>;
   sourceKind: string;
   sourceLabel: string;
   checksum: string;
   workflow?: Record<string, unknown>;
   rewards?: Record<string, unknown>;
   cards?: Record<string, unknown>;
+  type: 'course' | 'bundle';
+  bundleManifest?: Record<string, unknown>;
+  modules?: ResolvedModuleData[];
 }
 
 export class InstallCoordinator {
@@ -106,31 +119,64 @@ export class InstallCoordinator {
     let resolved: ResolvedInstallData;
     try {
       const extraction = await this.reader.read(bytes);
-      const contentRoot = extraction.manifest.contentRoot || 'course/';
-      resolved = {
-        inspection: {
-          id: extraction.manifest.id,
-          version: extraction.manifest.version,
-          title: extraction.manifest.title,
-          checksum: extraction.manifest.checksum,
-          signatureStatus: extraction.manifest.signature.status,
-        },
-        manifest: extraction.courseManifest,
-        nodes: Object.entries(extraction.nodes).map(([path, content]) => ({
-          relativePath: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
-          content,
-        })),
-        assets: Object.entries(extraction.assets).map(([path, data]) => ({
-          path: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
-          data,
-        })),
-        sourceKind: source.kind,
-        sourceLabel: source.label,
-        checksum: extraction.manifest.checksum.value,
-        workflow: extraction.workflow,
-        rewards: extraction.rewards,
-        cards: extraction.cards,
-      };
+
+      if (extraction.manifest.type === 'bundle') {
+        resolved = {
+          inspection: {
+            id: extraction.manifest.id,
+            version: extraction.manifest.version,
+            title: extraction.manifest.title,
+            checksum: extraction.manifest.checksum,
+            signatureStatus: extraction.manifest.signature.status,
+          },
+          type: 'bundle',
+          bundleManifest: extraction.bundleManifest,
+          modules: (extraction.modules ?? []).map((mod) => ({
+            manifest: mod.manifest,
+            nodes: Object.entries(mod.nodes).map(([path, content]) => ({
+              relativePath: path.startsWith(BUNDLE_DIR) ? path.slice(BUNDLE_DIR.length) : path,
+              content,
+            })),
+            assets: Object.entries(mod.assets).map(([path, data]) => ({
+              path: path.startsWith(BUNDLE_DIR) ? path.slice(BUNDLE_DIR.length) : path,
+              data,
+            })),
+            workflow: mod.workflow,
+            rewards: mod.rewards,
+            cards: mod.cards,
+          })),
+          sourceKind: source.kind,
+          sourceLabel: source.label,
+          checksum: extraction.manifest.checksum.value,
+        };
+      } else {
+        const contentRoot = extraction.manifest.contentRoot || 'course/';
+        resolved = {
+          inspection: {
+            id: extraction.manifest.id,
+            version: extraction.manifest.version,
+            title: extraction.manifest.title,
+            checksum: extraction.manifest.checksum,
+            signatureStatus: extraction.manifest.signature.status,
+          },
+          type: 'course',
+          manifest: extraction.courseManifest!,
+          nodes: Object.entries(extraction.nodes ?? {}).map(([path, content]) => ({
+            relativePath: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
+            content,
+          })),
+          assets: Object.entries(extraction.assets ?? {}).map(([path, data]) => ({
+            path: path.startsWith(contentRoot) ? path.slice(contentRoot.length) : path,
+            data,
+          })),
+          sourceKind: source.kind,
+          sourceLabel: source.label,
+          checksum: extraction.manifest.checksum.value,
+          workflow: extraction.workflow,
+          rewards: extraction.rewards,
+          cards: extraction.cards,
+        };
+      }
     } catch (err) {
       const code = (err as { code?: string }).code ?? 'UNKNOWN';
       return this.failure(
@@ -144,15 +190,6 @@ export class InstallCoordinator {
     const courseRecord: StoredCourseRecord = {
       id: resolved.inspection.id,
       version: resolved.inspection.version,
-      manifest: resolved.manifest,
-      nodes: resolved.nodes.map((n) => ({
-        relativePath: n.relativePath,
-        content: n.content,
-      })),
-      assets: resolved.assets.map((a) => ({
-        path: a.path,
-        data: a.data.buffer,
-      })),
       downloadedAt: new Date().toISOString(),
       distributionMeta: {
         sourceKind: resolved.sourceKind,
@@ -161,9 +198,30 @@ export class InstallCoordinator {
         signatureStatus: resolved.inspection.signatureStatus,
         installedAt: new Date().toISOString(),
       },
-      ...(resolved.workflow != null ? { workflow: resolved.workflow } : {}),
-      ...(resolved.rewards != null ? { rewards: resolved.rewards } : {}),
-      ...(resolved.cards != null ? { cards: resolved.cards } : {}),
+      type: resolved.type,
+      ...(resolved.type === 'bundle'
+        ? {
+            bundleManifest: resolved.bundleManifest,
+            modules: resolved.modules!.map((m) => ({
+              manifest: m.manifest,
+              nodes: m.nodes,
+              assets: m.assets.map((a) => ({ path: a.path, data: a.data.buffer })),
+              workflow: m.workflow,
+              rewards: m.rewards,
+              cards: m.cards,
+            })),
+          }
+        : {
+            manifest: resolved.manifest,
+            nodes: resolved.nodes!.map((n) => ({
+              relativePath: n.relativePath,
+              content: n.content,
+            })),
+            assets: resolved.assets!.map((a) => ({ path: a.path, data: a.data.buffer })),
+            workflow: resolved.workflow,
+            rewards: resolved.rewards,
+            cards: resolved.cards,
+          }),
     };
 
     try {

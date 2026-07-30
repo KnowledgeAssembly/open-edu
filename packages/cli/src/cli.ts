@@ -13,6 +13,7 @@ import { patchPackage } from './commands/patch.js';
 import { importLearnEasyCommand } from './commands/import.js';
 import { createCompileCommand } from '@open-edu/course-compiler';
 import { buildOep } from './commands/oep-build.js';
+import { buildOepBundle } from './commands/oep-build-bundle.js';
 import { i18nExtract } from './commands/i18n-extract.js';
 import { i18nValidate } from './commands/i18n-validate.js';
 import { i18nMissing } from './commands/i18n-missing.js';
@@ -81,6 +82,18 @@ program
   .action(async (packageDir: string, options: { output?: string; json?: boolean }) => {
     const json = program.optsWithGlobals().json ?? options.json;
     const result = await buildOep(packageDir, options.output, { json });
+    if (!result.success) process.exitCode = 1;
+  });
+
+program
+  .command('oep:build-bundle')
+  .description('Build a portable .oep distribution artifact from a bundle directory')
+  .argument('<bundle-dir>', 'Path to the bundle directory (containing bundle.json)')
+  .option('-o, --output <dir>', 'Output directory (default: cwd)')
+  .option('--json', 'Emit JSON output')
+  .action(async (bundleDir: string, options: { output?: string; json?: boolean }) => {
+    const json = program.optsWithGlobals().json ?? options.json;
+    const result = await buildOepBundle(bundleDir, options.output, { json });
     if (!result.success) process.exitCode = 1;
   });
 

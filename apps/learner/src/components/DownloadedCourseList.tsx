@@ -1,23 +1,32 @@
 import * as React from 'react';
-import { Trash2, BookOpen } from 'lucide-react';
+import { Trash2, BookOpen, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Button } from './ui/button.js';
 import { useTranslation } from '@open-edu/i18n';
-import type { StoredCourse } from '@open-edu/storage';
+import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 
 interface DownloadedCourseListProps {
   courses: StoredCourse[];
+  bundles?: StoredBundle[];
   onDelete?: (courseId: string) => void;
+  onDeleteBundle?: (bundleId: string) => void;
 }
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
+function getTitle(item: StoredCourse | StoredBundle): string {
+  const manifest = (item as StoredCourse).manifest ?? (item as StoredBundle).bundleManifest;
+  return ((manifest as Record<string, unknown>).title as string) ?? item.id;
+}
+
 export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedCourseListProps>(
-  ({ courses, onDelete }, ref) => {
+  ({ courses, bundles = [], onDelete, onDeleteBundle }, ref) => {
     const { t } = useTranslation();
-    if (courses.length === 0) {
+    const total = courses.length + bundles.length;
+
+    if (total === 0) {
       return (
         <Card ref={ref}>
           <CardContent className="text-on-surface/60 py-8 text-center">
@@ -33,7 +42,7 @@ export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedC
         <CardHeader className="flex flex-row items-center gap-2 pb-2">
           <BookOpen className="h-5 w-5" aria-hidden="true" />
           <CardTitle className="text-body-ui">
-            {t('learner.downloads.title', { count: String(courses.length) })}
+            {t('learner.downloads.title', { count: String(total) })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -57,7 +66,33 @@ export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedC
                     variant="ghost"
                     size="sm"
                     onClick={() => onDelete(course.id)}
-                    aria-label={`Remove ${((course.manifest as Record<string, unknown>).title as string) ?? course.id}`}
+                    aria-label={`Remove ${getTitle(course)}`}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                )}
+              </li>
+            ))}
+            {bundles.map((bundle) => (
+              <li key={bundle.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-2">
+                  <Package className="text-on-surface/60 h-4 w-4" aria-hidden="true" />
+                  <div>
+                    <p className="text-body-ui font-medium">
+                      {(bundle.bundleManifest.title as string) ?? bundle.id}
+                    </p>
+                    <p className="text-on-surface/60 text-caption">
+                      v{bundle.version} · {t('learner.downloads.modules', { count: String(bundle.modules.length) })} · Downloaded{' '}
+                      {formatDate(bundle.downloadedAt)}
+                    </p>
+                  </div>
+                </div>
+                {onDeleteBundle && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDeleteBundle(bundle.id)}
+                    aria-label={`Remove ${getTitle(bundle)}`}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>

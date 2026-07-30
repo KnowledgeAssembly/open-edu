@@ -10,7 +10,8 @@ export {
   type CardProgressData,
 } from './db.js';
 export { saveCourse, getCourse, listCourses, deleteCourse, replaceCourse } from './course-store.js';
-export { type DistributionMeta } from './db.js';
+export { saveBundle, getBundle, listBundles, replaceBundle, deleteBundle } from './bundle-store.js';
+export { type DistributionMeta, type StoredBundle, type StoredBundleModule } from './db.js';
 export {
   saveProgress,
   getProgress,

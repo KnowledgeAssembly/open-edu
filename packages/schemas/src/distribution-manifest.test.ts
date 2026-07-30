@@ -3,6 +3,8 @@ import {
   DistributionManifestSchema,
   ChecksumSchema,
   SignatureStatusSchema,
+  OEP_FORMAT,
+  OEP_FORMAT_VERSION,
 } from './distribution-manifest';
 
 describe('ChecksumSchema', () => {
@@ -102,5 +104,33 @@ describe('DistributionManifestSchema', () => {
       signature: { status: 'verified', verifiedAt: '2026-01-01T00:00:00Z', verifiedBy: 'key-1' },
     });
     expect(result.success).toBe(true);
+  });
+
+  it('accepts type: "bundle"', () => {
+    const result = DistributionManifestSchema.safeParse({
+      format: OEP_FORMAT,
+      formatVersion: OEP_FORMAT_VERSION,
+      type: 'bundle',
+      id: 'my-bundle',
+      version: '1.0.0',
+      title: 'My Bundle',
+      checksum: { algorithm: 'sha256', value: 'a'.repeat(64) },
+      contentRoot: 'bundle/',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.type).toBe('bundle');
+  });
+
+  it('defaults type to "course" when omitted', () => {
+    const result = DistributionManifestSchema.safeParse({
+      format: OEP_FORMAT,
+      formatVersion: OEP_FORMAT_VERSION,
+      id: 'c',
+      version: '1.0.0',
+      title: 'C',
+      checksum: { algorithm: 'sha256', value: 'a'.repeat(64) },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.type).toBe('course');
   });
 });

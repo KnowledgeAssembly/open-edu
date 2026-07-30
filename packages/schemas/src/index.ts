@@ -87,6 +87,7 @@ export {
   SignatureStatusSchema,
   OEP_FORMAT,
   OEP_FORMAT_VERSION,
+  OEP_BUNDLE_CONTENT_ROOT,
 } from './distribution-manifest.js';
 export type {
   DistributionManifest,

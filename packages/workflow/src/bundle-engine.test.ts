@@ -279,7 +279,9 @@ describe('BundleEngine', () => {
       engine.subscribe((e) => events.push(e));
       engine['handleModuleCompleted']('mod-a');
       expect(events.some((e) => e.type === 'module.unlocked')).toBe(false);
-      expect(events.some((e) => e.type === 'module.completed' && e.moduleId === 'mod-a')).toBe(true);
+      expect(events.some((e) => e.type === 'module.completed' && e.moduleId === 'mod-a')).toBe(
+        true,
+      );
     });
 
     it('should support unsubscribe', () => {

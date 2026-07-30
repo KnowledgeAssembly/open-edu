@@ -56,8 +56,9 @@ function SocialMapComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = socialMapSchema.safeParse(rawConfig);
   const parsedState = useMemo(() => {
     const result = SocialMapStateSchema.safeParse(storedState);
@@ -126,6 +127,7 @@ function SocialMapComponent(props: {
 
   // SVG-based rendering via SvgExplorer
   if (config.svgSrc) {
+    const resolvedSvgSrc = resolveAsset ? resolveAsset(config.svgSrc) : config.svgSrc;
     const selectedSvg = config.regions.find((r) => r.id === selectedRegion);
     return (
       <div className="space-y-4">
@@ -134,13 +136,12 @@ function SocialMapComponent(props: {
         {config.interactive && config.targetRegion && (
           <p className="text-on-surface/70 text-sm">
             Find:{' '}
-            {config.regions.find((r) => r.id === config.targetRegion)?.name ??
-              config.targetRegion}
+            {config.regions.find((r) => r.id === config.targetRegion)?.name ?? config.targetRegion}
           </p>
         )}
 
         <SvgExplorer
-          src={config.svgSrc}
+          src={resolvedSvgSrc}
           regions={config.regions.map((r) => ({
             id: r.id,
             name: r.name,

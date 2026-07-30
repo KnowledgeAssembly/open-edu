@@ -34,9 +34,9 @@ import { installFromSource } from './courseDownload';
 import { AvailableUpdatesList } from './components/AvailableUpdatesList';
 import { fetchCatalog } from '@open-edu/oep-distribution';
 import type { Catalog } from '@open-edu/oep-distribution';
-import type { StoredCourse } from '@open-edu/storage';
-import { deleteCourse } from '@open-edu/storage';
-import { isOepCourse } from './oepAdapters';
+import type { StoredCourse, StoredBundle } from '@open-edu/storage';
+import { deleteCourse, deleteBundle } from '@open-edu/storage';
+import { isOepCourse, storedBundleToBundleSummary } from './oepAdapters';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -47,6 +47,7 @@ export interface CatalogPageProps {
   onNavigate?: (view: AppView) => void;
   onRequestReset?: (id: string, title: string, isBundle: boolean) => void;
   installedCourses?: StoredCourse[];
+  installedBundles?: StoredBundle[];
   onRefreshInstalled?: () => Promise<void>;
   onRemoveInstalled?: () => Promise<void>;
 }
@@ -60,6 +61,7 @@ export function CatalogPage({
   onNavigate,
   onRequestReset,
   installedCourses = [],
+  installedBundles = [],
   onRefreshInstalled,
   onRemoveInstalled,
 }: CatalogPageProps): JSX.Element {
@@ -72,11 +74,16 @@ export function CatalogPage({
     getAllBadges().then(setBadgeData);
   }, []);
 
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string; isBundle?: boolean } | null>(null);
 
   const installedIds = useMemo(
     () => new Set(installedCourses.map((c) => c.id)),
     [installedCourses],
+  );
+
+  const installedBundleIds = useMemo(
+    () => new Set(installedBundles.map((b) => b.id)),
+    [installedBundles],
   );
 
   const handleInstall = useCallback(
@@ -98,9 +105,21 @@ export function CatalogPage({
     [],
   );
 
+  const handleDeleteInstalledBundle = useCallback(
+    (bundleId: string, title: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setDeleteTarget({ id: bundleId, title, isBundle: true });
+    },
+    [],
+  );
+
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
-    await deleteCourse(deleteTarget.id);
+    if (deleteTarget.isBundle) {
+      await deleteBundle(deleteTarget.id);
+    } else {
+      await deleteCourse(deleteTarget.id);
+    }
     setDeleteTarget(null);
     if (onRemoveInstalled) {
       await onRemoveInstalled();
@@ -129,6 +148,19 @@ export function CatalogPage({
   const [sortBy, setSortBy] = useState<'newest' | 'inProgress' | 'alphabetical'>('newest');
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [remoteCatalog, setRemoteCatalog] = useState<Catalog | null>(null);
+
+  const allBundleSummaries = useMemo(() => {
+    const map = new Map<string, BundleSummary>();
+    for (const b of bundleSummaries ?? []) {
+      map.set(b.manifest.id, b);
+    }
+    for (const stored of installedBundles) {
+      if (!map.has(stored.id)) {
+        map.set(stored.id, storedBundleToBundleSummary(stored));
+      }
+    }
+    return Array.from(map.values());
+  }, [bundleSummaries, installedBundles]);
 
   useEffect(() => {
     const catalogUrl = import.meta.env.VITE_CATALOG_URL as string | undefined;
@@ -288,17 +320,17 @@ export function CatalogPage({
         </section>
       )}
 
-      {continueList.length > 0 && bundleSummaries && bundleSummaries.length > 0 && (
+      {continueList.length > 0 && allBundleSummaries.length > 0 && (
         <SectionDivider density="minimal" className="mb-xl" />
       )}
 
-      {bundleSummaries && bundleSummaries.length > 0 && (
+      {allBundleSummaries.length > 0 && (
         <section className="mb-xl" data-testid="bundle-list-section">
           <h2 className="text-h2 font-display text-on-surface mb-md">
             {t('learner.catalog.learning_bundles')}
           </h2>
           <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {bundleSummaries.map((bundle) => {
+            {allBundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
               const completedModules = prog
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
@@ -333,6 +365,24 @@ export function CatalogPage({
                     >
                       <RotateCcw className="h-4 w-4" />
                       <span className="sr-only">{t('learner.reset.button')}</span>
+                    </Button>
+                  )}
+                  {installedBundleIds.has(bundle.manifest.id) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      data-testid="delete-installed-button"
+                      className="absolute bottom-2 right-12 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={(e) =>
+                        handleDeleteInstalledBundle(
+                          bundle.manifest.id,
+                          bundle.manifest.title,
+                          e,
+                        )
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
                     </Button>
                   )}
                 </div>
