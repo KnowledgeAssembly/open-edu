@@ -1,4 +1,5 @@
 import { zipSync, strToU8 } from 'fflate';
+import { BundleManifestSchema } from '@open-edu/schemas';
 import type { DistributionManifest, BundleManifest } from '@open-edu/schemas';
 import { computeSha256 } from './checksum.js';
 import { OEP_CONTENT_ROOT, BUNDLE_DIR } from './types.js';
@@ -33,6 +34,9 @@ export class OepWriter {
   }
 
   static async buildBundle(input: OepBundleBuildInput): Promise<OepBuildResult> {
+    // Validate bundle manifest at build time
+    BundleManifestSchema.parse(input.bundleManifest);
+
     const manifest = { ...input.manifest, type: 'bundle' as const, contentRoot: BUNDLE_DIR };
 
     const allFiles = new Map<string, Uint8Array>();
