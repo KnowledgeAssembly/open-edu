@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const OEP_FORMAT = 'openedu-package' as const;
 export const OEP_FORMAT_VERSION = 1 as const;
+export const OEP_BUNDLE_CONTENT_ROOT = 'bundle/' as const;
 
 export const ChecksumSchema = z.object({
   algorithm: z.literal('sha256'),
@@ -21,6 +22,7 @@ export type SignatureStatus = z.infer<typeof SignatureStatusSchema>;
 export const DistributionManifestSchema = z.object({
   format: z.literal(OEP_FORMAT),
   formatVersion: z.literal(OEP_FORMAT_VERSION),
+  type: z.enum(['course', 'bundle']).default('course'),
   id: z
     .string()
     .min(1)
