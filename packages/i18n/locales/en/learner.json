@@ -178,6 +178,7 @@
   "downloads.no_courses": "No downloaded courses yet.",
   "downloads.title": "Downloaded Courses ({{count}})",
   "downloads.list_aria": "Downloaded courses",
+  "downloads.modules": "{{count}} modules",
   "install.prompt": "Install OpenEdu for offline access",
   "install.button": "Install App",
   "install.aria": "Install OpenEdu app",
