@@ -65,7 +65,15 @@ describe('useInstalledCourses', () => {
   });
 
   it('loads bundles on refresh', async () => {
-    listBundlesMock.mockResolvedValue([{ id: 'bundle-x', version: '1.0.0', bundleManifest: {}, modules: [], downloadedAt: '2026-07-25T00:00:00Z' }]);
+    listBundlesMock.mockResolvedValue([
+      {
+        id: 'bundle-x',
+        version: '1.0.0',
+        bundleManifest: {},
+        modules: [],
+        downloadedAt: '2026-07-25T00:00:00Z',
+      },
+    ]);
     const { result } = renderHook(() => useInstalledCourses());
 
     await act(async () => {
@@ -108,7 +116,15 @@ describe('useInstalledCourses', () => {
   });
 
   it('removeBundle deletes and refreshes', async () => {
-    listBundlesMock.mockResolvedValueOnce([{ id: 'bundle-y', version: '1.0.0', bundleManifest: {}, modules: [], downloadedAt: '2026-07-25T00:00:00Z' }]);
+    listBundlesMock.mockResolvedValueOnce([
+      {
+        id: 'bundle-y',
+        version: '1.0.0',
+        bundleManifest: {},
+        modules: [],
+        downloadedAt: '2026-07-25T00:00:00Z',
+      },
+    ]);
     listBundlesMock.mockResolvedValueOnce([]);
     const { result } = renderHook(() => useInstalledCourses());
 
