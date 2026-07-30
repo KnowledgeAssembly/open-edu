@@ -61,7 +61,7 @@ import { BreakPage } from './BreakPage';
 import { loadLocaleFonts } from './i18n-fonts';
 import { useThemeColorMeta } from './hooks/useThemeColorMeta';
 import { useResizablePanel } from './hooks/useResizablePanel';
-import { storedCourseToPackageSummary, storedCourseToLoadedPackage } from './oepAdapters';
+import { storedCourseToPackageSummary, storedCourseToLoadedPackage, storedBundleToLoadedBundle } from './oepAdapters';
 
 export type AppView =
   | { view: 'home' }
@@ -238,6 +238,21 @@ function AppShellInner({
   const allCatalogPackages = useMemo(
     () => [...catalogPackages, ...oepCatalogPackages],
     [catalogPackages, oepCatalogPackages],
+  );
+
+  const oepBundleEntries = useMemo(() => {
+    const entries: Record<string, LoadedBundle> = {};
+    for (const bundle of installedBundles) {
+      if (!bundleEntries[bundle.id]) {
+        entries[bundle.id] = storedBundleToLoadedBundle(bundle);
+      }
+    }
+    return entries;
+  }, [installedBundles, bundleEntries]);
+
+  const allBundleEntries = useMemo(
+    () => ({ ...bundleEntries, ...oepBundleEntries }),
+    [bundleEntries, oepBundleEntries],
   );
 
   const view = useMemo<AppView>(
@@ -688,7 +703,7 @@ function AppShellInner({
                   )}
                   {(() => {
                     if (view.view !== 'bundleOverview' || !view.bundleId) return null;
-                    const bundle = bundleEntries[view.bundleId];
+                    const bundle = allBundleEntries[view.bundleId];
                     if (!bundle) return null;
                     return (
                       <BundleOverviewPage
