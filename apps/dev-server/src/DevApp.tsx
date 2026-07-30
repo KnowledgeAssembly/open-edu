@@ -73,7 +73,11 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
 
   const engine = useMemo(() => {
     if (!currentPkg?.workflow) return null;
-    const entry = initialProgress?.currentNodeId ?? currentPkg.manifest.entry;
+    const saved = initialProgress?.currentNodeId;
+    const entry =
+      saved && saved in currentPkg.workflow.routing
+        ? saved
+        : currentPkg.manifest.entry;
     return new WorkflowEngine(currentPkg.workflow, { entry });
   }, [currentPkg, initialProgress, progressKey]);
 
@@ -274,12 +278,15 @@ function SinglePackageDevApp(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressKey]);
 
-  const entry = initialProgress?.currentNodeId ?? loadedPkg?.manifest.entry;
-
   const engine = useMemo(() => {
     if (!loadedPkg?.workflow) return null;
+    const saved = initialProgress?.currentNodeId;
+    const entry =
+      saved && saved in loadedPkg.workflow.routing
+        ? saved
+        : loadedPkg.manifest.entry;
     return new WorkflowEngine(loadedPkg.workflow, { entry });
-  }, [loadedPkg, entry, progressKey]);
+  }, [loadedPkg, initialProgress, progressKey]);
 
   useEffect(() => {
     const session = new TelemetrySession();

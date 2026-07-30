@@ -408,10 +408,13 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const fileEditorContent = useMemo(() => {
     if (!currentFile) return null;
 
+    const ek = currentFile.path;
+
     if (currentFile.path === 'package.json') {
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -426,6 +429,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
           .sort();
         return (
           <ManifestEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
             nodePaths={nodePaths}
@@ -434,6 +438,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -446,6 +451,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -456,6 +462,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         const parsed = JSON.parse(currentFile.content);
         return (
           <WorkflowEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
           />
@@ -463,6 +470,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -475,6 +483,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -485,6 +494,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         const parsed = JSON.parse(currentFile.content);
         return (
           <RewardsEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
           />
@@ -492,6 +502,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -504,6 +515,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -514,6 +526,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         const parsed = JSON.parse(currentFile.content);
         return (
           <CardsEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
           />
@@ -521,6 +534,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -533,6 +547,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -543,6 +558,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         const parsed = JSON.parse(currentFile.content);
         return (
           <JSONNodeEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
             fileName={currentFile.path}
@@ -552,6 +568,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -563,6 +580,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     if (currentExtension === '.md') {
       return (
         <MarkdownEditor
+          key={ek}
           content={currentFile.content}
           onChange={handleContentChange}
           fileName={currentFile.path}
@@ -574,6 +592,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       if (viewMode === 'raw') {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}
@@ -584,6 +603,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         const parsed = JSON.parse(currentFile.content);
         return (
           <JSONNodeEditor
+            key={ek}
             data={parsed}
             onChange={(d) => handleStructuredDataChange(d as unknown as Record<string, unknown>)}
             fileName={currentFile.path}
@@ -593,6 +613,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       } catch {
         return (
           <RawJsonEditor
+            key={ek}
             content={currentFile.content}
             onChange={handleContentChange}
             fileName={currentFile.path}

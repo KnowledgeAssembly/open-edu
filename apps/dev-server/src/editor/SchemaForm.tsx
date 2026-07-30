@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect, Children, isValidElement, cloneElement } from 'react';
+import { useCallback, useEffect, useState, Children, isValidElement, cloneElement } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -130,7 +130,6 @@ export function SchemaForm({
                 <JsonTextarea
                   value={value}
                   onChange={(parsed) => handleFieldChange(key, parsed)}
-                  fieldKey={key}
                 />
               </FieldWrapper>
             );
@@ -180,7 +179,6 @@ export function SchemaForm({
               <JsonTextarea
                 value={value}
                 onChange={(parsed) => handleFieldChange(key, parsed)}
-                fieldKey={key}
               />
             </FieldWrapper>
           );
@@ -195,24 +193,20 @@ export function SchemaForm({
 function JsonTextarea({
   value,
   onChange,
-  fieldKey,
 }: {
   value: object;
   onChange: (parsed: object) => void;
-  fieldKey: string;
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState(() => JSON.stringify(value, null, 2));
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.value = JSON.stringify(value, null, 2);
-    }
-  }, [fieldKey]); // only re-sync when the field changes (e.g., user selects a different node)
+    setText(JSON.stringify(value, null, 2));
+  }, [value]);
 
   return (
     <textarea
-      ref={ref}
-      defaultValue={JSON.stringify(value, null, 2)}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
       className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
       rows={10}
       onBlur={(e) => {
