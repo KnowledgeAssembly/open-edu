@@ -30,23 +30,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
   const overviewModules: BundleOverviewModule[] = useMemo(() => {
     return bundle.manifest.modules.map((mod) => {
       const progress = bundleProgress?.moduleProgress[mod.id];
-      const snapshotStatus = bundleProgress?.moduleStatuses[mod.id];
-      const status =
-        snapshotStatus ??
-        (mod.dependsOn.length === 0 ||
-        mod.dependsOn.every((depId) => bundleProgress?.moduleStatuses[depId] === 'completed')
-          ? 'unlocked'
-          : 'locked');
-
-      const prerequisiteLabel =
-        status === 'locked' && mod.dependsOn.length > 0
-          ? `Complete ${mod.dependsOn
-              .map((depId) => {
-                const depMod = bundle.manifest.modules.find((m) => m.id === depId);
-                return depMod?.title ?? depId;
-              })
-              .join(', ')} first`
-          : undefined;
+      const status = bundleProgress?.moduleStatuses[mod.id] ?? 'unlocked';
 
       return {
         id: mod.id,
@@ -56,7 +40,6 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
         nodeCount: nodeCounts[mod.id] ?? 0,
         completedNodeCount: progress ? new Set(progress.visitedNodes).size : 0,
         estimatedDuration: mod.estimatedDuration,
-        prerequisiteLabel,
       };
     });
   }, [bundle, bundleProgress, nodeCounts]);
