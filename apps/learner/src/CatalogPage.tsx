@@ -35,7 +35,7 @@ import { AvailableUpdatesList } from './components/AvailableUpdatesList';
 import { fetchCatalog } from '@open-edu/oep-distribution';
 import type { Catalog } from '@open-edu/oep-distribution';
 import type { StoredCourse, StoredBundle } from '@open-edu/storage';
-import { deleteCourse } from '@open-edu/storage';
+import { deleteCourse, deleteBundle } from '@open-edu/storage';
 import { isOepCourse, storedBundleToBundleSummary } from './oepAdapters';
 
 export interface CatalogPageProps {
@@ -74,11 +74,16 @@ export function CatalogPage({
     getAllBadges().then(setBadgeData);
   }, []);
 
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string; isBundle?: boolean } | null>(null);
 
   const installedIds = useMemo(
     () => new Set(installedCourses.map((c) => c.id)),
     [installedCourses],
+  );
+
+  const installedBundleIds = useMemo(
+    () => new Set(installedBundles.map((b) => b.id)),
+    [installedBundles],
   );
 
   const handleInstall = useCallback(
@@ -100,9 +105,21 @@ export function CatalogPage({
     [],
   );
 
+  const handleDeleteInstalledBundle = useCallback(
+    (bundleId: string, title: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setDeleteTarget({ id: bundleId, title, isBundle: true });
+    },
+    [],
+  );
+
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
-    await deleteCourse(deleteTarget.id);
+    if (deleteTarget.isBundle) {
+      await deleteBundle(deleteTarget.id);
+    } else {
+      await deleteCourse(deleteTarget.id);
+    }
     setDeleteTarget(null);
     if (onRemoveInstalled) {
       await onRemoveInstalled();
@@ -348,6 +365,24 @@ export function CatalogPage({
                     >
                       <RotateCcw className="h-4 w-4" />
                       <span className="sr-only">{t('learner.reset.button')}</span>
+                    </Button>
+                  )}
+                  {installedBundleIds.has(bundle.manifest.id) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      data-testid="delete-installed-button"
+                      className="absolute bottom-2 right-12 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={(e) =>
+                        handleDeleteInstalledBundle(
+                          bundle.manifest.id,
+                          bundle.manifest.title,
+                          e,
+                        )
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
                     </Button>
                   )}
                 </div>
