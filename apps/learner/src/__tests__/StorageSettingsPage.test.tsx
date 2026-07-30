@@ -18,7 +18,9 @@ vi.mock('../hooks/useStorageUsage.js', () => ({
 
 vi.mock('../courseDownload.js', () => ({
   getDownloadedCourses: vi.fn().mockResolvedValue([]),
+  getDownloadedBundles: vi.fn().mockResolvedValue([]),
   deleteDownloadedCourse: vi.fn().mockResolvedValue(undefined),
+  deleteDownloadedBundle: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('StorageSettingsPage', () => {

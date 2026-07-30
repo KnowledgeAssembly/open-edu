@@ -2,14 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useInstalledCourses } from '../hooks/useInstalledCourses';
 
-const { listCoursesMock, deleteCourseMock } = vi.hoisted(() => ({
+const { listCoursesMock, listBundlesMock, deleteCourseMock, deleteBundleMock } = vi.hoisted(() => ({
   listCoursesMock: vi.fn(),
+  listBundlesMock: vi.fn(),
   deleteCourseMock: vi.fn(),
+  deleteBundleMock: vi.fn(),
 }));
 
 vi.mock('@open-edu/storage', () => ({
   listCourses: listCoursesMock,
+  listBundles: listBundlesMock,
   deleteCourse: deleteCourseMock,
+  deleteBundle: deleteBundleMock,
 }));
 
 import type { StoredCourse } from '@open-edu/storage';
@@ -37,11 +41,13 @@ describe('useInstalledCourses', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     listCoursesMock.mockResolvedValue([]);
+    listBundlesMock.mockResolvedValue([]);
   });
 
   it('returns empty list initially', () => {
     const { result } = renderHook(() => useInstalledCourses());
     expect(result.current.installedCourses).toEqual([]);
+    expect(result.current.installedBundles).toEqual([]);
   });
 
   it('loads courses on refresh', async () => {
@@ -56,6 +62,18 @@ describe('useInstalledCourses', () => {
       expect(result.current.installedCourses).toEqual(sampleCourses);
     });
     expect(result.current.loading).toBe(false);
+  });
+
+  it('loads bundles on refresh', async () => {
+    listBundlesMock.mockResolvedValue([{ id: 'bundle-x', version: '1.0.0', bundleManifest: {}, modules: [], downloadedAt: '2026-07-25T00:00:00Z' }]);
+    const { result } = renderHook(() => useInstalledCourses());
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.installedBundles).toHaveLength(1);
+    expect(result.current.installedBundles[0]!.id).toBe('bundle-x');
   });
 
   it('sets loading to false even when listCourses throws', async () => {
@@ -87,5 +105,24 @@ describe('useInstalledCourses', () => {
 
     expect(deleteCourseMock).toHaveBeenCalledWith('course-a');
     expect(result.current.installedCourses).toEqual([sampleCourses[1]!]);
+  });
+
+  it('removeBundle deletes and refreshes', async () => {
+    listBundlesMock.mockResolvedValueOnce([{ id: 'bundle-y', version: '1.0.0', bundleManifest: {}, modules: [], downloadedAt: '2026-07-25T00:00:00Z' }]);
+    listBundlesMock.mockResolvedValueOnce([]);
+    const { result } = renderHook(() => useInstalledCourses());
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.installedBundles).toHaveLength(1);
+
+    await act(async () => {
+      await result.current.removeBundle('bundle-y');
+    });
+
+    expect(deleteBundleMock).toHaveBeenCalledWith('bundle-y');
+    expect(result.current.installedBundles).toHaveLength(0);
   });
 });
