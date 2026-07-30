@@ -130,14 +130,17 @@ describe('OepWriter - bundle', () => {
 
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(bytes.length).toBeGreaterThan(0);
-    expect(checksumValue).toHaveLength(64);
+    expect(checksumValue).toMatch(/^[a-f0-9]{64}$/);
 
     const reader = new OepReader();
     const extraction = await reader.read(bytes);
 
     expect(extraction.manifest.type).toBe('bundle');
+    expect(extraction.manifest.checksum.value).toBe(checksumValue);
     expect(extraction.bundleManifest).toBeDefined();
+    expect((extraction.bundleManifest as Record<string, unknown>).id).toBe('bundle-test');
     expect(extraction.modules).toHaveLength(2);
+    expect(extraction.modules![0].manifest.id).toBe('mod-a');
     expect(extraction.modules![0].nodes['bundle/modules/mod-a/nodes/start.md']).toContain('Module A');
     expect(Object.keys(extraction.modules![1].assets)).toHaveLength(1);
   });
@@ -174,6 +177,6 @@ describe('OepWriter - bundle', () => {
     const b = await OepWriter.buildBundle({ manifest, bundleManifest, moduleFiles });
 
     expect(a.checksumValue).toBe(b.checksumValue);
-    expect(a.bytes.length).toBe(b.bytes.length);
+    expect(a.bytes).toEqual(b.bytes);
   });
 });
