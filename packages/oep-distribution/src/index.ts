@@ -1,6 +1,8 @@
 export {
   type OepExtraction,
+  type OepExtractedModule,
   type PackageInspection,
+  type BundleInspection,
   type InstallResult,
   type InstallErrorCode,
   type CourseSource,
@@ -10,15 +12,23 @@ export {
   DEFAULT_MAX_DECOMPRESSED_BYTES,
   DEFAULT_ZIP_SECURITY,
   OEP_CONTENT_ROOT,
+  BUNDLE_DIR,
+  BUNDLE_MODULES_DIR,
 } from './types.js';
 
 export type { Catalog, CatalogPackageEntry, CatalogVersionEntry } from '@open-edu/schemas';
 
 export { computeSha256 } from './checksum.js';
 export { OepReader } from './oep-reader.js';
-export { OepWriter } from './oep-writer.js';
+export { OepWriter, type OepBuildInput, type OepBundleBuildInput, type OepBuildResult } from './oep-writer.js';
 export { validateZipEntry, validateZipArchive, SecurityViolationError } from './zip-security.js';
-export { InstallCoordinator } from './install-coordinator.js';
+export {
+  InstallCoordinator,
+  type StorageAdapter,
+  type StoredCourseRecord,
+  type ResolvedInstallData,
+  type ResolvedModuleData,
+} from './install-coordinator.js';
 export { fileSource, urlSource, catalogSource } from './source-adapters.js';
 export {
   fetchCatalog,
