@@ -127,10 +127,7 @@ export function SchemaForm({
           if (hasObjectItems) {
             return (
               <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-                <JsonTextarea
-                  value={value}
-                  onChange={(parsed) => handleFieldChange(key, parsed)}
-                />
+                <JsonTextarea value={value} onChange={(parsed) => handleFieldChange(key, parsed)} />
               </FieldWrapper>
             );
           }
@@ -176,10 +173,7 @@ export function SchemaForm({
         if (typeof value === 'object') {
           return (
             <FieldWrapper key={key} label={label} error={fieldErr?.[0]} id={`field-${key}`}>
-              <JsonTextarea
-                value={value}
-                onChange={(parsed) => handleFieldChange(key, parsed)}
-              />
+              <JsonTextarea value={value} onChange={(parsed) => handleFieldChange(key, parsed)} />
             </FieldWrapper>
           );
         }
@@ -190,13 +184,7 @@ export function SchemaForm({
   );
 }
 
-function JsonTextarea({
-  value,
-  onChange,
-}: {
-  value: object;
-  onChange: (parsed: object) => void;
-}) {
+function JsonTextarea({ value, onChange }: { value: object; onChange: (parsed: object) => void }) {
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
 
   useEffect(() => {

@@ -64,17 +64,34 @@ async function buildTestBundleOep(
   const moduleFiles = new Map<string, Map<string, Uint8Array>>();
   for (const mod of modules) {
     const files = new Map<string, Uint8Array>();
-    files.set('package.json', encoder.encode(JSON.stringify({
-      id: mod.id, title: mod.title, version, author: 'test', entry: 'nodes/intro.md',
-    })));
+    files.set(
+      'package.json',
+      encoder.encode(
+        JSON.stringify({
+          id: mod.id,
+          title: mod.title,
+          version,
+          author: 'test',
+          entry: 'nodes/intro.md',
+        }),
+      ),
+    );
     files.set('nodes/intro.md', encoder.encode(`# ${mod.title}\n\nContent.`));
     moduleFiles.set(mod.id, files);
   }
 
   const bundleManifest = {
-    id, title, version, author: 'test', type: 'bundle' as const,
+    id,
+    title,
+    version,
+    author: 'test',
+    type: 'bundle' as const,
     modules: modules.map((m) => ({
-      id: m.id, title: m.title, path: `./modules/${m.id}`, dependsOn: [] as string[], estimatedDuration: 10,
+      id: m.id,
+      title: m.title,
+      path: `./modules/${m.id}`,
+      dependsOn: [] as string[],
+      estimatedDuration: 10,
     })),
   };
 
@@ -82,13 +99,19 @@ async function buildTestBundleOep(
     format: OEP_FORMAT,
     formatVersion: OEP_FORMAT_VERSION,
     type: 'bundle',
-    id, version, title,
+    id,
+    version,
+    title,
     contentRoot: BUNDLE_DIR,
     checksum: { algorithm: 'sha256', value: '' },
     signature: { status: 'unsigned' },
   };
 
-  const result = await OepWriter.buildBundle({ manifest: distManifest, bundleManifest, moduleFiles });
+  const result = await OepWriter.buildBundle({
+    manifest: distManifest,
+    bundleManifest,
+    moduleFiles,
+  });
   return result.bytes;
 }
 
@@ -281,7 +304,9 @@ describe('InstallCoordinator - bundles', () => {
     storedCourses = new Map();
     storage = {
       getInstalledCourse: vi.fn(async (id: string) => storedCourses.get(id)),
-      saveCourse: vi.fn(async (course: StoredCourseRecord) => { storedCourses.set(course.id, course); }),
+      saveCourse: vi.fn(async (course: StoredCourseRecord) => {
+        storedCourses.set(course.id, course);
+      }),
       replaceCourse: vi.fn(async (courseId: string, course: StoredCourseRecord) => {
         if (!storedCourses.has(courseId)) throw new Error(`Course "${courseId}" is not installed`);
         storedCourses.set(courseId, course);

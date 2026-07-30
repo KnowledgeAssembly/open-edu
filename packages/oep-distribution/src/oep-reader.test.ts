@@ -192,13 +192,18 @@ describe('OepReader - bundles', () => {
     const moduleFiles = new Map<string, Map<string, Uint8Array>>();
     for (const mod of modules) {
       const files = new Map<string, Uint8Array>();
-      files.set('package.json', encoder.encode(JSON.stringify({
-        id: mod.id,
-        title: mod.title,
-        version,
-        author: 'test',
-        entry: 'nodes/intro.md',
-      })));
+      files.set(
+        'package.json',
+        encoder.encode(
+          JSON.stringify({
+            id: mod.id,
+            title: mod.title,
+            version,
+            author: 'test',
+            entry: 'nodes/intro.md',
+          }),
+        ),
+      );
       files.set('nodes/intro.md', encoder.encode(`# ${mod.title}\n\nContent.`));
       moduleFiles.set(mod.id, files);
     }
@@ -230,7 +235,11 @@ describe('OepReader - bundles', () => {
       signature: { status: 'unsigned' },
     };
 
-    const result = await OepWriter.buildBundle({ manifest: distManifest, bundleManifest, moduleFiles });
+    const result = await OepWriter.buildBundle({
+      manifest: distManifest,
+      bundleManifest,
+      moduleFiles,
+    });
     return result.bytes;
   }
 
@@ -245,7 +254,7 @@ describe('OepReader - bundles', () => {
     expect(extraction.courseManifest).toBeUndefined();
   });
 
-  it('extracts each module\'s nodes and assets', async () => {
+  it("extracts each module's nodes and assets", async () => {
     const bytes = await buildTestBundleOep();
     const extraction = await reader.read(bytes);
 

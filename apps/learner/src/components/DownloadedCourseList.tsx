@@ -18,7 +18,7 @@ function formatDate(iso: string): string {
 
 function getTitle(item: StoredCourse | StoredBundle): string {
   const manifest = (item as StoredCourse).manifest ?? (item as StoredBundle).bundleManifest;
-  return (manifest as Record<string, unknown>).title as string ?? item.id;
+  return ((manifest as Record<string, unknown>).title as string) ?? item.id;
 }
 
 export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedCourseListProps>(
@@ -76,7 +76,7 @@ export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedC
             {bundles.map((bundle) => (
               <li key={bundle.id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-on-surface/60" aria-hidden="true" />
+                  <Package className="text-on-surface/60 h-4 w-4" aria-hidden="true" />
                   <div>
                     <p className="text-body-ui font-medium">
                       {(bundle.bundleManifest.title as string) ?? bundle.id}

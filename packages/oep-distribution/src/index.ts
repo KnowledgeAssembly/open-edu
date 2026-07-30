@@ -20,7 +20,12 @@ export type { Catalog, CatalogPackageEntry, CatalogVersionEntry } from '@open-ed
 
 export { computeSha256 } from './checksum.js';
 export { OepReader } from './oep-reader.js';
-export { OepWriter, type OepBuildInput, type OepBundleBuildInput, type OepBuildResult } from './oep-writer.js';
+export {
+  OepWriter,
+  type OepBuildInput,
+  type OepBundleBuildInput,
+  type OepBuildResult,
+} from './oep-writer.js';
 export { validateZipEntry, validateZipArchive, SecurityViolationError } from './zip-security.js';
 export {
   InstallCoordinator,

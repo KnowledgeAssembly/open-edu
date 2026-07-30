@@ -157,10 +157,7 @@ export function storedBundleToBundleSummary(bundle: StoredBundle): BundleSummary
     };
   }
 
-  const totalNodeCount = bundle.modules.reduce(
-    (sum, mod) => sum + (mod.nodes?.length ?? 0),
-    0,
-  );
+  const totalNodeCount = bundle.modules.reduce((sum, mod) => sum + (mod.nodes?.length ?? 0), 0);
 
   return {
     manifest,
@@ -168,7 +165,13 @@ export function storedBundleToBundleSummary(bundle: StoredBundle): BundleSummary
     totalNodeCount,
     rootDir: `${OEP_PREFIX}${bundle.id}`,
     moduleSummaries: bundle.modules.map((mod) => ({
-      manifest: mod.manifest as { id: string; title: string; version: string; author: string; entry: string },
+      manifest: mod.manifest as {
+        id: string;
+        title: string;
+        version: string;
+        author: string;
+        entry: string;
+      },
       nodeCount: mod.nodes?.length ?? 0,
       availableBadges: 0,
       rootDir: `${OEP_PREFIX}${bundle.id}/${mod.manifest.id as string}`,

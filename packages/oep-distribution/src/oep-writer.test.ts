@@ -97,17 +97,38 @@ describe('OepWriter - bundle', () => {
       version: '1.0.0',
       author: 'test',
       modules: [
-        { id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [], estimatedDuration: 10 },
-        { id: 'mod-b', title: 'Module B', path: './modules/mod-b', dependsOn: ['mod-a'], estimatedDuration: 15 },
+        {
+          id: 'mod-a',
+          title: 'Module A',
+          path: './modules/mod-a',
+          dependsOn: [],
+          estimatedDuration: 10,
+        },
+        {
+          id: 'mod-b',
+          title: 'Module B',
+          path: './modules/mod-b',
+          dependsOn: ['mod-a'],
+          estimatedDuration: 15,
+        },
       ],
     };
 
     const moduleFiles = new Map<string, Map<string, Uint8Array>>();
     for (const mod of bundleManifest.modules) {
       const files = new Map<string, Uint8Array>();
-      files.set('package.json', encoder.encode(JSON.stringify({
-        id: mod.id, title: mod.title, version: '1.0.0', author: 'test', entry: 'nodes/start.md',
-      })));
+      files.set(
+        'package.json',
+        encoder.encode(
+          JSON.stringify({
+            id: mod.id,
+            title: mod.title,
+            version: '1.0.0',
+            author: 'test',
+            entry: 'nodes/start.md',
+          }),
+        ),
+      );
       files.set('nodes/start.md', encoder.encode(`# ${mod.title}\n\nStart here.`));
       if (mod.id === 'mod-b') {
         files.set('assets/icon.png', new Uint8Array([0x89, 0x50, 0x4e, 0x47]));
@@ -127,7 +148,11 @@ describe('OepWriter - bundle', () => {
       signature: { status: 'unsigned' },
     };
 
-    const { bytes, checksumValue } = await OepWriter.buildBundle({ manifest, bundleManifest, moduleFiles });
+    const { bytes, checksumValue } = await OepWriter.buildBundle({
+      manifest,
+      bundleManifest,
+      moduleFiles,
+    });
 
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(bytes.length).toBeGreaterThan(0);
@@ -142,7 +167,9 @@ describe('OepWriter - bundle', () => {
     expect((extraction.bundleManifest as Record<string, unknown>).id).toBe('bundle-test');
     expect(extraction.modules).toHaveLength(2);
     expect(extraction.modules![0]!.manifest.id).toBe('mod-a');
-    expect(extraction.modules![0]!.nodes['bundle/modules/mod-a/nodes/start.md']).toContain('Module A');
+    expect(extraction.modules![0]!.nodes['bundle/modules/mod-a/nodes/start.md']).toContain(
+      'Module A',
+    );
     expect(Object.keys(extraction.modules![1]!.assets)).toHaveLength(1);
   });
 
@@ -153,13 +180,16 @@ describe('OepWriter - bundle', () => {
       title: 'Repro',
       version: '1.0.0',
       author: 'test',
-      modules: [
-        { id: 'm1', title: 'M1', path: './modules/m1', dependsOn: [] },
-      ],
+      modules: [{ id: 'm1', title: 'M1', path: './modules/m1', dependsOn: [] }],
     };
     const moduleFiles = new Map<string, Map<string, Uint8Array>>();
     const files = new Map<string, Uint8Array>();
-    files.set('package.json', encoder.encode(JSON.stringify({ id: 'm1', title: 'M1', version: '1.0.0', author: 't', entry: 'a' })));
+    files.set(
+      'package.json',
+      encoder.encode(
+        JSON.stringify({ id: 'm1', title: 'M1', version: '1.0.0', author: 't', entry: 'a' }),
+      ),
+    );
     files.set('nodes/a.md', encoder.encode('# A'));
     moduleFiles.set('m1', files);
 

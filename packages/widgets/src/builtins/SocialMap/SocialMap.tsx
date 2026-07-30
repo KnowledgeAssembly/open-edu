@@ -134,8 +134,7 @@ function SocialMapComponent(props: {
         {config.interactive && config.targetRegion && (
           <p className="text-on-surface/70 text-sm">
             Find:{' '}
-            {config.regions.find((r) => r.id === config.targetRegion)?.name ??
-              config.targetRegion}
+            {config.regions.find((r) => r.id === config.targetRegion)?.name ?? config.targetRegion}
           </p>
         )}
 

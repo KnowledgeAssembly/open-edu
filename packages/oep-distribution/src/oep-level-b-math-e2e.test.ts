@@ -131,7 +131,9 @@ describe('level-b-math OEP bundle E2E', () => {
         stored.bundleManifest = course.bundleManifest;
         stored.modules = course.modules;
       },
-      replaceCourse: async () => { throw new Error('not expected'); },
+      replaceCourse: async () => {
+        throw new Error('not expected');
+      },
     });
 
     const result = await coordinator.install({
@@ -144,6 +146,6 @@ describe('level-b-math OEP bundle E2E', () => {
     expect(result.courseId).toBe('level-b-math');
     expect(stored.id).toBe('level-b-math');
     expect(stored.type).toBe('bundle');
-    expect((stored.modules as Array<unknown>)).toHaveLength(3);
+    expect(stored.modules as Array<unknown>).toHaveLength(3);
   });
 });

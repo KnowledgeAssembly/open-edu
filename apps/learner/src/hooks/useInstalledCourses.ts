@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
-import { listCourses, deleteCourse, listBundles, deleteBundle, type StoredCourse, type StoredBundle } from '@open-edu/storage';
+import {
+  listCourses,
+  deleteCourse,
+  listBundles,
+  deleteBundle,
+  type StoredCourse,
+  type StoredBundle,
+} from '@open-edu/storage';
 
 export interface UseInstalledCoursesResult {
   installedCourses: StoredCourse[];

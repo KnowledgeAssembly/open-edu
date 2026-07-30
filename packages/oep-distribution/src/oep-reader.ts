@@ -59,8 +59,13 @@ export class OepReader {
       version: extraction.manifest.version,
       title: extraction.manifest.title,
       type: 'bundle',
-      moduleCount: ((extraction.bundleManifest as { modules?: unknown[] } | undefined)?.modules ?? []).length,
-      moduleIds: ((extraction.bundleManifest as { modules?: Array<{ id: string }> } | undefined)?.modules ?? []).map((m) => m.id),
+      moduleCount: (
+        (extraction.bundleManifest as { modules?: unknown[] } | undefined)?.modules ?? []
+      ).length,
+      moduleIds: (
+        (extraction.bundleManifest as { modules?: Array<{ id: string }> } | undefined)?.modules ??
+        []
+      ).map((m) => m.id),
       checksum: extraction.manifest.checksum,
       signatureStatus: extraction.manifest.signature.status,
     };
@@ -344,7 +349,11 @@ export class OepReader {
         const assetsPrefix = `${moduleDir}assets/`;
 
         for (const [path, data] of Object.entries(rawEntries)) {
-          if (path.startsWith(nodesPrefix) && (path.endsWith('.md') || path.endsWith('.json')) && data.length > 0) {
+          if (
+            path.startsWith(nodesPrefix) &&
+            (path.endsWith('.md') || path.endsWith('.json')) &&
+            data.length > 0
+          ) {
             modNodes[path] = strFromU8(data);
           } else if (path.startsWith(assetsPrefix) && data.length > 0) {
             modAssets[path] = data;
@@ -353,17 +362,29 @@ export class OepReader {
 
         const workflowRaw = rawEntries[`${moduleDir}workflow.json`];
         if (workflowRaw && workflowRaw.length > 0) {
-          try { modWorkflow = JSON.parse(strFromU8(workflowRaw)); } catch { /* ignore */ }
+          try {
+            modWorkflow = JSON.parse(strFromU8(workflowRaw));
+          } catch {
+            /* ignore */
+          }
         }
 
         const rewardsRaw = rawEntries[`${moduleDir}rewards.json`];
         if (rewardsRaw && rewardsRaw.length > 0) {
-          try { modRewards = JSON.parse(strFromU8(rewardsRaw)); } catch { /* ignore */ }
+          try {
+            modRewards = JSON.parse(strFromU8(rewardsRaw));
+          } catch {
+            /* ignore */
+          }
         }
 
         const cardsRaw = rawEntries[`${moduleDir}cards.json`];
         if (cardsRaw && cardsRaw.length > 0) {
-          try { modCards = JSON.parse(strFromU8(cardsRaw)); } catch { /* ignore */ }
+          try {
+            modCards = JSON.parse(strFromU8(cardsRaw));
+          } catch {
+            /* ignore */
+          }
         }
 
         if (Object.keys(modNodes).length === 0) {

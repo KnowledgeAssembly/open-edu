@@ -229,14 +229,16 @@ export async function installBundleFromSource(source: CourseSource): Promise<Ins
         id: course.id as string,
         version: course.version as string,
         bundleManifest: course.bundleManifest as Record<string, unknown>,
-        modules: (course.modules as Array<{
-          manifest: Record<string, unknown>;
-          nodes: { relativePath: string; content: string }[];
-          assets: { path: string; data: ArrayBuffer }[];
-          workflow?: Record<string, unknown>;
-          rewards?: Record<string, unknown>;
-          cards?: Record<string, unknown>;
-        }>).map((m) => ({
+        modules: (
+          course.modules as Array<{
+            manifest: Record<string, unknown>;
+            nodes: { relativePath: string; content: string }[];
+            assets: { path: string; data: ArrayBuffer }[];
+            workflow?: Record<string, unknown>;
+            rewards?: Record<string, unknown>;
+            cards?: Record<string, unknown>;
+          }>
+        ).map((m) => ({
           manifest: m.manifest,
           nodes: m.nodes,
           assets: m.assets.map((a) => ({
@@ -298,14 +300,16 @@ export async function updateBundleFromSource(
         id: course.id as string,
         version: course.version as string,
         bundleManifest: course.bundleManifest as Record<string, unknown>,
-        modules: (course.modules as Array<{
-          manifest: Record<string, unknown>;
-          nodes: { relativePath: string; content: string }[];
-          assets: { path: string; data: ArrayBuffer }[];
-          workflow?: Record<string, unknown>;
-          rewards?: Record<string, unknown>;
-          cards?: Record<string, unknown>;
-        }>).map((m) => ({
+        modules: (
+          course.modules as Array<{
+            manifest: Record<string, unknown>;
+            nodes: { relativePath: string; content: string }[];
+            assets: { path: string; data: ArrayBuffer }[];
+            workflow?: Record<string, unknown>;
+            rewards?: Record<string, unknown>;
+            cards?: Record<string, unknown>;
+          }>
+        ).map((m) => ({
           manifest: m.manifest,
           nodes: m.nodes,
           assets: m.assets.map((a) => ({
@@ -340,14 +344,16 @@ export async function updateBundleFromSource(
         id: course.id as string,
         version: course.version as string,
         bundleManifest: course.bundleManifest as Record<string, unknown>,
-        modules: (course.modules as Array<{
-          manifest: Record<string, unknown>;
-          nodes: { relativePath: string; content: string }[];
-          assets: { path: string; data: ArrayBuffer }[];
-          workflow?: Record<string, unknown>;
-          rewards?: Record<string, unknown>;
-          cards?: Record<string, unknown>;
-        }>).map((m) => ({
+        modules: (
+          course.modules as Array<{
+            manifest: Record<string, unknown>;
+            nodes: { relativePath: string; content: string }[];
+            assets: { path: string; data: ArrayBuffer }[];
+            workflow?: Record<string, unknown>;
+            rewards?: Record<string, unknown>;
+            cards?: Record<string, unknown>;
+          }>
+        ).map((m) => ({
           manifest: m.manifest,
           nodes: m.nodes,
           assets: m.assets.map((a) => ({

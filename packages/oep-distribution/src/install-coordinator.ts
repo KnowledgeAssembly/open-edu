@@ -213,7 +213,10 @@ export class InstallCoordinator {
           }
         : {
             manifest: resolved.manifest,
-            nodes: resolved.nodes!.map((n) => ({ relativePath: n.relativePath, content: n.content })),
+            nodes: resolved.nodes!.map((n) => ({
+              relativePath: n.relativePath,
+              content: n.content,
+            })),
             assets: resolved.assets!.map((a) => ({ path: a.path, data: a.data.buffer })),
             workflow: resolved.workflow,
             rewards: resolved.rewards,

@@ -29,7 +29,10 @@ export function SvgExplorer(props: SvgExplorerProps) {
     [regionConfigs],
   );
 
-  const { loading, error, svgElement, regions, viewBox, backgroundHtml } = useSvgLoader({ src, regionIds });
+  const { loading, error, svgElement, regions, viewBox, backgroundHtml } = useSvgLoader({
+    src,
+    regionIds,
+  });
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
