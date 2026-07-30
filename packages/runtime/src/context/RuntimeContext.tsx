@@ -235,7 +235,10 @@ export function RuntimeProvider({
 
   const resolveAsset = useCallback(
     (path: string): string => {
-      const normalized = (path ?? '').replace(/^(?:\.\.?\/)*/, '').replace(/^assets\//, '');
+      const normalized = (path ?? '')
+        .replace(/^\//, '')
+        .replace(/^(?:\.\.?\/)*/, '')
+        .replace(/^assets\//, '');
       if (!normalized) return '';
       const cached = blobUrlCache.current.get(normalized);
       if (cached) return cached;
