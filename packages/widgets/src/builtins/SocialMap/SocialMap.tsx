@@ -126,9 +126,19 @@ function SocialMapComponent(props: {
 
   // SVG-based rendering via SvgExplorer
   if (config.svgSrc) {
+    const selectedSvg = config.regions.find((r) => r.id === selectedRegion);
     return (
       <div className="space-y-4">
         {config.title && <h2 className="text-on-surface text-xl font-semibold">{config.title}</h2>}
+
+        {config.interactive && config.targetRegion && (
+          <p className="text-on-surface/70 text-sm">
+            Find:{' '}
+            {config.regions.find((r) => r.id === config.targetRegion)?.name ??
+              config.targetRegion}
+          </p>
+        )}
+
         <SvgExplorer
           src={config.svgSrc}
           regions={config.regions.map((r) => ({
@@ -141,6 +151,7 @@ function SocialMapComponent(props: {
           zoom={config.zoom ? { enabled: true } : undefined}
           onEvent={(event) => {
             if (event.type === 'region:select') {
+              setSelectedRegion(event.regionId);
               emitInteraction({
                 type: 'widget.interaction',
                 widgetId: 'social.map',
@@ -159,6 +170,25 @@ function SocialMapComponent(props: {
             }
           }}
         />
+
+        {selectedSvg?.description && (
+          <div
+            className="border-outline-variant bg-surface-container p-sm rounded-lg border"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-on-surface font-medium">{selectedSvg.name}</p>
+            <p className="text-on-surface/70 text-sm">{selectedSvg.description}</p>
+          </div>
+        )}
+
+        {isObserve && showAcknowledgeButton && (
+          <div className="p-md border-outline-variant flex items-center justify-center border-t">
+            <Button variant="default" onClick={handleAcknowledge} data-testid="observe-acknowledge">
+              Mark as seen ✓
+            </Button>
+          </div>
+        )}
       </div>
     );
   }

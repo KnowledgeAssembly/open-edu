@@ -91,10 +91,8 @@ export class BundleEngine {
         this.completedModuleIds.add(modRef.id);
       } else if (existingSnapshot && existingSnapshot.currentNodeId) {
         this.moduleStatuses[modRef.id] = 'in_progress';
-      } else if (modRef.dependsOn.length === 0) {
-        this.moduleStatuses[modRef.id] = 'unlocked';
       } else {
-        this.moduleStatuses[modRef.id] = 'locked';
+        this.moduleStatuses[modRef.id] = 'unlocked';
       }
     }
 
@@ -115,10 +113,6 @@ export class BundleEngine {
     const targetId = moduleId ?? this.findFirstUnlocked();
     if (!targetId) {
       throw new Error('No unlocked module available to start');
-    }
-
-    if (this.moduleStatuses[targetId] === 'locked') {
-      throw new Error(`Module "${targetId}" is locked and cannot be started`);
     }
 
     this.snapshotActiveModule();
@@ -225,10 +219,6 @@ export class BundleEngine {
       throw new Error(`Module "${moduleId}" not found in bundle`);
     }
 
-    if (this.moduleStatuses[moduleId] === 'locked') {
-      throw new Error(`Module "${moduleId}" is locked`);
-    }
-
     this.snapshotActiveModule();
     if (this.currentModuleId) {
       const engine = this.engineMap.get(this.currentModuleId);
@@ -306,29 +296,9 @@ export class BundleEngine {
     };
 
     this.fireEvent({ type: 'module.completed', moduleId });
-    this.evaluatePrerequisites(moduleId);
 
     if (this.isCompleted()) {
       this.fireEvent({ type: 'bundle.completed' });
-    }
-  }
-
-  private evaluatePrerequisites(completedModuleId: string): void {
-    const dependents = this.reverseDeps.get(completedModuleId) ?? [];
-    for (const dependentId of dependents) {
-      if (this.moduleStatuses[dependentId] !== 'locked') continue;
-
-      const modRef = this.bundleInput.manifest.modules.find((m) => m.id === dependentId);
-      if (!modRef) continue;
-
-      const allDepsCompleted = modRef.dependsOn.every(
-        (depId) => this.moduleStatuses[depId] === 'completed',
-      );
-
-      if (allDepsCompleted) {
-        this.moduleStatuses[dependentId] = 'unlocked';
-        this.fireEvent({ type: 'module.unlocked', moduleId: dependentId });
-      }
     }
   }
 

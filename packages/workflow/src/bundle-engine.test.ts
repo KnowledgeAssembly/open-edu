@@ -51,14 +51,14 @@ describe('BundleEngine', () => {
       expect(engine.getModuleStatus('mod-b')).toBe('unlocked');
     });
 
-    it('should set locked status for modules with dependsOn', () => {
+    it('should set unlocked status for all modules regardless of dependsOn', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A' },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
       ]);
       const engine = new BundleEngine(bundle);
       expect(engine.getModuleStatus('mod-a')).toBe('unlocked');
-      expect(engine.getModuleStatus('mod-b')).toBe('locked');
+      expect(engine.getModuleStatus('mod-b')).toBe('unlocked');
     });
 
     it('should throw for unknown dependsOn references', () => {
@@ -121,13 +121,15 @@ describe('BundleEngine', () => {
       expect(engine.getCurrentEngine()).not.toBeNull();
     });
 
-    it('should throw if starting a locked module', () => {
+    it('should start a module with dependsOn (no locking)', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A' },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
       ]);
       const engine = new BundleEngine(bundle);
-      expect(() => engine.start('mod-b')).toThrow('locked');
+      engine.start('mod-b');
+      expect(engine.getCurrentModuleId()).toBe('mod-b');
+      expect(engine.getCurrentEngine()).not.toBeNull();
     });
 
     it('should fire module.changed event on start', () => {
@@ -139,13 +141,14 @@ describe('BundleEngine', () => {
       expect(events.some((e) => e.type === 'module.changed')).toBe(true);
     });
 
-    it('should throw when no unlocked modules exist', () => {
+    it('should start any unlocked module for circular deps', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A', dependsOn: ['mod-b'] },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
       ]);
       const engine = new BundleEngine(bundle);
-      expect(() => engine.start()).toThrow('No unlocked module available');
+      engine.start();
+      expect(engine.getCurrentModuleId()).toBeTruthy();
     });
 
     it('should throw when module has no workflow', () => {
@@ -188,14 +191,15 @@ describe('BundleEngine', () => {
       expect(events.filter((e) => e.type === 'module.changed')).toHaveLength(0);
     });
 
-    it('should throw when switching to a locked module', () => {
+    it('should switch to a dependent module (no locking)', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A' },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
       ]);
       const engine = new BundleEngine(bundle);
       engine.start('mod-a');
-      expect(() => engine.switchModule('mod-b')).toThrow('locked');
+      engine.switchModule('mod-b');
+      expect(engine.getCurrentModuleId()).toBe('mod-b');
     });
 
     it('should throw when switching to a nonexistent module', () => {
@@ -206,40 +210,16 @@ describe('BundleEngine', () => {
     });
   });
 
-  describe('evaluatePrerequisites', () => {
-    it('should unlock dependent modules after completion', () => {
+  describe('all modules unlocked (no prerequisite gating)', () => {
+    it('should keep all modules unlocked regardless of dependsOn', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A' },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
+        { id: 'mod-c', title: 'Module C', dependsOn: ['mod-a', 'mod-b'] },
       ]);
       const engine = new BundleEngine(bundle);
-      engine.start('mod-a');
-      expect(engine.getModuleStatus('mod-b')).toBe('locked');
-
-      engine['handleModuleCompleted']('mod-a');
+      expect(engine.getModuleStatus('mod-a')).toBe('unlocked');
       expect(engine.getModuleStatus('mod-b')).toBe('unlocked');
-    });
-
-    it('should not unlock modules with multiple unmet dependencies', () => {
-      const bundle = createMockBundle([
-        { id: 'mod-a', title: 'Module A' },
-        { id: 'mod-b', title: 'Module B' },
-        { id: 'mod-c', title: 'Module C', dependsOn: ['mod-a', 'mod-b'] },
-      ]);
-      const engine = new BundleEngine(bundle);
-      engine['handleModuleCompleted']('mod-a');
-      expect(engine.getModuleStatus('mod-c')).toBe('locked');
-    });
-
-    it('should unlock when all dependencies are met', () => {
-      const bundle = createMockBundle([
-        { id: 'mod-a', title: 'Module A' },
-        { id: 'mod-b', title: 'Module B' },
-        { id: 'mod-c', title: 'Module C', dependsOn: ['mod-a', 'mod-b'] },
-      ]);
-      const engine = new BundleEngine(bundle);
-      engine['handleModuleCompleted']('mod-a');
-      engine['handleModuleCompleted']('mod-b');
       expect(engine.getModuleStatus('mod-c')).toBe('unlocked');
     });
   });
@@ -289,7 +269,7 @@ describe('BundleEngine', () => {
       expect(bundleCompleted).toHaveLength(1);
     });
 
-    it('should fire module.unlocked when prerequisites are met', () => {
+    it('should fire only module.completed (no module.unlocked)', () => {
       const bundle = createMockBundle([
         { id: 'mod-a', title: 'Module A' },
         { id: 'mod-b', title: 'Module B', dependsOn: ['mod-a'] },
@@ -298,7 +278,8 @@ describe('BundleEngine', () => {
       const events: BundleEngineEvent[] = [];
       engine.subscribe((e) => events.push(e));
       engine['handleModuleCompleted']('mod-a');
-      expect(events.some((e) => e.type === 'module.unlocked' && e.moduleId === 'mod-b')).toBe(true);
+      expect(events.some((e) => e.type === 'module.unlocked')).toBe(false);
+      expect(events.some((e) => e.type === 'module.completed' && e.moduleId === 'mod-a')).toBe(true);
     });
 
     it('should support unsubscribe', () => {
@@ -375,7 +356,7 @@ describe('BundleEngine', () => {
       const statuses = engine.getModuleStatuses();
       expect(statuses).toEqual({
         'mod-a': 'unlocked',
-        'mod-b': 'locked',
+        'mod-b': 'unlocked',
       });
     });
 

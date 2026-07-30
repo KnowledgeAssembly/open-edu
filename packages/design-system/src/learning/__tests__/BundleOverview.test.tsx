@@ -35,7 +35,7 @@ const sampleModules: BundleOverviewModule[] = [
     status: 'locked',
     nodeCount: 4,
     completedNodeCount: 0,
-    prerequisiteLabel: 'Complete Module 3 first',
+    estimatedDuration: 12,
   },
 ];
 
@@ -97,13 +97,12 @@ describe('BundleOverview', () => {
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
-  it('shows locked state with prerequisite label', () => {
+  it('shows locked state without prerequisite label', () => {
     renderDefault();
-    expect(screen.getByText('Complete Module 3 first')).toBeInTheDocument();
     const lockedCard = screen
       .getAllByTestId('module-card')
       .find((el) => el.getAttribute('data-status') === 'locked');
-    expect(lockedCard).toHaveClass('opacity-40');
+    expect(lockedCard).toBeInTheDocument();
   });
 
   it('shows empty state when no modules', () => {
@@ -166,9 +165,9 @@ describe('BundleOverview', () => {
     expect(onStartModule).toHaveBeenCalledWith('mod-3');
   });
 
-  it('does not show estimated duration for completed modules', () => {
+  it('shows estimated duration for completed modules', () => {
     renderDefault();
-    expect(screen.queryByText('~10 min')).toBeNull();
+    expect(screen.getByText('~10 min')).toBeInTheDocument();
   });
 
   it('has no accessibility violations', async () => {

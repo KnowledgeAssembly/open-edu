@@ -15,7 +15,6 @@ export interface BundleOverviewModule {
   nodeCount: number;
   completedNodeCount: number;
   estimatedDuration?: number;
-  prerequisiteLabel?: string;
 }
 
 export interface BundleOverviewProps {
@@ -119,8 +118,6 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                 className={cn(
                   'bg-surface-container-low font-body-md shadow-elevation-raised relative rounded-2xl transition-shadow duration-200',
                   isClickable && 'hover:shadow-elevation-overlay cursor-pointer',
-                  mod.status === 'locked' && 'opacity-40',
-                  mod.status === 'unlocked' && 'opacity-60',
                 )}
                 data-testid="module-card"
                 data-status={mod.status}
@@ -142,11 +139,6 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                           {mod.title}
                         </h3>
                       </div>
-                      {mod.status === 'locked' && mod.prerequisiteLabel && (
-                        <p className="text-on-surface-variant mt-xs text-sm">
-                          {mod.prerequisiteLabel}
-                        </p>
-                      )}
                     </div>
                     {mod.status === 'completed' && (
                       <span className="text-success flex flex-shrink-0 items-center gap-0.5 text-xs">
@@ -174,14 +166,14 @@ export function BundleOverview(props: BundleOverviewProps): JSX.Element {
                         {mod.completedNodeCount} of {mod.nodeCount} activities
                       </span>
                     )}
-                    {mod.estimatedDuration && mod.status === 'unlocked' && (
+                    {mod.estimatedDuration && (
                       <span className="text-on-surface-variant/70">
                         ~{mod.estimatedDuration} min
                       </span>
                     )}
                   </div>
 
-                  {mod.nodeCount > 0 && mod.status !== 'locked' && (
+                  {mod.nodeCount > 0 && (
                     <Progress current={mod.completedNodeCount} total={mod.nodeCount} size="xs" />
                   )}
 

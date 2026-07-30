@@ -50,7 +50,6 @@ export const Default: Story = {
         nodeCount: 10,
         completedNodeCount: 0,
         estimatedDuration: 50,
-        prerequisiteLabel: 'Complete Geometry Introduction first',
       },
     ],
     onStartModule: (moduleId) => console.log('Start module:', moduleId),
