@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 
 export interface DistributionMeta {
   sourceKind: string;
@@ -22,6 +22,24 @@ export interface StoredCourse {
   workflow?: Record<string, unknown>;
   rewards?: Record<string, unknown>;
   cards?: Record<string, unknown>;
+}
+
+export interface StoredBundleModule {
+  manifest: Record<string, unknown>;
+  nodes: { relativePath: string; content: string }[];
+  assets: { path: string; data: ArrayBuffer }[];
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
+}
+
+export interface StoredBundle {
+  id: string;
+  version: string;
+  bundleManifest: Record<string, unknown>;
+  modules: StoredBundleModule[];
+  downloadedAt: string;
+  distributionMeta?: DistributionMeta;
 }
 
 export interface LearningProgress {
@@ -80,6 +98,7 @@ export interface OpenEduDB {
   cards: CardProgressData;
   notes: NoteRecord;
   'note-tags': NoteTagRecord;
+  bundles: StoredBundle;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -116,6 +135,9 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         if (!db.objectStoreNames.contains('note-tags')) {
           const tagStore = db.createObjectStore('note-tags', { keyPath: ['noteId', 'tag'] });
           tagStore.createIndex('byNoteId', 'noteId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('bundles')) {
+          db.createObjectStore('bundles', { keyPath: 'id' });
         }
       },
     }).catch((err) => {
