@@ -48,9 +48,9 @@ describe('OepWriter', () => {
     expect(extraction.manifest.id).toBe('test-course');
     expect(extraction.manifest.version).toBe('1.0.0');
     expect(extraction.manifest.checksum.value).toBe(checksumValue);
-    expect(extraction.courseManifest.id).toBe('test-course');
-    expect(extraction.nodes['course/nodes/intro.md']).toBe(introMd);
-    expect(extraction.nodes['course/nodes/lesson-1.md']).toBe(lessonMd);
+    expect(extraction.courseManifest!.id).toBe('test-course');
+    expect(extraction.nodes!['course/nodes/intro.md']).toBe(introMd);
+    expect(extraction.nodes!['course/nodes/lesson-1.md']).toBe(lessonMd);
   });
 
   it('produces reproducible output for same input', async () => {
@@ -91,6 +91,7 @@ describe('OepWriter', () => {
 describe('OepWriter - bundle', () => {
   it('builds a valid bundle .oep that can be read back', async () => {
     const bundleManifest = {
+      type: 'bundle' as const,
       id: 'bundle-test',
       title: 'Bundle Test',
       version: '1.0.0',
@@ -140,13 +141,14 @@ describe('OepWriter - bundle', () => {
     expect(extraction.bundleManifest).toBeDefined();
     expect((extraction.bundleManifest as Record<string, unknown>).id).toBe('bundle-test');
     expect(extraction.modules).toHaveLength(2);
-    expect(extraction.modules![0].manifest.id).toBe('mod-a');
-    expect(extraction.modules![0].nodes['bundle/modules/mod-a/nodes/start.md']).toContain('Module A');
-    expect(Object.keys(extraction.modules![1].assets)).toHaveLength(1);
+    expect(extraction.modules![0]!.manifest.id).toBe('mod-a');
+    expect(extraction.modules![0]!.nodes['bundle/modules/mod-a/nodes/start.md']).toContain('Module A');
+    expect(Object.keys(extraction.modules![1]!.assets)).toHaveLength(1);
   });
 
   it('produces reproducible bundle output', async () => {
     const bundleManifest = {
+      type: 'bundle' as const,
       id: 'repro-bundle',
       title: 'Repro',
       version: '1.0.0',

@@ -72,10 +72,10 @@ describe('OepReader', () => {
     expect(extraction.manifest.id).toBe('test-course');
     expect(extraction.manifest.version).toBe('2.0.0');
     expect(extraction.manifest.checksum.value).toBe((manifest.checksum as { value: string }).value);
-    expect(extraction.courseManifest.id).toBe('test-course');
-    expect(Object.keys(extraction.nodes)).toHaveLength(2);
-    expect(extraction.nodes['course/nodes/intro.md']).toBe('# Intro\n\nHello.');
-    expect(Object.keys(extraction.assets)).toHaveLength(1);
+    expect(extraction.courseManifest!.id).toBe('test-course');
+    expect(Object.keys(extraction.nodes!)).toHaveLength(2);
+    expect(extraction.nodes!['course/nodes/intro.md']).toBe('# Intro\n\nHello.');
+    expect(Object.keys(extraction.assets!)).toHaveLength(1);
   });
 
   it('inspect returns metadata without full extraction', async () => {
@@ -204,6 +204,7 @@ describe('OepReader - bundles', () => {
     }
 
     const bundleManifest = {
+      type: 'bundle' as const,
       id,
       title,
       version,
@@ -248,12 +249,12 @@ describe('OepReader - bundles', () => {
     const bytes = await buildTestBundleOep();
     const extraction = await reader.read(bytes);
 
-    const modA = extraction.modules![0];
+    const modA = extraction.modules![0]!;
     expect(modA.manifest.id).toBe('mod-a');
     expect(Object.keys(modA.nodes)).toHaveLength(1);
     expect(modA.nodes['bundle/modules/mod-a/nodes/intro.md']).toContain('Module A');
 
-    const modB = extraction.modules![1];
+    const modB = extraction.modules![1]!;
     expect(modB.manifest.id).toBe('mod-b');
     expect(modB.nodes['bundle/modules/mod-b/nodes/intro.md']).toContain('Module B');
   });
@@ -330,6 +331,7 @@ describe('OepReader - bundles', () => {
     };
 
     const bundleManifest = {
+      type: 'bundle',
       id: 'inner-id',
       title: 'Inner',
       version: '1.0.0',

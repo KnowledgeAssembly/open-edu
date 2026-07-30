@@ -4,13 +4,15 @@ import type { DistributionManifest, BundleManifest } from '@open-edu/schemas';
 import { computeSha256 } from './checksum.js';
 import { OEP_CONTENT_ROOT, BUNDLE_DIR } from './types.js';
 
+type RelaxedManifest = Omit<DistributionManifest, 'type'> & { type?: 'course' | 'bundle' };
+
 export interface OepBuildInput {
-  manifest: DistributionManifest;
+  manifest: RelaxedManifest;
   courseFiles: Map<string, Uint8Array>;
 }
 
 export interface OepBundleBuildInput {
-  manifest: DistributionManifest;
+  manifest: RelaxedManifest;
   bundleManifest: BundleManifest;
   moduleFiles: Map<string, Map<string, Uint8Array>>;
 }
@@ -22,7 +24,7 @@ export interface OepBuildResult {
 
 export class OepWriter {
   static async build(input: OepBuildInput): Promise<OepBuildResult> {
-    const manifest = { ...input.manifest };
+    const manifest = { type: 'course' as const, ...input.manifest };
 
     const checksumValue = await computeContentChecksum(input.courseFiles);
 

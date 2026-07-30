@@ -303,8 +303,8 @@ describe('InstallCoordinator - bundles', () => {
     expect(saved!.type).toBe('bundle');
     expect(saved!.bundleManifest).toBeDefined();
     expect(saved!.modules).toHaveLength(2);
-    const modules = (saved as { modules: Array<{ manifest: unknown }> }).modules;
-    expect(modules[0].manifest).toBeDefined();
+    const modules = (saved as unknown as { modules: Array<{ manifest: unknown }> }).modules;
+    expect(modules[0]!.manifest).toBeDefined();
   });
 
   it('installs a bundle with single module', async () => {
