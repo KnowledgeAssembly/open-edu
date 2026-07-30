@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { zipSync, unzipSync } from 'fflate';
+import { zipSync, unzipSync, strFromU8 } from 'fflate';
 import { OepReader, OepReaderError } from './oep-reader';
 import { OepWriter } from './oep-writer';
 import { computeSha256 } from './checksum';
@@ -269,20 +269,27 @@ describe('OepReader - bundles', () => {
   });
 
   it('rejects bundle missing bundle/bundle.json', async () => {
-    const manifest = {
-      format: OEP_FORMAT,
-      formatVersion: OEP_FORMAT_VERSION,
-      type: 'bundle',
-      id: 'b',
-      version: '1.0.0',
-      title: 'B',
-      checksum: { algorithm: 'sha256', value: 'a'.repeat(64) },
-      contentRoot: 'bundle/',
-    };
-    const entries: Record<string, Uint8Array> = {};
-    entries['manifest.json'] = encoder.encode(JSON.stringify(manifest));
-    const bytes = zipSync(entries);
-    await expect(reader.read(bytes)).rejects.toThrow(OepReaderError);
+    // Build a valid bundle, then remove bundle.json and recompute checksum
+    const valid = await buildTestBundleOep();
+    const unzipped: Record<string, Uint8Array> = {};
+    for (const [path, data] of Object.entries(unzipSync(valid))) {
+      if (path !== 'bundle/bundle.json') {
+        unzipped[path] = data;
+      }
+    }
+
+    // Recompute checksum for tampered archive
+    const paths = Object.keys(unzipped)
+      .filter((p) => p.startsWith('bundle/') && p !== 'bundle/' && unzipped[p]!.length > 0)
+      .map((p) => p.slice('bundle/'.length))
+      .sort();
+    const hash = await computeSha256(new TextEncoder().encode(paths.join('\n')));
+    const manifest = JSON.parse(strFromU8(unzipped['manifest.json']!));
+    manifest.checksum.value = hash;
+    unzipped['manifest.json'] = encoder.encode(JSON.stringify(manifest));
+
+    const bytes = zipSync(unzipped);
+    await expect(reader.read(bytes)).rejects.toThrow('bundle/bundle.json not found');
   });
 
   it('rejects bundle with module missing package.json', async () => {
@@ -293,8 +300,19 @@ describe('OepReader - bundles', () => {
         unzipped[path] = data;
       }
     }
+
+    // Recompute checksum after removing the file
+    const paths = Object.keys(unzipped)
+      .filter((p) => p.startsWith('bundle/') && p !== 'bundle/' && unzipped[p]!.length > 0)
+      .map((p) => p.slice('bundle/'.length))
+      .sort();
+    const hash = await computeSha256(new TextEncoder().encode(paths.join('\n')));
+    const manifest = JSON.parse(strFromU8(unzipped['manifest.json']!));
+    manifest.checksum.value = hash;
+    unzipped['manifest.json'] = encoder.encode(JSON.stringify(manifest));
+
     const tampered = zipSync(unzipped);
-    await expect(reader.read(tampered)).rejects.toThrow(OepReaderError);
+    await expect(reader.read(tampered)).rejects.toThrow('missing package.json');
   });
 
   it('rejects bundle with id mismatch between outer and bundle manifest', async () => {
