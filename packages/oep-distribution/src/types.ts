@@ -5,10 +5,21 @@ export type { PackageManifest } from '@open-edu/schemas';
 
 export interface OepExtraction {
   manifest: DistributionManifest;
-  courseManifest: Record<string, unknown>;
+  courseManifest?: Record<string, unknown>;
+  nodes?: Record<string, string>;
+  assets?: Record<string, Uint8Array>;
+  rawEntries: Record<string, Uint8Array>;
+  workflow?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
+  bundleManifest?: Record<string, unknown>;
+  modules?: OepExtractedModule[];
+}
+
+export interface OepExtractedModule {
+  manifest: Record<string, unknown>;
   nodes: Record<string, string>;
   assets: Record<string, Uint8Array>;
-  rawEntries: Record<string, Uint8Array>;
   workflow?: Record<string, unknown>;
   rewards?: Record<string, unknown>;
   cards?: Record<string, unknown>;
@@ -18,6 +29,17 @@ export interface PackageInspection {
   id: string;
   version: string;
   title: string;
+  checksum: { algorithm: 'sha256'; value: string };
+  signatureStatus: string;
+}
+
+export interface BundleInspection {
+  id: string;
+  version: string;
+  title: string;
+  type: 'bundle';
+  moduleCount: number;
+  moduleIds: string[];
   checksum: { algorithm: 'sha256'; value: string };
   signatureStatus: string;
 }
@@ -39,7 +61,10 @@ export type InstallErrorCode =
   | 'VERSION_SAME'
   | 'CATALOG_FETCH_ERROR'
   | 'CATALOG_PARSE_ERROR'
-  | 'NOT_FOUND';
+  | 'NOT_FOUND'
+  | 'MISSING_BUNDLE_MANIFEST'
+  | 'BUNDLE_VALIDATION_ERROR'
+  | 'MODULE_VALIDATION_ERROR';
 
 export interface InstallResult {
   success: boolean;
@@ -71,3 +96,5 @@ export const DEFAULT_ZIP_SECURITY: ZipSecurityOptions = {
 };
 
 export const OEP_CONTENT_ROOT = 'course/';
+export const BUNDLE_DIR = 'bundle/';
+export const BUNDLE_MODULES_DIR = 'bundle/modules/';
