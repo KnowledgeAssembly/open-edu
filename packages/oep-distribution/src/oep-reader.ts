@@ -1,14 +1,22 @@
 import { unzipSync, strFromU8 } from 'fflate';
-import { DistributionManifestSchema } from '@open-edu/schemas';
-import { PackageManifestSchema } from '@open-edu/schemas';
+import {
+  DistributionManifestSchema,
+  BundleManifestSchema,
+  PackageManifestSchema,
+} from '@open-edu/schemas';
+import type { DistributionManifest } from '@open-edu/schemas';
 import { computeSha256 } from './checksum.js';
 import { validateZipArchive } from './zip-security.js';
 import {
   type OepExtraction,
   type PackageInspection,
+  type BundleInspection,
+  type OepExtractedModule,
   type ZipSecurityOptions,
   DEFAULT_ZIP_SECURITY,
   OEP_CONTENT_ROOT,
+  BUNDLE_DIR,
+  BUNDLE_MODULES_DIR,
 } from './types.js';
 
 export class OepReaderError extends Error {
@@ -33,6 +41,26 @@ export class OepReader {
       id: extraction.manifest.id,
       version: extraction.manifest.version,
       title: extraction.manifest.title,
+      checksum: extraction.manifest.checksum,
+      signatureStatus: extraction.manifest.signature.status,
+    };
+  }
+
+  async inspectBundle(bytes: Uint8Array): Promise<BundleInspection> {
+    const extraction = await this.readInternal(bytes, false);
+    if (extraction.manifest.type !== 'bundle') {
+      throw new OepReaderError(
+        'INVALID_MANIFEST',
+        'Archive is not a bundle (manifest.type is not "bundle")',
+      );
+    }
+    return {
+      id: extraction.manifest.id,
+      version: extraction.manifest.version,
+      title: extraction.manifest.title,
+      type: 'bundle',
+      moduleCount: ((extraction.bundleManifest as { modules?: unknown[] } | undefined)?.modules ?? []).length,
+      moduleIds: ((extraction.bundleManifest as { modules?: Array<{ id: string }> } | undefined)?.modules ?? []).map((m) => m.id),
       checksum: extraction.manifest.checksum,
       signatureStatus: extraction.manifest.signature.status,
     };
@@ -86,6 +114,11 @@ export class OepReader {
       );
     }
     const manifest = manifestResult.data;
+
+    if (manifest.type === 'bundle') {
+      return this.readBundleInternal(manifest, rawEntries, fullExtract);
+    }
+
     const contentRoot = manifest.contentRoot || OEP_CONTENT_ROOT;
 
     const courseContentPaths = Object.keys(rawEntries)
@@ -204,6 +237,158 @@ export class OepReader {
       workflow,
       rewards,
       cards,
+    };
+  }
+
+  private async readBundleInternal(
+    manifest: DistributionManifest,
+    rawEntries: Record<string, Uint8Array>,
+    fullExtract: boolean,
+  ): Promise<OepExtraction> {
+    const contentRoot = BUNDLE_DIR;
+
+    const bundleContentPaths = Object.keys(rawEntries)
+      .filter((p) => p.startsWith(contentRoot) && p !== contentRoot && rawEntries[p]!.length > 0)
+      .map((p) => p.slice(contentRoot.length))
+      .sort();
+    const contentHashInput = bundleContentPaths.join('\n');
+    const actualChecksum = await computeSha256(new TextEncoder().encode(contentHashInput));
+    if (actualChecksum !== manifest.checksum.value) {
+      throw new OepReaderError(
+        'CHECKSUM_MISMATCH',
+        `Expected ${manifest.checksum.value}, got ${actualChecksum}`,
+      );
+    }
+
+    const bundleJsonRaw = rawEntries[`${contentRoot}bundle.json`];
+    if (!bundleJsonRaw) {
+      throw new OepReaderError(
+        'MISSING_BUNDLE_MANIFEST',
+        'bundle/bundle.json not found in archive',
+      );
+    }
+
+    let bundleManifestJson: unknown;
+    try {
+      bundleManifestJson = JSON.parse(strFromU8(bundleJsonRaw));
+    } catch {
+      throw new OepReaderError('BUNDLE_VALIDATION_ERROR', 'bundle/bundle.json is not valid JSON');
+    }
+
+    const bundleResult = BundleManifestSchema.safeParse(bundleManifestJson);
+    if (!bundleResult.success) {
+      throw new OepReaderError(
+        'BUNDLE_VALIDATION_ERROR',
+        `bundle/bundle.json validation failed: ${bundleResult.error.message}`,
+      );
+    }
+
+    if (bundleResult.data.id !== manifest.id) {
+      throw new OepReaderError(
+        'MANIFEST_MISMATCH',
+        `Outer manifest id "${manifest.id}" != bundle.json id "${bundleResult.data.id}"`,
+      );
+    }
+    if (bundleResult.data.version !== manifest.version) {
+      throw new OepReaderError(
+        'MANIFEST_MISMATCH',
+        `Outer manifest version "${manifest.version}" != bundle.json version "${bundleResult.data.version}"`,
+      );
+    }
+
+    const modules: OepExtractedModule[] = [];
+
+    for (const modRef of bundleResult.data.modules) {
+      const moduleDir = `${BUNDLE_MODULES_DIR}${modRef.id}/`;
+      const modPkgRaw = rawEntries[`${moduleDir}package.json`];
+      if (!modPkgRaw) {
+        throw new OepReaderError(
+          'MODULE_VALIDATION_ERROR',
+          `Module "${modRef.id}" missing package.json at ${moduleDir}package.json`,
+        );
+      }
+
+      let modManifestJson: unknown;
+      try {
+        modManifestJson = JSON.parse(strFromU8(modPkgRaw));
+      } catch {
+        throw new OepReaderError(
+          'MODULE_VALIDATION_ERROR',
+          `Module "${modRef.id}" package.json is not valid JSON`,
+        );
+      }
+
+      const modResult = PackageManifestSchema.safeParse(modManifestJson);
+      if (!modResult.success) {
+        throw new OepReaderError(
+          'MODULE_VALIDATION_ERROR',
+          `Module "${modRef.id}" package.json validation failed: ${modResult.error.message}`,
+        );
+      }
+
+      if (modResult.data.id !== modRef.id) {
+        throw new OepReaderError(
+          'MANIFEST_MISMATCH',
+          `Module ref id "${modRef.id}" != module package.json id "${modResult.data.id}"`,
+        );
+      }
+
+      const modNodes: Record<string, string> = {};
+      const modAssets: Record<string, Uint8Array> = {};
+      let modWorkflow: Record<string, unknown> | undefined;
+      let modRewards: Record<string, unknown> | undefined;
+      let modCards: Record<string, unknown> | undefined;
+
+      if (fullExtract) {
+        const nodesPrefix = `${moduleDir}nodes/`;
+        const assetsPrefix = `${moduleDir}assets/`;
+
+        for (const [path, data] of Object.entries(rawEntries)) {
+          if (path.startsWith(nodesPrefix) && (path.endsWith('.md') || path.endsWith('.json')) && data.length > 0) {
+            modNodes[path] = strFromU8(data);
+          } else if (path.startsWith(assetsPrefix) && data.length > 0) {
+            modAssets[path] = data;
+          }
+        }
+
+        const workflowRaw = rawEntries[`${moduleDir}workflow.json`];
+        if (workflowRaw && workflowRaw.length > 0) {
+          try { modWorkflow = JSON.parse(strFromU8(workflowRaw)); } catch { /* ignore */ }
+        }
+
+        const rewardsRaw = rawEntries[`${moduleDir}rewards.json`];
+        if (rewardsRaw && rewardsRaw.length > 0) {
+          try { modRewards = JSON.parse(strFromU8(rewardsRaw)); } catch { /* ignore */ }
+        }
+
+        const cardsRaw = rawEntries[`${moduleDir}cards.json`];
+        if (cardsRaw && cardsRaw.length > 0) {
+          try { modCards = JSON.parse(strFromU8(cardsRaw)); } catch { /* ignore */ }
+        }
+
+        if (Object.keys(modNodes).length === 0) {
+          throw new OepReaderError(
+            'MODULE_VALIDATION_ERROR',
+            `Module "${modRef.id}" has no node files in ${nodesPrefix}`,
+          );
+        }
+      }
+
+      modules.push({
+        manifest: modManifestJson as Record<string, unknown>,
+        nodes: modNodes,
+        assets: modAssets,
+        workflow: modWorkflow,
+        rewards: modRewards,
+        cards: modCards,
+      });
+    }
+
+    return {
+      manifest,
+      bundleManifest: bundleManifestJson as Record<string, unknown>,
+      modules,
+      rawEntries,
     };
   }
 }
