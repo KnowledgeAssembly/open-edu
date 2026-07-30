@@ -99,14 +99,22 @@ function viewToPath(view: AppView): string {
     case 'bundleOverview':
       return `/bundle/${view.bundleId}`;
     case 'course': {
-      const base = `/course/${view.packageId}`;
-      if (view.bundleId && view.moduleId) return `${base}/${view.bundleId}/${view.moduleId}`;
-      return base;
+      if (view.bundleId && view.moduleId) {
+        if (view.packageId === view.moduleId) {
+          return `/course/${view.bundleId}/${view.moduleId}`;
+        }
+        return `/course/${view.packageId}/${view.bundleId}/${view.moduleId}`;
+      }
+      return `/course/${view.packageId}`;
     }
   }
 }
 
-function pathToView(pathname: string, packageEntries: Record<string, LoadedPackage>): AppView {
+function pathToView(
+  pathname: string,
+  packageEntries: Record<string, LoadedPackage>,
+  bundleEntries?: Record<string, LoadedBundle>,
+): AppView {
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return { view: 'home' };
   const main = segments[0];
@@ -127,13 +135,23 @@ function pathToView(pathname: string, packageEntries: Record<string, LoadedPacka
   if (main === 'break') return { view: 'break' };
   if (main === 'bundle' && segments[1]) return { view: 'bundleOverview', bundleId: segments[1] };
   if (main === 'course' && segments[1]) {
-    if (!packageEntries[segments[1]]) return { view: 'home' };
-    return {
-      view: 'course',
-      packageId: segments[1],
-      bundleId: segments[2],
-      moduleId: segments[3],
-    };
+    if (packageEntries[segments[1]]) {
+      return {
+        view: 'course',
+        packageId: segments[1],
+        bundleId: segments[2],
+        moduleId: segments[3],
+      };
+    }
+    if (segments[1] && segments[2] && bundleEntries?.[segments[1]]) {
+      return {
+        view: 'course',
+        packageId: segments[2],
+        bundleId: segments[1],
+        moduleId: segments[2],
+      };
+    }
+    return { view: 'home' };
   }
   return { view: 'home' };
 }
@@ -255,9 +273,26 @@ function AppShellInner({
     [bundleEntries, oepBundleEntries],
   );
 
+  const bundleModuleEntries = useMemo(() => {
+    const entries: Record<string, LoadedPackage> = {};
+    for (const bundle of Object.values(allBundleEntries)) {
+      for (const mod of bundle.modules) {
+        if (!packageEntries[mod.manifest.id]) {
+          entries[mod.manifest.id] = mod;
+        }
+      }
+    }
+    return entries;
+  }, [allBundleEntries, packageEntries]);
+
+  const mergedPackageEntries = useMemo(
+    () => ({ ...allPackageEntries, ...bundleModuleEntries }),
+    [allPackageEntries, bundleModuleEntries],
+  );
+
   const view = useMemo<AppView>(
-    () => pathToView(location.pathname, allPackageEntries),
-    [location.pathname, allPackageEntries],
+    () => pathToView(location.pathname, mergedPackageEntries, allBundleEntries),
+    [location.pathname, mergedPackageEntries, allBundleEntries],
   );
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -399,7 +434,7 @@ function AppShellInner({
 
   const handleStartBundleModule = useCallback(
     (bundleId: string, moduleId: string) => {
-      navigate(`/course/${moduleId}/${bundleId}/${moduleId}`);
+      navigate(`/course/${bundleId}/${moduleId}`);
     },
     [navigate],
   );
@@ -416,7 +451,7 @@ function AppShellInner({
     if (!resetTarget) return;
     try {
       if (resetTarget.isBundle) {
-        const bundle = bundleEntries[resetTarget.id];
+        const bundle = allBundleEntries[resetTarget.id];
         if (bundle) await resetBundle(bundle);
       } else {
         await resetCourse(resetTarget.id);
@@ -435,15 +470,13 @@ function AppShellInner({
 
   const coursePkg = useMemo<LoadedPackage | undefined>(() => {
     if (view.view !== 'course' || !view.packageId) return undefined;
-    return allPackageEntries[view.packageId];
-  }, [view, allPackageEntries]);
+    return mergedPackageEntries[view.packageId];
+  }, [view, mergedPackageEntries]);
 
   const courseBundle = useMemo<LoadedBundle | undefined>(() => {
     if (view.view !== 'course' || !view.bundleId) return undefined;
-    const bundle = bundleEntries[view.bundleId];
-    if (!bundle) return undefined;
-    return bundle;
-  }, [view, bundleEntries]);
+    return allBundleEntries[view.bundleId];
+  }, [view, allBundleEntries]);
 
   const bundleContextMemo = useMemo(() => {
     if (!courseBundle) return undefined;
@@ -479,7 +512,7 @@ function AppShellInner({
       case 'settings':
         return [{ label: t('learner.breadcrumb.settings') }];
       case 'bundleOverview': {
-        const bundle = bundleEntries[view.bundleId];
+        const bundle = allBundleEntries[view.bundleId];
         return [
           { label: t('learner.breadcrumb.course_catalog') },
           { label: bundle?.manifest.title ?? t('learner.fallback.bundle') },
@@ -490,7 +523,7 @@ function AppShellInner({
       case 'course': {
         const breadcrumbs = [{ label: coursePkg?.manifest.title ?? t('learner.fallback.course') }];
         if (view.bundleId) {
-          const bundle = bundleEntries[view.bundleId];
+          const bundle = allBundleEntries[view.bundleId];
           if (bundle) {
             breadcrumbs.unshift({ label: bundle.manifest.title });
           }

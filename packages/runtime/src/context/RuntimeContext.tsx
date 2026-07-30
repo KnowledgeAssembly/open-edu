@@ -235,7 +235,7 @@ export function RuntimeProvider({
 
   const resolveAsset = useCallback(
     (path: string): string => {
-      const normalized = (path ?? '').replace(/^\.\//, '').replace(/^assets\//, '');
+      const normalized = (path ?? '').replace(/^(?:\.\.?\/)*/, '').replace(/^assets\//, '');
       if (!normalized) return '';
       const cached = blobUrlCache.current.get(normalized);
       if (cached) return cached;
@@ -247,9 +247,13 @@ export function RuntimeProvider({
         blobUrlCache.current.set(normalized, url);
         return url;
       }
+      console.warn(
+        `[resolveAsset] "${normalized}" not found in assetMap for "${loadedPackage.manifest.id}". Available keys:`,
+        loadedPackage.assetMap ? Array.from(loadedPackage.assetMap.keys()) : 'no assetMap',
+      );
       return `/assets/${normalized}`;
     },
-    [loadedPackage.assetMap],
+    [loadedPackage.assetMap, loadedPackage.manifest.id],
   );
 
   const value = useMemo<RuntimeContextValue>(

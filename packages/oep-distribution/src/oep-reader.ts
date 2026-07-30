@@ -184,16 +184,24 @@ export class OepReader {
 
     if (fullExtract) {
       const nodesPrefix = `${contentRoot}nodes/`;
-      const assetsPrefix = `${contentRoot}assets/`;
+      const metadataFiles = new Set([
+        `${contentRoot}package.json`,
+        `${contentRoot}workflow.json`,
+        `${contentRoot}rewards.json`,
+        `${contentRoot}cards.json`,
+      ]);
 
       for (const [path, data] of Object.entries(rawEntries)) {
+        if (!path.startsWith(contentRoot) || data.length === 0) continue;
+        if (metadataFiles.has(path)) continue;
+        const relativePath = path.slice(contentRoot.length);
+        if (!relativePath.includes('/')) continue;
         if (
           path.startsWith(nodesPrefix) &&
-          (path.endsWith('.md') || path.endsWith('.json')) &&
-          data.length > 0
+          (path.endsWith('.md') || path.endsWith('.json'))
         ) {
           nodes[path] = strFromU8(data);
-        } else if (path.startsWith(assetsPrefix) && data.length > 0) {
+        } else {
           assets[path] = data;
         }
       }
@@ -346,16 +354,24 @@ export class OepReader {
 
       if (fullExtract) {
         const nodesPrefix = `${moduleDir}nodes/`;
-        const assetsPrefix = `${moduleDir}assets/`;
+        const metadataFiles = new Set([
+          `${moduleDir}package.json`,
+          `${moduleDir}workflow.json`,
+          `${moduleDir}rewards.json`,
+          `${moduleDir}cards.json`,
+        ]);
 
         for (const [path, data] of Object.entries(rawEntries)) {
+          if (!path.startsWith(moduleDir) || data.length === 0) continue;
+          if (metadataFiles.has(path)) continue;
+          const relativePath = path.slice(moduleDir.length);
+          if (!relativePath.includes('/')) continue;
           if (
             path.startsWith(nodesPrefix) &&
-            (path.endsWith('.md') || path.endsWith('.json')) &&
-            data.length > 0
+            (path.endsWith('.md') || path.endsWith('.json'))
           ) {
             modNodes[path] = strFromU8(data);
-          } else if (path.startsWith(assetsPrefix) && data.length > 0) {
+          } else if (!path.startsWith(nodesPrefix)) {
             modAssets[path] = data;
           }
         }

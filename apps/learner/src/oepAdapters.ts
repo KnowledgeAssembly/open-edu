@@ -210,15 +210,27 @@ export function storedBundleToLoadedBundle(bundle: StoredBundle): LoadedBundle {
       entry: (m.manifest.entry as string) ?? 'nodes/intro.md',
     };
 
-    const nodes: LoadedNode[] = m.nodes.map((n) => ({
-      path: `${modRootDir}/${n.relativePath}`,
-      relativePath: n.relativePath,
-      content: n.content,
-      node: parseNodeContent(n.relativePath, n.content),
-    }));
+    const modulePrefix = `modules/${m.manifest.id as string}/`;
+    const nodes: LoadedNode[] = m.nodes.map((n) => {
+      const relativePath = n.relativePath.startsWith(modulePrefix)
+        ? n.relativePath.slice(modulePrefix.length)
+        : n.relativePath;
+      return {
+        path: `${modRootDir}/${relativePath}`,
+        relativePath,
+        content: n.content,
+        node: parseNodeContent(relativePath, n.content),
+      };
+    });
 
-    const assetPaths = m.assets.map((a) => a.path);
-    const assetMap = new Map(m.assets.map((a) => [a.path, a.data]));
+    const stripPrefix = (p: string) => {
+      const withoutModule = p.startsWith(modulePrefix)
+        ? p.slice(modulePrefix.length)
+        : p;
+      return withoutModule.replace(/^assets\//, '');
+    };
+    const assetPaths = m.assets.map((a) => stripPrefix(a.path));
+    const assetMap = new Map(m.assets.map((a) => [stripPrefix(a.path), a.data]));
 
     let workflow: Workflow | null = null;
     if (m.workflow) {
