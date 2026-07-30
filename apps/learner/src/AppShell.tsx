@@ -210,7 +210,7 @@ function AppShellInner({
 
   const { panelState } = useCompanion();
 
-  const { installedCourses, refresh: refreshInstalled } = useInstalledCourses();
+  const { installedCourses, installedBundles, refresh: refreshInstalled } = useInstalledCourses();
 
   useEffect(() => {
     void refreshInstalled();
@@ -674,6 +674,7 @@ function AppShellInner({
                       onNavigate={handleNavigate}
                       onRequestReset={handleRequestReset}
                       installedCourses={installedCourses}
+                      installedBundles={installedBundles}
                       onRefreshInstalled={refreshInstalled}
                       onRemoveInstalled={refreshInstalled}
                     />
