@@ -4,6 +4,7 @@ import {
   WorkflowSchema,
   CardDefinitionsSchema,
   ContentNodeSchema,
+  BundleManifestSchema,
 } from '@open-edu/schemas';
 import type {
   PackageManifest,
@@ -12,8 +13,8 @@ import type {
   CardDefinitions,
   ContentNode,
 } from '@open-edu/schemas';
-import type { PackageSummary, LoadedPackage, LoadedNode } from '@open-edu/core';
-import type { StoredCourse } from '@open-edu/storage';
+import type { PackageSummary, LoadedPackage, LoadedNode, BundleSummary } from '@open-edu/core';
+import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 
 function extractTitle(content: string): string | undefined {
   const match = content.match(/^#\s+(.+)/m);
@@ -138,5 +139,39 @@ export function storedCourseToLoadedPackage(course: StoredCourse): LoadedPackage
     nodes,
     assetPaths,
     assetMap,
+  };
+}
+
+export function storedBundleToBundleSummary(bundle: StoredBundle): BundleSummary {
+  let manifest: ReturnType<typeof BundleManifestSchema.parse>;
+  try {
+    manifest = BundleManifestSchema.parse(bundle.bundleManifest);
+  } catch {
+    manifest = {
+      id: bundle.id,
+      type: 'bundle',
+      title: (bundle.bundleManifest.title as string) ?? bundle.id,
+      version: bundle.version,
+      author: (bundle.bundleManifest.author as string) ?? '',
+      modules: [],
+    };
+  }
+
+  const totalNodeCount = bundle.modules.reduce(
+    (sum, mod) => sum + (mod.nodes?.length ?? 0),
+    0,
+  );
+
+  return {
+    manifest,
+    moduleCount: manifest.modules.length,
+    totalNodeCount,
+    rootDir: `${OEP_PREFIX}${bundle.id}`,
+    moduleSummaries: bundle.modules.map((mod) => ({
+      manifest: mod.manifest as { id: string; title: string; version: string; author: string; entry: string },
+      nodeCount: mod.nodes?.length ?? 0,
+      availableBadges: 0,
+      rootDir: `${OEP_PREFIX}${bundle.id}/${mod.manifest.id as string}`,
+    })),
   };
 }

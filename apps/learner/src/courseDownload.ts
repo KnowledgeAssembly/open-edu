@@ -4,7 +4,13 @@ import {
   deleteCourse,
   listCourses,
   replaceCourse,
+  saveBundle,
+  getBundle,
+  listBundles,
+  replaceBundle,
+  deleteBundle,
   type StoredCourse,
+  type StoredBundle,
 } from '@open-edu/storage';
 import { InstallCoordinator } from '@open-edu/oep-distribution';
 import type { CourseSource, InstallResult } from '@open-edu/oep-distribution';
@@ -196,4 +202,191 @@ export async function updateFromSource(
   });
 
   return coordinator.update(courseId, source);
+}
+
+export async function installBundleFromSource(source: CourseSource): Promise<InstallResult> {
+  const coordinator = new InstallCoordinator({
+    getInstalledCourse: async (id: string) => {
+      const bundle = await getBundle(id);
+      return bundle
+        ? {
+            id: bundle.id,
+            version: bundle.version,
+            manifest: bundle.bundleManifest,
+            nodes: [],
+            assets: [],
+            downloadedAt: bundle.downloadedAt,
+            distributionMeta: bundle.distributionMeta,
+          }
+        : undefined;
+    },
+    saveCourse: async (course) => {
+      const type = course.type as string | undefined;
+      if (type !== 'bundle' || !course.bundleManifest || !course.modules) {
+        return;
+      }
+      await saveBundle({
+        id: course.id as string,
+        version: course.version as string,
+        bundleManifest: course.bundleManifest as Record<string, unknown>,
+        modules: (course.modules as Array<{
+          manifest: Record<string, unknown>;
+          nodes: { relativePath: string; content: string }[];
+          assets: { path: string; data: ArrayBuffer }[];
+          workflow?: Record<string, unknown>;
+          rewards?: Record<string, unknown>;
+          cards?: Record<string, unknown>;
+        }>).map((m) => ({
+          manifest: m.manifest,
+          nodes: m.nodes,
+          assets: m.assets.map((a) => ({
+            path: a.path,
+            data:
+              a.data instanceof ArrayBuffer
+                ? a.data
+                : new Uint8Array(a.data as Iterable<number>).buffer,
+          })),
+          workflow: m.workflow,
+          rewards: m.rewards,
+          cards: m.cards,
+        })),
+        downloadedAt: course.downloadedAt as string,
+        distributionMeta: course.distributionMeta as
+          | {
+              sourceKind: string;
+              sourceLabel: string;
+              checksum: string;
+              signatureStatus: string;
+              installedAt: string;
+            }
+          | undefined,
+      });
+    },
+    replaceCourse: async (_id, _course) => {
+      throw new Error('replaceCourse should not be called during initial install');
+    },
+  });
+
+  return coordinator.install(source);
+}
+
+export async function updateBundleFromSource(
+  bundleId: string,
+  source: CourseSource,
+): Promise<InstallResult> {
+  const coordinator = new InstallCoordinator({
+    getInstalledCourse: async (id: string) => {
+      const bundle = await getBundle(id);
+      return bundle
+        ? {
+            id: bundle.id,
+            version: bundle.version,
+            manifest: bundle.bundleManifest,
+            nodes: [],
+            assets: [],
+            downloadedAt: bundle.downloadedAt,
+            distributionMeta: bundle.distributionMeta,
+          }
+        : undefined;
+    },
+    saveCourse: async (course) => {
+      const type = course.type as string | undefined;
+      if (type !== 'bundle' || !course.bundleManifest || !course.modules) {
+        return;
+      }
+      await saveBundle({
+        id: course.id as string,
+        version: course.version as string,
+        bundleManifest: course.bundleManifest as Record<string, unknown>,
+        modules: (course.modules as Array<{
+          manifest: Record<string, unknown>;
+          nodes: { relativePath: string; content: string }[];
+          assets: { path: string; data: ArrayBuffer }[];
+          workflow?: Record<string, unknown>;
+          rewards?: Record<string, unknown>;
+          cards?: Record<string, unknown>;
+        }>).map((m) => ({
+          manifest: m.manifest,
+          nodes: m.nodes,
+          assets: m.assets.map((a) => ({
+            path: a.path,
+            data:
+              a.data instanceof ArrayBuffer
+                ? a.data
+                : new Uint8Array(a.data as Iterable<number>).buffer,
+          })),
+          workflow: m.workflow,
+          rewards: m.rewards,
+          cards: m.cards,
+        })),
+        downloadedAt: course.downloadedAt as string,
+        distributionMeta: course.distributionMeta as
+          | {
+              sourceKind: string;
+              sourceLabel: string;
+              checksum: string;
+              signatureStatus: string;
+              installedAt: string;
+            }
+          | undefined,
+      });
+    },
+    replaceCourse: async (id: string, course) => {
+      const type = course.type as string | undefined;
+      if (type !== 'bundle' || !course.bundleManifest || !course.modules) {
+        return;
+      }
+      await replaceBundle(id, {
+        id: course.id as string,
+        version: course.version as string,
+        bundleManifest: course.bundleManifest as Record<string, unknown>,
+        modules: (course.modules as Array<{
+          manifest: Record<string, unknown>;
+          nodes: { relativePath: string; content: string }[];
+          assets: { path: string; data: ArrayBuffer }[];
+          workflow?: Record<string, unknown>;
+          rewards?: Record<string, unknown>;
+          cards?: Record<string, unknown>;
+        }>).map((m) => ({
+          manifest: m.manifest,
+          nodes: m.nodes,
+          assets: m.assets.map((a) => ({
+            path: a.path,
+            data:
+              a.data instanceof ArrayBuffer
+                ? a.data
+                : new Uint8Array(a.data as Iterable<number>).buffer,
+          })),
+          workflow: m.workflow,
+          rewards: m.rewards,
+          cards: m.cards,
+        })),
+        downloadedAt: course.downloadedAt as string,
+        distributionMeta: course.distributionMeta as
+          | {
+              sourceKind: string;
+              sourceLabel: string;
+              checksum: string;
+              signatureStatus: string;
+              installedAt: string;
+            }
+          | undefined,
+      });
+    },
+  });
+
+  return coordinator.update(bundleId, source);
+}
+
+export async function isBundleDownloaded(bundleId: string): Promise<boolean> {
+  const bundle = await getBundle(bundleId);
+  return bundle !== undefined;
+}
+
+export async function deleteDownloadedBundle(bundleId: string): Promise<void> {
+  await deleteBundle(bundleId);
+}
+
+export async function getDownloadedBundles(): Promise<StoredBundle[]> {
+  return listBundles();
 }
