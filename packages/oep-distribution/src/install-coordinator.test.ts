@@ -6,6 +6,7 @@ import { OepWriter } from './oep-writer';
 import { OEP_FORMAT, OEP_FORMAT_VERSION } from '@open-edu/schemas';
 import type { DistributionManifest } from '@open-edu/schemas';
 import type { CourseSource } from './types';
+import { BUNDLE_DIR } from './types';
 
 const encoder = new TextEncoder();
 
@@ -46,6 +47,48 @@ async function buildTestOep(id: string, version: string, title: string): Promise
   courseFiles.set('nodes/lesson.md', encoder.encode('# Lesson'));
 
   const result = await OepWriter.build({ manifest, courseFiles });
+  return result.bytes;
+}
+
+async function buildTestBundleOep(
+  id: string,
+  version: string,
+  title: string,
+  moduleCount: number = 2,
+): Promise<Uint8Array> {
+  const modules = Array.from({ length: moduleCount }, (_, i) => ({
+    id: `mod-${String.fromCharCode(97 + i)}`,
+    title: `Module ${String.fromCharCode(65 + i)}`,
+  }));
+
+  const moduleFiles = new Map<string, Map<string, Uint8Array>>();
+  for (const mod of modules) {
+    const files = new Map<string, Uint8Array>();
+    files.set('package.json', encoder.encode(JSON.stringify({
+      id: mod.id, title: mod.title, version, author: 'test', entry: 'nodes/intro.md',
+    })));
+    files.set('nodes/intro.md', encoder.encode(`# ${mod.title}\n\nContent.`));
+    moduleFiles.set(mod.id, files);
+  }
+
+  const bundleManifest = {
+    id, title, version, author: 'test', type: 'bundle' as const,
+    modules: modules.map((m) => ({
+      id: m.id, title: m.title, path: `./modules/${m.id}`, dependsOn: [] as string[], estimatedDuration: 10,
+    })),
+  };
+
+  const distManifest: DistributionManifest = {
+    format: OEP_FORMAT,
+    formatVersion: OEP_FORMAT_VERSION,
+    type: 'bundle',
+    id, version, title,
+    contentRoot: BUNDLE_DIR,
+    checksum: { algorithm: 'sha256', value: '' },
+    signature: { status: 'unsigned' },
+  };
+
+  const result = await OepWriter.buildBundle({ manifest: distManifest, bundleManifest, moduleFiles });
   return result.bytes;
 }
 
@@ -132,6 +175,7 @@ describe('InstallCoordinator', () => {
     storedCourses.set('my-course', {
       id: 'my-course',
       version: '1.0.0',
+      type: 'course',
       manifest: {},
       nodes: [],
       assets: [],
@@ -153,6 +197,7 @@ describe('InstallCoordinator', () => {
     storedCourses.set('my-course', {
       id: 'my-course',
       version: '1.0.0',
+      type: 'course',
       manifest: {},
       nodes: [],
       assets: [],
@@ -171,6 +216,7 @@ describe('InstallCoordinator', () => {
     storedCourses.set('my-course', {
       id: 'my-course',
       version: '2.0.0',
+      type: 'course',
       manifest: {},
       nodes: [],
       assets: [],
@@ -198,6 +244,7 @@ describe('InstallCoordinator', () => {
     storedCourses.set('course-a', {
       id: 'course-a',
       version: '1.0.0',
+      type: 'course',
       manifest: {},
       nodes: [],
       assets: [],
@@ -222,5 +269,51 @@ describe('InstallCoordinator', () => {
 
     expect(result.success).toBe(false);
     expect(result.errorCode).toBe('SOURCE_READ_ERROR');
+  });
+});
+
+describe('InstallCoordinator - bundles', () => {
+  let storage: StorageAdapter;
+  let coordinator: InstallCoordinator;
+  let storedCourses: Map<string, StoredCourseRecord>;
+
+  beforeEach(() => {
+    storedCourses = new Map();
+    storage = {
+      getInstalledCourse: vi.fn(async (id: string) => storedCourses.get(id)),
+      saveCourse: vi.fn(async (course: StoredCourseRecord) => { storedCourses.set(course.id, course); }),
+      replaceCourse: vi.fn(async (courseId: string, course: StoredCourseRecord) => {
+        if (!storedCourses.has(courseId)) throw new Error(`Course "${courseId}" is not installed`);
+        storedCourses.set(courseId, course);
+      }),
+    };
+    coordinator = new InstallCoordinator(storage);
+  });
+
+  it('installs a bundle and stores module data', async () => {
+    const bytes = await buildTestBundleOep('bundle-test', '1.0.0', 'Bundle Test', 2);
+    const source = makeTestCourseSource(bytes);
+    const result = await coordinator.install(source);
+
+    expect(result.success).toBe(true);
+    expect(result.courseId).toBe('bundle-test');
+
+    const saved = storedCourses.get('bundle-test');
+    expect(saved).toBeDefined();
+    expect(saved!.type).toBe('bundle');
+    expect(saved!.bundleManifest).toBeDefined();
+    expect(saved!.modules).toHaveLength(2);
+    const modules = (saved as { modules: Array<{ manifest: unknown }> }).modules;
+    expect(modules[0].manifest).toBeDefined();
+  });
+
+  it('installs a bundle with single module', async () => {
+    const bytes = await buildTestBundleOep('mini-bundle', '1.0.0', 'Mini', 1);
+    const source = makeTestCourseSource(bytes);
+    const result = await coordinator.install(source);
+
+    expect(result.success).toBe(true);
+    const saved = storedCourses.get('mini-bundle');
+    expect(saved!.modules).toHaveLength(1);
   });
 });
