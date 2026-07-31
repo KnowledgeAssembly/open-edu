@@ -1,5 +1,12 @@
 import { useTranslation } from '@open-edu/i18n';
-import { cn } from '@open-edu/design-system';
+import {
+  cn,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@open-edu/design-system';
 import type { ExplanationStyle } from '@open-edu/ai-companion';
 import { useCompanion } from './CompanionProvider.js';
 
@@ -16,36 +23,31 @@ export function ExplanationStylePicker(): JSX.Element {
   const { explanationStyle, setExplanationStyle } = useCompanion();
 
   return (
-    <div
-      role="group"
-      aria-label={t('learner.explanation_style.label')}
-      data-testid="explanation-style-picker"
-    >
-      <p className="text-on-surface-muted text-caption mb-1.5">
+    <div data-testid="explanation-style-picker">
+      <label
+        htmlFor="explanation-style-select"
+        className="text-on-surface-variant text-caption mb-1 block"
+      >
         {t('learner.explanation_style.label')}
-      </p>
-      <div className="flex flex-wrap gap-1.5">
-        {STYLES.map((s) => {
-          const active = explanationStyle === s.id;
-          return (
-            <button
-              key={s.id}
-              type="button"
-              aria-pressed={active}
-              data-testid={`explanation-style-${s.id}`}
-              onClick={() => setExplanationStyle(s.id)}
-              className={cn(
-                'text-caption rounded-full border px-2.5 py-1 transition-colors',
-                active
-                  ? 'border-primary bg-primary-container text-primary'
-                  : 'border-outline-variant text-on-surface-variant hover:border-primary',
-              )}
-            >
+      </label>
+      <Select value={explanationStyle} onValueChange={setExplanationStyle}>
+        <SelectTrigger
+          id="explanation-style-select"
+          className={cn('h-8 w-full text-sm')}
+          aria-label={t('learner.explanation_style.label')}
+        >
+          <SelectValue>
+            {t(STYLES.find((s) => s.id === explanationStyle)?.labelKey ?? STYLES[1]!.labelKey)}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {STYLES.map((s) => (
+            <SelectItem key={s.id} value={s.id} data-testid={`explanation-style-${s.id}`}>
               {t(s.labelKey)}
-            </button>
-          );
-        })}
-      </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
