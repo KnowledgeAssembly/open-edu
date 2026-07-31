@@ -186,18 +186,11 @@ export function RuntimeProvider({
     if (!onProgressChange) return;
     const pkgId = packageId ?? loadedPackage.manifest.id;
     const pkgVer = packageVersion ?? loadedPackage.manifest.version;
-    const snapshot = buildProgressSnapshot(pkgId, pkgVer, {
-      currentNodeId,
-      visitedNodes,
-      scores,
-      answers,
-      isCompleted,
-    });
-    const json = JSON.stringify(snapshot);
-    if (json !== prevSnapshotRef.current) {
-      prevSnapshotRef.current = json;
-      onProgressChange(snapshot);
-    }
+    const content = { currentNodeId, visitedNodes, scores, answers, isCompleted };
+    const contentJson = JSON.stringify(content);
+    if (contentJson === prevSnapshotRef.current) return;
+    prevSnapshotRef.current = contentJson;
+    onProgressChange(buildProgressSnapshot(pkgId, pkgVer, content));
   }, [
     currentNodeId,
     visitedNodes,
