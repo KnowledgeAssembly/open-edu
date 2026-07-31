@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateCondition, shouldFireAction, getDefaultContext } from './conditions';
 import type { ContextSnapshot } from './types';
+import type { RewardCondition } from '@open-edu/schemas';
 
 const defaultContext: ContextSnapshot = {
   scores: { quiz1: 85, quiz2: 60, quiz3: 95 },
@@ -198,8 +199,33 @@ describe('moduleCompleted condition', () => {
 });
 
 describe('bundleCompleted condition', () => {
-  it('should return false by default (evaluated externally)', () => {
-    expect(evaluateCondition({ type: 'bundleCompleted' }, defaultContext)).toBe(false);
+  it('is true when completedModules is non-empty', () => {
+    const result = shouldFireAction(
+      { condition: { type: 'bundleCompleted' } },
+      { ...defaultContext, completedModules: ['mod-a'] },
+    );
+    expect(result).toBe(true);
+  });
+
+  it('is false when no modules are completed', () => {
+    const result = shouldFireAction(
+      { condition: { type: 'bundleCompleted' } },
+      { ...defaultContext, completedModules: [] },
+    );
+    expect(result).toBe(false);
+  });
+
+  it('never throws for conditions the context cannot evaluate', () => {
+    const result = shouldFireAction(
+      {
+        condition: {
+          type: 'stepCompleted',
+          stepId: 'step-1',
+        } as unknown as RewardCondition,
+      },
+      { ...defaultContext },
+    );
+    expect(result).toBe(false);
   });
 });
 
