@@ -41,7 +41,7 @@ function parseNodeContent(relativePath: string, content: string): ContentNode {
   return { type: 'lesson' };
 }
 
-function countBadgeRewards(rewards: Rewards | null): number {
+export function countBadgeRewards(rewards: Rewards | null): number {
   if (!rewards) return 0;
   let count = 0;
   for (const trigger of rewards.triggers) {

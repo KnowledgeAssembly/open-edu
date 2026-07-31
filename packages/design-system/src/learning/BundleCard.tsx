@@ -35,7 +35,7 @@ export function BundleCard({
       onClick={onStart}
       className={cn('cursor-pointer shadow-sm transition-shadow hover:shadow-md', className)}
     >
-      <CardHeader>
+      <CardHeader className="pr-16">
         <div className="mb-1 flex items-center gap-2">
           <Badge variant="secondary">Bundle</Badge>
           <CardTitle className="text-h4 font-display truncate">{title}</CardTitle>

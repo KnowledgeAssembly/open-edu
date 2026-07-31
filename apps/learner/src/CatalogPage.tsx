@@ -42,6 +42,7 @@ export interface CatalogPageProps {
   packages: PackageSummary[];
   bundleSummaries?: BundleSummary[];
   bundleProgress?: Record<string, BundleProgressSnapshot>;
+  modulePackages?: PackageSummary[];
   onStartCourse: (packageDir: string) => void;
   onStartBundle?: (bundleId: string) => void;
   onNavigate?: (view: AppView) => void;
@@ -56,6 +57,7 @@ export function CatalogPage({
   packages,
   bundleSummaries,
   bundleProgress,
+  modulePackages = [],
   onStartCourse,
   onStartBundle,
   onNavigate,
@@ -74,7 +76,11 @@ export function CatalogPage({
     getAllBadges().then(setBadgeData);
   }, []);
 
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string; isBundle?: boolean } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+    isBundle?: boolean;
+  } | null>(null);
 
   const installedIds = useMemo(
     () => new Set(installedCourses.map((c) => c.id)),
@@ -204,7 +210,21 @@ export function CatalogPage({
     [packages, progress],
   );
 
-  const continueList = useMemo(() => inProgressCourses.slice(0, 4), [inProgressCourses]);
+  const inProgressModules = useMemo(
+    () =>
+      modulePackages.filter((p) => {
+        const snap = progress[p.manifest.id];
+        return snap && !snap.isCompleted;
+      }),
+    [modulePackages, progress],
+  );
+
+  const inProgressItems = useMemo(
+    () => [...inProgressCourses, ...inProgressModules],
+    [inProgressCourses, inProgressModules],
+  );
+
+  const continueList = useMemo(() => inProgressItems.slice(0, 4), [inProgressItems]);
 
   if (packages.length === 0) {
     return (
@@ -270,7 +290,7 @@ export function CatalogPage({
               </h2>
               <span className="bg-surface-container text-on-surface-variant text-caption rounded-full px-2 py-0.5">
                 {t('learner.catalog.in_progress_count', {
-                  count: String(inProgressCourses.length),
+                  count: String(inProgressItems.length),
                 })}
               </span>
             </div>
@@ -374,11 +394,7 @@ export function CatalogPage({
                       data-testid="delete-installed-button"
                       className="absolute bottom-2 right-12 opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={(e) =>
-                        handleDeleteInstalledBundle(
-                          bundle.manifest.id,
-                          bundle.manifest.title,
-                          e,
-                        )
+                        handleDeleteInstalledBundle(bundle.manifest.id, bundle.manifest.title, e)
                       }
                     >
                       <Trash2 className="h-4 w-4" />
