@@ -67,4 +67,19 @@ describe('ModelFactory baseURL support', () => {
     expect(model).toMatchObject({ id: 'gpt-4o', api: 'responses' });
     vi.unstubAllEnvs();
   });
+
+  it('uses config.model for the fast tier when a custom baseURL is set', () => {
+    vi.stubEnv('LLM_FAST_MODEL', '');
+    const factory = createModelFactory({
+      provider: 'openai',
+      model: 'phi3.5',
+      apiKey: '',
+      baseURL: 'http://localhost:11434/v1',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+    const model = factory.getModel('fast');
+    expect(model).toMatchObject({ id: 'phi3.5', api: 'chat' });
+    vi.unstubAllEnvs();
+  });
 });
