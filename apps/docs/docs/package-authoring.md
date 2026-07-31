@@ -341,10 +341,12 @@ my-bundle/
 
 The `bundleCompleted` condition fires when **all** modules in the bundle complete. Condition scope rules mirror the rewards system:
 
-| Level  | Allowed conditions                                                                                                                             |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Module | `stepCompleted`, `exerciseCompleted`, `score`, `chain`, `activityCompleted`, `moduleUnlocked`, `moduleFailed`, `attempts`, `answeredCorrectly` |
-| Bundle | `bundleCompleted`, `moduleCompleted`, `skill`, `and`, `or`, `bundleCondition`                                                                  |
+| Level  | Supported conditions                              |
+| ------ | ------------------------------------------------- |
+| Module | `score`, `skill`, `chain`, `and`, `or`            |
+| Bundle | `moduleCompleted`, `bundleCompleted`, `and`, `or` |
+
+`score`/`skill`/`chain` in a bundle-scoped file are schema-valid but always resolve to `false`, because the bundle broker never receives module-local signals.
 
 Card IDs must be unique across the entire bundle (module + bundle cards) since saved progress is keyed by bare `card.id`.
 

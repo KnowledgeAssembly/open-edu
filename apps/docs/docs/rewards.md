@@ -71,9 +71,9 @@ broker.stop();
 
 #### Bundle Conditions
 
-For multi-module bundles, the rewards schema supports two additional event types:
+For multi-module bundles, the rewards schema supports two additional **condition** types:
 
-| Event             | Description                                  |
+| Condition         | Description                                  |
 | ----------------- | -------------------------------------------- |
 | `moduleCompleted` | A single module within a bundle is completed |
 | `bundleCompleted` | All modules in the bundle are completed      |
@@ -269,14 +269,14 @@ The runtime wires a bundle-scoped `RewardBroker`/`CardBroker` that listens for `
 
 ### Condition scope
 
-Conditions are evaluated against the broker's context. The broker can only see signals within its scope:
+Conditions are evaluated against the broker's context. The module broker is fed per-node signals; the bundle broker is fed `completedModules` only:
 
-| Level  | Broker sees                                   | Allowed conditions                                                                                                                             |
-| ------ | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Module | step/exercise/score signals within the module | `stepCompleted`, `exerciseCompleted`, `score`, `chain`, `activityCompleted`, `moduleUnlocked`, `moduleFailed`, `attempts`, `answeredCorrectly` |
-| Bundle | completed modules + cross-module signals      | `bundleCompleted`, `moduleCompleted`, `skill`, `and`, `or`, `bundleCondition`                                                                  |
+| Level  | Broker context                                | Supported conditions                              |
+| ------ | --------------------------------------------- | ------------------------------------------------- |
+| Module | scores, skills, completedNodes (module-local) | `score`, `skill`, `chain`, `and`, `or`            |
+| Bundle | completedModules                              | `moduleCompleted`, `bundleCompleted`, `and`, `or` |
 
-A bundle-scoped file must not reference module-local signals, and a module-scoped file must not reference bundle-level signals — conditions the broker cannot evaluate simply resolve to `false`.
+A bundle-scoped file must not reference module-local signals, and a module-scoped file must not reference bundle-level signals — conditions the broker cannot evaluate simply resolve to `false`. In particular, `score`/`skill`/`chain` in a bundle-scoped file are schema-valid but always resolve to `false`, because the bundle broker never receives module-local signals.
 
 ### Global card-ID uniqueness
 
