@@ -100,6 +100,10 @@ export const pipiliContextSchema = z.object({
       language: z.string(),
       readingLevel: z.string(),
       accessibilityProfile: z.enum(['autism', 'adhd', 'dyslexia']).optional(),
+      explanationStyle: z
+        .enum(['simple', 'detailed', 'exam', 'child_friendly', 'autism_friendly'])
+        .optional(),
+      emojiMode: z.enum(['native', 'openmoji']).optional(),
     })
     .optional(),
   history: z

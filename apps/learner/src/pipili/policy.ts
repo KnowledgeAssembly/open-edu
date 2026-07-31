@@ -2,6 +2,7 @@ import type {
   AccessibilityProfile,
   BoundedContext,
   Citation,
+  ExplanationStyle,
   PipiliMode,
   PipiliResponseMetadata,
 } from '@open-edu/ai-companion/pipili';
@@ -12,10 +13,18 @@ export interface SystemPromptParams {
   learnerLanguage: string;
   readingLevel: string;
   accessibilityProfile?: AccessibilityProfile;
+  explanationStyle?: ExplanationStyle;
+  emojiVisualMode?: boolean;
 }
 
 export function buildSystemPrompt(params: SystemPromptParams): string {
-  const { boundedContext, assessmentActive, accessibilityProfile } = params;
+  const {
+    boundedContext,
+    assessmentActive,
+    accessibilityProfile,
+    explanationStyle,
+    emojiVisualMode,
+  } = params;
 
   let prompt = `You are Pipili, a learning companion in the OpenEdu platform. Your role is to help learners understand, reflect, and progress through their educational content.
 
@@ -53,7 +62,48 @@ ${getAccessibilityInstructions(accessibilityProfile)}
 `;
   }
 
+  if (explanationStyle) {
+    prompt += `## Explanation Style (${explanationStyle})
+${getExplanationStyleInstructions(explanationStyle)}
+`;
+  }
+
+  if (emojiVisualMode) {
+    prompt += `## Emoji Use
+- Use a few small, friendly emojis (e.g. 🌟, 💡, ✅) to encourage the learner.
+- Keep emojis relevant and never let them replace meaning.
+- Use at most one or two emojis per response.
+`;
+  }
+
   return prompt;
+}
+
+function getExplanationStyleInstructions(style: ExplanationStyle): string {
+  switch (style) {
+    case 'simple':
+      return `- Use short sentences and plain words.
+- Explain one idea at a time.
+- Prefer examples over abstract definitions.`;
+    case 'detailed':
+      return `- Give thorough, well-structured explanations.
+- Include reasoning, examples, and connections to related ideas.
+- Use headings or numbered points to organize longer answers.`;
+    case 'exam':
+      return `- Teach toward exam-style questions.
+- Highlight key definitions and facts the learner should memorise.
+- Suggest practice questions and mark-relevant points.`;
+    case 'child_friendly':
+      return `- Use warm, playful, age-appropriate language.
+- Keep sentences short and concrete.
+- Use simple analogies from everyday life.`;
+    case 'autism_friendly':
+      return `- Use literal, concrete wording — avoid metaphors and sarcasm.
+- Keep structure predictable: headings, short paragraphs, numbered steps.
+- Avoid sensory overload; keep sentences short.`;
+    default:
+      return '';
+  }
 }
 
 function getAccessibilityInstructions(profile: AccessibilityProfile): string {

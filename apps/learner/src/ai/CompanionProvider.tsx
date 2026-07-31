@@ -15,6 +15,7 @@ import type {
   SearchResponse,
   EnrichedResult,
   PipiliResponseMetadata,
+  ExplanationStyle,
 } from '@open-edu/ai-companion';
 import {
   ConversationManager,
@@ -27,6 +28,8 @@ import type { PackageInfo } from '@open-edu/ai-companion';
 import { AIProviderImpl } from './AIProviderImpl';
 
 export type PanelState = 'closed' | 'floating' | 'expanded' | 'pinned';
+
+export type EmojiMode = 'native' | 'openmoji';
 
 export type RewardMessage =
   | {
@@ -48,6 +51,10 @@ export type RewardMessage =
 export interface CompanionContextValue {
   panelState: PanelState;
   setPanelState: (state: PanelState) => void;
+  explanationStyle: ExplanationStyle;
+  setExplanationStyle: (style: ExplanationStyle) => void;
+  emojiMode: EmojiMode;
+  setEmojiMode: (mode: EmojiMode) => void;
   messages: ConversationMessage[];
   isLoading: boolean;
   context: LearningContext;
@@ -79,6 +86,52 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
   const [context, setContext] = useState<LearningContext>({});
   const [pendingReward, setPendingReward] = useState(false);
   const [rewardMessages, setRewardMessages] = useState<RewardMessage[]>([]);
+
+  const [explanationStyle, setExplanationStyleState] = useState<ExplanationStyle>(() => {
+    try {
+      const stored = localStorage.getItem('oe-explanation-style');
+      if (
+        stored === 'simple' ||
+        stored === 'detailed' ||
+        stored === 'exam' ||
+        stored === 'child_friendly' ||
+        stored === 'autism_friendly'
+      ) {
+        return stored;
+      }
+    } catch {
+      // localStorage may not be available
+    }
+    return 'detailed';
+  });
+
+  const [emojiMode, setEmojiModeState] = useState<EmojiMode>(() => {
+    try {
+      const stored = localStorage.getItem('oe-emoji-pack');
+      if (stored === 'native' || stored === 'openmoji') return stored;
+    } catch {
+      // localStorage may not be available
+    }
+    return 'native';
+  });
+
+  const setExplanationStyle = useCallback((style: ExplanationStyle) => {
+    setExplanationStyleState(style);
+    try {
+      localStorage.setItem('oe-explanation-style', style);
+    } catch {
+      // localStorage may not be available
+    }
+  }, []);
+
+  const setEmojiMode = useCallback((mode: EmojiMode) => {
+    setEmojiModeState(mode);
+    try {
+      localStorage.setItem('oe-emoji-pack', mode);
+    } catch {
+      // localStorage may not be available
+    }
+  }, []);
 
   const servicesRef = useRef<{
     conversationManager: ConversationManager;
@@ -237,6 +290,10 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
     () => ({
       panelState,
       setPanelState,
+      explanationStyle,
+      setExplanationStyle,
+      emojiMode,
+      setEmojiMode,
       messages,
       isLoading,
       context,
@@ -252,6 +309,10 @@ export function CompanionProvider({ children }: CompanionProviderProps): JSX.Ele
     }),
     [
       panelState,
+      explanationStyle,
+      setExplanationStyle,
+      emojiMode,
+      setEmojiMode,
       messages,
       isLoading,
       context,

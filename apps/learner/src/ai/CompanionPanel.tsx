@@ -5,6 +5,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
 import { usePipiliChat } from './PipiliChatProvider';
 import { PipiliChat } from './PipiliChat';
+import { ExplanationStylePicker } from './ExplanationStylePicker.js';
 
 const suggestedQuestions = [
   'Can you explain what I just read?',
@@ -97,6 +98,9 @@ function PipiliCompanionContent(): JSX.Element {
           >
             <X className="h-5 w-5" />
           </Button>
+        </div>
+        <div className="border-outline-variant shrink-0 border-b px-4 py-2">
+          <ExplanationStylePicker />
         </div>
         <PipiliChat
           messages={messages}

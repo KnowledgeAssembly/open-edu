@@ -31,13 +31,22 @@ export interface LearningContext {
   learnerPreferences?: {
     readingLevel?: string;
     language?: string;
+    explanationStyle?: ExplanationStyle;
+    emojiMode?: 'native' | 'openmoji';
   };
 }
+
+export type ExplanationStyle =
+  | 'simple'
+  | 'detailed'
+  | 'exam'
+  | 'child_friendly'
+  | 'autism_friendly';
 
 export interface ExplanationRequest {
   text: string;
   context: LearningContext;
-  style: 'simple' | 'detailed' | 'child_friendly' | 'autism_friendly' | 'exam';
+  style: ExplanationStyle;
   readingLevel?: '6-8' | '9-12' | 'secondary' | 'adult' | 'teacher';
 }
 

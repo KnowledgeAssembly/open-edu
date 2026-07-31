@@ -8,6 +8,7 @@ import { CatalogPage } from '../CatalogPage';
 import { HomePage } from '../HomePage';
 import { ProgressDashboard } from '../ProgressDashboard';
 import { SettingsPage } from '../SettingsPage';
+import { CompanionProvider } from '../ai';
 import { CourseExitWarningDialog } from '../CourseExitWarningDialog';
 import { AppSidebar } from '@open-edu/design-system';
 import type { PackageSummary } from '@open-edu/core';
@@ -62,7 +63,9 @@ const samplePackages: PackageSummary[] = [
 function renderWithTheme(ui: React.ReactElement, themeId: ThemeId) {
   return render(
     <RuntimeThemeProvider themeId={themeId}>
-      <FontSizeProvider>{ui}</FontSizeProvider>
+      <FontSizeProvider>
+        <CompanionProvider>{ui}</CompanionProvider>
+      </FontSizeProvider>
     </RuntimeThemeProvider>,
   );
 }

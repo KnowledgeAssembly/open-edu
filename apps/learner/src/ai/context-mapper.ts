@@ -7,7 +7,10 @@ import type {
   LearnerProfile,
 } from '@open-edu/ai-companion';
 
-export function learningContextToSnapshot(ctx: LearningContext): PipiliContextSnapshot {
+export function learningContextToSnapshot(
+  ctx: LearningContext,
+  preferences?: Partial<LearnerProfile>,
+): PipiliContextSnapshot {
   const snapshot: PipiliContextSnapshot = {};
 
   if (ctx.lessonId && ctx.lessonTitle) {
@@ -41,10 +44,13 @@ export function learningContextToSnapshot(ctx: LearningContext): PipiliContextSn
     } satisfies PageContext;
   }
 
-  if (ctx.learnerPreferences) {
+  if (ctx.learnerPreferences || preferences) {
     snapshot.learner = {
-      language: ctx.learnerPreferences.language ?? 'en',
-      readingLevel: ctx.learnerPreferences.readingLevel ?? 'secondary',
+      language: ctx.learnerPreferences?.language ?? preferences?.language ?? 'en',
+      readingLevel:
+        ctx.learnerPreferences?.readingLevel ?? preferences?.readingLevel ?? 'secondary',
+      explanationStyle: ctx.learnerPreferences?.explanationStyle ?? preferences?.explanationStyle,
+      emojiMode: ctx.learnerPreferences?.emojiMode ?? preferences?.emojiMode,
     } satisfies LearnerProfile;
   }
 

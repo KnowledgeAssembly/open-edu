@@ -1,3 +1,7 @@
+import type { ExplanationStyle } from '../providers/types.js';
+
+export type { ExplanationStyle } from '../providers/types.js';
+
 export interface PipiliRequest {
   conversationId: string;
   messages: PipiliMessage[];
@@ -88,6 +92,8 @@ export interface LearnerProfile {
   language: string;
   readingLevel: string;
   accessibilityProfile?: AccessibilityProfile;
+  explanationStyle?: ExplanationStyle;
+  emojiMode?: 'native' | 'openmoji';
 }
 
 export type AccessibilityProfile = 'autism' | 'adhd' | 'dyslexia';

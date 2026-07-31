@@ -62,4 +62,30 @@ describe('learningContextToSnapshot', () => {
     expect(result.notes).toBeUndefined();
     expect(result.history).toBeUndefined();
   });
+
+  it('maps explanationStyle and emojiMode from the preferences argument', () => {
+    const result = learningContextToSnapshot(
+      {},
+      { explanationStyle: 'child_friendly', emojiMode: 'openmoji' },
+    );
+    expect(result.learner?.explanationStyle).toBe('child_friendly');
+    expect(result.learner?.emojiMode).toBe('openmoji');
+  });
+
+  it('prefers learnerPreferences over the preferences argument', () => {
+    const result = learningContextToSnapshot(
+      {
+        learnerPreferences: {
+          explanationStyle: 'exam',
+          emojiMode: 'native',
+          language: 'hi',
+          readingLevel: 'secondary',
+        },
+      },
+      { explanationStyle: 'simple', emojiMode: 'openmoji' },
+    );
+    expect(result.learner?.explanationStyle).toBe('exam');
+    expect(result.learner?.emojiMode).toBe('native');
+    expect(result.learner?.language).toBe('hi');
+  });
 });

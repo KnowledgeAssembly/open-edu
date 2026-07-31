@@ -53,6 +53,8 @@ import {
   TextSelectionToolbar,
   WordTapHandler,
   PipiliChatProvider,
+  ReaderToolbar,
+  useCompanionShortcut,
 } from './ai';
 import { getBundleProgress } from './bundleProgressStorage';
 import { useBreakTimer } from './useBreakTimer';
@@ -230,7 +232,11 @@ function AppShellInner({
   const location = useLocation();
   const courseContentRef = useRef<HTMLDivElement>(null);
 
-  const { panelState } = useCompanion();
+  const { panelState, setPanelState, messages } = useCompanion();
+
+  useCompanionShortcut(() => {
+    setPanelState(panelState === 'closed' ? 'floating' : 'closed');
+  });
 
   const { installedCourses, installedBundles, refresh: refreshInstalled } = useInstalledCourses();
 
@@ -667,14 +673,22 @@ function AppShellInner({
                   sidebarCollapsed={sidebarCollapsed}
                   onProgressUpdate={handleProgressUpdate}
                   header={
-                    <TopAppBar
-                      breadcrumbs={getBreadcrumbs()}
-                      isCourseView
-                      courseTitle={coursePkg.manifest.title}
-                      showA11yControls
-                      progressCurrent={courseProgressCurrent}
-                      progressTotal={courseProgressTotal}
-                    />
+                    <>
+                      <TopAppBar
+                        breadcrumbs={getBreadcrumbs()}
+                        isCourseView
+                        courseTitle={coursePkg.manifest.title}
+                        showA11yControls
+                        progressCurrent={courseProgressCurrent}
+                        progressTotal={courseProgressTotal}
+                      />
+                      <ReaderToolbar
+                        onOpen={() =>
+                          setPanelState(panelState === 'closed' ? 'floating' : 'closed')
+                        }
+                        hasUnread={messages.length > 0 && panelState === 'closed'}
+                      />
+                    </>
                   }
                   bundleContext={bundleContextMemo}
                 >
@@ -839,8 +853,8 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
 
   return (
     <Pipili
-      mood="idle"
-      visible={!isOpen}
+      mood={!isCourseView && isOpen ? 'curious' : 'idle'}
+      visible={isCourseView ? !isOpen : true}
       hasUnread={messages.length > 0 && !isOpen}
       pendingReward={showRewardState}
       onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}

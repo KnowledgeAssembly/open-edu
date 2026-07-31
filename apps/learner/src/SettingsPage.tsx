@@ -12,8 +12,9 @@ import {
   RadioGroupItem,
   Pipili,
 } from '@open-edu/design-system';
-import { Sun, Eye, Type, Minus, Plus, Languages } from 'lucide-react';
+import { Sun, Eye, Type, Minus, Plus, Languages, Smile } from 'lucide-react';
 import { LanguageSwitcher, useTranslation } from '@open-edu/i18n';
+import { useCompanion, type EmojiMode } from './ai';
 export interface SettingsPageProps {
   currentThemeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
@@ -30,6 +31,7 @@ export function SettingsPage({
 }: SettingsPageProps): JSX.Element {
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
   const { t } = useTranslation();
+  const { emojiMode, setEmojiMode } = useCompanion();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
@@ -194,6 +196,43 @@ export function SettingsPage({
                   <span className="font-medium">{t('learner.settings.break_60')}</span>
                   <p className="text-on-surface-variant text-caption">
                     {t('learner.settings.break_60_description')}
+                  </p>
+                </label>
+              </div>
+            </RadioGroup>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-h2 font-display flex items-center gap-2">
+              <Smile className="h-5 w-5" /> {t('learner.settings.emoji_pack')}
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <p className="text-on-surface-variant text-body-ui">
+              {t('learner.settings.emoji_pack_description')}
+            </p>
+            <RadioGroup
+              value={emojiMode}
+              onValueChange={(value) => setEmojiMode(value as EmojiMode)}
+              className="mt-3 gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="native" id="emoji-native" />
+                <label htmlFor="emoji-native" className="text-body-ui">
+                  <span className="font-medium">{t('learner.settings.emoji_native')}</span>
+                  <p className="text-on-surface-variant text-caption">
+                    {t('learner.settings.emoji_native_description')}
+                  </p>
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value="openmoji" id="emoji-openmoji" />
+                <label htmlFor="emoji-openmoji" className="text-body-ui">
+                  <span className="font-medium">{t('learner.settings.emoji_openmoji')}</span>
+                  <p className="text-on-surface-variant text-caption">
+                    {t('learner.settings.emoji_openmoji_description')}
                   </p>
                 </label>
               </div>
