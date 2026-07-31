@@ -12,6 +12,18 @@ const mockInstances = vi.hoisted(() => ({
   telemetrySessions: [] as any[],
   rewardBrokers: [] as any[],
   cardBrokers: [] as any[],
+  onProgressChange: null as
+    | ((snapshot: {
+        packageId: string;
+        packageVersion: string;
+        currentNodeId: string;
+        visitedNodes: string[];
+        scores: Record<string, number>;
+        answers: Record<string, unknown>;
+        isCompleted: boolean;
+        updatedAt: string;
+      }) => void)
+    | null,
 }));
 
 const engineHandlers: Array<(event: { type: string; nodeId?: string; score?: number }) => void> =
@@ -114,6 +126,28 @@ vi.mock('@open-edu/accessibility', () => ({
   AccessibilityProvider: ({ children }: { children: React.ReactNode }) => children,
   LiveRegionProvider: ({ children }: { children: React.ReactNode }) => children,
   useLiveRegion: vi.fn(() => ({ announce: vi.fn() })),
+}));
+
+vi.mock('@open-edu/runtime', () => ({
+  RuntimeProvider: ({
+    onProgressChange,
+    children,
+  }: {
+    onProgressChange?: (
+      snapshot: Parameters<NonNullable<typeof mockInstances.onProgressChange>>[0],
+    ) => void;
+    children: React.ReactNode;
+  }) => {
+    mockInstances.onProgressChange = onProgressChange ?? null;
+    return children;
+  },
+  LayoutShell: () => null,
+  CompletionScreen: () => <div data-testid="completion-screen" />,
+  useRuntime: () => ({
+    currentNodeId: '',
+    visitedNodes: [],
+    navigateToNode: vi.fn(),
+  }),
 }));
 
 vi.mock('./cardsStorage.js', () => ({
@@ -247,19 +281,29 @@ describe('CourseRuntime', () => {
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
     );
     await waitFor(() => {
-      expect(engineHandlers.length).toBeGreaterThan(0);
+      expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
     });
 
     act(() => {
-      engineHandlers.forEach((h) => h({ type: 'node.completed', nodeId: 'nodes/lesson-01.md' }));
-      engineHandlers.forEach((h) => h({ type: 'workflow.completed' }));
+      mockInstances.onProgressChange?.({
+        packageId: 'test-course',
+        packageVersion: '1.0.0',
+        currentNodeId: 'nodes/lesson-01.md',
+        visitedNodes: ['nodes/lesson-01.md'],
+        scores: {},
+        answers: {},
+        isCompleted: true,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
     });
 
     const bundleSession =
       mockInstances.telemetrySessions[mockInstances.telemetrySessions.length - 1];
-    const events = bundleSession.emit.mock.calls.map((c: any[]) => c[0].event);
-    expect(events).toContain('module_complete');
-    expect(events).toContain('bundle_complete');
+    await waitFor(() => {
+      const events = bundleSession.emit.mock.calls.map((c: any[]) => c[0].event);
+      expect(events).toContain('module_complete');
+      expect(events).toContain('bundle_complete');
+    });
   });
 
   it('updates the bundle broker context with completedModules on bundle completion', async () => {
@@ -298,17 +342,27 @@ describe('CourseRuntime', () => {
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
     );
     await waitFor(() => {
-      expect(engineHandlers.length).toBeGreaterThan(0);
+      expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
     });
 
     act(() => {
-      engineHandlers.forEach((h) => h({ type: 'node.completed', nodeId: 'nodes/lesson-01.md' }));
-      engineHandlers.forEach((h) => h({ type: 'workflow.completed' }));
+      mockInstances.onProgressChange?.({
+        packageId: 'test-course',
+        packageVersion: '1.0.0',
+        currentNodeId: 'nodes/lesson-01.md',
+        visitedNodes: ['nodes/lesson-01.md'],
+        scores: {},
+        answers: {},
+        isCompleted: true,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
     });
 
     const bundleRewardBroker = mockInstances.rewardBrokers[mockInstances.rewardBrokers.length - 1];
-    expect(bundleRewardBroker.updateContext).toHaveBeenCalledWith({
-      completedModules: ['test-course'],
+    await waitFor(() => {
+      expect(bundleRewardBroker.updateContext).toHaveBeenCalledWith({
+        completedModules: ['test-course'],
+      });
     });
   });
 });
