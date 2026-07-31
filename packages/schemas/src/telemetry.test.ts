@@ -155,4 +155,24 @@ describe('TelemetryEventSchema', () => {
       }),
     ).toThrow();
   });
+
+  it('accepts a module_complete event', () => {
+    const result = TelemetryEventSchema.safeParse({
+      event: 'module_complete',
+      moduleId: 'mod-a',
+      sessionId: 's1',
+      timestamp: ts,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a bundle_complete event', () => {
+    const result = TelemetryEventSchema.safeParse({
+      event: 'bundle_complete',
+      bundleId: 'bundle-1',
+      sessionId: 's1',
+      timestamp: ts,
+    });
+    expect(result.success).toBe(true);
+  });
 });

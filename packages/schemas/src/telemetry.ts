@@ -51,6 +51,16 @@ export const WorkflowCompleteEventSchema = BaseTelemetrySchema.extend({
   event: z.literal('workflow_complete'),
 });
 
+export const ModuleCompleteEventSchema = BaseTelemetrySchema.extend({
+  event: z.literal('module_complete'),
+  moduleId: z.string().min(1).max(128),
+});
+
+export const BundleCompleteEventSchema = BaseTelemetrySchema.extend({
+  event: z.literal('bundle_complete'),
+  bundleId: z.string().min(1).max(128),
+});
+
 export const TelemetryEventSchema = z.discriminatedUnion('event', [
   NodeOpenEventSchema,
   NodeCompleteEventSchema,
@@ -59,6 +69,8 @@ export const TelemetryEventSchema = z.discriminatedUnion('event', [
   WidgetInteractionEventSchema,
   RouteTriggeredEventSchema,
   WorkflowCompleteEventSchema,
+  ModuleCompleteEventSchema,
+  BundleCompleteEventSchema,
 ]);
 
 export type TelemetryEvent = z.infer<typeof TelemetryEventSchema>;
@@ -69,6 +81,8 @@ export type HintTriggeredEvent = z.infer<typeof HintTriggeredEventSchema>;
 export type WidgetInteractionEvent = z.infer<typeof WidgetInteractionEventSchema>;
 export type RouteTriggeredEvent = z.infer<typeof RouteTriggeredEventSchema>;
 export type WorkflowCompleteEvent = z.infer<typeof WorkflowCompleteEventSchema>;
+export type ModuleCompleteEvent = z.infer<typeof ModuleCompleteEventSchema>;
+export type BundleCompleteEvent = z.infer<typeof BundleCompleteEventSchema>;
 
 export const TelemetryEventEnum = z.enum([
   'node_open',
@@ -78,4 +92,6 @@ export const TelemetryEventEnum = z.enum([
   'widget_interaction',
   'route_triggered',
   'workflow_complete',
+  'module_complete',
+  'bundle_complete',
 ]);
