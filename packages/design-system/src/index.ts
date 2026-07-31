@@ -123,6 +123,9 @@ export type { PipiliProps, PipiliMood } from './primitives/pipili.js';
 
 export { EmojiText, splitEmojiRuns, emojiToHex } from './primitives/EmojiText.js';
 export type { EmojiTextProps, EmojiRun } from './primitives/EmojiText.js';
+
+export { MarkdownText } from './primitives/MarkdownText.js';
+export type { MarkdownTextProps } from './primitives/MarkdownText.js';
 export {
   NativeEmojiPack,
   createOpenMojiPack,

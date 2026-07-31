@@ -588,6 +588,7 @@ video {
 
 .open-edu-runtime {
   color: var(--foreground);
+  height: 100%;
 }
 
 .open-edu-runtime[data-reduced-motion='reduce'] *,
@@ -800,6 +801,10 @@ video {
   z-index: 10;
 }
 
+.z-40 {
+  z-index: 40;
+}
+
 .z-50 {
   z-index: 50;
 }
@@ -814,6 +819,10 @@ video {
 
 .z-\[200\] {
   z-index: 200;
+}
+
+.z-\[250\] {
+  z-index: 250;
 }
 
 .z-\[50\] {
@@ -1160,6 +1169,10 @@ video {
   height: 2.25rem;
 }
 
+.h-\[1\.2em\] {
+  height: 1.2em;
+}
+
 .h-\[1\.5em\] {
   height: 1.5em;
 }
@@ -1344,6 +1357,10 @@ video {
   width: 2.25rem;
 }
 
+.w-\[1\.2em\] {
+  width: 1.2em;
+}
+
 .w-\[100px\] {
   width: 100px;
 }
@@ -1406,6 +1423,10 @@ video {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.min-w-\[160px\] {
+  min-width: 160px;
 }
 
 .min-w-\[200px\] {
@@ -2375,6 +2396,10 @@ video {
   padding-bottom: 1.5rem;
 }
 
+.pl-2 {
+  padding-left: 0.5rem;
+}
+
 .pl-4 {
   padding-left: 1rem;
 }
@@ -2437,6 +2462,14 @@ video {
 
 .text-center {
   text-align: center;
+}
+
+.align-top {
+  vertical-align: top;
+}
+
+.align-\[-0\.2em\] {
+  vertical-align: -0.2em;
 }
 
 .font-body-md {
@@ -2564,6 +2597,12 @@ video {
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
+}
+
+.text-mono {
+  font-size: var(--oe-font-productive-code-size);
+  line-height: var(--oe-font-productive-code-lineHeight);
+  font-weight: var(--oe-font-productive-code-weight);
 }
 
 .text-sm {
@@ -3020,6 +3059,12 @@ video {
   widget: interaction;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .open-edu-runtime {
     animation-duration: 0.001ms !important;
@@ -3050,6 +3095,14 @@ video {
 
 .placeholder\:text-on-surface-variant::placeholder {
   color: var(--oe-color-on-surface-variant);
+}
+
+.first\:mt-0:first-child {
+  margin-top: 0px;
+}
+
+.last\:mb-0:last-child {
+  margin-bottom: 0px;
 }
 
 .hover\:scale-\[1\.02\]:hover {
@@ -3138,8 +3191,16 @@ video {
   background-color: var(--oe-color-accent);
 }
 
+.focus\:bg-error-container:focus {
+  background-color: var(--oe-color-error-container);
+}
+
 .focus\:text-accent-foreground:focus {
   color: var(--oe-color-on-secondary);
+}
+
+.focus\:text-error:focus {
+  color: var(--oe-color-error);
 }
 
 .focus\:outline-none:focus {
