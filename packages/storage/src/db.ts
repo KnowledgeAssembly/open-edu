@@ -40,6 +40,8 @@ export interface StoredBundle {
   modules: StoredBundleModule[];
   downloadedAt: string;
   distributionMeta?: DistributionMeta;
+  rewards?: Record<string, unknown>;
+  cards?: Record<string, unknown>;
 }
 
 export interface LearningProgress {
