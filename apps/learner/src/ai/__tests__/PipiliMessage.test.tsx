@@ -29,6 +29,24 @@ describe('PipiliMessage', () => {
     expect(screen.getByText('Hello assistant')).toBeInTheDocument();
   });
 
+  it('renders markdown formatting in assistant message text', () => {
+    renderWithI18n(
+      <PipiliMessage role="assistant" parts={textParts('Use **bold** and a table.')} />,
+    );
+    expect(screen.getByText('bold')).toHaveProperty('tagName', 'STRONG');
+  });
+
+  it('renders a GFM table in assistant message text', () => {
+    renderWithI18n(
+      <PipiliMessage
+        role="assistant"
+        parts={textParts('| Term | Meaning |\n| --- | --- |\n| Atom | Smallest unit |')}
+      />,
+    );
+    expect(screen.getByRole('columnheader', { name: 'Term' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Smallest unit' })).toBeInTheDocument();
+  });
+
   it('shows streaming caret when isStreaming is true', () => {
     const { container } = renderWithI18n(
       <PipiliMessage role="assistant" parts={textParts('Streaming')} isStreaming />,

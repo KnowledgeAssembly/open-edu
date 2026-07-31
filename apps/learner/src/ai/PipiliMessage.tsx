@@ -5,7 +5,7 @@ import {
   TutorMessage,
   Citation as CitationCmp,
   cn,
-  EmojiText,
+  MarkdownText,
   NativeEmojiPack,
   createOpenMojiPack,
   type EmojiPack,
@@ -45,7 +45,7 @@ export const PipiliMessage = React.forwardRef<HTMLDivElement, PipiliMessageProps
         <TutorMessage role={role === 'assistant' ? 'ai' : 'user'}>
           <span className={cn(isStreaming && 'opacity-95')}>
             {role === 'assistant' ? (
-              <EmojiText text={visibleText} pack={resolveEmojiPack(emojiMode)} />
+              <MarkdownText content={visibleText} emojiPack={resolveEmojiPack(emojiMode)} />
             ) : (
               visibleText
             )}
