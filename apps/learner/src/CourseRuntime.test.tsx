@@ -282,6 +282,7 @@ describe('CourseRuntime', () => {
     );
     await waitFor(() => {
       expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
     });
 
     act(() => {
@@ -343,6 +344,7 @@ describe('CourseRuntime', () => {
     );
     await waitFor(() => {
       expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
     });
 
     act(() => {

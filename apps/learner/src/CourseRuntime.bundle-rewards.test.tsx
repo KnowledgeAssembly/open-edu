@@ -230,6 +230,7 @@ describe('CourseRuntime bundle rewards (real brokers)', () => {
 
     await waitFor(() => {
       expect(mockInstances.sessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
     });
 
     act(() => {
@@ -278,6 +279,7 @@ describe('CourseRuntime bundle rewards (real brokers)', () => {
 
     await waitFor(() => {
       expect(mockInstances.sessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
     });
 
     act(() => {
