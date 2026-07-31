@@ -9,7 +9,7 @@ const productiveBody: TypographyToken = {
 
 const expressiveBody: TypographyToken = {
   fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
-  fontSize: '18px',
+  fontSize: '16px',
   fontWeight: '400',
   lineHeight: '1.7',
   letterSpacing: '0.01em',
@@ -50,13 +50,13 @@ const productiveSet: TypographySet = {
   },
   heading5: {
     fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-    fontSize: '16px',
+    fontSize: '17px',
     fontWeight: '600',
     lineHeight: '1.5',
   },
   heading6: {
     fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: '600',
     lineHeight: '1.5',
   },
@@ -116,13 +116,13 @@ const expressiveSet: TypographySet = {
   },
   heading5: {
     fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
-    fontSize: '16px',
+    fontSize: '17px',
     fontWeight: '600',
     lineHeight: '1.6',
   },
   heading6: {
     fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: '600',
     lineHeight: '1.6',
   },

@@ -129,7 +129,7 @@ const testTheme: ThemeDefinition = {
       },
       body: {
         fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
-        fontSize: '18px',
+        fontSize: '16px',
         fontWeight: '420',
         lineHeight: '1.7',
         letterSpacing: '0.01em',
@@ -200,7 +200,7 @@ describe('flattenTheme', () => {
     expect(vars['--oe-font-expressive-body-family']).toBe(
       '"Source Serif 4", Georgia, ui-serif, serif',
     );
-    expect(vars['--oe-font-expressive-body-size']).toBe('18px');
+    expect(vars['--oe-font-expressive-body-size']).toBe('16px');
     expect(vars['--oe-font-expressive-body-weight']).toBe('420');
     expect(vars['--oe-font-expressive-body-lineHeight']).toBe('1.7');
   });

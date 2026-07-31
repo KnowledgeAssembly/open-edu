@@ -98,13 +98,13 @@ export const nocturnal: ThemeDefinition = {
       },
       heading5: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        fontSize: '16px',
+        fontSize: '17px',
         fontWeight: '600',
         lineHeight: '24px',
       },
       heading6: {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        fontSize: '14px',
+        fontSize: '16px',
         fontWeight: '600',
         lineHeight: '20px',
       },
