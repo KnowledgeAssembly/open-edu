@@ -35,10 +35,15 @@ class ModelFactoryImpl implements ModelFactory {
   }
 
   private createProvider(): (modelId: string) => LanguageModel {
-    const { provider, apiKey } = this.config;
+    const { provider, apiKey, baseURL } = this.config;
     switch (provider) {
-      case 'openai':
-        return createOpenAI({ apiKey }) as (modelId: string) => LanguageModel;
+      case 'openai': {
+        const openai = createOpenAI({ apiKey, baseURL });
+        // Custom OpenAI-compatible endpoints (e.g. Ollama) expose the Chat
+        // Completions API, not the Responses API. The default provider method
+        // targets Responses, so route custom-baseURL traffic through .chat().
+        return (modelId) => (baseURL ? openai.chat(modelId) : openai(modelId)) as LanguageModel;
+      }
       case 'google':
         return createGoogleGenerativeAI({ apiKey }) as (modelId: string) => LanguageModel;
       case 'openrouter': {

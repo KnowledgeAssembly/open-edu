@@ -106,6 +106,20 @@ describe('ModelFactory', () => {
     expect(factory).toBeDefined();
   });
 
+  it('custom baseURL with empty apiKey (Ollama-style): returns a model', () => {
+    const factory = createModelFactory({
+      provider: 'openai',
+      model: 'llama3.2',
+      apiKey: '',
+      baseURL: 'http://localhost:11434/v1',
+      maxTokens: 4096,
+      temperature: 0.3,
+    });
+    const model = factory.getModel('fast');
+    expect(model).toBeDefined();
+    expect(typeof model).toBe('object');
+  });
+
   it('unknown provider: throws on getModel', () => {
     const factory = createModelFactory({
       provider: 'unknown',

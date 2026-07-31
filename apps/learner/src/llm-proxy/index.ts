@@ -92,9 +92,10 @@ async function handleLlmRequest(req: IncomingMessage, res: ServerResponse): Prom
     ...(temperature !== undefined ? { temperature } : {}),
   };
 
-  if (!config.apiKey) {
+  if (!config.apiKey && !config.baseURL) {
     sendJson(res, 503, {
-      error: 'LLM API key not configured on the server. Set LLM_API_KEY environment variable.',
+      error:
+        'LLM API key not configured on the server. Set LLM_API_KEY environment variable (or LLM_BASE_URL for a local endpoint like Ollama).',
       code: 'MISSING_API_KEY',
     });
     return;
