@@ -26,9 +26,9 @@ describe('TopAppBar', () => {
     expect(screen.queryByTestId('top-appbar-ask-ai')).toBeNull();
   });
 
-  it('renders user avatar placeholder when no avatar provided', () => {
+  it('does not render an avatar', () => {
     renderWithProvider(<TopAppBar />);
-    expect(screen.getByTestId('top-appbar-avatar')).toBeInTheDocument();
+    expect(screen.queryByTestId('top-appbar-avatar')).toBeNull();
   });
 
   it('shows a11y controls toggle when showA11yControls is true', () => {

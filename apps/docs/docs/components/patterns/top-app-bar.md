@@ -1,6 +1,6 @@
 # TopAppBar
 
-**Purpose:** Sticky top app bar with breadcrumbs, accessibility controls, user avatar, and course progress.
+**Purpose:** Sticky top app bar with breadcrumbs, accessibility controls, custom actions, and course progress.
 
 ## Import
 
@@ -10,16 +10,15 @@ import { TopAppBar } from '@open-edu/design-system';
 
 ## Props
 
-| Prop                   | Type                         | Default | Description                                |
-| ---------------------- | ---------------------------- | ------- | ------------------------------------------ |
-| `breadcrumbs`          | `TopAppBarBreadcrumb[]`      | —       | Breadcrumb trail items                     |
-| `showA11yControls`     | `boolean`                    | —       | Shows accessibility settings panel         |
-| `userAvatar`           | `string`                     | —       | URL for user avatar image                  |
-| `onReadingRulerChange` | `(enabled: boolean) => void` | —       | Callback when reading ruler toggled        |
-| `isCourseView`         | `boolean`                    | —       | Switches to course view (title + progress) |
-| `courseTitle`          | `string`                     | —       | Course title in course view                |
-| `progressCurrent`      | `number`                     | —       | Current lesson number for progress bar     |
-| `progressTotal`        | `number`                     | —       | Total lessons for progress bar             |
+| Prop               | Type                    | Default | Description                                |
+| ------------------ | ----------------------- | ------- | ------------------------------------------ |
+| `breadcrumbs`      | `TopAppBarBreadcrumb[]` | —       | Breadcrumb trail items                     |
+| `showA11yControls` | `boolean`               | —       | Shows accessibility settings panel         |
+| `actions`          | `React.ReactNode`       | —       | Custom header actions (e.g. Pipili button) |
+| `isCourseView`     | `boolean`               | —       | Switches to course view (title + progress) |
+| `courseTitle`      | `string`                | —       | Course title in course view                |
+| `progressCurrent`  | `number`                | —       | Current lesson number for progress bar     |
+| `progressTotal`    | `number`                | —       | Total lessons for progress bar             |
 
 `TopAppBarBreadcrumb` = `{ label: string; href?: string }`
 
@@ -33,11 +32,7 @@ import { TopAppBar } from '@open-edu/design-system';
 ## Examples
 
 ```tsx
-<TopAppBar
-  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]}
-  showA11yControls
-  userAvatar="/avatar.png"
-/>
+<TopAppBar breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Courses' }]} showA11yControls />
 ```
 
 ```tsx

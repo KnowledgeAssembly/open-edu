@@ -117,9 +117,8 @@ import { SideNav } from '@open-edu/runtime';
 Sticky header with:
 
 - Breadcrumb navigation
-- Accessibility controls popover (Reader mode, Reading Ruler toggle, font size A+/A-)
-- ThemeSelector integration (theme switcher)
-- User avatar
+- Accessibility controls popover (breadcrumbs toggle, font size A+/A-)
+- Custom `actions` slot (e.g. Pipili button)
 - Backdrop-blur effect
 
 ```tsx
@@ -128,7 +127,6 @@ import { TopAppBar } from '@open-edu/runtime';
 <TopAppBar
   breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Course' }]}
   showA11yControls
-  onReadingRulerChange={setRulerEnabled}
   isCourseView
   courseTitle="Introduction to Math"
   progressCurrent={3}
@@ -136,16 +134,15 @@ import { TopAppBar } from '@open-edu/runtime';
 />;
 ```
 
-| Prop                   | Type                         | Default | Description                           |
-| ---------------------- | ---------------------------- | ------- | ------------------------------------- |
-| `breadcrumbs`          | `TopAppBarBreadcrumb[]`      | —       | Breadcrumb trail                      |
-| `showA11yControls`     | `boolean`                    | —       | Show accessibility controls popover   |
-| `userAvatar`           | `string`                     | —       | User avatar URL                       |
-| `onReadingRulerChange` | `(enabled: boolean) => void` | —       | Reading Ruler toggle callback         |
-| `isCourseView`         | `boolean`                    | —       | Whether rendered inside a course view |
-| `courseTitle`          | `string`                     | —       | Course title for the header           |
-| `progressCurrent`      | `number`                     | —       | Current step in course progress       |
-| `progressTotal`        | `number`                     | —       | Total steps in course progress        |
+| Prop               | Type                    | Default | Description                           |
+| ------------------ | ----------------------- | ------- | ------------------------------------- |
+| `breadcrumbs`      | `TopAppBarBreadcrumb[]` | —       | Breadcrumb trail                      |
+| `showA11yControls` | `boolean`               | —       | Show accessibility controls popover   |
+| `actions`          | `React.ReactNode`       | —       | Custom header actions                 |
+| `isCourseView`     | `boolean`               | —       | Whether rendered inside a course view |
+| `courseTitle`      | `string`                | —       | Course title for the header           |
+| `progressCurrent`  | `number`                | —       | Current step in course progress       |
+| `progressTotal`    | `number`                | —       | Total steps in course progress        |
 
 ### CourseTree
 

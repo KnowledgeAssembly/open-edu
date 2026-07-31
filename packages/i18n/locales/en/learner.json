@@ -139,6 +139,7 @@
   "pipili.title": "Pipili AI Companion",
   "pipili.thinking": "Pipili is thinking...",
   "reader_toolbar.label": "Ask Pipili",
+  "reader_toolbar.tooltip": "Ask Pipili ({{shortcut}})",
   "reader_toolbar.unread": "New messages",
   "reader_toolbar.shortcut_mac": "⌘⇧P",
   "reader_toolbar.shortcut_other": "Ctrl⇧P",
