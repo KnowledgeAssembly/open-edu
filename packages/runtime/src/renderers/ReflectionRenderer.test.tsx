@@ -19,22 +19,37 @@ function renderWithI18n(ui: ReactNode) {
 }
 
 describe('ReflectionRenderer', () => {
-  it('renders the prompt as a label', () => {
-    const { getByText } = renderWithI18n(
-      <ReflectionRenderer node={makeReflection('Why is this important?')} onSubmit={vi.fn()} />,
+  it('renders the prompt with markdown support', () => {
+    const { container, getByText } = renderWithI18n(
+      <ReflectionRenderer node={makeReflection('Why is **this** important?')} onSubmit={vi.fn()} />,
     );
-    expect(getByText('Why is this important?')).toBeInTheDocument();
+    expect(container.textContent).toContain('Why is this important?');
+    expect(getByText('this')).toHaveProperty('tagName', 'STRONG');
   });
 
-  it('renders an associated textarea', () => {
+  it('renders inline code in the prompt', () => {
+    const { container } = renderWithI18n(
+      <ReflectionRenderer
+        node={makeReflection('What does the `load` function do?')}
+        onSubmit={vi.fn()}
+      />,
+    );
+    const code = container.querySelector('code');
+    expect(code).not.toBeNull();
+    expect(code?.textContent).toBe('load');
+  });
+
+  it('associates the textarea with the rendered prompt via aria-labelledby', () => {
     const { getByRole } = renderWithI18n(
-      <ReflectionRenderer node={makeReflection()} onSubmit={vi.fn()} />,
+      <ReflectionRenderer node={makeReflection('Why is this important?')} onSubmit={vi.fn()} />,
     );
     const textarea = getByRole('textbox');
-    expect(textarea).toBeInTheDocument();
     expect(textarea.getAttribute('id')).not.toBeNull();
-    const label = document.querySelector(`label[for="${textarea.id}"]`);
-    expect(label).not.toBeNull();
+    const labelledBy = textarea.getAttribute('aria-labelledby');
+    expect(labelledBy).not.toBeNull();
+    const promptEl = document.getElementById(labelledBy!);
+    expect(promptEl).not.toBeNull();
+    expect(promptEl?.textContent).toContain('Why is this important?');
   });
 
   it('disables submit while textarea is empty', () => {

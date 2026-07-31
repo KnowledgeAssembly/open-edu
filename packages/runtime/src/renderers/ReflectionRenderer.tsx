@@ -1,7 +1,8 @@
-import { useState, useId } from 'react';
+import { useState, useId, type ComponentProps } from 'react';
 import type { ReflectionNode, ReflectionAnswer } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
 import { Button } from '@open-edu/design-system';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 export interface ReflectionRendererProps {
   node: ReflectionNode;
@@ -13,6 +14,14 @@ export interface ReflectionRendererProps {
   maxLength?: number;
   showCharCount?: boolean;
 }
+
+const promptComponents: { p: (props: ComponentProps<'p'>) => JSX.Element } = {
+  p: ({ children, ...props }: ComponentProps<'p'>) => (
+    <p className="text-h3 font-display mb-0" {...props}>
+      {children}
+    </p>
+  ),
+};
 
 export function ReflectionRenderer({
   node,
@@ -30,6 +39,7 @@ export function ReflectionRenderer({
   );
   const [submitted, setSubmitted] = useState<boolean>(storedAnswer?.type === 'reflection');
   const hintId = useId();
+  const promptId = `${hintId}-prompt`;
 
   const trimmedLength = text.trim().length;
   const isValid = trimmedLength >= minLength && text.length <= maxLength;
@@ -47,9 +57,9 @@ export function ReflectionRenderer({
       className={`border-outline-variant rounded-lg border p-[calc(var(--oe-space-md)*1.5)] ${className ?? ''}`}
       data-testid="reflection-renderer"
     >
-      <label htmlFor={hintId} className="text-h3 font-display mb-2 block">
-        {node.prompt}
-      </label>
+      <div id={promptId} className="mb-2" data-testid="reflection-prompt">
+        <MarkdownRenderer content={node.prompt} components={promptComponents} />
+      </div>
 
       <textarea
         id={hintId}
@@ -57,7 +67,7 @@ export function ReflectionRenderer({
         onChange={(e) => setText(e.target.value.slice(0, maxLength))}
         readOnly={submitted}
         placeholder={t('runtime.reflection.placeholder')}
-        aria-label={node.prompt}
+        aria-labelledby={promptId}
         aria-describedby={showCharCount ? `${hintId}-count` : undefined}
         className="border-outline-variant font-body-md bg-surface text-on-surface text-body-ui min-h-[8rem] w-full resize-y rounded-[calc(var(--oe-radius-lg)-2px)] border p-2.5"
       />
