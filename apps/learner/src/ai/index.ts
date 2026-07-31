@@ -15,3 +15,4 @@ export type { PipiliMessageProps } from './PipiliMessage.js';
 export { HintControls } from './HintControls.js';
 export type { HintControlsProps } from './HintControls.js';
 export { learningContextToSnapshot } from './context-mapper.js';
+export { ExplanationStylePicker } from './ExplanationStylePicker.js';
