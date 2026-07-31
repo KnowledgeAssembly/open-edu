@@ -252,13 +252,20 @@ Reference skills in the manifest to enable skill tracking:
 
 ### Conditional Reward
 
+The `condition` belongs on the reward action, not the trigger:
+
 ```json
 {
   "triggers": [
     {
       "onEvent": "node.complete",
-      "conditions": [{ "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }],
-      "rewards": [{ "action": "badge.award", "badge": "high-scorer" }]
+      "rewards": [
+        {
+          "action": "badge.award",
+          "badge": "high-scorer",
+          "condition": { "type": "score", "nodeId": "nodes/quiz.json", "minScore": 80 }
+        }
+      ]
     }
   ]
 }
@@ -318,6 +325,28 @@ Add a `nextLevel` condition to allow cards to advance from their starting `level
   "nextLevel": { "type": "score", "nodeId": "nodes/advanced-quiz.json", "minScore": 85 }
 }
 ```
+
+## Bundle-Level Rewards and Cards
+
+Multi-module bundles can carry their own rewards and cards. Bundle-level files live at the **bundle root** and are referenced from `bundle.json` via `rewards`/`cards` relative paths:
+
+```
+my-bundle/
+├── bundle.json       # references "./rewards.json" and "./cards.json"
+├── rewards.json      # bundle-level rewards
+├── cards.json        # bundle-level cards
+└── modules/
+    └── module-a/
+```
+
+The `bundleCompleted` condition fires when **all** modules in the bundle complete. Condition scope rules mirror the rewards system:
+
+| Level  | Allowed conditions                                                                                                                             |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Module | `stepCompleted`, `exerciseCompleted`, `score`, `chain`, `activityCompleted`, `moduleUnlocked`, `moduleFailed`, `attempts`, `answeredCorrectly` |
+| Bundle | `bundleCompleted`, `moduleCompleted`, `skill`, `and`, `or`, `bundleCondition`                                                                  |
+
+Card IDs must be unique across the entire bundle (module + bundle cards) since saved progress is keyed by bare `card.id`.
 
 ## Validation and Linting
 

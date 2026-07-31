@@ -64,6 +64,8 @@ In the learner runtime:
 - badge and card progress are persisted in local storage helpers
 - toasts surface earned badges and unlocked cards
 
+Rewards and cards are supported at **both** module and bundle scope. Module-level `rewards.json`/`cards.json` live in the package directory; bundle-level files live at the bundle root and are referenced from `bundle.json` via `rewards`/`cards` relative paths. The runtime wires bundle-scoped brokers that listen for `module_complete`/`bundle_complete` events. Condition scope is enforced: module files cannot reference bundle-level signals (`bundleCompleted`, `moduleCompleted`) and bundle files cannot reference module-local signals (`stepCompleted`, `score`, `chain`, etc.).
+
 The recent rename from `Card` to `KnowledgeCard` in `packages/runtime` reflects a domain clarification: these are collection-style learning artifacts, not generic UI cards.
 
 ## Bundles and module chains

@@ -80,44 +80,52 @@ For multi-module bundles, the rewards schema supports two additional event types
 
 ```typescript
 {
-  onEvent: 'moduleCompleted',
-  conditions: [
-    { type: 'module', moduleId: 'addition_basics' },
+  onEvent: 'module_complete',
+  rewards: [
+    {
+      action: 'badge.award',
+      badge: 'basics-master',
+      condition: { type: 'moduleCompleted', moduleId: 'addition_basics' },
+    },
   ],
-  rewards: [{ action: 'badge.award', badge: 'basics-master' }],
 }
 ```
 
 ```typescript
 {
-  onEvent: 'bundleCompleted',
+  onEvent: 'bundle_complete',
   rewards: [{ action: 'badge.award', badge: 'level-b-math-complete' }],
 }
 ```
 
 ## Conditional Rules
 
-Rewards can include conditions that gate their execution:
+Rewards can include a `condition` that gates their execution. The condition belongs on the **reward action**, not the trigger:
 
 ```typescript
 {
   onEvent: 'node_complete',
-  conditions: [
-    { type: 'score', nodeId: 'nodes/quiz.json', minScore: 80 },
+  rewards: [
+    {
+      action: 'badge.award',
+      badge: 'high-scorer',
+      condition: { type: 'score', nodeId: 'nodes/quiz.json', minScore: 80 },
+    },
   ],
-  rewards: [{ action: 'badge.award', badge: 'high-scorer' }],
 }
 ```
 
 Supported condition types:
 
-| Type    | Description                                       |
-| ------- | ------------------------------------------------- |
-| `score` | Minimum score on a specific node                  |
-| `skill` | Minimum mastery level for a skill                 |
-| `chain` | Set of completed node IDs (all must be completed) |
-| `and`   | All sub-conditions must be met                    |
-| `or`    | Any sub-condition must be met                     |
+| Type              | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `score`           | Minimum score on a specific node                  |
+| `skill`           | Minimum mastery level for a skill                 |
+| `chain`           | Set of completed node IDs (all must be completed) |
+| `and`             | All sub-conditions must be met                    |
+| `or`              | Any sub-condition must be met                     |
+| `moduleCompleted` | A module is completed (bundle broker)             |
+| `bundleCompleted` | All modules in the bundle are completed           |
 
 ## Verification & Replay
 
@@ -238,6 +246,41 @@ Cards reuse the same `RewardCondition` types as rewards:
 | `chain` | All specified nodes must be completed |
 | `and`   | All sub-conditions must be met        |
 | `or`    | Any sub-condition must be met         |
+
+## Bundle-Level Rewards and Cards
+
+Multi-module bundles can carry their own rewards and cards in addition to per-module files. Bundle-level files live at the **bundle root** (`<bundle>/rewards.json` and `<bundle>/cards.json`) and are referenced from `bundle.json`:
+
+```json
+{
+  "id": "level-b-math",
+  "title": "Level B Math",
+  "version": "1.0.0",
+  "modules": [
+    { "id": "addition_basics", "title": "Addition Basics", "dependsOn": [] },
+    { "id": "addition_carry", "title": "Addition with Carry", "dependsOn": ["addition_basics"] }
+  ],
+  "rewards": "./rewards.json",
+  "cards": "./cards.json"
+}
+```
+
+The runtime wires a bundle-scoped `RewardBroker`/`CardBroker` that listens for `bundle_complete` (fired when **all** modules complete) and `module_complete` events on the bundle session.
+
+### Condition scope
+
+Conditions are evaluated against the broker's context. The broker can only see signals within its scope:
+
+| Level  | Broker sees                                   | Allowed conditions                                                                                                                             |
+| ------ | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Module | step/exercise/score signals within the module | `stepCompleted`, `exerciseCompleted`, `score`, `chain`, `activityCompleted`, `moduleUnlocked`, `moduleFailed`, `attempts`, `answeredCorrectly` |
+| Bundle | completed modules + cross-module signals      | `bundleCompleted`, `moduleCompleted`, `skill`, `and`, `or`, `bundleCondition`                                                                  |
+
+A bundle-scoped file must not reference module-local signals, and a module-scoped file must not reference bundle-level signals — conditions the broker cannot evaluate simply resolve to `false`.
+
+### Global card-ID uniqueness
+
+Card IDs are unique across the **entire bundle** (all module cards + bundle cards). Saved card progress is keyed by bare `card.id`, so duplicates would corrupt progress. Prefix IDs with `module-` or `bundle-`.
 
 ## Error Types
 
