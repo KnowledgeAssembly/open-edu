@@ -121,6 +121,15 @@ export type { GeoPrimitiveProps } from './primitives/geo-primitive.js';
 export { Pipili } from './primitives/pipili.js';
 export type { PipiliProps, PipiliMood } from './primitives/pipili.js';
 
+export { EmojiText, splitEmojiRuns, emojiToHex } from './primitives/EmojiText.js';
+export type { EmojiTextProps, EmojiRun } from './primitives/EmojiText.js';
+export {
+  NativeEmojiPack,
+  createOpenMojiPack,
+  OPENMOJI_CDN_BASE_URL,
+} from './primitives/emoji-packs.js';
+export type { EmojiPack, EmojiPackFormat, OpenMojiPackOptions } from './primitives/emoji-packs.js';
+
 export { AppBanner, appBannerVariants } from './primitives/app-banner.js';
 export type { AppBannerProps, AppBannerVariant } from './primitives/app-banner.js';
 
