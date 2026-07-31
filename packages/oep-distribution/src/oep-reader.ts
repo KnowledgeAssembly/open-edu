@@ -309,6 +309,32 @@ export class OepReader {
       );
     }
 
+    const readBundleRootJson = (relPath: string, label: string): Record<string, unknown> | undefined => {
+      const entryPath = `bundle/${relPath.replace(/^\.\//, '')}`.replace(/\/+$/, '');
+      const raw = rawEntries[entryPath];
+      if (!raw || raw.length === 0) {
+        throw new OepReaderError(
+          'BUNDLE_VALIDATION_ERROR',
+          `bundle references ${label} but the archive does not contain it (${entryPath})`,
+        );
+      }
+      try {
+        return JSON.parse(strFromU8(raw)) as Record<string, unknown>;
+      } catch {
+        throw new OepReaderError(
+          'BUNDLE_VALIDATION_ERROR',
+          `${entryPath} is not valid JSON`,
+        );
+      }
+    };
+
+    const bundleRewards = bundleResult.data.rewards
+      ? readBundleRootJson(bundleResult.data.rewards, 'rewards.json')
+      : undefined;
+    const bundleCards = bundleResult.data.cards
+      ? readBundleRootJson(bundleResult.data.cards, 'cards.json')
+      : undefined;
+
     const modules: OepExtractedModule[] = [];
 
     for (const modRef of bundleResult.data.modules) {
@@ -426,6 +452,8 @@ export class OepReader {
       bundleManifest: bundleManifestJson as Record<string, unknown>,
       modules,
       rawEntries,
+      rewards: bundleRewards,
+      cards: bundleCards,
     };
   }
 }

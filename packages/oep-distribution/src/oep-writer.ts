@@ -15,6 +15,7 @@ export interface OepBundleBuildInput {
   manifest: RelaxedManifest;
   bundleManifest: BundleManifest;
   moduleFiles: Map<string, Map<string, Uint8Array>>;
+  bundleFiles?: Map<string, Uint8Array>;
 }
 
 export interface OepBuildResult {
@@ -50,6 +51,16 @@ export class OepWriter {
       for (const [relativePath, content] of files) {
         const sanitizedPath = relativePath.replace(/\\/g, '/').replace(/^\/+/, '');
         allFiles.set(`modules/${moduleId}/${sanitizedPath}`, content);
+      }
+    }
+
+    if (input.bundleFiles) {
+      for (const [relativePath, content] of input.bundleFiles) {
+        const sanitizedPath = relativePath
+          .replace(/\\/g, '/')
+          .replace(/^\/+/, '')
+          .replace(/^bundle\//, '');
+        allFiles.set(sanitizedPath, content);
       }
     }
 

@@ -211,4 +211,116 @@ describe('OepWriter - bundle', () => {
     expect(a.checksumValue).toBe(b.checksumValue);
     expect(a.bytes).toEqual(b.bytes);
   });
+
+  it('round-trips bundle-level rewards and cards', async () => {
+    const bundleRewards = {
+      triggers: [
+        {
+          onEvent: 'bundle_complete',
+          rewards: [{ action: 'badge.award', badge: 'bundle-finisher' }],
+        },
+      ],
+    };
+    const bundleCards = {
+      cards: [
+        {
+          id: 'bundle-card',
+          title: 'Bundle Card',
+          type: 'achievement',
+          category: 'Achievement',
+          summary: 'Finished the bundle',
+          unlock: { type: 'bundleCompleted' },
+        },
+      ],
+    };
+    const bundleManifest = {
+      type: 'bundle' as const,
+      id: 'rewards-bundle',
+      title: 'Rewards Bundle',
+      version: '1.0.0',
+      author: 'test',
+      modules: [{ id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] }],
+      rewards: './rewards.json',
+      cards: './cards.json',
+    };
+
+    const moduleFiles = new Map<string, Map<string, Uint8Array>>();
+    const files = new Map<string, Uint8Array>();
+    files.set(
+      'package.json',
+      encoder.encode(
+        JSON.stringify({ id: 'mod-a', title: 'Module A', version: '1.0.0', author: 't', entry: 'a' }),
+      ),
+    );
+    files.set('nodes/a.md', encoder.encode('# A'));
+    moduleFiles.set('mod-a', files);
+
+    const manifest: DistributionManifest = {
+      format: OEP_FORMAT,
+      formatVersion: OEP_FORMAT_VERSION,
+      type: 'bundle',
+      id: 'rewards-bundle',
+      version: '1.0.0',
+      title: 'Rewards Bundle',
+      checksum: { algorithm: 'sha256', value: '' },
+      contentRoot: 'bundle/',
+      signature: { status: 'unsigned' },
+    };
+
+    const bundleFiles = new Map([
+      ['bundle/rewards.json', encoder.encode(JSON.stringify(bundleRewards))],
+      ['bundle/cards.json', encoder.encode(JSON.stringify(bundleCards))],
+    ]);
+
+    const archive = await OepWriter.buildBundle({
+      manifest,
+      bundleManifest,
+      moduleFiles,
+      bundleFiles,
+    });
+    const extraction = await new OepReader().read(archive.bytes);
+
+    expect((extraction.bundleManifest as Record<string, unknown>).rewards).toBe('./rewards.json');
+    expect((extraction.bundleManifest as Record<string, unknown>).cards).toBe('./cards.json');
+    expect(extraction.rewards).toEqual(bundleRewards);
+    expect(extraction.cards).toEqual(bundleCards);
+  });
+
+  it('leaves rewards/cards undefined when the bundle omits them', async () => {
+    const bundleManifest = {
+      type: 'bundle' as const,
+      id: 'plain-bundle',
+      title: 'Plain Bundle',
+      version: '1.0.0',
+      author: 'test',
+      modules: [{ id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] }],
+    };
+    const moduleFiles = new Map<string, Map<string, Uint8Array>>();
+    const files = new Map<string, Uint8Array>();
+    files.set(
+      'package.json',
+      encoder.encode(
+        JSON.stringify({ id: 'mod-a', title: 'Module A', version: '1.0.0', author: 't', entry: 'a' }),
+      ),
+    );
+    files.set('nodes/a.md', encoder.encode('# A'));
+    moduleFiles.set('mod-a', files);
+
+    const manifest: DistributionManifest = {
+      format: OEP_FORMAT,
+      formatVersion: OEP_FORMAT_VERSION,
+      type: 'bundle',
+      id: 'plain-bundle',
+      version: '1.0.0',
+      title: 'Plain Bundle',
+      checksum: { algorithm: 'sha256', value: '' },
+      contentRoot: 'bundle/',
+      signature: { status: 'unsigned' },
+    };
+
+    const archive = await OepWriter.buildBundle({ manifest, bundleManifest, moduleFiles });
+    const extraction = await new OepReader().read(archive.bytes);
+    expect(extraction.rewards).toBeUndefined();
+    expect(extraction.cards).toBeUndefined();
+  });
 });
