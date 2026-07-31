@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@open-edu/design-system';
 import { useCompanion } from './CompanionProvider';
+import { usePipiliChat } from './PipiliChatProvider';
 import { MessageCircle, BookOpen, Languages, Volume2, Sparkles } from 'lucide-react';
 
 export interface TextSelectionToolbarProps {
@@ -25,7 +26,8 @@ export function TextSelectionToolbar({
   const [position, setPosition] = useState<ToolbarPosition | null>(null);
   const [visible, setVisible] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const { setPanelState, sendMessage, search } = useCompanion();
+  const { setPanelState, search } = useCompanion();
+  const { sendMessage } = usePipiliChat();
 
   const isInsideContainer = useCallback(
     (node: Node | null): boolean => {
