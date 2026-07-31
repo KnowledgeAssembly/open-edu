@@ -21,10 +21,7 @@ export function ContextBridge({ contextManager }: ContextBridgeProps): null {
       courseTitle: pkg.manifest.title,
       lessonId: runtime.currentNodeId,
       lessonTitle: node?.node.title ?? runtime.currentNodeId,
-      pageContent:
-        node && 'body' in node.node
-          ? (node.node as { body?: { content?: string } }).body?.content
-          : undefined,
+      pageContent: node?.content ?? undefined,
     };
 
     const ctxJson = JSON.stringify(ctx);
