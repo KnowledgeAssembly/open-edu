@@ -144,14 +144,25 @@ describe('Sequencing submit and scoring', () => {
     const { complete, emitInteraction } = renderWidget(interactiveConfig);
     const order = getItemIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ widgetId: 'core.sequencing' }),
+    );
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(
       expectedScore(order, defaultCorrectOrder),
       expect.any(Object),
     );
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'core.sequencing' }),
-    );
+  });
+
+  it('shows result and Continue button after submit without completing', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('feedback')).toBeTruthy();
+    expect(screen.getByTestId('continue-button')).toBeVisible();
+    expect(screen.queryByText('Submit')).toBeNull();
   });
 
   it('shows feedback after submission', () => {
@@ -292,6 +303,8 @@ describe('Sequencing edge cases', () => {
     });
     expect(screen.getByTestId('sortable-item-only')).toBeTruthy();
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 

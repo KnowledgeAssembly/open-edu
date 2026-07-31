@@ -149,6 +149,8 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('unplaced-item-cat'));
     fireEvent.click(screen.getByTestId('target-mammal'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -159,6 +161,8 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('unplaced-item-cat'));
     fireEvent.click(screen.getByTestId('target-fish'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
@@ -181,6 +185,8 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('unplaced-item-cat'));
     fireEvent.click(screen.getByTestId('target-mammal'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -213,6 +219,38 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('target-mammal'));
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.getByTestId('feedback')).toBeTruthy();
+    expect(screen.getByTestId('feedback')).toHaveTextContent(
+      'Correct! All items placed correctly.',
+    );
+  });
+
+  it('shows result and Continue button after submit without completing', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByTestId('unplaced-item-cat'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('continue-button')).toBeVisible();
+    expect(screen.queryByText('Submit')).toBeNull();
+  });
+
+  it('completes with stored state on Continue', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByTestId('unplaced-item-cat'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByText('Submit'));
+    fireEvent.click(screen.getByTestId('continue-button'));
+    expect(complete).toHaveBeenCalledWith(
+      100,
+      expect.objectContaining({
+        submitted: true,
+        placedItems: { dog: 'mammal', cat: 'mammal' },
+      }),
+    );
   });
 
   it('handles single item single target', () => {
@@ -227,6 +265,7 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('unplaced-item-apple'));
     fireEvent.click(screen.getByTestId('target-fruit'));
     fireEvent.click(screen.getByText('Submit'));
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 

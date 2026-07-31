@@ -358,7 +358,6 @@ function TimelineComponent(props: {
       correctOrder.every((id, i) => id === eventOrder[i]);
     const accuracy =
       eventOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
-    const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
@@ -368,9 +367,17 @@ function TimelineComponent(props: {
       accuracy,
       widgetId: 'core.timeline',
     });
-    complete(score, { submitted: true, eventOrder, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, eventOrder, correctOrder, hintIndex, emitInteraction, complete]);
+  }, [submitted, content, eventOrder, correctOrder, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const accuracy =
+      eventOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
+    const score = Math.round(accuracy * 100);
+
+    complete(score, { submitted: true, eventOrder, hintIndex });
+  }, [content, eventOrder, correctOrder, hintIndex, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -669,7 +676,11 @@ function TimelineComponent(props: {
             <Button variant="default" onClick={handleSubmit} disabled={false}>
               Submit
             </Button>
-          ) : null}
+          ) : (
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
+            </Button>
+          )}
         </div>
 
         {submitted && (

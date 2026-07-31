@@ -68,7 +68,13 @@ function MultipleChoiceComponent(props: {
     return result.success ? result.data : null;
   }, [storedState]);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() => {
+    const storedIdx = parsedState?.selections?.[0];
+    if (storedIdx == null) return null;
+    const legacy = legacyConfigSchema.safeParse(rawConfig || {});
+    if (!legacy.success) return null;
+    return legacy.data.options[storedIdx]?.id ?? null;
+  });
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
   const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
   const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
@@ -87,10 +93,10 @@ function MultipleChoiceComponent(props: {
   const questionCount = multiParsed.success ? multiParsed.data.questions.length : 0;
 
   useEffect(() => {
-    if (questionCount > 0) {
+    if (questionCount > 0 && selections.length === 0) {
       setSelections(new Array(questionCount).fill(null));
     }
-  }, [questionCount]);
+  }, [questionCount, selections.length]);
 
   const isMultiObserve = multiParsed.success && !multiParsed.data.interactive;
 

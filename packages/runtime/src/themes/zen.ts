@@ -180,7 +180,7 @@ export const zen: ThemeDefinition = {
       },
       body: {
         fontFamily: '"Source Serif 4", Georgia, ui-serif, serif',
-        fontSize: '17px',
+        fontSize: '16px',
         fontWeight: '400',
         lineHeight: '1.7',
         letterSpacing: '0.01em',
