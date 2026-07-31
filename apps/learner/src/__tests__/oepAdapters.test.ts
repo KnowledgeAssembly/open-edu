@@ -49,9 +49,7 @@ function makeStoredBundle(overrides: Partial<StoredBundle> = {}): StoredBundle {
       version: '1.0.0',
       author: 'Test Author',
       type: 'bundle',
-      modules: [
-        { id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] },
-      ],
+      modules: [{ id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] }],
     },
     modules: [
       {
@@ -288,7 +286,9 @@ describe('storedBundleToLoadedBundle', () => {
   it('maps bundle-level rewards and cards from storage', () => {
     const stored = makeStoredBundle({
       rewards: {
-        triggers: [{ onEvent: 'bundle_complete', rewards: [{ action: 'badge.award', badge: 'b1' }] }],
+        triggers: [
+          { onEvent: 'bundle_complete', rewards: [{ action: 'badge.award', badge: 'b1' }] },
+        ],
       },
       cards: {
         cards: [

@@ -249,7 +249,13 @@ describe('OepWriter - bundle', () => {
     files.set(
       'package.json',
       encoder.encode(
-        JSON.stringify({ id: 'mod-a', title: 'Module A', version: '1.0.0', author: 't', entry: 'a' }),
+        JSON.stringify({
+          id: 'mod-a',
+          title: 'Module A',
+          version: '1.0.0',
+          author: 't',
+          entry: 'a',
+        }),
       ),
     );
     files.set('nodes/a.md', encoder.encode('# A'));
@@ -300,7 +306,13 @@ describe('OepWriter - bundle', () => {
     files.set(
       'package.json',
       encoder.encode(
-        JSON.stringify({ id: 'mod-a', title: 'Module A', version: '1.0.0', author: 't', entry: 'a' }),
+        JSON.stringify({
+          id: 'mod-a',
+          title: 'Module A',
+          version: '1.0.0',
+          author: 't',
+          entry: 'a',
+        }),
       ),
     );
     files.set('nodes/a.md', encoder.encode('# A'));

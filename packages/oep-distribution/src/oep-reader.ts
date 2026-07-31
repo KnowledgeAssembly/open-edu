@@ -196,10 +196,7 @@ export class OepReader {
         if (metadataFiles.has(path)) continue;
         const relativePath = path.slice(contentRoot.length);
         if (!relativePath.includes('/')) continue;
-        if (
-          path.startsWith(nodesPrefix) &&
-          (path.endsWith('.md') || path.endsWith('.json'))
-        ) {
+        if (path.startsWith(nodesPrefix) && (path.endsWith('.md') || path.endsWith('.json'))) {
           nodes[path] = strFromU8(data);
         } else {
           assets[path] = data;
@@ -309,7 +306,10 @@ export class OepReader {
       );
     }
 
-    const readBundleRootJson = (relPath: string, label: string): Record<string, unknown> | undefined => {
+    const readBundleRootJson = (
+      relPath: string,
+      label: string,
+    ): Record<string, unknown> | undefined => {
       const entryPath = `bundle/${relPath.replace(/^\.\//, '')}`.replace(/\/+$/, '');
       const raw = rawEntries[entryPath];
       if (!raw || raw.length === 0) {
@@ -321,10 +321,7 @@ export class OepReader {
       try {
         return JSON.parse(strFromU8(raw)) as Record<string, unknown>;
       } catch {
-        throw new OepReaderError(
-          'BUNDLE_VALIDATION_ERROR',
-          `${entryPath} is not valid JSON`,
-        );
+        throw new OepReaderError('BUNDLE_VALIDATION_ERROR', `${entryPath} is not valid JSON`);
       }
     };
 
@@ -392,10 +389,7 @@ export class OepReader {
           if (metadataFiles.has(path)) continue;
           const relativePath = path.slice(moduleDir.length);
           if (!relativePath.includes('/')) continue;
-          if (
-            path.startsWith(nodesPrefix) &&
-            (path.endsWith('.md') || path.endsWith('.json'))
-          ) {
+          if (path.startsWith(nodesPrefix) && (path.endsWith('.md') || path.endsWith('.json'))) {
             modNodes[path] = strFromU8(data);
           } else if (!path.startsWith(nodesPrefix)) {
             modAssets[path] = data;

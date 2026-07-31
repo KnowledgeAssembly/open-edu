@@ -61,7 +61,11 @@ import { BreakPage } from './BreakPage';
 import { loadLocaleFonts } from './i18n-fonts';
 import { useThemeColorMeta } from './hooks/useThemeColorMeta';
 import { useResizablePanel } from './hooks/useResizablePanel';
-import { storedCourseToPackageSummary, storedCourseToLoadedPackage, storedBundleToLoadedBundle } from './oepAdapters';
+import {
+  storedCourseToPackageSummary,
+  storedCourseToLoadedPackage,
+  storedBundleToLoadedBundle,
+} from './oepAdapters';
 
 export type AppView =
   | { view: 'home' }

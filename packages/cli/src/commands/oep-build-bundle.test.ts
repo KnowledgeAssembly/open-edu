@@ -41,7 +41,10 @@ describe('buildOepBundle', () => {
     );
     writeFileSync(join(dir, 'rewards.json'), JSON.stringify({ triggers: [] }));
     writeFileSync(join(dir, 'cards.json'), JSON.stringify({ cards: [] }));
-    writeFileSync(join(dir, 'modules', 'mod-a', 'package.json'), JSON.stringify(validPackageManifest));
+    writeFileSync(
+      join(dir, 'modules', 'mod-a', 'package.json'),
+      JSON.stringify(validPackageManifest),
+    );
     writeFileSync(join(dir, 'modules', 'mod-a', 'nodes', 'lesson.md'), '# Lesson');
 
     const outputDir = join(tmpDir, 'out');

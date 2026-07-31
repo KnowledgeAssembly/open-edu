@@ -73,7 +73,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
       />
       {bundleCardItems.length > 0 && (
         <section
-          className="max-w-content px-xl mx-auto w-full py-xl"
+          className="max-w-content px-xl py-xl mx-auto w-full"
           role="region"
           aria-label={t('learner.collection_binder.bundle_shelf')}
         >

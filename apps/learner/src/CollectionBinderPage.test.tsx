@@ -85,6 +85,8 @@ describe('CollectionBinderPage', () => {
 
   it('renders empty state when no cards exist', () => {
     renderWithI18n(<CollectionBinderPage packages={{}} />);
-    expect(screen.getByText('No cards yet. Complete lessons to unlock your first Knowledge Card.')).toBeInTheDocument();
+    expect(
+      screen.getByText('No cards yet. Complete lessons to unlock your first Knowledge Card.'),
+    ).toBeInTheDocument();
   });
 });

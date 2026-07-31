@@ -342,7 +342,10 @@ export function CourseRuntime({
             (id) => id === pkg.manifest.id || bundleSnapshot.moduleStatuses[id] === 'completed',
           );
           if ((bundleRewardsRef.current || bundleCardsRef.current) && bundleSessionRef.current) {
-            bundleSessionRef.current.emit({ event: 'module_complete', moduleId: pkg.manifest.id } as never);
+            bundleSessionRef.current.emit({
+              event: 'module_complete',
+              moduleId: pkg.manifest.id,
+            } as never);
             if (bundleCompletedRef.current && !wasComplete) {
               bundleSessionRef.current.emit({
                 event: 'bundle_complete',

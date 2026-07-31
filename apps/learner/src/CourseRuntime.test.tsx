@@ -14,7 +14,8 @@ const mockInstances = vi.hoisted(() => ({
   cardBrokers: [] as any[],
 }));
 
-const engineHandlers: Array<(event: { type: string; nodeId?: string; score?: number }) => void> = [];
+const engineHandlers: Array<(event: { type: string; nodeId?: string; score?: number }) => void> =
+  [];
 
 vi.mock('./ai', () => ({
   useCompanion: () => ({
@@ -35,10 +36,12 @@ function renderWithProvider(ui: React.ReactElement) {
 
 function createMockEngine() {
   return {
-    subscribe: vi.fn((handler?: (event: { type: string; nodeId?: string; score?: number }) => void) => {
-      if (handler) engineHandlers.push(handler);
-      return vi.fn();
-    }),
+    subscribe: vi.fn(
+      (handler?: (event: { type: string; nodeId?: string; score?: number }) => void) => {
+        if (handler) engineHandlers.push(handler);
+        return vi.fn();
+      },
+    ),
     start: vi.fn(),
     stop: vi.fn(),
     completeNode: vi.fn(),
@@ -99,7 +102,12 @@ vi.mock('@open-edu/rewards', () => ({
     mockInstances.cardBrokers.push(broker);
     return broker;
   }),
-  getDefaultContext: vi.fn(() => ({ scores: {}, skills: {}, completedNodes: [], completedModules: [] })),
+  getDefaultContext: vi.fn(() => ({
+    scores: {},
+    skills: {},
+    completedNodes: [],
+    completedModules: [],
+  })),
 }));
 
 vi.mock('@open-edu/accessibility', () => ({
@@ -239,7 +247,7 @@ describe('CourseRuntime', () => {
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
     );
     await waitFor(() => {
-      expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
+      expect(engineHandlers.length).toBeGreaterThan(0);
     });
 
     act(() => {
@@ -247,7 +255,8 @@ describe('CourseRuntime', () => {
       engineHandlers.forEach((h) => h({ type: 'workflow.completed' }));
     });
 
-    const bundleSession = mockInstances.telemetrySessions[mockInstances.telemetrySessions.length - 1];
+    const bundleSession =
+      mockInstances.telemetrySessions[mockInstances.telemetrySessions.length - 1];
     const events = bundleSession.emit.mock.calls.map((c: any[]) => c[0].event);
     expect(events).toContain('module_complete');
     expect(events).toContain('bundle_complete');
@@ -289,7 +298,7 @@ describe('CourseRuntime', () => {
       <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
     );
     await waitFor(() => {
-      expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
+      expect(engineHandlers.length).toBeGreaterThan(0);
     });
 
     act(() => {
