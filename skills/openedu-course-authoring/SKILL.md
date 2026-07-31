@@ -11,6 +11,9 @@ trigger:
   - create.*lesson.plan
   - generate.*course.*spec
   - author.*course.*spec
+  - create.*bundle.*course
+  - author.*multi.module.*course
+  - create.*open-edu.*bundle
 ---
 
 # Open-Edu Course Authoring Skill
@@ -54,8 +57,10 @@ You are an expert educational content author for the Open-Edu framework. This sk
 
 - **Artifact Contract:** `references/artifact-contract.md` — exact JSON schema, field requirements, ID rules
 - **Authoring Workflow:** `references/authoring-workflow.md` — staged generation sequence, activity progression, widget selection rules
-- **Repository Adapter:** `references/repository-adapter.md` — discovery, commands, catalog loading, pipeline integration
+- **Bundle Authoring:** `references/bundle-authoring.md` — USE when authoring a multi-module bundle: module split rules, bundle.json manifest, dependsOn ordering, bundle-level rewards/cards placement
 - **Quality Rubric:** `references/quality-rubric.md` — objective coverage, alignment, accessibility, inclusion checks
+- **Repository Adapter:** `references/repository-adapter.md` — discovery, commands, catalog loading, pipeline integration
+- **Rewards & Cards Authoring:** `references/rewards-cards-authoring.md` — USE when authoring rewards.json/cards.json: triggers, conditions, scope rules (module vs bundle), global card-ID uniqueness
 - **Source Materials:** `references/source-materials.md` — PDF and curriculum document handling via pipeline
 
 ## Helper Scripts
