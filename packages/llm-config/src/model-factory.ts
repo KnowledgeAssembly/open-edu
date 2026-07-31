@@ -80,6 +80,13 @@ class ModelFactoryImpl implements ModelFactory {
       return this.config.model;
     }
 
+    // Custom OpenAI-compatible endpoints (e.g. Ollama) don't share the hosted
+    // provider's model registry, so fall back to the configured model rather
+    // than provider-specific defaults like gpt-4o-mini.
+    if (this.config.baseURL) {
+      return this.config.model;
+    }
+
     const { provider } = this.config;
     if (provider === 'openai') return 'gpt-4o-mini';
     if (provider === 'google') return 'gemini-2.0-flash-001';
