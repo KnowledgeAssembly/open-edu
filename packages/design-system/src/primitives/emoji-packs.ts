@@ -15,8 +15,7 @@ export const NativeEmojiPack: EmojiPack = {
   fallbackToNative: true,
 };
 
-export const OPENMOJI_CDN_BASE_URL =
-  'https://cdn.jsdelivr.net/npm/openmoji-static@15.0.0/single_svg';
+export const OPENMOJI_CDN_BASE_URL = 'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg';
 
 export interface OpenMojiPackOptions {
   id?: string;

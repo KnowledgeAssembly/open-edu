@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MarkdownText } from '../MarkdownText.js';
-import { NativeEmojiPack, createOpenMojiPack } from '../emoji-packs.js';
+import { NativeEmojiPack, createOpenMojiPack, OPENMOJI_CDN_BASE_URL } from '../emoji-packs.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('MarkdownText', () => {
@@ -72,10 +72,7 @@ describe('MarkdownText', () => {
     it('renders OpenMoji images for emoji inside markdown', () => {
       render(<MarkdownText content="Great **job** 🌟" emojiPack={createOpenMojiPack()} />);
       const img = screen.getByAltText('🌟');
-      expect(img).toHaveAttribute(
-        'src',
-        'https://cdn.jsdelivr.net/npm/openmoji-static@15.0.0/single_svg/1F31F.svg',
-      );
+      expect(img).toHaveAttribute('src', `${OPENMOJI_CDN_BASE_URL}/1F31F.svg`);
       expect(screen.getByText('job')).toHaveProperty('tagName', 'STRONG');
     });
   });

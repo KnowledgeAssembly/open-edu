@@ -4,6 +4,7 @@ import axe from 'axe-core';
 import { PipiliMessage } from '../PipiliMessage.js';
 import { CompanionProvider } from '../CompanionProvider.js';
 import { I18nProvider } from '@open-edu/i18n';
+import { OPENMOJI_CDN_BASE_URL } from '@open-edu/design-system';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 function renderWithI18n(ui: React.ReactElement) {
@@ -168,10 +169,7 @@ describe('PipiliMessage', () => {
     localStorage.setItem('oe-emoji-pack', 'openmoji');
     renderWithI18n(<PipiliMessage role="assistant" parts={textParts('Great job 🌟')} />);
     const img = screen.getByAltText('🌟');
-    expect(img).toHaveAttribute(
-      'src',
-      'https://cdn.jsdelivr.net/npm/openmoji-static@15.0.0/single_svg/1F31F.svg',
-    );
+    expect(img).toHaveAttribute('src', `${OPENMOJI_CDN_BASE_URL}/1F31F.svg`);
     localStorage.removeItem('oe-emoji-pack');
   });
 
