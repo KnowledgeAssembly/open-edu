@@ -55,7 +55,7 @@ export function BundleOverviewPage(props: BundleOverviewPageProps): JSX.Element 
     const cards = bundle.cards?.cards ?? [];
     return cards.map((card) => {
       const saved = savedProgress[card.id];
-      const level = saved?.level ?? (savedProgress[card.id] ? 1 : 0);
+      const level = saved?.level ?? 0;
       return { card, level, isLocked: level === 0 };
     });
   }, [bundle.cards, savedProgress]);

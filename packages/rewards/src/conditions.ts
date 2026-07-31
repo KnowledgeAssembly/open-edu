@@ -26,7 +26,7 @@ export function evaluateCondition(condition: RewardCondition, context: ContextSn
       return (context.completedModules ?? []).includes(condition.moduleId);
     }
     case 'bundleCompleted': {
-      return context.completedModules.length > 0;
+      return (context.completedModules ?? []).length > 0;
     }
     default:
       return false;
