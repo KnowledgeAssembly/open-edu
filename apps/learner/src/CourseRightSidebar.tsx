@@ -3,7 +3,7 @@ import { Button, Tabs, TabsList, TabsTrigger, TabsContent } from '@open-edu/desi
 import { FileText, Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useRuntimeOptional } from '@open-edu/runtime';
-import { useCompanion, usePipiliChat, PipiliChat } from './ai';
+import { useCompanion, usePipiliChat, PipiliChat, ExplanationStylePicker } from './ai';
 import { NotePanel } from './notes/NotePanel';
 import type { AppView } from './AppShell';
 
@@ -111,6 +111,9 @@ function SidebarContent({ onNavigate, width = 320 }: CourseRightSidebarProps): J
           value="pipili"
           className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
+          <div className="border-outline-variant shrink-0 border-b px-3 py-2">
+            <ExplanationStylePicker />
+          </div>
           <PipiliChat
             messages={messages}
             onSend={handleSend}

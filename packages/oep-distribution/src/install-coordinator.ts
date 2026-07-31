@@ -148,6 +148,8 @@ export class InstallCoordinator {
           sourceKind: source.kind,
           sourceLabel: source.label,
           checksum: extraction.manifest.checksum.value,
+          rewards: extraction.rewards,
+          cards: extraction.cards,
         };
       } else {
         const contentRoot = extraction.manifest.contentRoot || 'course/';
@@ -210,6 +212,8 @@ export class InstallCoordinator {
               rewards: m.rewards,
               cards: m.cards,
             })),
+            rewards: resolved.rewards ?? null,
+            cards: resolved.cards ?? null,
           }
         : {
             manifest: resolved.manifest,

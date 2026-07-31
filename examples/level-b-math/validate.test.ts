@@ -23,4 +23,12 @@ describe('level-b-math bundle', () => {
     expect(mod2.dependsOn).toEqual(['addition_basics']);
     expect(mod3.dependsOn).toEqual(['addition_carry']);
   });
+
+  it('should load bundle-level rewards and cards', async () => {
+    const bundle = await loadBundle(join(__dirname));
+    expect(bundle.rewards).not.toBeNull();
+    expect(bundle.rewards!.triggers[0]!.onEvent).toBe('bundle_complete');
+    expect(bundle.cards).not.toBeNull();
+    expect(bundle.cards!.cards[0]!.unlock.type).toBe('bundleCompleted');
+  });
 });

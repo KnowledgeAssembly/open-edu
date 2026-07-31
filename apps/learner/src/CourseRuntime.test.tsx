@@ -1,12 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { CourseRuntime } from './CourseRuntime';
-import type { LoadedPackage } from '@open-edu/core';
+import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const mockAddRewardMessage = vi.fn();
 const mockClearPendingReward = vi.fn();
+
+const mockInstances = vi.hoisted(() => ({
+  telemetrySessions: [] as any[],
+  rewardBrokers: [] as any[],
+  cardBrokers: [] as any[],
+  onProgressChange: null as
+    | ((snapshot: {
+        packageId: string;
+        packageVersion: string;
+        currentNodeId: string;
+        visitedNodes: string[];
+        scores: Record<string, number>;
+        answers: Record<string, unknown>;
+        isCompleted: boolean;
+        updatedAt: string;
+      }) => void)
+    | null,
+}));
+
+const engineHandlers: Array<(event: { type: string; nodeId?: string; score?: number }) => void> =
+  [];
 
 vi.mock('./ai', () => ({
   useCompanion: () => ({
@@ -27,7 +48,12 @@ function renderWithProvider(ui: React.ReactElement) {
 
 function createMockEngine() {
   return {
-    subscribe: vi.fn(() => vi.fn()),
+    subscribe: vi.fn(
+      (handler?: (event: { type: string; nodeId?: string; score?: number }) => void) => {
+        if (handler) engineHandlers.push(handler);
+        return vi.fn();
+      },
+    ),
     start: vi.fn(),
     stop: vi.fn(),
     completeNode: vi.fn(),
@@ -66,7 +92,11 @@ vi.mock('@open-edu/workflow', () => ({
 }));
 
 vi.mock('@open-edu/telemetry', () => ({
-  TelemetrySession: vi.fn(() => createMockSession()),
+  TelemetrySession: vi.fn(() => {
+    const session = createMockSession();
+    mockInstances.telemetrySessions.push(session);
+    return session;
+  }),
 }));
 
 vi.mock('@open-edu/widgets', () => ({
@@ -74,13 +104,50 @@ vi.mock('@open-edu/widgets', () => ({
 }));
 
 vi.mock('@open-edu/rewards', () => ({
-  RewardBroker: vi.fn(() => createMockBroker()),
+  RewardBroker: vi.fn(() => {
+    const broker = createMockBroker();
+    mockInstances.rewardBrokers.push(broker);
+    return broker;
+  }),
+  CardBroker: vi.fn(() => {
+    const broker = createMockBroker();
+    mockInstances.cardBrokers.push(broker);
+    return broker;
+  }),
+  getDefaultContext: vi.fn(() => ({
+    scores: {},
+    skills: {},
+    completedNodes: [],
+    completedModules: [],
+  })),
 }));
 
 vi.mock('@open-edu/accessibility', () => ({
   AccessibilityProvider: ({ children }: { children: React.ReactNode }) => children,
   LiveRegionProvider: ({ children }: { children: React.ReactNode }) => children,
   useLiveRegion: vi.fn(() => ({ announce: vi.fn() })),
+}));
+
+vi.mock('@open-edu/runtime', () => ({
+  RuntimeProvider: ({
+    onProgressChange,
+    children,
+  }: {
+    onProgressChange?: (
+      snapshot: Parameters<NonNullable<typeof mockInstances.onProgressChange>>[0],
+    ) => void;
+    children: React.ReactNode;
+  }) => {
+    mockInstances.onProgressChange = onProgressChange ?? null;
+    return children;
+  },
+  LayoutShell: () => null,
+  CompletionScreen: () => <div data-testid="completion-screen" />,
+  useRuntime: () => ({
+    currentNodeId: '',
+    visitedNodes: [],
+    navigateToNode: vi.fn(),
+  }),
 }));
 
 vi.mock('./cardsStorage.js', () => ({
@@ -139,6 +206,10 @@ const samplePackage: LoadedPackage = {
 describe('CourseRuntime', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    engineHandlers.length = 0;
+    mockInstances.telemetrySessions.length = 0;
+    mockInstances.rewardBrokers.length = 0;
+    mockInstances.cardBrokers.length = 0;
     mockGetOrderedNodes.mockReturnValue(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
   });
 
@@ -172,5 +243,128 @@ describe('CourseRuntime', () => {
       expect(screen.getByTestId('section2-nav')).toBeInTheDocument();
     });
     expect(screen.getByTestId('course-runtime')).toBeInTheDocument();
+  });
+
+  it('emits bundle_complete when the last module completes', async () => {
+    const bundle: LoadedBundle = {
+      rootDir: '/test/bundle',
+      manifest: {
+        id: 'test-bundle',
+        type: 'bundle',
+        title: 'Test Bundle',
+        version: '1.0.0',
+        author: 'Test Author',
+        modules: [
+          { id: 'test-course', title: 'Test Course', path: './modules/test-course', dependsOn: [] },
+        ],
+      },
+      modules: [samplePackage],
+      moduleMap: new Map([['test-course', samplePackage]]),
+      rewards: {
+        triggers: [
+          {
+            onEvent: 'bundle_complete',
+            rewards: [{ action: 'badge.award', badge: 'bundle-finisher' }],
+          },
+        ],
+      },
+      cards: null,
+    };
+    const bundleContext = {
+      bundleId: 'test-bundle',
+      bundle,
+      currentBundleProgress: null,
+      onBundleSnapshot: vi.fn(),
+    };
+
+    renderWithProvider(
+      <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
+    );
+    await waitFor(() => {
+      expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
+    });
+
+    act(() => {
+      mockInstances.onProgressChange?.({
+        packageId: 'test-course',
+        packageVersion: '1.0.0',
+        currentNodeId: 'nodes/lesson-01.md',
+        visitedNodes: ['nodes/lesson-01.md'],
+        scores: {},
+        answers: {},
+        isCompleted: true,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+    });
+
+    const bundleSession =
+      mockInstances.telemetrySessions[mockInstances.telemetrySessions.length - 1];
+    await waitFor(() => {
+      const events = bundleSession.emit.mock.calls.map((c: any[]) => c[0].event);
+      expect(events).toContain('module_complete');
+      expect(events).toContain('bundle_complete');
+    });
+  });
+
+  it('updates the bundle broker context with completedModules on bundle completion', async () => {
+    const bundle: LoadedBundle = {
+      rootDir: '/test/bundle',
+      manifest: {
+        id: 'test-bundle',
+        type: 'bundle',
+        title: 'Test Bundle',
+        version: '1.0.0',
+        author: 'Test Author',
+        modules: [
+          { id: 'test-course', title: 'Test Course', path: './modules/test-course', dependsOn: [] },
+        ],
+      },
+      modules: [samplePackage],
+      moduleMap: new Map([['test-course', samplePackage]]),
+      rewards: {
+        triggers: [
+          {
+            onEvent: 'bundle_complete',
+            rewards: [{ action: 'badge.award', badge: 'bundle-finisher' }],
+          },
+        ],
+      },
+      cards: null,
+    };
+    const bundleContext = {
+      bundleId: 'test-bundle',
+      bundle,
+      currentBundleProgress: null,
+      onBundleSnapshot: vi.fn(),
+    };
+
+    renderWithProvider(
+      <CourseRuntime pkg={samplePackage} onBackToCatalog={vi.fn()} bundleContext={bundleContext} />,
+    );
+    await waitFor(() => {
+      expect(mockInstances.telemetrySessions.length).toBeGreaterThanOrEqual(2);
+      expect(mockInstances.onProgressChange).not.toBeNull();
+    });
+
+    act(() => {
+      mockInstances.onProgressChange?.({
+        packageId: 'test-course',
+        packageVersion: '1.0.0',
+        currentNodeId: 'nodes/lesson-01.md',
+        visitedNodes: ['nodes/lesson-01.md'],
+        scores: {},
+        answers: {},
+        isCompleted: true,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+    });
+
+    const bundleRewardBroker = mockInstances.rewardBrokers[mockInstances.rewardBrokers.length - 1];
+    await waitFor(() => {
+      expect(bundleRewardBroker.updateContext).toHaveBeenCalledWith({
+        completedModules: ['test-course'],
+      });
+    });
   });
 });

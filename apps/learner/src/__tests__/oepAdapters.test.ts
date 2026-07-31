@@ -3,8 +3,9 @@ import {
   isOepCourse,
   storedCourseToPackageSummary,
   storedCourseToLoadedPackage,
+  storedBundleToLoadedBundle,
 } from '../oepAdapters';
-import type { StoredCourse } from '@open-edu/storage';
+import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 
 function makeStoredCourse(overrides: Partial<StoredCourse> = {}): StoredCourse {
   return {
@@ -33,6 +34,36 @@ function makeStoredCourse(overrides: Partial<StoredCourse> = {}): StoredCourse {
       },
     ],
     assets: [{ path: 'assets/img.png', data: new ArrayBuffer(8) }],
+    downloadedAt: '2026-07-27T00:00:00Z',
+    ...overrides,
+  };
+}
+
+function makeStoredBundle(overrides: Partial<StoredBundle> = {}): StoredBundle {
+  return {
+    id: 'test-bundle',
+    version: '1.0.0',
+    bundleManifest: {
+      id: 'test-bundle',
+      title: 'Test Bundle',
+      version: '1.0.0',
+      author: 'Test Author',
+      type: 'bundle',
+      modules: [{ id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] }],
+    },
+    modules: [
+      {
+        manifest: {
+          id: 'mod-a',
+          title: 'Module A',
+          version: '1.0.0',
+          author: 'Test Author',
+          entry: 'nodes/intro.md',
+        },
+        nodes: [{ relativePath: 'nodes/intro.md', content: '# Hello\n\nWorld' }],
+        assets: [{ path: 'assets/img.png', data: new ArrayBuffer(8) }],
+      },
+    ],
     downloadedAt: '2026-07-27T00:00:00Z',
     ...overrides,
   };
@@ -238,5 +269,58 @@ describe('storedCourseToLoadedPackage', () => {
     const loaded = storedCourseToLoadedPackage(course);
 
     expect(loaded.assetPaths).toEqual([]);
+  });
+});
+
+describe('storedBundleToLoadedBundle', () => {
+  it('maps a stored bundle to a loaded bundle', () => {
+    const stored = makeStoredBundle();
+    const loaded = storedBundleToLoadedBundle(stored);
+
+    expect(loaded.manifest.id).toBe('test-bundle');
+    expect(loaded.modules).toHaveLength(1);
+    expect(loaded.rewards).toBeNull();
+    expect(loaded.cards).toBeNull();
+  });
+
+  it('maps bundle-level rewards and cards from storage', () => {
+    const stored = makeStoredBundle({
+      rewards: {
+        triggers: [
+          { onEvent: 'bundle_complete', rewards: [{ action: 'badge.award', badge: 'b1' }] },
+        ],
+      },
+      cards: {
+        cards: [
+          {
+            id: 'bundle-card',
+            title: 'Bundle Card',
+            category: 'General',
+            type: 'achievement',
+            summary: 'A bundle card',
+            unlock: { type: 'bundleCompleted' },
+          },
+        ],
+      },
+    });
+    const loaded = storedBundleToLoadedBundle(stored);
+    expect(loaded.rewards).toEqual({
+      triggers: [{ onEvent: 'bundle_complete', rewards: [{ action: 'badge.award', badge: 'b1' }] }],
+    });
+    expect(loaded.cards!.cards[0]!.id).toBe('bundle-card');
+  });
+
+  it('defaults missing bundle rewards/cards to null', () => {
+    const stored = makeStoredBundle({});
+    const loaded = storedBundleToLoadedBundle(stored);
+    expect(loaded.rewards).toBeNull();
+    expect(loaded.cards).toBeNull();
+  });
+
+  it('returns null for invalid bundle rewards/cards', () => {
+    const stored = makeStoredBundle({ rewards: { invalid: true }, cards: { invalid: true } });
+    const loaded = storedBundleToLoadedBundle(stored);
+    expect(loaded.rewards).toBeNull();
+    expect(loaded.cards).toBeNull();
   });
 });

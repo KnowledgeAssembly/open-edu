@@ -31,5 +31,7 @@
       "dependsOn": ["addition_carry"],
       "estimatedDuration": 25
     }
-  ]
+  ],
+  "rewards": "./rewards.json",
+  "cards": "./cards.json"
 }

@@ -11,6 +11,8 @@ export interface BundleSummary {
   totalNodeCount: number;
   rootDir: string;
   moduleSummaries: PackageSummary[];
+  rewardsPath?: string;
+  cardsPath?: string;
 }
 
 export function scanBundles(dir: string): BundleSummary[] {
@@ -54,6 +56,8 @@ export function scanBundles(dir: string): BundleSummary[] {
         totalNodeCount,
         rootDir: bundleDir,
         moduleSummaries,
+        rewardsPath: manifest.rewards,
+        cardsPath: manifest.cards,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

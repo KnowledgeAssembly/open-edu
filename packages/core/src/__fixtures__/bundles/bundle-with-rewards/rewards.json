@@ -1,0 +1,8 @@
+{
+  "triggers": [
+    {
+      "onEvent": "bundle_complete",
+      "rewards": [{ "action": "badge.award", "badge": "bundle-complete" }]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { SettingsPage } from './SettingsPage';
 import { FontSizeProvider } from '@open-edu/design-system';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
+import { CompanionProvider } from './ai';
 
 const mockBreakTimer = {
   mode: 'off' as const,
@@ -13,7 +14,9 @@ const mockBreakTimer = {
 function renderWithProvider(ui: React.ReactElement) {
   return render(
     <I18nProvider locale="en" dictionaries={{ en: { learner: learnerDict } }}>
-      <FontSizeProvider>{ui}</FontSizeProvider>
+      <FontSizeProvider>
+        <CompanionProvider>{ui}</CompanionProvider>
+      </FontSizeProvider>
     </I18nProvider>,
   );
 }
@@ -61,5 +64,18 @@ describe('SettingsPage', () => {
     fireEvent.click(screen.getByTestId('theme-selector-trigger'));
     fireEvent.click(screen.getByTestId('theme-card-zen'));
     expect(onThemeChange).toHaveBeenCalledWith('zen');
+  });
+
+  it('renders the emoji pack section with both options', () => {
+    renderWithProvider(
+      <SettingsPage
+        currentThemeId="lumina-scholastica"
+        onThemeChange={vi.fn()}
+        breakTimer={mockBreakTimer}
+      />,
+    );
+    expect(screen.getByText('Emoji Style')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Native/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /OpenMoji/ })).toBeInTheDocument();
   });
 });

@@ -1,0 +1,16 @@
+{
+  "id": "rewards-bundle",
+  "title": "Rewards Bundle",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "modules": [
+    {
+      "id": "mod-a",
+      "title": "Module A",
+      "path": "./modules/mod-a",
+      "dependsOn": []
+    }
+  ],
+  "rewards": "./rewards.json",
+  "cards": "./cards.json"
+}

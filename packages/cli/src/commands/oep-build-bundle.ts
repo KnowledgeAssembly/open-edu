@@ -34,6 +34,17 @@ function collectModuleFiles(moduleDir: string): Map<string, Uint8Array> {
   return files;
 }
 
+function collectBundleRootFiles(bundleDir: string): Map<string, Uint8Array> {
+  const files = new Map<string, Uint8Array>();
+  for (const name of ['rewards.json', 'cards.json']) {
+    const p = join(bundleDir, name);
+    if (existsSync(p)) {
+      files.set(`bundle/${name}`, new Uint8Array(readFileSync(p)));
+    }
+  }
+  return files;
+}
+
 export async function buildOepBundle(
   bundleDir: string,
   outputDir?: string,
@@ -95,10 +106,13 @@ export async function buildOepBundle(
       signature: { status: 'unsigned' as const },
     } as DistributionManifest;
 
+    const bundleFiles = collectBundleRootFiles(bundleDir);
+
     const result = await OepWriter.buildBundle({
       manifest: distManifest,
       bundleManifest,
       moduleFiles,
+      bundleFiles,
     });
 
     const oepFileName = `${bundleManifest.id}-${bundleManifest.version}.oep`;

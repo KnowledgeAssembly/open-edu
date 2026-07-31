@@ -108,6 +108,51 @@ describe('buildSystemPrompt', () => {
     });
     expect(prompt).not.toMatch(/metadata/i);
   });
+
+  it('includes explanation style instructions when a style is provided', () => {
+    const prompt = buildSystemPrompt({
+      boundedContext: makeBoundedContext(),
+      assessmentActive: false,
+      learnerLanguage: 'en',
+      readingLevel: 'secondary',
+      explanationStyle: 'child_friendly',
+    });
+    expect(prompt).toContain('Explanation Style');
+    expect(prompt).toContain('playful');
+  });
+
+  it('excludes the explanation style section when no style is provided', () => {
+    const prompt = buildSystemPrompt({
+      boundedContext: makeBoundedContext(),
+      assessmentActive: false,
+      learnerLanguage: 'en',
+      readingLevel: 'secondary',
+    });
+    expect(prompt).not.toContain('Explanation Style');
+  });
+
+  it('includes emoji guidance when emojiVisualMode is true', () => {
+    const prompt = buildSystemPrompt({
+      boundedContext: makeBoundedContext(),
+      assessmentActive: false,
+      learnerLanguage: 'en',
+      readingLevel: 'secondary',
+      emojiVisualMode: true,
+    });
+    expect(prompt).toContain('Emoji Use');
+    expect(prompt).toContain('friendly emojis');
+  });
+
+  it('excludes emoji guidance when emojiVisualMode is false', () => {
+    const prompt = buildSystemPrompt({
+      boundedContext: makeBoundedContext(),
+      assessmentActive: false,
+      learnerLanguage: 'en',
+      readingLevel: 'secondary',
+      emojiVisualMode: false,
+    });
+    expect(prompt).not.toContain('Emoji Use');
+  });
 });
 
 describe('isAssessmentActive', () => {

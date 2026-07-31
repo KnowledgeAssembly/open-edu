@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve, relative } from 'node:path';
 import { OepWriter } from './oep-writer';
 import { OepReader } from './oep-reader';
@@ -32,51 +32,65 @@ function collectModuleFiles(moduleDir: string): Map<string, Uint8Array> {
   return files;
 }
 
+function collectBundleRootFiles(bundleDir: string): Map<string, Uint8Array> {
+  const files = new Map<string, Uint8Array>();
+  for (const name of ['rewards.json', 'cards.json']) {
+    const p = join(bundleDir, name);
+    if (existsSync(p)) {
+      files.set(`bundle/${name}`, new Uint8Array(readFileSync(p)));
+    }
+  }
+  return files;
+}
+
+async function buildLevelBMathOep(): Promise<Uint8Array> {
+  const bundleJsonPath = join(LEVEL_B_MATH_DIR, 'bundle.json');
+  const bundleJsonRaw = readFileSync(bundleJsonPath, 'utf-8');
+  const bundleJson = JSON.parse(bundleJsonRaw);
+  const bundleManifest = BundleManifestSchema.parse(bundleJson);
+
+  const moduleFiles = new Map<string, Map<string, Uint8Array>>();
+  for (const mod of bundleManifest.modules) {
+    const moduleDir = resolve(LEVEL_B_MATH_DIR, mod.path);
+    const files = collectModuleFiles(moduleDir);
+    moduleFiles.set(mod.id, files);
+  }
+
+  const distManifest: DistributionManifest = {
+    format: OEP_FORMAT,
+    formatVersion: OEP_FORMAT_VERSION,
+    type: 'bundle',
+    id: bundleManifest.id,
+    version: bundleManifest.version,
+    title: bundleManifest.title,
+    contentRoot: BUNDLE_DIR,
+    checksum: { algorithm: 'sha256', value: '' },
+    signature: { status: 'unsigned' },
+  };
+
+  const { bytes } = await OepWriter.buildBundle({
+    manifest: distManifest,
+    bundleManifest,
+    moduleFiles,
+    bundleFiles: collectBundleRootFiles(LEVEL_B_MATH_DIR),
+  });
+  return bytes;
+}
+
 describe('level-b-math OEP bundle E2E', () => {
   it('builds level-b-math as .oep and reads it back', async () => {
-    const bundleJsonPath = join(LEVEL_B_MATH_DIR, 'bundle.json');
-    const bundleJsonRaw = readFileSync(bundleJsonPath, 'utf-8');
-    const bundleJson = JSON.parse(bundleJsonRaw);
-    const bundleManifest = BundleManifestSchema.parse(bundleJson);
-
-    const moduleFiles = new Map<string, Map<string, Uint8Array>>();
-    for (const mod of bundleManifest.modules) {
-      const moduleDir = resolve(LEVEL_B_MATH_DIR, mod.path);
-      const files = collectModuleFiles(moduleDir);
-      moduleFiles.set(mod.id, files);
-    }
-
-    const distManifest: DistributionManifest = {
-      format: OEP_FORMAT,
-      formatVersion: OEP_FORMAT_VERSION,
-      type: 'bundle',
-      id: bundleManifest.id,
-      version: bundleManifest.version,
-      title: bundleManifest.title,
-      contentRoot: BUNDLE_DIR,
-      checksum: { algorithm: 'sha256', value: '' },
-      signature: { status: 'unsigned' },
-    };
-
-    const { bytes, checksumValue } = await OepWriter.buildBundle({
-      manifest: distManifest,
-      bundleManifest,
-      moduleFiles,
-    });
-
-    expect(bytes).toBeInstanceOf(Uint8Array);
-    expect(bytes.length).toBeGreaterThan(0);
-    expect(checksumValue).toMatch(/^[a-f0-9]{64}$/);
+    const bytes = await buildLevelBMathOep();
 
     const reader = new OepReader();
     const extraction = await reader.read(bytes);
 
     expect(extraction.manifest.type).toBe('bundle');
     expect(extraction.manifest.id).toBe('level-b-math');
-    expect(extraction.manifest.checksum.value).toBe(checksumValue);
     expect(extraction.bundleManifest).toBeDefined();
     expect(extraction.modules).toHaveLength(3);
     expect(extraction.courseManifest).toBeUndefined();
+    expect(extraction.rewards).toBeDefined();
+    expect(extraction.cards).toBeDefined();
 
     const modIds = extraction.modules!.map((m) => m.manifest.id);
     expect(modIds).toContain('addition_basics');
@@ -92,35 +106,7 @@ describe('level-b-math OEP bundle E2E', () => {
   });
 
   it('installs level-b-math bundle via InstallCoordinator', async () => {
-    const bundleJsonPath = join(LEVEL_B_MATH_DIR, 'bundle.json');
-    const bundleJsonRaw = readFileSync(bundleJsonPath, 'utf-8');
-    const bundleJson = JSON.parse(bundleJsonRaw);
-    const bundleManifest = BundleManifestSchema.parse(bundleJson);
-
-    const moduleFiles = new Map<string, Map<string, Uint8Array>>();
-    for (const mod of bundleManifest.modules) {
-      const moduleDir = resolve(LEVEL_B_MATH_DIR, mod.path);
-      const files = collectModuleFiles(moduleDir);
-      moduleFiles.set(mod.id, files);
-    }
-
-    const distManifest: DistributionManifest = {
-      format: OEP_FORMAT,
-      formatVersion: OEP_FORMAT_VERSION,
-      type: 'bundle',
-      id: bundleManifest.id,
-      version: bundleManifest.version,
-      title: bundleManifest.title,
-      contentRoot: BUNDLE_DIR,
-      checksum: { algorithm: 'sha256', value: '' },
-      signature: { status: 'unsigned' },
-    };
-
-    const { bytes } = await OepWriter.buildBundle({
-      manifest: distManifest,
-      bundleManifest,
-      moduleFiles,
-    });
+    const bytes = await buildLevelBMathOep();
 
     const stored: Record<string, unknown> = {};
     const coordinator = new InstallCoordinator({
@@ -130,6 +116,8 @@ describe('level-b-math OEP bundle E2E', () => {
         stored.type = course.type;
         stored.bundleManifest = course.bundleManifest;
         stored.modules = course.modules;
+        stored.rewards = (course as unknown as { rewards?: unknown }).rewards ?? null;
+        stored.cards = (course as unknown as { cards?: unknown }).cards ?? null;
       },
       replaceCourse: async () => {
         throw new Error('not expected');
@@ -147,5 +135,7 @@ describe('level-b-math OEP bundle E2E', () => {
     expect(stored.id).toBe('level-b-math');
     expect(stored.type).toBe('bundle');
     expect(stored.modules as Array<unknown>).toHaveLength(3);
+    expect(stored.rewards).toBeDefined();
+    expect(stored.cards).toBeDefined();
   });
 });

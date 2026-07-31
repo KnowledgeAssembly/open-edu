@@ -6,6 +6,10 @@ function TestConsumer(): JSX.Element {
   const {
     panelState,
     setPanelState,
+    explanationStyle,
+    setExplanationStyle,
+    emojiMode,
+    setEmojiMode,
     messages,
     isLoading,
     clearConversation,
@@ -17,10 +21,18 @@ function TestConsumer(): JSX.Element {
   return (
     <div>
       <div data-testid="panel-state">{panelState}</div>
+      <div data-testid="explanation-style">{explanationStyle}</div>
+      <div data-testid="emoji-mode">{emojiMode}</div>
       <div data-testid="msg-count">{messages.length}</div>
       <div data-testid="is-loading">{String(isLoading)}</div>
       <div data-testid="pending-reward">{String(pendingReward)}</div>
       <div data-testid="reward-count">{rewardMessages.length}</div>
+      <button data-testid="set-style-exam" onClick={() => setExplanationStyle('exam')}>
+        Set Exam
+      </button>
+      <button data-testid="set-mode-openmoji" onClick={() => setEmojiMode('openmoji')}>
+        Set OpenMoji
+      </button>
       <button data-testid="toggle" onClick={() => setPanelState('floating')}>
         Toggle
       </button>
@@ -142,5 +154,40 @@ describe('CompanionProvider', () => {
     fireEvent.click(screen.getByTestId('add-badge'));
     fireEvent.click(screen.getByTestId('add-card'));
     expect(screen.getByTestId('reward-count')).toHaveTextContent('2');
+  });
+
+  it('defaults explanationStyle to detailed and emojiMode to native', () => {
+    localStorage.clear();
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    expect(screen.getByTestId('explanation-style')).toHaveTextContent('detailed');
+    expect(screen.getByTestId('emoji-mode')).toHaveTextContent('native');
+  });
+
+  it('updates explanationStyle and persists it to localStorage', () => {
+    localStorage.clear();
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    fireEvent.click(screen.getByTestId('set-style-exam'));
+    expect(screen.getByTestId('explanation-style')).toHaveTextContent('exam');
+    expect(localStorage.getItem('oe-explanation-style')).toBe('exam');
+  });
+
+  it('updates emojiMode and persists it to localStorage', () => {
+    localStorage.clear();
+    render(
+      <CompanionProvider>
+        <TestConsumer />
+      </CompanionProvider>,
+    );
+    fireEvent.click(screen.getByTestId('set-mode-openmoji'));
+    expect(screen.getByTestId('emoji-mode')).toHaveTextContent('openmoji');
+    expect(localStorage.getItem('oe-emoji-pack')).toBe('openmoji');
   });
 });

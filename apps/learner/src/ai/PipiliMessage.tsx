@@ -1,14 +1,30 @@
 import * as React from 'react';
 import type { UIMessage } from 'ai';
 import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
-import { TutorMessage, Citation as CitationCmp, cn } from '@open-edu/design-system';
+import {
+  TutorMessage,
+  Citation as CitationCmp,
+  cn,
+  EmojiText,
+  NativeEmojiPack,
+  createOpenMojiPack,
+  type EmojiPack,
+} from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
+import { useCompanion } from './CompanionProvider.js';
+import type { EmojiMode } from './CompanionProvider.js';
 
 export interface PipiliMessageProps {
   role: 'user' | 'assistant' | 'system';
   parts: UIMessage['parts'];
   metadata?: PipiliResponseMetadata;
   isStreaming?: boolean;
+}
+
+const openMojiPack = createOpenMojiPack();
+
+function resolveEmojiPack(emojiMode: EmojiMode | undefined): EmojiPack {
+  return emojiMode === 'openmoji' ? openMojiPack : NativeEmojiPack;
 }
 
 /**
@@ -20,6 +36,7 @@ export interface PipiliMessageProps {
 export const PipiliMessage = React.forwardRef<HTMLDivElement, PipiliMessageProps>(
   function PipiliMessage({ role, parts, metadata, isStreaming }, ref): JSX.Element {
     const { t } = useTranslation();
+    const { emojiMode } = useCompanion();
     const textParts = parts.filter((p): p is { type: 'text'; text: string } => p.type === 'text');
     const visibleText = textParts.map((p) => p.text).join('');
 
@@ -27,7 +44,11 @@ export const PipiliMessage = React.forwardRef<HTMLDivElement, PipiliMessageProps
       <div ref={ref} className="space-y-2" data-testid="pipili-message">
         <TutorMessage role={role === 'assistant' ? 'ai' : 'user'}>
           <span className={cn(isStreaming && 'opacity-95')}>
-            {visibleText}
+            {role === 'assistant' ? (
+              <EmojiText text={visibleText} pack={resolveEmojiPack(emojiMode)} />
+            ) : (
+              visibleText
+            )}
             {isStreaming && (
               <span
                 aria-hidden="true"

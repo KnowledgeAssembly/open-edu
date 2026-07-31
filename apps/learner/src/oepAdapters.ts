@@ -13,7 +13,13 @@ import type {
   CardDefinitions,
   ContentNode,
 } from '@open-edu/schemas';
-import type { PackageSummary, LoadedPackage, LoadedNode, BundleSummary, LoadedBundle } from '@open-edu/core';
+import type {
+  PackageSummary,
+  LoadedPackage,
+  LoadedNode,
+  BundleSummary,
+  LoadedBundle,
+} from '@open-edu/core';
 import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 
 function extractTitle(content: string): string | undefined {
@@ -224,9 +230,7 @@ export function storedBundleToLoadedBundle(bundle: StoredBundle): LoadedBundle {
     });
 
     const stripPrefix = (p: string) => {
-      const withoutModule = p.startsWith(modulePrefix)
-        ? p.slice(modulePrefix.length)
-        : p;
+      const withoutModule = p.startsWith(modulePrefix) ? p.slice(modulePrefix.length) : p;
       return withoutModule.replace(/^assets\//, '');
     };
     const assetPaths = m.assets.map((a) => stripPrefix(a.path));
@@ -262,10 +266,24 @@ export function storedBundleToLoadedBundle(bundle: StoredBundle): LoadedBundle {
     } as LoadedPackage;
   });
 
+  let bundleRewards: Rewards | null = null;
+  if (bundle.rewards) {
+    const result = RewardsSchema.safeParse(bundle.rewards);
+    if (result.success) bundleRewards = result.data;
+  }
+
+  let bundleCards: CardDefinitions | null = null;
+  if (bundle.cards) {
+    const result = CardDefinitionsSchema.safeParse(bundle.cards);
+    if (result.success) bundleCards = result.data;
+  }
+
   return {
     rootDir: `${OEP_PREFIX}${bundle.id}`,
     manifest,
     modules,
     moduleMap: new Map(modules.map((m) => [m.manifest.id, m])),
+    rewards: bundleRewards,
+    cards: bundleCards,
   } as LoadedBundle;
 }

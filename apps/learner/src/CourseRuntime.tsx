@@ -8,6 +8,7 @@ import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import { useTranslation } from '@open-edu/i18n';
 import type { RewardReceipt } from '@open-edu/rewards';
+import type { Rewards, CardDefinitions } from '@open-edu/schemas';
 import type { ProgressSnapshot, BundleProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage, LoadedNode, LoadedBundle } from '@open-edu/core';
 import { getProgress, saveProgress } from './progressStorage';
@@ -202,6 +203,105 @@ export function CourseRuntime({
     };
   }, [engine, pkg]);
 
+  const bundleCardBrokerRef = useRef<CardBroker | null>(null);
+  const bundleRewardBrokerRef = useRef<RewardBroker | null>(null);
+  const bundleSessionRef = useRef<TelemetrySession | null>(null);
+  const bundleCompletedRef = useRef(false);
+  const bundleModuleIdsRef = useRef<Set<string>>(new Set());
+  const bundleRewardsRef = useRef<Rewards | null>(null);
+  const bundleCardsRef = useRef<CardDefinitions | null>(null);
+
+  useEffect(() => {
+    const bundle = bundleContext?.bundle;
+    if (!bundleContext || !bundle) return;
+
+    const bundleRewards = bundle.rewards ?? null;
+    const bundleCards = bundle.cards ?? null;
+    if (!bundleRewards && !bundleCards) return;
+
+    bundleRewardsRef.current = bundleRewards;
+    bundleCardsRef.current = bundleCards;
+    bundleModuleIdsRef.current = new Set(bundle.modules.map((m) => m.manifest.id));
+
+    const session = new TelemetrySession();
+    session.start();
+    bundleSessionRef.current = session;
+
+    const eventSub = session.events$.subscribe({ next: () => {} });
+
+    const broker = bundleRewards
+      ? new RewardBroker({
+          rewards: bundleRewards,
+          source: session.events$,
+          context: { scores: {}, skills: {}, completedNodes: [], completedModules: [] },
+          onReceipt: (receipt: RewardReceipt) => {
+            if (receipt.status === 'delivered' && receipt.actionType === 'badge.award') {
+              const badgeName = receipt.actionKey ?? receipt.detail ?? 'Unknown badge';
+              setBadges((prev) => [...prev, badgeName]);
+              void addBadge(bundleContext.bundleId, badgeName);
+              companion.addRewardMessage({
+                id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                type: 'badge',
+                badgeName,
+                timestamp: Date.now(),
+              });
+            }
+          },
+        })
+      : null;
+    broker?.start();
+
+    const cardBroker = bundleCards
+      ? new CardBroker({
+          cards: bundleCards.cards,
+          source: session.events$,
+          context: { scores: {}, skills: {}, completedNodes: [], completedModules: [] },
+          onCardUnlocked: (card) => {
+            void saveCardProgress(card.id, card.level);
+            companion.addRewardMessage({
+              id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+              type: 'card',
+              cardTitle: card.title,
+              cardType: card.type,
+              cardLevel: card.level,
+              cardMaxLevel: card.maximumLevel,
+              timestamp: Date.now(),
+            });
+          },
+          onCardLeveledUp: (card, newLevel) => {
+            void saveCardProgress(card.id, newLevel);
+            companion.addRewardMessage({
+              id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+              type: 'cardLevelUp',
+              cardTitle: card.title,
+              cardType: card.type,
+              cardLevel: newLevel,
+              cardMaxLevel: card.maximumLevel,
+              timestamp: Date.now(),
+            });
+          },
+        })
+      : null;
+    cardBroker?.start();
+
+    bundleRewardBrokerRef.current = broker;
+    bundleCardBrokerRef.current = cardBroker;
+
+    return () => {
+      eventSub.unsubscribe();
+      broker?.stop();
+      cardBroker?.stop();
+      session.stop();
+      bundleSessionRef.current = null;
+      bundleRewardBrokerRef.current = null;
+      bundleCardBrokerRef.current = null;
+      bundleCompletedRef.current = false;
+      bundleModuleIdsRef.current = new Set();
+      bundleRewardsRef.current = null;
+      bundleCardsRef.current = null;
+    };
+  }, [bundleContext?.bundle, bundleContext?.bundleId]);
+
   const handleProgressChange = useCallback(
     (snapshot: ProgressSnapshot) => {
       void saveProgress(pkg.manifest.id, snapshot);
@@ -235,6 +335,28 @@ export function CourseRuntime({
         bundleProgressRef.current = bundleSnapshot;
         void saveBundleProgress(bundleContext.bundleId, bundleSnapshot);
         bundleContext.onBundleSnapshot(bundleSnapshot);
+
+        if (snapshot.isCompleted && bundleModuleIdsRef.current.has(pkg.manifest.id)) {
+          const wasComplete = bundleCompletedRef.current;
+          const completedModules = [...bundleModuleIdsRef.current].filter(
+            (id) => id === pkg.manifest.id || bundleSnapshot.moduleStatuses[id] === 'completed',
+          );
+          bundleCompletedRef.current = completedModules.length === bundleModuleIdsRef.current.size;
+          if ((bundleRewardsRef.current || bundleCardsRef.current) && bundleSessionRef.current) {
+            bundleRewardBrokerRef.current?.updateContext({ completedModules });
+            bundleCardBrokerRef.current?.updateContext({ completedModules });
+            bundleSessionRef.current.emit({
+              event: 'module_complete',
+              moduleId: pkg.manifest.id,
+            } as never);
+            if (bundleCompletedRef.current && !wasComplete) {
+              bundleSessionRef.current.emit({
+                event: 'bundle_complete',
+                bundleId: bundleContext.bundleId,
+              } as never);
+            }
+          }
+        }
       }
     },
     [pkg, bundleContext],

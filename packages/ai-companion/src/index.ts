@@ -3,6 +3,7 @@ export type {
   DictionaryProvider,
   LearningContext,
   ExplanationRequest,
+  ExplanationStyle,
   AIResponse,
   AIProvider,
   ContextProvider,

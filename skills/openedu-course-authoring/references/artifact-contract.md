@@ -84,6 +84,55 @@ course-output/
 - Compiler warnings (missing objectives, empty lessons) are reported but do not fail.
 - A run is successful only when `course-spec.json` exists and every required validation gate passes.
 
+## Bundle-level artifacts
+
+A multi-module bundle is a directory with its own manifest and module subdirectories. Each module is a standard Open-Edu package.
+
+| Field     | Type   | Required | Description                                         |
+| --------- | ------ | -------- | --------------------------------------------------- |
+| `id`      | string | yes      | Kebab-case, unique                                  |
+| `title`   | string | yes      | Bundle title                                        |
+| `version` | string | yes      | Semver (`1.0.0`)                                    |
+| `author`  | string | yes      | Author name                                         |
+| `modules` | array  | yes      | Non-empty array of `{ id, title, path, dependsOn }` |
+| `rewards` | string | no       | Relative path to bundle-root `rewards.json`         |
+| `cards`   | string | no       | Relative path to bundle-root `cards.json`           |
+
+Bundle-root `rewards.json`/`cards.json` follow the same schemas as module-level files (see below). `rewards`/`cards` paths must stay inside the bundle directory — never absolute paths or `../` escapes.
+
+## Rewards/cards artifacts
+
+Both module packages and bundles may include optional `rewards.json` and `cards.json` files. The schemas mirror `packages/schemas/src/rewards.ts` and `packages/schemas/src/cards.ts`.
+
+### rewards.json
+
+| Field      | Type  | Required | Description                 |
+| ---------- | ----- | -------- | --------------------------- |
+| `triggers` | array | yes      | Non-empty array of triggers |
+
+Each trigger:
+
+| Field     | Type   | Required | Description                                 |
+| --------- | ------ | -------- | ------------------------------------------- |
+| `onEvent` | string | yes      | Telemetry event name (e.g. `node_complete`) |
+| `rewards` | array  | yes      | Non-empty array of reward actions           |
+
+Each reward action is a discriminated union on `action`:
+
+- `{ action: "badge.award", badge: string, condition?: Condition }`
+- `{ action: "webhook", url: string, condition?: Condition }`
+- `{ action: "script", exec: string, condition?: Condition }`
+
+`condition` belongs on the **reward**, not the trigger. See `rewards-cards-authoring.md` for condition scope rules.
+
+### cards.json
+
+| Field   | Type  | Required | Description                         |
+| ------- | ----- | -------- | ----------------------------------- |
+| `cards` | array | yes      | Non-empty array of card definitions |
+
+Each card requires `id` (globally unique across the bundle), `title`, `category`, `type`, `summary`, and `unlock` (a condition). `level`/`maximumLevel` default to 1.
+
 ## Quality Report Format
 
 `quality-report.json` is produced by `quality-report.mjs` (the central orchestrator and sole writer) and follows this schema:

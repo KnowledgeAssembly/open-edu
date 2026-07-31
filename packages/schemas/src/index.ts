@@ -107,6 +107,8 @@ export {
   HintTriggeredEventSchema,
   WidgetInteractionEventSchema,
   RouteTriggeredEventSchema,
+  ModuleCompleteEventSchema,
+  BundleCompleteEventSchema,
   TelemetryEventEnum,
 } from './telemetry.js';
 export type {
@@ -117,6 +119,8 @@ export type {
   HintTriggeredEvent,
   WidgetInteractionEvent,
   RouteTriggeredEvent,
+  ModuleCompleteEvent,
+  BundleCompleteEvent,
 } from './telemetry.js';
 
 export {

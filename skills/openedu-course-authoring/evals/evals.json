@@ -115,6 +115,37 @@
         "metadata language/locale is recorded",
         "content is age-appropriate for 6-8 year olds"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Create an Open-Edu bundle course about basic algebra with two modules: module-a (linear equations) and module-b (word problems). Each module is a single package. Add a bundle-level rewards.json with a bundle-completion badge and a bundle-level cards.json with one card unlocked on bundle completion.",
+      "expected_output": "Mode: portable. Generate a two-module bundle in portable mode.\nExpected artifacts: bundle.json, module-a/package.json, module-b/package.json, rewards.json, cards.json.\nChecks:\n- bundle.json has modules [module-a, module-b]\n- module-b dependsOn module-a\n- rewards.json has a trigger with condition bundleCompleted\n- cards.json has one card with unlock.type bundleCompleted\n- card id is prefixed (e.g. bundle-...)",
+      "files": [
+        "bundle.json",
+        "rewards.json",
+        "cards.json",
+        "module-a/package.json",
+        "module-b/package.json"
+      ],
+      "expectations": [
+        "bundle.json has modules [module-a, module-b]",
+        "module-b dependsOn module-a",
+        "rewards.json condition uses bundleCompleted",
+        "cards.json unlock uses bundleCompleted",
+        "card id is globally unique"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Create a single-module Open-Edu course about fractions with a module-level rewards.json awarding a badge after the learner completes the first lesson, and a module-level cards.json with one card unlocked by that same lesson. Keep the card id namespaced.",
+      "expected_output": "Mode: portable. Single package with rewards.json and cards.json at package root.\nChecks:\n- rewards.json trigger onEvent node_complete\n- reward condition type chain, completedNodeIds references the first lesson node\n- cards.json card unlock references the same node\n- card id is namespaced",
+      "files": ["package.json", "rewards.json", "cards.json"],
+      "expectations": [
+        "rewards.json trigger onEvent node_complete",
+        "reward condition type chain references the first lesson node",
+        "cards.json unlock references the same node",
+        "card id is namespaced"
+      ]
     }
   ]
 }

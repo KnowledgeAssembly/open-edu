@@ -76,13 +76,6 @@ export class BundleEngine {
     this.reverseDeps = new Map();
     this.completedModuleIds = new Set<string>();
 
-    if (bundleInput.manifest.rewards) {
-      console.warn(
-        `[BundleEngine] Bundle "${bundleInput.manifest.id}" has rewards configured, but ` +
-          'bundle-level reward evaluation requires external wiring via updateContext().',
-      );
-    }
-
     this.moduleStatuses = {};
     for (const modRef of bundleInput.manifest.modules) {
       const existingSnapshot = this.moduleSnapshots[modRef.id];

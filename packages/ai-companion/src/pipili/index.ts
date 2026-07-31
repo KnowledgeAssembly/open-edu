@@ -1,4 +1,5 @@
 export type {
+  ExplanationStyle,
   PipiliRequest,
   PipiliMessage,
   PipiliContextSnapshot,

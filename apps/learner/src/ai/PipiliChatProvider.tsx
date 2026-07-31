@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import type { PipiliResponseMetadata } from '@open-edu/ai-companion';
+import type { PipiliResponseMetadata, LearnerProfile } from '@open-edu/ai-companion';
 import { useCompanion } from './CompanionProvider.js';
 import { learningContextToSnapshot } from './context-mapper.js';
 
@@ -52,6 +52,15 @@ export function PipiliChatProvider({
   const contextRef = useRef(companion.context);
   contextRef.current = companion.context;
 
+  const prefsRef = useRef<Partial<LearnerProfile>>({
+    explanationStyle: companion.explanationStyle,
+    emojiMode: companion.emojiMode,
+  });
+  prefsRef.current = {
+    explanationStyle: companion.explanationStyle,
+    emojiMode: companion.emojiMode,
+  };
+
   // v7 transport: inject conversationId + a fresh context snapshot into the
   // POST body on every send (and regenerate).
   const transport = useMemo(
@@ -62,7 +71,7 @@ export function PipiliChatProvider({
           body: {
             conversationId: id,
             messages,
-            context: learningContextToSnapshot(contextRef.current),
+            context: learningContextToSnapshot(contextRef.current, prefsRef.current),
           },
         }),
       }),

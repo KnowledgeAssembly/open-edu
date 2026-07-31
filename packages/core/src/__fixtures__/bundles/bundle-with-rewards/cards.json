@@ -1,0 +1,12 @@
+{
+  "cards": [
+    {
+      "id": "bundle-finisher",
+      "title": "Bundle Finisher",
+      "category": "Achievement",
+      "type": "achievement",
+      "summary": "Completed every module in the bundle.",
+      "unlock": { "type": "bundleCompleted" }
+    }
+  ]
+}

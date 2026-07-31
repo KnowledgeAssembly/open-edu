@@ -9,6 +9,7 @@ import { getAllCardProgress, type CardsData } from './cardsStorage';
 
 export interface CollectionBinderPageProps {
   packages: Record<string, LoadedPackage>;
+  bundleCards?: CardDefinition[];
 }
 
 interface ShelfData {
@@ -16,7 +17,14 @@ interface ShelfData {
   cards: KnowledgeCardGridItem[];
 }
 
-export function CollectionBinderPage({ packages }: CollectionBinderPageProps): JSX.Element {
+interface ShelfItem extends KnowledgeCardGridItem {
+  shelfCategory: string;
+}
+
+export function CollectionBinderPage({
+  packages,
+  bundleCards,
+}: CollectionBinderPageProps): JSX.Element {
   const { t } = useTranslation();
   const [selectedCard, setSelectedCard] = useState<CardDefinition | null>(null);
   const [savedProgress, setSavedProgress] = useState<CardsData>({});
@@ -25,23 +33,33 @@ export function CollectionBinderPage({ packages }: CollectionBinderPageProps): J
     getAllCardProgress().then(setSavedProgress);
   }, []);
 
-  const allCardItems = useMemo<KnowledgeCardGridItem[]>(() => {
-    const items: KnowledgeCardGridItem[] = [];
+  const allCardItems = useMemo<ShelfItem[]>(() => {
+    const items: ShelfItem[] = [];
     for (const pkg of Object.values(packages)) {
       if (!pkg.cards?.cards) continue;
       for (const card of pkg.cards.cards) {
         const saved = savedProgress[card.id];
         const level = saved?.level ?? (savedProgress[card.id] ? 1 : 0);
-        items.push({ card, level, isLocked: level === 0 });
+        items.push({ card, level, isLocked: level === 0, shelfCategory: card.category });
       }
     }
+    for (const card of bundleCards ?? []) {
+      const saved = savedProgress[card.id];
+      const level = saved?.level ?? (savedProgress[card.id] ? 1 : 0);
+      items.push({
+        card,
+        level,
+        isLocked: level === 0,
+        shelfCategory: t('learner.collection_binder.bundle_shelf'),
+      });
+    }
     return items;
-  }, [packages, savedProgress]);
+  }, [packages, bundleCards, savedProgress, t]);
 
   const shelves = useMemo<ShelfData[]>(() => {
     const grouped: Record<string, KnowledgeCardGridItem[]> = {};
     for (const item of allCardItems) {
-      const cat = item.card.category;
+      const cat = item.shelfCategory;
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push(item);
     }
