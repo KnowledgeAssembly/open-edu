@@ -18,9 +18,9 @@ describe('evals.json schema validation', () => {
     strictEqual(data.skill_name, 'openedu-course-authoring');
   });
 
-  it('has an evals array with 9 entries', () => {
+  it('has an evals array with 11 entries', () => {
     ok(Array.isArray(data.evals));
-    strictEqual(data.evals.length, 9);
+    strictEqual(data.evals.length, 11);
   });
 
   it('all eval IDs are unique', () => {

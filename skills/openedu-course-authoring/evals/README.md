@@ -1,6 +1,6 @@
 # Open-Edu Course Authoring Skill Evaluations
 
-These evaluations test the skill across 9 scenarios: portable mode, repository mode, source material (PDF), and edge cases (missing input, unsupported widgets, existing output, multilingual).
+These evaluations test the skill across 11 scenarios: portable mode, repository mode, source material (PDF), bundles, rewards/cards, and edge cases (missing input, unsupported widgets, existing output, multilingual).
 
 ## Running Evaluations
 
@@ -93,3 +93,5 @@ The agent must never claim it performed an operation it did not run. When gradin
 | 7   | eval-edge-unsupported-widget | repository | 0             | 3            |
 | 8   | eval-edge-existing-output    | any        | 0             | 3            |
 | 9   | eval-edge-multilingual       | portable   | 3             | 4            |
+| 10  | eval-bundle-rewards-cards    | portable   | 5             | 5            |
+| 11  | eval-module-rewards-cards    | portable   | 3             | 4            |
