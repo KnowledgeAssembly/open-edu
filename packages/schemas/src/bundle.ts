@@ -37,6 +37,7 @@ export const BundleManifestSchema = z
     modules: z.array(BundleModuleRefSchema).min(1),
     skills: z.array(z.string()).optional(),
     rewards: z.string().optional(),
+    cards: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const ids = data.modules.map((m) => m.id);
@@ -51,6 +52,17 @@ export const BundleManifestSchema = z
         });
       }
       seen.add(id);
+    }
+
+    for (const key of ['rewards', 'cards'] as const) {
+      const p = data[key];
+      if (p && (p.startsWith('/') || p.startsWith('..') || p.includes('\\'))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${key} must be a relative path inside the bundle directory`,
+          path: [key],
+        });
+      }
     }
   });
 

@@ -113,4 +113,21 @@ describe('BundleManifestSchema', () => {
     });
     expect(result.modules[0]!.id).toBe('my_module_v2');
   });
+
+  it('accepts an optional cards path', () => {
+    const result = BundleManifestSchema.parse({ ...validBundle, cards: './cards.json' });
+    expect(result.cards).toBe('./cards.json');
+  });
+
+  it('rejects rewards/cards paths that escape the bundle directory', () => {
+    expect(() => BundleManifestSchema.parse({ ...validBundle, rewards: '../rewards.json' })).toThrow(
+      'must be a relative path',
+    );
+    expect(() => BundleManifestSchema.parse({ ...validBundle, cards: '/etc/cards.json' })).toThrow(
+      'must be a relative path',
+    );
+    expect(() => BundleManifestSchema.parse({ ...validBundle, cards: '..\\cards.json' })).toThrow(
+      'must be a relative path',
+    );
+  });
 });
