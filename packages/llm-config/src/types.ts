@@ -6,6 +6,8 @@ export interface LlmConfig {
   apiKey: string;
   maxTokens: number;
   temperature: number;
+  /** Custom OpenAI-compatible endpoint (e.g. Ollama: http://localhost:11434/v1). */
+  baseURL?: string;
 }
 
 export interface LlmProvider {
@@ -28,5 +30,6 @@ export function loadConfig(): LlmConfig {
       '',
     maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '4096', 10),
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
+    baseURL: process.env.LLM_BASE_URL || undefined,
   };
 }

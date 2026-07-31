@@ -58,6 +58,7 @@ export class LlmRouter {
           '',
         maxTokens: config.maxTokens,
         temperature: config.temperature,
+        baseURL: process.env.LLM_BASE_URL || undefined,
       };
       provider = createLlmProvider(llmConfig);
       this.providerCache.set(key, provider);

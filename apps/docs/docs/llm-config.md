@@ -73,14 +73,15 @@ const result = await llm.generateStructured(
 
 Load configuration from environment variables:
 
-| Variable          | Default       | Description         |
-| ----------------- | ------------- | ------------------- |
-| `LLM_PROVIDER`    | `openai`      | Provider name       |
-| `LLM_MODEL`       | `gpt-4o-mini` | Model name          |
-| `OPENAI_API_KEY`  | —             | API key             |
-| `LLM_API_KEY`     | —             | Alternative API key |
-| `LLM_MAX_TOKENS`  | `4096`        | Max tokens per call |
-| `LLM_TEMPERATURE` | `0.3`         | LLM temperature     |
+| Variable          | Default       | Description                                     |
+| ----------------- | ------------- | ----------------------------------------------- |
+| `LLM_PROVIDER`    | `openai`      | Provider name                                   |
+| `LLM_MODEL`       | `gpt-4o-mini` | Model name                                      |
+| `OPENAI_API_KEY`  | —             | API key                                         |
+| `LLM_API_KEY`     | —             | Alternative API key                             |
+| `LLM_BASE_URL`    | —             | Custom OpenAI-compatible endpoint (e.g. Ollama) |
+| `LLM_MAX_TOKENS`  | `4096`        | Max tokens per call                             |
+| `LLM_TEMPERATURE` | `0.3`         | LLM temperature                                 |
 
 ```typescript
 import { loadConfig, createLlmProvider } from '@open-edu/llm-config';
@@ -103,6 +104,16 @@ const provider = createLlmProvider({
 ### OpenAI
 
 Uses the OpenAI SDK with `zodResponseFormat` for structured output. Set `LLM_PROVIDER=openai` and provide `OPENAI_API_KEY`.
+
+### OpenAI-compatible endpoints (e.g. Ollama)
+
+Set `LLM_BASE_URL` to any OpenAI-compatible server (e.g. Ollama's `http://localhost:11434/v1`). No API key is required for local endpoints. The `ModelFactory` routes through the Chat Completions API for custom base URLs; the `OpenAIProvider` (pipeline) requires `response_format` support on the endpoint for structured output.
+
+```bash
+LLM_PROVIDER=openai
+LLM_MODEL=llama3.2
+LLM_BASE_URL=http://localhost:11434/v1
+```
 
 ### OpenRouter
 

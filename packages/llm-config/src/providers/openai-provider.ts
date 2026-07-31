@@ -10,12 +10,16 @@ export class OpenAIProvider implements LlmProvider {
   private defaultTemperature: number;
 
   constructor(config: LlmConfig) {
-    if (!config.apiKey) {
+    if (!config.apiKey && !config.baseURL) {
       throw new Error(
         'OpenAI API key is required. Set OPENAI_API_KEY or LLM_API_KEY environment variable.',
       );
     }
-    this.client = new OpenAI({ apiKey: config.apiKey, dangerouslyAllowBrowser: true });
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: config.baseURL,
+      dangerouslyAllowBrowser: true,
+    });
     this.model = config.model;
     this.defaultMaxTokens = config.maxTokens;
     this.defaultTemperature = config.temperature;
