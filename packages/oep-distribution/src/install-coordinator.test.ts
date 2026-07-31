@@ -55,6 +55,7 @@ async function buildTestBundleOep(
   version: string,
   title: string,
   moduleCount: number = 2,
+  bundleFiles?: Map<string, Uint8Array>,
 ): Promise<Uint8Array> {
   const modules = Array.from({ length: moduleCount }, (_, i) => ({
     id: `mod-${String.fromCharCode(97 + i)}`,
@@ -93,6 +94,7 @@ async function buildTestBundleOep(
       dependsOn: [] as string[],
       estimatedDuration: 10,
     })),
+    ...(bundleFiles ? { rewards: './rewards.json', cards: './cards.json' } : {}),
   };
 
   const distManifest: DistributionManifest = {
@@ -111,6 +113,7 @@ async function buildTestBundleOep(
     manifest: distManifest,
     bundleManifest,
     moduleFiles,
+    bundleFiles,
   });
   return result.bytes;
 }
@@ -340,5 +343,41 @@ describe('InstallCoordinator - bundles', () => {
     expect(result.success).toBe(true);
     const saved = storedCourses.get('mini-bundle');
     expect(saved!.modules).toHaveLength(1);
+  });
+
+  it('stores bundle-level rewards and cards on install', async () => {
+    const bundleRewards = {
+      triggers: [
+        {
+          onEvent: 'bundle_complete',
+          rewards: [{ action: 'badge.award', badge: 'bundle-finisher' }],
+        },
+      ],
+    };
+    const bundleCards = {
+      cards: [
+        {
+          id: 'bundle-card',
+          title: 'Bundle Card',
+          type: 'achievement',
+          category: 'Achievement',
+          summary: 'Finished the bundle',
+          unlock: { type: 'bundleCompleted' },
+        },
+      ],
+    };
+    const bundleFiles = new Map([
+      ['bundle/rewards.json', encoder.encode(JSON.stringify(bundleRewards))],
+      ['bundle/cards.json', encoder.encode(JSON.stringify(bundleCards))],
+    ]);
+    const bytes = await buildTestBundleOep('rew-bundle', '1.0.0', 'Rewards Bundle', 1, bundleFiles);
+    const source = makeTestCourseSource(bytes);
+    const result = await coordinator.install(source);
+
+    expect(result.success).toBe(true);
+    const saved = storedCourses.get('rew-bundle');
+    const record = saved as unknown as { rewards: unknown; cards: unknown };
+    expect(record.rewards).toEqual(bundleRewards);
+    expect(record.cards).toEqual(bundleCards);
   });
 });
