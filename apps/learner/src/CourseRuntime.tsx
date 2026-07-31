@@ -338,10 +338,13 @@ export function CourseRuntime({
 
         if (snapshot.isCompleted && bundleModuleIdsRef.current.has(pkg.manifest.id)) {
           const wasComplete = bundleCompletedRef.current;
-          bundleCompletedRef.current = [...bundleModuleIdsRef.current].every(
+          const completedModules = [...bundleModuleIdsRef.current].filter(
             (id) => id === pkg.manifest.id || bundleSnapshot.moduleStatuses[id] === 'completed',
           );
+          bundleCompletedRef.current = completedModules.length === bundleModuleIdsRef.current.size;
           if ((bundleRewardsRef.current || bundleCardsRef.current) && bundleSessionRef.current) {
+            bundleRewardBrokerRef.current?.updateContext({ completedModules });
+            bundleCardBrokerRef.current?.updateContext({ completedModules });
             bundleSessionRef.current.emit({
               event: 'module_complete',
               moduleId: pkg.manifest.id,
@@ -351,11 +354,6 @@ export function CourseRuntime({
                 event: 'bundle_complete',
                 bundleId: bundleContext.bundleId,
               } as never);
-              const completedModules = [...bundleModuleIdsRef.current].filter(
-                (id) => bundleSnapshot.moduleStatuses[id] === 'completed',
-              );
-              bundleRewardBrokerRef.current?.updateContext({ completedModules });
-              bundleCardBrokerRef.current?.updateContext({ completedModules });
             }
           }
         }
