@@ -107,6 +107,16 @@ describe('BundleEngine', () => {
       });
       expect(engine.getModuleStatus('mod-a')).toBe('completed');
     });
+
+    it('should not warn when the bundle has no rewards configured', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        new BundleEngine(createMockBundle([{ id: 'mod-a', title: 'Module A' }]));
+        expect(warnSpy).not.toHaveBeenCalled();
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
   });
 
   describe('start', () => {
