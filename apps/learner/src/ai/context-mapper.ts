@@ -49,8 +49,7 @@ export function learningContextToSnapshot(
       language: ctx.learnerPreferences?.language ?? preferences?.language ?? 'en',
       readingLevel:
         ctx.learnerPreferences?.readingLevel ?? preferences?.readingLevel ?? 'secondary',
-      explanationStyle:
-        ctx.learnerPreferences?.explanationStyle ?? preferences?.explanationStyle,
+      explanationStyle: ctx.learnerPreferences?.explanationStyle ?? preferences?.explanationStyle,
       emojiMode: ctx.learnerPreferences?.emojiMode ?? preferences?.emojiMode,
     } satisfies LearnerProfile;
   }

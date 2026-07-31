@@ -35,7 +35,7 @@ export function ExplanationStylePicker(): JSX.Element {
               data-testid={`explanation-style-${s.id}`}
               onClick={() => setExplanationStyle(s.id)}
               className={cn(
-                'rounded-full border px-2.5 py-1 text-caption transition-colors',
+                'text-caption rounded-full border px-2.5 py-1 transition-colors',
                 active
                   ? 'border-primary bg-primary-container text-primary'
                   : 'border-outline-variant text-on-surface-variant hover:border-primary',

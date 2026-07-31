@@ -683,7 +683,9 @@ function AppShellInner({
                         progressTotal={courseProgressTotal}
                       />
                       <ReaderToolbar
-                        onOpen={() => setPanelState(panelState === 'closed' ? 'floating' : 'closed')}
+                        onOpen={() =>
+                          setPanelState(panelState === 'closed' ? 'floating' : 'closed')
+                        }
                         hasUnread={messages.length > 0 && panelState === 'closed'}
                       />
                     </>
