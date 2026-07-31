@@ -65,6 +65,16 @@ Assessments must test what was taught, not introduce new concepts.
 | `QC-COM-02` | No unresolved assumptions in course-brief.md             | `warning` |
 | `QC-COM-03` | Every lesson has coreIdea, examples, and misconceptions  | `warning` |
 
+## Dimension 8: Rewards & Cards
+
+| Check ID    | Rule                                                          | Severity  |
+| ----------- | ------------------------------------------------------------- | --------- |
+| `QC-REW-01` | Reward `condition` is attached to the reward, not the trigger | `error`   |
+| `QC-REW-02` | Condition scope matches file placement (module vs bundle)     | `error`   |
+| `QC-REW-03` | Card IDs are unique across the whole bundle                   | `error`   |
+| `QC-REW-04` | Card definitions include summary, category, and levels        | `warning` |
+| `QC-REW-05` | No condition uses a signal the scope cannot evaluate          | `error`   |
+
 ## Finding Severity Codes
 
 Findings use these severity levels:
