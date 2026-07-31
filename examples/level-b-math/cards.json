@@ -1,0 +1,14 @@
+{
+  "cards": [
+    {
+      "id": "bundle-level-b-math",
+      "title": "Level B Math Finisher",
+      "category": "Achievement",
+      "type": "achievement",
+      "level": 1,
+      "maximumLevel": 1,
+      "summary": "Completed every module in the Level B Math bundle.",
+      "unlock": { "type": "bundleCompleted" }
+    }
+  ]
+}
