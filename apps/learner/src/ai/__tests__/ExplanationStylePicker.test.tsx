@@ -20,31 +20,25 @@ describe('ExplanationStylePicker', () => {
     localStorage.clear();
   });
 
-  it('renders all five style pills', () => {
+  it('renders a compact select showing the current style', () => {
     renderPicker();
-    expect(screen.getByRole('button', { name: 'Simple' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Detailed' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Exam' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Child-Friendly' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Autism-Friendly' })).toBeInTheDocument();
+    const select = screen.getByRole('combobox', { name: 'Explanation style' });
+    expect(select).toBeInTheDocument();
+    expect(select).toHaveTextContent('Detailed');
   });
 
   it('defaults to Detailed', () => {
     renderPicker();
-    expect(screen.getByRole('button', { name: 'Detailed' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
+    expect(screen.getByRole('combobox', { name: 'Explanation style' })).toHaveTextContent(
+      'Detailed',
     );
   });
 
-  it('selecting a style updates aria-pressed and persists to localStorage', () => {
+  it('selecting a style from the menu updates the trigger and persists to localStorage', () => {
     renderPicker();
-    fireEvent.click(screen.getByRole('button', { name: 'Exam' }));
-    expect(screen.getByRole('button', { name: 'Exam' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Detailed' })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    );
+    fireEvent.click(screen.getByRole('combobox', { name: 'Explanation style' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Exam' }));
+    expect(screen.getByRole('combobox', { name: 'Explanation style' })).toHaveTextContent('Exam');
     expect(localStorage.getItem('oe-explanation-style')).toBe('exam');
   });
 });
