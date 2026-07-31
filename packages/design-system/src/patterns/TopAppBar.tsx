@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useFontSize } from '../font-size-context.js';
+import { Button } from '../primitives/button.js';
+import { cn } from '../lib/utils.js';
 
 export interface TopAppBarBreadcrumb {
   label: string;
@@ -9,28 +11,29 @@ export interface TopAppBarBreadcrumb {
 export interface TopAppBarProps {
   breadcrumbs?: TopAppBarBreadcrumb[];
   showA11yControls?: boolean;
-  userAvatar?: string;
-  onReadingRulerChange?: (enabled: boolean) => void;
   isCourseView?: boolean;
   courseTitle?: string;
   progressCurrent?: number;
   progressTotal?: number;
+  actions?: React.ReactNode;
 }
+
+export const headerIconButtonClasses = cn(
+  'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface relative h-9 w-9 cursor-pointer rounded-[var(--oe-radius,8px)] border-none',
+);
 
 export function TopAppBar({
   breadcrumbs,
   showA11yControls,
-  userAvatar,
-  onReadingRulerChange,
   isCourseView,
   courseTitle,
   progressCurrent,
   progressTotal,
+  actions,
 }: TopAppBarProps): JSX.Element {
   const [a11yOpen, setA11yOpen] = useState(false);
   const { fontSize, decreaseFontSize, increaseFontSize } = useFontSize();
   const [breadcrumbsEnabled, setBreadcrumbsEnabled] = useState(true);
-  const [readingRulerEnabled, setReadingRulerEnabled] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -132,17 +135,20 @@ export function TopAppBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        {actions}
         {showA11yControls && (
           <div className="relative">
-            <button
+            <Button
               ref={triggerRef}
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => setA11yOpen((o) => !o)}
               aria-label="Accessibility settings"
               title="Accessibility settings"
               aria-expanded={a11yOpen}
               data-testid="top-appbar-a11y"
-              className="text-on-surface-variant hover:bg-surface-container-high flex h-9 w-9 cursor-pointer items-center justify-center rounded-[var(--oe-radius,8px)] border-none bg-transparent text-lg transition-colors duration-200"
+              className={headerIconButtonClasses}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -150,12 +156,13 @@ export function TopAppBar({
                 height="24"
                 fill="currentColor"
                 aria-hidden="true"
+                className="h-4 w-4"
               >
                 <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
                 <path d="M12 6a2 2 0 100-4 2 2 0 000 4z" />
                 <path d="M12 8c-3 0-5 1-5 1l1 2s1.5-.5 4-.5v5l-1 5h2l1-4 1 4h2l-1-5v-5c2.5 0 4 .5 4 .5l1-2s-2-1-5-1z" />
               </svg>
-            </button>
+            </Button>
             {a11yOpen && (
               <div
                 ref={panelRef}
@@ -172,17 +179,6 @@ export function TopAppBar({
                     onChange={(e) => setBreadcrumbsEnabled(e.target.checked)}
                   />
                   Breadcrumbs
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={readingRulerEnabled}
-                    onChange={(e) => {
-                      setReadingRulerEnabled(e.target.checked);
-                      onReadingRulerChange?.(e.target.checked);
-                    }}
-                  />
-                  Reading Ruler
                 </label>
                 <div className="flex items-center gap-2 text-xs">
                   <span>Font:</span>
@@ -206,33 +202,6 @@ export function TopAppBar({
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {userAvatar ? (
-          <img
-            src={userAvatar}
-            alt="User avatar"
-            className="border-outline-variant h-8 w-8 rounded-full border-2 object-cover"
-            data-testid="top-appbar-avatar"
-          />
-        ) : (
-          <div
-            className="border-outline-variant bg-primary-container flex h-8 w-8 items-center justify-center rounded-full border-2"
-            role="img"
-            aria-label="User avatar placeholder"
-            data-testid="top-appbar-avatar"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="text-on-primary-container"
-              aria-hidden="true"
-            >
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
           </div>
         )}
       </div>

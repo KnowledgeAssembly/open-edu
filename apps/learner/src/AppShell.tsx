@@ -53,7 +53,7 @@ import {
   TextSelectionToolbar,
   WordTapHandler,
   PipiliChatProvider,
-  ReaderToolbar,
+  PipiliHeaderButton,
   useCompanionShortcut,
 } from './ai';
 import { getBundleProgress } from './bundleProgressStorage';
@@ -688,6 +688,13 @@ function AppShellInner({
     );
   }
 
+  const headerActions = (
+    <PipiliHeaderButton
+      onOpen={() => setPanelState(panelState === 'closed' ? 'floating' : 'closed')}
+      hasUnread={messages.length > 0 && panelState === 'closed'}
+    />
+  );
+
   return (
     <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
       <OfflineBanner isOnline={isOnline} />
@@ -715,22 +722,15 @@ function AppShellInner({
                   sidebarCollapsed={sidebarCollapsed}
                   onProgressUpdate={handleProgressUpdate}
                   header={
-                    <>
-                      <TopAppBar
-                        breadcrumbs={getBreadcrumbs()}
-                        isCourseView
-                        courseTitle={coursePkg.manifest.title}
-                        showA11yControls
-                        progressCurrent={courseProgressCurrent}
-                        progressTotal={courseProgressTotal}
-                      />
-                      <ReaderToolbar
-                        onOpen={() =>
-                          setPanelState(panelState === 'closed' ? 'floating' : 'closed')
-                        }
-                        hasUnread={messages.length > 0 && panelState === 'closed'}
-                      />
-                    </>
+                    <TopAppBar
+                      breadcrumbs={getBreadcrumbs()}
+                      isCourseView
+                      courseTitle={coursePkg.manifest.title}
+                      showA11yControls
+                      progressCurrent={courseProgressCurrent}
+                      progressTotal={courseProgressTotal}
+                      actions={headerActions}
+                    />
                   }
                   bundleContext={bundleContextMemo}
                 >
@@ -769,7 +769,11 @@ function AppShellInner({
             )}
             <div className="bg-surface flex h-full w-full flex-col" data-testid="app-main">
               <div className="shrink-0">
-                <TopAppBar breadcrumbs={getBreadcrumbs()} showA11yControls />
+                <TopAppBar
+                  breadcrumbs={getBreadcrumbs()}
+                  showA11yControls
+                  actions={headerActions}
+                />
               </div>
               <div className="flex min-h-0 flex-1 flex-col">
                 <div

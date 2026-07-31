@@ -17,9 +17,27 @@ describe('TopAppBar', () => {
     expect(screen.getByText('Courses')).toBeInTheDocument();
   });
 
-  it('renders user avatar placeholder when no avatar provided', () => {
+  it('does not render an avatar', () => {
     renderWithProvider(<TopAppBar />);
-    expect(screen.getByTestId('top-appbar-avatar')).toBeInTheDocument();
+    expect(screen.queryByTestId('top-appbar-avatar')).toBeNull();
+  });
+
+  it('does not render a Reading Ruler toggle', () => {
+    renderWithProvider(<TopAppBar showA11yControls />);
+    fireEvent.click(screen.getByTestId('top-appbar-a11y'));
+    expect(screen.queryByLabelText('Reading Ruler')).toBeNull();
+  });
+
+  it('renders custom actions when provided', () => {
+    renderWithProvider(
+      <TopAppBar actions={<button data-testid="top-appbar-action">Ask Pipili</button>} />,
+    );
+    expect(screen.getByTestId('top-appbar-action')).toBeInTheDocument();
+  });
+
+  it('does not render custom actions when not provided', () => {
+    renderWithProvider(<TopAppBar />);
+    expect(screen.queryByTestId('top-appbar-action')).toBeNull();
   });
 
   it('shows a11y controls toggle when showA11yControls is true', () => {

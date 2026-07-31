@@ -102,6 +102,75 @@ describe('AppShell', () => {
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });
 
+  it('renders Pipili button in the course header', async () => {
+    const bundleModule: LoadedPackage = {
+      rootDir: 'oep://bundle-1/module-a',
+      manifest: {
+        id: 'module-a',
+        title: 'Module A',
+        version: '1.0.0',
+        author: 'Author',
+        entry: 'nodes/a.md',
+      },
+      workflow: {
+        routing: { 'nodes/a.md': { onComplete: 'nodes/a.md' } },
+      },
+      rewards: null,
+      cards: null,
+      nodes: [
+        {
+          path: 'oep://bundle-1/module-a/nodes/a.md',
+          relativePath: 'nodes/a.md',
+          content: '# M',
+          node: { type: 'lesson', title: 'M' },
+        },
+      ],
+      assetPaths: [],
+      assetMap: new Map(),
+    };
+
+    const loadedBundle: LoadedBundle = {
+      rootDir: 'oep://bundle-1',
+      manifest: {
+        id: 'bundle-1',
+        type: 'bundle',
+        title: 'Bundle One',
+        version: '1.0.0',
+        author: 'Author',
+        modules: [{ id: 'module-a', title: 'Module A', path: './modules/module-a', dependsOn: [] }],
+      },
+      modules: [bundleModule],
+      moduleMap: new Map([['module-a', bundleModule]]),
+      rewards: null,
+      cards: null,
+    };
+
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={{ 'bundle-1': loadedBundle }}
+      />,
+      ['/course/bundle-1/module-a'],
+    );
+
+    expect(await screen.findByRole('button', { name: 'Ask Pipili' })).toBeInTheDocument();
+  });
+
+  it('renders Pipili button in the header on non-course pages too', () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/'],
+    );
+    expect(screen.getByRole('button', { name: 'Ask Pipili' })).toBeInTheDocument();
+  });
+
   it('renders catalog heading at /catalog route', () => {
     renderWithRouter(
       <AppShell

@@ -169,7 +169,7 @@ export type {
 export { SideNav } from './patterns/SideNav.js';
 export type { SideNavProps, NavTabId } from './patterns/SideNav.js';
 
-export { TopAppBar } from './patterns/TopAppBar.js';
+export { TopAppBar, headerIconButtonClasses } from './patterns/TopAppBar.js';
 export type { TopAppBarProps, TopAppBarBreadcrumb } from './patterns/TopAppBar.js';
 
 export { CourseTree } from './patterns/CourseTree.js';

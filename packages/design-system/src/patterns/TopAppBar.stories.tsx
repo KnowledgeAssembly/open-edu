@@ -37,16 +37,6 @@ export const WithA11yControls: Story = {
   },
 };
 
-export const WithAvatar: Story = {
-  args: {
-    breadcrumbs: [
-      { label: 'Home', href: '/' },
-      { label: 'Dashboard', href: '/dashboard' },
-    ],
-    userAvatar: 'https://i.pravatar.cc/150?u=sarthak',
-  },
-};
-
 export const CourseView: Story = {
   args: {
     isCourseView: true,
