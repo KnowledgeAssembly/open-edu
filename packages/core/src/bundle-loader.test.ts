@@ -21,6 +21,20 @@ describe('loadBundle', () => {
     expect(bundle.moduleMap.has('mod-b')).toBe(true);
   });
 
+  it('returns null rewards/cards for a bundle without them', async () => {
+    const loaded = await loadBundle(join(FIXTURES_DIR, 'valid-bundle'));
+    expect(loaded.rewards).toBeNull();
+    expect(loaded.cards).toBeNull();
+  });
+
+  it('loads bundle-root rewards and cards', async () => {
+    const loaded = await loadBundle(join(FIXTURES_DIR, 'bundle-with-rewards'));
+    expect(loaded.rewards).not.toBeNull();
+    expect(loaded.rewards!.triggers.length).toBeGreaterThan(0);
+    expect(loaded.cards).not.toBeNull();
+    expect(loaded.cards!.cards.length).toBeGreaterThan(0);
+  });
+
   it('should throw ModuleMismatchError when moduleRef.id differs from manifest.id', async () => {
     await expect(loadBundle(join(FIXTURES_DIR, 'mismatch-bundle'))).rejects.toThrow(
       ModuleMismatchError,

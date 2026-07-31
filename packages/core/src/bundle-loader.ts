@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path';
 import { BundleManifestSchema } from '@open-edu/schemas';
 import type { BundleManifest } from '@open-edu/schemas';
 import { loadPackage } from './loader.js';
+import { loadRewards } from './rewards.js';
+import { loadCards } from './cards.js';
 import type { LoadedPackage, LoadedBundle } from './types.js';
 import {
   BundleValidationError,
@@ -135,7 +137,9 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     }
   }
 
-  return { rootDir: bundleDir, manifest, modules, moduleMap };
+  const [rewards, cards] = await Promise.all([loadRewards(bundleDir), loadCards(bundleDir)]);
+
+  return { rootDir: bundleDir, manifest, modules, moduleMap, rewards, cards };
 }
 
 export type { LoadedBundle };

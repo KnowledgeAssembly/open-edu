@@ -30,4 +30,6 @@ export interface LoadedBundle {
   manifest: BundleManifest;
   modules: LoadedPackage[];
   moduleMap: Map<string, LoadedPackage>;
+  rewards: Rewards | null;
+  cards: CardDefinitions | null;
 }
