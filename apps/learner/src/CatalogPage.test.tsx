@@ -126,6 +126,60 @@ describe('CatalogPage', () => {
       fireEvent.click(viewAll);
       expect(onNavigate).toHaveBeenCalledWith({ view: 'progress' });
     });
+
+    it('includes in-progress bundle modules in the continue shelf', async () => {
+      getAllProgressMock.mockResolvedValue({
+        'course-1': {
+          packageId: 'course-1',
+          packageVersion: '1.0.0',
+          currentNodeId: 'lesson-2',
+          visitedNodes: ['lesson-1', 'lesson-2'],
+          scores: {},
+          isCompleted: false,
+          updatedAt: '2025-01-01T00:00:00Z',
+        },
+        'module-a': {
+          packageId: 'module-a',
+          packageVersion: '1.0.0',
+          currentNodeId: 'nodes/mod-a-2.md',
+          visitedNodes: ['nodes/mod-a-1.md', 'nodes/mod-a-2.md'],
+          scores: {},
+          isCompleted: false,
+          updatedAt: '2025-01-02T00:00:00Z',
+        },
+      });
+
+      const modulePackages: PackageSummary[] = [
+        {
+          manifest: {
+            id: 'module-a',
+            title: 'Module A',
+            version: '1.0.0',
+            author: 'Author',
+            entry: 'nodes/mod-a-1.md',
+          },
+          nodeCount: 3,
+          availableBadges: 0,
+          rootDir: 'oep://bundle-1/module-a',
+        },
+      ];
+
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          modulePackages={modulePackages}
+          onStartCourse={vi.fn()}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('2 in progress')).toBeInTheDocument();
+      });
+
+      const shelf = screen.getByTestId('continue-learning-shelf');
+      expect(shelf).toHaveTextContent('Module A');
+      expect(shelf).toHaveTextContent('Course One');
+    });
   });
 
   describe('completed course card', () => {

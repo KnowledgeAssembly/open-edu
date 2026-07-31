@@ -22,13 +22,18 @@ const defaultSearchResponse = {
 vi.mock('../ai/CompanionProvider', () => ({
   useCompanion: () => ({
     setPanelState: mockSetPanelState,
-    sendMessage: mockSendMessage,
     search: mockSearch,
     context: {},
     messages: [],
     isLoading: false,
     clearConversation: vi.fn(),
     contextManager: { getCurrentContext: vi.fn(), subscribe: vi.fn(), updateContext: vi.fn() },
+  }),
+}));
+
+vi.mock('../ai/PipiliChatProvider', () => ({
+  usePipiliChat: () => ({
+    sendMessage: mockSendMessage,
   }),
 }));
 
@@ -461,18 +466,28 @@ describe('WordTapHandler', () => {
 
     const { wordEl } = renderWithWordTap(<p>gravity</p>);
 
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1000);
+
     const touch = new Touch({ identifier: 0, target: wordEl, clientX: 50, clientY: 50 });
 
+    // A touch interaction records a tap; the synthesized mouse events that
+    // immediately follow are suppressed within the ghost-click window.
     fireEvent.touchStart(wordEl, { touches: [touch] });
     fireEvent.touchEnd(wordEl, { changedTouches: [touch] });
     fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
     fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
 
+    // After the suppression window, real mouse input works normally.
+    nowSpy.mockReturnValue(2000);
     fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
     fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
+
+    nowSpy.mockReturnValue(2100);
     fireEvent.mouseDown(wordEl, { clientX: 50, clientY: 50 });
     fireEvent.mouseUp(wordEl, { clientX: 50, clientY: 50 });
 
     expect(screen.getByTestId('word-tap-popover')).toBeInTheDocument();
+
+    nowSpy.mockRestore();
   });
 });

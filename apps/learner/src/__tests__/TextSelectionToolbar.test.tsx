@@ -21,8 +21,13 @@ const mockSendMessage = vi.fn();
 vi.mock('../ai/CompanionProvider', () => ({
   useCompanion: () => ({
     setPanelState: mockSetPanelState,
-    sendMessage: mockSendMessage,
     search: mockSearch,
+  }),
+}));
+
+vi.mock('../ai/PipiliChatProvider', () => ({
+  usePipiliChat: () => ({
+    sendMessage: mockSendMessage,
   }),
 }));
 

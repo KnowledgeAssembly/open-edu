@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cn } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
+import { usePipiliChat } from './PipiliChatProvider';
 import { Sparkles } from 'lucide-react';
 import type { DictionaryEntry } from '@open-edu/ai-companion';
 
@@ -22,14 +23,16 @@ interface PopoverState {
 
 const DOUBLE_TAP_TIME_MS = 300;
 const DOUBLE_TAP_DISTANCE_PX = 20;
+const MOUSE_SUPPRESS_AFTER_TOUCH_MS = 350;
 
 export function WordTapHandler({ children, className }: WordTapHandlerProps): JSX.Element {
   const { t } = useTranslation();
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
-  const lastInputWasTouch = useRef(false);
-  const { search, setPanelState, sendMessage } = useCompanion();
+  const lastTouchEndTime = useRef(0);
+  const { search, setPanelState } = useCompanion();
+  const { sendMessage } = usePipiliChat();
 
   const getRangeAtPoint = useCallback((x: number, y: number): Range | null => {
     const doc = document as Document & {
@@ -321,30 +324,21 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
     <div
       className={className}
       onMouseDown={(e) => {
-        if (lastInputWasTouch.current) {
-          lastInputWasTouch.current = false;
-          return;
-        }
+        if (Date.now() - lastTouchEndTime.current < MOUSE_SUPPRESS_AFTER_TOUCH_MS) return;
         handlePointerDown(e.clientX, e.clientY);
       }}
       onMouseUp={(e) => {
-        if (lastInputWasTouch.current) {
-          lastInputWasTouch.current = false;
-          return;
-        }
+        if (Date.now() - lastTouchEndTime.current < MOUSE_SUPPRESS_AFTER_TOUCH_MS) return;
         handlePointerUp(e.clientX, e.clientY);
       }}
       onTouchStart={(e: TouchEvent<HTMLDivElement>) => {
-        lastInputWasTouch.current = true;
         const touch = e.touches[0];
         if (touch) handlePointerDown(touch.clientX, touch.clientY);
       }}
       onTouchEnd={(e: TouchEvent<HTMLDivElement>) => {
+        lastTouchEndTime.current = Date.now();
         const touch = e.changedTouches[0];
         if (touch) handlePointerUp(touch.clientX, touch.clientY);
-        setTimeout(() => {
-          lastInputWasTouch.current = false;
-        }, 0);
       }}
       data-testid="word-tap-container"
     >

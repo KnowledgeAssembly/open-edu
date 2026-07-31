@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { AppShell } from './AppShell';
 import type { LoadedPackage, PackageSummary } from '@open-edu/core';
@@ -127,5 +127,131 @@ describe('AppShell', () => {
       ['/settings'],
     );
     expect(screen.getByTestId('settings-page')).toBeInTheDocument();
+  });
+
+  it('back to catalog from a bundle course navigates to the bundle overview', async () => {
+    const bundleModule: LoadedPackage = {
+      rootDir: 'oep://bundle-1/module-a',
+      manifest: {
+        id: 'module-a',
+        title: 'Module A',
+        version: '1.0.0',
+        author: 'Author',
+        entry: 'nodes/a.md',
+      },
+      workflow: null,
+      rewards: null,
+      cards: null,
+      nodes: [],
+      assetPaths: [],
+      assetMap: new Map(),
+    };
+
+    const loadedBundle: LoadedBundle = {
+      rootDir: 'oep://bundle-1',
+      manifest: {
+        id: 'bundle-1',
+        type: 'bundle',
+        title: 'Bundle One',
+        version: '1.0.0',
+        author: 'Author',
+        modules: [{ id: 'module-a', title: 'Module A', path: './modules/module-a', dependsOn: [] }],
+      },
+      modules: [bundleModule],
+      moduleMap: new Map([['module-a', bundleModule]]),
+      rewards: null,
+      cards: null,
+    };
+
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={{ 'bundle-1': loadedBundle }}
+      />,
+      ['/course/bundle-1/module-a'],
+    );
+
+    const backButton = await screen.findByRole('button', { name: /back to catalog/i });
+    expect(backButton).toBeInTheDocument();
+
+    backButton.click();
+
+    // Leaving a course mid-progress shows the exit warning; confirm "Leave"
+    // to reach the bundle overview.
+    const leaveButton = await screen.findByTestId('exit-warning-leave');
+    leaveButton.click();
+
+    await screen.findByTestId('bundle-overview');
+  });
+
+  it('shows exit warning when navigating away from a bundle course mid-course', async () => {
+    const bundleModule: LoadedPackage = {
+      rootDir: 'oep://bundle-1/module-a',
+      manifest: {
+        id: 'module-a',
+        title: 'Module A',
+        version: '1.0.0',
+        author: 'Author',
+        entry: 'nodes/a.md',
+      },
+      workflow: {
+        routing: { 'nodes/a.md': { onComplete: 'nodes/a.md' } },
+      },
+      rewards: null,
+      cards: null,
+      nodes: [
+        {
+          path: 'oep://bundle-1/module-a/nodes/a.md',
+          relativePath: 'nodes/a.md',
+          content: '# M',
+          node: { type: 'lesson', title: 'M' },
+        },
+      ],
+      assetPaths: [],
+      assetMap: new Map(),
+    };
+
+    const loadedBundle: LoadedBundle = {
+      rootDir: 'oep://bundle-1',
+      manifest: {
+        id: 'bundle-1',
+        type: 'bundle',
+        title: 'Bundle One',
+        version: '1.0.0',
+        author: 'Author',
+        modules: [{ id: 'module-a', title: 'Module A', path: './modules/module-a', dependsOn: [] }],
+      },
+      modules: [bundleModule],
+      moduleMap: new Map([['module-a', bundleModule]]),
+      rewards: null,
+      cards: null,
+    };
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: '*',
+          element: (
+            <AppShell
+              catalogPackages={emptyPackages}
+              packageEntries={emptyEntries}
+              catalogBundles={emptyBundles}
+              bundleEntries={{ 'bundle-1': loadedBundle }}
+            />
+          ),
+        },
+      ],
+      { initialEntries: ['/course/bundle-1/module-a'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    await screen.findByTestId('appsidebar-nav-settings');
+    fireEvent.click(screen.getByTestId('appsidebar-nav-settings'));
+
+    expect(
+      await screen.findByTestId('exit-warning-dialog', {}, { timeout: 5000 }),
+    ).toBeInTheDocument();
   });
 });

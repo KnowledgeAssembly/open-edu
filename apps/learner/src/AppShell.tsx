@@ -67,6 +67,7 @@ import {
   storedCourseToPackageSummary,
   storedCourseToLoadedPackage,
   storedBundleToLoadedBundle,
+  countBadgeRewards,
 } from './oepAdapters';
 
 export type AppView =
@@ -300,6 +301,25 @@ function AppShellInner({
     [allPackageEntries, bundleModuleEntries],
   );
 
+  const bundleModulePackages = useMemo<PackageSummary[]>(() => {
+    return Object.values(bundleModuleEntries).map((mod) => ({
+      manifest: mod.manifest,
+      nodeCount: mod.nodes.length,
+      availableBadges: countBadgeRewards(mod.rewards),
+      rootDir: mod.rootDir,
+    }));
+  }, [bundleModuleEntries]);
+
+  const moduleToBundleId = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const bundle of Object.values(allBundleEntries)) {
+      for (const mod of bundle.modules) {
+        map[mod.manifest.id] = bundle.manifest.id;
+      }
+    }
+    return map;
+  }, [allBundleEntries]);
+
   const bundleCards = useMemo(
     () => Object.values(allBundleEntries).flatMap((b) => b.cards?.cards ?? []),
     [allBundleEntries],
@@ -388,10 +408,10 @@ function AppShellInner({
 
   const isCourseInProgress = useMemo(() => {
     if (view.view !== 'course' || !view.packageId) return false;
-    const pkg = allPackageEntries[view.packageId];
+    const pkg = mergedPackageEntries[view.packageId];
     if (!pkg) return false;
     return true;
-  }, [view, allPackageEntries]);
+  }, [view, mergedPackageEntries]);
 
   useEffect(() => {
     if (!isCourseInProgress) return;
@@ -415,11 +435,24 @@ function AppShellInner({
 
   const handleNavigate = useCallback(
     (newView: AppView) => {
-      if (newView.view === 'course' && newView.packageId && !allPackageEntries[newView.packageId])
-        return;
+      if (newView.view === 'course' && newView.packageId) {
+        if (!mergedPackageEntries[newView.packageId]) return;
+        const bundleId = newView.bundleId ?? moduleToBundleId[newView.packageId];
+        if (bundleId && !newView.bundleId) {
+          navigate(
+            viewToPath({
+              view: 'course',
+              packageId: newView.packageId,
+              bundleId,
+              moduleId: newView.packageId,
+            }),
+          );
+          return;
+        }
+      }
       navigate(viewToPath(newView));
     },
-    [allPackageEntries, navigate],
+    [mergedPackageEntries, moduleToBundleId, navigate],
   );
 
   const handleExitStay = useCallback(() => {
@@ -432,12 +465,17 @@ function AppShellInner({
 
   const handleStartCourse = useCallback(
     (packageDir: string) => {
-      const pkg = Object.values(allPackageEntries).find((p) => p.rootDir === packageDir);
+      const pkg = Object.values(mergedPackageEntries).find((p) => p.rootDir === packageDir);
       if (pkg) {
-        navigate(`/course/${pkg.manifest.id}`);
+        const bundleId = moduleToBundleId[pkg.manifest.id];
+        if (bundleId) {
+          navigate(`/course/${bundleId}/${pkg.manifest.id}`);
+        } else {
+          navigate(`/course/${pkg.manifest.id}`);
+        }
       }
     },
-    [allPackageEntries, navigate],
+    [mergedPackageEntries, moduleToBundleId, navigate],
   );
 
   const handleStartBundle = useCallback(
@@ -455,8 +493,12 @@ function AppShellInner({
   );
 
   const handleBackToCatalog = useCallback(() => {
+    if (view.view === 'course' && view.bundleId) {
+      navigate(`/bundle/${view.bundleId}`);
+      return;
+    }
     navigate('/catalog');
-  }, [navigate]);
+  }, [view, navigate]);
 
   const handleRequestReset = useCallback((id: string, title: string, isBundle: boolean) => {
     setResetTarget({ id, title, isBundle });
@@ -740,6 +782,7 @@ function AppShellInner({
                       packages={allCatalogPackages}
                       bundleSummaries={catalogBundles}
                       bundleProgress={bundleProgress}
+                      modulePackages={bundleModulePackages}
                       onStartCourse={handleStartCourse}
                       onStartBundle={handleStartBundle}
                       onNavigate={handleNavigate}
@@ -775,7 +818,7 @@ function AppShellInner({
                     <ProgressDashboard
                       onNavigate={handleNavigate}
                       catalogPackages={allCatalogPackages}
-                      packageEntries={allPackageEntries}
+                      packageEntries={mergedPackageEntries}
                       onRequestReset={handleRequestReset}
                     />
                   )}

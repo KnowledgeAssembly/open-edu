@@ -298,12 +298,12 @@ describe('CourseRuntime', () => {
       });
     });
 
-    const bundleSession =
-      mockInstances.telemetrySessions[mockInstances.telemetrySessions.length - 1];
     await waitFor(() => {
-      const events = bundleSession.emit.mock.calls.map((c: any[]) => c[0].event);
-      expect(events).toContain('module_complete');
-      expect(events).toContain('bundle_complete');
+      const emittedEvents = mockInstances.telemetrySessions.flatMap((session: any) =>
+        session.emit.mock.calls.map((c: any[]) => c[0].event),
+      );
+      expect(emittedEvents).toContain('module_complete');
+      expect(emittedEvents).toContain('bundle_complete');
     });
   });
 
