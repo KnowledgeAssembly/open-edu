@@ -285,6 +285,41 @@ describe('RuntimeProvider', () => {
     }).not.toThrow();
   });
 
+  it('does not re-call onProgressChange when only the callback identity changes', () => {
+    let tick = 0;
+    const toISOStringSpy = vi.spyOn(Date.prototype, 'toISOString').mockImplementation(function (
+      this: Date,
+    ) {
+      tick += 1;
+      return `2024-01-01T00:00:00.${String(tick).padStart(3, '0')}Z`;
+    });
+    try {
+      const calls: ProgressSnapshot[] = [];
+      let onProgressChange: (snapshot: ProgressSnapshot) => void = () => {};
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <RuntimeProvider loadedPackage={pkg} engine={engine} onProgressChange={onProgressChange}>
+          {children}
+        </RuntimeProvider>
+      );
+      const first = vi.fn((s: ProgressSnapshot) => calls.push(s));
+      onProgressChange = first;
+      const { rerender } = renderHook(() => useRuntime(), { wrapper });
+      act(() => {
+        emit(engine, { type: 'node.entered', nodeId: 'nodes/lesson-01.md', timestamp: 1 });
+      });
+      const countAfterEnter = calls.length;
+      for (let i = 0; i < 5; i++) {
+        const cb = vi.fn((s: ProgressSnapshot) => calls.push(s));
+        onProgressChange = cb;
+        rerender();
+        expect(cb).not.toHaveBeenCalled();
+      }
+      expect(calls.length).toBe(countAfterEnter);
+    } finally {
+      toISOStringSpy.mockRestore();
+    }
+  });
+
   it('exposes progressSnapshot in context value', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
       <RuntimeProvider loadedPackage={pkg} engine={engine}>

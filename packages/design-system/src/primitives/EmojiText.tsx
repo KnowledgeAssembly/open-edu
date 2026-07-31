@@ -62,7 +62,7 @@ export const EmojiText = React.forwardRef<HTMLSpanElement, EmojiTextProps>(funct
 });
 EmojiText.displayName = 'EmojiText';
 
-function EmojiGlyph({ emoji, pack }: { emoji: string; pack: EmojiPack }): JSX.Element {
+export function EmojiGlyph({ emoji, pack }: { emoji: string; pack: EmojiPack }): JSX.Element {
   const [failed, setFailed] = React.useState(false);
   const src = pack.getUrl?.(emojiToHex(emoji));
 

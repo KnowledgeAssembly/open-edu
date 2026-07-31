@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EmojiText, splitEmojiRuns, emojiToHex } from '../EmojiText.js';
-import { NativeEmojiPack, createOpenMojiPack } from '../emoji-packs.js';
+import { NativeEmojiPack, createOpenMojiPack, OPENMOJI_CDN_BASE_URL } from '../emoji-packs.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
 describe('splitEmojiRuns', () => {
@@ -38,10 +38,7 @@ describe('EmojiText', () => {
   it('renders an SVG img for an OpenMoji pack', () => {
     render(<EmojiText text="Great job 🌟" pack={createOpenMojiPack()} />);
     const img = screen.getByAltText('🌟');
-    expect(img).toHaveAttribute(
-      'src',
-      'https://cdn.jsdelivr.net/npm/openmoji-static@15.0.0/single_svg/1F31F.svg',
-    );
+    expect(img).toHaveAttribute('src', `${OPENMOJI_CDN_BASE_URL}/1F31F.svg`);
   });
 
   it('falls back to native emoji text when the image fails to load', () => {
