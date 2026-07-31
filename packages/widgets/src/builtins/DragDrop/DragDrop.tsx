@@ -343,7 +343,6 @@ function DragDropComponent(props: {
 
     const allCorrect = correctCount === totalItems;
     const accuracy = totalItems > 0 ? correctCount / totalItems : 0;
-    const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
@@ -353,9 +352,27 @@ function DragDropComponent(props: {
       accuracy,
       widgetId: 'core.drag-drop',
     });
-    complete(score, { submitted: true, placedItems, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, placedItems, hintIndex, emitInteraction, complete]);
+  }, [submitted, content, placedItems, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const totalItems = content.items.length;
+    let correctCount = 0;
+
+    for (const item of content.items) {
+      const placed = placedItems[item.id];
+      const expected = content.expectedPositions[item.id];
+      if (placed && placed === expected) {
+        correctCount++;
+      }
+    }
+
+    const accuracy = totalItems > 0 ? correctCount / totalItems : 0;
+    const score = Math.round(accuracy * 100);
+
+    complete(score, { submitted: true, placedItems, hintIndex });
+  }, [content, placedItems, hintIndex, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -580,7 +597,11 @@ function DragDropComponent(props: {
             <Button variant="default" onClick={handleSubmit} disabled={!allItemsPlaced}>
               Submit
             </Button>
-          ) : null}
+          ) : (
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
+            </Button>
+          )}
         </div>
 
         {submitted && (

@@ -204,7 +204,6 @@ function SequencingComponent(props: {
       correctOrder.every((id, i) => id === itemOrder[i]);
     const accuracy =
       itemOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
-    const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
@@ -214,9 +213,17 @@ function SequencingComponent(props: {
       accuracy,
       widgetId: 'core.sequencing',
     });
-    complete(score, { submitted: true, itemOrder, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, itemOrder, correctOrder, hintIndex, emitInteraction, complete]);
+  }, [submitted, content, itemOrder, correctOrder, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const accuracy =
+      itemOrder.filter((id, i) => id === correctOrder[i]).length / correctOrder.length;
+    const score = Math.round(accuracy * 100);
+
+    complete(score, { submitted: true, itemOrder, hintIndex });
+  }, [content, itemOrder, correctOrder, hintIndex, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -394,7 +401,11 @@ function SequencingComponent(props: {
             <Button variant="default" onClick={handleSubmit} disabled={false}>
               Submit
             </Button>
-          ) : null}
+          ) : (
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
+            </Button>
+          )}
         </div>
 
         {submitted && (

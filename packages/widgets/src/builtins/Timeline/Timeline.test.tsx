@@ -259,14 +259,25 @@ describe('Timeline submit and scoring', () => {
     const { complete, emitInteraction } = renderWidget(interactiveConfig);
     const order = getEventIdsFromDom();
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ widgetId: 'core.timeline' }),
+    );
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(
       expectedScore(order, ['evap', 'cond', 'rain', 'collect']),
       expect.any(Object),
     );
-    expect(emitInteraction).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: 'core.timeline' }),
-    );
+  });
+
+  it('shows result and Continue button after submit without completing', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('feedback')).toBeTruthy();
+    expect(screen.getByTestId('continue-button')).toBeVisible();
+    expect(screen.queryByText('Submit')).toBeNull();
   });
 
   it('shows feedback after submission', () => {

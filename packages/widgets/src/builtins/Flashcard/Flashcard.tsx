@@ -107,18 +107,20 @@ function FlashcardComponent(props: {
       if (currentIndex < totalCards - 1) {
         setCurrentIndex((prev) => prev + 1);
         setShowHint(false);
-      } else {
-        const score = ((correctCards.length + (isCorrect ? 1 : 0)) / totalCards) * 100;
-        complete(score, {
-          currentIndex,
-          flipped,
-          correct: isCorrect ? [...correctCards, currentIndex] : correctCards,
-          incorrect: isCorrect ? incorrectCards : [...incorrectCards, currentIndex],
-        });
       }
     },
-    [currentIndex, correctCards, incorrectCards, flipped, totalCards, emitInteraction, complete],
+    [currentIndex, correctCards, incorrectCards, totalCards, emitInteraction],
   );
+
+  const handleContinue = useCallback(() => {
+    const score = (correctCards.length / totalCards) * 100;
+    complete(score, {
+      currentIndex,
+      flipped,
+      correct: correctCards,
+      incorrect: incorrectCards,
+    });
+  }, [correctCards, incorrectCards, flipped, currentIndex, totalCards, complete]);
 
   const handleRetryIncorrect = useCallback(() => {
     const incorrectIndices = incorrectCards;
@@ -233,16 +235,16 @@ function FlashcardComponent(props: {
           <p className="text-on-surface font-semibold">
             Done! {correctCards.length} correct, {incorrectCards.length} incorrect.
           </p>
-          {incorrectCards.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleRetryIncorrect}
-              className="mt-sm"
-              data-testid="btn-retry"
-            >
-              Retry Incorrect
+          <div className="mt-sm gap-sm flex justify-center">
+            {incorrectCards.length > 0 && (
+              <Button variant="outline" onClick={handleRetryIncorrect} data-testid="btn-retry">
+                Retry Incorrect
+              </Button>
+            )}
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
             </Button>
-          )}
+          </div>
         </div>
       )}
     </div>

@@ -99,13 +99,37 @@ describe('Flashcard flip interaction', () => {
     expect(screen.getByText('Card 2 of 2')).toBeInTheDocument();
   });
 
+  it('shows result and Continue button after last card without completing', () => {
+    const { complete } = renderWidget(baseConfig);
+    fireEvent.click(screen.getByTestId('flashcard-card'));
+    fireEvent.click(screen.getByTestId('btn-correct'));
+    fireEvent.click(screen.getByTestId('flashcard-card'));
+    fireEvent.click(screen.getByTestId('btn-correct'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('flashcard-complete')).toHaveTextContent('2 correct, 0 incorrect');
+    expect(screen.getByTestId('continue-button')).toBeVisible();
+  });
+
   it('completes after last card', () => {
     const { complete } = renderWidget(baseConfig);
     fireEvent.click(screen.getByTestId('flashcard-card'));
     fireEvent.click(screen.getByTestId('btn-correct'));
     fireEvent.click(screen.getByTestId('flashcard-card'));
     fireEvent.click(screen.getByTestId('btn-correct'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
+  });
+
+  it('completes with correct score when some incorrect', () => {
+    const { complete } = renderWidget(baseConfig);
+    fireEvent.click(screen.getByTestId('flashcard-card'));
+    fireEvent.click(screen.getByTestId('btn-incorrect'));
+    fireEvent.click(screen.getByTestId('flashcard-card'));
+    fireEvent.click(screen.getByTestId('btn-correct'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
+    expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
   it('shows completion with scores', () => {

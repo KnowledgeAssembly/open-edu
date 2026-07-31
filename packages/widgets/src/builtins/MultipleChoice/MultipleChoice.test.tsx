@@ -4,7 +4,7 @@ import { multipleChoice, multipleChoicePractice } from './MultipleChoice';
 
 const WidgetComponent = multipleChoice.render;
 
-function renderWidget(config: Record<string, unknown> = {}) {
+function renderWidget(config: Record<string, unknown> = {}, storedState?: unknown) {
   const emitInteraction = vi.fn();
   const complete = vi.fn();
   const result = render(
@@ -13,6 +13,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
       config={config}
       emitInteraction={emitInteraction}
       complete={complete}
+      storedState={storedState}
     />,
   );
   return { emitInteraction, complete, ...result };
@@ -100,6 +101,18 @@ describe('MultipleChoice legacy single-question mode', () => {
     expect(screen.getByLabelText('3')).toBeDisabled();
     expect(screen.getByLabelText('4')).toBeDisabled();
     expect(screen.getByLabelText('5')).toBeDisabled();
+  });
+
+  it('restores selected answer from stored state on review', () => {
+    renderWidget(baseConfig, {
+      submitted: true,
+      currentIndex: 0,
+      selections: [1],
+      responses: [{ correct: true, selectedIndex: 1 }],
+      feedback: null,
+    });
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
+    expect(screen.getByLabelText('4')).toBeChecked();
   });
 });
 
@@ -274,6 +287,25 @@ describe('MultipleChoice multi-question interactive mode', () => {
     expect(result0).toHaveTextContent('Your answer: 4');
     const result1 = screen.getByTestId('result-question-1');
     expect(result1).toHaveTextContent('What is 3 * 3?');
+    expect(result1).toHaveTextContent('Your answer: 6');
+    expect(result1).toHaveTextContent('Correct answer: 9');
+  });
+
+  it('restores submitted answers from stored state on review', () => {
+    renderWidget(multiConfig, {
+      submitted: true,
+      currentIndex: 1,
+      selections: [1, 0],
+      responses: [
+        { correct: true, selectedIndex: 1 },
+        { correct: false, selectedIndex: 0 },
+      ],
+      feedback: null,
+    });
+    expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 2 correct.');
+    const result0 = screen.getByTestId('result-question-0');
+    expect(result0).toHaveTextContent('Your answer: 4');
+    const result1 = screen.getByTestId('result-question-1');
     expect(result1).toHaveTextContent('Your answer: 6');
     expect(result1).toHaveTextContent('Correct answer: 9');
   });
