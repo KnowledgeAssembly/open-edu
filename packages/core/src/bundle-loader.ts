@@ -137,7 +137,10 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     }
   }
 
-  const [rewards, cards] = await Promise.all([loadRewards(bundleDir), loadCards(bundleDir)]);
+  const [rewards, cards] = await Promise.all([
+    loadRewards(bundleDir, { filename: manifest.rewards }),
+    loadCards(bundleDir, { filename: manifest.cards }),
+  ]);
 
   return { rootDir: bundleDir, manifest, modules, moduleMap, rewards, cards };
 }

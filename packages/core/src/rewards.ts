@@ -4,8 +4,12 @@ import { RewardsSchema } from '@open-edu/schemas';
 import type { Rewards } from '@open-edu/schemas';
 import { RewardsValidationError } from './errors.js';
 
-export async function loadRewards(packageDir: string): Promise<Rewards | null> {
-  const rewardsPath = join(packageDir, 'rewards.json');
+export async function loadRewards(
+  packageDir: string,
+  options?: { filename?: string },
+): Promise<Rewards | null> {
+  const filename = options?.filename ?? 'rewards.json';
+  const rewardsPath = join(packageDir, filename);
 
   try {
     await access(rewardsPath);
@@ -20,15 +24,15 @@ export async function loadRewards(packageDir: string): Promise<Rewards | null> {
   } catch (err) {
     if (err instanceof SyntaxError) {
       throw new RewardsValidationError(
-        `rewards.json is not valid JSON: ${(err as Error).message}`,
+        `${filename} is not valid JSON: ${(err as Error).message}`,
         undefined,
         {
-          file: 'rewards.json',
-          suggestion: 'Fix the JSON syntax error in rewards.json',
+          file: filename,
+          suggestion: `Fix the JSON syntax error in ${filename}`,
         },
       );
     }
-    throw new RewardsValidationError(`Failed to read rewards.json: ${(err as Error).message}`);
+    throw new RewardsValidationError(`Failed to read ${filename}: ${(err as Error).message}`);
   }
 
   const result = RewardsSchema.safeParse(raw);
@@ -41,12 +45,12 @@ export async function loadRewards(packageDir: string): Promise<Rewards | null> {
       .join('; ');
     const firstIssue = result.error.issues[0];
     const rPath = firstIssue ? firstIssue.path.join('.') : undefined;
-    throw new RewardsValidationError(`Invalid rewards.json: ${issues}`, result.error, {
-      file: 'rewards.json',
+    throw new RewardsValidationError(`Invalid ${filename}: ${issues}`, result.error, {
+      file: filename,
       path: rPath,
       suggestion: firstIssue
-        ? `Fix the "${rPath}" field in rewards.json`
-        : 'Check the rewards.json structure matches the schema',
+        ? `Fix the "${rPath}" field in ${filename}`
+        : `Check the ${filename} structure matches the schema`,
     });
   }
 

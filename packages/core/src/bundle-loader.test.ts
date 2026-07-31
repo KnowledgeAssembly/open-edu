@@ -35,6 +35,77 @@ describe('loadBundle', () => {
     expect(loaded.cards!.cards.length).toBeGreaterThan(0);
   });
 
+  it('honors manifest rewards/cards paths instead of hardcoded filenames', async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync, rmSync } = await import('node:fs');
+    const tmpDir = mkdtempSync(join(FIXTURES_DIR, 'tmp-manifest-paths-'));
+    mkdirSync(join(tmpDir, 'config'), { recursive: true });
+    mkdirSync(join(tmpDir, 'modules', 'mod-a', 'nodes'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, 'bundle.json'),
+      JSON.stringify({
+        id: 'manifest-paths-bundle',
+        title: 'Manifest Paths',
+        version: '1.0.0',
+        author: 'Test',
+        modules: [{ id: 'mod-a', title: 'Module A', path: './modules/mod-a', dependsOn: [] }],
+        rewards: './config/rewardz.json',
+        cards: './config/cardz.json',
+      }),
+    );
+    writeFileSync(
+      join(tmpDir, 'modules', 'mod-a', 'package.json'),
+      JSON.stringify({
+        id: 'mod-a',
+        title: 'Module A',
+        version: '1.0.0',
+        author: 'Test',
+        entry: 'nodes/lesson.md',
+      }),
+    );
+    writeFileSync(
+      join(tmpDir, 'modules', 'mod-a', 'workflow.json'),
+      JSON.stringify({ routing: { 'nodes/lesson.md': { onComplete: 'COMPLETED' } } }),
+    );
+    writeFileSync(join(tmpDir, 'modules', 'mod-a', 'nodes', 'lesson.md'), '# Test');
+    writeFileSync(
+      join(tmpDir, 'rewards.json'),
+      JSON.stringify({
+        triggers: [{ onEvent: 'x', rewards: [{ action: 'badge.award', badge: 'root-file' }] }],
+      }),
+    );
+    writeFileSync(
+      join(tmpDir, 'config', 'rewardz.json'),
+      JSON.stringify({
+        triggers: [
+          {
+            onEvent: 'bundle_complete',
+            rewards: [{ action: 'badge.award', badge: 'manifest-file' }],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(tmpDir, 'config', 'cardz.json'),
+      JSON.stringify({
+        cards: [
+          {
+            id: 'manifest-card',
+            title: 'M',
+            category: 'C',
+            type: 'achievement',
+            summary: 'S',
+            unlock: { type: 'bundleCompleted' },
+          },
+        ],
+      }),
+    );
+
+    const loaded = await loadBundle(tmpDir);
+    expect(loaded.rewards?.triggers[0]?.rewards[0]).toMatchObject({ badge: 'manifest-file' });
+    expect(loaded.cards?.cards[0]?.id).toBe('manifest-card');
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
   it('should throw ModuleMismatchError when moduleRef.id differs from manifest.id', async () => {
     await expect(loadBundle(join(FIXTURES_DIR, 'mismatch-bundle'))).rejects.toThrow(
       ModuleMismatchError,
