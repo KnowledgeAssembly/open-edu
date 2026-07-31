@@ -16,3 +16,6 @@ export { HintControls } from './HintControls.js';
 export type { HintControlsProps } from './HintControls.js';
 export { learningContextToSnapshot } from './context-mapper.js';
 export { ExplanationStylePicker } from './ExplanationStylePicker.js';
+export { useCompanionShortcut } from './useCompanionShortcut.js';
+export { ReaderToolbar } from './ReaderToolbar.js';
+export type { ReaderToolbarProps } from './ReaderToolbar.js';
