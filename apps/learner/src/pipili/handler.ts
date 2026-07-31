@@ -69,6 +69,8 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
     const learnerLanguage = context.learner?.language ?? 'en';
     const readingLevel = context.learner?.readingLevel ?? 'secondary';
     const accessibilityProfile = context.learner?.accessibilityProfile;
+    const explanationStyle = context.learner?.explanationStyle;
+    const emojiVisualMode = context.learner?.emojiMode === 'openmoji';
 
     const boundedCtx = boundContext(context);
 
@@ -78,6 +80,8 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
       learnerLanguage,
       readingLevel,
       accessibilityProfile,
+      explanationStyle,
+      emojiVisualMode,
     });
 
     const factory = getModelFactory();
