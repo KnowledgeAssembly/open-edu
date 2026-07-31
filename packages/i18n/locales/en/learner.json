@@ -88,6 +88,7 @@
   "collection_binder.stat_total_cards": "total cards",
   "collection_binder.stat_categories": "categories",
   "collection_binder.empty_description": "No cards yet. Complete lessons to unlock your first Knowledge Card.",
+  "collection_binder.bundle_shelf": "Bundle rewards",
   "collection_binder.card_unlocked_default": "Unlock",
   "collection_binder.card_locked_default": "Locked",
   "course.leave_warning": "Leave this course?",

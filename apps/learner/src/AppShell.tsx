@@ -290,6 +290,11 @@ function AppShellInner({
     [allPackageEntries, bundleModuleEntries],
   );
 
+  const bundleCards = useMemo(
+    () => Object.values(allBundleEntries).flatMap((b) => b.cards?.cards ?? []),
+    [allBundleEntries],
+  );
+
   const view = useMemo<AppView>(
     () => pathToView(location.pathname, mergedPackageEntries, allBundleEntries),
     [location.pathname, mergedPackageEntries, allBundleEntries],
@@ -767,7 +772,10 @@ function AppShellInner({
                     />
                   )}
                   {view.view === 'collection' && (
-                    <CollectionBinderPage packages={allPackageEntries} />
+                    <CollectionBinderPage
+                      packages={mergedPackageEntries}
+                      bundleCards={bundleCards}
+                    />
                   )}
                   {view.view === 'notes' && <NotesDashboardPage onNavigate={handleNavigate} />}
                   {view.view === 'note-editor' && view.noteId && (
