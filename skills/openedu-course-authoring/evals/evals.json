@@ -137,13 +137,13 @@
     },
     {
       "id": 11,
-      "prompt": "Create a single-module Open-Edu course about fractions with a module-level rewards.json awarding a badge after the learner completes the first step, and a module-level cards.json with one card unlocked by that step. Keep the card id namespaced.",
-      "expected_output": "Mode: portable. Single package with rewards.json and cards.json at package root.\nChecks:\n- rewards.json trigger onEvent step_completed\n- reward condition type stepCompleted\n- cards.json card unlock references the same step\n- card id is namespaced",
+      "prompt": "Create a single-module Open-Edu course about fractions with a module-level rewards.json awarding a badge after the learner completes the first lesson, and a module-level cards.json with one card unlocked by that same lesson. Keep the card id namespaced.",
+      "expected_output": "Mode: portable. Single package with rewards.json and cards.json at package root.\nChecks:\n- rewards.json trigger onEvent node_complete\n- reward condition type chain, completedNodeIds references the first lesson node\n- cards.json card unlock references the same node\n- card id is namespaced",
       "files": ["package.json", "rewards.json", "cards.json"],
       "expectations": [
-        "rewards.json trigger onEvent step_completed",
-        "reward condition type stepCompleted",
-        "cards.json unlock references the same step",
+        "rewards.json trigger onEvent node_complete",
+        "reward condition type chain references the first lesson node",
+        "cards.json unlock references the same node",
         "card id is namespaced"
       ]
     }

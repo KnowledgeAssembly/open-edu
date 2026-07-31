@@ -2,21 +2,27 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const MODULE_LOCAL_CONDITIONS = [
-  'stepCompleted',
-  'exerciseCompleted',
+const CONDITION_TYPES = new Set([
   'score',
+  'skill',
   'chain',
-  'activityCompleted',
-  'moduleUnlocked',
-  'moduleFailed',
-  'attempts',
-  'answeredCorrectly',
-];
+  'and',
+  'or',
+  'moduleCompleted',
+  'bundleCompleted',
+]);
 
-const BUNDLE_ONLY_CONDITIONS = ['bundleCompleted', 'moduleCompleted', 'skill', 'bundleCondition'];
+const MODULE_SIGNAL_CONDITIONS = ['score', 'skill', 'chain'];
 
-const VALID_ACTIONS = ['badge.award', 'webhook', 'script'];
+const BUNDLE_ONLY_CONDITIONS = ['moduleCompleted', 'bundleCompleted'];
+
+const ACTION_FIELDS = {
+  'badge.award': ['badge'],
+  webhook: ['url'],
+  script: ['exec'],
+};
+
+const CARD_TYPES = ['knowledge', 'skill', 'achievement', 'exploration', 'mentor'];
 
 /**
  * Validates rewards.json/cards.json at a target directory.
@@ -76,7 +82,7 @@ export function validateRewardsCards(dir, { scope = 'module' } = {}) {
             const refPath = join(dir, rel.replace(/^\.\//, ''));
             if (!existsSync(refPath)) {
               findings.push({
-                checkId: 'QC-REW-01',
+                checkId: 'QC-REW-08',
                 severity: 'error',
                 message: `bundle.json references ${key} (${rel}) but the file does not exist`,
               });
@@ -114,7 +120,7 @@ function validateRewards(rewards, { scope, path, findings }) {
 
     if (trigger.condition) {
       findings.push({
-        checkId: 'QC-REW-01',
+        checkId: 'QC-REW-07',
         severity: 'error',
         message: `${path}: trigger ${triggerIndex} has a condition — conditions belong on the reward, not the trigger`,
       });
@@ -133,24 +139,32 @@ function validateRewards(rewards, { scope, path, findings }) {
     for (const [rewardIndex, reward] of rewardActions.entries()) {
       if (!reward || typeof reward !== 'object') continue;
 
-      if (!VALID_ACTIONS.includes(reward.action)) {
+      const requiredFields = ACTION_FIELDS[reward.action];
+      if (!requiredFields) {
         findings.push({
           checkId: 'QC-REW-01',
           severity: 'error',
-          message: `${path}: reward ${triggerIndex}.${rewardIndex} has invalid action "${reward.action}" (expected one of ${VALID_ACTIONS.join(', ')})`,
+          message: `${path}: reward ${triggerIndex}.${rewardIndex} has invalid action "${reward.action}" (expected one of ${Object.keys(ACTION_FIELDS).join(', ')})`,
         });
-      }
-
-      if (!reward.spec || typeof reward.spec !== 'object') {
-        findings.push({
-          checkId: 'QC-REW-04',
-          severity: 'warning',
-          message: `${path}: reward ${triggerIndex}.${rewardIndex} missing spec object`,
-        });
+      } else {
+        for (const field of requiredFields) {
+          if (typeof reward[field] !== 'string' || reward[field].length === 0) {
+            findings.push({
+              checkId: 'QC-REW-04',
+              severity: 'error',
+              message: `${path}: reward ${triggerIndex}.${rewardIndex} (${reward.action}) missing required string ${field}`,
+            });
+          }
+        }
       }
 
       if (reward.condition) {
-        validateConditionScope(reward.condition, { scope, path, findings, label: `reward ${triggerIndex}.${rewardIndex}` });
+        validateConditionScope(reward.condition, {
+          scope,
+          path,
+          findings,
+          label: `reward ${triggerIndex}.${rewardIndex}`,
+        });
       }
     }
   }
@@ -168,12 +182,13 @@ function validateConditionScope(condition, { scope, path, findings, label }) {
     return;
   }
 
-  if (scope === 'bundle' && MODULE_LOCAL_CONDITIONS.includes(type)) {
+  if (!CONDITION_TYPES.has(type)) {
     findings.push({
-      checkId: 'QC-REW-02',
+      checkId: 'QC-REW-06',
       severity: 'error',
-      message: `${path}: ${label} uses module-local condition "${type}" in a bundle-scoped file`,
+      message: `${path}: ${label} uses unknown condition type "${type}" (expected one of ${[...CONDITION_TYPES].join(', ')})`,
     });
+    return;
   }
 
   if (scope === 'module' && BUNDLE_ONLY_CONDITIONS.includes(type)) {
@@ -181,6 +196,14 @@ function validateConditionScope(condition, { scope, path, findings, label }) {
       checkId: 'QC-REW-02',
       severity: 'error',
       message: `${path}: ${label} uses bundle-level condition "${type}" in a module-scoped file`,
+    });
+  }
+
+  if (scope === 'bundle' && MODULE_SIGNAL_CONDITIONS.includes(type)) {
+    findings.push({
+      checkId: 'QC-REW-02',
+      severity: 'warning',
+      message: `${path}: ${label} uses module-signal condition "${type}" in a bundle-scoped file — the bundle broker never receives module-local signals, so it always resolves to false`,
     });
   }
 
@@ -206,21 +229,33 @@ function validateCards(cards, { scope, path, findings }) {
   for (const [index, card] of list.entries()) {
     if (!card || typeof card !== 'object') continue;
 
-    for (const field of ['id', 'category', 'summary']) {
+    for (const field of ['id', 'title', 'category', 'type', 'summary']) {
       if (typeof card[field] !== 'string' || card[field].length === 0) {
         findings.push({
-          checkId: 'QC-REW-04',
-          severity: 'warning',
-          message: `${path}: card ${index} missing string ${field}`,
+          checkId: 'QC-REW-05',
+          severity: 'error',
+          message: `${path}: card ${index} missing required string ${field}`,
         });
       }
     }
 
-    if (!Array.isArray(card.levels) || card.levels.length === 0) {
+    if (typeof card.type === 'string' && !CARD_TYPES.includes(card.type)) {
       findings.push({
-        checkId: 'QC-REW-04',
-        severity: 'warning',
-        message: `${path}: card ${index} missing non-empty levels array`,
+        checkId: 'QC-REW-05',
+        severity: 'error',
+        message: `${path}: card ${index} has invalid type "${card.type}" (expected one of ${CARD_TYPES.join(', ')})`,
+      });
+    }
+
+    if (
+      typeof card.level === 'number' &&
+      typeof card.maximumLevel === 'number' &&
+      card.level > card.maximumLevel
+    ) {
+      findings.push({
+        checkId: 'QC-REW-09',
+        severity: 'error',
+        message: `${path}: card ${index} level (${card.level}) must not exceed maximumLevel (${card.maximumLevel})`,
       });
     }
 
@@ -228,7 +263,7 @@ function validateCards(cards, { scope, path, findings }) {
       findings.push({
         checkId: 'QC-REW-05',
         severity: 'error',
-        message: `${path}: card ${index} missing unlock.type`,
+        message: `${path}: card ${index} missing unlock condition`,
       });
     }
 
@@ -243,11 +278,16 @@ function validateCards(cards, { scope, path, findings }) {
       seen.add(card.id);
     }
 
-    if (scope === 'bundle' && card.unlock) {
+    if (card.unlock) {
       validateConditionScope(card.unlock, { scope, path, findings, label: `card ${index} unlock` });
-      if (card.nextLevel) {
-        validateConditionScope(card.nextLevel, { scope, path, findings, label: `card ${index} nextLevel` });
-      }
+    }
+    if (card.nextLevel) {
+      validateConditionScope(card.nextLevel, {
+        scope,
+        path,
+        findings,
+        label: `card ${index} nextLevel`,
+      });
     }
   }
 }
