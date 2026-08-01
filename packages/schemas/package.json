@@ -25,9 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "zod": "^3.22.0"
-  },
-  "devDependencies": {
+    "zod": "^3.22.0",
     "zod-to-json-schema": "^3.22.0"
   },
   "type": "module"
