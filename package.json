@@ -25,6 +25,8 @@
     "check:hygiene": "node scripts/check-repo-hygiene.mjs",
     "clean": "pnpm -r run clean",
     "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "release": "pnpm --filter @open-edu/schemas --filter @open-edu/oep-distribution --filter @open-edu/registry build && changeset publish",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
     "storybook": "pnpm --filter @open-edu/design-system storybook",
