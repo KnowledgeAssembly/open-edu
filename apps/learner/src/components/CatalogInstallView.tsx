@@ -3,6 +3,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { fetchCatalog, catalogSource } from '@open-edu/oep-distribution';
 import type { Catalog, CatalogPackageEntry } from '@open-edu/oep-distribution';
 import { installFromSource } from '../courseDownload';
+import { proxyUrl } from '../oep-proxy/client';
 import {
   Button,
   Input,
@@ -28,7 +29,7 @@ export function CatalogInstallView(): JSX.Element {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await fetchCatalog(catalogUrl.trim());
+      const result = await fetchCatalog(proxyUrl(catalogUrl.trim()));
       setCatalog(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('learner.catalog.fetch_error'));
@@ -42,7 +43,7 @@ export function CatalogInstallView(): JSX.Element {
     setInstallingId(entry.id);
     try {
       const source = catalogSource({
-        downloadUrl: version.downloadUrl,
+        downloadUrl: proxyUrl(version.downloadUrl),
         label: `${entry.title} v${version.version}`,
         expectedChecksum: version.checksum,
       });

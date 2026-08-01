@@ -9,6 +9,7 @@ import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/cor
 import { llmProxyHandler } from './src/llm-proxy/index.js';
 import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
 import { createPipiliHandler } from './src/pipili/index.js';
+import { oepProxyHandler } from './src/oep-proxy/index.js';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -51,6 +52,8 @@ function eduDataPlugin(): Plugin {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
     },
     configureServer(server) {
+      server.middlewares.use(oepProxyHandler);
+
       server.middlewares.use(llmProxyHandler);
 
       // Pipili AI Companion endpoint
@@ -128,6 +131,9 @@ function eduDataPlugin(): Plugin {
       });
 
       console.log(`[edu-data] Serving assets from ${assetDirs.length} package(s) (${CATALOG_DIR})`);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(oepProxyHandler);
     },
     async load(id) {
       if (id !== RESOLVED_MODULE_ID) return;

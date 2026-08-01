@@ -34,6 +34,7 @@ import { installFromSource } from './courseDownload';
 import { AvailableUpdatesList } from './components/AvailableUpdatesList';
 import { fetchCatalog } from '@open-edu/oep-distribution';
 import type { Catalog } from '@open-edu/oep-distribution';
+import { proxyUrl } from './oep-proxy/client';
 import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 import { deleteCourse, deleteBundle } from '@open-edu/storage';
 import { isOepCourse, storedBundleToBundleSummary } from './oepAdapters';
@@ -171,7 +172,7 @@ export function CatalogPage({
   useEffect(() => {
     const catalogUrl = import.meta.env.VITE_CATALOG_URL as string | undefined;
     if (catalogUrl) {
-      fetchCatalog(catalogUrl)
+      fetchCatalog(proxyUrl(catalogUrl))
         .then(setRemoteCatalog)
         .catch(() => {});
     }
