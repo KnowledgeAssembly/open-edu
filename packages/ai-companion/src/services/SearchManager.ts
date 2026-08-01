@@ -2,6 +2,7 @@ import type { DictionaryEntry } from '../providers/types.js';
 import type { LearningContext } from '../providers/types.js';
 import type { DictionaryService } from './DictionaryService.js';
 import type { CacheService } from './CacheService.js';
+import { pipiliServiceLogger } from './logger.js';
 
 export interface InstantResult {
   entry: DictionaryEntry | null;
@@ -28,6 +29,7 @@ export class SearchManager {
 
   search(query: string, context?: LearningContext): SearchResponse {
     const normalized = query.toLowerCase().trim();
+    pipiliServiceLogger.debug('Search requested', { query: normalized });
 
     const exact = this.dictionaryService.lookupExact(normalized);
     const suggestions = exact ? [] : this.dictionaryService.getSuggestions(normalized, 5);

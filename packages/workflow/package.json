@@ -23,6 +23,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@open-edu/logger": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "xstate": "^5.0.0"
   },

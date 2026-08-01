@@ -4,6 +4,7 @@ import { BundleManifestSchema } from '@open-edu/schemas';
 import type { BundleManifest } from '@open-edu/schemas';
 import { scanPackages } from './scanner.js';
 import type { PackageSummary } from './scanner.js';
+import { coreScannerLogger } from './logger.js';
 
 export interface BundleSummary {
   manifest: BundleManifest;
@@ -16,10 +17,14 @@ export interface BundleSummary {
 }
 
 export function scanBundles(dir: string): BundleSummary[] {
+  coreScannerLogger.info('Scanning bundles...', { dir });
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
-  } catch {
+  } catch (err) {
+    coreScannerLogger.warn(`Cannot read directory ${dir}`, {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return [];
   }
 
@@ -61,10 +66,11 @@ export function scanBundles(dir: string): BundleSummary[] {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[scanBundles] Skipping invalid bundle in "${bundleDir}": ${message}`);
+      coreScannerLogger.warn(`Skipping invalid bundle in "${bundleDir}": ${message}`);
     }
   }
 
+  coreScannerLogger.info('Bundle scan complete', { dir, count: results.length });
   return results;
 }
 

@@ -30,6 +30,7 @@
     "@open-edu/core": "workspace:*",
     "@open-edu/course-compiler": "workspace:*",
     "@open-edu/dev-server": "workspace:*",
+    "@open-edu/logger": "workspace:*",
     "@open-edu/oep-distribution": "workspace:^",
     "@open-edu/schemas": "workspace:^",
     "@open-edu/telemetry": "workspace:*",

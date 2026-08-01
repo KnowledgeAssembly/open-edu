@@ -1,12 +1,16 @@
 import { generateAgentPrompt, getDefaultWidgetCatalog, loadPackage } from '@open-edu/core';
 import { createPackage } from './create.js';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:generate' });
 
 function buildWidgetCatalog(): string {
   return getDefaultWidgetCatalog();
 }
 
 export async function generatePrompt(options?: { json?: boolean }): Promise<CliResult> {
+  logger.info('Generating agent prompt');
   const widgetCatalog = buildWidgetCatalog();
   const prompt = generateAgentPrompt(widgetCatalog);
 
@@ -23,6 +27,7 @@ export async function generateFromDescription(
   description: string,
   options?: { json?: boolean; force?: boolean },
 ): Promise<CliResult> {
+  logger.info('Generating package from description', { dir });
   const id = extractId(description);
   const title = extractTitle(description);
 
@@ -65,9 +70,11 @@ export async function generateFromDescription(
     console.log(`  ID: ${pkg.manifest.id}`);
     console.log(`  Title: ${pkg.manifest.title}`);
     console.log(`  Files: ${createResult.files!.join(', ')}`);
+    logger.info('Package generated', { dir, id: pkg.manifest.id });
     return { success: true, data: { directory: dir, files: createResult.files! } };
   } catch (error) {
     const msg = `Generated package failed validation: ${error instanceof Error ? error.message : String(error)}`;
+    logger.error('Generated package failed validation', { dir, error: msg });
     if (options?.json) {
       return { success: false, error: msg, code: 1 };
     }

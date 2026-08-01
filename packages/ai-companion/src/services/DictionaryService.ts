@@ -4,6 +4,7 @@ import type { PackageInfo } from '../data/DictionaryLoader.js';
 import { ExactIndex } from '../search/ExactIndex.js';
 import { FlexSearchIndex } from '../search/FlexSearchIndex.js';
 import { DictionaryLoader } from '../data/DictionaryLoader.js';
+import { pipiliServiceLogger } from './logger.js';
 
 const PLURAL_SUFFIXES = [/^(.+)ies$/, /^(.+)es$/, /^(.+)s$/];
 const VERB_SUFFIXES = [/^(.+)ing$/, /^(.+)ed$/, /^(.+)en$/];
@@ -55,11 +56,13 @@ export class DictionaryService {
 
   async initialize(): Promise<void> {
     if (this.loaded) return;
+    pipiliServiceLogger.info('Initializing dictionary service');
     const entries = await this.loader.load();
     for (const builder of this.searchBuilders) {
       builder.build(entries);
     }
     this.loaded = true;
+    pipiliServiceLogger.info('Dictionary service initialized', { entries: entries.length });
   }
 
   lookupExact(word: string): DictionaryEntry | null {
@@ -126,9 +129,19 @@ export class DictionaryService {
       const res = await fetch(
         `/api/dictionary/search?q=${encodeURIComponent(query)}&limit=${limit}`,
       );
-      if (!res.ok) return [];
+      if (!res.ok) {
+        pipiliServiceLogger.warn('Remote dictionary search failed', {
+          query,
+          status: res.status,
+        });
+        return [];
+      }
       return (await res.json()) as DictionaryEntry[];
-    } catch {
+    } catch (err) {
+      pipiliServiceLogger.warn('Remote dictionary search error', {
+        query,
+        error: err instanceof Error ? err.message : String(err),
+      });
       return [];
     }
   }

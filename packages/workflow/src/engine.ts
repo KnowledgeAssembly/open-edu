@@ -6,8 +6,11 @@ import { createWorkflowEvent } from './events.js';
 import { createSkillState, applyAssessment } from './skills.js';
 import type { WorkflowEvent, WorkflowEventListener } from './events.js';
 import type { Workflow, RouteDefinition, SkillGraph } from '@open-edu/schemas';
+import { createLogger } from '@open-edu/logger';
 
 const COMPLETED_STATE = 'COMPLETED';
+
+const workflowLogger = createLogger({ scope: 'workflow:engine' });
 
 export interface WorkflowEngineOptions {
   entry?: string;
@@ -35,9 +38,11 @@ export class WorkflowEngine {
     this.entry = entry;
     this.skillGraph = options?.skillGraph;
     this.skillState = createSkillState(options?.skillGraph);
+    workflowLogger.info('Workflow engine initialized', { entry });
   }
 
   start(): void {
+    workflowLogger.info('Workflow engine started', { entry: this.entry });
     const config = buildMachineConfig(this.workflow, { entry: this.entry });
     const machine = createMachine(config);
     const actor = interpret(machine).start();
@@ -69,8 +74,12 @@ export class WorkflowEngine {
   navigateTo(nodeId: string): void {
     if (!this.actor) return;
     if (!(nodeId in this.workflow.routing)) {
+      workflowLogger.error(`Cannot navigate to node "${nodeId}" — not in workflow routing.`, {
+        nodeId,
+      });
       throw new Error(`Cannot navigate to node "${nodeId}" — not in workflow routing.`);
     }
+    workflowLogger.info('Navigating to node', { nodeId });
     this.actor.stop();
     const config = buildMachineConfig(this.workflow, { entry: nodeId });
     const machine = createMachine(config);
@@ -91,6 +100,9 @@ export class WorkflowEngine {
     const routeDef = this.workflow.routing[currentNode];
 
     if (!routeDef) {
+      workflowLogger.error(`No route definition found for node: ${currentNode}`, {
+        currentNode,
+      });
       throw new Error(`No route definition found for node: ${currentNode}`);
     }
 
@@ -116,8 +128,18 @@ export class WorkflowEngine {
     const prevNode = this.getCurrentNodeId();
 
     for (const cond of routeDef.conditions) {
+      workflowLogger.debug('Evaluating route condition', {
+        node: prevNode,
+        score: s,
+        rule: cond.if,
+      });
       const result = evaluateCondition(cond.if, s);
       if (result.match) {
+        workflowLogger.info('Route condition matched', {
+          node: prevNode,
+          target: cond.then,
+          score: s,
+        });
         this.emit(
           createWorkflowEvent('node.completed', {
             nodeId: prevNode,
@@ -139,6 +161,7 @@ export class WorkflowEngine {
       }
     }
 
+    workflowLogger.warn('No route condition matched', { node: prevNode, score: s });
     this.emit(
       createWorkflowEvent('route.evaluated', {
         nodeId: prevNode,
@@ -158,9 +181,11 @@ export class WorkflowEngine {
   private emitEnteredOrCompleted(): void {
     const newNode = this.getCurrentNodeId();
     if (newNode === COMPLETED_STATE) {
+      workflowLogger.info('Workflow completed', { nodeId: newNode });
       this.emit(createWorkflowEvent('workflow.completed', {}));
       return;
     }
+    workflowLogger.info('Node entered', { nodeId: newNode });
     this.emit(createWorkflowEvent('node.entered', { nodeId: newNode }));
   }
 

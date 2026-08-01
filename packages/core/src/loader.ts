@@ -6,6 +6,7 @@ import { loadCards } from './cards.js';
 import { loadNodes } from './nodes.js';
 import { resolveAssets } from './assets.js';
 import { EntryNodeNotFoundError, WorkflowRouteError } from './errors.js';
+import { coreLoaderLogger } from './logger.js';
 
 const COMPLETED_SENTINEL = 'COMPLETED';
 
@@ -34,6 +35,9 @@ export async function loadPackage(
   packageDir: string,
   _options?: LoadOptions,
 ): Promise<LoadedPackage> {
+  coreLoaderLogger.info('Loading package...', { rootDir: packageDir });
+  coreLoaderLogger.time('load-package');
+
   const manifest = await loadManifest(packageDir);
 
   const [workflow, rewards, cards, nodes, assetPaths] = await Promise.all([
@@ -51,6 +55,10 @@ export async function loadPackage(
 
   const manifestNodePath = manifest.entry;
   if (!nodeMap.has(manifestNodePath)) {
+    coreLoaderLogger.error(`Entry node "${manifestNodePath}" not found in package ${packageDir}`, {
+      path: manifestNodePath,
+      available,
+    });
     throw new EntryNodeNotFoundError(
       `Entry node "${manifestNodePath}" not found in package. ${list()}`,
       {
@@ -64,6 +72,7 @@ export async function loadPackage(
     const routingKeys: string[] = [];
     for (const routePath of Object.keys(workflow.routing)) {
       if (!nodeMap.has(routePath)) {
+        coreLoaderLogger.warn(`Workflow references unknown node "${routePath}"`, { routePath });
         throw new WorkflowRouteError(`Workflow references unknown node "${routePath}". ${list()}`, {
           path: routePath,
           suggestion: `Add a node at "nodes/${routePath.replace('nodes/', '')}" or remove the "${routePath}" key from workflow.json routing`,
@@ -76,6 +85,7 @@ export async function loadPackage(
     for (const target of targets) {
       if (target === COMPLETED_SENTINEL) continue;
       if (!nodeMap.has(target)) {
+        coreLoaderLogger.warn(`Workflow route targets unknown node "${target}"`, { target });
         throw new WorkflowRouteError(`Workflow route targets unknown node "${target}". ${list()}`, {
           path: target,
           suggestion: `Add a node at "nodes/${target.replace('nodes/', '')}" or change the route target in workflow.json to one of: ${available.join(', ')}`,
@@ -84,11 +94,20 @@ export async function loadPackage(
     }
 
     if (!routingKeys.includes(manifestNodePath)) {
+      coreLoaderLogger.warn(`Manifest entry "${manifestNodePath}" is not a workflow routing key`, {
+        manifestNodePath,
+      });
       throw new WorkflowRouteError(
         `Manifest entry "${manifestNodePath}" is not a key in workflow.routing. The entry must be the first visited node. Routing keys: ${routingKeys.join(', ')}`,
       );
     }
   }
+
+  coreLoaderLogger.timeEnd('load-package');
+  coreLoaderLogger.info('Package loaded successfully', {
+    rootDir: packageDir,
+    nodeCount: nodes.length,
+  });
 
   return {
     rootDir: packageDir,

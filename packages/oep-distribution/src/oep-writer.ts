@@ -3,6 +3,9 @@ import { BundleManifestSchema } from '@open-edu/schemas';
 import type { DistributionManifest, BundleManifest } from '@open-edu/schemas';
 import { computeSha256 } from './checksum.js';
 import { OEP_CONTENT_ROOT, BUNDLE_DIR } from './types.js';
+import { createLogger } from '@open-edu/logger';
+
+const writerLogger = createLogger({ scope: 'oep:writer' });
 
 type RelaxedManifest = Omit<DistributionManifest, 'type'> & { type?: 'course' | 'bundle' };
 
@@ -27,16 +30,34 @@ export class OepWriter {
   static async build(input: OepBuildInput): Promise<OepBuildResult> {
     const manifest = { type: 'course' as const, ...input.manifest };
 
+    writerLogger.info('Building .oep archive...', {
+      packageId: manifest.id,
+      fileCount: input.courseFiles.size,
+    });
+    writerLogger.time('build-archive');
+
     const checksumValue = await computeContentChecksum(input.courseFiles);
 
     manifest.checksum = { algorithm: 'sha256', value: checksumValue };
     const zipEntries = buildZipEntries(manifest, input.courseFiles);
     const finalBytes = zipSync(zipEntries);
 
+    writerLogger.timeEnd('build-archive');
+    writerLogger.info('.oep archive built', {
+      packageId: manifest.id,
+      bytes: finalBytes.length,
+    });
+
     return { bytes: finalBytes, checksumValue };
   }
 
   static async buildBundle(input: OepBundleBuildInput): Promise<OepBuildResult> {
+    writerLogger.info('Building .oep bundle archive...', {
+      bundleId: input.bundleManifest.id,
+      moduleCount: input.bundleManifest.modules.length,
+    });
+    writerLogger.time('build-bundle-archive');
+
     // Validate bundle manifest at build time
     BundleManifestSchema.parse(input.bundleManifest);
 
@@ -64,6 +85,8 @@ export class OepWriter {
       }
     }
 
+    writerLogger.debug('Bundle archive file inventory', { fileCount: allFiles.size });
+
     const checksumValue = await computeContentChecksum(allFiles);
     manifest.checksum = { algorithm: 'sha256', value: checksumValue };
 
@@ -76,6 +99,11 @@ export class OepWriter {
     }
 
     const finalBytes = zipSync(zipEntries);
+    writerLogger.timeEnd('build-bundle-archive');
+    writerLogger.info('.oep bundle archive built', {
+      bundleId: input.bundleManifest.id,
+      bytes: finalBytes.length,
+    });
     return { bytes: finalBytes, checksumValue };
   }
 }

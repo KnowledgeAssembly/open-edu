@@ -1,11 +1,15 @@
 import { loadPackage, verifyIntegrity } from '@open-edu/core';
 import { formatValidationSuccess, formatValidationError, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:validate' });
 
 export async function validatePackage(
   packageDir: string,
   options?: { json?: boolean; verifyIntegrity?: boolean },
 ): Promise<CliResult> {
+  logger.info('Validating package', { packageDir, verifyIntegrity: options?.verifyIntegrity });
   try {
     const pkg = await loadPackage(packageDir);
 
@@ -46,8 +50,14 @@ export async function validatePackage(
     }
     const messages = formatValidationSuccess(pkg);
     printMessages(messages);
+    logger.info('Package validated successfully', {
+      packageDir,
+      title: pkg.manifest.title,
+      nodeCount: pkg.nodes.length,
+    });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('Package validation failed', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,

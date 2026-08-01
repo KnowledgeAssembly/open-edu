@@ -1,10 +1,13 @@
 import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createLogger } from '@open-edu/logger';
 
 const TEMPLATE_DIR = resolve(
   fileURLToPath(new URL('../../../../packages/widgets/templates/widget-scaffold', import.meta.url)),
 );
+
+const logger = createLogger({ scope: 'cli:widget-create' });
 
 export interface WidgetCreateOptions {
   id: string;
@@ -71,5 +74,10 @@ export async function widgetCreate(
     }
   }
 
+  logger.info('Widget scaffold created', {
+    dir: resolvedDir,
+    id: options.id,
+    fileCount: files.length,
+  });
   return { success: true, files };
 }

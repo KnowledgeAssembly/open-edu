@@ -21,6 +21,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@open-edu/logger": "workspace:*",
     "flexsearch": "^0.8.212",
     "zod": "^3.22.0"
   },

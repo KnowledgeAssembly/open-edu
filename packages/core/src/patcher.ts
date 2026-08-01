@@ -1,6 +1,7 @@
 import { readFile, writeFile, access, mkdir, unlink } from 'node:fs/promises';
 import { join, dirname, sep } from 'node:path';
 import { loadPackage } from './loader.js';
+import { corePatcherLogger } from './logger.js';
 
 export type PatchOperation =
   | { op: 'add'; path: string; value: unknown }
@@ -172,6 +173,13 @@ export async function applyPatch(
   operations: PatchOperation[],
   options?: { dryRun?: boolean },
 ): Promise<PatchReport> {
+  corePatcherLogger.info('Applying patch...', {
+    packageDir,
+    operationCount: operations.length,
+    dryRun: options?.dryRun ?? false,
+  });
+  corePatcherLogger.time('apply-patch');
+
   const results: PatchOperationResult[] = [];
   const diffSummary: string[] = ['Patch operations:'];
   const backups: BackupEntry[] = [];
@@ -383,6 +391,11 @@ export async function applyPatch(
   // Validate
   try {
     await loadPackage(packageDir);
+    corePatcherLogger.timeEnd('apply-patch');
+    corePatcherLogger.info('Patch applied and validated', {
+      packageDir,
+      appliedCount: results.filter((r) => r.status === 'applied').length,
+    });
     return {
       operations: results,
       validationResult: { valid: true },
@@ -430,6 +443,11 @@ export async function applyPatch(
         );
       }
     }
+
+    corePatcherLogger.timeEnd('apply-patch');
+    corePatcherLogger.error('Patch validation failed — changes reverted', error, {
+      packageDir,
+    });
 
     return {
       operations: results,

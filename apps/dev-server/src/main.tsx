@@ -5,6 +5,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@open-edu/i18n';
 import { FontSizeProvider } from '@open-edu/design-system';
+import { LoggerProvider, MemorySink } from '@open-edu/logger';
+import { setInspectorSink } from './inspectors/LogsInspector.js';
 import { DevApp } from './DevApp';
 
 import runtimeEn from '@open-edu/i18n/locales/en/runtime.json';
@@ -21,6 +23,9 @@ const dictionaries = {
   },
 };
 
+const memorySink = new MemorySink();
+setInspectorSink(memorySink);
+
 const root = document.getElementById('root');
 if (!root) {
   throw new Error('Root element #root not found');
@@ -30,7 +35,9 @@ createRoot(root).render(
   <StrictMode>
     <I18nProvider locale="en" dictionaries={dictionaries}>
       <FontSizeProvider>
-        <DevApp />
+        <LoggerProvider sinks={[memorySink]}>
+          <DevApp />
+        </LoggerProvider>
       </FontSizeProvider>
     </I18nProvider>
   </StrictMode>,

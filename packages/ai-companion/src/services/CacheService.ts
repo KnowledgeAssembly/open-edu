@@ -1,4 +1,5 @@
 import type { CacheProvider } from '../providers/types.js';
+import { pipiliServiceLogger } from './logger.js';
 
 interface CacheRecord<T> {
   key: string;
@@ -122,7 +123,9 @@ export class CacheService implements CacheProvider {
         tx.objectStore('cache').put(record);
       })
       .catch((err) => {
-        console.warn('CacheService: IndexedDB write failed', err); // eslint-disable-line no-console
+        pipiliServiceLogger.warn('IndexedDB write failed', {
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
   }
 
@@ -134,7 +137,9 @@ export class CacheService implements CacheProvider {
         tx.objectStore('cache').delete(key);
       })
       .catch((err) => {
-        console.warn('CacheService: IndexedDB delete failed', err); // eslint-disable-line no-console
+        pipiliServiceLogger.warn('IndexedDB delete failed', {
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
   }
 
@@ -158,7 +163,9 @@ export class CacheService implements CacheProvider {
         tx.objectStore('cache').clear();
       })
       .catch((err) => {
-        console.warn('CacheService: IndexedDB clear failed', err); // eslint-disable-line no-console
+        pipiliServiceLogger.warn('IndexedDB clear failed', {
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
   }
 }

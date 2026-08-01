@@ -13,12 +13,17 @@ import {
   CircularDependencyError,
   MissingPrerequisiteError,
 } from './errors.js';
+import { coreLoaderLogger } from './logger.js';
 
 export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
+  coreLoaderLogger.info('Loading bundle...', { bundleDir });
+  coreLoaderLogger.time('load-bundle');
+
   let raw: string;
   try {
     raw = readFileSync(join(bundleDir, 'bundle.json'), 'utf-8');
   } catch (err) {
+    coreLoaderLogger.error(`Cannot read bundle.json in ${bundleDir}`, err);
     throw new BundleValidationError(
       `Cannot read bundle.json in ${bundleDir}: ${err instanceof Error ? err.message : String(err)}`,
     );
@@ -28,6 +33,7 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
   try {
     manifestJson = JSON.parse(raw);
   } catch {
+    coreLoaderLogger.error(`bundle.json in ${bundleDir} is not valid JSON`);
     throw new BundleValidationError(`bundle.json in ${bundleDir} is not valid JSON`);
   }
 
@@ -36,6 +42,7 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     manifest = BundleManifestSchema.parse(manifestJson);
   } catch (err: unknown) {
     const zodErr = (err as { issues?: unknown })?.issues ? (err as any) : null;
+    coreLoaderLogger.error(`bundle.json validation failed in ${bundleDir}`, err);
     throw new BundleValidationError(`bundle.json validation failed in ${bundleDir}`, zodErr, {
       file: join(bundleDir, 'bundle.json'),
     });
@@ -46,10 +53,14 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
 
   for (const moduleRef of manifest.modules) {
     const resolvedPath = resolve(bundleDir, moduleRef.path);
+    coreLoaderLogger.debug(`Loading bundle module ${moduleRef.id}`, { path: resolvedPath });
 
     // Security: reject path traversal
     const bundleRoot = resolve(bundleDir);
     if (!resolvedPath.startsWith(bundleRoot)) {
+      coreLoaderLogger.error(`Module path "${moduleRef.path}" escapes the bundle directory`, {
+        path: resolvedPath,
+      });
       throw new ModuleNotFoundError(
         `Module path "${moduleRef.path}" escapes the bundle directory`,
         { file: join(bundleDir, 'bundle.json'), path: `modules[${moduleRef.id}].path` },
@@ -60,6 +71,9 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     try {
       loadedPkg = await loadPackage(resolvedPath);
     } catch (err) {
+      coreLoaderLogger.error(`Module "${moduleRef.id}" could not be loaded`, err, {
+        path: moduleRef.path,
+      });
       throw new ModuleNotFoundError(
         `Module "${moduleRef.id}" at "${moduleRef.path}" could not be loaded: ${err instanceof Error ? err.message : String(err)}`,
         { file: join(bundleDir, 'bundle.json'), path: `modules[${moduleRef.id}]` },
@@ -67,6 +81,9 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     }
 
     if (moduleRef.id !== loadedPkg.manifest.id) {
+      coreLoaderLogger.error(
+        `Module ref id "${moduleRef.id}" does not match package manifest id "${loadedPkg.manifest.id}"`,
+      );
       throw new ModuleMismatchError(
         `Module ref id "${moduleRef.id}" does not match package manifest id "${loadedPkg.manifest.id}"`,
         {
@@ -141,6 +158,12 @@ export async function loadBundle(bundleDir: string): Promise<LoadedBundle> {
     loadRewards(bundleDir, { filename: manifest.rewards }),
     loadCards(bundleDir, { filename: manifest.cards }),
   ]);
+
+  coreLoaderLogger.timeEnd('load-bundle');
+  coreLoaderLogger.info('Bundle loaded successfully', {
+    bundleDir,
+    moduleCount: modules.length,
+  });
 
   return { rootDir: bundleDir, manifest, modules, moduleMap, rewards, cards };
 }

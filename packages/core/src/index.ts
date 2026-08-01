@@ -1,5 +1,12 @@
 export const CORE_VERSION = '0.1.0';
 
+export {
+  coreLoaderLogger,
+  coreValidatorLogger,
+  coreScannerLogger,
+  corePatcherLogger,
+} from './logger.js';
+
 export { loadPackage } from './loader.js';
 export type { LoadOptions } from './loader.js';
 export type { LoadedPackage, LoadedNode, LoadedBundle } from './types.js';

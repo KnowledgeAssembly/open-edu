@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { PackageManifestSchema, RewardsSchema } from '@open-edu/schemas';
 import type { PackageManifest } from '@open-edu/schemas';
+import { coreScannerLogger } from './logger.js';
 
 export interface PackageSummary {
   manifest: PackageManifest;
@@ -11,10 +12,14 @@ export interface PackageSummary {
 }
 
 export function scanPackages(dir: string): PackageSummary[] {
+  coreScannerLogger.info('Scanning packages...', { dir });
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
-  } catch {
+  } catch (err) {
+    coreScannerLogger.warn(`Cannot read directory ${dir}`, {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return [];
   }
 
@@ -57,10 +62,13 @@ export function scanPackages(dir: string): PackageSummary[] {
       }
 
       results.push({ manifest, nodeCount, availableBadges, rootDir: pkgDir });
-    } catch {
-      // skip invalid packages
+    } catch (err) {
+      coreScannerLogger.debug(`Skipping invalid package ${pkgDir}`, {
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 
+  coreScannerLogger.info('Package scan complete', { dir, count: results.length });
   return results;
 }

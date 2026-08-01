@@ -5,6 +5,9 @@ import { OepWriter } from '@open-edu/oep-distribution';
 import { OEP_FORMAT, OEP_FORMAT_VERSION, type DistributionManifest } from '@open-edu/schemas';
 import type { CliResult } from '../utils/json-output.js';
 import { formatValidationError, printMessages } from '../utils/format.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:oep-build' });
 
 function collectCourseFiles(packageDir: string): Map<string, Uint8Array> {
   const files = new Map<string, Uint8Array>();
@@ -35,6 +38,7 @@ export async function buildOep(
   outputDir?: string,
   options?: { json?: boolean },
 ): Promise<CliResult> {
+  logger.info('Building .oep archive', { packageDir, outputDir: outputDir ?? null });
   try {
     const pkg = await loadPackage(packageDir);
     const outDir = outputDir ?? process.cwd();
@@ -80,8 +84,10 @@ export async function buildOep(
       { type: 'info', text: `  SHA-256: ${result.checksumValue}` },
       { type: 'info', text: `  Size: ${(result.bytes.length / 1024).toFixed(1)} KiB` },
     ]);
+    logger.info('.oep archive built', { oepPath, checksum: result.checksumValue });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('.oep build failed', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,
