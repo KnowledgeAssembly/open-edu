@@ -1,8 +1,10 @@
 {
   "name": "@open-edu/schemas",
   "version": "0.1.0",
-  "private": true,
   "description": "Zod schemas and TypeScript type generation for Open-Edu",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
