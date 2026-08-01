@@ -3,7 +3,6 @@ export const CORE_VERSION = '0.1.0';
 export {
   coreLoaderLogger,
   coreValidatorLogger,
-  coreCatalogLogger,
   coreScannerLogger,
   corePatcherLogger,
 } from './logger.js';

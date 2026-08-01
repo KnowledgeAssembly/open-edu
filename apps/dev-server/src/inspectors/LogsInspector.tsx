@@ -10,10 +10,6 @@ export function setInspectorSink(sink: MemorySink | null): void {
   _inspectorSnapshot = [];
 }
 
-export function getInspectorSink(): MemorySink | null {
-  return _inspectorSink;
-}
-
 const LEVEL_BADGE: Record<LogLevel, string> = {
   debug: 'bg-transparent border-outline-variant text-on-surface-variant',
   info: 'bg-primary/10 border-primary/30 text-primary',

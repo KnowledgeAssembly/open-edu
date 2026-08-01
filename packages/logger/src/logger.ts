@@ -11,7 +11,7 @@ import { ConsoleSink } from './sinks/consoleSink.js';
 
 export { type ILogger };
 
-let GLOBAL_MIN_LEVEL: LogLevel = 'debug';
+let GLOBAL_MIN_LEVEL: LogLevel = 'info';
 let GLOBAL_SINKS: LogSink[] | null = null;
 
 export function configureLogger(config: { minLevel?: LogLevel; sinks?: LogSink[] }): void {
@@ -42,7 +42,7 @@ export function deriveLogLevel(
 
 export class Logger implements ILogger {
   readonly scope: string;
-  readonly #minLevel: LogLevel;
+  readonly #minLevelOverride?: LogLevel;
   readonly #sinks: LogSink[];
   readonly #context: Record<string, unknown>;
   readonly #correlationId?: string;
@@ -60,9 +60,7 @@ export class Logger implements ILogger {
           ? localStorage.getItem('oe_log_level')
           : null;
 
-    const resolvedLevel = deriveLogLevel(options.minLevel, envLevel);
-    const globalCfg = getGlobalConfig();
-    this.#minLevel = resolvedLevel ?? globalCfg.minLevel;
+    this.#minLevelOverride = deriveLogLevel(options.minLevel, envLevel);
     this.#sinks = resolveSinks(options.sinks);
   }
 
@@ -70,7 +68,7 @@ export class Logger implements ILogger {
     const childScope = options.scope ? `${this.scope}:${options.scope}` : this.scope;
     return new Logger({
       scope: childScope,
-      minLevel: this.#minLevel,
+      minLevel: this.#minLevelOverride,
       sinks: this.#sinks,
       context: { ...this.#context, ...options.context },
       correlationId: options.correlationId ?? this.#correlationId,
@@ -116,7 +114,8 @@ export class Logger implements ILogger {
     error?: Error | unknown,
     context?: Record<string, unknown>,
   ): void {
-    if (LOG_LEVEL_VALUES[level] < LOG_LEVEL_VALUES[this.#minLevel]) return;
+    const minLevel = this.#minLevelOverride ?? getGlobalConfig().minLevel;
+    if (LOG_LEVEL_VALUES[level] < LOG_LEVEL_VALUES[minLevel]) return;
 
     let serializedError: LogEntry['error'] | undefined;
     if (error instanceof Error) {

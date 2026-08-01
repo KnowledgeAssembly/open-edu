@@ -192,5 +192,30 @@ describe('Logger', () => {
       expect(errorEntry).toBeDefined();
       expect(errorEntry!.level).toBe('error');
     });
+
+    it('applies a new global minLevel to loggers created before the change', () => {
+      const { sink, entries } = createMockSink();
+      configureLogger({ minLevel: 'debug', sinks: [sink] });
+      const logger = new Logger({ scope: 'pre-existing' });
+
+      logger.info('before');
+      configureLogger({ minLevel: 'error', sinks: [sink] });
+      logger.info('suppressed');
+      logger.warn('suppressed');
+      logger.error('after');
+
+      expect(entries.map((e) => e.message)).toEqual(['before', 'after']);
+    });
+
+    it('suppresses debug by default at the info level', () => {
+      const { sink, entries } = createMockSink();
+      configureLogger({ minLevel: 'info', sinks: [sink] });
+      const logger = new Logger({ scope: 'default-level' });
+
+      logger.debug('hidden');
+      logger.info('shown');
+
+      expect(entries.map((e) => e.message)).toEqual(['shown']);
+    });
   });
 });
