@@ -1,6 +1,7 @@
 {
   "name": "@open-edu/example-phase2-showcase",
   "version": "1.0.0",
+  "private": true,
   "description": "Showcase of Phase 2 core widgets",
   "openEdu": {
     "type": "package",
