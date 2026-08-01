@@ -1,4 +1,3 @@
-import { appendFile } from 'node:fs/promises';
 import type { LogSink, LogEntry } from '../types.js';
 import { LoggerWriteError } from '../errors.js';
 
@@ -36,6 +35,7 @@ export class JsonlSink implements LogSink {
     if (this.#buffer.length === 0) return;
     const lines = this.#buffer.splice(0).join('\n') + '\n';
     try {
+      const { appendFile } = await import('node:fs/promises');
       await appendFile(this.#filePath, lines);
     } catch (err) {
       throw new LoggerWriteError(`Failed to write log to ${this.#filePath}: ${String(err)}`);
