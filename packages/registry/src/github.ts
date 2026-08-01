@@ -12,6 +12,11 @@ export interface GithubRelease {
 }
 
 const API = 'https://api.github.com';
+// Release tags must be `<id>-v<major>.<minor>.<patch>` (e.g. `tribal-art-v0.4.0`),
+// matching the `edu oep:build` output filename `<id>-<version>.oep`. Pre-release
+// suffixes (`-rc1`, `-beta.1`, ...) are NOT parsed: to publish a pre-release, tag
+// it as a plain `<id>-v<semver>` and mark the GitHub release as a pre-release
+// (`--include-prerelease` then opts it into the catalog).
 const TAG_RE = /^(.+)-v(\d+)\.(\d+)\.(\d+)$/;
 
 function headers(token?: string): Record<string, string> {

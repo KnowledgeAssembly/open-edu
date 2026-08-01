@@ -116,6 +116,11 @@ merges to `main` (triggered by pending `.changeset/*.md` files).
   `npm ci` installs `@open-edu/registry` (and transitively `@open-edu/schemas` and
   `@open-edu/oep-distribution`) from the public registry.
 
+All three packages are **ESM-only** (built with `tsc`); they expose only an `import`
+condition in their `exports` map. Pre-release course versions must be tagged as a
+plain `<id>-v<semver>` with the GitHub release marked as a pre-release — `-rc`
+suffixed tags are not parsed (see `packages/registry/src/github.ts`).
+
 For a manual first publish:
 
 ```bash
