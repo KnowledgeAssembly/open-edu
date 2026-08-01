@@ -68,7 +68,9 @@ async function main(): Promise<void> {
 
       const metadataMap = loadMetadataMap(arg('dir') ?? 'courses');
       const releases = releasesFile
-        ? (JSON.parse(readFileSync(releasesFile, 'utf8')) as Awaited<ReturnType<typeof listReleases>>)
+        ? (JSON.parse(readFileSync(releasesFile, 'utf8')) as Awaited<
+            ReturnType<typeof listReleases>
+          >)
         : await listReleases(repo, token);
 
       const { catalog, warnings } = await buildCatalog({
@@ -89,10 +91,7 @@ async function main(): Promise<void> {
         process.exit(1);
       }
 
-      const versionCount = catalog.packages.reduce(
-        (n, p) => n + p.versions.length,
-        0,
-      );
+      const versionCount = catalog.packages.reduce((n, p) => n + p.versions.length, 0);
       if (!hasFlag('dry-run')) {
         writeFileSync(out, JSON.stringify(catalog, null, 2) + '\n');
         console.log(

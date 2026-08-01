@@ -1,11 +1,6 @@
 import { CatalogSchema } from '@open-edu/schemas';
 import { computeSha256, semverGreaterThan } from '@open-edu/oep-distribution';
-import {
-  parseReleaseTag,
-  parseChecksums,
-  fetchAssetBytes,
-  type GithubRelease,
-} from './github.js';
+import { parseReleaseTag, parseChecksums, fetchAssetBytes, type GithubRelease } from './github.js';
 import type { LoadedMetadata } from './metadata.js';
 
 const RELEASE_BASE = 'https://github.com';
@@ -59,7 +54,14 @@ export async function buildCatalog({
   const rawBaseUrl = `${RAW_BASE}/${repo}/HEAD`;
   const byId = new Map<
     string,
-    { versions: Array<{ version: string; downloadUrl: string; checksum: string; sizeBytes: number }> }
+    {
+      versions: Array<{
+        version: string;
+        downloadUrl: string;
+        checksum: string;
+        sizeBytes: number;
+      }>;
+    }
   >();
   const warnings: string[] = [];
 
@@ -95,7 +97,9 @@ export async function buildCatalog({
     const checksumsAsset = (release.assets ?? []).find((a) => a.name === 'checksums.txt');
     if (checksumsAsset) {
       try {
-        const text = new TextDecoder().decode(await fetchAsset(checksumsAsset.browser_download_url));
+        const text = new TextDecoder().decode(
+          await fetchAsset(checksumsAsset.browser_download_url),
+        );
         const declared = parseChecksums(text).get(oepName);
         if (declared && declared !== checksum) {
           warnings.push(

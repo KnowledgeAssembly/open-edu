@@ -23,9 +23,9 @@ async function makeFakeFetch({ mismatch = false } = {}) {
   };
 }
 
-const releases = JSON.parse(
-  readFileSync(join(fixtures, 'releases.json'), 'utf8'),
-) as Parameters<typeof buildCatalog>[0]['releases'];
+const releases = JSON.parse(readFileSync(join(fixtures, 'releases.json'), 'utf8')) as Parameters<
+  typeof buildCatalog
+>[0]['releases'];
 
 describe('buildCatalog', () => {
   beforeEach(() => {});

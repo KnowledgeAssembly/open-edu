@@ -6,7 +6,11 @@ import { z } from 'zod';
  */
 export const RegistryMetadataSchema = z
   .object({
-    id: z.string().min(1).max(128).regex(/^[a-z0-9][a-z0-9_-]*$/),
+    id: z
+      .string()
+      .min(1)
+      .max(128)
+      .regex(/^[a-z0-9][a-z0-9_-]*$/),
     name: z.string().min(1).max(256),
     description: z.string().max(4096).optional(),
     author: z.string().min(1).max(128),

@@ -24,10 +24,13 @@ function headers(token?: string): Record<string, string> {
 }
 
 export async function listReleases(repo: string, token?: string): Promise<GithubRelease[]> {
-  const res = await fetch(`${API}/repos/${repo}/releases?per_page=100`, { headers: headers(token) });
+  const res = await fetch(`${API}/repos/${repo}/releases?per_page=100`, {
+    headers: headers(token),
+  });
   if (!res.ok) throw new Error(`GitHub API ${res.status} listing releases: ${await res.text()}`);
   const data: unknown = await res.json();
-  if (!Array.isArray(data)) throw new Error('GitHub API returned an unexpected payload for releases');
+  if (!Array.isArray(data))
+    throw new Error('GitHub API returned an unexpected payload for releases');
   return data as GithubRelease[];
 }
 
@@ -39,7 +42,8 @@ export async function getReleaseByTag(
   const res = await fetch(`${API}/repos/${repo}/releases/tags/${encodeURIComponent(tag)}`, {
     headers: headers(token),
   });
-  if (!res.ok) throw new Error(`GitHub API ${res.status} for release "${tag}": ${await res.text()}`);
+  if (!res.ok)
+    throw new Error(`GitHub API ${res.status} for release "${tag}": ${await res.text()}`);
   return (await res.json()) as GithubRelease;
 }
 
