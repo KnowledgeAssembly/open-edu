@@ -1,31 +1,30 @@
 {
   "name": "@open-edu/schemas",
   "version": "0.1.0",
-  "private": true,
   "description": "Zod schemas and TypeScript type generation for Open-Edu",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "zod": "^3.22.0"
-  },
-  "devDependencies": {
+    "zod": "^3.22.0",
     "zod-to-json-schema": "^3.22.0"
   },
   "type": "module"

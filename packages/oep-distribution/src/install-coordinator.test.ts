@@ -3,6 +3,8 @@ import { zipSync } from 'fflate';
 import { InstallCoordinator } from './install-coordinator';
 import type { StorageAdapter, StoredCourseRecord } from './install-coordinator';
 import { OepWriter } from './oep-writer';
+import { catalogSource } from './source-adapters';
+import { computeSha256 } from './checksum';
 import { OEP_FORMAT, OEP_FORMAT_VERSION } from '@open-edu/schemas';
 import type { DistributionManifest } from '@open-edu/schemas';
 import type { CourseSource } from './types';
@@ -295,6 +297,54 @@ describe('InstallCoordinator', () => {
 
     expect(result.success).toBe(false);
     expect(result.errorCode).toBe('SOURCE_READ_ERROR');
+  });
+
+  it('rejects install when catalog checksum does not match downloaded bytes', async () => {
+    const bytes = await buildTestOep('checksum-course', '1.0.0', 'Checksum Course');
+    const source = catalogSource({
+      downloadUrl: 'https://example.org/checksum-course-1.0.0.oep',
+      label: 'Checksum Course v1.0.0',
+      expectedChecksum: 'e'.repeat(64),
+    });
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      arrayBuffer: () => Promise.resolve(bytes.buffer),
+    } as Response);
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await coordinator.install(source);
+    expect(result.success).toBe(false);
+    expect(result.errorCode).toBe('CHECKSUM_MISMATCH');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('installs when catalog checksum matches downloaded bytes', async () => {
+    const bytes = await buildTestOep('checksum-ok', '1.0.0', 'Checksum OK');
+    const sha = await computeSha256(bytes);
+    const source = catalogSource({
+      downloadUrl: 'https://example.org/checksum-ok-1.0.0.oep',
+      label: 'Checksum OK v1.0.0',
+      expectedChecksum: sha,
+    });
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      arrayBuffer: () => Promise.resolve(bytes.buffer),
+    } as Response);
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await coordinator.install(source);
+    expect(result.success).toBe(true);
+    expect(result.courseId).toBe('checksum-ok');
+    expect(result.version).toBe('1.0.0');
+
+    vi.unstubAllGlobals();
   });
 });
 

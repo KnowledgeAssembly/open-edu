@@ -1,0 +1,10 @@
+{
+  "id": "science-grade7",
+  "name": "Science Grade 7",
+  "description": "Seventh-grade science curriculum.",
+  "author": "OpenEdu Authors",
+  "license": "CC-BY-SA-4.0",
+  "languages": ["en"],
+  "thumbnail": "thumbnail.png",
+  "tags": ["science"]
+}

@@ -80,6 +80,7 @@ export interface CourseSource {
   kind: SourceKind;
   label: string;
   getBytes(signal?: AbortSignal): Promise<Uint8Array>;
+  expectedChecksum?: string;
 }
 
 export const DEFAULT_MAX_ARCHIVE_BYTES = 100 * 1024 * 1024; // 100 MiB

@@ -237,6 +237,7 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/design-system`    | Design system — UI primitives, tokens, patterns, learning/AI components, shadcn/ui-style component library                                                                                                                                                                                                                                                                                                                                                                                                | Done   |
 | `@open-edu/ai-companion`     | AI Learning Companion — search, dictionary, conversation, and provider interfaces; **Pipili subsystem** (context normalization, hint progression, bounded context, V2 extension seams)                                                                                                                                                                                                                                                                                                                    | Done   |
 | `@open-edu/oep-distribution` | Course distribution — `.oep` ZIP archive writer/reader with SHA-256 integrity, install coordinator (stage-then-activate), catalog loader, source adapters (file/URL/catalog), version comparison, ZIP security (path traversal, decompression bomb protection)                                                                                                                                                                                                                                            | Done   |
+| `@open-edu/registry`         | GitHub-native course registry tooling — GitHub Releases API client, catalog builder (metadata + releases → `catalog.json`), release-asset validation (reuses `OepReader`), JSON Schema generation, `open-edu-registry` CLI. Powers the [`openedu-library`](https://github.com/<owner>/openedu-library) course registry.                                                                                                                                                                                   | Done   |
 | `@open-edu/storage`          | IndexedDB persistence layer — 6 typed object stores (courses, progress, badges, cards, search-indexes, preferences) with Promise-based API via `idb`                                                                                                                                                                                                                                                                                                                                                      | Done   |
 | `@open-edu/pwa-core`         | Framework-agnostic PWA primitives — install prompt, update detection, connectivity monitoring, storage quota queries                                                                                                                                                                                                                                                                                                                                                                                      | Done   |
 | `@open-edu/learner`          | Standalone learner app — course catalog, **8-page router** (home, catalog, progress, settings, course, bundleOverview, collection, break), **PWA with offline-first support** (service worker, IndexedDB storage, install prompt, update detection, offline banner), **bundle catalog + overview**, **Collection Binder** (card museum with category shelves), **shadcn/ui component library** (10 components), **theme switching**, progress persistence, reward + card integration, E2E-tested workflow | Done   |
@@ -318,9 +319,12 @@ schemas
   │            ──► ai-companion (Pipili model factory)
   ├──► oep-distribution ──► learner (install/catalog/update UI)
   │                   ──► cli (oep:build command)
+  │                   ──► registry (course registry tooling, published to npm)
   ├──► ai-companion ──► learner (Pipili chat, companion panel)
   └──► examples ───► learner (via virtual module at dev time)
 ```
+
+`registry ──► openedu-library (external registry repo consumes the published package)`.
 
 ### Architecture
 
@@ -461,6 +465,7 @@ open-edu/
 │   ├── storage/             # IndexedDB persistence (6 typed stores)
 │   ├── pwa-core/            # PWA primitives (install, update, connectivity, storage info)
 │   ├── oep-distribution/    # .oep archive format, install coordinator, catalog loader
+│   ├── registry/            # GitHub-native course registry tooling (catalog builder, release validation)
 │   └── widgets/             # Widget SDK, registry, builtins, remote loader
 ├── examples/                # Example educational packages
 │   ├── course-compiler/     # Course specification examples (3 sample specs)
@@ -482,6 +487,8 @@ open-edu/
 ## Release Process
 
 See [RELEASE.md](./docs/RELEASE.md) for the full release checklist, including changeset management, build and test verification, dry-run publish, and rollback guidance.
+
+`@open-edu/schemas`, `@open-edu/oep-distribution`, and `@open-edu/registry` are published to npm by the changesets Release workflow (needs the `NPM_TOKEN` secret). The `openedu-library` registry repo consumes `@open-edu/registry` and points learners at its catalog via `VITE_CATALOG_URL`.
 
 ## License
 

@@ -59,6 +59,7 @@ pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --subj
 pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --format json  # JSON-only pipeline output
 pnpm --filter @open-edu/pipeline test  # Run pipeline tests
 pnpm --filter @open-edu/pipeline test -- generic-pipeline  # Run acceptance tests
+pnpm --filter @open-edu/registry test  # Run registry package tests
 pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-data.json from canonical source
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales  # Extract translatable strings
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales  # Validate translation completeness
@@ -92,7 +93,8 @@ open-edu/
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
 │   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
-│   └── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
+│   ├── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
+│   └── registry/             # Course registry tooling (catalog builder, release validation, open-edu-registry CLI)
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
 │   ├── autism-reading/
@@ -144,6 +146,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/pipeline`, `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
 - `@open-edu/oep-distribution`
+- `@open-edu/registry`
 
 Examples use `@open-edu/example-` prefix.
 
@@ -186,6 +189,7 @@ Epic 298 (Recognition Engine)
 
 Epic 300 (Course Distribution)
   └─► Epics 2, 3 (oep-distribution package, schemas, storage extension, CLI oep:build, learner install UI)
+        └─► @open-edu/registry (registry tooling) ──► openedu-library (course registry repo)
 
 Epic 301 (Pipili AI Companion)
   └─► Epics 2, 3 (ai-companion pipili subsystem, llm-config model-factory, learner server-side endpoint, streaming chat UI)

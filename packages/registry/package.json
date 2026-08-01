@@ -1,10 +1,8 @@
 {
-  "name": "@open-edu/oep-distribution",
+  "name": "@open-edu/registry",
   "version": "0.1.0",
+  "description": "GitHub-native course registry tooling for OpenEdu (catalog builder + release validation)",
   "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -13,6 +11,9 @@
       "import": "./dist/index.js"
     }
   },
+  "bin": {
+    "open-edu-registry": "./dist/cli.js"
+  },
   "files": [
     "dist"
   ],
@@ -20,15 +21,22 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@open-edu/logger": "workspace:*",
-    "@open-edu/schemas": "workspace:*",
-    "fflate": "^0.8.2"
+    "@open-edu/oep-distribution": "workspace:*",
+    "@open-edu/schemas": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

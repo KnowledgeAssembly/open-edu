@@ -1,4 +1,5 @@
 import { OepReader } from './oep-reader.js';
+import { computeSha256 } from './checksum.js';
 import { semverGreaterThan, semverEquals } from './version-compare.js';
 import type { CourseSource, InstallResult, InstallErrorCode, PackageInspection } from './types.js';
 import { BUNDLE_DIR } from './types.js';
@@ -114,6 +115,18 @@ export class InstallCoordinator {
         'SOURCE_READ_ERROR',
         err instanceof Error ? err.message : String(err),
       );
+    }
+
+    if (source.expectedChecksum) {
+      const actual = await computeSha256(bytes);
+      if (actual !== source.expectedChecksum) {
+        return this.failure(
+          'unknown',
+          '0.0.0',
+          'CHECKSUM_MISMATCH',
+          `Downloaded file SHA-256 ${actual} does not match catalog checksum ${source.expectedChecksum}`,
+        );
+      }
     }
 
     let resolved: ResolvedInstallData;

@@ -1,0 +1,10 @@
+{
+  "id": "tribal-art",
+  "name": "Indian Tribal Art",
+  "description": "Explore the traditional art forms of India.",
+  "author": "OpenEdu Authors",
+  "license": "CC-BY-SA-4.0",
+  "languages": ["en"],
+  "thumbnail": "thumbnail.png",
+  "tags": ["art", "india"]
+}

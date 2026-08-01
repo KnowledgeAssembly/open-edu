@@ -99,6 +99,9 @@ export { CatalogSchema, CatalogPackageEntrySchema, CatalogVersionEntrySchema } f
 export type { Catalog, CatalogPackageEntry, CatalogVersionEntry } from './catalog.js';
 export type { BundleManifest, BundleModuleRef } from './bundle.js';
 
+export { RegistryMetadataSchema } from './registry.js';
+export type { RegistryMetadata } from './registry.js';
+
 export {
   TelemetryEventSchema,
   NodeOpenEventSchema,
@@ -136,4 +139,4 @@ export const SCHEMAS_VERSION = '0.1.0';
 export { LocalizedSchema, localizedField, isLocalized, extractLocalized } from './localized.js';
 export type { Localized } from './localized.js';
 
-export { toJsonSchema } from './json-schema.js';
+export { toJsonSchema, toJsonSchemaDraft7 } from './json-schema.js';

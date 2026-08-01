@@ -138,6 +138,18 @@ Course distribution system for portable `.oep` (Open-Edu Package) archives:
 - **Catalog loader** — fetch and parse static JSON catalogs
 - **Version comparison** — SEMVER comparison utilities
 
+### `@open-edu/registry`
+
+Node-only course registry tooling for GitHub-native distribution, published to npm:
+
+- **GitHub API client** — list/get releases, download assets, parse `<id>-v<semver>` tags and `checksums.txt`
+- **Catalog builder** — `buildCatalog()` merges `courses/*/metadata.json` + GitHub Releases into a `catalog.json` conforming to `CatalogSchema` (reuses `computeSha256`, `parseSemver`)
+- **Release validation** — `validateRelease()` checks metadata presence, `.oep` asset + `checksums.txt`, SHA-256 cross-check, and validates the package with `OepReader`
+- **JSON Schema generation** — emits `metadata.schema.json` / `catalog.schema.json` from the Zod schemas via `toJsonSchemaDraft7`
+- **CLI** — `open-edu-registry validate-metadata | validate-catalog | generate-catalog | validate-release | generate-schemas`
+
+Consumed by the `openedu-library` course registry repo (GitHub Actions call the CLI via `npx --no-install`).
+
 ### `@open-edu/storage`
 
 Provides IndexedDB persistence with 6 typed object stores: courses, progress, badges, cards, search-indexes, and preferences. Built on the `idb` Promise-based wrapper. All learner app persistence (progress, badges, cards, bundle progress, search index) migrated from localStorage to this package.
@@ -191,5 +203,6 @@ The repo is organized to keep learning content portable and the runtime platform
 - service worker and caching config: `apps/learner/vite.config.ts`
 - internationalization and locale management: `packages/i18n`
 - course distribution (`.oep` build, install, catalog, updates): `packages/oep-distribution`
+- course registry (catalog build, release validation, schema generation): `packages/registry` + the `openedu-library` repo
 - Pipili AI companion (chat, hints, context mapping): `packages/ai-companion/src/pipili/` and `apps/learner/src/pipili/`
 - end-user navigation and app composition: `apps/learner`
