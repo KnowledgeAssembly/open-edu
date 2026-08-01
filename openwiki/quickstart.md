@@ -45,6 +45,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 - `packages/storage` — IndexedDB persistence layer with 6 typed object stores (courses, progress, badges, cards, search-indexes, preferences).
 - `packages/pwa-core` — framework-agnostic PWA primitives (install prompt, update detection, connectivity monitoring, storage quota queries).
 - `packages/oep-distribution` — course distribution system: `.oep` ZIP archive writer/reader with SHA-256 integrity, install coordinator, catalog loader, source adapters, ZIP security, and version comparison.
+- `packages/registry` — GitHub-native course registry tooling: GitHub Releases API client, catalog builder (metadata + releases → `catalog.json`), release-asset validation via `OepReader`, JSON Schema generation, and the `open-edu-registry` CLI. Consumed by the `openedu-library` registry repo.
 
 ### Example content
 
@@ -96,6 +97,7 @@ The UI is intentionally split between low-level primitives and opinionated visua
 - Change CLI behavior: start in `packages/cli`.
 - Change course-authoring skill behavior: start in `skills/openedu-course-authoring/` — see [agentic course authoring](domain/content-and-workflows.md#agentic-course-authoring).
 - Change course distribution (`.oep` build, install, catalog, updates): start in `packages/oep-distribution` and `apps/learner/src/courseDownload.ts`.
+- Change course registry tooling (catalog generation, release validation): start in `packages/registry` and the `openedu-library` repo.
 - Change Pipili AI companion (chat, hints, context mapping): start in `packages/ai-companion/src/pipili/` and `apps/learner/src/pipili/`.
 
 ## Navigation notes for future agents

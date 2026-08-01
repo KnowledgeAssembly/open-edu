@@ -35,6 +35,7 @@ The schema package is the single source of truth for all data structures in the 
 | `CatalogSchema`                                                                                        | Static registry catalog with package entries and version entries                             |
 | `CatalogPackageEntrySchema`                                                                            | Single catalog package — id, title, description, versions array                              |
 | `CatalogVersionEntrySchema`                                                                            | Version entry — version string, download URL, checksum, size                                 |
+| `RegistryMetadataSchema`                                                                               | Author-facing metadata for one course in the OpenEdu registry (`courses/<id>/metadata.json`) |
 
 ## Usage
 
@@ -59,8 +60,9 @@ const result = PackageManifestSchema.safeParse(manifest);
 Schemas can be exported to JSON Schema for use in non-TypeScript tooling:
 
 ```typescript
-import { toJsonSchema } from '@open-edu/schemas';
-const jsonSchema = toJsonSchema(PackageManifestSchema);
+import { toJsonSchema, toJsonSchemaDraft7 } from '@open-edu/schemas';
+const jsonSchema = toJsonSchema(PackageManifestSchema); // OpenAPI 3.0
+const jsonSchema7 = toJsonSchemaDraft7(PackageManifestSchema); // draft-07 (JSON Schema)
 ```
 
 ## Design Principle

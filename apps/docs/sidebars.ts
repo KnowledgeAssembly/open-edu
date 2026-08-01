@@ -195,6 +195,7 @@ const sidebars: SidebarsConfig = {
         'ai-companion',
         'i18n',
         'oep-distribution',
+        'registry',
         'widgets/overview',
       ],
     },

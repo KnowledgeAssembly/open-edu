@@ -103,6 +103,26 @@ If a release introduces issues:
 - **Minor**: New features, new widgets, new CLI commands.
 - **Patch**: Bug fixes, documentation, internal refactoring with no API changes.
 
+## npm publishing (`@open-edu/schemas`, `@open-edu/oep-distribution`, `@open-edu/registry`)
+
+`@open-edu/schemas`, `@open-edu/oep-distribution`, and `@open-edu/registry` are
+published to npm by the `.github/workflows/release.yml` changesets workflow on
+merges to `main` (triggered by pending `.changeset/*.md` files).
+
+- Requires the **`NPM_TOKEN`** repo secret (owner scope).
+- The **first publish** happens automatically for any of the three packages not yet
+  on npm when a changeset bumps it.
+- Publishing these three is a **prerequisite for `openedu-library` CI**: its
+  `npm ci` installs `@open-edu/registry` (and transitively `@open-edu/schemas` and
+  `@open-edu/oep-distribution`) from the public registry.
+
+For a manual first publish:
+
+```bash
+pnpm --filter @open-edu/schemas --filter @open-edu/oep-distribution --filter @open-edu/registry build
+pnpm exec changeset publish
+```
+
 ## Related Documents
 
 - [AGENTS.md](../AGENTS.md) — Development rules and PR checklist

@@ -35,6 +35,7 @@ From the repository root:
 - `pnpm --filter @open-edu/pipeline curriculum:generate --pdf <path> --stage-model source_inventory=gpt-4o-mini --stage-model concept_map=gpt-4o` — override model per stage
 - `pnpm --filter @open-edu/pipeline test -- generic-pipeline` — run generic pipeline acceptance tests
 - `pnpm --filter @open-edu/pipeline test -- registry` — run profile registry tests
+- `pnpm --filter @open-edu/registry test` — run the registry package tests (catalog builder, release validation, metadata validation)
 
 ## Package-local commands
 
@@ -79,3 +80,4 @@ This matters because runtime and dev-server styling are intentionally coupled th
 - CLI behavior: `packages/cli`
 - test coverage and test utilities: the package-level `src/**/*.test.ts[x]` files plus `tests/e2e/`
 - translation and locale management: `packages/i18n`
+- course registry tooling: `packages/registry`

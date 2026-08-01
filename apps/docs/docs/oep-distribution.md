@@ -167,6 +167,15 @@ Outputs:
 - SHA-256 checksum
 - File size
 
+The package is published to npm as `@open-edu/oep-distribution`.
+
+## Install-time checksum enforcement
+
+Catalog installs now verify the downloaded file against the catalog's checksum.
+`catalogSource` carries the catalog's `expectedChecksum`, and `InstallCoordinator`
+computes the downloaded file's SHA-256 in `installInternal`. A mismatch fails the
+install with a `CHECKSUM_MISMATCH` error before any extraction happens.
+
 ## Learner App Integration
 
 The learner app provides three install surfaces:
