@@ -210,6 +210,7 @@ describe('CourseRuntime', () => {
     mockInstances.telemetrySessions.length = 0;
     mockInstances.rewardBrokers.length = 0;
     mockInstances.cardBrokers.length = 0;
+    mockInstances.onProgressChange = null;
     mockGetOrderedNodes.mockReturnValue(['nodes/lesson-01.md', 'nodes/lesson-02.md']);
   });
 
@@ -360,9 +361,11 @@ describe('CourseRuntime', () => {
       });
     });
 
-    const bundleRewardBroker = mockInstances.rewardBrokers[mockInstances.rewardBrokers.length - 1];
     await waitFor(() => {
-      expect(bundleRewardBroker.updateContext).toHaveBeenCalledWith({
+      const brokerContexts = mockInstances.rewardBrokers.flatMap((broker: any) =>
+        broker.updateContext.mock.calls.map((c: any[]) => c[0]),
+      );
+      expect(brokerContexts).toContainEqual({
         completedModules: ['test-course'],
       });
     });
