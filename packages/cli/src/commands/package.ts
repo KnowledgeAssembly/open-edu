@@ -9,14 +9,18 @@ import {
   writeBuildManifest,
 } from '../utils/build-manifest.js';
 import * as tar from 'tar';
+import { createLogger } from '@open-edu/logger';
 
 const MANIFEST_FILE = 'open-edu-build.json';
+
+const logger = createLogger({ scope: 'cli:package' });
 
 export async function packagePackage(
   packageDir: string,
   outputDir?: string,
   options?: { json?: boolean },
 ): Promise<CliResult> {
+  logger.info('Packaging package', { packageDir, outputDir: outputDir ?? null });
   try {
     const pkg = await loadPackage(packageDir);
     const outDir = outputDir ?? process.cwd();
@@ -65,8 +69,10 @@ export async function packagePackage(
     }
     const messages = formatPackageSuccess(archivePath);
     printMessages(messages);
+    logger.info('Package archived', { packageDir, archivePath });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('Package archiving failed', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,

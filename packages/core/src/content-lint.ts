@@ -1,4 +1,5 @@
 import type { LoadedPackage, LoadedNode } from './types.js';
+import { coreValidatorLogger } from './logger.js';
 
 export interface LintWarning {
   file: string;
@@ -144,6 +145,9 @@ function checkReachability(pkg: LoadedPackage): LintWarning[] {
 }
 
 export function lintPackage(pkg: LoadedPackage): LintResult {
+  coreValidatorLogger.info('Linting package...', { packageId: pkg.manifest.id });
+  coreValidatorLogger.time('lint-package');
+
   const warnings: LintWarning[] = [];
   const errors: LintWarning[] = [];
 
@@ -163,6 +167,16 @@ export function lintPackage(pkg: LoadedPackage): LintResult {
   if (pkg.workflow) {
     const reachabilityIssues = checkReachability(pkg);
     warnings.push(...reachabilityIssues);
+  }
+
+  coreValidatorLogger.timeEnd('lint-package');
+  if (warnings.length > 0) {
+    coreValidatorLogger.warn('Lint completed with warnings', {
+      packageId: pkg.manifest.id,
+      warningCount: warnings.length,
+    });
+  } else {
+    coreValidatorLogger.info('Lint completed with no warnings', { packageId: pkg.manifest.id });
   }
 
   return { warnings, errors };

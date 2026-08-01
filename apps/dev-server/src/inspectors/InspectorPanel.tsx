@@ -4,11 +4,12 @@ import type { RewardReceipt } from '@open-edu/rewards';
 import { TelemetryInspector } from './TelemetryInspector';
 import { AccessibilityInspector } from './AccessibilityInspector';
 import { RewardsInspector } from './RewardsInspector';
+import { LogsInspector } from './LogsInspector';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { PanelRightOpen, PanelRightClose } from 'lucide-react';
 
-type Tab = 'telemetry' | 'accessibility' | 'rewards' | 'bundle';
+type Tab = 'telemetry' | 'logs' | 'accessibility' | 'rewards' | 'bundle';
 
 interface InspectorPanelProps {
   telemetryEvents: TelemetryEvent[];
@@ -67,6 +68,12 @@ export function InspectorPanel({
               Telemetry
             </TabsTrigger>
             <TabsTrigger
+              value="logs"
+              className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            >
+              Logs
+            </TabsTrigger>
+            <TabsTrigger
               value="rewards"
               className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
@@ -100,6 +107,9 @@ export function InspectorPanel({
 
         <TabsContent value="telemetry" className="mt-0 flex-1 overflow-auto border-0 p-2">
           <TelemetryInspector events={telemetryEvents} />
+        </TabsContent>
+        <TabsContent value="logs" className="mt-0 flex-1 overflow-auto border-0 p-2">
+          <LogsInspector />
         </TabsContent>
         <TabsContent value="rewards" className="mt-0 flex-1 overflow-auto border-0 p-2">
           <RewardsInspector

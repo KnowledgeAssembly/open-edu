@@ -3,6 +3,7 @@ import type {
   ConversationStore,
   LearningContext,
 } from '../providers/types.js';
+import { pipiliServiceLogger } from './logger.js';
 
 interface Session {
   id: string;
@@ -124,7 +125,10 @@ export class ConversationManager implements ConversationStore {
         tx.objectStore('sessions').put(session);
       })
       .catch((err) => {
-        console.warn('ConversationManager: failed to persist session', err); // eslint-disable-line no-console
+        pipiliServiceLogger.warn('Failed to persist session', {
+          sessionId: session.id,
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
   }
 
@@ -141,8 +145,11 @@ export class ConversationManager implements ConversationStore {
       for (const session of all) {
         this.sessions.set(session.id, session);
       }
+      pipiliServiceLogger.info('Sessions loaded', { count: all.length });
     } catch (err) {
-      console.warn('ConversationManager: failed to load sessions', err); // eslint-disable-line no-console
+      pipiliServiceLogger.warn('Failed to load sessions', {
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 }

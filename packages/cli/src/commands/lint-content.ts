@@ -1,6 +1,9 @@
 import { loadPackage, lintPackage, type LintResult } from '@open-edu/core';
 import { formatLintResults, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:lint-content' });
 
 export interface LintContentOptions {
   json?: boolean;
@@ -11,6 +14,7 @@ export async function lintContent(
   packageDir: string,
   options?: LintContentOptions,
 ): Promise<CliResult> {
+  logger.info('Linting package content', { packageDir, maxWarnings: options?.maxWarnings });
   try {
     const pkg = await loadPackage(packageDir);
     const result: LintResult = lintPackage(pkg);
@@ -79,6 +83,7 @@ export async function lintContent(
 
     return { success: true, data: { warningCount: result.warnings.length } };
   } catch (error) {
+    logger.error('Content lint failed', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,

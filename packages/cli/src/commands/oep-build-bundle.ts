@@ -9,6 +9,9 @@ import {
 } from '@open-edu/schemas';
 import type { CliResult } from '../utils/json-output.js';
 import { formatValidationError, printMessages } from '../utils/format.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:oep-build-bundle' });
 
 function collectModuleFiles(moduleDir: string): Map<string, Uint8Array> {
   const files = new Map<string, Uint8Array>();
@@ -50,6 +53,7 @@ export async function buildOepBundle(
   outputDir?: string,
   options?: { json?: boolean },
 ): Promise<CliResult> {
+  logger.info('Building .oep bundle archive', { bundleDir, outputDir: outputDir ?? null });
   try {
     const outDir = outputDir ?? process.cwd();
 
@@ -139,8 +143,10 @@ export async function buildOepBundle(
       { type: 'info', text: `  Size: ${(result.bytes.length / 1024).toFixed(1)} KiB` },
       { type: 'info', text: `  Modules: ${bundleManifest.modules.length}` },
     ]);
+    logger.info('.oep bundle archive built', { oepPath, checksum: result.checksumValue });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('.oep bundle build failed', { bundleDir, error: String(error) });
     const messages = formatValidationError(error);
     printMessages(messages);
     return {

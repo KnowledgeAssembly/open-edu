@@ -1,10 +1,15 @@
 import * as fs from 'fs';
 import { readJsonl, createSummary } from '@open-edu/telemetry';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:report' });
 
 export function reportTelemetry(filePath: string, options?: { json?: boolean }): CliResult {
+  logger.info('Generating telemetry report', { filePath });
   if (!fs.existsSync(filePath)) {
     const error = `File not found: ${filePath}`;
+    logger.error(error);
     if (options?.json) {
       return { success: false, error, code: 1 };
     }
@@ -19,6 +24,7 @@ export function reportTelemetry(filePath: string, options?: { json?: boolean }):
   if (errors.length > 0) {
     const diagnostics = errors.map((e) => `  Line ${e.line}: ${e.error}`).join('\n');
     const errorMsg = `Failed to parse telemetry file:\n${diagnostics}`;
+    logger.warn('Telemetry file contained parse errors', { errorCount: errors.length });
     if (options?.json) {
       return {
         success: false,

@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import { coreValidatorLogger } from './logger.js';
 
 export interface IntegrityMismatch {
   path: string;
@@ -43,9 +44,11 @@ export interface BuildManifest {
 }
 
 export function verifyIntegrity(packageDir: string): IntegrityResult {
+  coreValidatorLogger.info('Verifying package integrity...', { packageDir });
   const manifestPath = join(packageDir, 'open-edu-build.json');
 
   if (!existsSync(manifestPath)) {
+    coreValidatorLogger.warn('Build manifest not found', { packageDir });
     return { valid: false, mismatches: [], missing: ['open-edu-build.json'], checked: 0 };
   }
 
@@ -82,10 +85,22 @@ export function verifyIntegrity(packageDir: string): IntegrityResult {
     }
   }
 
-  return {
+  const result = {
     valid: mismatches.length === 0 && missing.length === 0,
     mismatches,
     missing,
     checked,
   };
+
+  if (result.valid) {
+    coreValidatorLogger.info('Integrity check passed', { packageDir, checked: result.checked });
+  } else {
+    coreValidatorLogger.warn('Integrity check failed', {
+      packageDir,
+      mismatchCount: result.mismatches.length,
+      missingCount: result.missing.length,
+    });
+  }
+
+  return result;
 }

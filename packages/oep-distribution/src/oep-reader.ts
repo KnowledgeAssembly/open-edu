@@ -7,6 +7,7 @@ import {
 import type { DistributionManifest } from '@open-edu/schemas';
 import { computeSha256 } from './checksum.js';
 import { validateZipArchive } from './zip-security.js';
+import { createLogger } from '@open-edu/logger';
 import {
   type OepExtraction,
   type PackageInspection,
@@ -18,6 +19,8 @@ import {
   BUNDLE_DIR,
   BUNDLE_MODULES_DIR,
 } from './types.js';
+
+const readerLogger = createLogger({ scope: 'oep:reader' });
 
 export class OepReaderError extends Error {
   public readonly code: string;
@@ -76,7 +79,12 @@ export class OepReader {
   }
 
   private async readInternal(bytes: Uint8Array, fullExtract: boolean): Promise<OepExtraction> {
+    readerLogger.time('read-archive');
     if (bytes.length > this.securityOptions.maxArchiveBytes) {
+      readerLogger.error('Archive exceeds size limit', {
+        size: bytes.length,
+        limit: this.securityOptions.maxArchiveBytes,
+      });
       throw new OepReaderError(
         'ARCHIVE_TOO_LARGE',
         `Archive ${bytes.length} bytes exceeds limit ${this.securityOptions.maxArchiveBytes}`,
@@ -87,6 +95,7 @@ export class OepReader {
     try {
       rawEntries = unzipSync(bytes);
     } catch (err) {
+      readerLogger.error('Cannot unzip archive', err);
       throw new OepReaderError(
         'MALFORMED_ARCHIVE',
         `Cannot unzip: ${err instanceof Error ? err.message : String(err)}`,
@@ -133,11 +142,17 @@ export class OepReader {
     const contentHashInput = courseContentPaths.join('\n');
     const actualChecksum = await computeSha256(new TextEncoder().encode(contentHashInput));
     if (actualChecksum !== manifest.checksum.value) {
+      readerLogger.warn('SHA-256 checksum mismatch', {
+        packageId: manifest.id,
+        expected: manifest.checksum.value,
+        actual: actualChecksum,
+      });
       throw new OepReaderError(
         'CHECKSUM_MISMATCH',
         `Expected ${manifest.checksum.value}, got ${actualChecksum}`,
       );
     }
+    readerLogger.info('SHA-256 checksum verified', { packageId: manifest.id });
 
     const pkgJsonRaw = rawEntries[`${contentRoot}package.json`];
     if (!pkgJsonRaw) {
@@ -238,6 +253,13 @@ export class OepReader {
       }
     }
 
+    readerLogger.timeEnd('read-archive');
+    readerLogger.info('Archive read complete', {
+      packageId: manifest.id,
+      nodeCount: Object.keys(nodes).length,
+      assetCount: Object.keys(assets).length,
+    });
+
     return {
       manifest,
       courseManifest: courseManifestJson as Record<string, unknown>,
@@ -264,11 +286,17 @@ export class OepReader {
     const contentHashInput = bundleContentPaths.join('\n');
     const actualChecksum = await computeSha256(new TextEncoder().encode(contentHashInput));
     if (actualChecksum !== manifest.checksum.value) {
+      readerLogger.warn('SHA-256 checksum mismatch', {
+        bundleId: manifest.id,
+        expected: manifest.checksum.value,
+        actual: actualChecksum,
+      });
       throw new OepReaderError(
         'CHECKSUM_MISMATCH',
         `Expected ${manifest.checksum.value}, got ${actualChecksum}`,
       );
     }
+    readerLogger.info('SHA-256 checksum verified', { bundleId: manifest.id });
 
     const bundleJsonRaw = rawEntries[`${contentRoot}bundle.json`];
     if (!bundleJsonRaw) {
@@ -440,6 +468,12 @@ export class OepReader {
         cards: modCards,
       });
     }
+
+    readerLogger.timeEnd('read-archive');
+    readerLogger.info('Bundle archive read complete', {
+      bundleId: manifest.id,
+      moduleCount: modules.length,
+    });
 
     return {
       manifest,

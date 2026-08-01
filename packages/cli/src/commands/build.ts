@@ -8,12 +8,16 @@ import {
   generateBuildManifest,
   writeBuildManifest,
 } from '../utils/build-manifest.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:build' });
 
 export async function buildPackage(
   packageDir: string,
   outDir?: string,
   options?: { json?: boolean },
 ): Promise<CliResult> {
+  logger.info('Building package', { packageDir, outDir: outDir ?? null });
   try {
     const pkg = await loadPackage(packageDir);
     const outputDir = outDir ?? join(packageDir, 'dist');
@@ -51,8 +55,10 @@ export async function buildPackage(
     }
     const messages = formatBuildSuccess(outputDir);
     printMessages(messages);
+    logger.info('Package built', { packageDir, outputDir });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('Package build failed', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,

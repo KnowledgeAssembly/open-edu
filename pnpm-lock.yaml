@@ -89,6 +89,9 @@ importers:
       '@open-edu/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@open-edu/rewards':
         specifier: workspace:*
         version: link:../../packages/rewards
@@ -244,6 +247,9 @@ importers:
       '@open-edu/llm-config':
         specifier: workspace:*
         version: link:../../packages/llm-config
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@open-edu/oep-distribution':
         specifier: workspace:^
         version: link:../../packages/oep-distribution
@@ -479,6 +485,9 @@ importers:
 
   packages/ai-companion:
     dependencies:
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       flexsearch:
         specifier: ^0.8.212
         version: 0.8.212
@@ -501,6 +510,9 @@ importers:
       '@open-edu/dev-server':
         specifier: workspace:*
         version: link:../../apps/dev-server
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@open-edu/oep-distribution':
         specifier: workspace:^
         version: link:../oep-distribution
@@ -523,6 +535,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
@@ -759,8 +774,26 @@ importers:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.43)(jsdom@24.1.3)(terser@5.48.0)
 
+  packages/logger:
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^14.2.0
+        version: 14.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react':
+        specifier: ^18.0.0
+        version: 18.3.31
+      jsdom:
+        specifier: ^24.0.0
+        version: 24.1.3
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+
   packages/oep-distribution:
     dependencies:
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
@@ -780,6 +813,9 @@ importers:
       '@open-edu/llm-config':
         specifier: workspace:*
         version: link:../llm-config
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       dotenv:
         specifier: ^16.0.0
         version: 16.6.1
@@ -965,6 +1001,9 @@ importers:
 
   packages/workflow:
     dependencies:
+      '@open-edu/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas

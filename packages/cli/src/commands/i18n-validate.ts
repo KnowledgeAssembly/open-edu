@@ -1,8 +1,12 @@
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:i18n-validate' });
 
 export async function i18nValidate(localesDir: string): Promise<CliResult> {
+  logger.info('Validating locale files', { localesDir });
   const errors: string[] = [];
   const localeDirs = readdirSync(localesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -55,9 +59,11 @@ export async function i18nValidate(localesDir: string): Promise<CliResult> {
   }
 
   if (errors.length > 0) {
+    logger.warn('Locale validation failed', { localesDir, errorCount: errors.length });
     return { success: false, error: `Validation failed:\n${errors.join('\n')}`, code: 1 };
   }
 
+  logger.info('All locales are valid', { localesDir, count: localeDirs.length });
   return {
     success: true,
     data: {

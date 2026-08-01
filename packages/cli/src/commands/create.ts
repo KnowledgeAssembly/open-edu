@@ -1,7 +1,10 @@
 import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { createLogger } from '@open-edu/logger';
 
 const MANIFEST_ID_REGEX = /^[a-z0-9][a-z0-9_-]*$/;
+
+const logger = createLogger({ scope: 'cli:create' });
 
 export interface CreateOptions {
   id: string;
@@ -121,5 +124,6 @@ describe('${options.id} package', () => {
   );
   files.push('validate.test.ts');
 
+  logger.info('Package created', { dir: resolvedDir, id: options.id, fileCount: files.length });
   return { success: true, files };
 }

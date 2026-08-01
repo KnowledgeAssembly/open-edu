@@ -1,3 +1,5 @@
+import { createLogger, type ILogger } from '@open-edu/logger';
+
 export interface ExtractionLogEntry {
   stage: 'extraction';
   extractor: string;
@@ -13,21 +15,26 @@ export class ExtractionLogger {
   private entries: ExtractionLogEntry[] = [];
   private output: ExtractionLoggerOutput;
   private verbose: boolean;
+  private logger: ILogger;
 
   constructor(output: ExtractionLoggerOutput = 'console', verbose = false) {
     this.output = output;
     this.verbose = verbose;
+    this.logger = createLogger({ scope: 'pipeline:extraction' });
   }
 
   info(extractor: string, file: string, durationMs: number, message: string): void {
+    this.logger.info(`[extraction:${extractor}] ${file} (${durationMs}ms) — ${message}`);
     this.log('info', extractor, file, durationMs, message);
   }
 
   warn(extractor: string, file: string, durationMs: number, message: string): void {
+    this.logger.warn(`[extraction:${extractor}] ${file} (${durationMs}ms) — ${message}`);
     this.log('warn', extractor, file, durationMs, message);
   }
 
   error(extractor: string, file: string, durationMs: number, message: string): void {
+    this.logger.error(`[extraction:${extractor}] ${file} (${durationMs}ms) — ${message}`);
     this.log('error', extractor, file, durationMs, message);
   }
 

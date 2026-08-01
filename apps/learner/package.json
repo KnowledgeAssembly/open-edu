@@ -32,6 +32,7 @@
     "@open-edu/design-system": "workspace:*",
     "@open-edu/i18n": "workspace:*",
     "@open-edu/llm-config": "workspace:*",
+    "@open-edu/logger": "workspace:*",
     "@open-edu/oep-distribution": "workspace:^",
     "@open-edu/pwa-core": "workspace:*",
     "@open-edu/rewards": "workspace:*",

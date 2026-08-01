@@ -22,6 +22,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@open-edu/logger": "workspace:*",
     "@open-edu/schemas": "workspace:*",
     "fflate": "^0.8.2"
   },

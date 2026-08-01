@@ -2,16 +2,21 @@ import { readFile, access } from 'node:fs/promises';
 import { applyPatch } from '@open-edu/core';
 import type { PatchOperation } from '@open-edu/core';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:patch' });
 
 export async function patchPackage(
   packageDir: string,
   patchFilePath: string,
   options?: { json?: boolean; dryRun?: boolean },
 ): Promise<CliResult> {
+  logger.info('Applying patch', { packageDir, patchFilePath, dryRun: options?.dryRun });
   try {
     await access(patchFilePath);
   } catch {
     const msg = `Patch file not found: ${patchFilePath}`;
+    logger.error(msg);
     if (options?.json) {
       return { success: false, error: msg, code: 1 };
     }
@@ -28,6 +33,7 @@ export async function patchPackage(
     }
   } catch (err) {
     const msg = `Failed to parse patch file: ${err instanceof Error ? err.message : String(err)}`;
+    logger.error(msg);
     if (options?.json) {
       return { success: false, error: msg, code: 1 };
     }
@@ -59,9 +65,11 @@ export async function patchPackage(
     }
 
     console.log(`\nPatch applied successfully. ${report.operations.length} operation(s).`);
+    logger.info('Patch applied', { packageDir, operationCount: report.operations.length });
     return { success: true, data: { operations: report.operations.length } };
   } catch (error) {
     const msg = `Patch error: ${error instanceof Error ? error.message : String(error)}`;
+    logger.error(msg);
     if (options?.json) {
       return { success: false, error: msg, code: 1 };
     }

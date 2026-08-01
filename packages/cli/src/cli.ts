@@ -20,12 +20,27 @@ import { i18nMissing } from './commands/i18n-missing.js';
 import { CLI_VERSION } from './index.js';
 import { formatJsonResult } from './utils/json-output.js';
 import type { CliResult } from './utils/json-output.js';
+import { configureLogger, createLogger } from '@open-edu/logger';
+
+const cliLogger = createLogger({ scope: 'cli:main' });
 
 const program = new Command();
 
 program.name('edu').description('Open-Edu educational package toolkit').version(CLI_VERSION);
 
 program.option('--json', 'Output results as structured JSON');
+program.option('--verbose', 'Enable verbose diagnostic logging');
+program.option('--quiet', 'Suppress all non-error output');
+
+program.hook('preAction', () => {
+  const opts = program.optsWithGlobals();
+  if (opts.verbose) {
+    configureLogger({ minLevel: 'debug' });
+  } else if (opts.quiet) {
+    configureLogger({ minLevel: 'error' });
+  }
+  cliLogger.debug('CLI command invoked', { argv: process.argv.slice(2) });
+});
 
 program
   .command('validate')

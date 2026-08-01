@@ -2,11 +2,15 @@ import { loadPackage } from '@open-edu/core';
 import { startDevServer } from '@open-edu/dev-server';
 import { formatValidationError, printMessages } from '../utils/format.js';
 import type { CliResult } from '../utils/json-output.js';
+import { createLogger } from '@open-edu/logger';
+
+const logger = createLogger({ scope: 'cli:dev' });
 
 export async function devPackage(
   packageDir: string,
   options?: { json?: boolean },
 ): Promise<CliResult> {
+  logger.info('Starting dev server', { packageDir });
   try {
     const pkg = await loadPackage(packageDir);
 
@@ -27,8 +31,10 @@ export async function devPackage(
     console.log('');
 
     await startDevServer(packageDir);
+    logger.info('Dev server started', { packageDir });
     return { success: true, data: {} };
   } catch (error) {
+    logger.error('Dev server failed to start', { packageDir, error: String(error) });
     if (options?.json) {
       return {
         success: false,

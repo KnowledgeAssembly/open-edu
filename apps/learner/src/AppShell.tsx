@@ -8,6 +8,7 @@ import {
   type ThemeId,
 } from '@open-edu/runtime';
 import { I18nProvider, useTranslation } from '@open-edu/i18n';
+import { LoggerProvider, MemorySink } from '@open-edu/logger';
 import { dictionaries } from './i18n-dictionaries';
 import type { LoadedPackage, PackageSummary, LoadedBundle, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
@@ -178,6 +179,13 @@ export function AppShell({
 }: AppShellProps): JSX.Element {
   const [themeId, setThemeId] = useThemePreference();
 
+  const loggerSinks = useMemo(() => {
+    if (import.meta.env.DEV) {
+      return [new MemorySink()];
+    }
+    return undefined;
+  }, []);
+
   return (
     <CompanionProvider>
       <PipiliChatProvider>
@@ -187,16 +195,18 @@ export function AppShell({
             supportedLocales={['en', 'hi', 'or']}
             dictionaries={dictionaries}
           >
-            <FontSizeProvider>
-              <AppShellInner
-                catalogPackages={catalogPackages}
-                packageEntries={packageEntries}
-                catalogBundles={catalogBundles}
-                bundleEntries={bundleEntries}
-                themeId={themeId}
-                onThemeChange={setThemeId}
-              />
-            </FontSizeProvider>
+            <LoggerProvider sinks={loggerSinks}>
+              <FontSizeProvider>
+                <AppShellInner
+                  catalogPackages={catalogPackages}
+                  packageEntries={packageEntries}
+                  catalogBundles={catalogBundles}
+                  bundleEntries={bundleEntries}
+                  themeId={themeId}
+                  onThemeChange={setThemeId}
+                />
+              </FontSizeProvider>
+            </LoggerProvider>
           </I18nProvider>
         </RuntimeThemeProvider>
       </PipiliChatProvider>
