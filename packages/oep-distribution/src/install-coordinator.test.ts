@@ -301,21 +301,18 @@ describe('InstallCoordinator', () => {
 
   it('rejects install when catalog checksum does not match downloaded bytes', async () => {
     const bytes = await buildTestOep('checksum-course', '1.0.0', 'Checksum Course');
-    const sha = await computeSha256(bytes);
     const source = catalogSource({
       downloadUrl: 'https://example.org/checksum-course-1.0.0.oep',
       label: 'Checksum Course v1.0.0',
       expectedChecksum: 'e'.repeat(64),
     });
 
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        arrayBuffer: () => Promise.resolve(bytes.buffer),
-      } as Response);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      arrayBuffer: () => Promise.resolve(bytes.buffer),
+    } as Response);
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await coordinator.install(source);
@@ -323,7 +320,6 @@ describe('InstallCoordinator', () => {
     expect(result.errorCode).toBe('CHECKSUM_MISMATCH');
 
     vi.unstubAllGlobals();
-    expect(sha).toBeDefined();
   });
 
   it('installs when catalog checksum matches downloaded bytes', async () => {
@@ -335,14 +331,12 @@ describe('InstallCoordinator', () => {
       expectedChecksum: sha,
     });
 
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        arrayBuffer: () => Promise.resolve(bytes.buffer),
-      } as Response);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      arrayBuffer: () => Promise.resolve(bytes.buffer),
+    } as Response);
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await coordinator.install(source);

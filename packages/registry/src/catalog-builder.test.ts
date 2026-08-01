@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -28,8 +28,6 @@ const releases = JSON.parse(readFileSync(join(fixtures, 'releases.json'), 'utf8'
 >[0]['releases'];
 
 describe('buildCatalog', () => {
-  beforeEach(() => {});
-
   it('builds a catalog from releases and metadata', async () => {
     const { catalog, warnings } = await buildCatalog({
       metadataMap,
