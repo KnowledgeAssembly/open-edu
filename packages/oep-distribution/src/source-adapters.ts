@@ -52,6 +52,7 @@ export function catalogSource(options: CatalogSourceOptions): CourseSource {
   return {
     kind: 'catalog' as SourceKind,
     label: options.label,
+    expectedChecksum: options.expectedChecksum,
     async getBytes(signal?: AbortSignal): Promise<Uint8Array> {
       const response = await fetch(options.downloadUrl, { signal });
       if (!response.ok) {
