@@ -35,8 +35,14 @@ export function createPipiliHandler(_options?: PipiliHandlerOptions) {
       raw = await readRequestBody(req);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'PAYLOAD_ERROR';
-      res.writeHead(413, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', message }));
+      const isSizeError = message.includes('too large');
+      res.writeHead(isSizeError ? 413 : 400, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          error: isSizeError ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON',
+          message,
+        }),
+      );
       return;
     }
 
