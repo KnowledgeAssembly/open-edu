@@ -254,6 +254,97 @@ describe('oepProxyHandler', () => {
     expect(JSON.parse(res.body).error).toBe('INVALID_URL');
   });
 
+  it('follows public redirects and streams the final response', async () => {
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce(
+        new Response(null, {
+          status: 302,
+          headers: { location: 'https://objects.githubusercontent.com/x/a.oep' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode('redirected-bytes'));
+              controller.close();
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/octet-stream' } },
+        ),
+      );
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('redirected-bytes');
+  });
+
+  it('blocks a redirect to a private host', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { location: 'http://169.254.169.254/meta' },
+      }),
+    );
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error).toBe('INVALID_URL');
+  });
+
+  it('blocks a redirect to a non-http protocol', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
+      new Response(null, { status: 302, headers: { location: 'file:///etc/passwd' } }),
+    );
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error).toBe('INVALID_URL');
+  });
+
+  it('returns 502 when the target redirects too many times', async () => {
+    for (let i = 0; i < 6; i++) {
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
+        new Response(null, {
+          status: 302,
+          headers: { location: 'https://github.com/x/a.oep' },
+        }),
+      );
+    }
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(502);
+    expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
+  });
+
   it('calls next for non-GET methods', () => {
     const res = createMockRes();
     const next = vi.fn();

@@ -5,10 +5,12 @@ import { createLogger } from '@open-edu/logger';
 
 export const OEP_PROXY_PATH = '/api/oep-proxy';
 export const OEP_PROXY_TIMEOUT_MS = 30_000;
+export const MAX_PROXY_REDIRECTS = 5;
 
 const proxyLogger = createLogger({ scope: 'oep:proxy' });
 
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
 export interface ProxyResponse {
   statusCode: number;
@@ -61,6 +63,32 @@ export async function assertPublicTarget(target: URL): Promise<void> {
     if (isPrivateIp(entry.address)) {
       throw new ProxyValidationError(`Proxy target "${hostname}" resolves to a private address`);
     }
+  }
+}
+
+export async function fetchWithSafeRedirects(target: URL, signal: AbortSignal): Promise<Response> {
+  let current = target;
+  let hops = 0;
+  for (;;) {
+    const response = await fetch(current, { signal, redirect: 'manual' });
+    if (!REDIRECT_STATUSES.has(response.status)) return response;
+    const location = response.headers.get('location');
+    if (!location) return response;
+    hops += 1;
+    if (hops > MAX_PROXY_REDIRECTS) {
+      throw new Error('Proxy target exceeded the redirect limit');
+    }
+    let nextUrl: URL;
+    try {
+      nextUrl = new URL(location, current);
+    } catch {
+      throw new ProxyValidationError('Proxy target returned an invalid redirect location');
+    }
+    if (!ALLOWED_PROTOCOLS.has(nextUrl.protocol)) {
+      throw new ProxyValidationError('Proxy redirect blocked');
+    }
+    await assertPublicTarget(nextUrl);
+    current = nextUrl;
   }
 }
 
@@ -125,7 +153,7 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
 
   try {
     await assertPublicTarget(target);
-    const upstream = await fetch(target, { signal: controller.signal, redirect: 'follow' });
+    const upstream = await fetchWithSafeRedirects(target, controller.signal);
     if (!upstream.ok) {
       sendJson(res, upstream.status, {
         error: 'UPSTREAM_ERROR',
