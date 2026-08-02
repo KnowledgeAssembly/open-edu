@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Leaf, Menu, Moon, Star, Sun, X, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
@@ -36,6 +36,7 @@ export interface NavbarProps {
 export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const ThemeIcon = themeIcons[themeId];
 
@@ -48,6 +49,18 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
   };
 
   const closeMenu = (): void => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        closeMenu();
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [menuOpen]);
 
   return (
     <header className="border-outline bg-surface/80 sticky top-0 z-50 border-b backdrop-blur">
@@ -66,7 +79,7 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
                 cn(
                   'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary/10 text-primary'
+                    ? 'bg-surface-variant text-on-surface-variant'
                     : 'text-on-surface-variant hover:text-on-surface',
                 )
               }
@@ -92,12 +105,14 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
             type="button"
             onClick={handleThemeToggle}
             aria-label={t('website.nav.theme_toggle')}
-            aria-live="polite"
             className="text-on-surface-variant hover:bg-primary/10 hover:text-primary inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors"
           >
             <ThemeIcon className="h-5 w-5" aria-hidden="true" />
-            <span className="sr-only">{t(themeLabelKeys[themeId])}</span>
           </button>
+
+          <div role="status" aria-live="polite" className="sr-only">
+            {t('website.nav.theme_switched', { theme: t(themeLabelKeys[themeId]) })}
+          </div>
 
           <Button asChild size="sm" className="hidden lg:inline-flex">
             <Link to="/courses">{t('website.nav.get_started')}</Link>
@@ -105,6 +120,7 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
 
           <button
             type="button"
+            ref={menuButtonRef}
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
@@ -136,7 +152,7 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
                     cn(
                       'block rounded-md px-3 py-2 text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-primary/10 text-primary'
+                        ? 'bg-surface-variant text-on-surface-variant'
                         : 'text-on-surface-variant hover:text-on-surface',
                     )
                   }
@@ -146,6 +162,11 @@ export function Navbar({ themeId, onThemeChange }: NavbarProps): JSX.Element {
               </li>
             ))}
           </ul>
+          <Button asChild className="mt-3 w-full">
+            <Link to="/courses" onClick={closeMenu}>
+              {t('website.nav.get_started')}
+            </Link>
+          </Button>
         </div>
       )}
     </header>

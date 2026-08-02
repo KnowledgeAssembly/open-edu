@@ -5,7 +5,7 @@ import { dictionaries } from './i18n-dictionaries';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 
-export interface LayoutProps {
+interface LayoutProps {
   themeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
 }
@@ -22,7 +22,7 @@ function Layout({ themeId, onThemeChange }: LayoutProps): JSX.Element {
         {t('website.nav.skip_to_content')}
       </a>
       <Navbar themeId={themeId} onThemeChange={onThemeChange} />
-      <main id="main-content" className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <Outlet />
       </main>
       <Footer />

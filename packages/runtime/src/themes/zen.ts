@@ -20,7 +20,7 @@ export const zen: ThemeDefinition = {
     outline: '#75736e',
     'outline-variant': '#c6c3bd',
     'surface-tint': '#8a8294',
-    primary: '#8a8294',
+    primary: '#6f667e',
     'on-primary': '#ffffff',
     'primary-container': '#d4cfdc',
     'on-primary-container': '#2a2630',

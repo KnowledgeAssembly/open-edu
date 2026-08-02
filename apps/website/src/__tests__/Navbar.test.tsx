@@ -95,4 +95,36 @@ describe('Navbar', () => {
     );
     expect(screen.getAllByRole('link', { name: 'Courses' })).toHaveLength(1);
   });
+
+  it('includes a Get Started CTA in the mobile menu', () => {
+    render(<Harness />);
+    expect(screen.getAllByRole('link', { name: 'Get Started' })).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    expect(screen.getAllByRole('link', { name: 'Get Started' })).toHaveLength(2);
+
+    fireEvent.click(screen.getAllByRole('link', { name: 'Get Started' })[1] as HTMLElement);
+    expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('closes the mobile menu on Escape and returns focus to the hamburger button', () => {
+    render(<Harness />);
+    const hamburger = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(hamburger);
+    expect(hamburger).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+    expect(hamburger).toHaveFocus();
+  });
+
+  it('does not listen for Escape when the mobile menu is closed', () => {
+    render(<Harness />);
+    const hamburger = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+  });
 });

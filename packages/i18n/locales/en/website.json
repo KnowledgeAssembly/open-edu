@@ -20,6 +20,7 @@
   "nav.menu": "Open menu",
   "nav.close_menu": "Close menu",
   "nav.skip_to_content": "Skip to content",
+  "nav.theme_switched": "Theme switched to {{theme}}",
 
   "hero.eyebrow": "Open learning, reimagined",
   "hero.headline": "Learning that adapts to every child",
