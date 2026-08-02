@@ -155,6 +155,19 @@ describe('LabelDiagramDemo', () => {
     expect(screen.queryByText('Well done! The flower is labeled.')).not.toBeInTheDocument();
   });
 
+  it('overwrites an occupied target and returns the displaced label to the palette', () => {
+    renderDemo(<LabelDiagramDemo />);
+    fireEvent.click(screen.getByRole('button', { name: 'Petal' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Drop Stem here' }));
+    expect(screen.getByRole('button', { name: 'Petal' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Leaf' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Drop Stem here' }));
+    expect(screen.getByRole('button', { name: 'Petal' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Leaf' })).toBeDisabled();
+    expect(screen.queryByText('Well done! The flower is labeled.')).not.toBeInTheDocument();
+  });
+
   it('resets placements and re-enables the labels', () => {
     renderDemo(<LabelDiagramDemo />);
     fireEvent.click(screen.getByRole('button', { name: 'Petal' }));

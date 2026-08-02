@@ -80,13 +80,13 @@ export function LabelDiagramDemo(): JSX.Element {
   };
 
   const handleTargetClick = (targetId: PartId): void => {
+    if (selectedId) {
+      placeLabel(selectedId, targetId);
+      return;
+    }
     if (placements[targetId]) {
       setPlacements((prev) => ({ ...prev, [targetId]: null }));
       setSelectedId(null);
-      return;
-    }
-    if (selectedId) {
-      placeLabel(selectedId, targetId);
     }
   };
 

@@ -4,14 +4,31 @@ import { cn } from '@open-edu/design-system';
 
 interface Milestone {
   year: string;
+  labelKey: string;
   descriptionKey: string;
 }
 
 const MILESTONES: Milestone[] = [
-  { year: '1947', descriptionKey: 'website.timeline.milestone_1947_desc' },
-  { year: '1965', descriptionKey: 'website.timeline.milestone_1965_desc' },
-  { year: '1991', descriptionKey: 'website.timeline.milestone_1991_desc' },
-  { year: '2000', descriptionKey: 'website.timeline.milestone_2000_desc' },
+  {
+    year: '1947',
+    labelKey: 'website.timeline.milestone_1947',
+    descriptionKey: 'website.timeline.milestone_1947_desc',
+  },
+  {
+    year: '1965',
+    labelKey: 'website.timeline.milestone_1965',
+    descriptionKey: 'website.timeline.milestone_1965_desc',
+  },
+  {
+    year: '1991',
+    labelKey: 'website.timeline.milestone_1991',
+    descriptionKey: 'website.timeline.milestone_1991_desc',
+  },
+  {
+    year: '2000',
+    labelKey: 'website.timeline.milestone_2000',
+    descriptionKey: 'website.timeline.milestone_2000_desc',
+  },
 ];
 
 export function TimelineDemo(): JSX.Element {
@@ -48,7 +65,7 @@ export function TimelineDemo(): JSX.Element {
                     : 'border-outline bg-surface text-on-surface hover:border-primary',
                 )}
               >
-                {milestone.year}
+                {t(milestone.labelKey)}
               </button>
             );
           })}
@@ -60,7 +77,7 @@ export function TimelineDemo(): JSX.Element {
           role="status"
           className="text-on-surface-variant bg-surface-container-low mt-5 rounded-lg px-4 py-3 text-sm"
         >
-          <span className="text-on-surface font-semibold">{active.year}</span> —{' '}
+          <span className="text-on-surface font-semibold">{t(active.labelKey)}</span> —{' '}
           {t(active.descriptionKey)}
         </p>
       ) : null}

@@ -113,12 +113,20 @@ export function HotspotDemo(): JSX.Element {
                 aria-pressed={isActive}
                 aria-label={t(hotspot.labelKey)}
                 className={cn(
-                  'oe-hotspot-pulse absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full',
-                  'border-on-surface focus-visible:outline-primary border-2 focus-visible:outline-2 focus-visible:outline-offset-2',
-                  isActive ? 'bg-secondary text-on-secondary' : 'bg-primary text-primary',
+                  'oe-hotspot-pulse absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full',
+                  'focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2',
+                  isActive ? 'text-on-secondary' : 'text-primary',
                 )}
                 style={{ top: hotspot.top, left: hotspot.left }}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'border-on-surface h-4 w-4 rounded-full border-2',
+                    isActive ? 'bg-secondary' : 'bg-primary',
+                  )}
+                />
+              </button>
             );
           })}
         </div>
