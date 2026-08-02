@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { handleDictionaryRequest } from './dictionary-server.js';
@@ -59,10 +59,6 @@ async function bodyOf(res: ReturnType<typeof makeRes>): Promise<unknown> {
 describe('handleDictionaryRequest (FreeDictionaryAPI only)', () => {
   const originalFetch = globalThis.fetch;
 
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
   afterEach(() => {
     globalThis.fetch = originalFetch;
     vi.restoreAllMocks();
@@ -97,6 +93,15 @@ describe('handleDictionaryRequest (FreeDictionaryAPI only)', () => {
     globalThis.fetch = mockResFetch(false, {});
 
     const { handled, res } = callHandler('/api/dictionary/lookup?word=zebra');
+
+    expect(handled).toBe(true);
+    expect(await bodyOf(res)).toBeNull();
+  });
+
+  it('returns null when the remote fetch throws (network error)', async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('ECONNREFUSED'));
+
+    const { handled, res } = callHandler('/api/dictionary/lookup?word=kiwi');
 
     expect(handled).toBe(true);
     expect(await bodyOf(res)).toBeNull();

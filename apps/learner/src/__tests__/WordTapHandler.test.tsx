@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor, act, within } from '@testing-library/react';
 import { WordTapHandler } from '../ai/WordTapHandler';
 import type { SearchResponse } from '@open-edu/ai-companion';
 import { I18nProvider } from '@open-edu/i18n';
@@ -226,7 +226,9 @@ describe('WordTapHandler', () => {
     doubleTap(wordEl);
 
     const popover = screen.getByTestId('word-tap-popover');
-    expect(popover).toHaveTextContent('Powered by Wiktionary Data & FreeDictionaryAPI.com');
+    const attribution = within(popover).getByTestId('word-popover-attribution');
+    expect(attribution).toBeInTheDocument();
+    expect(attribution).toHaveTextContent('Powered by Wiktionary Data & FreeDictionaryAPI.com');
   });
 
   it('shows suggestions when no exact match is found', () => {

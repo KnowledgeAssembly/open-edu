@@ -236,7 +236,12 @@ export function handleDictionaryRequest(req: IncomingMessage, res: ServerRespons
   /* ----- lookup ----- */
   if (pathname === '/api/dictionary/lookup') {
     const word = url.searchParams.get('word') ?? '';
-    lookupWord(word).then((result) => res.end(JSON.stringify(result)));
+    lookupWord(word)
+      .then((result) => res.end(JSON.stringify(result)))
+      .catch(() => {
+        res.statusCode = 500;
+        res.end(JSON.stringify(null));
+      });
     return true;
   }
 
@@ -257,14 +262,19 @@ export function handleDictionaryRequest(req: IncomingMessage, res: ServerRespons
 
       // Remote lookup via FreeDictionaryAPI (the single data source)
       if (query) {
-        const remote = await lookupWord(query).catch(() => null);
+        const remote = await lookupWord(query);
         if (remote) result.unshift(remote);
       }
 
       const cleaned = result.slice(0, limit).map(cleanEntry);
       const deduped = cleaned.filter((e, i, arr) => arr.findIndex((x) => x.word === e.word) === i);
       res.end(JSON.stringify(deduped));
-    })();
+    })().catch(() => {
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.end(JSON.stringify([]));
+      }
+    });
     return true;
   }
 
