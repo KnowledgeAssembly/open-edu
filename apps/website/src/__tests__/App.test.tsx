@@ -21,6 +21,6 @@ describe('App shell', () => {
 
   it('renders the courses page heading at /courses', () => {
     renderAt('/courses');
-    expect(screen.getByRole('heading', { name: 'Courses' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Explore Courses' })).toBeInTheDocument();
   });
 });
