@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from '@open-edu/i18n';
 import { parseCatalog, catalogSource } from '@open-edu/oep-distribution';
-import type { Catalog, CatalogPackageEntry } from '@open-edu/oep-distribution';
+import type { Catalog, CatalogPackageEntry, InstallResult } from '@open-edu/oep-distribution';
 import { installFromSource } from '../courseDownload';
 import { proxyFetch, proxyErrorCode, proxyUrl } from '../oep-proxy/client';
 import type { ProxyErrorCode } from '../oep-proxy/client';
+import { Check } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Button,
   Input,
@@ -17,13 +19,18 @@ import {
   CardContent,
 } from '@open-edu/design-system';
 
-export function CatalogInstallView(): JSX.Element {
+export interface CatalogInstallViewProps {
+  onInstalled?: () => Promise<void>;
+}
+
+export function CatalogInstallView({ onInstalled }: CatalogInstallViewProps): JSX.Element {
   const { t } = useTranslation();
   const [catalogUrl, setCatalogUrl] = useState('');
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [installingId, setInstallingId] = useState<string | null>(null);
+  const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
 
   const handleFetchCatalog = useCallback(async () => {
     if (!catalogUrl.trim()) return;
@@ -40,22 +47,32 @@ export function CatalogInstallView(): JSX.Element {
     }
   }, [catalogUrl, t]);
 
-  const handleInstallPackage = useCallback(async (entry: CatalogPackageEntry) => {
-    const version = entry.versions[entry.versions.length - 1]!;
-    setInstallingId(entry.id);
-    try {
-      const source = catalogSource({
-        downloadUrl: proxyUrl(version.downloadUrl),
-        label: `${entry.title} v${version.version}`,
-        expectedChecksum: version.checksum,
-      });
-      await installFromSource(source);
-    } catch {
-      // errors surfaced by coordinator
-    } finally {
-      setInstallingId(null);
-    }
-  }, []);
+  const handleInstallPackage = useCallback(
+    async (entry: CatalogPackageEntry) => {
+      const version = entry.versions[entry.versions.length - 1]!;
+      setInstallingId(entry.id);
+      try {
+        const source = catalogSource({
+          downloadUrl: proxyUrl(version.downloadUrl),
+          label: `${entry.title} v${version.version}`,
+          expectedChecksum: version.checksum,
+        });
+        const result = await installFromSource(source);
+        if (result.success) {
+          setInstalledIds((prev) => new Set(prev).add(entry.id));
+          toast.success(t('learner.install.success'));
+          await onInstalled?.();
+        } else {
+          toast.error(t(installErrorKey(result)));
+        }
+      } catch {
+        toast.error(t('learner.install.error_unknown'));
+      } finally {
+        setInstallingId(null);
+      }
+    },
+    [onInstalled, t],
+  );
 
   return (
     <div className="p-xl max-w-content mx-auto w-full">
@@ -103,12 +120,21 @@ export function CatalogInstallView(): JSX.Element {
                   </p>
                   <Button
                     onClick={() => handleInstallPackage(entry)}
-                    disabled={installingId === entry.id}
+                    disabled={installingId === entry.id || installedIds.has(entry.id)}
+                    variant={installedIds.has(entry.id) ? 'outline' : 'default'}
+                    data-testid="install-from-catalog-button"
                     className="w-full"
                   >
-                    {installingId === entry.id
-                      ? t('learner.catalog.loading')
-                      : t('learner.catalog.install_version')}
+                    {installedIds.has(entry.id) ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" aria-hidden="true" />
+                        {t('learner.catalog.installed_badge')}
+                      </>
+                    ) : installingId === entry.id ? (
+                      t('learner.catalog.loading')
+                    ) : (
+                      t('learner.catalog.install_version')
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -131,4 +157,22 @@ function proxyErrorKey(err: unknown): string {
   return code
     ? (proxyErrorKeyMap[code] ?? 'learner.catalog.fetch_error')
     : 'learner.catalog.fetch_error';
+}
+
+const installErrorKeyMap: Record<string, string> = {
+  ARCHIVE_TOO_LARGE: 'learner.install.error_archive_too_large',
+  DECOMPRESSED_TOO_LARGE: 'learner.install.error_decompressed_too_large',
+  MALFORMED_ARCHIVE: 'learner.install.error_malformed_archive',
+  CHECKSUM_MISMATCH: 'learner.install.error_checksum_mismatch',
+  MANIFEST_MISMATCH: 'learner.install.error_manifest_mismatch',
+  COURSE_VALIDATION_ERROR: 'learner.install.error_course_validation',
+  SOURCE_READ_ERROR: 'learner.install.error_network',
+  STORAGE_ERROR: 'learner.install.error_storage',
+  VERSION_DOWNGRADE: 'learner.install.error_version_downgrade',
+  VERSION_SAME: 'learner.install.error_version_same',
+  NOT_FOUND: 'learner.install.error_not_found',
+};
+
+function installErrorKey(result: InstallResult): string {
+  return installErrorKeyMap[result.errorCode ?? ''] ?? 'learner.install.error_unknown';
 }

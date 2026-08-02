@@ -59,8 +59,8 @@ function mockHttpOnce({ status, headers = {}, body = null, viaHttps = true }: Fa
   const req = new EventEmitter() as EventEmitter & { end(): void };
   req.end = () => {};
   const requestMock = viaHttps ? httpsRequestMock : httpRequestMock;
-  requestMock.mockImplementationOnce((_options: unknown, cb: (res: IncomingMessage) => void) => {
-    queueMicrotask(() => cb(response));
+  requestMock.mockImplementationOnce((_options: unknown) => {
+    queueMicrotask(() => req.emit('response', response));
     return req;
   });
   return { req, response };
@@ -78,11 +78,11 @@ function mockHttpError(error: Error, viaHttps = true) {
 }
 
 function mockHttpsRedirectChain(location: string) {
-  httpsRequestMock.mockImplementation((_options: unknown, cb: (res: IncomingMessage) => void) => {
+  httpsRequestMock.mockImplementation((_options: unknown) => {
     const response = createFakeResponse(302, { location }, null);
-    queueMicrotask(() => cb(response));
     const req = new EventEmitter() as EventEmitter & { end(): void };
     req.end = () => {};
+    queueMicrotask(() => req.emit('response', response));
     return req;
   });
 }
@@ -508,6 +508,270 @@ describe('oepProxyHandler', () => {
 
     expect(res.statusCode).toBe(502);
     expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
+  });
+});
+
+describe('oepProxyHandler streaming timeouts', () => {
+  beforeEach(() => {
+    vi.stubEnv('OEP_PROXY_ALLOW_PRIVATE', '');
+    httpRequestMock.mockReset();
+    httpsRequestMock.mockReset();
+    lookupMock.mockReset();
+    lookupMock.mockResolvedValue([{ address: '140.82.112.4', family: 4 }]);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  function mockControlledUpstream() {
+    const response = new Readable({ read() {} }) as unknown as IncomingMessage & {
+      statusMessage: string;
+    };
+    response.statusCode = 200;
+    response.statusMessage = 'Mock';
+    response.headers = { 'content-type': 'application/octet-stream' };
+    const req = new EventEmitter() as EventEmitter & { end(): void };
+    req.end = () => {};
+    httpsRequestMock.mockImplementation((options: unknown) => {
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signal?.addEventListener('abort', () => {
+        const err = new DOMException('The operation was aborted', 'AbortError');
+        req.emit('error', err);
+        response.destroy(err);
+      });
+      queueMicrotask(() => req.emit('response', response));
+      return req;
+    });
+    return response;
+  }
+
+  const proxyRequest = () =>
+    mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`);
+
+  it('keeps streaming a slow download as long as chunks keep arriving', async () => {
+    vi.useFakeTimers();
+    const response = mockControlledUpstream();
+    const res = createMockRes();
+    const pending = oepProxyHandler(proxyRequest(), res, () => {}, {
+      ttfbMs: 50,
+      streamIdleMs: 100,
+    });
+
+    await vi.advanceTimersByTimeAsync(0);
+
+    response.push(Buffer.from('part1-'));
+    await vi.advanceTimersByTimeAsync(50);
+    response.push(Buffer.from('part2-'));
+    await vi.advanceTimersByTimeAsync(50);
+    response.push(Buffer.from('part3'));
+    await vi.advanceTimersByTimeAsync(50);
+    response.push(null);
+
+    await pending;
+    expect(res.writableEnded).toBe(true);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('part1-part2-part3');
+  });
+
+  it('aborts when the stream stalls beyond the idle timeout', async () => {
+    vi.useFakeTimers();
+    const response = mockControlledUpstream();
+    const res = createMockRes();
+    const pending = oepProxyHandler(proxyRequest(), res, () => {}, {
+      ttfbMs: 50,
+      streamIdleMs: 100,
+    });
+
+    await vi.advanceTimersByTimeAsync(0);
+    response.push(Buffer.from('partial'));
+    await vi.advanceTimersByTimeAsync(0);
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    await pending;
+    expect(res.writableEnded).toBe(true);
+    expect(res.body).toBe('partial');
+  });
+
+  it('aborts when upstream headers do not arrive within the TTFB timeout', async () => {
+    vi.useFakeTimers();
+    const response = new Readable({ read() {} }) as unknown as IncomingMessage & {
+      statusMessage: string;
+    };
+    response.on('error', () => {});
+    const req = new EventEmitter() as EventEmitter & { end(): void };
+    req.end = () => {};
+    const err = new DOMException('The operation was aborted', 'AbortError');
+    httpsRequestMock.mockImplementation((options: unknown) => {
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signal?.addEventListener('abort', () => {
+        req.emit('error', err);
+        response.destroy(err);
+      });
+      return req;
+    });
+
+    const res = createMockRes();
+    const pending = oepProxyHandler(proxyRequest(), res, () => {}, { ttfbMs: 50 });
+    await vi.advanceTimersByTimeAsync(60);
+    await pending;
+
+    expect(res.writableEnded).toBe(true);
+    expect(res.statusCode).toBe(502);
+    expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
+  });
+
+  it('completes via a working address even when another resolved address fails', async () => {
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    mockHttpError(Object.assign(new Error('Connect timed out'), { code: 'ETIMEDOUT' }));
+    mockHttpOnce({ status: 200, body: 'failover-bytes' });
+
+    const res = createMockRes();
+    oepProxyHandler(proxyRequest(), res, () => {});
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('failover-bytes');
+    expect(httpsRequestMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not spawn new attempts once the request has been aborted', async () => {
+    vi.useFakeTimers();
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    const err = new DOMException('The operation was aborted', 'AbortError');
+    const signals: AbortSignal[] = [];
+    httpsRequestMock.mockImplementation((options: unknown) => {
+      const req = new EventEmitter() as EventEmitter & { end(): void };
+      req.end = () => {};
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signals.push(signal!);
+      signal?.addEventListener('abort', () => req.emit('error', err));
+      return req;
+    });
+
+    const res = createMockRes();
+    const pending = oepProxyHandler(proxyRequest(), res, () => {}, { ttfbMs: 50 });
+    await vi.advanceTimersByTimeAsync(60);
+    await pending;
+
+    expect(res.writableEnded).toBe(true);
+    expect(res.statusCode).toBe(502);
+    expect(httpsRequestMock).toHaveBeenCalledTimes(2);
+    expect(signals.every((s) => s.aborted)).toBe(true);
+  });
+
+  it('returns 502 when every resolved address is unreachable', async () => {
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    mockHttpError(Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' }));
+    mockHttpError(Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' }));
+
+    const res = createMockRes();
+    oepProxyHandler(proxyRequest(), res, () => {});
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.writableEnded).toBe(true);
+    expect(res.statusCode).toBe(502);
+    expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
+  });
+
+  it('accepts a successful address even when another address fails non-connectionally', async () => {
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    mockHttpError(
+      Object.assign(new Error('TLS verify failed'), { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' }),
+    );
+    mockHttpOnce({ status: 200, body: 'good-edge' });
+
+    const res = createMockRes();
+    oepProxyHandler(proxyRequest(), res, () => {});
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('good-edge');
+    expect(httpsRequestMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('resolves via the fastest-responding address rather than waiting on DNS order', async () => {
+    vi.useFakeTimers();
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    httpsRequestMock.mockImplementationOnce((options: unknown) => {
+      const req = new EventEmitter() as EventEmitter & { end(): void };
+      req.end = () => {};
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signal?.addEventListener('abort', () =>
+        req.emit('error', new DOMException('The operation was aborted', 'AbortError')),
+      );
+      setTimeout(() => req.emit('response', createFakeResponse(200, {}, 'slow-edge')), 1000);
+      return req;
+    });
+    httpsRequestMock.mockImplementationOnce(() => {
+      const req = new EventEmitter() as EventEmitter & { end(): void };
+      req.end = () => {};
+      queueMicrotask(() => req.emit('response', createFakeResponse(200, {}, 'fast-edge')));
+      return req;
+    });
+
+    const res = createMockRes();
+    const pending = oepProxyHandler(proxyRequest(), res, () => {});
+    await vi.advanceTimersByTimeAsync(0);
+    await pending;
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('fast-edge');
+    expect(httpsRequestMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('aborts losing attempts once another address responds', async () => {
+    lookupMock.mockResolvedValue([
+      { address: '185.199.109.133', family: 4 },
+      { address: '185.199.110.133', family: 4 },
+    ]);
+    const signals: AbortSignal[] = [];
+    httpsRequestMock.mockImplementationOnce((options: unknown) => {
+      const req = new EventEmitter() as EventEmitter & { end(): void };
+      req.end = () => {};
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signals.push(signal!);
+      signal?.addEventListener('abort', () =>
+        req.emit('error', new DOMException('The operation was aborted', 'AbortError')),
+      );
+      return req;
+    });
+    httpsRequestMock.mockImplementationOnce((options: unknown) => {
+      const req = new EventEmitter() as EventEmitter & { end(): void };
+      req.end = () => {};
+      const signal = (options as { signal?: AbortSignal }).signal;
+      signals.push(signal!);
+      queueMicrotask(() => req.emit('response', createFakeResponse(200, {}, 'winner')));
+      return req;
+    });
+
+    const res = createMockRes();
+    oepProxyHandler(proxyRequest(), res, () => {});
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe('winner');
+    expect(signals).toHaveLength(2);
+    expect(signals[0]!.aborted).toBe(true);
+    expect(signals[1]!.aborted).toBe(false);
   });
 });
 

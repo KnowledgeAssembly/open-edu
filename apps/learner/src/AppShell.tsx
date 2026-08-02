@@ -20,6 +20,7 @@ import {
   FontSizeProvider,
   OpenEduLogo,
   AssemblyFlow,
+  Toaster,
 } from '@open-edu/design-system';
 import type {
   AppSidebarItem,
@@ -708,6 +709,7 @@ function AppShellInner({
   return (
     <div className="bg-surface text-on-surface flex h-screen overflow-hidden">
       <OfflineBanner isOnline={isOnline} />
+      <Toaster position="bottom-center" richColors />
       <div className="flex min-w-0 flex-1">
         {isCourseView && coursePkg ? (
           <WordTapHandler className="flex min-w-0 flex-1 flex-col">
@@ -790,7 +792,9 @@ function AppShellInner({
                   key={`${location.pathname}-${resetCounter}`}
                   className="animate-in fade-in slide-in-from-bottom-4 flex min-h-0 flex-1 flex-col overflow-y-auto duration-500"
                 >
-                  {view.view === 'catalog-install' && <CatalogInstallView />}
+                  {view.view === 'catalog-install' && (
+                    <CatalogInstallView onInstalled={refreshInstalled} />
+                  )}
                   {view.view === 'catalog' && (
                     <CatalogPage
                       packages={allCatalogPackages}

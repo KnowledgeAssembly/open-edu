@@ -192,6 +192,32 @@ const fdCache = new LRUCache<DictionaryEntry>(500);
 let localEntries: Map<string, DictionaryEntry[]> | null = null;
 let localWords: string[] = [];
 
+// The parsed dictionary is several hundred MB. Vite restarts the dev server
+// in-process whenever a config dependency changes, and each restart bundles a
+// fresh copy of this module while the previous server is still resident — so a
+// naive re-parse doubles the ~1.3 GB heap and can OOM the process. Cache the
+// parsed data on globalThis so it is loaded at most once per process.
+const LOCAL_DICTIONARY_CACHE_KEY = '__openEduLocalDictionaryCache';
+
+interface LocalDictionaryCache {
+  entries: Map<string, DictionaryEntry[]>;
+  words: string[];
+}
+
+function readLocalDictionaryCache(): LocalDictionaryCache | undefined {
+  return (globalThis as Record<string, unknown>)[LOCAL_DICTIONARY_CACHE_KEY] as
+    | LocalDictionaryCache
+    | undefined;
+}
+
+function writeLocalDictionaryCache(): void {
+  if (!localEntries) return;
+  (globalThis as Record<string, unknown>)[LOCAL_DICTIONARY_CACHE_KEY] = {
+    entries: localEntries,
+    words: localWords,
+  };
+}
+
 /* ---------- FreeDictionaryAPI client ---------- */
 
 function mapFDApiToEntry(word: string, data: FDApiResponse): DictionaryEntry {
@@ -275,6 +301,12 @@ async function lookupWord(word: string): Promise<DictionaryEntry | null> {
 /* ---------- Public API ---------- */
 
 export function loadDictionary(dictionaryDir: string): boolean {
+  const cached = readLocalDictionaryCache();
+  if (cached) {
+    localEntries = cached.entries;
+    localWords = cached.words;
+    return true;
+  }
   try {
     const baseDir = join(dictionaryDir, 'en/v1.0.0');
     const manifestPath = join(baseDir, 'manifest.json');
@@ -300,6 +332,7 @@ export function loadDictionary(dictionaryDir: string): boolean {
       }
     }
     localWords = data.map((e) => e.word).sort((a, b) => a.localeCompare(b));
+    writeLocalDictionaryCache();
     console.log(
       `[DictionaryServer] Local fallback: ${localEntries.size} words (${data.length} entries)`,
     );
