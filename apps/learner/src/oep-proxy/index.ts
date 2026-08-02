@@ -1,4 +1,6 @@
 import type { IncomingMessage } from 'node:http';
+import { isIP } from 'node:net';
+import { lookup } from 'node:dns/promises';
 import { createLogger } from '@open-edu/logger';
 
 export const OEP_PROXY_PATH = '/api/oep-proxy';
@@ -32,6 +34,36 @@ export function isBlockedProxyTarget(hostname: string): boolean {
   return false;
 }
 
+export class ProxyValidationError extends Error {}
+
+export function isPrivateIp(ip: string): boolean {
+  if (!ip.includes(':')) return isBlockedProxyTarget(ip);
+  const lower = ip.toLowerCase().replace(/^\[|\]$/g, '');
+  if (lower === '::' || lower === '::1') return true;
+  if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
+  if (/^fe[89ab]/.test(lower)) return true;
+  const mapped = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return isBlockedProxyTarget(mapped[1]!);
+  return false;
+}
+
+export async function assertPublicTarget(target: URL): Promise<void> {
+  if (!blockPrivateTargets()) return;
+  const hostname = target.hostname.replace(/^\[|\]$/g, '');
+  if (isIP(hostname)) {
+    if (isPrivateIp(hostname)) {
+      throw new ProxyValidationError(`Proxy target "${hostname}" is a private address`);
+    }
+    return;
+  }
+  const addresses = await lookup(hostname, { all: true, verbatim: true });
+  for (const entry of addresses) {
+    if (isPrivateIp(entry.address)) {
+      throw new ProxyValidationError(`Proxy target "${hostname}" resolves to a private address`);
+    }
+  }
+}
+
 export function parseProxyTarget(reqUrl: string): URL | null {
   let requestUrl: URL;
   try {
@@ -59,7 +91,7 @@ function blockPrivateTargets(): boolean {
   return override !== 'true' && override !== '1';
 }
 
-export function isProxyPath(url: string | undefined): boolean {
+export function isProxyPath(url: string | undefined): url is string {
   if (!url) return false;
   const pathname = url.split('?')[0];
   return pathname === OEP_PROXY_PATH;
@@ -92,6 +124,7 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
   const timer = setTimeout(() => controller.abort(), OEP_PROXY_TIMEOUT_MS);
 
   try {
+    await assertPublicTarget(target);
     const upstream = await fetch(target, { signal: controller.signal, redirect: 'follow' });
     if (!upstream.ok) {
       sendJson(res, upstream.status, {
@@ -118,6 +151,10 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
     }
     if (!res.writableEnded) res.end();
   } catch (err) {
+    if (err instanceof ProxyValidationError) {
+      sendJson(res, 400, { error: 'INVALID_URL', message: err.message });
+      return;
+    }
     proxyLogger.error(
       'OEP proxy fetch failed',
       err instanceof Error ? err : new Error(String(err)),

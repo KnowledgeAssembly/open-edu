@@ -1,11 +1,26 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { lookup } from 'node:dns/promises';
+import type { LookupAddress } from 'node:dns';
 import {
   OEP_PROXY_PATH,
   oepProxyHandler,
   parseProxyTarget,
   isBlockedProxyTarget,
+  isPrivateIp,
+  assertPublicTarget,
+  ProxyValidationError,
 } from './index.js';
 import { proxyUrl } from './client.js';
+
+vi.mock('node:dns/promises', () => {
+  const lookup = vi.fn();
+  return { default: { lookup }, lookup };
+});
+
+const lookupMock = vi.mocked(lookup) as unknown as Mock<
+  [hostname: string, options?: { all: true; verbatim?: boolean }],
+  Promise<LookupAddress[]>
+>;
 
 function createMockRes() {
   const chunks: Uint8Array[] = [];
@@ -130,10 +145,79 @@ describe('parseProxyTarget', () => {
   });
 });
 
+describe('isPrivateIp', () => {
+  it('blocks IPv6 loopback and unspecified addresses', () => {
+    expect(isPrivateIp('::1')).toBe(true);
+    expect(isPrivateIp('::')).toBe(true);
+  });
+
+  it('blocks IPv6 unique-local addresses (fc00::/7)', () => {
+    expect(isPrivateIp('fd00::1')).toBe(true);
+    expect(isPrivateIp('fc00::')).toBe(true);
+  });
+
+  it('blocks IPv6 link-local addresses (fe80::/10)', () => {
+    expect(isPrivateIp('fe80::1')).toBe(true);
+    expect(isPrivateIp('fe90::1')).toBe(true);
+    expect(isPrivateIp('febf::1')).toBe(true);
+  });
+
+  it('blocks IPv4-mapped private IPv6 addresses', () => {
+    expect(isPrivateIp('::ffff:127.0.0.1')).toBe(true);
+    expect(isPrivateIp('::ffff:192.168.1.1')).toBe(true);
+  });
+
+  it('allows public IPv6 addresses', () => {
+    expect(isPrivateIp('2606:4700::1111')).toBe(false);
+  });
+
+  it('delegates IPv4 addresses to isBlockedProxyTarget', () => {
+    expect(isPrivateIp('10.0.0.1')).toBe(true);
+    expect(isPrivateIp('172.16.0.1')).toBe(true);
+    expect(isPrivateIp('140.82.112.4')).toBe(false);
+  });
+});
+
+describe('assertPublicTarget', () => {
+  beforeEach(() => {
+    vi.stubEnv('OEP_PROXY_ALLOW_PRIVATE', '');
+    lookupMock.mockReset();
+  });
+
+  it('rejects a hostname that resolves to a private address', async () => {
+    lookupMock.mockResolvedValue([{ address: '127.0.0.1', family: 4 }]);
+    await expect(
+      assertPublicTarget(new URL('https://spoofed.example.com/a.oep')),
+    ).rejects.toBeInstanceOf(ProxyValidationError);
+  });
+
+  it('rejects a literal private address', async () => {
+    await expect(assertPublicTarget(new URL('http://169.254.169.254/meta'))).rejects.toBeInstanceOf(
+      ProxyValidationError,
+    );
+  });
+
+  it('resolves for a public hostname', async () => {
+    lookupMock.mockResolvedValue([{ address: '140.82.112.4', family: 4 }]);
+    await expect(
+      assertPublicTarget(new URL('https://github.com/x/a.oep')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('skips the check when OEP_PROXY_ALLOW_PRIVATE is enabled', async () => {
+    vi.stubEnv('OEP_PROXY_ALLOW_PRIVATE', 'true');
+    lookupMock.mockResolvedValue([{ address: '127.0.0.1', family: 4 }]);
+    await expect(
+      assertPublicTarget(new URL('https://spoofed.example.com/a.oep')),
+    ).resolves.toBeUndefined();
+  });
+});
+
 describe('oepProxyHandler', () => {
   beforeEach(() => {
     vi.stubEnv('OEP_PROXY_ALLOW_PRIVATE', '');
     globalThis.fetch = vi.fn();
+    lookupMock.mockResolvedValue([{ address: '140.82.112.4', family: 4 }]);
   });
 
   afterEach(() => {
@@ -153,6 +237,21 @@ describe('oepProxyHandler', () => {
     const next = vi.fn();
     oepProxyHandler(mockRequest('/api/oep-proxy-foo?url=x'), res, next);
     expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 400 when the target resolves to a private address', async () => {
+    lookupMock.mockResolvedValueOnce([{ address: '10.0.0.5', family: 4 }]);
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(
+        `${OEP_PROXY_PATH}?url=${encodeURIComponent('https://spoofed.example.com/x.oep')}`,
+      ),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error).toBe('INVALID_URL');
   });
 
   it('calls next for non-GET methods', () => {
