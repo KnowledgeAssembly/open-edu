@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle, ASSET_MIME_TYPES } from '@open-edu/core';
 import type { PackageSummary, LoadedPackage, BundleSummary } from '@open-edu/core';
 import { llmProxyHandler } from './src/llm-proxy/index.js';
-import { loadDictionary, handleDictionaryRequest } from './src/dictionary-server.js';
+import { handleDictionaryRequest } from './src/dictionary-server.js';
 import { createPipiliHandler } from './src/pipili/index.js';
 import { oepProxyHandler } from './src/oep-proxy/index.js';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -77,33 +77,9 @@ function registerServerMiddlewares(server: MiddlewareServer): void {
     next();
   });
 
-  // Load dictionary on server startup
-  const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
-  loadDictionary(dictionaryDir);
-
-  // Dictionary API endpoints (server-side search: never sends full dict to browser)
+  // Dictionary API endpoints (remote FreeDictionaryAPI lookups; no local dict)
   server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => {
     if (handleDictionaryRequest(req, res)) return;
-    next();
-  });
-
-  // Serve external dictionary static files at /dictionary/
-  server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => {
-    const url = decodeURIComponent(req.url ?? '');
-    if (!url.startsWith('/dictionary/')) return next();
-    const filePath = join(dictionaryDir, url.slice('/dictionary/'.length));
-    if (!filePath.startsWith(dictionaryDir)) return next();
-    try {
-      if (statSync(filePath).isFile()) {
-        const ext = extname(filePath);
-        res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.end(readFileSync(filePath));
-        return;
-      }
-    } catch {
-      // file not found
-    }
     next();
   });
 

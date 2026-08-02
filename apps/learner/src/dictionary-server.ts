@@ -1,6 +1,3 @@
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { gunzipSync } from 'node:zlib';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 interface DictionaryEntry {
@@ -15,12 +12,6 @@ interface DictionaryEntry {
   antonyms?: string[];
   relatedWords?: string[];
   translations?: Record<string, string>;
-}
-
-interface PackageManifest {
-  files: { dictionary: string; metadata: string };
-  wordCount: number;
-  compressed: boolean;
 }
 
 interface FDApiResponse {
@@ -108,15 +99,6 @@ function cleanPhonetic(phonetic: string | undefined): string | undefined {
   return cleaned;
 }
 
-function mergeEntries(group: DictionaryEntry[]): DictionaryEntry {
-  const best = group[0]!;
-  if (group.length === 1) return best;
-  return {
-    ...best,
-    definitions: group.flatMap((e) => e.definitions),
-  };
-}
-
 function cleanEntry(entry: DictionaryEntry): DictionaryEntry {
   const cleaned = entry.definitions
     .map((d) => ({
@@ -138,17 +120,6 @@ function cleanEntry(entry: DictionaryEntry): DictionaryEntry {
       .filter((s) => s.length > 0 && /[a-zA-Z]/.test(s))
       .slice(0, 10),
   };
-}
-
-function bisectLeft(sorted: string[], target: string): number {
-  let lo = 0;
-  let hi = sorted.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if ((sorted[mid] ?? '').toLowerCase() < target) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
 }
 
 /* ---------- LRU cache for FreeDictionaryAPI responses ---------- */
@@ -186,37 +157,6 @@ class LRUCache<V> {
 }
 
 const fdCache = new LRUCache<DictionaryEntry>(500);
-
-/* ---------- Local-dictionary fallback ---------- */
-
-let localEntries: Map<string, DictionaryEntry[]> | null = null;
-let localWords: string[] = [];
-
-// The parsed dictionary is several hundred MB. Vite restarts the dev server
-// in-process whenever a config dependency changes, and each restart bundles a
-// fresh copy of this module while the previous server is still resident — so a
-// naive re-parse doubles the ~1.3 GB heap and can OOM the process. Cache the
-// parsed data on globalThis so it is loaded at most once per process.
-const LOCAL_DICTIONARY_CACHE_KEY = '__openEduLocalDictionaryCache';
-
-interface LocalDictionaryCache {
-  entries: Map<string, DictionaryEntry[]>;
-  words: string[];
-}
-
-function readLocalDictionaryCache(): LocalDictionaryCache | undefined {
-  return (globalThis as Record<string, unknown>)[LOCAL_DICTIONARY_CACHE_KEY] as
-    | LocalDictionaryCache
-    | undefined;
-}
-
-function writeLocalDictionaryCache(): void {
-  if (!localEntries) return;
-  (globalThis as Record<string, unknown>)[LOCAL_DICTIONARY_CACHE_KEY] = {
-    entries: localEntries,
-    words: localWords,
-  };
-}
 
 /* ---------- FreeDictionaryAPI client ---------- */
 
@@ -282,66 +222,10 @@ async function lookupWord(word: string): Promise<DictionaryEntry | null> {
   const cached = fdCache.get(word);
   if (cached) return cached;
 
-  // Primary: FreeDictionaryAPI (clean data)
-  const remote = await fetchFromFDApi(word).catch(() => null);
-  if (remote) return remote;
-
-  // Fallback: local dictionary
-  const local = localEntries?.get(word);
-  if (local) {
-    const merged = mergeEntries(local);
-    const cleaned = cleanEntry(merged);
-    fdCache.set(word, cleaned);
-    return cleaned;
-  }
-
-  return null;
+  return fetchFromFDApi(word).catch(() => null);
 }
 
 /* ---------- Public API ---------- */
-
-export function loadDictionary(dictionaryDir: string): boolean {
-  const cached = readLocalDictionaryCache();
-  if (cached) {
-    localEntries = cached.entries;
-    localWords = cached.words;
-    return true;
-  }
-  try {
-    const baseDir = join(dictionaryDir, 'en/v1.0.0');
-    const manifestPath = join(baseDir, 'manifest.json');
-    if (!existsSync(manifestPath)) return false;
-    const manifest: PackageManifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-    const dictPath = join(baseDir, manifest.files.dictionary);
-    if (!existsSync(dictPath)) return false;
-
-    let data: DictionaryEntry[];
-    if (dictPath.endsWith('.gz')) {
-      data = JSON.parse(gunzipSync(readFileSync(dictPath)).toString('utf-8'));
-    } else {
-      data = JSON.parse(readFileSync(dictPath, 'utf-8')) as DictionaryEntry[];
-    }
-
-    localEntries = new Map();
-    for (const e of data) {
-      const existing = localEntries.get(e.word);
-      if (existing) {
-        existing.push(e);
-      } else {
-        localEntries.set(e.word, [e]);
-      }
-    }
-    localWords = data.map((e) => e.word).sort((a, b) => a.localeCompare(b));
-    writeLocalDictionaryCache();
-    console.log(
-      `[DictionaryServer] Local fallback: ${localEntries.size} words (${data.length} entries)`,
-    );
-    return true;
-  } catch (err) {
-    console.error('[DictionaryServer] Failed to load local dictionary:', err);
-    return false;
-  }
-}
 
 export function handleDictionaryRequest(req: IncomingMessage, res: ServerResponse): boolean {
   const url = new URL(req.url ?? '', `http://${req.headers.host ?? 'localhost'}`);
@@ -352,25 +236,20 @@ export function handleDictionaryRequest(req: IncomingMessage, res: ServerRespons
   /* ----- lookup ----- */
   if (pathname === '/api/dictionary/lookup') {
     const word = url.searchParams.get('word') ?? '';
-    lookupWord(word).then((result) => res.end(JSON.stringify(result)));
+    lookupWord(word)
+      .then((result) => res.end(JSON.stringify(result)))
+      .catch(() => {
+        res.statusCode = 500;
+        res.end(JSON.stringify(null));
+      });
     return true;
   }
 
   /* ----- autocomplete ----- */
+  // Local dictionary word index was removed; the browser-side search handles
+  // autocomplete from its bundled index. Return an empty list.
   if (pathname === '/api/dictionary/autocomplete') {
-    const prefix = url.searchParams.get('prefix') ?? '';
-    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '10', 10), 50);
-    const result: string[] = [];
-    if (prefix) {
-      const lower = prefix.toLowerCase();
-      const start = bisectLeft(localWords, lower);
-      for (let i = start; i < localWords.length && result.length < limit; i++) {
-        const w = localWords[i]!;
-        if (w.toLowerCase().startsWith(lower)) result.push(w);
-        else break;
-      }
-    }
-    res.end(JSON.stringify(result));
+    res.end(JSON.stringify([]));
     return true;
   }
 
@@ -380,50 +259,22 @@ export function handleDictionaryRequest(req: IncomingMessage, res: ServerRespons
     const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '10', 10), 50);
     (async () => {
       const result: DictionaryEntry[] = [];
-      const seen = new Set<string>();
 
-      // Exact matches from local dictionary
-      if (query && localEntries) {
-        const lower = query.toLowerCase();
-        const exact = localEntries.get(query);
-        if (exact) {
-          const merged = mergeEntries(exact);
-          result.push(merged);
-          seen.add(query);
-        }
-        for (const word of localWords) {
-          if (result.length >= limit) break;
-          if (seen.has(word)) continue;
-          if (word.toLowerCase().startsWith(lower)) {
-            const group = localEntries.get(word)!;
-            const merged = mergeEntries(group);
-            result.push(merged);
-            seen.add(word);
-          }
-        }
-      }
-
-      // Remote lookup via FreeDictionaryAPI (always attempt, replaces local exact match)
+      // Remote lookup via FreeDictionaryAPI (the single data source)
       if (query) {
-        let remote: DictionaryEntry | null = null;
-        try {
-          remote = await lookupWord(query);
-        } catch {
-          // ignore
-        }
-        if (remote) {
-          // Remove any stale local entry for this word
-          const idx = result.findIndex((e) => e.word === query);
-          if (idx >= 0) result.splice(idx, 1);
-          result.unshift(remote);
-          seen.add(query);
-        }
+        const remote = await lookupWord(query);
+        if (remote) result.unshift(remote);
       }
 
       const cleaned = result.slice(0, limit).map(cleanEntry);
       const deduped = cleaned.filter((e, i, arr) => arr.findIndex((x) => x.word === e.word) === i);
       res.end(JSON.stringify(deduped));
-    })();
+    })().catch(() => {
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.end(JSON.stringify([]));
+      }
+    });
     return true;
   }
 

@@ -123,6 +123,7 @@
   "ai.did_you_mean": "Did you mean?",
   "ai.no_definition": "No definition found for this word.",
   "ai.ask_about": "Ask AI about \"{{word}}\"",
+  "ai.dictionary_attribution": "Powered by Wiktionary Data & FreeDictionaryAPI.com",
   "right_sidebar.label": "AI companion sidebar",
   "right_sidebar.open": "Open sidebar",
   "right_sidebar.close": "Close sidebar",
