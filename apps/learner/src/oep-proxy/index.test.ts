@@ -426,6 +426,23 @@ describe('oepProxyHandler', () => {
     expect(res.statusCode).toBe(502);
     expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
   });
+
+  it('returns 502 when the upstream request is aborted', async () => {
+    vi.mocked(globalThis.fetch).mockRejectedValue(
+      new DOMException('The operation was aborted', 'AbortError'),
+    );
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(502);
+    expect(JSON.parse(res.body).error).toBe('PROXY_ERROR');
+  });
 });
 
 describe('proxyUrl', () => {
