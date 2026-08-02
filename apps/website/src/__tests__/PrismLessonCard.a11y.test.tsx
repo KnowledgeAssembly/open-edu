@@ -1,10 +1,12 @@
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@open-edu/i18n';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
 import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
 import { PrismLessonCard } from '../ui/PrismLessonCard';
 import { dictionaries } from '../i18n-dictionaries';
+
+const ROYGBIV = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet'];
 
 async function expectNoViolations(container: HTMLElement): Promise<void> {
   const result = await axe.run(container);
@@ -28,23 +30,30 @@ function renderCard(): HTMLElement {
   return container;
 }
 
+function placeOrder(order: string[]): void {
+  order.forEach((color, index) => {
+    fireEvent.click(screen.getByRole('button', { name: `${color} tile` }));
+    fireEvent.click(screen.getByRole('button', { name: `Slot ${index + 1}` }));
+  });
+}
+
 describe('PrismLessonCard accessibility', () => {
   it('has no axe violations in its initial state', async () => {
     const container = renderCard();
     await expectNoViolations(container);
   });
 
-  it('has no axe violations after tiles are placed and feedback is shown', async () => {
+  it('has no axe violations when success feedback is shown', async () => {
     const container = renderCard();
-    const roygbiv = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet'];
-    roygbiv.forEach((color, index) => {
-      const tile = container.querySelector<HTMLButtonElement>(`[aria-label="${color} tile"]`);
-      tile?.click();
-      const slot = container.querySelector<HTMLButtonElement>(`[aria-label="Slot ${index + 1}"]`);
-      slot?.click();
-    });
-    const check = container.querySelector<HTMLButtonElement>('[aria-label="Check Answer"]');
-    check?.click();
+    placeOrder(ROYGBIV);
+    fireEvent.click(screen.getByRole('button', { name: 'Check Answer' }));
+    await expectNoViolations(container);
+  });
+
+  it('has no axe violations when error feedback is shown', async () => {
+    const container = renderCard();
+    placeOrder([...ROYGBIV].reverse());
+    fireEvent.click(screen.getByRole('button', { name: 'Check Answer' }));
     await expectNoViolations(container);
   });
 });

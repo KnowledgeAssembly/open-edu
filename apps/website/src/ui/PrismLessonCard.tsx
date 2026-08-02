@@ -126,6 +126,7 @@ export function PrismLessonCard(): JSX.Element {
         next[slotIndex] = null;
         return next;
       });
+      setSelectedColor(null);
       setFeedback(null);
       return;
     }
@@ -195,7 +196,7 @@ export function PrismLessonCard(): JSX.Element {
 
         <PrismSvg className="mt-4 w-full" />
 
-        <div className="mt-4 space-y-4" aria-describedby="prism-instructions">
+        <div role="group" aria-describedby="prism-instructions" className="mt-4 space-y-4">
           <ul className="flex flex-wrap items-center justify-center gap-2">
             {PRISM_COLORS.map((color) => {
               const placed = placedIds.has(color.id);
