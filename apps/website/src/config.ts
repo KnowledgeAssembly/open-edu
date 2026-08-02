@@ -1,0 +1,3 @@
+export const GITHUB_URL = 'https://github.com/spatnaik1982/open-edu';
+
+export const LEARNER_APP_URL = import.meta.env.VITE_LEARNER_URL ?? 'http://localhost:4001';
