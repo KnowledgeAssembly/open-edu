@@ -40,7 +40,7 @@ export function AvailableUpdatesList({ catalog }: AvailableUpdatesListProps): JS
         const source = urlSource(proxyUrl(downloadUrl), `${courseId} v${version}`);
         const result = await updateFromSource(courseId, source);
         setResults((prev) => ({ ...prev, [courseId]: result }));
-      } catch (err) {
+      } catch {
         setResults((prev) => ({
           ...prev,
           [courseId]: {
@@ -48,7 +48,7 @@ export function AvailableUpdatesList({ catalog }: AvailableUpdatesListProps): JS
             courseId,
             version,
             errorCode: 'SOURCE_READ_ERROR',
-            errorMessage: err instanceof Error ? err.message : String(err),
+            errorMessage: t('learner.install.error_network'),
           },
         }));
       } finally {
