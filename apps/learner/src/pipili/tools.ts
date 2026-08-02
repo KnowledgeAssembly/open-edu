@@ -40,7 +40,15 @@ export function createToolRegistry(
     description: 'Searches learner-owned notes using the existing notes service/storage boundary.',
     inputSchema: z.object({
       query: z.string().describe('Search query for notes'),
-      maxResults: z.number().default(5).describe('Maximum number of results'),
+      // Coerce + catch so a sloppy numeric value from the model never turns
+      // into a tool-call error (which the model would otherwise narrate).
+      maxResults: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .catch(5)
+        .describe('Maximum number of results'),
     }),
     execute: async ({ query }) => {
       contextGetter();
@@ -68,7 +76,7 @@ export function createToolRegistry(
     inputSchema: z.object({
       fields: z
         .array(z.enum(['completedLessons', 'strengths', 'weakConcepts']))
-        .default(['strengths', 'weakConcepts']),
+        .catch(['strengths', 'weakConcepts']),
     }),
     execute: async () => {
       return {
@@ -84,7 +92,7 @@ export function createToolRegistry(
       'Finds concepts related to the given topic using available course/glossary data. Ready for V2 concept graph integration.',
     inputSchema: z.object({
       concept: z.string().describe('The concept to find relations for'),
-      maxResults: z.number().default(5),
+      maxResults: z.coerce.number().int().min(1).max(20).catch(5),
     }),
     execute: async ({ concept }) => {
       return {
@@ -103,29 +111,48 @@ export function createToolRegistry(
       'Produces or selects a hint level constrained by learner effort and assessment state.',
     inputSchema: z.object({
       topic: z.string().describe('The topic or problem to hint about'),
-      requestedLevel: z
-        .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
+      // Coerce + catch: the model may emit a numeric string (e.g. "2") or an
+      // out-of-range value; never let that surface as a tool-call error.
+      requestedLevel: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(4)
+        .catch(1)
         .describe('Requested hint level (1-4)'),
       learnerHasAttempted: z
         .boolean()
+        .catch(false)
         .describe('Whether the learner has demonstrated effort on this problem'),
     }),
     execute: async ({ topic, requestedLevel, learnerHasAttempted }) => {
       contextGetter();
-      const { resolveHintLevel, HINT_INSTRUCTIONS } = await import('@open-edu/ai-companion/pipili');
+      try {
+        const { resolveHintLevel, HINT_INSTRUCTIONS } =
+          await import('@open-edu/ai-companion/pipili');
 
-      const actualLevel = resolveHintLevel({
-        currentLevel: 1,
-        requestedLevel,
-        learnerHasAttempted,
-        assessmentActive: false,
-      });
+        // The schema clamps requestedLevel to 1-4 (coerce + catch), so the
+        // number is safe to narrow to HintLevel.
+        const actualLevel = resolveHintLevel({
+          currentLevel: 1,
+          requestedLevel: requestedLevel as 1 | 2 | 3 | 4,
+          learnerHasAttempted,
+          assessmentActive: false,
+        });
 
-      return {
-        topic,
-        level: actualLevel,
-        instruction: HINT_INSTRUCTIONS[actualLevel],
-      };
+        return {
+          topic,
+          level: actualLevel,
+          instruction: HINT_INSTRUCTIONS[actualLevel],
+        };
+      } catch {
+        // The hint service is best-effort; never fail the turn because of it.
+        return {
+          topic,
+          level: 1 as const,
+          instruction: 'Nudge toward the relevant concept without revealing the solution.',
+        };
+      }
     },
   });
 

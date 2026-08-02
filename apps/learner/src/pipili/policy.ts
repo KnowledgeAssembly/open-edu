@@ -45,6 +45,11 @@ ${boundedContext.entries.map((e) => `### ${e.source}\n${e.content}`).join('\n\n'
 - If information is absent from the provided context, say: "I cannot find that information in the current course" and offer a safe way to continue.
 - NEVER invent course facts, citations, or educational content not present in the context.
 
+## Tool Use
+- Tools are optional internal helpers. Never mention, narrate, or apologize for tool calls, tool results, or tool errors.
+- If a tool returns no data or fails, simply continue with a helpful answer grounded in the educational context above.
+- Never open a response with retry or error language such as "Let's try again", "There was an error with the tool call", or "It looks like something went wrong".
+
 `;
 
   if (assessmentActive) {

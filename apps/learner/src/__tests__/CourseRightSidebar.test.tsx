@@ -110,4 +110,26 @@ describe('CourseRightSidebar', () => {
     const aside = screen.getByRole('complementary');
     expect(aside).toHaveClass('w-12');
   });
+
+  it('animates width on the same aside when opening and closing', () => {
+    renderWithProvider(<CourseRightSidebar />);
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveClass('w-12');
+    expect(aside).toHaveClass('transition-[width]');
+
+    fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+    expect(aside).not.toHaveClass('w-12');
+    expect(aside).toHaveStyle('width: 320px');
+
+    fireEvent.click(screen.getByRole('button', { name: /close sidebar/i }));
+    expect(aside).toHaveClass('w-12');
+    expect(aside).not.toHaveStyle('width: 320px');
+  });
+
+  it('disables the width transition while the resize handle is dragged', () => {
+    renderWithProvider(<CourseRightSidebar isResizing />);
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveClass('transition-none');
+    expect(aside).not.toHaveClass('transition-[width]');
+  });
 });

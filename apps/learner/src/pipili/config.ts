@@ -13,16 +13,21 @@ export const PIPILI_CONFIG = {
 // AI SDK v7 UIMessage carries text in a `parts` array (no top-level
 // `content`). Some legacy/older clients may still send `content`. Accept both
 // so the transport is forgiving; convertToModelMessages enforces the real
-// UIMessage shape on the server.
+// UIMessage shape on the server. Parts must pass through unknown keys
+// (`.passthrough()`): tool parts carry `toolCallId`, `toolName`, `state`,
+// `input`, `output`, etc. which `z.object` would strip by default, corrupting
+// tool turns when they are sent back on a later message.
 export const pipiliMessageSchema = z.object({
   id: z.string(),
   role: z.enum(['user', 'assistant', 'system']),
   parts: z
     .array(
-      z.object({
-        type: z.string(),
-        text: z.string().optional(),
-      }),
+      z
+        .object({
+          type: z.string(),
+          text: z.string().optional(),
+        })
+        .passthrough(),
     )
     .optional(),
   content: z.string().max(PIPILI_CONFIG.MAX_MESSAGE_LENGTH).optional(),

@@ -153,6 +153,19 @@ describe('buildSystemPrompt', () => {
     });
     expect(prompt).not.toContain('Emoji Use');
   });
+
+  it('forbids the model from narrating tool calls or tool errors', () => {
+    const prompt = buildSystemPrompt({
+      boundedContext: makeBoundedContext(),
+      assessmentActive: false,
+      learnerLanguage: 'en',
+      readingLevel: 'secondary',
+    });
+    expect(prompt).toContain('## Tool Use');
+    expect(prompt).toContain('Never mention, narrate, or apologize for tool calls');
+    expect(prompt).toContain("Let's try again");
+    expect(prompt).toContain('error with the tool call');
+  });
 });
 
 describe('isAssessmentActive', () => {
