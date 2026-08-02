@@ -148,6 +148,13 @@ describe('oepProxyHandler', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
+  it('calls next for a prefix-only path that is not the proxy endpoint', () => {
+    const res = createMockRes();
+    const next = vi.fn();
+    oepProxyHandler(mockRequest('/api/oep-proxy-foo?url=x'), res, next);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
   it('calls next for non-GET methods', () => {
     const res = createMockRes();
     const next = vi.fn();

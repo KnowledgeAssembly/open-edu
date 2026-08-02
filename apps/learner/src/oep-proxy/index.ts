@@ -59,8 +59,18 @@ function blockPrivateTargets(): boolean {
   return override !== 'true' && override !== '1';
 }
 
-export function oepProxyHandler(req: IncomingMessage, res: ProxyResponse, next: () => void): void {
-  if (req.method !== 'GET' || !req.url?.startsWith(OEP_PROXY_PATH)) {
+export function isProxyPath(url: string | undefined): boolean {
+  if (!url) return false;
+  const pathname = url.split('?')[0];
+  return pathname === OEP_PROXY_PATH;
+}
+
+export async function oepProxyHandler(
+  req: IncomingMessage,
+  res: ProxyResponse,
+  next: () => void,
+): Promise<void> {
+  if (req.method !== 'GET' || !isProxyPath(req.url)) {
     next();
     return;
   }
@@ -74,7 +84,7 @@ export function oepProxyHandler(req: IncomingMessage, res: ProxyResponse, next: 
     return;
   }
 
-  void forwardToTarget(target, res);
+  await forwardToTarget(target, res);
 }
 
 async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
