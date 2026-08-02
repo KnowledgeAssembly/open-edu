@@ -876,7 +876,11 @@ function AppShellInner({
             {...resizeHandleProps}
           />
         )}
-        <CourseRightSidebar onNavigate={handleNavigate} width={sidebarWidth} />
+        <CourseRightSidebar
+          onNavigate={handleNavigate}
+          width={sidebarWidth}
+          isResizing={isResizing}
+        />
       </div>
       <CompanionFloatingUI view={view} />
       <ResetConfirmDialog
