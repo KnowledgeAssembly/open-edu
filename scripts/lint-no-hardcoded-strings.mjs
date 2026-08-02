@@ -23,6 +23,7 @@ const SCAN_ROOTS = [
   'packages/runtime/src/layout',
   'packages/runtime/src/components',
   'apps/learner/src',
+  'apps/website/src',
 ];
 const EXCLUDE_REGEX = /\.(?:test|spec|stories)\.[jt]sx$|\.d\.ts$/;
 const STRICT = process.argv.includes('--strict');
@@ -56,17 +57,17 @@ const IGNORE_PATTERNS = [
   /^\(/,
 
   // Single words that are likely identifiers, not user text
-  /^[a-z][a-zA-Z]+$/,  // camelCase identifiers
-  /^[A-Z][a-zA-Z]+$/,  // PascalCase component names
-  /^[a-z]+$/,           // lowercase single words (roles, types)
+  /^[a-z][a-zA-Z]+$/, // camelCase identifiers
+  /^[A-Z][a-zA-Z]+$/, // PascalCase component names
+  /^[a-z]+$/, // lowercase single words (roles, types)
 
   // Numbers and short fragments
   /^\d/,
-  /^\//,               // paths
+  /^\//, // paths
   /^http/,
-  /^#/,                // CSS selectors / hex colors
-  /^\./,               // relative paths
-  /^@/,                // package scopes
+  /^#/, // CSS selectors / hex colors
+  /^\./, // relative paths
+  /^@/, // package scopes
 
   // Known-safe UI labels that come from props, not hardcoded
   /^Next$/,
@@ -124,15 +125,14 @@ function extractJsxText(line) {
 }
 
 function shouldIgnore(text) {
-  return IGNORE_PATTERNS.some(pattern => pattern.test(text));
+  return IGNORE_PATTERNS.some((pattern) => pattern.test(text));
 }
 
 function hasTFunctionUsage(lines, lineIndex) {
   // Check if the line or nearby lines use t() for content
-  const surrounding = lines.slice(
-    Math.max(0, lineIndex - 2),
-    Math.min(lines.length, lineIndex + 3)
-  ).join('\n');
+  const surrounding = lines
+    .slice(Math.max(0, lineIndex - 2), Math.min(lines.length, lineIndex + 3))
+    .join('\n');
   return surrounding.includes("t('") || surrounding.includes('t("');
 }
 
