@@ -9,6 +9,14 @@ interface StatCounterProps {
 
 const DEFAULT_DURATION_MS = 1200;
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 export function StatCounter({
   value,
   label,
@@ -19,7 +27,7 @@ export function StatCounter({
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (duration <= 0) {
+    if (prefersReducedMotion() || duration <= 0) {
       setDisplay(value);
       return;
     }
@@ -46,10 +54,13 @@ export function StatCounter({
   }, [duration, value]);
 
   const formatted = format ? format(display) : String(display);
+  const accessibleValue = format ? format(value) : String(value);
 
   return (
     <div data-testid="stat-counter" className="text-center">
-      <span className="text-3xl font-bold">{formatted}</span>
+      <span role="img" aria-label={accessibleValue} className="text-3xl font-bold">
+        <span aria-hidden="true">{formatted}</span>
+      </span>
       <span className="text-on-surface-variant mt-1 block text-sm">{label}</span>
     </div>
   );

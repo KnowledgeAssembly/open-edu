@@ -14,9 +14,11 @@ describe('App shell', () => {
     expect(document.querySelector('.open-edu-runtime')).toBeInTheDocument();
   });
 
-  it('renders the home page heading at /', () => {
+  it('renders the hero headline at /', () => {
     renderAt('/');
-    expect(screen.getByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Learning that adapts to every child' }),
+    ).toBeInTheDocument();
   });
 
   it('renders the courses page heading at /courses', () => {
