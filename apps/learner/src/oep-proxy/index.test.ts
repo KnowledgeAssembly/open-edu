@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { lookup } from 'node:dns/promises';
 import type { LookupAddress } from 'node:dns';
+import { Readable } from 'node:stream';
+import { EventEmitter } from 'node:events';
+import type { IncomingMessage } from 'node:http';
 import {
   OEP_PROXY_PATH,
   oepProxyHandler,
@@ -13,15 +16,76 @@ import {
 import { proxyUrl } from './client.js';
 import { createMockRes, mockRequest } from './test-helpers.js';
 
+const httpRequestMock = vi.hoisted(() => vi.fn());
+const httpsRequestMock = vi.hoisted(() => vi.fn());
+
 vi.mock('node:dns/promises', () => {
   const lookup = vi.fn();
   return { default: { lookup }, lookup };
 });
 
+vi.mock('node:http', () => ({ default: { request: httpRequestMock }, request: httpRequestMock }));
+vi.mock('node:https', () => ({
+  default: { request: httpsRequestMock },
+  request: httpsRequestMock,
+}));
+
 const lookupMock = vi.mocked(lookup) as unknown as Mock<
   [hostname: string, options?: { all: true; verbatim?: boolean }],
   Promise<LookupAddress[]>
 >;
+
+type FakeResponseOptions = {
+  status: number;
+  headers?: Record<string, string>;
+  body?: string | null;
+  viaHttps?: boolean;
+};
+
+function createFakeResponse(status: number, headers: Record<string, string>, body: string | null) {
+  const stream = new Readable({ read() {} }) as unknown as IncomingMessage & {
+    statusMessage: string;
+  };
+  stream.statusCode = status;
+  stream.statusMessage = 'Mock';
+  stream.headers = headers;
+  if (body !== null) stream.push(Buffer.from(body));
+  stream.push(null);
+  return stream;
+}
+
+function mockHttpOnce({ status, headers = {}, body = null, viaHttps = true }: FakeResponseOptions) {
+  const response = createFakeResponse(status, headers, body);
+  const req = new EventEmitter() as EventEmitter & { end(): void };
+  req.end = () => {};
+  const requestMock = viaHttps ? httpsRequestMock : httpRequestMock;
+  requestMock.mockImplementationOnce((_options: unknown, cb: (res: IncomingMessage) => void) => {
+    queueMicrotask(() => cb(response));
+    return req;
+  });
+  return { req, response };
+}
+
+function mockHttpError(error: Error, viaHttps = true) {
+  const req = new EventEmitter() as EventEmitter & { end(): void };
+  req.end = () => {};
+  const requestMock = viaHttps ? httpsRequestMock : httpRequestMock;
+  requestMock.mockImplementationOnce(() => {
+    queueMicrotask(() => req.emit('error', error));
+    return req;
+  });
+  return req;
+}
+
+function mockHttpsRedirectChain(location: string) {
+  httpsRequestMock.mockImplementation((_options: unknown, cb: (res: IncomingMessage) => void) => {
+    const response = createFakeResponse(302, { location }, null);
+    queueMicrotask(() => cb(response));
+    const req = new EventEmitter() as EventEmitter & { end(): void };
+    req.end = () => {};
+    return req;
+  });
+}
 
 describe('isBlockedProxyTarget', () => {
   it('blocks localhost and loopback addresses', () => {
@@ -143,6 +207,27 @@ describe('isPrivateIp', () => {
     expect(isPrivateIp('::ffff:8c52:7004')).toBe(false);
   });
 
+  it('blocks IPv4-translated private IPv6 addresses (::ffff:0:...)', () => {
+    expect(isPrivateIp('::ffff:0:7f00:1')).toBe(true);
+    expect(isPrivateIp('::ffff:0:127.0.0.1')).toBe(true);
+    expect(isPrivateIp('::ffff:0:a00:1')).toBe(true);
+    expect(isPrivateIp('::ffff:0:8c52:7004')).toBe(false);
+  });
+
+  it('blocks NAT64-mapped private IPv6 addresses (64:ff9b::/96 and local-use prefix)', () => {
+    expect(isPrivateIp('64:ff9b::7f00:1')).toBe(true);
+    expect(isPrivateIp('64:ff9b::127.0.0.1')).toBe(true);
+    expect(isPrivateIp('64:ff9b:1::a00:1')).toBe(true);
+    expect(isPrivateIp('64:ff9b:1::10.0.0.1')).toBe(true);
+    expect(isPrivateIp('64:ff9b::8c52:7004')).toBe(false);
+  });
+
+  it('blocks IPv4-compatible private IPv6 addresses (::a.b.c.d)', () => {
+    expect(isPrivateIp('::7f00:1')).toBe(true);
+    expect(isPrivateIp('::127.0.0.1')).toBe(true);
+    expect(isPrivateIp('::8c52:7004')).toBe(false);
+  });
+
   it('allows public IPv6 addresses', () => {
     expect(isPrivateIp('2606:4700::1111')).toBe(false);
   });
@@ -192,7 +277,9 @@ describe('assertPublicTarget', () => {
 describe('oepProxyHandler', () => {
   beforeEach(() => {
     vi.stubEnv('OEP_PROXY_ALLOW_PRIVATE', '');
-    globalThis.fetch = vi.fn();
+    httpRequestMock.mockReset();
+    httpsRequestMock.mockReset();
+    lookupMock.mockReset();
     lookupMock.mockResolvedValue([{ address: '140.82.112.4', family: 4 }]);
   });
 
@@ -242,25 +329,27 @@ describe('oepProxyHandler', () => {
     expect(JSON.parse(res.body).error).toBe('INVALID_URL');
   });
 
-  it('follows public redirects and streams the final response', async () => {
-    vi.mocked(globalThis.fetch)
-      .mockResolvedValueOnce(
-        new Response(null, {
-          status: 302,
-          headers: { location: 'https://objects.githubusercontent.com/x/a.oep' },
-        }),
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(new TextEncoder().encode('redirected-bytes'));
-              controller.close();
-            },
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/octet-stream' } },
-        ),
+  it.each(['[64:ff9b::7f00:1]', '[64:ff9b:1::a00:1]', '[::7f00:1]', '[::ffff:0:7f00:1]'])(
+    'blocks the IPv6 embed bypass %s through the real URL parser',
+    async (host) => {
+      const res = createMockRes();
+      oepProxyHandler(
+        mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent(`http://${host}/x.oep`)}`),
+        res,
+        () => {},
       );
+      await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.body).error).toBe('INVALID_URL');
+    },
+  );
+
+  it('follows public redirects and streams the final response', async () => {
+    mockHttpOnce({
+      status: 302,
+      headers: { location: 'https://objects.githubusercontent.com/x/a.oep' },
+    });
+    mockHttpOnce({ status: 200, body: 'redirected-bytes' });
 
     const res = createMockRes();
     oepProxyHandler(
@@ -275,12 +364,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('blocks a redirect to a private host', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-      new Response(null, {
-        status: 302,
-        headers: { location: 'http://169.254.169.254/meta' },
-      }),
-    );
+    mockHttpOnce({ status: 302, headers: { location: 'http://169.254.169.254/meta' } });
 
     const res = createMockRes();
     oepProxyHandler(
@@ -295,9 +379,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('blocks a redirect to a non-http protocol', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-      new Response(null, { status: 302, headers: { location: 'file:///etc/passwd' } }),
-    );
+    mockHttpOnce({ status: 302, headers: { location: 'file:///etc/passwd' } });
 
     const res = createMockRes();
     oepProxyHandler(
@@ -312,9 +394,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('blocks an https to http redirect downgrade', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-      new Response(null, { status: 302, headers: { location: 'http://example.com/x.oep' } }),
-    );
+    mockHttpOnce({ status: 302, headers: { location: 'http://example.com/x.oep' } });
 
     const res = createMockRes();
     oepProxyHandler(
@@ -329,14 +409,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('returns 502 when the target redirects too many times', async () => {
-    for (let i = 0; i < 6; i++) {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(null, {
-          status: 302,
-          headers: { location: 'https://github.com/x/a.oep' },
-        }),
-      );
-    }
+    mockHttpsRedirectChain('https://github.com/x/a.oep');
 
     const res = createMockRes();
     oepProxyHandler(
@@ -371,19 +444,11 @@ describe('oepProxyHandler', () => {
   });
 
   it('streams upstream bytes back to the client', async () => {
-    const bytes = new TextEncoder().encode('fake-oep-bytes');
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(bytes);
-        controller.close();
-      },
+    mockHttpOnce({
+      status: 200,
+      headers: { 'content-type': 'application/octet-stream' },
+      body: 'fake-oep-bytes',
     });
-    vi.mocked(globalThis.fetch).mockResolvedValue(
-      new Response(stream, {
-        status: 200,
-        headers: { 'Content-Type': 'application/octet-stream' },
-      }),
-    );
 
     const res = createMockRes();
     oepProxyHandler(
@@ -399,9 +464,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('forwards upstream error status codes', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValue(
-      new Response('', { status: 404, statusText: 'Not Found' }),
-    );
+    mockHttpOnce({ status: 404, headers: { 'content-type': 'text/plain' }, body: 'Not Found' });
 
     const res = createMockRes();
     oepProxyHandler(
@@ -417,8 +480,8 @@ describe('oepProxyHandler', () => {
     expect(JSON.parse(res.body).error).toBe('UPSTREAM_ERROR');
   });
 
-  it('returns 502 when the upstream fetch fails', async () => {
-    vi.mocked(globalThis.fetch).mockRejectedValue(new TypeError('Failed to fetch'));
+  it('returns 502 when the upstream request fails', async () => {
+    mockHttpError(new TypeError('Failed to fetch'));
 
     const res = createMockRes();
     oepProxyHandler(
@@ -433,9 +496,7 @@ describe('oepProxyHandler', () => {
   });
 
   it('returns 502 when the upstream request is aborted', async () => {
-    vi.mocked(globalThis.fetch).mockRejectedValue(
-      new DOMException('The operation was aborted', 'AbortError'),
-    );
+    mockHttpError(new DOMException('The operation was aborted', 'AbortError'));
 
     const res = createMockRes();
     oepProxyHandler(

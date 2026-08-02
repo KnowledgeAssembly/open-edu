@@ -1,4 +1,8 @@
 import type { IncomingMessage } from 'node:http';
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
+import type { RequestOptions } from 'node:http';
+import type { LookupAddress } from 'node:dns';
 import { isIP } from 'node:net';
 import { lookup } from 'node:dns/promises';
 import { createLogger } from '@open-edu/logger';
@@ -19,6 +23,13 @@ export interface ProxyResponse {
   setHeader(name: string, value: string): void;
   write(chunk: Uint8Array): boolean;
   end(chunk?: Uint8Array | string): void;
+}
+
+interface PinnedResponse {
+  status: number;
+  statusMessage: string;
+  headers: Record<string, string | string[] | undefined>;
+  body: AsyncIterable<Uint8Array>;
 }
 
 export function isBlockedProxyTarget(hostname: string): boolean {
@@ -54,50 +65,113 @@ export function isBlockedProxyTarget(hostname: string): boolean {
 
 export class ProxyValidationError extends Error {}
 
+function decodeEmbeddedIpv4(encoded: string): string {
+  if (encoded.includes('.')) return encoded;
+  const groups = encoded.split(':');
+  const low = Number.parseInt(groups[groups.length - 1] ?? '0', 16);
+  const high = Number.parseInt(groups[groups.length - 2] ?? '0', 16);
+  return `${(high >> 8) & 0xff}.${high & 0xff}.${(low >> 8) & 0xff}.${low & 0xff}`;
+}
+
 export function isPrivateIp(ip: string): boolean {
   if (!ip.includes(':')) return isBlockedProxyTarget(ip);
   const lower = ip.toLowerCase().replace(/^\[|\]$/g, '');
   if (lower === '::' || lower === '::1') return true;
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
   if (/^fe[8-f]/.test(lower)) return true;
-  const mapped = lower.match(/^::ffff:(.+)$/);
-  if (mapped) {
-    let dotted = mapped[1]!;
-    if (!dotted.includes('.')) {
-      const groups = dotted.split(':');
-      const high = Number.parseInt(groups[0] ?? '0', 16);
-      const low = Number.parseInt(groups[1] ?? '0', 16);
-      dotted = `${(high >> 8) & 0xff}.${high & 0xff}.${(low >> 8) & 0xff}.${low & 0xff}`;
-    }
-    return isBlockedProxyTarget(dotted);
-  }
+  const ipv4Translated = lower.match(/^::ffff:0:(.+)$/);
+  if (ipv4Translated) return isBlockedProxyTarget(decodeEmbeddedIpv4(ipv4Translated[1]!));
+  const ipv4Mapped = lower.match(/^::ffff:(.+)$/);
+  if (ipv4Mapped) return isBlockedProxyTarget(decodeEmbeddedIpv4(ipv4Mapped[1]!));
+  const nat64 = lower.match(/^64:ff9b(?::1)?::(.+)$/);
+  if (nat64) return isBlockedProxyTarget(decodeEmbeddedIpv4(nat64[1]!));
+  const ipv4Compatible = lower.match(/^::(.+)$/);
+  if (ipv4Compatible) return isBlockedProxyTarget(decodeEmbeddedIpv4(ipv4Compatible[1]!));
   return false;
 }
 
-export async function assertPublicTarget(target: URL): Promise<void> {
-  if (!blockPrivateTargets()) return;
+export async function resolvePublicTarget(target: URL): Promise<LookupAddress[]> {
+  if (!blockPrivateTargets()) return [];
   const hostname = target.hostname.replace(/^\[|\]$/g, '');
   if (isIP(hostname)) {
     if (isPrivateIp(hostname)) {
       throw new ProxyValidationError(`Proxy target "${hostname}" is a private address`);
     }
-    return;
+    return [{ address: hostname, family: isIP(hostname) }];
   }
   const addresses = await lookup(hostname, { all: true, verbatim: true });
+  if (addresses.length === 0) {
+    throw new ProxyValidationError(`Proxy target "${hostname}" did not resolve to any address`);
+  }
   for (const entry of addresses) {
     if (isPrivateIp(entry.address)) {
       throw new ProxyValidationError(`Proxy target "${hostname}" resolves to a private address`);
     }
   }
+  return addresses;
 }
 
-export async function fetchWithSafeRedirects(target: URL, signal: AbortSignal): Promise<Response> {
+export async function assertPublicTarget(target: URL): Promise<void> {
+  await resolvePublicTarget(target);
+}
+
+function requestPinned(
+  target: URL,
+  signal: AbortSignal,
+  addresses: LookupAddress[],
+): Promise<PinnedResponse> {
+  const lib = target.protocol === 'https:' ? httpsRequest : httpRequest;
+  const hostname = target.hostname.replace(/^\[|\]$/g, '');
+  const options: RequestOptions = {
+    hostname,
+    port: target.port ? Number(target.port) : undefined,
+    path: `${target.pathname}${target.search}`,
+    method: 'GET',
+    headers: { accept: '*/*' },
+    signal,
+  };
+  // Pin the connection to the pre-validated address so the target cannot be
+  // re-resolved (DNS rebinding) between validation and connect time. Host and
+  // SNI keep the original hostname, so TLS certificate validation is intact.
+  if (addresses.length > 0) {
+    options.lookup = (_hostname, _opts, callback) => {
+      const address = addresses[0]!;
+      if ((_opts as { all?: boolean }).all) {
+        callback(null, [address]);
+        return;
+      }
+      callback(null, address.address, address.family);
+    };
+  }
+  if (target.protocol === 'https:') {
+    (options as RequestOptions & { servername: string }).servername = hostname;
+  }
+  return new Promise((resolve, reject) => {
+    const req = lib(options, (res: IncomingMessage) => {
+      resolve({
+        status: res.statusCode ?? 0,
+        statusMessage: res.statusMessage ?? '',
+        headers: res.headers,
+        body: res as unknown as AsyncIterable<Uint8Array>,
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+export async function fetchWithSafeRedirects(
+  target: URL,
+  signal: AbortSignal,
+): Promise<PinnedResponse> {
   let current = target;
   let hops = 0;
   for (;;) {
-    const response = await fetch(current, { signal, redirect: 'manual' });
+    const addresses = await resolvePublicTarget(current);
+    const response = await requestPinned(current, signal, addresses);
     if (!REDIRECT_STATUSES.has(response.status)) return response;
-    const location = response.headers.get('location');
+    const rawLocation = response.headers.location;
+    const location = typeof rawLocation === 'string' ? rawLocation : undefined;
     if (!location) return response;
     hops += 1;
     if (hops > MAX_PROXY_REDIRECTS) {
@@ -115,7 +189,7 @@ export async function fetchWithSafeRedirects(target: URL, signal: AbortSignal): 
     if (current.protocol === 'https:' && nextUrl.protocol !== 'https:') {
       throw new ProxyValidationError('Proxy redirect downgrade blocked');
     }
-    await assertPublicTarget(nextUrl);
+    (response.body as { resume?: () => void }).resume?.();
     current = nextUrl;
   }
 }
@@ -180,30 +254,28 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
   const timer = setTimeout(() => controller.abort(), OEP_PROXY_TIMEOUT_MS);
 
   try {
-    await assertPublicTarget(target);
     const upstream = await fetchWithSafeRedirects(target, controller.signal);
-    if (!upstream.ok) {
+    if (upstream.status < 200 || upstream.status >= 300) {
+      (upstream.body as { resume?: () => void }).resume?.();
       sendJson(res, upstream.status, {
         error: 'UPSTREAM_ERROR',
         status: upstream.status,
-        message: upstream.statusText,
+        message: upstream.statusMessage,
       });
       return;
     }
 
-    res.statusCode = upstream.status || 200;
+    res.statusCode = upstream.status;
+    const upstreamContentType = upstream.headers['content-type'];
     res.setHeader(
       'Content-Type',
-      upstream.headers.get('content-type') ?? 'application/octet-stream',
+      typeof upstreamContentType === 'string' ? upstreamContentType : 'application/octet-stream',
     );
     res.setHeader('Cache-Control', 'no-store');
 
-    if (upstream.body) {
-      const body = upstream.body as unknown as AsyncIterable<Uint8Array>;
-      for await (const chunk of body) {
-        if (res.writableEnded) return;
-        res.write(chunk);
-      }
+    for await (const chunk of upstream.body) {
+      if (res.writableEnded) return;
+      res.write(chunk);
     }
     if (!res.writableEnded) res.end();
   } catch (err) {
