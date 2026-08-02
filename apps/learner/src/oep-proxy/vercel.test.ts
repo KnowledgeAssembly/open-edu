@@ -74,12 +74,10 @@ describe('oepProxy Vercel function', () => {
     stream.push(null);
     const req = new EventEmitter() as EventEmitter & { end(): void };
     req.end = () => {};
-    httpsRequestMock.mockImplementationOnce(
-      (_options: unknown, cb: (r: IncomingMessage) => void) => {
-        queueMicrotask(() => cb(stream));
-        return req;
-      },
-    );
+    httpsRequestMock.mockImplementationOnce((_options: unknown) => {
+      queueMicrotask(() => req.emit('response', stream));
+      return req;
+    });
 
     const res = createMockRes();
     await oepProxy(

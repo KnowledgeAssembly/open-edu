@@ -9,6 +9,8 @@ import { createLogger } from '@open-edu/logger';
 
 export const OEP_PROXY_PATH = '/api/oep-proxy';
 export const OEP_PROXY_TIMEOUT_MS = 30_000;
+export const OEP_PROXY_STREAM_IDLE_TIMEOUT_MS = 30_000;
+export const OEP_PROXY_CONNECT_ATTEMPT_TIMEOUT_MS = 15_000;
 export const MAX_PROXY_REDIRECTS = 5;
 
 const proxyLogger = createLogger({ scope: 'oep:proxy' });
@@ -115,39 +117,34 @@ export async function assertPublicTarget(target: URL): Promise<void> {
   await resolvePublicTarget(target);
 }
 
-function requestPinned(
-  target: URL,
-  signal: AbortSignal,
-  addresses: LookupAddress[],
+function isConnectionError(err: unknown): boolean {
+  const code = (err as NodeJS.ErrnoException).code;
+  return (
+    code === 'ECONNREFUSED' ||
+    code === 'ECONNRESET' ||
+    code === 'ETIMEDOUT' ||
+    code === 'ESOCKETTIMEDOUT' ||
+    code === 'ENETUNREACH' ||
+    code === 'EHOSTUNREACH' ||
+    code === 'EAI_AGAIN'
+  );
+}
+
+function requestAttempt(
+  lib: typeof httpRequest,
+  options: RequestOptions,
 ): Promise<PinnedResponse> {
-  const lib = target.protocol === 'https:' ? httpsRequest : httpRequest;
-  const hostname = target.hostname.replace(/^\[|\]$/g, '');
-  const options: RequestOptions = {
-    hostname,
-    port: target.port ? Number(target.port) : undefined,
-    path: `${target.pathname}${target.search}`,
-    method: 'GET',
-    headers: { accept: '*/*' },
-    signal,
-  };
-  // Pin the connection to the pre-validated address so the target cannot be
-  // re-resolved (DNS rebinding) between validation and connect time. Host and
-  // SNI keep the original hostname, so TLS certificate validation is intact.
-  if (addresses.length > 0) {
-    options.lookup = (_hostname, _opts, callback) => {
-      const address = addresses[0]!;
-      if ((_opts as { all?: boolean }).all) {
-        callback(null, [address]);
-        return;
-      }
-      callback(null, address.address, address.family);
-    };
-  }
-  if (target.protocol === 'https:') {
-    (options as RequestOptions & { servername: string }).servername = hostname;
-  }
   return new Promise((resolve, reject) => {
-    const req = lib(options, (res: IncomingMessage) => {
+    const req = lib(options);
+    const attemptTimer = setTimeout(() => {
+      req.destroy(
+        Object.assign(new Error(`Connect to ${options.hostname} timed out`), {
+          code: 'ETIMEDOUT',
+        }),
+      );
+    }, OEP_PROXY_CONNECT_ATTEMPT_TIMEOUT_MS);
+    req.on('response', (res: IncomingMessage) => {
+      clearTimeout(attemptTimer);
       resolve({
         status: res.statusCode ?? 0,
         statusMessage: res.statusMessage ?? '',
@@ -155,8 +152,106 @@ function requestPinned(
         body: res as unknown as AsyncIterable<Uint8Array>,
       });
     });
-    req.on('error', reject);
+    req.on('error', (err) => {
+      clearTimeout(attemptTimer);
+      reject(err);
+    });
     req.end();
+  });
+}
+
+async function requestPinned(
+  target: URL,
+  signal: AbortSignal,
+  addresses: LookupAddress[],
+): Promise<PinnedResponse> {
+  const lib = target.protocol === 'https:' ? httpsRequest : httpRequest;
+  const hostname = target.hostname.replace(/^\[|\]$/g, '');
+  const baseOptions: RequestOptions = {
+    hostname,
+    port: target.port ? Number(target.port) : undefined,
+    path: `${target.pathname}${target.search}`,
+    method: 'GET',
+    headers: { accept: '*/*' },
+    signal,
+  };
+  // Pin each attempt to a single pre-validated address so the target cannot be
+  // re-resolved (DNS rebinding) between validation and connect time. Host and
+  // SNI keep the original hostname, so TLS certificate validation is intact.
+  if (target.protocol === 'https:') {
+    (baseOptions as RequestOptions & { servername: string }).servername = hostname;
+  }
+
+  if (signal.aborted) throw new DOMException('The operation was aborted', 'AbortError');
+  if (addresses.length === 0) {
+    throw new Error('Proxy target resolved to no addresses');
+  }
+
+  const attemptFor = (address: LookupAddress, attemptSignal: AbortSignal): Promise<PinnedResponse> =>
+    requestAttempt(lib, {
+      ...baseOptions,
+      signal: attemptSignal,
+      lookup: (_hostname: string, opts: { all?: boolean }, callback) => {
+        if (opts.all) {
+          callback(null, [address]);
+          return;
+        }
+        callback(null, address.address, address.family);
+      },
+    });
+
+  // A single resolved address is the common case and needs no race.
+  if (addresses.length === 1) {
+    return attemptFor(addresses[0]!, signal);
+  }
+
+  // Every address was pre-validated as public in resolvePublicTarget, so racing
+  // them cannot reintroduce the SSRF bypass that pinning prevents. Fire one
+  // connect attempt per address and accept whichever responds first, aborting
+  // the losers so no sockets leak. This restores happy-eyeballs latency for
+  // CDNs whose first DNS entry is an unreachable edge.
+  return new Promise<PinnedResponse>((resolve, reject) => {
+    const attempts = addresses.map(() => new AbortController());
+    let settled = false;
+    let pending = addresses.length;
+    const errors: Array<{ error: unknown; connection: boolean }> = [];
+
+    const onExternalAbort = () => {
+      for (const attempt of attempts) attempt.abort();
+    };
+    signal.addEventListener('abort', onExternalAbort, { once: true });
+
+    const finishFailure = () => {
+      pending -= 1;
+      if (pending > 0 || settled) return;
+      settled = true;
+      signal.removeEventListener('abort', onExternalAbort);
+      const nonConnection = errors.find((entry) => !entry.connection);
+      reject(
+        nonConnection
+          ? nonConnection.error
+          : (errors[errors.length - 1]?.error ?? new Error('Proxy target resolved to no addresses')),
+      );
+    };
+
+    addresses.forEach((address, index) => {
+      void attemptFor(address, attempts[index]!.signal).then(
+        (response) => {
+          if (settled) return;
+          settled = true;
+          signal.removeEventListener('abort', onExternalAbort);
+          attempts.forEach((attempt, otherIndex) => {
+            if (otherIndex !== index) attempt.abort();
+          });
+          resolve(response);
+        },
+        (error) => {
+          if (settled) return;
+          errors.push({ error, connection: isConnectionError(error) });
+          finishFailure();
+        },
+      );
+    });
   });
 }
 
@@ -227,10 +322,16 @@ export function isProxyPath(url: string | undefined): url is string {
   return pathname === OEP_PROXY_PATH;
 }
 
+export interface ProxyTimeoutOptions {
+  ttfbMs?: number;
+  streamIdleMs?: number;
+}
+
 export async function oepProxyHandler(
   req: IncomingMessage,
   res: ProxyResponse,
   next: () => void,
+  options: ProxyTimeoutOptions = {},
 ): Promise<void> {
   if (req.method !== 'GET' || !isProxyPath(req.url)) {
     next();
@@ -246,12 +347,24 @@ export async function oepProxyHandler(
     return;
   }
 
-  await forwardToTarget(target, res);
+  await forwardToTarget(target, res, options);
 }
 
-async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
+async function forwardToTarget(
+  target: URL,
+  res: ProxyResponse,
+  options: ProxyTimeoutOptions,
+): Promise<void> {
+  const ttfbMs = options.ttfbMs ?? OEP_PROXY_TIMEOUT_MS;
+  const streamIdleMs = options.streamIdleMs ?? OEP_PROXY_STREAM_IDLE_TIMEOUT_MS;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), OEP_PROXY_TIMEOUT_MS);
+  // The TTFB timeout bounds DNS resolution, redirects, connection, and waiting
+  // for the upstream response headers.
+  let timer = setTimeout(() => controller.abort(), ttfbMs);
+  const resetTimer = (ms: number) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => controller.abort(), ms);
+  };
 
   try {
     const upstream = await fetchWithSafeRedirects(target, controller.signal);
@@ -265,6 +378,10 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
       return;
     }
 
+    // Once the upstream headers arrive, switch to a per-chunk idle timeout so
+    // large course files can stream for as long as they keep making progress.
+    resetTimer(streamIdleMs);
+
     res.statusCode = upstream.status;
     const upstreamContentType = upstream.headers['content-type'];
     res.setHeader(
@@ -275,6 +392,7 @@ async function forwardToTarget(target: URL, res: ProxyResponse): Promise<void> {
 
     for await (const chunk of upstream.body) {
       if (res.writableEnded) return;
+      resetTimer(streamIdleMs);
       res.write(chunk);
     }
     if (!res.writableEnded) res.end();
