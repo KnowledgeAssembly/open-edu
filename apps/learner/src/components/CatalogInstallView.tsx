@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from '@open-edu/i18n';
-import { fetchCatalog, catalogSource } from '@open-edu/oep-distribution';
+import { parseCatalog, catalogSource } from '@open-edu/oep-distribution';
 import type { Catalog, CatalogPackageEntry } from '@open-edu/oep-distribution';
 import { installFromSource } from '../courseDownload';
-import { proxyUrl } from '../oep-proxy/client';
+import { proxyFetch, proxyErrorCode, proxyUrl } from '../oep-proxy/client';
+import type { ProxyErrorCode } from '../oep-proxy/client';
 import {
   Button,
   Input,
@@ -29,10 +30,11 @@ export function CatalogInstallView(): JSX.Element {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await fetchCatalog(proxyUrl(catalogUrl.trim()));
+      const response = await proxyFetch(catalogUrl.trim());
+      const result = parseCatalog(await response.json());
       setCatalog(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('learner.catalog.fetch_error'));
+      setError(t(proxyErrorKey(err)));
     } finally {
       setIsLoading(false);
     }
@@ -116,4 +118,17 @@ export function CatalogInstallView(): JSX.Element {
       )}
     </div>
   );
+}
+
+const proxyErrorKeyMap: Record<ProxyErrorCode, string> = {
+  INVALID_URL: 'learner.proxy.error.invalid_url',
+  UPSTREAM_ERROR: 'learner.proxy.error.upstream_error',
+  PROXY_ERROR: 'learner.proxy.error.proxy_error',
+};
+
+function proxyErrorKey(err: unknown): string {
+  const code = proxyErrorCode(err);
+  return code
+    ? (proxyErrorKeyMap[code] ?? 'learner.catalog.fetch_error')
+    : 'learner.catalog.fetch_error';
 }

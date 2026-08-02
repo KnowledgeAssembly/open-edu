@@ -53,8 +53,8 @@ export function InstallCourseDialog({
       } else {
         setError(t(installErrorKey(result)));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setError(t('learner.install.error_unknown'));
     } finally {
       setIsInstalling(false);
     }
@@ -75,8 +75,8 @@ export function InstallCourseDialog({
       } else {
         setError(t(installErrorKey(result)));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setError(t('learner.install.error_network'));
     } finally {
       setIsInstalling(false);
     }
