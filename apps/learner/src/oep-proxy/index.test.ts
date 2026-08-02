@@ -38,11 +38,21 @@ describe('isBlockedProxyTarget', () => {
     expect(isBlockedProxyTarget('172.31.255.255')).toBe(true);
   });
 
+  it('blocks CGNAT and reserved ranges', () => {
+    expect(isBlockedProxyTarget('100.64.0.1')).toBe(true);
+    expect(isBlockedProxyTarget('100.127.255.255')).toBe(true);
+    expect(isBlockedProxyTarget('192.0.0.1')).toBe(true);
+    expect(isBlockedProxyTarget('198.18.0.1')).toBe(true);
+    expect(isBlockedProxyTarget('224.0.0.1')).toBe(true);
+    expect(isBlockedProxyTarget('240.0.0.1')).toBe(true);
+  });
+
   it('allows public hosts', () => {
     expect(isBlockedProxyTarget('github.com')).toBe(false);
     expect(isBlockedProxyTarget('objects.githubusercontent.com')).toBe(false);
     expect(isBlockedProxyTarget('172.15.0.1')).toBe(false);
     expect(isBlockedProxyTarget('172.32.0.1')).toBe(false);
+    expect(isBlockedProxyTarget('100.128.0.1')).toBe(false);
   });
 });
 
@@ -115,9 +125,22 @@ describe('isPrivateIp', () => {
     expect(isPrivateIp('febf::1')).toBe(true);
   });
 
+  it('blocks IPv6 site-local addresses (fec0::/10)', () => {
+    expect(isPrivateIp('fec0::1')).toBe(true);
+  });
+
   it('blocks IPv4-mapped private IPv6 addresses', () => {
     expect(isPrivateIp('::ffff:127.0.0.1')).toBe(true);
     expect(isPrivateIp('::ffff:192.168.1.1')).toBe(true);
+  });
+
+  it('blocks hex-canonicalized IPv4-mapped private IPv6 addresses', () => {
+    expect(isPrivateIp('::ffff:7f00:1')).toBe(true);
+    expect(isPrivateIp('::ffff:a9fe:a9fe')).toBe(true);
+  });
+
+  it('allows hex-canonicalized IPv4-mapped public IPv6 addresses', () => {
+    expect(isPrivateIp('::ffff:8c52:7004')).toBe(false);
   });
 
   it('allows public IPv6 addresses', () => {
@@ -207,6 +230,18 @@ describe('oepProxyHandler', () => {
     expect(JSON.parse(res.body).error).toBe('INVALID_URL');
   });
 
+  it('blocks an IPv4-mapped IPv6 private target through the real URL parser', async () => {
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('http://[::ffff:127.0.0.1]/x.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error).toBe('INVALID_URL');
+  });
+
   it('follows public redirects and streams the final response', async () => {
     vi.mocked(globalThis.fetch)
       .mockResolvedValueOnce(
@@ -262,6 +297,23 @@ describe('oepProxyHandler', () => {
   it('blocks a redirect to a non-http protocol', async () => {
     vi.mocked(globalThis.fetch).mockResolvedValueOnce(
       new Response(null, { status: 302, headers: { location: 'file:///etc/passwd' } }),
+    );
+
+    const res = createMockRes();
+    oepProxyHandler(
+      mockRequest(`${OEP_PROXY_PATH}?url=${encodeURIComponent('https://github.com/x/a.oep')}`),
+      res,
+      () => {},
+    );
+    await vi.waitFor(() => expect(res.writableEnded).toBe(true));
+
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error).toBe('INVALID_URL');
+  });
+
+  it('blocks an https to http redirect downgrade', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce(
+      new Response(null, { status: 302, headers: { location: 'http://example.com/x.oep' } }),
     );
 
     const res = createMockRes();

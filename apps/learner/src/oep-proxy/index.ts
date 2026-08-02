@@ -33,6 +33,22 @@ export function isBlockedProxyTarget(hostname: string): boolean {
     const octet = Number(privateRange172[1]);
     if (octet >= 16 && octet <= 31) return true;
   }
+  if (host.startsWith('100.')) {
+    const cgnatRange100 = /^100\.(\d+)\./.exec(host);
+    if (cgnatRange100) {
+      const octet = Number(cgnatRange100[1]);
+      if (octet >= 64 && octet <= 127) return true;
+    }
+  }
+  if (
+    host.startsWith('192.0.') ||
+    host.startsWith('198.18.') ||
+    host.startsWith('198.19.') ||
+    host.startsWith('224.') ||
+    host.startsWith('240.')
+  ) {
+    return true;
+  }
   return false;
 }
 
@@ -43,9 +59,18 @@ export function isPrivateIp(ip: string): boolean {
   const lower = ip.toLowerCase().replace(/^\[|\]$/g, '');
   if (lower === '::' || lower === '::1') return true;
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
-  if (/^fe[89ab]/.test(lower)) return true;
-  const mapped = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isBlockedProxyTarget(mapped[1]!);
+  if (/^fe[8-f]/.test(lower)) return true;
+  const mapped = lower.match(/^::ffff:(.+)$/);
+  if (mapped) {
+    let dotted = mapped[1]!;
+    if (!dotted.includes('.')) {
+      const groups = dotted.split(':');
+      const high = Number.parseInt(groups[0] ?? '0', 16);
+      const low = Number.parseInt(groups[1] ?? '0', 16);
+      dotted = `${(high >> 8) & 0xff}.${high & 0xff}.${(low >> 8) & 0xff}.${low & 0xff}`;
+    }
+    return isBlockedProxyTarget(dotted);
+  }
   return false;
 }
 
@@ -86,6 +111,9 @@ export async function fetchWithSafeRedirects(target: URL, signal: AbortSignal): 
     }
     if (!ALLOWED_PROTOCOLS.has(nextUrl.protocol)) {
       throw new ProxyValidationError('Proxy redirect blocked');
+    }
+    if (current.protocol === 'https:' && nextUrl.protocol !== 'https:') {
+      throw new ProxyValidationError('Proxy redirect downgrade blocked');
     }
     await assertPublicTarget(nextUrl);
     current = nextUrl;
