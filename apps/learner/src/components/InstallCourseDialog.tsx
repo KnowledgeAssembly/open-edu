@@ -3,6 +3,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { fileSource, urlSource } from '@open-edu/oep-distribution';
 import type { CourseSource, InstallResult } from '@open-edu/oep-distribution';
 import { proxyUrl } from '../oep-proxy/client';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,7 @@ export function InstallCourseDialog({
       const source = fileSource(file);
       const result = await onInstall(source);
       if (result.success) {
+        toast.success(t('learner.install.success'));
         onClose();
       } else {
         setError(t(installErrorKey(result)));
@@ -71,6 +73,7 @@ export function InstallCourseDialog({
       const source = urlSource(proxyUrl(url.trim()));
       const result = await onInstall(source);
       if (result.success) {
+        toast.success(t('learner.install.success'));
         onClose();
       } else {
         setError(t(installErrorKey(result)));
