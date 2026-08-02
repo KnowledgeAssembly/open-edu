@@ -3,6 +3,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { semverGreaterThan, urlSource } from '@open-edu/oep-distribution';
 import type { Catalog, InstallResult } from '@open-edu/oep-distribution';
 import { getDownloadedCourses, updateFromSource } from '../courseDownload';
+import { proxyUrl } from '../oep-proxy/client';
 import { Button, Badge } from '@open-edu/design-system';
 
 export interface AvailableUpdatesListProps {
@@ -36,10 +37,10 @@ export function AvailableUpdatesList({ catalog }: AvailableUpdatesListProps): JS
     async (courseId: string, version: string, downloadUrl: string) => {
       setUpdatingId(courseId);
       try {
-        const source = urlSource(downloadUrl, `${courseId} v${version}`);
+        const source = urlSource(proxyUrl(downloadUrl), `${courseId} v${version}`);
         const result = await updateFromSource(courseId, source);
         setResults((prev) => ({ ...prev, [courseId]: result }));
-      } catch (err) {
+      } catch {
         setResults((prev) => ({
           ...prev,
           [courseId]: {
@@ -47,7 +48,7 @@ export function AvailableUpdatesList({ catalog }: AvailableUpdatesListProps): JS
             courseId,
             version,
             errorCode: 'SOURCE_READ_ERROR',
-            errorMessage: err instanceof Error ? err.message : String(err),
+            errorMessage: t('learner.install.error_network'),
           },
         }));
       } finally {

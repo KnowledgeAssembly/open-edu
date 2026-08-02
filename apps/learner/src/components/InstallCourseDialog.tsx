@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from '@open-edu/i18n';
 import { fileSource, urlSource } from '@open-edu/oep-distribution';
 import type { CourseSource, InstallResult } from '@open-edu/oep-distribution';
+import { proxyUrl } from '../oep-proxy/client';
 import {
   Dialog,
   DialogContent,
@@ -52,8 +53,8 @@ export function InstallCourseDialog({
       } else {
         setError(t(installErrorKey(result)));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setError(t('learner.install.error_unknown'));
     } finally {
       setIsInstalling(false);
     }
@@ -67,15 +68,15 @@ export function InstallCourseDialog({
     setError(null);
     setIsInstalling(true);
     try {
-      const source = urlSource(url.trim());
+      const source = urlSource(proxyUrl(url.trim()));
       const result = await onInstall(source);
       if (result.success) {
         onClose();
       } else {
         setError(t(installErrorKey(result)));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setError(t('learner.install.error_network'));
     } finally {
       setIsInstalling(false);
     }

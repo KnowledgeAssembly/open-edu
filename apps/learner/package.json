@@ -9,7 +9,7 @@
     "build:deploy": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p api/tsconfig.json",
     "lint": "eslint src/",
     "pwa:analyze": "npx vite-bundle-visualizer"
   },
