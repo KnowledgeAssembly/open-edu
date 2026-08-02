@@ -1,10 +1,4 @@
 {
-  "pages.home": "Home",
-  "pages.courses": "Courses",
-  "pages.widgets": "Widgets",
-  "pages.docs": "Docs",
-  "pages.community": "Community",
-
   "nav.home": "Home",
   "nav.courses": "Courses",
   "nav.widgets": "Widgets",
@@ -96,7 +90,6 @@
   "widgets.label_diagram.description": "Drag labels to the right parts.",
 
   "quiz.question": "2 + 3 = ?",
-  "quiz.option": "Option {{label}}",
   "quiz.correct": "Correct! 2 + 3 equals 5.",
   "quiz.incorrect": "Not quite — try again.",
   "quiz.reset": "Try another",
@@ -115,8 +108,6 @@
   "image_compare.after": "After",
   "image_compare.slider": "Drag to compare",
   "image_compare.label": "Compare before and after",
-  "image_compare.skyline_old": "Old skyline",
-  "image_compare.skyline_new": "New skyline",
 
   "hotspot.volcano": "Volcano diagram",
   "hotspot.instruction": "Tap a pin to learn more.",
