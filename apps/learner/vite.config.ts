@@ -45,6 +45,98 @@ function findAssetsDirs(catalogDir: string): string[] {
   return dirs;
 }
 
+type MiddlewareNext = () => void;
+type MiddlewareServer = {
+  middlewares: {
+    use(handler: (req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => void): void;
+    use(
+      route: string,
+      handler: (req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => void,
+    ): void;
+  };
+};
+
+function registerServerMiddlewares(server: MiddlewareServer): void {
+  server.middlewares.use(oepProxyHandler);
+  server.middlewares.use(llmProxyHandler);
+
+  // Pipili AI Companion endpoint
+  const pipiliHandler = createPipiliHandler();
+  server.middlewares.use('/api/pipili', async (req, res, next) => {
+    if (req.url?.startsWith('/chat')) {
+      try {
+        await pipiliHandler(req, res);
+      } catch (err) {
+        if (!res.headersSent) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
+        }
+      }
+      return;
+    }
+    next();
+  });
+
+  // Load dictionary on server startup
+  const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
+  loadDictionary(dictionaryDir);
+
+  // Dictionary API endpoints (server-side search: never sends full dict to browser)
+  server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => {
+    if (handleDictionaryRequest(req, res)) return;
+    next();
+  });
+
+  // Serve external dictionary static files at /dictionary/
+  server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => {
+    const url = decodeURIComponent(req.url ?? '');
+    if (!url.startsWith('/dictionary/')) return next();
+    const filePath = join(dictionaryDir, url.slice('/dictionary/'.length));
+    if (!filePath.startsWith(dictionaryDir)) return next();
+    try {
+      if (statSync(filePath).isFile()) {
+        const ext = extname(filePath);
+        res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.end(readFileSync(filePath));
+        return;
+      }
+    } catch {
+      // file not found
+    }
+    next();
+  });
+
+  const assetDirs = findAssetsDirs(CATALOG_DIR);
+  if (assetDirs.length === 0) return;
+
+  server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: MiddlewareNext) => {
+    const requestPath = decodeURIComponent(req.url ?? '');
+    if (!requestPath.startsWith('/assets/')) return next();
+
+    const relativePath = requestPath.slice('/assets/'.length);
+    for (const assetsDir of assetDirs) {
+      const filePath = join(assetsDir, relativePath);
+      if (!filePath.startsWith(assetsDir)) continue;
+      try {
+        const stat = statSync(filePath);
+        if (stat.isFile()) {
+          const ext = extname(filePath).toLowerCase();
+          res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(readFileSync(filePath));
+          return;
+        }
+      } catch {
+        continue;
+      }
+    }
+    next();
+  });
+
+  console.log(`[edu-data] Serving assets from ${assetDirs.length} package(s) (${CATALOG_DIR})`);
+}
+
 function eduDataPlugin(): Plugin {
   return {
     name: 'edu-data-loader',
@@ -52,88 +144,10 @@ function eduDataPlugin(): Plugin {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_MODULE_ID;
     },
     configureServer(server) {
-      server.middlewares.use(oepProxyHandler);
-
-      server.middlewares.use(llmProxyHandler);
-
-      // Pipili AI Companion endpoint
-      const pipiliHandler = createPipiliHandler();
-      server.middlewares.use('/api/pipili', async (req, res, next) => {
-        if (req.url?.startsWith('/chat')) {
-          try {
-            await pipiliHandler(req, res);
-          } catch (err) {
-            if (!res.headersSent) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
-            }
-          }
-          return;
-        }
-        next();
-      });
-
-      // Load dictionary on server startup
-      const dictionaryDir = resolve(PKGS_DIR, 'ai-companion/src/data/external');
-      loadDictionary(dictionaryDir);
-
-      // Dictionary API endpoints (server-side search: never sends full dict to browser)
-      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-        if (handleDictionaryRequest(req, res)) return;
-        next();
-      });
-
-      // Serve external dictionary static files at /dictionary/
-      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-        const url = decodeURIComponent(req.url ?? '');
-        if (!url.startsWith('/dictionary/')) return next();
-        const filePath = join(dictionaryDir, url.slice('/dictionary/'.length));
-        if (!filePath.startsWith(dictionaryDir)) return next();
-        try {
-          if (statSync(filePath).isFile()) {
-            const ext = extname(filePath);
-            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.end(readFileSync(filePath));
-            return;
-          }
-        } catch {
-          // file not found
-        }
-        next();
-      });
-
-      const assetDirs = findAssetsDirs(CATALOG_DIR);
-      if (assetDirs.length === 0) return;
-
-      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-        const requestPath = decodeURIComponent(req.url ?? '');
-        if (!requestPath.startsWith('/assets/')) return next();
-
-        const relativePath = requestPath.slice('/assets/'.length);
-        for (const assetsDir of assetDirs) {
-          const filePath = join(assetsDir, relativePath);
-          if (!filePath.startsWith(assetsDir)) continue;
-          try {
-            const stat = statSync(filePath);
-            if (stat.isFile()) {
-              const ext = extname(filePath).toLowerCase();
-              res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
-              res.setHeader('Cache-Control', 'no-cache');
-              res.end(readFileSync(filePath));
-              return;
-            }
-          } catch {
-            continue;
-          }
-        }
-        next();
-      });
-
-      console.log(`[edu-data] Serving assets from ${assetDirs.length} package(s) (${CATALOG_DIR})`);
+      registerServerMiddlewares(server);
     },
     configurePreviewServer(server) {
-      server.middlewares.use(oepProxyHandler);
+      registerServerMiddlewares(server);
     },
     async load(id) {
       if (id !== RESOLVED_MODULE_ID) return;
