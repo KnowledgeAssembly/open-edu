@@ -1,80 +1,135 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-const fsMock = vi.hoisted(() => ({
-  readFileSync: vi.fn(),
-  existsSync: vi.fn(),
-  gunzipSync: vi.fn(),
-}));
+import { handleDictionaryRequest } from './dictionary-server.js';
 
-vi.mock('node:fs', () => ({
-  default: { readFileSync: fsMock.readFileSync, existsSync: fsMock.existsSync },
-  readFileSync: fsMock.readFileSync,
-  existsSync: fsMock.existsSync,
-}));
-vi.mock('node:zlib', () => ({
-  default: { gunzipSync: fsMock.gunzipSync },
-  gunzipSync: fsMock.gunzipSync,
-}));
+const FD_API_ENTRY = {
+  word: 'apple',
+  entries: [
+    {
+      language: { code: 'en', name: 'English' },
+      partOfSpeech: 'noun',
+      pronunciations: [{ type: 'ipa', text: 'ˈæp.əl' }],
+      senses: [
+        { definition: 'A fruit produced by the apple tree.', examples: ['She ate an apple.'] },
+      ],
+      synonyms: ['fruit'],
+      antonyms: ['vegetable'],
+    },
+  ],
+  source: { url: 'https://example.org', license: { name: 'CC BY', url: 'https://example.org' } },
+};
 
-import { loadDictionary, handleDictionaryRequest } from './dictionary-server.js';
+function mockResFetch(ok: boolean, body: unknown) {
+  return vi.fn().mockResolvedValue({
+    ok,
+    json: vi.fn().mockResolvedValue(body),
+  });
+}
 
-const DICTIONARY_ENTRIES = [
-  { id: '1', word: 'apple', language: 'en', definitions: [{ definition: 'a fruit' }] },
-  { id: '2', word: 'banana', language: 'en', definitions: [{ definition: 'a fruit' }] },
-];
+function makeRes() {
+  return {
+    statusCode: undefined as number | undefined,
+    setHeader: vi.fn(),
+    end: vi.fn(),
+  };
+}
 
-describe('loadDictionary', () => {
+function callHandler(url: string, res = makeRes()) {
+  const handled = handleDictionaryRequest(
+    {
+      url,
+      headers: { host: 'localhost' },
+    } as unknown as IncomingMessage,
+    res as unknown as ServerResponse,
+  );
+  return { handled, res };
+}
+
+async function bodyOf(res: ReturnType<typeof makeRes>): Promise<unknown> {
+  const end = res.end as ReturnType<typeof vi.fn>;
+  const started = Date.now();
+  while (end.mock.calls.length === 0) {
+    if (Date.now() - started > 2000) throw new Error('res.end was never called');
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  return JSON.parse(end.mock.calls[0]![0] as string);
+}
+
+describe('handleDictionaryRequest (FreeDictionaryAPI only)', () => {
+  const originalFetch = globalThis.fetch;
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    delete (globalThis as Record<string, unknown>)['__openEduLocalDictionaryCache'];
-    fsMock.existsSync.mockImplementation(
-      (p: string) => p.endsWith('/manifest.json') || p.endsWith('/dictionary.json.gz'),
-    );
-    fsMock.readFileSync.mockImplementation((p: string) => {
-      if (p.endsWith('/manifest.json')) {
-        return JSON.stringify({
-          files: { dictionary: 'dictionary.json.gz', metadata: 'metadata.json' },
-          wordCount: 2,
-          compressed: true,
-        });
-      }
-      return 'gzipped-bytes';
-    });
-    fsMock.gunzipSync.mockReturnValue(Buffer.from(JSON.stringify(DICTIONARY_ENTRIES)));
+    vi.restoreAllMocks();
   });
 
-  it('parses the local dictionary once and reuses it across reloads', () => {
-    expect(loadDictionary('/dict')).toBe(true);
-    const readsAfterFirst = fsMock.readFileSync.mock.calls.length;
-    expect(readsAfterFirst).toBeGreaterThan(0);
-
-    // A Vite dev-server restart re-invokes loadDictionary in the same process
-    // while the previous server is still resident; it must reuse the cached
-    // parse instead of re-reading and re-parsing the multi-hundred-MB file.
-    expect(loadDictionary('/dict')).toBe(true);
-    expect(fsMock.readFileSync.mock.calls.length).toBe(readsAfterFirst);
-    expect(fsMock.gunzipSync).toHaveBeenCalledTimes(1);
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    vi.restoreAllMocks();
   });
 
-  it('serves cached dictionary data after a restart-style reload', () => {
-    loadDictionary('/dict');
-    loadDictionary('/dict');
+  it('returns false for non-dictionary paths', () => {
+    const { handled } = callHandler('/api/other');
+    expect(handled).toBe(false);
+  });
 
-    const res = {
-      setHeader: vi.fn(),
-      end: vi.fn(),
-    };
-    const handled = handleDictionaryRequest(
-      {
-        url: '/api/dictionary/autocomplete?prefix=app',
-        headers: { host: 'localhost' },
-      } as unknown as IncomingMessage,
-      res as unknown as ServerResponse,
-    );
+  it('looks up a word via FreeDictionaryAPI', async () => {
+    globalThis.fetch = mockResFetch(true, FD_API_ENTRY);
+
+    const { handled, res } = callHandler('/api/dictionary/lookup?word=apple');
 
     expect(handled).toBe(true);
-    const body = JSON.parse(((res.end as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] ?? '[]') as string);
-    expect(body).toContain('apple');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://freedictionaryapi.com/api/v1/entries/en/apple',
+    );
+
+    const entry = (await bodyOf(res)) as {
+      word: string;
+      phonetic?: string;
+      definitions: unknown[];
+    };
+    expect(entry.word).toBe('apple');
+    expect(entry.definitions.length).toBeGreaterThan(0);
+    expect(entry.phonetic).toBe('ˈæp.əl');
+  });
+
+  it('returns null when the remote API fails', async () => {
+    globalThis.fetch = mockResFetch(false, {});
+
+    const { handled, res } = callHandler('/api/dictionary/lookup?word=zebra');
+
+    expect(handled).toBe(true);
+    expect(await bodyOf(res)).toBeNull();
+  });
+
+  it('returns an empty autocomplete list since the local dictionary is removed', async () => {
+    const { handled, res } = callHandler('/api/dictionary/autocomplete?prefix=app');
+
+    expect(handled).toBe(true);
+    expect(await bodyOf(res)).toEqual([]);
+  });
+
+  it('searches via FreeDictionaryAPI without a local fallback', async () => {
+    const entry = { ...FD_API_ENTRY, word: 'banana' };
+    globalThis.fetch = mockResFetch(true, entry);
+
+    const { handled, res } = callHandler('/api/dictionary/search?q=banana');
+
+    expect(handled).toBe(true);
+
+    const results = (await bodyOf(res)) as { word: string }[];
+    expect(Array.isArray(results)).toBe(true);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0]!.word).toBe('banana');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://freedictionaryapi.com/api/v1/entries/en/banana',
+    );
+  });
+
+  it('returns a 404 for unknown dictionary paths', () => {
+    const { handled, res } = callHandler('/api/dictionary/unknown');
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(404);
   });
 });

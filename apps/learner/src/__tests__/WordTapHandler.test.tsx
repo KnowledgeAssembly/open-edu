@@ -205,6 +205,30 @@ describe('WordTapHandler', () => {
     expect(popover).toHaveTextContent(/attraction/);
   });
 
+  it('shows dictionary attribution footer in the popover', () => {
+    mockSearch.mockReturnValue({
+      query: 'gravity',
+      instant: {
+        entry: {
+          word: 'gravity',
+          definitions: [{ definition: 'The force that attracts a body' }],
+        },
+        suggestions: [],
+      },
+      enriched: Promise.resolve({
+        ftsResults: [],
+        cachedAiResponse: null,
+        courseReferences: [],
+      }),
+    });
+
+    const { wordEl } = renderWithWordTap(<p>gravity</p>);
+    doubleTap(wordEl);
+
+    const popover = screen.getByTestId('word-tap-popover');
+    expect(popover).toHaveTextContent('Powered by Wiktionary Data & FreeDictionaryAPI.com');
+  });
+
   it('shows suggestions when no exact match is found', () => {
     mockSearch.mockReturnValue({
       query: 'gravi',

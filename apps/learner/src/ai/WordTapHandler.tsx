@@ -314,6 +314,13 @@ export function WordTapHandler({ children, className }: WordTapHandlerProps): JS
               </button>
             </div>
           )}
+
+          <footer
+            className="text-on-surface-variant text-caption mt-3 border-t pt-2"
+            data-testid="word-popover-attribution"
+          >
+            {t('learner.ai.dictionary_attribution')}
+          </footer>
         </div>
       </div>,
       document.body,
