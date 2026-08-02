@@ -4,6 +4,10 @@
   "installCommand": "pnpm install",
   "framework": "vite",
   "functions": {
+    "api/dictionary/[route].ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
     "api/oep-proxy.ts": {
       "memory": 512,
       "maxDuration": 60

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["*.ts", "pipili/**/*.ts"]
+  "include": ["*.ts", "pipili/**/*.ts", "dictionary/**/*.ts"]
 }
