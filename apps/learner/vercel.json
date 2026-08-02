@@ -4,6 +4,10 @@
   "installCommand": "pnpm install",
   "framework": "vite",
   "functions": {
+    "api/oep-proxy.ts": {
+      "memory": 512,
+      "maxDuration": 60
+    },
     "api/pipili/chat.ts": {
       "memory": 512,
       "maxDuration": 60
