@@ -23,7 +23,7 @@ export function WidgetErrorFallback({
       className="border-outline-variant bg-surface-container-lowest p-md rounded-xl border text-center"
       data-testid="widget-error-fallback"
     >
-      <div className="mb-sm text-display-sm" aria-hidden="true">
+      <div className="mb-sm text-display-lg" aria-hidden="true">
         ⚠
       </div>
       <p className="text-on-surface mb-sm font-semibold">

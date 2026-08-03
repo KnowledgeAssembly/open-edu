@@ -7,6 +7,7 @@ const ROOT = process.cwd();
 const RUNTIME_SRC = join(ROOT, 'packages/runtime/src');
 const TAILWIND_CSS = join(ROOT, 'apps/dev-server/src/tailwind.css');
 const STRICT = process.argv.includes('--strict');
+const EXCLUDE_REGEX = /\.(?:test|spec|stories)\.tsx$/;
 
 function walkDir(dir) {
   const files = [];
@@ -17,7 +18,7 @@ function walkDir(dir) {
       const s = statSync(fullPath);
       if (s.isDirectory()) {
         files.push(...walkDir(fullPath));
-      } else if (s.isFile() && entry.endsWith('.tsx')) {
+      } else if (s.isFile() && entry.endsWith('.tsx') && !EXCLUDE_REGEX.test(entry)) {
         files.push(fullPath);
       }
     }
@@ -118,7 +119,11 @@ for (const filePath of walkDir(RUNTIME_SRC)) {
 
 const missing = [];
 for (const cls of usedClasses) {
-  if (!cssClasses.has(cls)) {
+  // Variant classes appear in the generated CSS with the pseudo-variant suffix
+  // appended (e.g. `hover:shadow-md:hover`). Match the source class as a prefix.
+  const present =
+    cssClasses.has(cls) || [...cssClasses].some((cssClass) => cssClass.startsWith(`${cls}:`));
+  if (!present) {
     missing.push(cls);
   }
 }
@@ -126,7 +131,9 @@ for (const cls of usedClasses) {
 if (missing.length > 0) {
   console.error(`\u26a0\ufe0f  Dev-server Tailwind CSS is stale.`);
   console.error(`   Missing classes: ${missing.join(', ')}`);
-  console.error(`   Run: pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css`);
+  console.error(
+    `   Run: pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css`,
+  );
   if (STRICT) process.exit(1);
 } else {
   console.log('\u2705 All Tailwind classes are present in dev-server CSS.');

@@ -164,7 +164,7 @@ export function ThemeSelector({ currentThemeId, onThemeChange }: ThemeSelectorPr
                     ))}
                   </div>
                   <span className="text-body-ui font-medium leading-tight">{theme.name}</span>
-                  <span className="text-surface-variant-foreground text-caption leading-tight">
+                  <span className="text-on-surface-variant text-caption leading-tight">
                     {theme.description}
                   </span>
                   {isSelected && (
