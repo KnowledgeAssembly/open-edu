@@ -32,12 +32,14 @@ export async function promptInstall(): Promise<{ outcome: 'accepted' | 'dismisse
     return { outcome: 'dismissed' };
   }
 
-  const prompt = (deferredPrompt as unknown as { prompt: () => Promise<void> }).prompt;
-  await prompt();
+  const event = deferredPrompt as unknown as {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  };
 
-  const userChoice = await (
-    deferredPrompt as unknown as { userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
-  ).userChoice;
+  await event.prompt();
+
+  const userChoice = await event.userChoice;
 
   deferredPrompt = null;
   return userChoice;
