@@ -10,13 +10,14 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const LOCALES_DIR = join(import.meta.dirname, '../../packages/i18n/locales/en');
+const LOCALES_DIR = join(import.meta.dirname, '../locales/en');
 
 const SCAN_DIRS = [
-  join(import.meta.dirname, '../../packages/runtime/src/renderers'),
-  join(import.meta.dirname, '../../packages/runtime/src/layout'),
-  join(import.meta.dirname, '../../packages/runtime/src/components'),
-  join(import.meta.dirname, '../../apps/learner/src'),
+  join(import.meta.dirname, '../../../packages/runtime/src/renderers'),
+  join(import.meta.dirname, '../../../packages/runtime/src/layout'),
+  join(import.meta.dirname, '../../../packages/runtime/src/components'),
+  join(import.meta.dirname, '../../../apps/learner/src'),
+  join(import.meta.dirname, '../../../apps/website/src'),
 ];
 
 function loadAllDictionaries(): Record<string, Record<string, string>> {
@@ -93,12 +94,17 @@ describe('i18n key validation', () => {
 
   const uniqueKeys = [...new Set(allKeys)];
 
+  it('discovers locale dictionaries and scanned t() keys (non-vacuous)', () => {
+    expect(Object.keys(dictionaries).length).toBeGreaterThan(0);
+    expect(uniqueKeys.length).toBeGreaterThan(0);
+  });
+
   it('all t() keys have a namespace prefix (namespace.key format)', () => {
     const invalidKeys = uniqueKeys.filter((key) => {
       const dotIndex = key.indexOf('.');
       if (dotIndex <= 0) return true;
       const namespace = key.slice(0, dotIndex);
-      return !['runtime', 'learner', 'widgets', 'schemas'].includes(namespace);
+      return !['runtime', 'learner', 'widgets', 'schemas', 'website', 'notes'].includes(namespace);
     });
 
     if (invalidKeys.length > 0) {

@@ -11,6 +11,7 @@
   "quiz.your_answer_incorrect": " — Your answer (incorrect)",
   "quiz.answer_options": "Answer options",
   "widget.load_error": "This activity couldn't load. Try refreshing the page.",
+  "widget.loading_error": "This activity couldn't load. Try refreshing the page.",
   "widget.no_registered": "No widget registered for ID: {{id}}",
   "widget.loading_remote": "Loading remote widget \"{{id}}\"…",
   "widget.remote_load_error": "Failed to load remote widget \"{{id}}\".",

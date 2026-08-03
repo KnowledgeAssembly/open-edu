@@ -18,6 +18,10 @@ describe('namespaces', () => {
     expect(NAMESPACES).toContain('schemas');
   });
 
+  it('includes website namespace', () => {
+    expect(NAMESPACES).toContain('website');
+  });
+
   it('is a typed const array', () => {
     const ns: Namespace = 'runtime';
     expect(NAMESPACES).toContain(ns);
