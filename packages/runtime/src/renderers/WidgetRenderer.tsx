@@ -1,10 +1,11 @@
-import { Component, useContext, type ReactNode } from 'react';
+import { Component, useContext, useRef, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
 import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
+import type { OasAnimationController } from '../components/useOasAnimation';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import type { WidgetAnswer } from '@open-edu/schemas';
 
@@ -90,8 +91,13 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
   const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
 
+  const animationControllerRef = useRef<OasAnimationController | null>(null);
+
   const emitInteraction = (data: Record<string, unknown>) => {
     console.debug('[widget:interaction]', widgetId, data);
+    if (data.action === 'reveal') {
+      animationControllerRef.current?.nextStep();
+    }
   };
 
   const WidgetComponent = definition.render;
@@ -127,6 +133,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
             config={animationConfig}
             resolveSrc={resolveAsset}
             preserveChildren
+            controllerRef={animationControllerRef}
             staticChildren={<WidgetComponent {...widgetProps} />}
           />
         ) : (

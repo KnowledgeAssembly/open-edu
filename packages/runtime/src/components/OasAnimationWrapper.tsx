@@ -4,6 +4,7 @@ import type { AnimationConfig } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
 import { Button } from '@open-edu/design-system';
 import { useOasAnimation } from './useOasAnimation';
+import type { OasAnimationController } from './useOasAnimation';
 import { DotLottiePlayer } from './DotLottiePlayer';
 
 export interface OasAnimationWrapperProps {
@@ -16,6 +17,7 @@ export interface OasAnimationWrapperProps {
   onComplete?: () => void;
   staticChildren?: ReactNode;
   preserveChildren?: boolean;
+  controllerRef?: React.MutableRefObject<OasAnimationController | null>;
 }
 
 function resolveUrl(
@@ -63,6 +65,7 @@ export function OasAnimationWrapper({
   onComplete,
   staticChildren,
   preserveChildren = false,
+  controllerRef,
 }: OasAnimationWrapperProps): JSX.Element | null {
   const { t } = useTranslation();
 
@@ -81,6 +84,10 @@ export function OasAnimationWrapper({
   const controller = useOasAnimation(resolvedConfig, (status) => {
     if (status === 'completed') onComplete?.();
   });
+
+  if (controllerRef) {
+    controllerRef.current = controller;
+  }
 
   const { handlePlayerEvent, reducedMotion } = controller;
 
@@ -102,7 +109,7 @@ export function OasAnimationWrapper({
   }, [resolvedConfig?.trigger, resolvedConfig?.effects?.length, controller.currentStep]);
 
   const effectiveSegments = resolvedConfig?.segments ?? stepSegments;
-  const effectiveShowControls = showControls || resolvedConfig?.trigger === 'step';
+  const effectiveShowControls = showControls || (resolvedConfig?.trigger === 'step' && !preserveChildren);
 
   const renderControls = () => {
     if (!effectiveShowControls) return null;
