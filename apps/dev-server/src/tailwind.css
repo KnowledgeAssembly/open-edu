@@ -1773,6 +1773,10 @@ video {
   gap: var(--oe-space-sm);
 }
 
+.gap-xs {
+  gap: var(--oe-space-xs);
+}
+
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
