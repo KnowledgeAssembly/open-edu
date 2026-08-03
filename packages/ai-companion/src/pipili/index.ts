@@ -21,9 +21,6 @@ export type {
 
 export { DEFAULT_PIPILI_OAS_BINDINGS } from './types.js';
 
-export { PipiliMascotAnimation } from './PipiliMascotAnimation.js';
-export type { PipiliMascotAnimationProps } from './PipiliMascotAnimation.js';
-
 export type { PipiliMode, Citation, PipiliResponseMetadata } from './metadata.js';
 
 export { citationSchema, pipiliResponseMetadataSchema } from './metadata.js';
