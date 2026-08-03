@@ -69,6 +69,7 @@ export interface WidgetRendererProps {
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
   const { t } = useTranslation();
+  const animationControllerRef = useRef<OasAnimationController | null>(null);
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale;
@@ -90,8 +91,6 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
   const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
   const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
-
-  const animationControllerRef = useRef<OasAnimationController | null>(null);
 
   const emitInteraction = (data: Record<string, unknown>) => {
     console.debug('[widget:interaction]', widgetId, data);
