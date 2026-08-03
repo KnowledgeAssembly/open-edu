@@ -46,7 +46,11 @@ function readThemeColors(): Record<string, string> {
 }
 
 function shouldAutoplay(config: AnimationConfig): boolean {
-  return config.trigger === 'load' || config.trigger === 'visible' || config.trigger === 'step';
+  return config.trigger === 'load' || config.trigger === 'visible';
+}
+
+function shouldAutoplayStep(config: AnimationConfig): boolean {
+  return config.trigger === 'step';
 }
 
 export function OasAnimationWrapper({
@@ -84,8 +88,24 @@ export function OasAnimationWrapper({
     ? resolveUrl(resolvedConfig.src, assetBaseUrl, resolveSrc)
     : undefined;
 
+  const stepSegments = useMemo(() => {
+    if (resolvedConfig?.trigger !== 'step') return undefined;
+    const steps = resolvedConfig?.effects?.length ?? 1;
+    if (steps <= 1) return undefined;
+    const frameCount = 120;
+    const perStep = Math.floor(frameCount / steps);
+    const seg: [number, number] = [
+      controller.currentStep * perStep,
+      (controller.currentStep + 1) * perStep,
+    ];
+    return seg;
+  }, [resolvedConfig?.trigger, resolvedConfig?.effects?.length, controller.currentStep]);
+
+  const effectiveSegments = resolvedConfig?.segments ?? stepSegments;
+  const effectiveShowControls = showControls || resolvedConfig?.trigger === 'step';
+
   const renderControls = () => {
-    if (!showControls) return null;
+    if (!effectiveShowControls) return null;
     return (
       <div
         role="group"
@@ -179,10 +199,10 @@ export function OasAnimationWrapper({
         ) : (
           <DotLottiePlayer
             src={resolvedSrc}
-            autoplay={shouldAutoplay(resolvedConfig)}
-            loop={resolvedConfig.loop}
+            autoplay={shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig)}
+            loop={resolvedConfig.loop ?? resolvedConfig.trigger === 'step'}
             speed={resolvedConfig.speed}
-            segments={resolvedConfig.segments}
+            segments={effectiveSegments}
             themeColors={themeColors}
             ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
             onEvent={handlePlayerEvent}

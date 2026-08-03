@@ -127,7 +127,7 @@ describe('OasAnimationWrapper', () => {
     expect(container.querySelector('[data-testid="oas-static-fallback"]')).toBeNull();
   });
 
-  it('autoplays for step-triggered configs', () => {
+  it('autoplays for step-triggered configs (segment restricts range)', () => {
     render(
       <OasAnimationWrapper
         config={{ backend: 'lottie', src: 'assets/animations/water-cycle.lottie', trigger: 'step' }}

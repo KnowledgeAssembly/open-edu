@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   DotLottiePlayer as DotLottiePlayerImpl,
   PlayerEvents,
@@ -50,11 +50,13 @@ export function DotLottiePlayer({
   onError,
 }: OasDotLottiePlayerProps): JSX.Element {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
-  const segmentsRef = useRef(segments);
-  segmentsRef.current = segments;
+  const [ready, setReady] = useState(false);
 
   const handleEvent = useCallback(
     (name: PlayerEvents) => {
+      if (name === PlayerEvents.DataReady) {
+        setReady(true);
+      }
       const status = mapPlayerEvent(name);
       if (status) {
         onEvent?.(status);
@@ -71,10 +73,10 @@ export function DotLottiePlayer({
   }, []);
 
   useEffect(() => {
-    if (segmentsRef.current && playerRef.current) {
-      playerRef.current.playSegments(segmentsRef.current);
+    if (segments && playerRef.current && ready) {
+      playerRef.current.playSegments(segments);
     }
-  }, []);
+  }, [segments, ready]);
 
   const content = (
     <DotLottiePlayerImpl
