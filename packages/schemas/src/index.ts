@@ -134,6 +134,23 @@ export {
 } from './cards.js';
 export type { CardType, CardDifficulty, CardDefinition, CardDefinitions } from './cards.js';
 
+export {
+  AnimationBackendEnum,
+  AnimationEffectEnum,
+  AnimationTriggerEnum,
+  AnimationReducedMotionEnum,
+  AnimationEffectConfigSchema,
+  AnimationConfigSchema,
+} from './animation.js';
+export type {
+  AnimationBackend,
+  AnimationEffect,
+  AnimationTrigger,
+  AnimationReducedMotion,
+  AnimationEffectConfig,
+  AnimationConfig,
+} from './animation.js';
+
 export const SCHEMAS_VERSION = '0.1.0';
 
 export { LocalizedSchema, localizedField, isLocalized, extractLocalized } from './localized.js';
