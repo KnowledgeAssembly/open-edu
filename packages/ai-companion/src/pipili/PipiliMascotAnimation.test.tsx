@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
@@ -37,14 +37,18 @@ describe('PipiliMascotAnimation', () => {
     expect(screen.getByText('assets/pipili/fallback.lottie')).toBeInTheDocument();
   });
 
-  it('renders a static pose under OS reduced motion', () => {
-    document.documentElement.style.setProperty('--oe-reduced-motion', 'reduce');
+  it('renders a static pose under OS reduced motion', async () => {
+    act(() => {
+      document.documentElement.style.setProperty('--oe-reduced-motion', 'reduce');
+    });
 
     render(<PipiliMascotAnimation state="idle" />, { wrapper });
     expect(screen.queryByTestId('oas-wrapper')).not.toBeInTheDocument();
     expect(screen.getByRole('img')).toBeInTheDocument();
 
-    document.documentElement.style.removeProperty('--oe-reduced-motion');
+    await act(async () => {
+      document.documentElement.style.removeProperty('--oe-reduced-motion');
+    });
   });
 
   it('respects the reducedMotion override', () => {
