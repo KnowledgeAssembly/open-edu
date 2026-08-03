@@ -8,11 +8,27 @@ import { iconSizeScale, iconStrokeScale } from '../tokens/icons.js';
 import { layoutTokens } from '../tokens/layout.js';
 import { elevationScale } from '../tokens/elevation.js';
 
+function hexToRgbTriplet(value: string): string {
+  let hex = value.startsWith('#') ? value.slice(1) : value;
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  if (!/^[a-f\d]{6}$/i.test(hex)) {
+    return value;
+  }
+  const int = parseInt(hex, 16);
+  return `${(int >> 16) & 255} ${(int >> 8) & 255} ${int & 255}`;
+}
+
 export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   const vars: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(theme.colors)) {
     vars[`--oe-color-${key}`] = value;
+    vars[`--oe-color-${key}-rgb`] = hexToRgbTriplet(value);
   }
 
   for (const [setName, set] of Object.entries(theme.typography)) {
@@ -81,10 +97,15 @@ export function flattenTheme(theme: ThemeDefinition): Record<string, string> {
   }
 
   vars['--oe-color-bg'] = theme.colors['background'] ?? theme.colors['surface'] ?? '';
+  vars['--oe-color-bg-rgb'] = hexToRgbTriplet(vars['--oe-color-bg']);
   vars['--oe-color-fg'] = theme.colors['on-background'] ?? theme.colors['on-surface'] ?? '';
+  vars['--oe-color-fg-rgb'] = hexToRgbTriplet(vars['--oe-color-fg']);
   vars['--oe-color-border'] = theme.colors['outline'] ?? '';
-  vars['--oe-color-success'] = theme.colors['secondary'] ?? '#16a34a';
-  vars['--oe-color-warning'] = theme.colors['tertiary'] ?? '#b8862d';
+  vars['--oe-color-border-rgb'] = hexToRgbTriplet(vars['--oe-color-border']);
+  vars['--oe-color-success'] = theme.colors['success'] ?? '#16a34a';
+  vars['--oe-color-success-rgb'] = hexToRgbTriplet(vars['--oe-color-success']);
+  vars['--oe-color-warning'] = theme.colors['warning'] ?? theme.colors['tertiary'] ?? '#b8862d';
+  vars['--oe-color-warning-rgb'] = hexToRgbTriplet(vars['--oe-color-warning']);
   vars['--oe-font-sans'] = theme.typography.productive.body.fontFamily;
   vars['--oe-font-ui-family'] = theme.typography.productive.body.fontFamily;
   vars['--oe-font-content-family'] = theme.typography.expressive.body.fontFamily;
