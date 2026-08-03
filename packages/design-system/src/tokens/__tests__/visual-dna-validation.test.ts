@@ -43,10 +43,18 @@ describe('color palette validation against Visual DNA', () => {
   });
 
   it('includes silhouette assembly palette mappings matching Visual DNA spec', () => {
-    expect(tailwindColorExtensions.accent).toBe('var(--oe-color-accent)');
-    expect(tailwindColorExtensions.primary).toBe('var(--oe-color-primary)');
-    expect(tailwindColorExtensions['primary-light']).toBe('var(--oe-color-primary-light)');
-    expect(tailwindColorExtensions.tertiary).toBe('var(--oe-color-tertiary)');
-    expect(tailwindColorExtensions.success).toBe('var(--oe-color-success)');
+    expect(tailwindColorExtensions.accent).toBe('rgb(var(--oe-color-accent-rgb) / <alpha-value>)');
+    expect(tailwindColorExtensions.primary).toBe(
+      'rgb(var(--oe-color-primary-rgb) / <alpha-value>)',
+    );
+    expect(tailwindColorExtensions['primary-light']).toBe(
+      'rgb(var(--oe-color-primary-light-rgb) / <alpha-value>)',
+    );
+    expect(tailwindColorExtensions.tertiary).toBe(
+      'rgb(var(--oe-color-tertiary-rgb) / <alpha-value>)',
+    );
+    expect(tailwindColorExtensions.success).toBe(
+      'rgb(var(--oe-color-success-rgb) / <alpha-value>)',
+    );
   });
 });

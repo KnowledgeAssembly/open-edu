@@ -1,104 +1,110 @@
 export const tailwindColorExtensions: Record<string, string> = {
   // Surface colors
-  surface: 'var(--oe-color-surface)',
-  'surface-dim': 'var(--oe-color-surface-dim)',
-  'surface-bright': 'var(--oe-color-surface-bright)',
-  'surface-container-lowest': 'var(--oe-color-surface-container-lowest)',
-  'surface-container-low': 'var(--oe-color-surface-container-low)',
-  'surface-container': 'var(--oe-color-surface-container)',
-  'surface-container-high': 'var(--oe-color-surface-container-high)',
-  'surface-container-highest': 'var(--oe-color-surface-container-highest)',
-  'on-surface': 'var(--oe-color-on-surface)',
-  'on-surface-variant': 'var(--oe-color-on-surface-variant)',
-  'inverse-surface': 'var(--oe-color-inverse-surface)',
-  'inverse-on-surface': 'var(--oe-color-inverse-on-surface)',
-  'surface-variant': 'var(--oe-color-surface-variant)',
+  surface: 'rgb(var(--oe-color-surface-rgb) / <alpha-value>)',
+  'surface-dim': 'rgb(var(--oe-color-surface-dim-rgb) / <alpha-value>)',
+  'surface-bright': 'rgb(var(--oe-color-surface-bright-rgb) / <alpha-value>)',
+  'surface-container-lowest': 'rgb(var(--oe-color-surface-container-lowest-rgb) / <alpha-value>)',
+  'surface-container-low': 'rgb(var(--oe-color-surface-container-low-rgb) / <alpha-value>)',
+  'surface-container': 'rgb(var(--oe-color-surface-container-rgb) / <alpha-value>)',
+  'surface-container-high': 'rgb(var(--oe-color-surface-container-high-rgb) / <alpha-value>)',
+  'surface-container-highest': 'rgb(var(--oe-color-surface-container-highest-rgb) / <alpha-value>)',
+  'on-surface': 'rgb(var(--oe-color-on-surface-rgb) / <alpha-value>)',
+  'on-surface-variant': 'rgb(var(--oe-color-on-surface-variant-rgb) / <alpha-value>)',
+  'inverse-surface': 'rgb(var(--oe-color-inverse-surface-rgb) / <alpha-value>)',
+  'inverse-on-surface': 'rgb(var(--oe-color-inverse-on-surface-rgb) / <alpha-value>)',
+  'surface-variant': 'rgb(var(--oe-color-surface-variant-rgb) / <alpha-value>)',
 
   // Outline / border
-  outline: 'var(--oe-color-outline)',
-  'outline-variant': 'var(--oe-color-outline-variant)',
-  'surface-tint': 'var(--oe-color-surface-tint)',
+  outline: 'rgb(var(--oe-color-outline-rgb) / <alpha-value>)',
+  'outline-variant': 'rgb(var(--oe-color-outline-variant-rgb) / <alpha-value>)',
+  'surface-tint': 'rgb(var(--oe-color-surface-tint-rgb) / <alpha-value>)',
 
   // Primary
-  primary: 'var(--oe-color-primary)',
-  'on-primary': 'var(--oe-color-on-primary)',
-  'primary-container': 'var(--oe-color-primary-container)',
-  'on-primary-container': 'var(--oe-color-on-primary-container)',
-  'inverse-primary': 'var(--oe-color-inverse-primary)',
+  primary: 'rgb(var(--oe-color-primary-rgb) / <alpha-value>)',
+  'on-primary': 'rgb(var(--oe-color-on-primary-rgb) / <alpha-value>)',
+  'primary-container': 'rgb(var(--oe-color-primary-container-rgb) / <alpha-value>)',
+  'on-primary-container': 'rgb(var(--oe-color-on-primary-container-rgb) / <alpha-value>)',
+  'inverse-primary': 'rgb(var(--oe-color-inverse-primary-rgb) / <alpha-value>)',
 
   // Secondary
-  secondary: 'var(--oe-color-secondary)',
-  'on-secondary': 'var(--oe-color-on-secondary)',
-  'secondary-container': 'var(--oe-color-secondary-container)',
-  'on-secondary-container': 'var(--oe-color-on-secondary-container)',
+  secondary: 'rgb(var(--oe-color-secondary-rgb) / <alpha-value>)',
+  'on-secondary': 'rgb(var(--oe-color-on-secondary-rgb) / <alpha-value>)',
+  'secondary-container': 'rgb(var(--oe-color-secondary-container-rgb) / <alpha-value>)',
+  'on-secondary-container': 'rgb(var(--oe-color-on-secondary-container-rgb) / <alpha-value>)',
 
   // Tertiary
-  tertiary: 'var(--oe-color-tertiary)',
-  'on-tertiary': 'var(--oe-color-on-tertiary)',
-  'tertiary-container': 'var(--oe-color-tertiary-container)',
-  'on-tertiary-container': 'var(--oe-color-on-tertiary-container)',
+  tertiary: 'rgb(var(--oe-color-tertiary-rgb) / <alpha-value>)',
+  'on-tertiary': 'rgb(var(--oe-color-on-tertiary-rgb) / <alpha-value>)',
+  'tertiary-container': 'rgb(var(--oe-color-tertiary-container-rgb) / <alpha-value>)',
+  'on-tertiary-container': 'rgb(var(--oe-color-on-tertiary-container-rgb) / <alpha-value>)',
 
   // Error / destructive
-  destructive: 'var(--oe-color-error)',
-  error: 'var(--oe-color-error)',
-  'on-error': 'var(--oe-color-on-error)',
-  'error-container': 'var(--oe-color-error-container)',
-  'on-error-container': 'var(--oe-color-on-error-container)',
+  destructive: 'rgb(var(--oe-color-error-rgb) / <alpha-value>)',
+  error: 'rgb(var(--oe-color-error-rgb) / <alpha-value>)',
+  'on-error': 'rgb(var(--oe-color-on-error-rgb) / <alpha-value>)',
+  'error-container': 'rgb(var(--oe-color-error-container-rgb) / <alpha-value>)',
+  'on-error-container': 'rgb(var(--oe-color-on-error-container-rgb) / <alpha-value>)',
+
+  // Success / warning
+  success: 'rgb(var(--oe-color-success-rgb) / <alpha-value>)',
+  'success-container': 'rgb(var(--oe-color-success-container-rgb) / <alpha-value>)',
+  'on-success': 'rgb(var(--oe-color-on-success-rgb) / <alpha-value>)',
+  'on-success-container': 'rgb(var(--oe-color-on-success-container-rgb) / <alpha-value>)',
+  warning: 'rgb(var(--oe-color-warning-rgb) / <alpha-value>)',
 
   // Fixed variants
-  'primary-fixed': 'var(--oe-color-primary-fixed)',
-  'primary-fixed-dim': 'var(--oe-color-primary-fixed-dim)',
-  'on-primary-fixed': 'var(--oe-color-on-primary-fixed)',
-  'on-primary-fixed-variant': 'var(--oe-color-on-primary-fixed-variant)',
-  'secondary-fixed': 'var(--oe-color-secondary-fixed)',
-  'secondary-fixed-dim': 'var(--oe-color-secondary-fixed-dim)',
-  'on-secondary-fixed': 'var(--oe-color-on-secondary-fixed)',
-  'on-secondary-fixed-variant': 'var(--oe-color-on-secondary-fixed-variant)',
-  'tertiary-fixed': 'var(--oe-color-tertiary-fixed)',
-  'tertiary-fixed-dim': 'var(--oe-color-tertiary-fixed-dim)',
-  'on-tertiary-fixed': 'var(--oe-color-on-tertiary-fixed)',
-  'on-tertiary-fixed-variant': 'var(--oe-color-on-tertiary-fixed-variant)',
+  'primary-fixed': 'rgb(var(--oe-color-primary-fixed-rgb) / <alpha-value>)',
+  'primary-fixed-dim': 'rgb(var(--oe-color-primary-fixed-dim-rgb) / <alpha-value>)',
+  'on-primary-fixed': 'rgb(var(--oe-color-on-primary-fixed-rgb) / <alpha-value>)',
+  'on-primary-fixed-variant': 'rgb(var(--oe-color-on-primary-fixed-variant-rgb) / <alpha-value>)',
+  'secondary-fixed': 'rgb(var(--oe-color-secondary-fixed-rgb) / <alpha-value>)',
+  'secondary-fixed-dim': 'rgb(var(--oe-color-secondary-fixed-dim-rgb) / <alpha-value>)',
+  'on-secondary-fixed': 'rgb(var(--oe-color-on-secondary-fixed-rgb) / <alpha-value>)',
+  'on-secondary-fixed-variant':
+    'rgb(var(--oe-color-on-secondary-fixed-variant-rgb) / <alpha-value>)',
+  'tertiary-fixed': 'rgb(var(--oe-color-tertiary-fixed-rgb) / <alpha-value>)',
+  'tertiary-fixed-dim': 'rgb(var(--oe-color-tertiary-fixed-dim-rgb) / <alpha-value>)',
+  'on-tertiary-fixed': 'rgb(var(--oe-color-on-tertiary-fixed-rgb) / <alpha-value>)',
+  'on-tertiary-fixed-variant': 'rgb(var(--oe-color-on-tertiary-fixed-variant-rgb) / <alpha-value>)',
 
   // Background
-  background: 'var(--oe-color-background)',
-  'on-background': 'var(--oe-color-on-background)',
+  background: 'rgb(var(--oe-color-background-rgb) / <alpha-value>)',
+  'on-background': 'rgb(var(--oe-color-on-background-rgb) / <alpha-value>)',
 
   // Misc
-  'primary-light': 'var(--oe-color-primary-light)',
-  success: 'var(--oe-color-success)',
-  warning: 'var(--oe-color-warning)',
+  'primary-light': 'rgb(var(--oe-color-primary-light-rgb) / <alpha-value>)',
 
   // Shadcn/ui semantic aliases — map to design-system tokens
-  foreground: 'var(--oe-color-on-surface)',
-  border: 'var(--oe-color-outline-variant)',
-  input: 'var(--oe-color-outline-variant)',
-  ring: 'var(--oe-color-primary)',
-  'ring-offset': 'var(--oe-color-background)',
+  foreground: 'rgb(var(--oe-color-on-surface-rgb) / <alpha-value>)',
+  border: 'rgb(var(--oe-color-outline-variant-rgb) / <alpha-value>)',
+  input: 'rgb(var(--oe-color-outline-variant-rgb) / <alpha-value>)',
+  ring: 'rgb(var(--oe-color-primary-rgb) / <alpha-value>)',
+  'ring-offset': 'rgb(var(--oe-color-background-rgb) / <alpha-value>)',
 
   // Card
-  card: 'var(--oe-color-surface-container-lowest)',
-  'card-foreground': 'var(--oe-color-on-surface)',
+  card: 'rgb(var(--oe-color-surface-container-lowest-rgb) / <alpha-value>)',
+  'card-foreground': 'rgb(var(--oe-color-on-surface-rgb) / <alpha-value>)',
 
   // Popover
-  popover: 'var(--oe-color-surface-container)',
-  'popover-foreground': 'var(--oe-color-on-surface)',
+  popover: 'rgb(var(--oe-color-surface-container-rgb) / <alpha-value>)',
+  'popover-foreground': 'rgb(var(--oe-color-on-surface-rgb) / <alpha-value>)',
 
   // Muted
-  muted: 'var(--oe-color-surface-variant)',
-  'muted-foreground': 'var(--oe-color-on-surface-variant)',
+  muted: 'rgb(var(--oe-color-surface-variant-rgb) / <alpha-value>)',
+  'muted-foreground': 'rgb(var(--oe-color-on-surface-variant-rgb) / <alpha-value>)',
 
   // Accent
-  accent: 'var(--oe-color-accent)',
-  'accent-foreground': 'var(--oe-color-on-secondary)',
+  accent: 'rgb(var(--oe-color-accent-rgb) / <alpha-value>)',
+  'accent-foreground': 'rgb(var(--oe-color-on-secondary-rgb) / <alpha-value>)',
 
   // Primary foreground
-  'primary-foreground': 'var(--oe-color-on-primary)',
+  'primary-foreground': 'rgb(var(--oe-color-on-primary-rgb) / <alpha-value>)',
 
   // Secondary foreground
-  'secondary-foreground': 'var(--oe-color-on-secondary)',
+  'secondary-foreground': 'rgb(var(--oe-color-on-secondary-rgb) / <alpha-value>)',
 
   // Destructive foreground
-  'destructive-foreground': 'var(--oe-color-on-error)',
+  'destructive-foreground': 'rgb(var(--oe-color-on-error-rgb) / <alpha-value>)',
 };
 
 export const tailwindFontFamilyExtensions: Record<string, string> = {
@@ -196,6 +202,14 @@ export const tailwindFontSizeExtensions: Record<string, [string, Record<string, 
     },
   ],
   'label-caps': [
+    'var(--oe-font-productive-label-size)',
+    {
+      lineHeight: 'var(--oe-font-productive-label-lineHeight)',
+      letterSpacing: 'var(--oe-font-productive-label-letterSpacing)',
+      fontWeight: 'var(--oe-font-productive-label-weight)',
+    },
+  ],
+  label: [
     'var(--oe-font-productive-label-size)',
     {
       lineHeight: 'var(--oe-font-productive-label-lineHeight)',

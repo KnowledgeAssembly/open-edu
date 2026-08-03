@@ -26,7 +26,12 @@ describe('tailwind token extensions', () => {
 
   it('exports color extensions', () => {
     expect(tailwindColorExtensions).toHaveProperty('primary');
-    expect(tailwindColorExtensions['primary']).toBe('var(--oe-color-primary)');
+    expect(tailwindColorExtensions['primary']).toBe(
+      'rgb(var(--oe-color-primary-rgb) / <alpha-value>)',
+    );
+    expect(tailwindColorExtensions['success-container']).toBe(
+      'rgb(var(--oe-color-success-container-rgb) / <alpha-value>)',
+    );
   });
 
   it('exports font family extensions', () => {

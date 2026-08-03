@@ -185,6 +185,15 @@ describe('flattenTheme', () => {
     expect(vars['--oe-color-background']).toBe('#fcfaf8');
   });
 
+  it('emits rgb triplet color vars for alpha-value support', () => {
+    const vars = flattenTheme(testTheme);
+    expect(vars['--oe-color-background-rgb']).toBe('252 250 248');
+    expect(vars['--oe-color-secondary-rgb']).toBe('102 94 119');
+    expect(vars['--oe-color-success']).toBe('#16a34a');
+    expect(vars['--oe-color-success-rgb']).toBe('22 163 74');
+    expect(vars['--oe-color-warning-rgb']).toBe('184 134 45');
+  });
+
   it('emits productive typography CSS vars', () => {
     const vars = flattenTheme(testTheme);
     expect(vars['--oe-font-productive-body-family']).toBe(
