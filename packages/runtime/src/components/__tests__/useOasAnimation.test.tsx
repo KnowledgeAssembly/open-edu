@@ -122,4 +122,25 @@ describe('useOasAnimation', () => {
     act(() => result.current.nextStep());
     expect(document.body.innerHTML).toContain('Step 1 of 1');
   });
+
+  it('announces the new step after navigating', () => {
+    const config: AnimationConfigInput = {
+      backend: 'lottie',
+      effects: [
+        { target: 'a', effect: 'flow', step: 1 },
+        { target: 'b', effect: 'pulse', step: 2 },
+        { target: 'c', effect: 'draw', step: 3 },
+      ],
+    };
+    const { result } = renderHook(() => useOasAnimation(config), { wrapper });
+
+    act(() => result.current.nextStep());
+    expect(document.body.innerHTML).toContain('Step 2 of 3');
+
+    act(() => result.current.nextStep());
+    expect(document.body.innerHTML).toContain('Step 3 of 3');
+
+    act(() => result.current.prevStep());
+    expect(document.body.innerHTML).toContain('Step 2 of 3');
+  });
 });

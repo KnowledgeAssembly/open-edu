@@ -28,7 +28,10 @@ export function useOasAnimation(
 
   const parsed = useMemo(() => AnimationConfigSchema.safeParse(config), [config]);
 
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
   const [status, setStatusState] = useState<OasAnimationStatus>('idle');
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -92,18 +95,17 @@ export function useOasAnimation(
 
   const nextStep = useCallback(() => {
     if (!valid) return;
-    setCurrentStep((step) => {
-      const next = Math.min(step + 1, totalSteps - 1);
-      return next;
-    });
-    announceStep(currentStep);
+    const next = Math.min(currentStep + 1, totalSteps - 1);
+    setCurrentStep(next);
+    announceStep(next);
     setStatus('started');
   }, [valid, totalSteps, setStatus, announceStep, currentStep]);
 
   const prevStep = useCallback(() => {
     if (!valid) return;
-    setCurrentStep((step) => Math.max(step - 1, 0));
-    announceStep(currentStep);
+    const next = Math.max(currentStep - 1, 0);
+    setCurrentStep(next);
+    announceStep(next);
     setStatus('started');
   }, [valid, setStatus, announceStep, currentStep]);
 
