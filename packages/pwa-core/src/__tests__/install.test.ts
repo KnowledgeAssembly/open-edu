@@ -40,4 +40,21 @@ describe('Install management', () => {
     const result = await promptInstall();
     expect(result.outcome).toBe('dismissed');
   });
+
+  it('promptInstall calls prompt with the event as this binding', async () => {
+    const event = new Event('beforeinstallprompt');
+    const promptSpy = vi.fn(function (this: unknown) {
+      expect(this).toBe(event);
+    });
+    Object.defineProperty(event, 'prompt', { value: promptSpy });
+    Object.defineProperty(event, 'userChoice', {
+      value: Promise.resolve({ outcome: 'accepted' }),
+    });
+    window.dispatchEvent(event);
+
+    const result = await promptInstall();
+
+    expect(promptSpy).toHaveBeenCalledOnce();
+    expect(result.outcome).toBe('accepted');
+  });
 });

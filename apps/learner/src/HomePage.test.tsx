@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '@open-edu/i18n';
+import { getInstallState } from '@open-edu/pwa-core';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 function renderWithProvider(ui: React.ReactElement) {
@@ -22,6 +23,15 @@ vi.mock('../badgesStorage', () => ({
 
 vi.mock('../bundleProgressStorage', () => ({
   getAllBundleProgress: vi.fn(() => ({})),
+}));
+
+vi.mock('@open-edu/pwa-core', () => ({
+  getInstallState: vi.fn().mockReturnValue({
+    isInstallable: false,
+    isInstalled: false,
+    platform: 'desktop',
+  }),
+  promptInstall: vi.fn().mockResolvedValue({ outcome: 'dismissed' }),
 }));
 
 describe('HomePage', () => {
@@ -55,5 +65,25 @@ describe('HomePage', () => {
     renderWithProvider(<HomePage onNavigate={onNavigate} />);
     fireEvent.click(screen.getByText('Browse Courses'));
     expect(onNavigate).toHaveBeenCalledWith({ view: 'catalog' });
+  });
+
+  it('renders install prompt at the bottom when installable', () => {
+    vi.mocked(getInstallState).mockReturnValue({
+      isInstallable: true,
+      isInstalled: false,
+      platform: 'desktop',
+    });
+    renderWithProvider(<HomePage onNavigate={vi.fn()} />);
+    expect(screen.getByText('Install App')).toBeInTheDocument();
+  });
+
+  it('hides install prompt when already installed', () => {
+    vi.mocked(getInstallState).mockReturnValue({
+      isInstallable: true,
+      isInstalled: true,
+      platform: 'desktop',
+    });
+    renderWithProvider(<HomePage onNavigate={vi.fn()} />);
+    expect(screen.queryByText('Install App')).not.toBeInTheDocument();
   });
 });

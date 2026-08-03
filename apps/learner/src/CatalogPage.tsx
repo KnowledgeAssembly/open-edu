@@ -26,8 +26,6 @@ import {
   SelectValue,
 } from '@open-edu/design-system';
 import type { AppView } from './AppShell';
-import { InstallPrompt } from './components/InstallPrompt.js';
-import { useInstallPrompt } from './hooks/useInstallPrompt.js';
 import { RotateCcw, Trash2 } from 'lucide-react';
 import { InstallCourseDialog } from './components/InstallCourseDialog.js';
 import { installFromSource } from './courseDownload';
@@ -69,7 +67,6 @@ export function CatalogPage({
   onRemoveInstalled,
 }: CatalogPageProps): JSX.Element {
   const { t } = useTranslation();
-  const installPrompt = useInstallPrompt();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   useEffect(() => {
@@ -276,12 +273,6 @@ export function CatalogPage({
         open={showInstallDialog}
         onClose={() => setShowInstallDialog(false)}
         onInstall={handleInstall}
-      />
-
-      <InstallPrompt
-        isInstallable={installPrompt.isInstallable}
-        isInstalled={installPrompt.isInstalled}
-        onInstall={installPrompt.install}
       />
 
       {continueList.length > 0 && (

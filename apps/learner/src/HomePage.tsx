@@ -5,6 +5,8 @@ import { type AppView } from './AppShell';
 import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
 import { getAllBundleProgress, type BundleProgressData } from './bundleProgressStorage';
+import { InstallPrompt } from './components/InstallPrompt.js';
+import { useInstallPrompt } from './hooks/useInstallPrompt.js';
 import { OpenModule } from '@open-edu/design-system';
 import {
   Button,
@@ -27,6 +29,7 @@ export function HomePage({
   bundleEntries,
 }: HomePageProps): JSX.Element {
   const { t } = useTranslation();
+  const installPrompt = useInstallPrompt();
   const [progress, setProgress] = useState<ProgressData>({});
   const [badgeData, setBadgeData] = useState<BadgesData>({});
   const [bundleProg, setBundleProg] = useState<BundleProgressData>({});
@@ -136,6 +139,12 @@ export function HomePage({
       <div className="w-full overflow-hidden opacity-[0.06]" aria-hidden="true">
         <AssemblyFlow density="dense" animated className="h-lg w-full" />
       </div>
+
+      <InstallPrompt
+        isInstallable={installPrompt.isInstallable}
+        isInstalled={installPrompt.isInstalled}
+        onInstall={installPrompt.install}
+      />
     </div>
   );
 }

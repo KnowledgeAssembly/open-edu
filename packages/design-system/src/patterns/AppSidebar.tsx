@@ -116,8 +116,9 @@ export function AppSidebar({
               variant={isActive ? 'secondary' : 'ghost'}
               size={collapsed ? 'icon' : 'sm'}
               className={cn(
-                'hover:bg-surface-variant/30 gap-2 transition-colors',
-                !isActive && 'hover:text-on-surface text-on-surface-variant',
+                'gap-2 transition-colors',
+                !isActive &&
+                  'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
                 collapsed ? 'w-full justify-center' : 'w-full justify-start',
               )}
               onClick={() => onNavigate(item.id)}
@@ -168,8 +169,9 @@ export function AppSidebar({
                           size="sm"
                           disabled={isFuture}
                           className={cn(
-                            'hover:bg-surface-variant/30 w-full gap-2 text-left transition-colors',
-                            !isCurrent && 'hover:text-on-surface text-on-surface-variant',
+                            'w-full gap-2 text-left transition-colors',
+                            !isCurrent &&
+                              'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
                             collapsed ? 'justify-center px-0' : 'justify-start px-3',
                           )}
                           onClick={() => step.onClick?.()}
