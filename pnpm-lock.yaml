@@ -1112,6 +1112,9 @@ importers:
       '@open-edu/design-system':
         specifier: workspace:*
         version: link:../design-system
+      '@open-edu/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@open-edu/schemas':
         specifier: workspace:^
         version: link:../schemas

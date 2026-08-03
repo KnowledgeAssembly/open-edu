@@ -4,6 +4,7 @@ import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
 import { AnimationConfigSchema } from '@open-edu/schemas';
+import { useTranslation } from '@open-edu/i18n';
 import { useObserveMode } from '../../use-observe-mode';
 import { WidgetError } from '../WidgetError';
 
@@ -36,6 +37,7 @@ function ProcessExplainerComponent(props: {
   storedState?: unknown;
 }) {
   const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { t } = useTranslation();
   const parsed = processExplainerSchema.safeParse(rawConfig);
 
   const [revealedCount, setRevealedCount] = useState(() => {
@@ -84,19 +86,26 @@ function ProcessExplainerComponent(props: {
   return (
     <div
       role="group"
-      aria-label={config.title ?? 'Process explainer'}
+      aria-label={config.title ?? t('widgets.process_explainer.title_default')}
       data-testid="process-explainer"
     >
       {config.title && <h3 className="text-on-surface mb-sm font-semibold">{config.title}</h3>}
 
-      <ol role="list" className="space-y-md" aria-label="Process steps">
+      <ol
+        role="list"
+        className="space-y-md"
+        aria-label={t('widgets.process_explainer.steps_label')}
+      >
         {config.steps.map((step, index) => {
           const revealed = index < revealedCount;
           return (
             <li
               key={step.id}
               role="listitem"
-              aria-label={`Step ${index + 1}: ${step.title}`}
+              aria-label={t('widgets.process_explainer.step_label', {
+                step: String(index + 1),
+                title: step.title,
+              })}
               className="border-outline-variant bg-surface-container-lowest gap-sm p-md flex items-start rounded-xl border"
             >
               <span
@@ -127,10 +136,13 @@ function ProcessExplainerComponent(props: {
       {config.stepByStep && revealedCount < config.steps.length && (
         <div className="mt-md text-center">
           <Button variant="default" onClick={handleRevealNext} data-testid="reveal-next">
-            Reveal Next Step
+            {t('widgets.process_explainer.reveal_next')}
           </Button>
           <p className="text-on-surface/70 mt-xs text-sm">
-            Step {revealedCount + 1} of {config.steps.length}
+            {t('widgets.process_explainer.step_of', {
+              step: String(revealedCount + 1),
+              total: String(config.steps.length),
+            })}
           </p>
         </div>
       )}
@@ -138,7 +150,7 @@ function ProcessExplainerComponent(props: {
       {config.stepByStep && revealedCount >= config.steps.length && !finished && (
         <div className="mt-md text-center">
           <p className="text-on-surface font-semibold" data-testid="explainer-complete">
-            All steps revealed!
+            {t('widgets.process_explainer.all_steps')}
           </p>
           <Button
             variant="default"
@@ -146,7 +158,7 @@ function ProcessExplainerComponent(props: {
             data-testid="finish-button"
             className="mt-sm"
           >
-            Finish
+            {t('widgets.process_explainer.finish')}
           </Button>
         </div>
       )}
@@ -158,14 +170,16 @@ function ProcessExplainerComponent(props: {
           data-testid="explainer-finished"
           className="mt-md text-center"
         >
-          <p className="text-on-surface font-semibold">All steps viewed.</p>
+          <p className="text-on-surface font-semibold">
+            {t('widgets.process_explainer.all_steps_viewed')}
+          </p>
         </div>
       )}
 
       {isObserve && showAcknowledgeButton && (
         <div className="border-outline-variant p-md mt-md flex items-center justify-center border-t">
           <Button variant="default" onClick={handleAcknowledge} data-testid="observe-acknowledge">
-            Mark as seen ✓
+            {t('widgets.process_explainer.mark_as_seen')}
           </Button>
         </div>
       )}

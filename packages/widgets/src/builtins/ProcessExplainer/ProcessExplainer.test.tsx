@@ -1,8 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { I18nProvider } from '@open-edu/i18n';
+import widgetsDict from '@open-edu/i18n/locales/en/widgets.json';
 import { processExplainer } from './ProcessExplainer';
 
 const WidgetComponent = processExplainer.render;
+
+function wrapper({ children }: { children: ReactNode }) {
+  return (
+    <I18nProvider dictionaries={{ en: { widgets: widgetsDict as Record<string, string> } }}>
+      {children}
+    </I18nProvider>
+  );
+}
 
 function renderWidget(config: Record<string, unknown> = {}) {
   const emitInteraction = vi.fn();
@@ -14,6 +25,7 @@ function renderWidget(config: Record<string, unknown> = {}) {
       emitInteraction={emitInteraction}
       complete={complete}
     />,
+    { wrapper },
   );
   return { emitInteraction, complete, ...result };
 }

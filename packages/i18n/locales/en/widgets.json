@@ -6,5 +6,14 @@
   "common.next": "Next",
   "common.previous": "Previous",
   "common.save": "Save",
-  "common.cancel": "Cancel"
+  "common.cancel": "Cancel",
+  "process_explainer.title_default": "Process explainer",
+  "process_explainer.steps_label": "Process steps",
+  "process_explainer.step_label": "Step {{step}}: {{title}}",
+  "process_explainer.reveal_next": "Reveal Next Step",
+  "process_explainer.step_of": "Step {{step}} of {{total}}",
+  "process_explainer.all_steps": "All steps revealed!",
+  "process_explainer.finish": "Finish",
+  "process_explainer.all_steps_viewed": "All steps viewed.",
+  "process_explainer.mark_as_seen": "Mark as seen ✓"
 }
