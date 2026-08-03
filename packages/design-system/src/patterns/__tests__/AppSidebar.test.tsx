@@ -47,6 +47,29 @@ describe('AppSidebar', () => {
     expect(onNavigate).toHaveBeenCalledWith('catalog');
   });
 
+  it('applies hover tint only to non-selected nav items', () => {
+    render(<AppSidebar items={navItems} currentItemId="catalog" onNavigate={() => {}} />);
+    const catalogBtn = screen.getByTestId('appsidebar-nav-catalog');
+    const homeBtn = screen.getByTestId('appsidebar-nav-home');
+    expect(catalogBtn.className).not.toContain('hover:bg-surface-variant/30');
+    expect(homeBtn.className).toContain('hover:bg-surface-variant/30');
+  });
+
+  it('applies hover tint only to non-current step items', () => {
+    render(
+      <AppSidebar
+        items={navItems}
+        currentItemId="home"
+        onNavigate={() => {}}
+        sections={sections}
+      />,
+    );
+    const currentBtn = screen.getByTestId('step-step2');
+    const completedBtn = screen.getByTestId('step-step1');
+    expect(currentBtn.className).not.toContain('hover:bg-surface-variant/30');
+    expect(completedBtn.className).toContain('hover:bg-surface-variant/30');
+  });
+
   it('renders course step sections', () => {
     render(
       <AppSidebar
