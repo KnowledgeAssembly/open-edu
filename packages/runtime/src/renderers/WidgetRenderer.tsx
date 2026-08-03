@@ -4,6 +4,7 @@ import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
+import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import type { WidgetAnswer } from '@open-edu/schemas';
 
@@ -116,10 +117,20 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     storedState,
   };
 
+  const animationConfig = node.config?.animation;
+
   return (
     <WidgetErrorBoundary widgetId={widgetId} message={t('runtime.widget.load_error')}>
       <WidgetCanvas widgetId={widgetId} minHeight={200}>
-        <WidgetComponent {...widgetProps} />
+        {animationConfig ? (
+          <OasAnimationWrapper
+            config={animationConfig}
+            resolveSrc={resolveAsset}
+            staticChildren={<WidgetComponent {...widgetProps} />}
+          />
+        ) : (
+          <WidgetComponent {...widgetProps} />
+        )}
       </WidgetCanvas>
     </WidgetErrorBoundary>
   );

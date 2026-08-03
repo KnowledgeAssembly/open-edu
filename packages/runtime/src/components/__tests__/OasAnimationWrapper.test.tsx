@@ -1,0 +1,124 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
+import { LiveRegionProvider } from '@open-edu/accessibility';
+import { OasAnimationWrapper } from '../OasAnimationWrapper.js';
+
+vi.mock('@dotlottie/react-player', () => ({
+  DotLottiePlayer: ({ onEvent }: { onEvent?: (name: string) => void }) => (
+    <div data-testid="mocked-dotlottie">
+      <button data-testid="mock-complete" onClick={() => onEvent?.('complete')}>
+        complete
+      </button>
+    </div>
+  ),
+  PlayerEvents: {
+    Complete: 'complete',
+    Pause: 'pause',
+    Ready: 'ready',
+    Play: 'play',
+    DataReady: 'data_ready',
+    Error: 'error',
+    Stop: 'stop',
+  },
+}));
+
+function wrapper({ children }: { children: ReactNode }) {
+  return (
+    <I18nProvider dictionaries={{ en: { runtime: runtimeDict } }}>
+      <LiveRegionProvider>{children}</LiveRegionProvider>
+    </I18nProvider>
+  );
+}
+
+const lottieConfig = {
+  backend: 'lottie',
+  src: 'assets/animations/water-cycle.lottie',
+  trigger: 'load',
+  loop: true,
+};
+
+describe('OasAnimationWrapper', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('renders the dotLottie player for lottie backend', () => {
+    render(<OasAnimationWrapper config={lottieConfig} />, { wrapper });
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+  });
+
+  it('resolves relative src against assetBaseUrl', () => {
+    render(<OasAnimationWrapper config={lottieConfig} assetBaseUrl="/course" />, { wrapper });
+    const el = screen.getByTestId('mocked-dotlottie');
+    expect(el).toBeInTheDocument();
+  });
+
+  it('uses resolveSrc when provided', () => {
+    const resolveSrc = vi.fn((src: string) => `/resolved/${src}`);
+    render(<OasAnimationWrapper config={lottieConfig} resolveSrc={resolveSrc} />, { wrapper });
+    expect(resolveSrc).toHaveBeenCalledWith('assets/animations/water-cycle.lottie');
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+  });
+
+  it('renders staticChildren when config is missing src', () => {
+    render(
+      <OasAnimationWrapper config={{ backend: 'lottie' }} staticChildren={<p>Fallback</p>} />,
+      { wrapper },
+    );
+    expect(screen.getByText('Fallback')).toBeInTheDocument();
+  });
+
+  it('renders staticChildren for OS reduced motion', () => {
+    const matchMediaMock = vi.fn((query: string) => ({
+      matches: query.includes('reduce'),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal('matchMedia', matchMediaMock);
+
+    render(
+      <OasAnimationWrapper
+        config={lottieConfig}
+        staticChildren={<p>Static</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByText('Static')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it('renders svg backend as an image', () => {
+    render(
+      <OasAnimationWrapper
+        config={{ backend: 'svg', src: 'diagrams/heart.svg' }}
+        assetBaseUrl="/course"
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-svg-backend')).toBeInTheDocument();
+  });
+
+  it('renders controls when showControls is true and toggles status', () => {
+    render(<OasAnimationWrapper config={lottieConfig} showControls />, { wrapper });
+
+    expect(screen.getByTestId('oas-control-pause')).toBeInTheDocument();
+    expect(screen.getByTestId('oas-control-next')).toBeInTheDocument();
+    expect(screen.getByTestId('oas-control-prev')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('oas-control-pause'));
+    expect(screen.getByTestId('oas-control-play')).toBeInTheDocument();
+  });
+
+  it('returns null when config is invalid and no staticChildren', () => {
+    const { container } = render(<OasAnimationWrapper config={{ backend: 'flash' }} />, {
+      wrapper,
+    });
+    expect(container.querySelector('[data-testid="oas-lottie-backend"]')).toBeNull();
+    expect(container.querySelector('[data-testid="oas-svg-backend"]')).toBeNull();
+    expect(container.querySelector('[data-testid="oas-static-fallback"]')).toBeNull();
+  });
+});
