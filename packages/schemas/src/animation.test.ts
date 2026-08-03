@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  AnimationBackendEnum,
-  AnimationEffectEnum,
-  AnimationConfigSchema,
-} from './animation';
+import { AnimationBackendEnum, AnimationEffectEnum, AnimationConfigSchema } from './animation';
 
 describe('AnimationBackendEnum', () => {
   it('should default to lottie when omitted', () => {

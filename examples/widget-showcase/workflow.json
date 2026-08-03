@@ -1,91 +1,91 @@
 {
- "routing": {
-  "nodes/intro.md": {
-   "onComplete": "nodes/visual-counting.json"
-  },
-  "nodes/visual-counting.json": {
-   "onComplete": "nodes/multiple-choice.json"
-  },
-  "nodes/multiple-choice.json": {
-   "onComplete": "nodes/matching.json"
-  },
-  "nodes/matching.json": {
-   "onComplete": "nodes/drag-drop.json"
-  },
-  "nodes/drag-drop.json": {
-   "onComplete": "nodes/sequencing.json"
-  },
-  "nodes/sequencing.json": {
-   "onComplete": "nodes/fill-blank.json"
-  },
-  "nodes/fill-blank.json": {
-   "onComplete": "nodes/story-question.json"
-  },
-  "nodes/story-question.json": {
-   "onComplete": "nodes/real-world.json"
-  },
-  "nodes/real-world.json": {
-   "onComplete": "nodes/fraction-visual.json"
-  },
-  "nodes/fraction-visual.json": {
-   "onComplete": "nodes/place-value-chart.json"
-  },
-  "nodes/place-value-chart.json": {
-   "onComplete": "nodes/grid-area.json"
-  },
-  "nodes/grid-area.json": {
-   "onComplete": "nodes/chart-reader.json"
-  },
-  "nodes/chart-reader.json": {
-   "onComplete": "nodes/clock-time.json"
-  },
-  "nodes/clock-time.json": {
-   "onComplete": "nodes/measurement-scale.json"
-  },
-  "nodes/measurement-scale.json": {
-   "onComplete": "nodes/callout.json"
-  },
-  "nodes/callout.json": {
-   "onComplete": "nodes/image-compare.json"
-  },
-  "nodes/image-compare.json": {
-   "onComplete": "nodes/hotspot.json"
-  },
-  "nodes/hotspot.json": {
-   "onComplete": "nodes/timeline.json"
-  },
-  "nodes/timeline.json": {
-   "onComplete": "nodes/label-diagram.json"
-  },
-  "nodes/label-diagram.json": {
-   "onComplete": "nodes/image-label.json"
-  },
-  "nodes/image-label.json": {
-   "onComplete": "nodes/audio-player.json"
-  },
-  "nodes/audio-player.json": {
-   "onComplete": "nodes/video-player.json"
-  },
-  "nodes/video-player.json": {
-   "onComplete": "nodes/flashcard.json"
-  },
-  "nodes/flashcard.json": {
-   "onComplete": "nodes/process-diagram.json"
-  },
-  "nodes/process-diagram.json": {
-   "onComplete": "nodes/number-line.json"
-  },
-  "nodes/number-line.json": {
-   "onComplete": "nodes/social-map.json"
-  },
-  "nodes/social-map.json": {
-   "onComplete": "nodes/animated-water-cycle.json"
-  },
-  "nodes/outro.md": {
-   "onComplete": "COMPLETED"
-  },
-  "nodes/animated-water-cycle.json": {
-   "onComplete": "nodes/outro.md"
+  "routing": {
+    "nodes/intro.md": {
+      "onComplete": "nodes/visual-counting.json"
+    },
+    "nodes/visual-counting.json": {
+      "onComplete": "nodes/multiple-choice.json"
+    },
+    "nodes/multiple-choice.json": {
+      "onComplete": "nodes/matching.json"
+    },
+    "nodes/matching.json": {
+      "onComplete": "nodes/drag-drop.json"
+    },
+    "nodes/drag-drop.json": {
+      "onComplete": "nodes/sequencing.json"
+    },
+    "nodes/sequencing.json": {
+      "onComplete": "nodes/fill-blank.json"
+    },
+    "nodes/fill-blank.json": {
+      "onComplete": "nodes/story-question.json"
+    },
+    "nodes/story-question.json": {
+      "onComplete": "nodes/real-world.json"
+    },
+    "nodes/real-world.json": {
+      "onComplete": "nodes/fraction-visual.json"
+    },
+    "nodes/fraction-visual.json": {
+      "onComplete": "nodes/place-value-chart.json"
+    },
+    "nodes/place-value-chart.json": {
+      "onComplete": "nodes/grid-area.json"
+    },
+    "nodes/grid-area.json": {
+      "onComplete": "nodes/chart-reader.json"
+    },
+    "nodes/chart-reader.json": {
+      "onComplete": "nodes/clock-time.json"
+    },
+    "nodes/clock-time.json": {
+      "onComplete": "nodes/measurement-scale.json"
+    },
+    "nodes/measurement-scale.json": {
+      "onComplete": "nodes/callout.json"
+    },
+    "nodes/callout.json": {
+      "onComplete": "nodes/image-compare.json"
+    },
+    "nodes/image-compare.json": {
+      "onComplete": "nodes/hotspot.json"
+    },
+    "nodes/hotspot.json": {
+      "onComplete": "nodes/timeline.json"
+    },
+    "nodes/timeline.json": {
+      "onComplete": "nodes/label-diagram.json"
+    },
+    "nodes/label-diagram.json": {
+      "onComplete": "nodes/image-label.json"
+    },
+    "nodes/image-label.json": {
+      "onComplete": "nodes/audio-player.json"
+    },
+    "nodes/audio-player.json": {
+      "onComplete": "nodes/video-player.json"
+    },
+    "nodes/video-player.json": {
+      "onComplete": "nodes/flashcard.json"
+    },
+    "nodes/flashcard.json": {
+      "onComplete": "nodes/process-diagram.json"
+    },
+    "nodes/process-diagram.json": {
+      "onComplete": "nodes/number-line.json"
+    },
+    "nodes/number-line.json": {
+      "onComplete": "nodes/social-map.json"
+    },
+    "nodes/social-map.json": {
+      "onComplete": "nodes/animated-water-cycle.json"
+    },
+    "nodes/outro.md": {
+      "onComplete": "COMPLETED"
+    },
+    "nodes/animated-water-cycle.json": {
+      "onComplete": "nodes/outro.md"
+    }
   }
- }
 }

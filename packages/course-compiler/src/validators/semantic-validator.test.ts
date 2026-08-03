@@ -247,7 +247,12 @@ describe('validateCourseModel', () => {
       },
     ];
     model.modules[0]!.lessons[0]!.assets = [
-      { id: 'wc', path: 'assets/animations/water-cycle.lottie', type: 'embed', placeholderGenerated: false },
+      {
+        id: 'wc',
+        path: 'assets/animations/water-cycle.lottie',
+        type: 'embed',
+        placeholderGenerated: false,
+      },
     ];
     const diags = validateCourseModel(model);
     expect(diags.some((d) => d.code === 'INVALID_ANIMATION_CONFIG')).toBe(false);
@@ -291,7 +296,12 @@ describe('validateCourseModel', () => {
       },
     ];
     model.modules[0]!.lessons[0]!.assets = [
-      { id: 'other', path: 'assets/images/diagram.svg', type: 'image', placeholderGenerated: false },
+      {
+        id: 'other',
+        path: 'assets/images/diagram.svg',
+        type: 'image',
+        placeholderGenerated: false,
+      },
     ];
     const diags = validateCourseModel(model);
     const missing = diags.find((d) => d.code === 'UNDECLARED_ANIMATION_ASSET');

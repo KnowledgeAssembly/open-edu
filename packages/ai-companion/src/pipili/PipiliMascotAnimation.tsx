@@ -54,11 +54,7 @@ export function PipiliMascotAnimation({
 
   if (staticPose) {
     return (
-      <Pipili
-        size={sizeToPipiliSize(size)}
-        mood={stateToMood[state]}
-        aria-label={ariaLabel}
-      />
+      <Pipili size={sizeToPipiliSize(size)} mood={stateToMood[state]} aria-label={ariaLabel} />
     );
   }
 

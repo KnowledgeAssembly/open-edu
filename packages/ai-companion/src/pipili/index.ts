@@ -19,9 +19,7 @@ export type {
   PipiliOasBindings,
 } from './types.js';
 
-export {
-  DEFAULT_PIPILI_OAS_BINDINGS,
-} from './types.js';
+export { DEFAULT_PIPILI_OAS_BINDINGS } from './types.js';
 
 export { PipiliMascotAnimation } from './PipiliMascotAnimation.js';
 export type { PipiliMascotAnimationProps } from './PipiliMascotAnimation.js';

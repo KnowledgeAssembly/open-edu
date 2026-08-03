@@ -66,7 +66,9 @@ export const AnimationEffectConfigSchema = z.object({
   duration: z.union([z.enum(['instant', 'fast', 'normal', 'slow']), z.number()]).optional(),
   delay: z.number().optional(),
   easing: z.string().optional(),
-  repeat: z.union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })]).optional(),
+  repeat: z
+    .union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })])
+    .optional(),
   direction: z.enum(['forward', 'reverse', 'alternate']).optional(),
 });
 

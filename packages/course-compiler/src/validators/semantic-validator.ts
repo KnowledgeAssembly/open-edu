@@ -270,7 +270,10 @@ function validateAssets(model: CourseModel, diagnostics: CompilerDiagnostic[]) {
 }
 
 function normalizeAssetPath(path: string): string {
-  return path.replace(/\\/g, '/').replace(/^\.?\//, '').replace(/^assets\//, '');
+  return path
+    .replace(/\\/g, '/')
+    .replace(/^\.?\//, '')
+    .replace(/^assets\//, '');
 }
 
 function validateAnimationConfigs(model: CourseModel, diagnostics: CompilerDiagnostic[]) {

@@ -97,7 +97,7 @@ function ProcessExplainerComponent(props: {
               key={step.id}
               role="listitem"
               aria-label={`Step ${index + 1}: ${step.title}`}
-              className="border-outline-variant bg-surface-container-lowest flex items-start gap-sm rounded-xl border p-md"
+              className="border-outline-variant bg-surface-container-lowest gap-sm p-md flex items-start rounded-xl border"
             >
               <span
                 className="text-on-primary bg-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-bold"
@@ -140,14 +140,24 @@ function ProcessExplainerComponent(props: {
           <p className="text-on-surface font-semibold" data-testid="explainer-complete">
             All steps revealed!
           </p>
-          <Button variant="default" onClick={handleFinish} data-testid="finish-button" className="mt-sm">
+          <Button
+            variant="default"
+            onClick={handleFinish}
+            data-testid="finish-button"
+            className="mt-sm"
+          >
             Finish
           </Button>
         </div>
       )}
 
       {config.stepByStep && finished && (
-        <div role="status" aria-live="assertive" data-testid="explainer-finished" className="mt-md text-center">
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="explainer-finished"
+          className="mt-md text-center"
+        >
           <p className="text-on-surface font-semibold">All steps viewed.</p>
         </div>
       )}
@@ -227,16 +237,23 @@ const ProcessExplainerWidget: WidgetDefinitionV2 = {
       'Keep each step description to 1-2 sentences',
       'Provide an icon or simple media asset per step when possible',
     ],
-    authoringPrompt:
-      'Create a step-by-step explainer for a natural or computational process',
+    authoringPrompt: 'Create a step-by-step explainer for a natural or computational process',
     exampleConfigs: [
       {
         title: 'Water Cycle',
         steps: [
           { id: 'evaporation', title: 'Evaporation', description: 'Sun heats water into vapor' },
           { id: 'condensation', title: 'Condensation', description: 'Vapor cools into clouds' },
-          { id: 'precipitation', title: 'Precipitation', description: 'Water falls as rain or snow' },
-          { id: 'collection', title: 'Collection', description: 'Water gathers in oceans and lakes' },
+          {
+            id: 'precipitation',
+            title: 'Precipitation',
+            description: 'Water falls as rain or snow',
+          },
+          {
+            id: 'collection',
+            title: 'Collection',
+            description: 'Water gathers in oceans and lakes',
+          },
         ],
         stepByStep: true,
         interactive: true,

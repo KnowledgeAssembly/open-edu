@@ -61,7 +61,7 @@ export function OasAnimationWrapper({
       <div
         role="group"
         aria-label={t('runtime.animation.controls')}
-        className="mt-sm flex items-center gap-xs"
+        className="mt-sm gap-xs flex items-center"
       >
         {controller.status === 'paused' ? (
           <Button
@@ -125,7 +125,11 @@ export function OasAnimationWrapper({
   if (resolvedConfig.backend === 'svg') {
     return (
       <div className={className} data-testid="oas-svg-backend">
-        <img src={resolvedSrc} alt={ariaLabel ?? t('runtime.animation.static_fallback')} className="w-full" />
+        <img
+          src={resolvedSrc}
+          alt={ariaLabel ?? t('runtime.animation.static_fallback')}
+          className="w-full"
+        />
         {renderControls()}
       </div>
     );

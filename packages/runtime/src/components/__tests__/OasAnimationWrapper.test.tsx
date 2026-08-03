@@ -79,13 +79,9 @@ describe('OasAnimationWrapper', () => {
     }));
     vi.stubGlobal('matchMedia', matchMediaMock);
 
-    render(
-      <OasAnimationWrapper
-        config={lottieConfig}
-        staticChildren={<p>Static</p>}
-      />,
-      { wrapper },
-    );
+    render(<OasAnimationWrapper config={lottieConfig} staticChildren={<p>Static</p>} />, {
+      wrapper,
+    });
     expect(screen.getByText('Static')).toBeInTheDocument();
     expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
     vi.unstubAllGlobals();

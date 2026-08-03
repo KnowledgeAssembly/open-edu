@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { DotLottiePlayer } from '../DotLottiePlayer.js';
 
-vi.mock('@dotlottie/react-player', () => ({  DotLottiePlayer: ({
+vi.mock('@dotlottie/react-player', () => ({
+  DotLottiePlayer: ({
     onEvent,
     testId,
     ...props
@@ -13,10 +14,7 @@ vi.mock('@dotlottie/react-player', () => ({  DotLottiePlayer: ({
     [key: string]: unknown;
   }) => (
     <div data-testid={testId ?? 'mocked-dotlottie'} data-props={JSON.stringify(props)}>
-      <button
-        data-testid="mock-emit-complete"
-        onClick={() => onEvent('complete')}
-      >
+      <button data-testid="mock-emit-complete" onClick={() => onEvent('complete')}>
         complete
       </button>
       <button data-testid="mock-emit-pause" onClick={() => onEvent('pause')}>
@@ -45,7 +43,13 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('DotLottiePlayer', () => {
   it('renders the dotLottie player with expected props', () => {
     const { container } = render(
-      <DotLottiePlayer src="water-cycle.lottie" autoplay loop speed={1.5} ariaLabel="Water cycle" />,
+      <DotLottiePlayer
+        src="water-cycle.lottie"
+        autoplay
+        loop
+        speed={1.5}
+        ariaLabel="Water cycle"
+      />,
       { wrapper },
     );
     const el = screen.getByTestId('oas-dotlottie-player');
@@ -59,20 +63,18 @@ describe('DotLottiePlayer', () => {
 
   it('maps complete event to completed status', () => {
     const onEvent = vi.fn();
-    render(
-      <DotLottiePlayer src="water-cycle.lottie" ariaLabel="Water cycle" onEvent={onEvent} />,
-      { wrapper },
-    );
+    render(<DotLottiePlayer src="water-cycle.lottie" ariaLabel="Water cycle" onEvent={onEvent} />, {
+      wrapper,
+    });
     screen.getByTestId('mock-emit-complete').click();
     expect(onEvent).toHaveBeenCalledWith('completed');
   });
 
   it('maps pause event to paused status', () => {
     const onEvent = vi.fn();
-    render(
-      <DotLottiePlayer src="water-cycle.lottie" ariaLabel="Water cycle" onEvent={onEvent} />,
-      { wrapper },
-    );
+    render(<DotLottiePlayer src="water-cycle.lottie" ariaLabel="Water cycle" onEvent={onEvent} />, {
+      wrapper,
+    });
     screen.getByTestId('mock-emit-pause').click();
     expect(onEvent).toHaveBeenCalledWith('paused');
   });
