@@ -126,6 +126,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
           <OasAnimationWrapper
             config={animationConfig}
             resolveSrc={resolveAsset}
+            preserveChildren
             staticChildren={<WidgetComponent {...widgetProps} />}
           />
         ) : (

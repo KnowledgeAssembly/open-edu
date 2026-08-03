@@ -97,12 +97,10 @@ export function DotLottiePlayer({
     );
   }
 
-  if (themeColors && Object.keys(themeColors).length > 0) {
-    return <div style={themeColors}>{content}</div>;
-  }
+  const themeStyle = themeColors && Object.keys(themeColors).length > 0 ? themeColors : undefined;
 
   return (
-    <div role="img" aria-label={ariaLabel} className={className}>
+    <div role="img" aria-label={ariaLabel} className={className} style={themeStyle}>
       {content}
     </div>
   );

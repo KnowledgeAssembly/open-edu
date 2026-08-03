@@ -7,10 +7,19 @@ import { LiveRegionProvider } from '@open-edu/accessibility';
 import { OasAnimationWrapper } from '../OasAnimationWrapper.js';
 
 vi.mock('@dotlottie/react-player', () => ({
-  DotLottiePlayer: ({ onEvent }: { onEvent?: (name: string) => void }) => (
-    <div data-testid="mocked-dotlottie">
+  DotLottiePlayer: ({
+    onEvent,
+    autoplay,
+  }: {
+    onEvent?: (name: string) => void;
+    autoplay?: boolean;
+  }) => (
+    <div data-testid="mocked-dotlottie" data-autoplay={String(autoplay)}>
       <button data-testid="mock-complete" onClick={() => onEvent?.('complete')}>
         complete
+      </button>
+      <button data-testid="mock-error" onClick={() => onEvent?.('error')}>
+        error
       </button>
     </div>
   ),
@@ -116,5 +125,63 @@ describe('OasAnimationWrapper', () => {
     expect(container.querySelector('[data-testid="oas-lottie-backend"]')).toBeNull();
     expect(container.querySelector('[data-testid="oas-svg-backend"]')).toBeNull();
     expect(container.querySelector('[data-testid="oas-static-fallback"]')).toBeNull();
+  });
+
+  it('autoplays for step-triggered configs', () => {
+    render(
+      <OasAnimationWrapper
+        config={{ backend: 'lottie', src: 'assets/animations/water-cycle.lottie', trigger: 'step' }}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('mocked-dotlottie').dataset.autoplay).toBe('true');
+  });
+
+  it('does not autoplay for manually-triggered configs', () => {
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/animations/water-cycle.lottie',
+          trigger: 'click',
+        }}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('mocked-dotlottie').dataset.autoplay).toBe('false');
+  });
+
+  it('renders preserved children below the lottie player', () => {
+    render(
+      <OasAnimationWrapper config={lottieConfig} preserveChildren staticChildren={<p>Body</p>} />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+    expect(screen.getByText('Body')).toBeInTheDocument();
+  });
+
+  it('renders preserved children below the svg image', () => {
+    render(
+      <OasAnimationWrapper
+        config={{ backend: 'svg', src: 'diagrams/heart.svg' }}
+        assetBaseUrl="/course"
+        preserveChildren
+        staticChildren={<p>Body</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-svg-backend')).toBeInTheDocument();
+    expect(screen.getByText('Body')).toBeInTheDocument();
+  });
+
+  it('falls back to static children when the player errors', () => {
+    render(<OasAnimationWrapper config={lottieConfig} staticChildren={<p>Static</p>} />, {
+      wrapper,
+    });
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    expect(screen.getByText('Static')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
   });
 });

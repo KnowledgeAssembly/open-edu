@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import type { AnimationConfig } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
@@ -15,6 +15,7 @@ export interface OasAnimationWrapperProps {
   showControls?: boolean;
   onComplete?: () => void;
   staticChildren?: ReactNode;
+  preserveChildren?: boolean;
 }
 
 function resolveUrl(
@@ -29,6 +30,25 @@ function resolveUrl(
   return src;
 }
 
+function readThemeColors(): Record<string, string> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return {};
+  const styles = getComputedStyle(document.documentElement);
+  const colors: Record<string, string> = {};
+  for (let i = 0; i < styles.length; i++) {
+    const name = styles[i];
+    if (!name) continue;
+    if (name.startsWith('--oe-color-')) {
+      const value = styles.getPropertyValue(name).trim();
+      if (value) colors[name] = value;
+    }
+  }
+  return colors;
+}
+
+function shouldAutoplay(config: AnimationConfig): boolean {
+  return config.trigger === 'load' || config.trigger === 'visible' || config.trigger === 'step';
+}
+
 export function OasAnimationWrapper({
   config,
   assetBaseUrl,
@@ -38,12 +58,21 @@ export function OasAnimationWrapper({
   showControls = false,
   onComplete,
   staticChildren,
+  preserveChildren = false,
 }: OasAnimationWrapperProps): JSX.Element | null {
   const { t } = useTranslation();
 
   const parsed = useMemo(() => AnimationConfigSchema.safeParse(config), [config]);
 
   const resolvedConfig: AnimationConfig | undefined = parsed.success ? parsed.data : undefined;
+
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [config]);
+
+  const themeColors = useMemo(() => readThemeColors(), []);
 
   const controller = useOasAnimation(resolvedConfig, (status) => {
     if (status === 'completed') onComplete?.();
@@ -102,6 +131,16 @@ export function OasAnimationWrapper({
     );
   };
 
+  const renderStaticFallback = () =>
+    staticChildren ?? (
+      <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
+        {t('runtime.animation.static_fallback')}
+      </div>
+    );
+
+  const renderPreservedChildren = () =>
+    preserveChildren && staticChildren ? <div className="mt-sm">{staticChildren}</div> : null;
+
   if (!resolvedConfig || !resolvedSrc) {
     if (staticChildren) {
       return <div className={className}>{staticChildren}</div>;
@@ -112,11 +151,7 @@ export function OasAnimationWrapper({
   if (reducedMotion) {
     return (
       <div className={className} data-testid="oas-static-fallback">
-        {staticChildren ?? (
-          <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
-            {t('runtime.animation.static_fallback')}
-          </div>
-        )}
+        {renderStaticFallback()}
         {renderControls()}
       </div>
     );
@@ -131,6 +166,7 @@ export function OasAnimationWrapper({
           className="w-full"
         />
         {renderControls()}
+        {renderPreservedChildren()}
       </div>
     );
   }
@@ -138,17 +174,23 @@ export function OasAnimationWrapper({
   if (resolvedConfig.backend === 'lottie') {
     return (
       <div className={className} data-testid="oas-lottie-backend">
-        <DotLottiePlayer
-          src={resolvedSrc}
-          autoplay={resolvedConfig.trigger === 'load' || resolvedConfig.trigger === 'visible'}
-          loop={resolvedConfig.loop}
-          speed={resolvedConfig.speed}
-          segments={resolvedConfig.segments}
-          ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
-          onEvent={handlePlayerEvent}
-          onError={() => controller.stop()}
-        />
+        {hasError ? (
+          renderStaticFallback()
+        ) : (
+          <DotLottiePlayer
+            src={resolvedSrc}
+            autoplay={shouldAutoplay(resolvedConfig)}
+            loop={resolvedConfig.loop}
+            speed={resolvedConfig.speed}
+            segments={resolvedConfig.segments}
+            themeColors={themeColors}
+            ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
+            onEvent={handlePlayerEvent}
+            onError={() => setHasError(true)}
+          />
+        )}
         {renderControls()}
+        {renderPreservedChildren()}
       </div>
     );
   }
