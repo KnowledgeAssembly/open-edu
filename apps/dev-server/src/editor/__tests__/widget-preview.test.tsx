@@ -108,7 +108,7 @@ describe('WidgetPreviewProvider', () => {
         <Consumer />
       </WidgetPreviewProvider>,
     );
-    expect(screen.getByTestId('widget-count').textContent).toBe('27');
+    expect(screen.getByTestId('widget-count').textContent).toBe('28');
   });
 
   it('wraps children and renders them', () => {
