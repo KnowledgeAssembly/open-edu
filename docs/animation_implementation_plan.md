@@ -32,16 +32,16 @@ The source plan is structurally sound. These corrections are REQUIRED before/whi
 
 Work top-down on the dependency graph, one conventional commit per step. Each step MUST land green before the next.
 
-| # | Scope | Commit subject |
-|---|-------|----------------|
-| 1 | schemas | `feat(schemas): add OAS animation schemas` |
-| 2 | design-system | `feat(design-system): add OAS motion duration tokens and lottie theme helper` |
-| 3 | runtime (dep + hook + player + wrapper) | `feat(runtime): add OAS animation engine (useOasAnimation, DotLottiePlayer, OasAnimationWrapper)` |
-| 4 | ai-companion | `feat(ai-companion): bind Pipili states to OAS dotLottie animations` |
-| 5 | widgets (schemas + new process-explainer + catalog) | `feat(widgets): add OAS animation support and core.process-explainer widget` |
-| 6 | course-compiler | `feat(course-compiler): validate OAS animation configs and assets` |
-| 7 | oep-distribution + examples | `test(oep-distribution): preserve lottie/svg assets` + `feat(examples): add animated water cycle node` |
-| 8 | final verification | `chore: verify full monorepo` |
+| #   | Scope                                               | Commit subject                                                                                         |
+| --- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | schemas                                             | `feat(schemas): add OAS animation schemas`                                                             |
+| 2   | design-system                                       | `feat(design-system): add OAS motion duration tokens and lottie theme helper`                          |
+| 3   | runtime (dep + hook + player + wrapper)             | `feat(runtime): add OAS animation engine (useOasAnimation, DotLottiePlayer, OasAnimationWrapper)`      |
+| 4   | ai-companion                                        | `feat(ai-companion): bind Pipili states to OAS dotLottie animations`                                   |
+| 5   | widgets (schemas + new process-explainer + catalog) | `feat(widgets): add OAS animation support and core.process-explainer widget`                           |
+| 6   | course-compiler                                     | `feat(course-compiler): validate OAS animation configs and assets`                                     |
+| 7   | oep-distribution + examples                         | `test(oep-distribution): preserve lottie/svg assets` + `feat(examples): add animated water cycle node` |
+| 8   | final verification                                  | `chore: verify full monorepo`                                                                          |
 
 ---
 
@@ -52,14 +52,41 @@ Create `packages/schemas/src/animation.ts` — replicate the Zod schema from `do
 ```ts
 import { z } from 'zod';
 
-export const AnimationBackendEnum = z.enum(['lottie', 'svg', 'css', 'canvas', 'webgpu']).default('lottie');
+export const AnimationBackendEnum = z
+  .enum(['lottie', 'svg', 'css', 'canvas', 'webgpu'])
+  .default('lottie');
 
 export const AnimationEffectEnum = z.enum([
-  'fade', 'slide', 'zoom', 'pop', 'appear',
-  'highlight', 'pulse', 'shake', 'glow', 'focus',
-  'flow', 'grow', 'trace', 'draw', 'orbit', 'rotate',
-  'assemble', 'disassemble', 'transform', 'connect', 'compare', 'morph',
-  'wave', 'think', 'celebrate', 'hint', 'confetti', 'sparkle', 'badge', 'success',
+  'fade',
+  'slide',
+  'zoom',
+  'pop',
+  'appear',
+  'highlight',
+  'pulse',
+  'shake',
+  'glow',
+  'focus',
+  'flow',
+  'grow',
+  'trace',
+  'draw',
+  'orbit',
+  'rotate',
+  'assemble',
+  'disassemble',
+  'transform',
+  'connect',
+  'compare',
+  'morph',
+  'wave',
+  'think',
+  'celebrate',
+  'hint',
+  'confetti',
+  'sparkle',
+  'badge',
+  'success',
 ]);
 
 export const AnimationConfigSchema = z.object({
@@ -68,18 +95,36 @@ export const AnimationConfigSchema = z.object({
   loop: z.boolean().optional(),
   speed: z.number().optional(),
   segments: z.tuple([z.number(), z.number()]).optional(),
-  trigger: z.enum(['load', 'visible', 'click', 'hover', 'step', 'answer-correct', 'answer-wrong', 'lesson-complete', 'custom']).default('visible'),
+  trigger: z
+    .enum([
+      'load',
+      'visible',
+      'click',
+      'hover',
+      'step',
+      'answer-correct',
+      'answer-wrong',
+      'lesson-complete',
+      'custom',
+    ])
+    .default('visible'),
   reducedMotion: z.enum(['instant', 'fade', 'static-steps', 'static-pose']).default('instant'),
-  effects: z.array(z.object({
-    step: z.number().optional(),
-    target: z.string().describe('Target element ID or dotLottie layer key'),
-    effect: AnimationEffectEnum,
-    duration: z.union([z.enum(['instant', 'fast', 'normal', 'slow']), z.number()]).optional(),
-    delay: z.number().optional(),
-    easing: z.string().optional(),
-    repeat: z.union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })]).optional(),
-    direction: z.enum(['forward', 'reverse', 'alternate']).optional(),
-  })).optional(),
+  effects: z
+    .array(
+      z.object({
+        step: z.number().optional(),
+        target: z.string().describe('Target element ID or dotLottie layer key'),
+        effect: AnimationEffectEnum,
+        duration: z.union([z.enum(['instant', 'fast', 'normal', 'slow']), z.number()]).optional(),
+        delay: z.number().optional(),
+        easing: z.string().optional(),
+        repeat: z
+          .union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })])
+          .optional(),
+        direction: z.enum(['forward', 'reverse', 'alternate']).optional(),
+      }),
+    )
+    .optional(),
 });
 
 export type AnimationBackend = z.infer<typeof AnimationBackendEnum>;
@@ -108,12 +153,15 @@ Edit `packages/design-system/src/tokens/motion.ts` (it already exports `motionTo
 2. **CSS-var mapping helper**: `oasDurationVar(duration): string` returning `var(--oe-motion-duration-${name})` for named durations (matching the semantic names), else the numeric `ms` value.
 3. **dotLottie theme color helper** (pure, DOM-free — testable):
    ```ts
-   export interface LottieThemeColorMap { [variable: string]: string }
-   export function lottieThemeColors(prefix = '--oe-color-'): LottieThemeColorMap
+   export interface LottieThemeColorMap {
+     [variable: string]: string;
+   }
+   export function lottieThemeColors(prefix = '--oe-color-'): LottieThemeColorMap;
    ```
    It takes an explicit `Record<string,string>` source (mapping a color name e.g. `primary` → a hex) and returns `{ ['--oe-color-' + name]: hex }` entries. Keep it pure; do NOT read `getComputedStyle` here (the wrapper/hook in runtime reads the DOM). Unit-test it in `packages/design-system/src/tokens/__tests__/` (check existing test layout in that dir first and match it).
 
 Notes:
+
 - Do NOT change existing token values or `useReducedMotion` behavior (other components depend on them).
 - This file currently imports React (`useState/useEffect`); keep the new helpers side-effect-free.
 
@@ -129,6 +177,7 @@ Add to `packages/runtime/package.json` dependencies: `"@dotlottie/react-player":
 Run `pnpm install` at repo root.
 
 API facts for `@dotlottie/react-player@1.6.19` (verify against installed `.d.ts`):
+
 - Named exports: `DotLottiePlayer`, `Controls`, `PlayerEvents`, `DotLottieRefProps` (type).
 - CSS: `import '@dotlottie/react-player/dist/index.css'`.
 - Props: `src` (required; string URL or data object), `autoplay`, `loop`, `speed`, `renderer` (`'svg'|'html'|'canvas'`), `direction` (`1|-1`), `playMode` (`'normal'|'bounce'`), `onEvent`, `lottieRef`, `defaultTheme`.
@@ -150,10 +199,14 @@ export interface OasAnimationController {
   nextStep: () => void;
   prevStep: () => void;
 }
-export function useOasAnimation(config?: AnimationConfig, onStatusChange?: (s: OasAnimationStatus) => void): OasAnimationController
+export function useOasAnimation(
+  config?: AnimationConfig,
+  onStatusChange?: (s: OasAnimationStatus) => void,
+): OasAnimationController;
 ```
 
 Implementation requirements:
+
 - Import `AnimationConfigSchema`/`AnimationConfig` from `@open-edu/schemas`; `safeParse` the config; if invalid or absent → `status` stays `'idle'`, all controls no-ops.
 - **Reduced motion**: on mount and via `window.matchMedia('(prefers-reduced-motion: reduce)')` change listener, set `reducedMotion`. When reduced and config present → jump to `'completed'` immediately (static reveal), skip play/pause.
 - **Lifecycle**: expose `status`; call `onStatusChange` on transitions. Map dotLottie events to statuses: `ready`/autoplay start → `'started'`, `pause` → `'paused'`, `complete` → `'completed'`. For multi-step configs, track `currentStep`; `nextStep`/`prevStep` clamp to `[0, effects.length]`, set status `'started'`, and call `onStatusChange('started')` (StepChanged).
@@ -171,9 +224,9 @@ export interface OasDotLottiePlayerProps {
   loop?: boolean;
   speed?: number;
   segments?: [number, number];
-  staticFallback?: ReactNode;          // rendered when reducedMotion
-  themeColors?: Record<string, string>;// var name -> color, injected as inline CSS vars
-  ariaLabel: string;                    // used for role="img" fallback semantics
+  staticFallback?: ReactNode; // rendered when reducedMotion
+  themeColors?: Record<string, string>; // var name -> color, injected as inline CSS vars
+  ariaLabel: string; // used for role="img" fallback semantics
   className?: string;
   onEvent?: (status: OasAnimationStatus) => void; // maps PlayerEvents
   onError?: (err: unknown) => void;
@@ -181,6 +234,7 @@ export interface OasDotLottiePlayerProps {
 ```
 
 Implementation requirements:
+
 - Wrap `DotLottiePlayer` from `@dotlottie/react-player` (import its CSS once). Use `lottieRef` to drive `play/pause/stop/seek` and `playSegments` (or `seek`+`play`) when `segments` provided.
 - Map `PlayerEvents` → `OasAnimationStatus`: `ready`→`started` (when autoplay), `pause`→`paused`, `complete`→`completed`, `error`→ call `onError` + render static fallback.
 - **Theme injection**: if `themeColors` provided, wrap in a `<div style={{...themeColors}}>` (CSS-variable references are a sanctioned inline-style exception per AGENTS.md UI rules #10). Do NOT use non-`--oe-*` inline values.
@@ -193,16 +247,17 @@ Composition container for widgets. Props:
 
 ```ts
 export interface OasAnimationWrapperProps {
-  config?: unknown;                      // raw widget config.animation (validated here)
-  assetBaseUrl?: string;                 // resolves relative `src`
+  config?: unknown; // raw widget config.animation (validated here)
+  assetBaseUrl?: string; // resolves relative `src`
   ariaLabel?: string;
   className?: string;
   onComplete?: () => void;
-  staticChildren?: ReactNode;            // static SVG/content shown when reduced-motion/instant
+  staticChildren?: ReactNode; // static SVG/content shown when reduced-motion/instant
 }
 ```
 
 Behavior:
+
 - `safeParse` config with `AnimationConfigSchema`.
 - `backend === 'lottie' && src` → render `DotLottiePlayer` (resolve `src` against `assetBaseUrl`), pass `autoplay`/`loop`/`speed`/`segments` from config, theme colors from `lottieThemeColors` read from `document.documentElement` computed style (guard for SSR; safe fallback to `{}`).
 - `backend === 'svg' && src` → render an `<img>`/inline `<svg>` (use inline `<img>` to keep it simple) with static reveal; apply reduced-motion instant reveal.
@@ -218,6 +273,7 @@ Add to `packages/runtime/src/index.ts`: `useOasAnimation`, `DotLottiePlayer`, `O
 ### 3.5 i18n keys
 
 Add to `packages/i18n/locales/en/runtime.json` (namespace `runtime.animation.*`):
+
 ```
 "animation.play": "Play",
 "animation.pause": "Pause",
@@ -229,6 +285,7 @@ Add to `packages/i18n/locales/en/runtime.json` (namespace `runtime.animation.*`)
 "animation.completed": "Animation complete",
 "animation.static_fallback": "Static diagram"
 ```
+
 Run the i18n key validation test: `node packages/i18n/src/i18n-keys.test.ts`.
 
 ### 3.6 Tests (all in `packages/runtime/src/components/__tests__/`, Vitest + @testing-library/react)
@@ -265,6 +322,7 @@ pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src
 ### 4.0 Package deps
 
 Add to `packages/ai-companion/package.json`:
+
 - `dependencies`: `@open-edu/runtime: workspace:*`
 - `peerDependencies`: `react: ^18.0.0`, `react-dom: ^18.0.0`
 - `devDependencies`: `@testing-library/react: ^14.0.0`, `@testing-library/jest-dom: ^6.0.0`, `@types/react: ^18.0.0`, `@types/react-dom: ^18.0.0`
@@ -274,6 +332,7 @@ Run `pnpm install`. (Confirm no circular dep: `@open-edu/runtime` does NOT impor
 ### 4.1 Extend `packages/ai-companion/src/pipili/types.ts`
 
 Add (additive — do not disturb existing interfaces):
+
 ```ts
 import type { AnimationConfig } from '@open-edu/schemas';
 
@@ -290,6 +349,7 @@ export interface PipiliOasBindings {
   fallback?: AnimationConfig;
 }
 ```
+
 Pre-filled example bindings (documented in the file, matching spec §4.1):
 `pipili-idle.lottie` (state `idle`, loop true, `reducedMotion:'static-pose'`), `pipili-thinking.lottie` (state `thinking`, loop true), `pipili-celebrate.lottie` (state `celebrating`, `trigger:'lesson-complete'`), `pipili-hint.lottie` (state `hinting`, `reducedMotion:'static-pose'`).
 
@@ -298,17 +358,20 @@ Re-export `PipiliAnimationState`, `PipiliAnimationBinding`, `PipiliOasBindings` 
 ### 4.2 `packages/ai-companion/src/pipili/PipiliMascotAnimation.tsx`
 
 Props:
+
 ```ts
 export interface PipiliMascotAnimationProps {
   state: PipiliAnimationState;
-  bindings?: PipiliOasBindings;   // optional; defaults to a documented example set
+  bindings?: PipiliOasBindings; // optional; defaults to a documented example set
   assetBaseUrl?: string;
-  size?: number;                  // px; inline style allowed for dynamic sizing only
-  reducedMotion?: boolean;        // override
+  size?: number; // px; inline style allowed for dynamic sizing only
+  reducedMotion?: boolean; // override
   onComplete?: () => void;
 }
 ```
+
 Behavior:
+
 - Find the binding for `state`; resolve `animation.src` against `assetBaseUrl`.
 - Render `OasAnimationWrapper` (from `@open-edu/runtime`) with the resolved config; pass `onComplete`.
 - When reduced motion or `reducedMotion:'static-pose'` → render a static pose: a `<div role="img" aria-label={...}>` with a simple Pipili face built from design-system tokens (or the existing design-system `Pipili` primitive with `mood` mapped: `idle`→`idle`, `thinking`→`thinking`, `celebrating`→`content`, `hinting`→`curious`). Prefer the existing `@open-edu/design-system` `Pipili` primitive for the static pose.
@@ -338,12 +401,13 @@ Verify: `pnpm --filter @open-edu/ai-companion test && pnpm --filter @open-edu/ai
 Create `packages/widgets/src/builtins/ProcessExplainer/ProcessExplainer.tsx` + `ProcessExplainer.test.tsx`. Follow the `ProcessDiagram` file structure exactly (WidgetDefinitionV2, `LearningIntent`, `useObserveMode`, `WidgetError`, design-system `Button`, `--oe-*` tokens only).
 
 Schema:
+
 ```ts
 const explainerStepSchema = z.object({
   id: z.string(),
   title: z.string().min(1),
   description: z.string().optional(),
-  media: z.string().optional(),            // .svg/.lottie/.png path
+  media: z.string().optional(), // .svg/.lottie/.png path
   icon: z.string().optional(),
 });
 const processExplainerSchema = z.object({
@@ -354,11 +418,13 @@ const processExplainerSchema = z.object({
   animation: AnimationConfigSchema.optional(),
 });
 ```
+
 Render: step list with numbered badges; when `stepByStep` reveal one step at a time (`Reveal Next` button — i18n via `t('widgets.process_explainer.reveal_next', ...)` with keys added to `packages/i18n/locales/en/widgets.json`); step content uses inline SVG drawing for `media` `.svg` when present. The widget emits `widget.interaction` telemetry and calls `complete()` like `ProcessDiagram`. When `config.animation` present, it passes it through in config (rendered by the runtime wrapper per 5.1).
 
 Widget metadata: `id: 'core.process-explainer'`, `domain: 'core'`, `capabilities` with `supportsAnimation: true`, `accessibility` with `reducedMotion: true`, `reward`, `ai` block with an `authoringPrompt` and `exampleConfigs` (water-cycle style example), `icon: 'list-video'` (or a lucide icon available in the repo), `status: 'stable'`. Match the exact field shapes used by neighboring entries (check `science.process-diagram` entry + `WidgetDefinitionV2` in `types.ts`).
 
 Register:
+
 1. `packages/widgets/src/builtins/index.ts` — add `export { processExplainer } from './ProcessExplainer/ProcessExplainer';`
 2. `packages/widgets/src/registry.ts` — add `processExplainer` to the builtins import (top of file, alphabetical) AND to the `BUILTIN_WIDGETS` array (line ~160–172). `registerAllBuiltins` (line 174) iterates `BUILTIN_WIDGETS` to call `registry.register(widget)` — that's the seeding mechanism.
 3. `packages/widgets/src/widget-catalog-source.ts` — add a `WidgetCatalogEntry` for `core.process-explainer`; also add `'Animation'` to `capabilities` of `science.process-diagram` and `core.timeline` catalog entries if not present.
@@ -371,6 +437,7 @@ Register:
 - Add `packages/i18n/locales/en/widgets.json` keys: `"process_explainer.reveal_next"`, `"process_explainer.step_of"`, `"process_explainer.all_steps"`, `"process_explainer.finish"`.
 
 Verify:
+
 ```bash
 pnpm --filter @open-edu/widgets test
 pnpm --filter @open-edu/widgets typecheck
@@ -390,6 +457,7 @@ Add `@open-edu/schemas: workspace:*` to `packages/course-compiler/package.json` 
 ### 6.1 Validator
 
 Edit `packages/course-compiler/src/validators/semantic-validator.ts`:
+
 - Import `AnimationConfigSchema` from `@open-edu/schemas`.
 - Add `validateAnimationConfigs(model, diagnostics)` and call it from `validateCourseModel`.
 - Logic: for every lesson, for each `activity` where `activity.type === 'widget'`:
@@ -406,6 +474,7 @@ Verify: `pnpm --filter @open-edu/course-compiler test && pnpm --filter @open-edu
 ### 7.1 `@open-edu/oep-distribution` (tests only)
 
 Add regression test to `packages/oep-distribution/src/oep-writer.test.ts`:
+
 - Build an archive with a `.lottie` and `.svg` file in `courseFiles`; read it back with `oep-reader` (or unzip) and assert both bytes survive byte-for-byte.
 - No production code change expected. If a test reveals filtering, fix the cause.
 
@@ -414,6 +483,7 @@ Verify: `pnpm --filter @open-edu/oep-distribution test`
 ### 7.2 Example node
 
 Create `examples/widget-showcase/nodes/animated-water-cycle.json`:
+
 ```json
 {
   "type": "exercise",
@@ -424,10 +494,30 @@ Create `examples/widget-showcase/nodes/animated-water-cycle.json`:
     "stepByStep": true,
     "interactive": true,
     "steps": [
-      { "id": "evaporation", "title": "Evaporation", "description": "Sun heats water, turning it into vapor", "icon": "☀️" },
-      { "id": "condensation", "title": "Condensation", "description": "Water vapor cools and forms clouds", "icon": "☁️" },
-      { "id": "precipitation", "title": "Precipitation", "description": "Water falls as rain, snow, or hail", "icon": "🌧️" },
-      { "id": "collection", "title": "Collection", "description": "Water gathers in oceans, lakes, and rivers", "icon": "🌊" }
+      {
+        "id": "evaporation",
+        "title": "Evaporation",
+        "description": "Sun heats water, turning it into vapor",
+        "icon": "☀️"
+      },
+      {
+        "id": "condensation",
+        "title": "Condensation",
+        "description": "Water vapor cools and forms clouds",
+        "icon": "☁️"
+      },
+      {
+        "id": "precipitation",
+        "title": "Precipitation",
+        "description": "Water falls as rain, snow, or hail",
+        "icon": "🌧️"
+      },
+      {
+        "id": "collection",
+        "title": "Collection",
+        "description": "Water gathers in oceans, lakes, and rivers",
+        "icon": "🌊"
+      }
     ],
     "animation": {
       "backend": "lottie",
@@ -444,7 +534,9 @@ Create `examples/widget-showcase/nodes/animated-water-cycle.json`:
   }
 }
 ```
+
 Also create a **minimal valid placeholder** `examples/widget-showcase/assets/animations/water-cycle.lottie` so the asset reference is real and offline-runnable. dotLottie is a ZIP of `manifest.json` + `animations/animations.json`. Create it with a one-off script using `fflate` (already a workspace dep of `@open-edu/oep-distribution`) — place the script under `/tmp` (use the opencode temp dir), do NOT commit it:
+
 - `manifest.json`: `{ "version": 1, "author": "open-edu", "description": "Placeholder water cycle animation", "animations": [{ "id": "water-cycle", "loop": true }] }`
 - `animations/animations.json`: a minimal valid Lottie: `{ "v": "5.7.4", "fr": 30, "ip": 0, "op": 60, "w": 200, "h": 200, "nm": "water-cycle", "ddd": 0, "assets": [], "layers": [] }`
 - Zip with `zipSync` → `water-cycle.lottie`. Verify it unzips (read back).
@@ -461,6 +553,7 @@ const raw = readFileSync('examples/widget-showcase/nodes/animated-water-cycle.js
 const result = WidgetNodeSchema.safeParse(JSON.parse(raw));
 console.log(result.success ? 'VALID' : JSON.stringify(result.error, null, 2));
 ```
+
 Verify it prints `VALID` and that `examples/widget-showcase/assets/animations/water-cycle.lottie` exists and unzips. This also exercises Phase 6 indirectly: course-compiler's validator imports the same `AnimationConfigSchema`. Add a course-compiler e2e case in `packages/course-compiler/src/e2e.test.ts` (follow the existing pattern) covering a widget activity with a valid `animation` block and one with an invalid effect, if one is not already added in Step 6.
 
 ---
@@ -468,6 +561,7 @@ Verify it prints `VALID` and that `examples/widget-showcase/assets/animations/wa
 ## Step 8 — Full verification
 
 Run from repo root, in order; ALL must pass:
+
 ```bash
 pnpm install                      # once deps added (Steps 3.0/4.0/6.0)
 pnpm test
@@ -475,7 +569,9 @@ pnpm typecheck
 pnpm lint                         # includes lint-no-hardcoded-strings
 pnpm format:check                 # run pnpm format if anything is off
 ```
+
 Additional targeted checks:
+
 - `node packages/i18n/src/i18n-keys.test.ts` (new i18n keys valid)
 - `pnpm --filter @open-edu/widgets generate:catalog` then re-verify `@open-edu/core` builds
 - dev-server tailwind regeneration if runtime Tailwind classes changed (Step 3.7)

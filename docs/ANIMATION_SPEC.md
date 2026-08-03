@@ -12,14 +12,14 @@ The OpenEdu Animation Specification (OAS) defines a portable, declarative, decou
 
 The specification enables:
 
-* Rich educational animations embedded in widget configurations
-* AI Learning Companion (Pipili) state animations (idle, thinking, celebrating, hint progression)
-* Preferred **dotLottie (`.lottie`)** high-efficiency binary packaging
-* Offline-first execution
-* Cross-platform rendering (Web, PWA, Android, iOS, Desktop)
-* First-class accessibility (Screen reader live regions, `prefers-reduced-motion`)
-* Schema-validated AI-generated animation presets
-* Multiple rendering backends (dotLottie, SVG, CSS, Canvas, WebGPU)
+- Rich educational animations embedded in widget configurations
+- AI Learning Companion (Pipili) state animations (idle, thinking, celebrating, hint progression)
+- Preferred **dotLottie (`.lottie`)** high-efficiency binary packaging
+- Offline-first execution
+- Cross-platform rendering (Web, PWA, Android, iOS, Desktop)
+- First-class accessibility (Screen reader live regions, `prefers-reduced-motion`)
+- Schema-validated AI-generated animation presets
+- Multiple rendering backends (dotLottie, SVG, CSS, Canvas, WebGPU)
 
 Animations are authored once as JSON schema configurations or dotLottie assets and rendered consistently across content widgets and the AI Companion.
 
@@ -30,6 +30,7 @@ Animations are authored once as JSON schema configurations or dotLottie assets a
 ## 2.1 Decoupled Core Subsystem (Widgets + AI Companion)
 
 The animation engine is architected as a reusable core runtime subsystem in `@open-edu/runtime` and `@open-edu/design-system`. It is consumed equally by:
+
 1. **Content Widgets**: Diagram steps, process flows, interactive exercises.
 2. **AI Companion (Pipili)**: Character states, emotional reactions, thinking indicators.
 3. **Rewards & Milestones**: Confetti bursts, badge unlock animations.
@@ -43,6 +44,7 @@ OpenEdu standardizes on **dotLottie (`.lottie`)** as the primary vector animatio
 Authors describe educational intent rather than implementation details.
 
 Good (JSON Schema):
+
 ```json
 {
   "effect": "flow",
@@ -51,9 +53,10 @@ Good (JSON Schema):
 ```
 
 Bad (Raw CSS / Bezier Curves):
+
 ```css
 transform: translateX(20px);
-animation-timing-function: cubic-bezier(...)
+animation-timing-function: cubic-bezier(...);
 ```
 
 ---
@@ -83,10 +86,11 @@ Every animation asset (.lottie, .svg, .json) MUST execute locally without an int
 ## 2.7 Accessibility First
 
 Renderers MUST support:
-* System `prefers-reduced-motion` settings
-* Screen reader live region announcements (`@open-edu/accessibility`) upon step completion
-* Full keyboard navigation (Focus Management)
-* Animation playback controls (Play, Pause, Resume, Speed)
+
+- System `prefers-reduced-motion` settings
+- Screen reader live region announcements (`@open-edu/accessibility`) upon step completion
+- Full keyboard navigation (Focus Management)
+- Animation playback controls (Play, Pause, Resume, Speed)
 
 ---
 
@@ -126,24 +130,28 @@ dotLottie Engine               SVG Engine                      CSS Engine
 # 4. Animation Categories
 
 ## 4.1 AI Companion & Mascot (Pipili)
-* **Purpose**: Emotional connection, hint progression, thinking states
-* **Examples**: Idle wave, thinking pulse, celebration jump, hint reveal
-* **Preferred Backend**: dotLottie (`.lottie`)
+
+- **Purpose**: Emotional connection, hint progression, thinking states
+- **Examples**: Idle wave, thinking pulse, celebration jump, hint reveal
+- **Preferred Backend**: dotLottie (`.lottie`)
 
 ## 4.2 Decorative & Rewards
-* **Purpose**: Visual delight, milestone encouragement
-* **Examples**: Reward bursts, confetti, badge unlocks, XP gain
-* **Preferred Backend**: dotLottie (`.lottie`), CSS
+
+- **Purpose**: Visual delight, milestone encouragement
+- **Examples**: Reward bursts, confetti, badge unlocks, XP gain
+- **Preferred Backend**: dotLottie (`.lottie`), CSS
 
 ## 4.3 Educational
-* **Purpose**: Teach concepts, illustrate step-by-step processes
-* **Examples**: Photosynthesis, water cycle, blood circulation, geometric transforms
-* **Preferred Backend**: SVG, Canvas
+
+- **Purpose**: Teach concepts, illustrate step-by-step processes
+- **Examples**: Photosynthesis, water cycle, blood circulation, geometric transforms
+- **Preferred Backend**: SVG, Canvas
 
 ## 4.4 Interactive
-* **Purpose**: Respond to real-time learner input and simulation controls
-* **Examples**: Sorting algorithms, circuit simulations, physics collision, chemistry bonds
-* **Preferred Backend**: Canvas, WebGPU
+
+- **Purpose**: Respond to real-time learner input and simulation controls
+- **Examples**: Sorting algorithms, circuit simulations, physics collision, chemistry bonds
+- **Preferred Backend**: Canvas, WebGPU
 
 ---
 
@@ -197,35 +205,80 @@ dotLottie Engine               SVG Engine                      CSS Engine
 ```typescript
 import { z } from 'zod';
 
-export const AnimationBackendEnum = z.enum(['lottie', 'svg', 'css', 'canvas', 'webgpu']).default('lottie');
+export const AnimationBackendEnum = z
+  .enum(['lottie', 'svg', 'css', 'canvas', 'webgpu'])
+  .default('lottie');
 
 export const AnimationEffectEnum = z.enum([
   // Entrance
-  'fade', 'slide', 'zoom', 'pop', 'appear',
+  'fade',
+  'slide',
+  'zoom',
+  'pop',
+  'appear',
   // Emphasis
-  'highlight', 'pulse', 'shake', 'glow', 'focus',
+  'highlight',
+  'pulse',
+  'shake',
+  'glow',
+  'focus',
   // Educational
-  'flow', 'grow', 'trace', 'draw', 'orbit', 'rotate',
-  'assemble', 'disassemble', 'transform', 'connect', 'compare', 'morph',
+  'flow',
+  'grow',
+  'trace',
+  'draw',
+  'orbit',
+  'rotate',
+  'assemble',
+  'disassemble',
+  'transform',
+  'connect',
+  'compare',
+  'morph',
   // AI Companion & Celebration
-  'wave', 'think', 'celebrate', 'hint', 'confetti', 'sparkle', 'badge', 'success'
+  'wave',
+  'think',
+  'celebrate',
+  'hint',
+  'confetti',
+  'sparkle',
+  'badge',
+  'success',
 ]);
 
 export const AnimationConfigSchema = z.object({
   backend: AnimationBackendEnum,
   src: z.string().optional().describe('Path to .lottie or .svg asset'),
-  trigger: z.enum(['load', 'visible', 'click', 'hover', 'step', 'answer-correct', 'answer-wrong', 'lesson-complete', 'custom']).default('visible'),
+  trigger: z
+    .enum([
+      'load',
+      'visible',
+      'click',
+      'hover',
+      'step',
+      'answer-correct',
+      'answer-wrong',
+      'lesson-complete',
+      'custom',
+    ])
+    .default('visible'),
   reducedMotion: z.enum(['instant', 'fade', 'static-steps', 'static-pose']).default('instant'),
-  effects: z.array(z.object({
-    step: z.number().optional(),
-    target: z.string().describe('Target element ID or dotLottie layer key'),
-    effect: AnimationEffectEnum,
-    duration: z.union([z.enum(['instant', 'fast', 'normal', 'slow']), z.number()]).optional(),
-    delay: z.number().optional(),
-    easing: z.string().optional(),
-    repeat: z.union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })]).optional(),
-    direction: z.enum(['forward', 'reverse', 'alternate']).optional()
-  })).optional()
+  effects: z
+    .array(
+      z.object({
+        step: z.number().optional(),
+        target: z.string().describe('Target element ID or dotLottie layer key'),
+        effect: AnimationEffectEnum,
+        duration: z.union([z.enum(['instant', 'fast', 'normal', 'slow']), z.number()]).optional(),
+        delay: z.number().optional(),
+        easing: z.string().optional(),
+        repeat: z
+          .union([z.enum(['once', 'loop', 'pingpong']), z.object({ count: z.number() })])
+          .optional(),
+        direction: z.enum(['forward', 'reverse', 'alternate']).optional(),
+      }),
+    )
+    .optional(),
 });
 ```
 
@@ -246,9 +299,10 @@ OpenEdu standardizes on **dotLottie** (`.lottie`):
 ```
 
 **dotLottie Features**:
-* **High Compression**: Up to 80% smaller than raw Lottie `.json`.
-* **Multi-State Packaging**: Single `.lottie` archive can contain multiple animation states (e.g. `idle`, `thinking`, `happy`).
-* **Theme Variable Injection**: Maps `--oe-color-*` CSS tokens directly to dotLottie vector fills and strokes.
+
+- **High Compression**: Up to 80% smaller than raw Lottie `.json`.
+- **Multi-State Packaging**: Single `.lottie` archive can contain multiple animation states (e.g. `idle`, `thinking`, `happy`).
+- **Theme Variable Injection**: Maps `--oe-color-*` CSS tokens directly to dotLottie vector fills and strokes.
 
 ---
 
@@ -276,7 +330,7 @@ Renderers MUST strictly obey accessibility preferences:
    - `flow` → `highlight`
    - `pipili-thinking.lottie` → `pipili-static-thinking.png`
 2. **Screen Reader Integration (`@open-edu/accessibility`)**:
-   - Step reveals emit live region progress notifications (e.g., *"Pipili provided hint 1: Think about evaporation"*).
+   - Step reveals emit live region progress notifications (e.g., _"Pipili provided hint 1: Think about evaporation"_).
 
 ---
 
