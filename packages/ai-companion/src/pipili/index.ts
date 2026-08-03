@@ -14,7 +14,17 @@ export type {
   LearnerProfile,
   AccessibilityProfile,
   LearningHistory,
+  PipiliAnimationState,
+  PipiliAnimationBinding,
+  PipiliOasBindings,
 } from './types.js';
+
+export {
+  DEFAULT_PIPILI_OAS_BINDINGS,
+} from './types.js';
+
+export { PipiliMascotAnimation } from './PipiliMascotAnimation.js';
+export type { PipiliMascotAnimationProps } from './PipiliMascotAnimation.js';
 
 export type { PipiliMode, Citation, PipiliResponseMetadata } from './metadata.js';
 

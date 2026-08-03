@@ -252,5 +252,9 @@
   "updates.update_button": "Update to {{version}}",
   "updates.updating": "Updating...",
   "updates.up_to_date": "All courses are up to date",
-  "updates.update_success": "Course updated to {{version}}"
+  "updates.update_success": "Course updated to {{version}}",
+  "pipili.state_idle": "Pipili is here",
+  "pipili.state_thinking": "Pipili is thinking",
+  "pipili.state_celebrating": "Pipili is celebrating",
+  "pipili.state_hinting": "Pipili is sharing a hint"
 }

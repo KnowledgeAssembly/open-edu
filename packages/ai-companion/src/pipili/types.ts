@@ -1,6 +1,74 @@
 import type { ExplanationStyle } from '../providers/types.js';
+import type { AnimationConfigInput } from '@open-edu/schemas';
 
 export type { ExplanationStyle } from '../providers/types.js';
+
+/**
+ * OAS animation states for the Pipili mascot. Each state maps to a dotLottie
+ * animation binding (see `PipiliAnimationBinding`).
+ */
+export type PipiliAnimationState = 'idle' | 'thinking' | 'celebrating' | 'hinting';
+
+export interface PipiliAnimationBinding {
+  state: PipiliAnimationState;
+  animation: AnimationConfigInput;
+}
+
+export interface PipiliOasBindings {
+  bindings: PipiliAnimationBinding[];
+  /** Default animation used when no state-specific binding matches. */
+  fallback?: AnimationConfigInput;
+}
+
+/**
+ * Default example bindings matching the OAS spec §4.1 (AI Companion & Mascot).
+ * Content authors override these with their own `.lottie` assets.
+ */
+export const DEFAULT_PIPILI_OAS_BINDINGS: PipiliOasBindings = {
+  fallback: {
+    backend: 'lottie',
+    src: 'assets/pipili/pipili-idle.lottie',
+    loop: true,
+    reducedMotion: 'static-pose',
+  },
+  bindings: [
+    {
+      state: 'idle',
+      animation: {
+        backend: 'lottie',
+        src: 'assets/pipili/pipili-idle.lottie',
+        loop: true,
+        reducedMotion: 'static-pose',
+      },
+    },
+    {
+      state: 'thinking',
+      animation: {
+        backend: 'lottie',
+        src: 'assets/pipili/pipili-thinking.lottie',
+        loop: true,
+        reducedMotion: 'static-pose',
+      },
+    },
+    {
+      state: 'celebrating',
+      animation: {
+        backend: 'lottie',
+        src: 'assets/pipili/pipili-celebrate.lottie',
+        trigger: 'lesson-complete',
+        reducedMotion: 'static-pose',
+      },
+    },
+    {
+      state: 'hinting',
+      animation: {
+        backend: 'lottie',
+        src: 'assets/pipili/pipili-hint.lottie',
+        reducedMotion: 'static-pose',
+      },
+    },
+  ],
+};
 
 export interface PipiliRequest {
   conversationId: string;

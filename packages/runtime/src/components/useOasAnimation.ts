@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
-import type { AnimationConfig } from '@open-edu/schemas';
+import type { AnimationConfig, AnimationConfigInput } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
 import { useLiveRegion } from '@open-edu/accessibility';
 
@@ -20,7 +20,7 @@ export interface OasAnimationController {
 }
 
 export function useOasAnimation(
-  config?: AnimationConfig,
+  config?: AnimationConfigInput,
   onStatusChange?: (s: OasAnimationStatus) => void,
 ): OasAnimationController {
   const { t } = useTranslation();
@@ -43,7 +43,8 @@ export function useOasAnimation(
     onStatusChangeRef.current?.(next);
   }, []);
 
-  const totalSteps = parsed.success ? Math.max(1, parsed.data.effects?.length ?? 1) : 1;
+  const parsedConfig: AnimationConfig | undefined = parsed.success ? parsed.data : undefined;
+  const totalSteps = parsedConfig ? Math.max(1, parsedConfig.effects?.length ?? 1) : 1;
   const valid = parsed.success && !reducedMotion;
 
   useEffect(() => {

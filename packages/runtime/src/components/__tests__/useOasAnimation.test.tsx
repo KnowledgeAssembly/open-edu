@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import { LiveRegionProvider } from '@open-edu/accessibility';
+import type { AnimationConfigInput } from '@open-edu/schemas';
 import { useOasAnimation } from '../useOasAnimation.js';
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -14,7 +15,7 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
-const validConfig = {
+const validConfig: AnimationConfigInput = {
   backend: 'lottie',
   src: 'assets/animations/water-cycle.lottie',
   effects: [{ target: 'evaporation', effect: 'flow' }],
@@ -72,7 +73,10 @@ describe('useOasAnimation', () => {
   });
 
   it('stays idle for invalid configs without throwing', () => {
-    const { result } = renderHook(() => useOasAnimation({ backend: 'flash' }), { wrapper });
+    const { result } = renderHook(
+      () => useOasAnimation({ backend: 'flash' } as unknown as AnimationConfigInput),
+      { wrapper },
+    );
 
     expect(result.current.status).toBe('idle');
 
@@ -84,21 +88,17 @@ describe('useOasAnimation', () => {
 
   it('clamps step navigation to bounds and reports total steps', () => {
     const onStatusChange = vi.fn();
-    const { result } = renderHook(
-      () =>
-        useOasAnimation(
-          {
-            backend: 'lottie',
-            effects: [
-              { target: 'a', effect: 'flow', step: 1 },
-              { target: 'b', effect: 'pulse', step: 2 },
-              { target: 'c', effect: 'draw', step: 3 },
-            ],
-          },
-          onStatusChange,
-        ),
-      { wrapper },
-    );
+    const config: AnimationConfigInput = {
+      backend: 'lottie',
+      effects: [
+        { target: 'a', effect: 'flow', step: 1 },
+        { target: 'b', effect: 'pulse', step: 2 },
+        { target: 'c', effect: 'draw', step: 3 },
+      ],
+    };
+    const { result } = renderHook(() => useOasAnimation(config, onStatusChange), {
+      wrapper,
+    });
 
     expect(result.current.totalSteps).toBe(3);
 

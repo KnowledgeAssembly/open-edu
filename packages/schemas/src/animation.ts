@@ -87,3 +87,5 @@ export type AnimationTrigger = z.infer<typeof AnimationTriggerEnum>;
 export type AnimationReducedMotion = z.infer<typeof AnimationReducedMotionEnum>;
 export type AnimationEffectConfig = z.infer<typeof AnimationEffectConfigSchema>;
 export type AnimationConfig = z.infer<typeof AnimationConfigSchema>;
+export type AnimationConfigInput = z.input<typeof AnimationConfigSchema>;
+export type AnimationEffectConfigInput = z.input<typeof AnimationEffectConfigSchema>;
