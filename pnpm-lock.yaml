@@ -1109,6 +1109,9 @@ importers:
       '@open-edu/design-system':
         specifier: workspace:*
         version: link:../design-system
+      '@open-edu/schemas':
+        specifier: workspace:^
+        version: link:../schemas
       react:
         specifier: ^18.0.0
         version: 18.3.1

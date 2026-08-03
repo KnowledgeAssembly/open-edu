@@ -34,6 +34,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@open-edu/design-system": "workspace:*",
+    "@open-edu/schemas": "workspace:^",
     "zod": "^3.22.0"
   },
   "devDependencies": {

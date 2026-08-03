@@ -56,6 +56,19 @@ describe('Timeline schema', () => {
     renderWidget({ events: defaultEvents, interactive: false });
     expect(screen.getByTestId('timeline')).toBeTruthy();
   });
+
+  it('accepts an animation config', () => {
+    renderWidget({
+      events: defaultEvents,
+      interactive: false,
+      animation: {
+        backend: 'lottie',
+        src: 'assets/animations/timeline.lottie',
+        reducedMotion: 'static-steps',
+      },
+    });
+    expect(screen.getByTestId('timeline')).toBeTruthy();
+  });
 });
 
 describe('Timeline vertical layout', () => {

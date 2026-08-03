@@ -74,6 +74,18 @@ describe('ProcessDiagram rendering', () => {
     renderWidget({});
     expect(screen.getByTestId('widget-config-error')).toBeInTheDocument();
   });
+
+  it('accepts an animation config', () => {
+    renderWidget({
+      ...baseConfig,
+      animation: {
+        backend: 'svg',
+        src: 'diagrams/water-cycle.svg',
+        effects: [{ target: 'evaporation', effect: 'flow' }],
+      },
+    });
+    expect(screen.getByTestId('process-diagram')).toBeInTheDocument();
+  });
 });
 
 describe('ProcessDiagram step-by-step', () => {
