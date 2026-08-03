@@ -228,4 +228,74 @@ describe('validateCourseModel', () => {
     const diags = validateCourseModel(model);
     expect(diags.filter((d) => d.severity === 'error')).toHaveLength(0);
   });
+
+  it('passes for a widget activity with a valid animation config', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-anim',
+        type: 'widget',
+        widgetId: 'core.process-explainer',
+        config: {
+          animation: {
+            backend: 'lottie',
+            src: 'assets/animations/water-cycle.lottie',
+            trigger: 'step',
+            reducedMotion: 'static-steps',
+          },
+        },
+      },
+    ];
+    model.modules[0]!.lessons[0]!.assets = [
+      { id: 'wc', path: 'assets/animations/water-cycle.lottie', type: 'embed', placeholderGenerated: false },
+    ];
+    const diags = validateCourseModel(model);
+    expect(diags.some((d) => d.code === 'INVALID_ANIMATION_CONFIG')).toBe(false);
+    expect(diags.some((d) => d.code === 'UNDECLARED_ANIMATION_ASSET')).toBe(false);
+  });
+
+  it('reports an invalid animation effect', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-anim',
+        type: 'widget',
+        widgetId: 'core.process-explainer',
+        config: {
+          animation: {
+            backend: 'lottie',
+            effects: [{ target: 'x', effect: 'sparkles' }],
+          },
+        },
+      },
+    ];
+    const diags = validateCourseModel(model);
+    const invalid = diags.find((d) => d.code === 'INVALID_ANIMATION_CONFIG');
+    expect(invalid).toBeDefined();
+    expect(invalid?.severity).toBe('error');
+  });
+
+  it('warns when an animation src is not declared in lesson assets', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-anim',
+        type: 'widget',
+        widgetId: 'core.process-explainer',
+        config: {
+          animation: {
+            backend: 'lottie',
+            src: 'assets/animations/missing.lottie',
+          },
+        },
+      },
+    ];
+    model.modules[0]!.lessons[0]!.assets = [
+      { id: 'other', path: 'assets/images/diagram.svg', type: 'image', placeholderGenerated: false },
+    ];
+    const diags = validateCourseModel(model);
+    const missing = diags.find((d) => d.code === 'UNDECLARED_ANIMATION_ASSET');
+    expect(missing).toBeDefined();
+    expect(missing?.severity).toBe('warning');
+  });
 });

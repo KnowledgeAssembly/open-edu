@@ -668,6 +668,9 @@ importers:
       '@open-edu/core':
         specifier: workspace:*
         version: link:../core
+      '@open-edu/schemas':
+        specifier: workspace:^
+        version: link:../schemas
       commander:
         specifier: ^12.0.0
         version: 12.1.0
