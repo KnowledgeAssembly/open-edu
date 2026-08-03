@@ -1,7 +1,9 @@
+import { useCallback } from 'react';
 import type { ValidationError } from './WidgetValidator';
 import { WidgetPreviewProvider, useWidgetPreview } from './WidgetPreviewProvider';
 import type { WidgetRenderProps } from '@open-edu/widgets';
 import { Badge, Button, EmptyState } from '@open-edu/design-system';
+import { OasAnimationWrapper } from '@open-edu/runtime';
 import { PanelRightClose, RotateCcw } from 'lucide-react';
 
 interface WidgetPreviewPanelProps {
@@ -21,6 +23,15 @@ function WidgetPreviewRenderer({
 }) {
   const { registry, emitInteraction, complete, storedState } = useWidgetPreview();
   const definition = registry.get(widgetType);
+
+  const resolveAsset = useCallback((path: string): string => {
+    const normalized = (path ?? '')
+      .replace(/^\//, '')
+      .replace(/^(?:\.\.?\/)*/, '')
+      .replace(/^assets\//, '');
+    if (!normalized) return '';
+    return `/assets/${normalized}`;
+  }, []);
 
   if (!definition) {
     const available = registry
@@ -48,10 +59,23 @@ function WidgetPreviewRenderer({
     storedState,
   };
 
+  const animationConfig = widgetConfig?.animation;
+
+  const widgetElement = <WidgetComponent {...widgetProps} />;
+
   return (
     <div className="flex min-h-[200px] items-center justify-center p-4">
       <div className="w-full max-w-[600px]">
-        <WidgetComponent {...widgetProps} />
+        {animationConfig ? (
+          <OasAnimationWrapper
+            config={animationConfig}
+            resolveSrc={resolveAsset}
+            preserveChildren
+            staticChildren={widgetElement}
+          />
+        ) : (
+          widgetElement
+        )}
       </div>
     </div>
   );
