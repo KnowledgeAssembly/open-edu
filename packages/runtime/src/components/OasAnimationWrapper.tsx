@@ -7,6 +7,7 @@ import { useOasAnimation } from './useOasAnimation';
 import type { OasAnimationController } from './useOasAnimation';
 import { DotLottiePlayer } from './DotLottiePlayer';
 import { CssAnimationRenderer, effectToClass } from './CssAnimationRenderer';
+import { CanvasAnimationRenderer } from './CanvasAnimationRenderer';
 
 export interface OasAnimationWrapperProps {
   config?: unknown;
@@ -237,6 +238,20 @@ export function OasAnimationWrapper({
           )}
         </CssAnimationRenderer>
         {renderControls()}
+        {renderPreservedChildren()}
+      </div>
+    );
+  }
+
+  if (resolvedConfig.backend === 'canvas') {
+    return (
+      <div className={className} data-testid="oas-canvas-backend">
+        <CanvasAnimationRenderer
+          config={resolvedConfig}
+          reducedMotion={reducedMotion}
+          speed={resolvedConfig.speed}
+          ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
+        />
         {renderPreservedChildren()}
       </div>
     );

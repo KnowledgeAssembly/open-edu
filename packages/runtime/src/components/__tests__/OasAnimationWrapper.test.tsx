@@ -120,6 +120,20 @@ describe('OasAnimationWrapper', () => {
     expect(screen.getByText('CSS content')).toBeInTheDocument();
   });
 
+  it('renders canvas backend with CanvasAnimationRenderer', () => {
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'canvas',
+          effects: [{ target: 'bar-0', effect: 'flow', step: 30 }],
+        }}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-canvas-backend')).toBeInTheDocument();
+    expect(screen.getByTestId('canvas-animation-renderer')).toBeInTheDocument();
+  });
+
   it('falls back to CssAnimationRenderer when the lottie player errors with effects', () => {
     render(
       <OasAnimationWrapper
