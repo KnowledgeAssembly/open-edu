@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, type ReactNode } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { Observable } from 'rxjs';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { RewardAnimation, type RewardAnimationType } from './RewardAnimation.js';
@@ -85,6 +85,7 @@ export function RewardEventBridge({ receipts$ }: RewardEventBridgeProps): JSX.El
   if (!current && queue.length === 0) return null;
 
   const active = current ?? queue[0];
+  if (!active) return null;
 
   return (
     <RewardAnimation
