@@ -29,6 +29,7 @@ const WIDGET_IDS = [
   'science.process-diagram',
   'math.number-line',
   'social.map',
+  'core.process-explainer',
 ];
 
 describe('widget-showcase example package', () => {
@@ -36,7 +37,7 @@ describe('widget-showcase example package', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('widget-showcase');
     expect(pkg.manifest.title).toBe('Widget Showcase');
-    expect(pkg.nodes.length).toBe(28);
+    expect(pkg.nodes.length).toBe(29);
   });
 
   it('should have correct node types', async () => {
@@ -45,10 +46,10 @@ describe('widget-showcase example package', () => {
     expect(pkg.nodes.find((n) => n.relativePath === 'nodes/outro.md')?.node.type).toBe('lesson');
 
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
-    expect(exerciseNodes).toHaveLength(26);
+    expect(exerciseNodes).toHaveLength(27);
   });
 
-  it('should reference all 26 widget IDs in exercise nodes', async () => {
+  it('should reference all 27 widget IDs in exercise nodes', async () => {
     const pkg = await loadPackage(resolve(__dirname));
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
 

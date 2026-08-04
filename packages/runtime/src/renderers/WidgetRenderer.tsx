@@ -1,9 +1,11 @@
-import { Component, useContext, type ReactNode } from 'react';
+import { Component, useContext, useRef, type ReactNode } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
 import { WidgetCanvas } from '../components/WidgetCanvas';
+import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
+import type { OasAnimationController } from '../components/useOasAnimation';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import type { WidgetAnswer } from '@open-edu/schemas';
 
@@ -67,6 +69,7 @@ export interface WidgetRendererProps {
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
   const { t } = useTranslation();
+  const animationControllerRef = useRef<OasAnimationController | null>(null);
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale;
@@ -91,6 +94,9 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
   const emitInteraction = (data: Record<string, unknown>) => {
     console.debug('[widget:interaction]', widgetId, data);
+    if (data.action === 'reveal') {
+      animationControllerRef.current?.nextStep();
+    }
   };
 
   const WidgetComponent = definition.render;
@@ -116,10 +122,22 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     storedState,
   };
 
+  const animationConfig = node.config?.animation;
+
   return (
     <WidgetErrorBoundary widgetId={widgetId} message={t('runtime.widget.load_error')}>
       <WidgetCanvas widgetId={widgetId} minHeight={200}>
-        <WidgetComponent {...widgetProps} />
+        {animationConfig ? (
+          <OasAnimationWrapper
+            config={animationConfig}
+            resolveSrc={resolveAsset}
+            preserveChildren
+            controllerRef={animationControllerRef}
+            staticChildren={<WidgetComponent {...widgetProps} />}
+          />
+        ) : (
+          <WidgetComponent {...widgetProps} />
+        )}
       </WidgetCanvas>
     </WidgetErrorBoundary>
   );

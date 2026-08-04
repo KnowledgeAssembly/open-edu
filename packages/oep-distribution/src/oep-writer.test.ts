@@ -53,6 +53,49 @@ describe('OepWriter', () => {
     expect(extraction.nodes!['course/nodes/lesson-1.md']).toBe(lessonMd);
   });
 
+  it('preserves .lottie and .svg assets byte-for-byte', async () => {
+    const manifest = {
+      format: OEP_FORMAT,
+      formatVersion: OEP_FORMAT_VERSION,
+      id: 'anim-course',
+      version: '1.0.0',
+      title: 'Animation Course',
+      checksum: { algorithm: 'sha256' as const, value: '' },
+      contentRoot: 'course/',
+      signature: { status: 'unsigned' as const },
+    } as const;
+
+    const courseFiles = new Map<string, Uint8Array>();
+    courseFiles.set(
+      'package.json',
+      encoder.encode(
+        JSON.stringify({
+          id: 'anim-course',
+          version: '1.0.0',
+          title: 'Animation Course',
+          author: 'test',
+          entry: 'nodes/lesson.md',
+        }),
+      ),
+    );
+    courseFiles.set('nodes/lesson.md', encoder.encode('# Lesson'));
+    const lottieBytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x01, 0x02]);
+    const svgBytes = new Uint8Array([
+      0x3c, 0x73, 0x76, 0x67, 0x3e, 0x3c, 0x2f, 0x73, 0x76, 0x67, 0x3e,
+    ]);
+    courseFiles.set('assets/animations/water-cycle.lottie', lottieBytes);
+    courseFiles.set('assets/diagrams/heart.svg', svgBytes);
+
+    const { bytes, checksumValue } = await OepWriter.build({ manifest, courseFiles });
+
+    const reader = new OepReader();
+    const extraction = await reader.read(bytes);
+
+    expect(extraction.manifest.checksum.value).toBe(checksumValue);
+    expect(extraction.assets!['course/assets/animations/water-cycle.lottie']).toEqual(lottieBytes);
+    expect(extraction.assets!['course/assets/diagrams/heart.svg']).toEqual(svgBytes);
+  });
+
   it('produces reproducible output for same input', async () => {
     const manifest = {
       format: OEP_FORMAT,

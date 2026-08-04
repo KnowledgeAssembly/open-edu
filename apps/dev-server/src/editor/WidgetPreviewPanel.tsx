@@ -1,7 +1,10 @@
+import { useCallback, useRef } from 'react';
 import type { ValidationError } from './WidgetValidator';
 import { WidgetPreviewProvider, useWidgetPreview } from './WidgetPreviewProvider';
 import type { WidgetRenderProps } from '@open-edu/widgets';
 import { Badge, Button, EmptyState } from '@open-edu/design-system';
+import { OasAnimationWrapper } from '@open-edu/runtime';
+import type { OasAnimationController } from '@open-edu/runtime';
 import { PanelRightClose, RotateCcw } from 'lucide-react';
 
 interface WidgetPreviewPanelProps {
@@ -21,6 +24,26 @@ function WidgetPreviewRenderer({
 }) {
   const { registry, emitInteraction, complete, storedState } = useWidgetPreview();
   const definition = registry.get(widgetType);
+  const animationControllerRef = useRef<OasAnimationController | null>(null);
+
+  const resolveAsset = useCallback((path: string): string => {
+    const normalized = (path ?? '')
+      .replace(/^\//, '')
+      .replace(/^(?:\.\.?\/)*/, '')
+      .replace(/^assets\//, '');
+    if (!normalized) return '';
+    return `/assets/${normalized}`;
+  }, []);
+
+  const handleInteraction = useCallback(
+    (data: Record<string, unknown>) => {
+      emitInteraction(widgetType, data);
+      if (data.action === 'reveal') {
+        animationControllerRef.current?.nextStep();
+      }
+    },
+    [widgetType, emitInteraction],
+  );
 
   if (!definition) {
     const available = registry
@@ -43,15 +66,29 @@ function WidgetPreviewRenderer({
   const widgetProps: WidgetRenderProps = {
     nodeId: '__preview__',
     config: widgetConfig,
-    emitInteraction: (data) => emitInteraction(widgetType, data),
+    emitInteraction: handleInteraction,
     complete: (score?: number, state?: unknown) => complete(score, state),
     storedState,
   };
 
+  const animationConfig = widgetConfig?.animation;
+
+  const widgetElement = <WidgetComponent {...widgetProps} />;
+
   return (
     <div className="flex min-h-[200px] items-center justify-center p-4">
       <div className="w-full max-w-[600px]">
-        <WidgetComponent {...widgetProps} />
+        {animationConfig ? (
+          <OasAnimationWrapper
+            config={animationConfig}
+            resolveSrc={resolveAsset}
+            preserveChildren
+            controllerRef={animationControllerRef}
+            staticChildren={widgetElement}
+          />
+        ) : (
+          widgetElement
+        )}
       </div>
     </div>
   );

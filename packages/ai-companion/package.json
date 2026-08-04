@@ -21,11 +21,24 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@open-edu/accessibility": "workspace:^",
+    "@open-edu/design-system": "workspace:^",
+    "@open-edu/i18n": "workspace:^",
     "@open-edu/logger": "workspace:*",
+    "@open-edu/runtime": "workspace:^",
+    "@open-edu/schemas": "workspace:^",
     "flexsearch": "^0.8.212",
     "zod": "^3.22.0"
   },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "vitest": "^1.0.0"
   }
 }

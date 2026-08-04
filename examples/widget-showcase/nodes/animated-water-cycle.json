@@ -1,0 +1,48 @@
+{
+  "type": "exercise",
+  "title": "Animated Water Cycle",
+  "widget": "core.process-explainer",
+  "config": {
+    "title": "The Water Cycle",
+    "stepByStep": true,
+    "interactive": true,
+    "steps": [
+      {
+        "id": "evaporation",
+        "title": "Evaporation",
+        "description": "Sun heats water, turning it into vapor",
+        "icon": "☀️"
+      },
+      {
+        "id": "condensation",
+        "title": "Condensation",
+        "description": "Water vapor cools and forms clouds",
+        "icon": "☁️"
+      },
+      {
+        "id": "precipitation",
+        "title": "Precipitation",
+        "description": "Water falls as rain, snow, or hail",
+        "icon": "🌧️"
+      },
+      {
+        "id": "collection",
+        "title": "Collection",
+        "description": "Water gathers in oceans, lakes, and rivers",
+        "icon": "🌊"
+      }
+    ],
+    "animation": {
+      "backend": "lottie",
+      "src": "assets/animations/water-cycle.lottie",
+      "trigger": "step",
+      "reducedMotion": "static-steps",
+      "effects": [
+        { "step": 1, "target": "evaporation", "effect": "flow" },
+        { "step": 2, "target": "condensation", "effect": "pulse" },
+        { "step": 3, "target": "precipitation", "effect": "draw" },
+        { "step": 4, "target": "collection", "effect": "flow" }
+      ]
+    }
+  }
+}

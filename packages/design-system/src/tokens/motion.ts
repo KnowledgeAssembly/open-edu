@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export const motionTokens = {
+  durationInstant: '0ms',
   durationFast: '100ms',
   durationNormal: '200ms',
   durationSlow: '300ms',
@@ -8,6 +9,40 @@ export const motionTokens = {
   easingEaseOut: 'cubic-bezier(0, 0, 0.15, 1)',
   easingEaseIn: 'cubic-bezier(0.4, 0, 1, 1)',
 } as const;
+
+export type OasDurationName = 'instant' | 'fast' | 'normal' | 'slow';
+
+const oasDurations: Record<OasDurationName, string> = {
+  instant: motionTokens.durationInstant,
+  fast: motionTokens.durationFast,
+  normal: motionTokens.durationNormal,
+  slow: motionTokens.durationSlow,
+};
+
+export function oasDurationToMs(duration: OasDurationName | number): string {
+  if (typeof duration === 'number') return `${duration}ms`;
+  return oasDurations[duration];
+}
+
+export function oasDurationVar(duration: OasDurationName | number): string {
+  if (typeof duration === 'number') return `${duration}ms`;
+  return `var(--oe-motion-duration-${duration})`;
+}
+
+export interface LottieThemeColorMap {
+  [variable: string]: string;
+}
+
+export function lottieThemeColors(
+  colors: Record<string, string>,
+  prefix = '--oe-color-',
+): LottieThemeColorMap {
+  const result: LottieThemeColorMap = {};
+  for (const [name, value] of Object.entries(colors)) {
+    result[`${prefix}${name}`] = value;
+  }
+  return result;
+}
 
 export const motionSafe = (animations: string) => `
 @media (prefers-reduced-motion: no-preference) {

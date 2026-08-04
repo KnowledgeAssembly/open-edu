@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
+import { AnimationConfigSchema } from '@open-edu/schemas';
 import { useObserveMode } from '../../use-observe-mode';
 import {
   DndContext,
@@ -40,6 +41,7 @@ const timelineSchema = z.object({
   showImages: z.boolean().optional().default(false),
   interactive: z.boolean().optional().default(false),
   hints: z.array(z.string()).optional(),
+  animation: AnimationConfigSchema.optional(),
 });
 
 export type TimelineConfig = z.infer<typeof timelineSchema>;

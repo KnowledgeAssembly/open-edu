@@ -2709,6 +2709,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       'Accessibility',
       'Offline',
       'ObserveMode',
+      'Animation',
     ],
     accessibility: [
       'HighContrast',
@@ -2827,6 +2828,145 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
           domain: 'science',
           slug: 'process-diagram',
         },
+      ],
+    },
+  },
+  {
+    id: 'core.process-explainer',
+    name: 'Process Explainer',
+    description: 'Step-by-step explanation of a process with progressive reveal',
+    domain: 'core',
+    status: 'stable',
+    keywords: ['process', 'explainer', 'steps', 'step-by-step', 'sequence', 'how-it-works'],
+    learningIntents: ['Observe', 'Understand'],
+    capabilities: [
+      'Keyboard',
+      'ScreenReader',
+      'Hints',
+      'Touch',
+      'Mouse',
+      'Analytics',
+      'Rewards',
+      'Accessibility',
+      'Offline',
+      'ObserveMode',
+      'Animation',
+    ],
+    accessibility: [
+      'HighContrast',
+      'KeyboardOnly',
+      'ScreenReader',
+      'FocusManagement',
+      'AriaSupport',
+    ],
+    analytics: ['Attempts', 'CompletionTime', 'SuccessRate', 'Hints', 'Interactions'],
+    reward: {
+      completionXP: 15,
+      positiveMessage: 'Process understood!',
+      achievement: 'first-process-explainer',
+    },
+    ai: {
+      difficulty: 'medium',
+      estimatedMinutes: 5,
+      bloomsLevel: 'understand',
+      cognitiveLoad: 'moderate',
+      recommendedAge: [8, 18],
+      readingLevel: 'grade-4',
+      learningObjectives: [
+        'Understand the sequence of steps in a process',
+        'Identify relationships between process stages',
+        'Explain each stage of a process in their own words',
+      ],
+      commonMisconceptions: [
+        'Skipping intermediate steps in a process',
+        'Confusing the order of stages',
+      ],
+      generationHints: [
+        'Use 3-8 steps for clarity',
+        'Keep each step description to 1-2 sentences',
+        'Provide an icon or simple media asset per step when possible',
+      ],
+    },
+    guide: {
+      oneLiner: 'Walk through a process one step at a time with clear explanations.',
+      whatItDoes:
+        'The Process Explainer widget presents a process as a numbered list of steps. In step-by-step mode, each step is revealed progressively, keeping focus on one idea at a time. Optional dotLottie or SVG animations can be attached via config.animation.',
+      whenToUse: [
+        'Teaching multi-stage processes step by step',
+        'Explaining how a system works',
+        'Guiding learners through a procedure',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.process-explainer"',
+        'Define your steps — each needs an id and title',
+        'Optionally add descriptions, icons, and media per step',
+        'Optionally attach an animation config for dotLottie/SVG effects',
+      ],
+      configFields: [
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'An overall title for the explainer.',
+        },
+        {
+          name: 'steps',
+          type: 'array of objects',
+          required: true,
+          description:
+            'Explainer steps. Each has id (string) and title (string), with optional description (string), icon (string), and media (string).',
+        },
+        {
+          name: 'stepByStep',
+          type: 'boolean',
+          required: false,
+          description: 'Reveal steps one at a time. Defaults to true.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'When false, shows steps for observation only. Defaults to false.',
+        },
+        {
+          name: 'animation',
+          type: 'object',
+          required: false,
+          description:
+            'Optional OAS animation config (backend lottie/svg, src, trigger, reducedMotion, effects).',
+        },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Water Cycle",
+  "widget": "core.process-explainer",
+  "config": {
+    "title": "The Water Cycle",
+    "stepByStep": true,
+    "interactive": true,
+    "steps": [
+      { "id": "evap", "title": "Evaporation", "description": "Sun heats water into vapor" },
+      { "id": "cond", "title": "Condensation", "description": "Vapor cools into clouds" },
+      { "id": "rain", "title": "Precipitation", "description": "Water falls as rain or snow" },
+      { "id": "collect", "title": "Collection", "description": "Water gathers in oceans and lakes" }
+    ]
+  }
+}`,
+      tips: [
+        'Use 3-8 steps for clarity',
+        'Keep step descriptions to 1-2 sentences',
+        'Use stepByStep mode to reduce cognitive load',
+      ],
+      sidebarPosition: 14,
+      relatedWidgets: [
+        {
+          id: 'science.process-diagram',
+          name: 'Process Diagram',
+          domain: 'science',
+          slug: 'process-diagram',
+        },
+        { id: 'core.timeline', name: 'Timeline', domain: 'core', slug: 'timeline' },
       ],
     },
   },
@@ -3537,6 +3677,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       'Accessibility',
       'Offline',
       'ObserveMode',
+      'Animation',
     ],
     accessibility: [
       'HighContrast',

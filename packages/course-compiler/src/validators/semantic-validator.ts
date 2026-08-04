@@ -1,4 +1,5 @@
 import type { CourseModel, CompilerDiagnostic } from '../schemas/index.js';
+import { AnimationConfigSchema } from '@open-edu/schemas';
 
 export function validateCourseModel(model: CourseModel): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
@@ -10,6 +11,7 @@ export function validateCourseModel(model: CourseModel): CompilerDiagnostic[] {
   validateQuizStructure(model, diagnostics);
   validateEmptyContent(model, diagnostics);
   validateAssets(model, diagnostics);
+  validateAnimationConfigs(model, diagnostics);
 
   return diagnostics;
 }
@@ -261,6 +263,58 @@ function validateAssets(model: CourseModel, diagnostics: CompilerDiagnostic[]) {
             'PLACEHOLDER_ASSET',
             'Replace the placeholder with the actual asset file',
           );
+        }
+      }
+    }
+  }
+}
+
+function normalizeAssetPath(path: string): string {
+  return path
+    .replace(/\\/g, '/')
+    .replace(/^\.?\//, '')
+    .replace(/^assets\//, '');
+}
+
+function validateAnimationConfigs(model: CourseModel, diagnostics: CompilerDiagnostic[]) {
+  for (const mod of model.modules) {
+    for (const lesson of mod.lessons) {
+      const activities = lesson.activities ?? [];
+      for (const activity of activities) {
+        if (activity.type !== 'widget') continue;
+        const animation = activity.config?.animation;
+        if (animation === undefined) continue;
+
+        const parsed = AnimationConfigSchema.safeParse(animation);
+        if (!parsed.success) {
+          addDiag(
+            diagnostics,
+            'error',
+            `Widget activity "${activity.id}" has an invalid animation config`,
+            'INVALID_ANIMATION_CONFIG',
+            `Invalid fields: ${parsed.error.issues
+              .map((issue) => issue.path.join('.'))
+              .filter(Boolean)
+              .join(', ')}`,
+          );
+          continue;
+        }
+
+        const src = parsed.data.src;
+        if (src && lesson.assets && lesson.assets.length > 0) {
+          const normalizedSrc = normalizeAssetPath(src);
+          const declared = lesson.assets.some(
+            (asset) => normalizeAssetPath(asset.path) === normalizedSrc,
+          );
+          if (!declared) {
+            addDiag(
+              diagnostics,
+              'warning',
+              `Animation "${src}" in widget activity "${activity.id}" is not declared in lesson assets`,
+              'UNDECLARED_ANIMATION_ASSET',
+              'Declare the asset in the lesson assets or place it under assets/',
+            );
+          }
         }
       }
     }

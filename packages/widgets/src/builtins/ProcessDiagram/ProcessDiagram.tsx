@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { WidgetDefinitionV2 } from '../../types';
 import { LearningIntent } from '../../metadata/learning-intents';
 import { Button } from '@open-edu/design-system';
+import { AnimationConfigSchema } from '@open-edu/schemas';
 import { useObserveMode } from '../../use-observe-mode';
 import { WidgetError } from '../WidgetError';
 
@@ -29,6 +30,7 @@ const processDiagramSchema = z.object({
   interactive: z.boolean().optional().default(false),
   animate: z.boolean().optional().default(false),
   stepByStep: z.boolean().optional().default(false),
+  animation: AnimationConfigSchema.optional(),
 });
 
 const ProcessDiagramStateSchema = z.object({
