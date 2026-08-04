@@ -118,3 +118,5 @@ export { RewardAnimation } from './components/RewardAnimation.js';
 export type { RewardAnimationProps, RewardAnimationType } from './components/RewardAnimation.js';
 export { RewardEventBridge } from './components/RewardEventBridge.js';
 export type { RewardEventBridgeProps } from './components/RewardEventBridge.js';
+export { CanvasAnimationRenderer } from './components/CanvasAnimationRenderer.js';
+export type { CanvasAnimationRendererProps } from './components/CanvasAnimationRenderer.js';
