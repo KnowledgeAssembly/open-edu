@@ -45,6 +45,10 @@
   "animation.speed": "Animation speed",
   "animation.completed": "Animation complete",
   "animation.static_fallback": "Static diagram",
+  "animation.reset": "Reset",
+  "canvas.comparing": "Comparing elements at index {{a}} and {{b}}",
+  "canvas.sort_complete": "Sorting complete",
+  "canvas.step_of": "Step {{step}} of {{total}}",
   "reward.badge_unlocked": "Badge unlocked: {{name}}",
   "reward.xp_gained": "Gained {{amount}} XP",
   "reward.generic": "{{type}} reward"
