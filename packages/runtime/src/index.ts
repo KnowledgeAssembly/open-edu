@@ -114,3 +114,7 @@ export { OasAnimationWrapper } from './components/OasAnimationWrapper.js';
 export type { OasAnimationWrapperProps } from './components/OasAnimationWrapper.js';
 export { CssAnimationRenderer } from './components/CssAnimationRenderer.js';
 export type { CssAnimationRendererProps } from './components/CssAnimationRenderer.js';
+export { RewardAnimation } from './components/RewardAnimation.js';
+export type { RewardAnimationProps, RewardAnimationType } from './components/RewardAnimation.js';
+export { RewardEventBridge } from './components/RewardEventBridge.js';
+export type { RewardEventBridgeProps } from './components/RewardEventBridge.js';
