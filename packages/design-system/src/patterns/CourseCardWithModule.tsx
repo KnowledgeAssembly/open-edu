@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '../lib/utils.js';
 import { OpenModule } from '../primitives/open-module.js';
 import type { CourseCardProps } from '../learning/CourseCard.js';
 
@@ -9,6 +10,7 @@ export interface CourseCardWithModuleProps {
   } | null;
   badgeCount?: number;
   children: React.ReactNode;
+  className?: string;
 }
 
 export function getProgressSatellites(
@@ -36,6 +38,7 @@ export function CourseCardWithModule({
   progress,
   badgeCount = 0,
   children,
+  className,
 }: CourseCardWithModuleProps): JSX.Element {
   const satellites = getProgressSatellites(progress, badgeCount);
 
@@ -53,11 +56,11 @@ export function CourseCardWithModule({
   const hasCourseCard = React.Children.toArray(children).some(isCourseCard);
 
   if (hasCourseCard) {
-    return <>{mapped}</>;
+    return <div className={cn('flex h-full flex-col', className)}>{mapped}</div>;
   }
 
   return (
-    <div className="relative pr-16">
+    <div className={cn('relative flex h-full flex-col pr-16', className)}>
       <div className="absolute right-4 top-4 z-10">{indicator}</div>
       {children}
     </div>

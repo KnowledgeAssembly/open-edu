@@ -15,6 +15,7 @@ export const PackageManifestSchema = z.object({
   author: z.string().min(1).max(128),
   entry: z.string().min(1).max(512),
   tags: z.array(z.string().min(1).max(64)).optional(),
+  image: z.string().optional(),
 });
 
 export type PackageManifest = z.infer<typeof PackageManifestSchema>;

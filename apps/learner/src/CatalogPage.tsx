@@ -24,6 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  getCourseCardImage,
 } from '@open-edu/design-system';
 import type { AppView } from './AppShell';
 import { RotateCcw, Trash2 } from 'lucide-react';
@@ -36,6 +37,12 @@ import { proxyFetch } from './oep-proxy/client';
 import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 import { deleteCourse, deleteBundle } from '@open-edu/storage';
 import { isOepCourse, storedBundleToBundleSummary } from './oepAdapters';
+
+const overlayActionButtonClassName =
+  'h-8 w-8 rounded-full p-0 flex items-center justify-center bg-surface-container-high/90 hover:bg-surface-container-highest shadow-sm backdrop-blur transition-all';
+
+const overlayActionsClassName =
+  'absolute bottom-3 right-3 z-10 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100';
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -299,7 +306,10 @@ export function CatalogPage({
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {continueList.map((pkg) => (
-              <div key={pkg.manifest.id} className="group relative overflow-hidden">
+              <div
+                key={pkg.manifest.id}
+                className="group relative flex h-full flex-col overflow-hidden"
+              >
                 <CourseCardWithModule
                   progress={progress[pkg.manifest.id] ?? null}
                   badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
@@ -311,22 +321,29 @@ export function CatalogPage({
                     earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                     progress={progress[pkg.manifest.id] ?? null}
                     onStart={() => onStartCourse(pkg.rootDir)}
+                    image={getCourseCardImage({
+                      image: pkg.manifest.image,
+                      tags: pkg.manifest.tags,
+                      title: pkg.manifest.title,
+                    })}
                   />
                 </CourseCardWithModule>
                 {progress[pkg.manifest.id] && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-testid="reset-button"
-                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
-                    }}
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    <span className="sr-only">{t('learner.reset.button')}</span>
-                  </Button>
+                  <div className={overlayActionsClassName} data-testid="card-overlay-actions">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-testid="reset-button"
+                      className={overlayActionButtonClassName}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
+                      }}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      <span className="sr-only">{t('learner.reset.button')}</span>
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -350,7 +367,10 @@ export function CatalogPage({
                 ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
                 : 0;
               return (
-                <div key={bundle.manifest.id} className="group relative overflow-hidden">
+                <div
+                  key={bundle.manifest.id}
+                  className="group relative flex h-full flex-col overflow-hidden"
+                >
                   <BundleCardWithModule
                     completedModules={completedModules}
                     totalModules={bundle.moduleCount}
@@ -364,36 +384,50 @@ export function CatalogPage({
                       totalModules={bundle.moduleCount}
                       isStarted={prog !== undefined}
                       onStart={() => onStartBundle?.(bundle.manifest.id)}
+                      subject={bundle.manifest.subject}
+                      image={getCourseCardImage({
+                        image: bundle.manifest.image,
+                        subject: bundle.manifest.subject,
+                        title: bundle.manifest.title,
+                      })}
                     />
                   </BundleCardWithModule>
-                  {prog && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      data-testid="reset-button"
-                      className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true);
-                      }}
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                      <span className="sr-only">{t('learner.reset.button')}</span>
-                    </Button>
-                  )}
-                  {installedBundleIds.has(bundle.manifest.id) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      data-testid="delete-installed-button"
-                      className="absolute bottom-2 right-12 opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={(e) =>
-                        handleDeleteInstalledBundle(bundle.manifest.id, bundle.manifest.title, e)
-                      }
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
-                    </Button>
+                  {(prog || installedBundleIds.has(bundle.manifest.id)) && (
+                    <div className={overlayActionsClassName} data-testid="card-overlay-actions">
+                      {prog && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          data-testid="reset-button"
+                          className={overlayActionButtonClassName}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRequestReset?.(bundle.manifest.id, bundle.manifest.title, true);
+                          }}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          <span className="sr-only">{t('learner.reset.button')}</span>
+                        </Button>
+                      )}
+                      {installedBundleIds.has(bundle.manifest.id) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          data-testid="delete-installed-button"
+                          className={overlayActionButtonClassName}
+                          onClick={(e) =>
+                            handleDeleteInstalledBundle(
+                              bundle.manifest.id,
+                              bundle.manifest.title,
+                              e,
+                            )
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
               );
@@ -464,8 +498,13 @@ export function CatalogPage({
             const prog = progress[pkg.manifest.id] ?? null;
             const isInstalled = installedIds.has(pkg.manifest.id);
             const isOep = isOepCourse(pkg.rootDir);
+            const showReset = !!progress[pkg.manifest.id];
+            const showDelete = isOep;
             return (
-              <div key={pkg.manifest.id} className="group relative overflow-hidden">
+              <div
+                key={pkg.manifest.id}
+                className="group relative flex h-full flex-col overflow-hidden"
+              >
                 <CourseCardWithModule
                   progress={prog}
                   badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
@@ -477,6 +516,11 @@ export function CatalogPage({
                     earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                     progress={prog}
                     onStart={() => onStartCourse(pkg.rootDir)}
+                    image={getCourseCardImage({
+                      image: pkg.manifest.image,
+                      tags: pkg.manifest.tags,
+                      title: pkg.manifest.title,
+                    })}
                     indicator={
                       isInstalled ? (
                         <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
@@ -486,47 +530,38 @@ export function CatalogPage({
                     }
                   />
                 </CourseCardWithModule>
-                {isOep && progress[pkg.manifest.id] && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-testid="reset-button"
-                    className="absolute bottom-2 right-10 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
-                    }}
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    <span className="sr-only">{t('learner.reset.button')}</span>
-                  </Button>
-                )}
-                {isOep && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-testid="delete-installed-button"
-                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => handleDeleteInstalled(pkg.manifest.id, pkg.manifest.title, e)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
-                  </Button>
-                )}
-                {!isOep && progress[pkg.manifest.id] && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-testid="reset-button"
-                    className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
-                    }}
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    <span className="sr-only">{t('learner.reset.button')}</span>
-                  </Button>
+                {(showReset || showDelete) && (
+                  <div className={overlayActionsClassName} data-testid="card-overlay-actions">
+                    {showReset && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        data-testid="reset-button"
+                        className={overlayActionButtonClassName}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRequestReset?.(pkg.manifest.id, pkg.manifest.title, false);
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        <span className="sr-only">{t('learner.reset.button')}</span>
+                      </Button>
+                    )}
+                    {showDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        data-testid="delete-installed-button"
+                        className={overlayActionButtonClassName}
+                        onClick={(e) =>
+                          handleDeleteInstalled(pkg.manifest.id, pkg.manifest.title, e)
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             );

@@ -133,4 +133,29 @@ describe('CourseCard', () => {
   it('has no accessibility violations', async () => {
     await checkAccessibility(<CourseCard {...makeProps()} />);
   });
+
+  it('renders a cover image from the image prop', () => {
+    render(<CourseCard {...makeProps({ image: 'https://cdn.example.com/course.png' })} />);
+    const cover = screen.getByTestId('course-card-cover');
+    const img = cover.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', 'https://cdn.example.com/course.png');
+  });
+
+  it('renders a prepackaged cover when image is omitted', () => {
+    render(<CourseCard {...makeProps()} />);
+    const cover = screen.getByTestId('course-card-cover');
+    const img = cover.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute('src') ?? '').toContain('.svg');
+  });
+
+  it('uses full-height flex layout for uniform grid cards', () => {
+    render(<CourseCard {...makeProps()} />);
+    const card = screen.getByTestId('course-card');
+    expect(card.className).toContain('h-full');
+    expect(card.className).toContain('flex');
+    expect(card.className).toContain('flex-col');
+    expect(card.className).toContain('justify-between');
+  });
 });

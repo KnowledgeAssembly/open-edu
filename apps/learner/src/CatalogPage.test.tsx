@@ -308,5 +308,58 @@ describe('CatalogPage', () => {
       expect(cards).toHaveLength(3);
       expect(screen.getByText('OEP Course One')).toBeInTheDocument();
     });
+
+    it('groups reset and delete buttons in a shared overlay actions container', async () => {
+      getAllProgressMock.mockResolvedValue({
+        'oep-course-1': {
+          packageId: 'oep-course-1',
+          packageVersion: '1.0.0',
+          currentNodeId: 'lesson-1',
+          visitedNodes: ['lesson-1'],
+          scores: {},
+          isCompleted: false,
+          updatedAt: '2026-07-27T00:00:00Z',
+        },
+      });
+
+      renderWithI18n(
+        <CatalogPage
+          packages={[...samplePackages, ...oepPackages]}
+          onStartCourse={vi.fn()}
+          installedCourses={installedCourses}
+        />,
+      );
+
+      await waitFor(() => {
+        const overlays = screen.getAllByTestId('card-overlay-actions');
+        const oepOverlay = overlays.find(
+          (el) =>
+            el.querySelector('[data-testid="reset-button"]') &&
+            el.querySelector('[data-testid="delete-installed-button"]'),
+        );
+        expect(oepOverlay).toBeTruthy();
+        expect(oepOverlay!.className).toContain('flex');
+        expect(oepOverlay!.className).toContain('items-center');
+        expect(oepOverlay!.className).toContain('gap-1.5');
+      });
+    });
+  });
+
+  it('renders cover images on course cards', () => {
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    const covers = screen.getAllByTestId('course-card-cover');
+    expect(covers.length).toBeGreaterThanOrEqual(2);
+    for (const cover of covers) {
+      expect(cover.querySelector('img')).toBeInTheDocument();
+    }
+  });
+
+  it('applies full-height wrappers so cards stretch uniformly', () => {
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    const cards = screen.getAllByTestId('course-card');
+    for (const card of cards) {
+      expect(card.className).toContain('h-full');
+      expect(card.parentElement?.className ?? '').toContain('h-full');
+    }
   });
 });

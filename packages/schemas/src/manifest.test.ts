@@ -77,6 +77,19 @@ describe('PackageManifestSchema', () => {
       PackageManifestSchema.parse({ ...validManifest, title: 'a'.repeat(257) }),
     ).toThrow();
   });
+
+  it('should accept an optional image field', () => {
+    const m = PackageManifestSchema.parse({
+      ...validManifest,
+      image: 'assets/cover.svg',
+    });
+    expect(m.image).toBe('assets/cover.svg');
+  });
+
+  it('should accept a manifest without image', () => {
+    const m = PackageManifestSchema.parse(validManifest);
+    expect(m.image).toBeUndefined();
+  });
 });
 
 describe('SkillsSchema', () => {

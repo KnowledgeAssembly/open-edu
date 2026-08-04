@@ -28,6 +28,7 @@ export const BundleManifestSchema = z
     level: z.string().optional(),
     subject: z.string().optional(),
     description: z.string().optional(),
+    image: z.string().optional(),
     version: z
       .string()
       .min(1)

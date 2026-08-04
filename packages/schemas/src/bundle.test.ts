@@ -86,6 +86,7 @@ describe('BundleManifestSchema', () => {
       level: 'level-b',
       subject: 'math',
       description: 'A math bundle',
+      image: 'assets/bundle-cover.svg',
       skills: ['algebra.basics'],
       rewards: './rewards.json',
     };
@@ -93,8 +94,14 @@ describe('BundleManifestSchema', () => {
     expect(result.level).toBe('level-b');
     expect(result.subject).toBe('math');
     expect(result.description).toBe('A math bundle');
+    expect(result.image).toBe('assets/bundle-cover.svg');
     expect(result.skills).toEqual(['algebra.basics']);
     expect(result.rewards).toBe('./rewards.json');
+  });
+
+  it('should accept a bundle without image', () => {
+    const result = BundleManifestSchema.parse(validBundle);
+    expect(result.image).toBeUndefined();
   });
 
   it('should reject module id with uppercase', () => {
