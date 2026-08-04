@@ -44,5 +44,8 @@
   "animation.step_changed": "Step {{step}} of {{total}}",
   "animation.speed": "Animation speed",
   "animation.completed": "Animation complete",
-  "animation.static_fallback": "Static diagram"
+  "animation.static_fallback": "Static diagram",
+  "reward.badge_unlocked": "Badge unlocked: {{name}}",
+  "reward.xp_gained": "Gained {{amount}} XP",
+  "reward.generic": "{{type}} reward"
 }
