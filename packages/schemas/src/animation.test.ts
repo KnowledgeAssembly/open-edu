@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { AnimationBackendEnum, AnimationEffectEnum, AnimationConfigSchema } from './animation';
 
 describe('AnimationBackendEnum', () => {
-  it('should default to lottie when omitted', () => {
+  it('should default to svg when omitted', () => {
     const result = AnimationBackendEnum.safeParse(undefined);
     expect(result.success).toBe(true);
-    if (result.success) expect(result.data).toBe('lottie');
+    if (result.success) expect(result.data).toBe('svg');
   });
 
   it('should accept all backends', () => {
@@ -36,7 +36,7 @@ describe('AnimationConfigSchema', () => {
     const result = AnimationConfigSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.backend).toBe('lottie');
+      expect(result.data.backend).toBe('svg');
       expect(result.data.trigger).toBe('visible');
       expect(result.data.reducedMotion).toBe('instant');
     }
