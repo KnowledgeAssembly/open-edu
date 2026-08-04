@@ -112,3 +112,5 @@ export { DotLottiePlayer } from './components/DotLottiePlayer.js';
 export type { OasDotLottiePlayerProps } from './components/DotLottiePlayer.js';
 export { OasAnimationWrapper } from './components/OasAnimationWrapper.js';
 export type { OasAnimationWrapperProps } from './components/OasAnimationWrapper.js';
+export { CssAnimationRenderer } from './components/CssAnimationRenderer.js';
+export type { CssAnimationRendererProps } from './components/CssAnimationRenderer.js';
