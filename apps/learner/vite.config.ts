@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, extname, resolve, dirname } from 'node:path';
+import { join, extname, resolve, dirname, relative } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle, ASSET_MIME_TYPES } from '@open-edu/core';
@@ -124,6 +124,49 @@ function eduDataPlugin(): Plugin {
     },
     configurePreviewServer(server) {
       registerServerMiddlewares(server);
+    },
+    async generateBundle() {
+      // Emit each catalog package's assets/ directory into the build output
+      // under assets/<relative-path>. The runtime resolves catalog-course
+      // assets (which have no assetMap) to /assets/<path>; the dev/preview
+      // middleware serves those paths, and this hook makes them available on
+      // static hosts (e.g. Vercel) where no middleware runs.
+      const emitted = new Set<string>();
+      const emitAssetDir = (assetsDir: string) => {
+        const walk = (dir: string) => {
+          const entries = readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            const fullPath = join(dir, entry.name);
+            if (entry.isDirectory()) {
+              walk(fullPath);
+            } else if (entry.isFile()) {
+              const relPath = relative(assetsDir, fullPath).replace(/\\/g, '/');
+              if (emitted.has(relPath)) continue;
+              emitted.add(relPath);
+              this.emitFile({
+                type: 'asset',
+                fileName: `assets/${relPath}`,
+                source: readFileSync(fullPath),
+              });
+            }
+          }
+        };
+        walk(assetsDir);
+      };
+
+      let catalogDirs: string[] = [];
+      try {
+        catalogDirs = readdirSync(CATALOG_DIR, { withFileTypes: true })
+          .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
+          .map((e) => join(CATALOG_DIR, e.name));
+      } catch {
+        return;
+      }
+      for (const pkgDir of catalogDirs) {
+        const assetsDir = join(pkgDir, 'assets');
+        if (!existsSync(assetsDir)) continue;
+        emitAssetDir(assetsDir);
+      }
     },
     async load(id) {
       if (id !== RESOLVED_MODULE_ID) return;
