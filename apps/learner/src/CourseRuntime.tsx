@@ -1,5 +1,12 @@
 import { useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
-import { RuntimeProvider, LayoutShell, CompletionScreen, useRuntime } from '@open-edu/runtime';
+import {
+  RuntimeProvider,
+  LayoutShell,
+  CompletionScreen,
+  useRuntime,
+  RewardEventBridge,
+} from '@open-edu/runtime';
+import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
 import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
@@ -93,6 +100,8 @@ export function CourseRuntime({
 
   const cardBrokerRef = useRef<CardBroker | null>(null);
 
+  const rewardBridge = useMemo(() => createRewardReceiptBridge(), []);
+
   useEffect(() => {
     if (!engine) return;
 
@@ -106,6 +115,7 @@ export function CourseRuntime({
           rewards: pkg.rewards,
           source: session.events$,
           onReceipt: (receipt: RewardReceipt) => {
+            rewardBridge.onReceipt(receipt);
             if (receipt.status === 'delivered' && receipt.actionType === 'badge.award') {
               const badgeName = receipt.actionKey ?? receipt.detail ?? 'Unknown badge';
               setBadges((prev) => [...prev, badgeName]);
@@ -235,6 +245,7 @@ export function CourseRuntime({
           source: session.events$,
           context: { scores: {}, skills: {}, completedNodes: [], completedModules: [] },
           onReceipt: (receipt: RewardReceipt) => {
+            rewardBridge.onReceipt(receipt);
             if (receipt.status === 'delivered' && receipt.actionType === 'badge.award') {
               const badgeName = receipt.actionKey ?? receipt.detail ?? 'Unknown badge';
               setBadges((prev) => [...prev, badgeName]);
@@ -397,6 +408,7 @@ export function CourseRuntime({
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
         >
+          <RewardEventBridge receipts$={rewardBridge.receipts$} />
           {children && (
             <div
               className={cn(
