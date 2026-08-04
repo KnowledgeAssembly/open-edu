@@ -233,7 +233,7 @@ export function CanvasAnimationRenderer({
           <Button variant="outline" size="sm" onClick={handleReset} data-testid="canvas-reset">
             {t('runtime.animation.reset')}
           </Button>
-          <span className="text-on-surface-variant ml-sm text-xs">
+          <span className="text-on-surface-variant ml-sm text-caption">
             {t('runtime.canvas.step_of', {
               step: String(Math.min(step + 1, totalSteps)),
               total: String(totalSteps),
