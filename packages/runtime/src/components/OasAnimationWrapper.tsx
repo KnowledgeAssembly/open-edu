@@ -157,6 +157,18 @@ export function OasAnimationWrapper({
         >
           {t('runtime.animation.step_forward')}
         </Button>
+        <select
+          value={controller.speed}
+          onChange={(e) => controller.setSpeed(Number(e.target.value))}
+          className="border-outline-variant px-xs py-xs rounded text-xs"
+          aria-label={t('runtime.animation.speed')}
+          data-testid="oas-control-speed"
+        >
+          <option value={0.5}>0.5x</option>
+          <option value={1}>1x</option>
+          <option value={1.5}>1.5x</option>
+          <option value={2}>2x</option>
+        </select>
       </div>
     );
   };

@@ -143,4 +143,25 @@ describe('useOasAnimation', () => {
     act(() => result.current.prevStep());
     expect(document.body.innerHTML).toContain('Step 2 of 3');
   });
+
+  it('exposes speed state and setSpeed control', () => {
+    const { result } = renderHook(() => useOasAnimation(validConfig), { wrapper });
+
+    expect(result.current.speed).toBe(1);
+
+    act(() => result.current.setSpeed(2));
+    expect(result.current.speed).toBe(2);
+
+    act(() => result.current.setSpeed(5));
+    expect(result.current.speed).toBe(2);
+  });
+
+  it('initializes speed from config', () => {
+    const { result } = renderHook(
+      () => useOasAnimation({ ...validConfig, speed: 1.5 }),
+      { wrapper },
+    );
+
+    expect(result.current.speed).toBe(1.5);
+  });
 });

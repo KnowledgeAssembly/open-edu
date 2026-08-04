@@ -42,6 +42,7 @@
   "animation.step_forward": "Next step",
   "animation.controls": "Animation controls",
   "animation.step_changed": "Step {{step}} of {{total}}",
+  "animation.speed": "Animation speed",
   "animation.completed": "Animation complete",
   "animation.static_fallback": "Static diagram"
 }

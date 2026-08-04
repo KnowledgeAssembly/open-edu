@@ -151,6 +151,17 @@ describe('OasAnimationWrapper', () => {
     expect(screen.getByTestId('oas-control-play')).toBeInTheDocument();
   });
 
+  it('renders the speed selector and updates controller speed', () => {
+    render(<OasAnimationWrapper config={lottieConfig} showControls />, { wrapper });
+
+    const speed = screen.getByTestId('oas-control-speed') as HTMLSelectElement;
+    expect(speed).toBeInTheDocument();
+    expect(speed).toHaveAccessibleName('Animation speed');
+
+    fireEvent.change(speed, { target: { value: '2' } });
+    expect(speed.value).toBe('2');
+  });
+
   it('returns null when config is invalid and no staticChildren', () => {
     const { container } = render(<OasAnimationWrapper config={{ backend: 'flash' }} />, {
       wrapper,
