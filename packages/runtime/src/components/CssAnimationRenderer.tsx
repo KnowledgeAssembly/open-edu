@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import type { AnimationEffectConfig } from '@open-edu/schemas';
 import { oasDurationVar } from '@open-edu/design-system';
 import { animationsCss } from '../styles/animations.css.js';
@@ -9,6 +9,7 @@ export interface CssAnimationRendererProps {
   reducedMotion: boolean;
   speed?: number;
   className?: string;
+  onComplete?: () => void;
 }
 
 export const effectToClass: Record<string, string> = {
@@ -17,6 +18,10 @@ export const effectToClass: Record<string, string> = {
   highlight: 'oas-animate-highlight',
   pulse: 'oas-animate-pulse',
   glow: 'oas-animate-glow',
+  badge: 'oas-animate-badge',
+  confetti: 'oas-animate-confetti',
+  sparkle: 'oas-animate-sparkle',
+  celebrate: 'oas-animate-celebrate',
 };
 
 const effectToDuration: Record<string, string> = {
@@ -25,6 +30,10 @@ const effectToDuration: Record<string, string> = {
   highlight: oasDurationVar('slow'),
   pulse: oasDurationVar('fast'),
   glow: oasDurationVar('slow'),
+  badge: oasDurationVar('slow'),
+  confetti: '1800ms', // 600ms × 3 iterations
+  sparkle: '600ms', // 200ms × 3 iterations
+  celebrate: '600ms', // 300ms × 2 iterations
 };
 
 let cssInjected = false;
@@ -44,10 +53,29 @@ export function CssAnimationRenderer({
   reducedMotion,
   speed = 1,
   className,
+  onComplete,
 }: CssAnimationRendererProps): JSX.Element {
   useEffect(() => {
     ensureAnimationsCss();
   }, []);
+
+  const completedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  const notifyComplete = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    onCompleteRef.current?.();
+  }, []);
+
+  useEffect(() => {
+    completedRef.current = false;
+    if (!onCompleteRef.current) return;
+    if (reducedMotion || !effects.some((e) => effectToClass[e.effect])) {
+      notifyComplete();
+    }
+  }, [effects, reducedMotion, onComplete, notifyComplete]);
 
   const animationStyles = useMemo(() => {
     if (reducedMotion || effects.length === 0) return undefined;
@@ -82,6 +110,7 @@ export function CssAnimationRenderer({
       className={`${animationClass} ${className ?? ''}`.trim()}
       style={animationStyles}
       data-testid="css-animation-renderer"
+      onAnimationEnd={onComplete ? () => notifyComplete() : undefined}
     >
       {children}
     </div>

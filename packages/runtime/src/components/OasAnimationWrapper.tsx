@@ -231,6 +231,9 @@ export function OasAnimationWrapper({
           effects={resolvedConfig.effects ?? []}
           reducedMotion={reducedMotion}
           speed={resolvedConfig.speed}
+          onComplete={() => {
+            if (!reducedMotion) onComplete?.();
+          }}
         >
           {staticChildren ?? (
             <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
@@ -266,6 +269,9 @@ export function OasAnimationWrapper({
             <CssAnimationRenderer
               effects={resolvedConfig.effects.filter((e) => effectToClass[e.effect])}
               reducedMotion={reducedMotion}
+              onComplete={() => {
+                if (!reducedMotion) onComplete?.();
+              }}
             >
               {renderStaticFallback()}
             </CssAnimationRenderer>
