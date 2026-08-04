@@ -247,6 +247,16 @@ export type {
 export { CourseCard } from './learning/CourseCard.js';
 export type { CourseCardProps } from './learning/CourseCard.js';
 
+export {
+  getCourseCardImage,
+  getPrepackagedCourseCardImage,
+  resolveCourseCardImageCategory,
+} from './learning/prepackagedImages.js';
+export type {
+  CourseCardImageCategory,
+  CourseCardImageOptions,
+} from './learning/prepackagedImages.js';
+
 export { ProgressBadge } from './learning/ProgressBadge.js';
 export type { ProgressBadgeProps } from './learning/ProgressBadge.js';
 

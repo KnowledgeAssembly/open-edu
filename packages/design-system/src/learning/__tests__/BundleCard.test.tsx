@@ -71,4 +71,29 @@ describe('BundleCard', () => {
   it('has no accessibility violations', async () => {
     await checkAccessibility(<BundleCard {...makeProps()} />);
   });
+
+  it('renders a cover image from the image prop', () => {
+    render(<BundleCard {...makeProps({ image: 'https://cdn.example.com/bundle.png' })} />);
+    const cover = screen.getByTestId('bundle-card-cover');
+    const img = cover.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', 'https://cdn.example.com/bundle.png');
+  });
+
+  it('renders a subject-themed prepackaged cover when image is omitted', () => {
+    render(<BundleCard {...makeProps({ subject: 'math', image: undefined })} />);
+    const cover = screen.getByTestId('bundle-card-cover');
+    const img = cover.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute('src') ?? '').toContain('data:image/svg+xml');
+  });
+
+  it('uses full-height flex layout for uniform grid cards', () => {
+    render(<BundleCard {...makeProps()} />);
+    const card = screen.getByTestId('bundle-card');
+    expect(card.className).toContain('h-full');
+    expect(card.className).toContain('flex');
+    expect(card.className).toContain('flex-col');
+    expect(card.className).toContain('justify-between');
+  });
 });

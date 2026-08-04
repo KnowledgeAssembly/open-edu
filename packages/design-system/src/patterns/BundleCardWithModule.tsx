@@ -25,7 +25,7 @@ export function BundleCardWithModule({
   const satellites = getBundleSatellites(completedModules, totalModules);
 
   return (
-    <div className={cn('relative', className)} {...props}>
+    <div className={cn('relative flex h-full flex-col', className)} {...props}>
       <div className="absolute right-4 top-4 z-10">
         <OpenModule size="xs" satellites={satellites} aria-hidden="true" />
       </div>
