@@ -1,10 +1,3 @@
-import mathCover from './covers/math.svg?url';
-import scienceCover from './covers/science.svg?url';
-import languageCover from './covers/language.svg?url';
-import computerCover from './covers/computer.svg?url';
-import artCover from './covers/art.svg?url';
-import defaultCover from './covers/default.svg?url';
-
 export type CourseCardImageCategory =
   | 'math'
   | 'science'
@@ -39,14 +32,17 @@ const CATEGORY_KEYWORDS: Record<Exclude<CourseCardImageCategory, 'default'>, str
 /**
  * Subject-themed prepackaged cover artwork.
  * Swap the SVG files in `./covers/` to update designs without changing this module.
+ *
+ * Uses `new URL(..., import.meta.url)` so assets resolve under Vite/bundlers
+ * without Vite-only `?url` imports that break plain `tsc` consumers.
  */
 export const PREPACKAGED_IMAGES: Record<CourseCardImageCategory, string> = {
-  math: mathCover,
-  science: scienceCover,
-  language: languageCover,
-  computer: computerCover,
-  art: artCover,
-  default: defaultCover,
+  math: new URL('./covers/math.svg', import.meta.url).href,
+  science: new URL('./covers/science.svg', import.meta.url).href,
+  language: new URL('./covers/language.svg', import.meta.url).href,
+  computer: new URL('./covers/computer.svg', import.meta.url).href,
+  art: new URL('./covers/art.svg', import.meta.url).href,
+  default: new URL('./covers/default.svg', import.meta.url).href,
 };
 
 export function resolveCourseCardImageCategory(
