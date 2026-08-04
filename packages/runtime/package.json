@@ -37,6 +37,7 @@
     "@open-edu/core": "workspace:*",
     "@open-edu/design-system": "workspace:*",
     "@open-edu/i18n": "workspace:*",
+    "@open-edu/rewards": "workspace:^",
     "@open-edu/schemas": "workspace:*",
     "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",
@@ -45,6 +46,7 @@
     "remark-gfm": "^4.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.0.0",
+    "rxjs": "^7.8.0",
     "unified": "^11.0.0"
   },
   "devDependencies": {

@@ -1005,6 +1005,9 @@ importers:
       '@open-edu/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@open-edu/rewards':
+        specifier: workspace:^
+        version: link:../rewards
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
@@ -1035,6 +1038,9 @@ importers:
       remark-rehype:
         specifier: ^11.0.0
         version: 11.1.2
+      rxjs:
+        specifier: ^7.8.0
+        version: 7.8.2
       unified:
         specifier: ^11.0.0
         version: 11.0.5
