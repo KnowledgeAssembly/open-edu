@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const AnimationBackendEnum = z
   .enum(['lottie', 'svg', 'css', 'canvas', 'webgpu'])
-  .default('lottie');
+  .default('svg');
 
 export const AnimationEffectEnum = z.enum([
   // Entrance

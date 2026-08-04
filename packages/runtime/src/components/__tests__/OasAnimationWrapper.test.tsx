@@ -107,6 +107,53 @@ describe('OasAnimationWrapper', () => {
     expect(screen.getByTestId('oas-svg-backend')).toBeInTheDocument();
   });
 
+  it('renders css backend with CssAnimationRenderer', () => {
+    render(
+      <OasAnimationWrapper
+        config={{ backend: 'css', effects: [{ target: 'feedback', effect: 'highlight' }] }}
+        staticChildren={<p>CSS content</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-css-backend')).toBeInTheDocument();
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(screen.getByText('CSS content')).toBeInTheDocument();
+  });
+
+  it('renders canvas backend with CanvasAnimationRenderer', () => {
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'canvas',
+          effects: [{ target: 'bar-0', effect: 'flow', step: 30 }],
+        }}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-canvas-backend')).toBeInTheDocument();
+    expect(screen.getByTestId('canvas-animation-renderer')).toBeInTheDocument();
+  });
+
+  it('falls back to CssAnimationRenderer when the lottie player errors with effects', () => {
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/animations/water-cycle.lottie',
+          effects: [{ target: 'evaporation', effect: 'fade' }],
+        }}
+        staticChildren={<p>Static</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(screen.getByText('Static')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
+  });
+
   it('renders controls when showControls is true and toggles status', () => {
     render(<OasAnimationWrapper config={lottieConfig} showControls />, { wrapper });
 
@@ -116,6 +163,17 @@ describe('OasAnimationWrapper', () => {
 
     fireEvent.click(screen.getByTestId('oas-control-pause'));
     expect(screen.getByTestId('oas-control-play')).toBeInTheDocument();
+  });
+
+  it('renders the speed selector and updates controller speed', () => {
+    render(<OasAnimationWrapper config={lottieConfig} showControls />, { wrapper });
+
+    const speed = screen.getByTestId('oas-control-speed') as HTMLSelectElement;
+    expect(speed).toBeInTheDocument();
+    expect(speed).toHaveAccessibleName('Animation speed');
+
+    fireEvent.change(speed, { target: { value: '2' } });
+    expect(speed.value).toBe('2');
   });
 
   it('returns null when config is invalid and no staticChildren', () => {

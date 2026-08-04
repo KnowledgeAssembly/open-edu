@@ -11,6 +11,8 @@ export interface OasAnimationController {
   reducedMotion: boolean;
   currentStep: number;
   totalSteps: number;
+  speed: number;
+  setSpeed: (speed: number) => void;
   play: () => void;
   pause: () => void;
   stop: () => void;
@@ -34,6 +36,13 @@ export function useOasAnimation(
   });
   const [status, setStatusState] = useState<OasAnimationStatus>('idle');
   const [currentStep, setCurrentStep] = useState(0);
+  const [speed, setSpeedState] = useState(config?.speed ?? 1);
+
+  const setSpeed = useCallback((s: number) => {
+    if (s > 0 && s <= 4) {
+      setSpeedState(s);
+    }
+  }, []);
 
   const statusRef = useRef<OasAnimationStatus>('idle');
   const onStatusChangeRef = useRef(onStatusChange);
@@ -127,6 +136,8 @@ export function useOasAnimation(
     reducedMotion,
     currentStep,
     totalSteps,
+    speed,
+    setSpeed,
     play,
     pause,
     stop,

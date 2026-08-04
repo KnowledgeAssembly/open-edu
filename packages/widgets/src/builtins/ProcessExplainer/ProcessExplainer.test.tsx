@@ -1,9 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import axe from 'axe-core';
 import { I18nProvider } from '@open-edu/i18n';
 import widgetsDict from '@open-edu/i18n/locales/en/widgets.json';
 import { processExplainer } from './ProcessExplainer';
+
+(globalThis as { axe?: typeof axe }).axe = axe;
 
 const WidgetComponent = processExplainer.render;
 
@@ -125,5 +128,13 @@ describe('ProcessExplainer rendering', () => {
       },
     });
     expect(screen.getByTestId('process-explainer')).toBeInTheDocument();
+  });
+
+  it('passes axe-core accessibility audit', async () => {
+    const { container } = renderWidget(baseConfig);
+    const results = await axe.run(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    });
+    expect(results.violations).toHaveLength(0);
   });
 });

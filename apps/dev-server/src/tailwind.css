@@ -964,6 +964,10 @@ video {
   margin-left: auto;
 }
 
+.ml-sm {
+  margin-left: var(--oe-space-sm);
+}
+
 .mr-1 {
   margin-right: 0.25rem;
 }
@@ -2535,6 +2539,11 @@ video {
   padding-right: var(--oe-space-md);
 }
 
+.px-xs {
+  padding-left: var(--oe-space-xs);
+  padding-right: var(--oe-space-xs);
+}
+
 .py-0\.5 {
   padding-top: 0.125rem;
   padding-bottom: 0.125rem;
@@ -2603,6 +2612,11 @@ video {
 .py-xl {
   padding-top: var(--oe-space-xl);
   padding-bottom: var(--oe-space-xl);
+}
+
+.py-xs {
+  padding-top: var(--oe-space-xs);
+  padding-bottom: var(--oe-space-xs);
 }
 
 .pb-2 {

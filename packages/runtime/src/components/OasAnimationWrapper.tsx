@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import type { AnimationConfig } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
@@ -6,6 +6,8 @@ import { Button } from '@open-edu/design-system';
 import { useOasAnimation } from './useOasAnimation';
 import type { OasAnimationController } from './useOasAnimation';
 import { DotLottiePlayer } from './DotLottiePlayer';
+import { CssAnimationRenderer, effectToClass } from './CssAnimationRenderer';
+import { CanvasAnimationRenderer } from './CanvasAnimationRenderer';
 
 export interface OasAnimationWrapperProps {
   config?: unknown;
@@ -85,9 +87,11 @@ export function OasAnimationWrapper({
     if (status === 'completed') onComplete?.();
   });
 
-  if (controllerRef) {
-    controllerRef.current = controller;
-  }
+  useLayoutEffect(() => {
+    if (controllerRef) {
+      controllerRef.current = controller;
+    }
+  }, [controllerRef, controller]);
 
   const { handlePlayerEvent, reducedMotion } = controller;
 
@@ -109,7 +113,8 @@ export function OasAnimationWrapper({
   }, [resolvedConfig?.trigger, resolvedConfig?.effects?.length, controller.currentStep]);
 
   const effectiveSegments = resolvedConfig?.segments ?? stepSegments;
-  const effectiveShowControls = showControls || (resolvedConfig?.trigger === 'step' && !preserveChildren);
+  const effectiveShowControls =
+    showControls || (resolvedConfig?.trigger === 'step' && !preserveChildren);
 
   const renderControls = () => {
     if (!effectiveShowControls) return null;
@@ -154,6 +159,18 @@ export function OasAnimationWrapper({
         >
           {t('runtime.animation.step_forward')}
         </Button>
+        <select
+          value={controller.speed}
+          onChange={(e) => controller.setSpeed(Number(e.target.value))}
+          className="border-outline-variant px-xs py-xs text-caption rounded"
+          aria-label={t('runtime.animation.speed')}
+          data-testid="oas-control-speed"
+        >
+          <option value={0.5}>0.5x</option>
+          <option value={1}>1x</option>
+          <option value={1.5}>1.5x</option>
+          <option value={2}>2x</option>
+        </select>
       </div>
     );
   };
@@ -168,7 +185,16 @@ export function OasAnimationWrapper({
   const renderPreservedChildren = () =>
     preserveChildren && staticChildren ? <div className="mt-sm">{staticChildren}</div> : null;
 
-  if (!resolvedConfig || !resolvedSrc) {
+  if (!resolvedConfig) {
+    if (staticChildren) {
+      return <div className={className}>{staticChildren}</div>;
+    }
+    return null;
+  }
+
+  const backendRequiresSrc =
+    resolvedConfig.backend === 'lottie' || resolvedConfig.backend === 'svg';
+  if (backendRequiresSrc && !resolvedSrc) {
     if (staticChildren) {
       return <div className={className}>{staticChildren}</div>;
     }
@@ -198,14 +224,57 @@ export function OasAnimationWrapper({
     );
   }
 
+  if (resolvedConfig.backend === 'css') {
+    return (
+      <div className={className} data-testid="oas-css-backend">
+        <CssAnimationRenderer
+          effects={resolvedConfig.effects ?? []}
+          reducedMotion={reducedMotion}
+          speed={resolvedConfig.speed}
+        >
+          {staticChildren ?? (
+            <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
+              {t('runtime.animation.static_fallback')}
+            </div>
+          )}
+        </CssAnimationRenderer>
+        {renderControls()}
+        {renderPreservedChildren()}
+      </div>
+    );
+  }
+
+  if (resolvedConfig.backend === 'canvas') {
+    return (
+      <div className={className} data-testid="oas-canvas-backend">
+        <CanvasAnimationRenderer
+          config={resolvedConfig}
+          reducedMotion={reducedMotion}
+          speed={resolvedConfig.speed}
+          ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
+        />
+        {renderPreservedChildren()}
+      </div>
+    );
+  }
+
   if (resolvedConfig.backend === 'lottie') {
     return (
       <div className={className} data-testid="oas-lottie-backend">
         {hasError ? (
-          renderStaticFallback()
+          resolvedConfig.effects && resolvedConfig.effects.length > 0 ? (
+            <CssAnimationRenderer
+              effects={resolvedConfig.effects.filter((e) => effectToClass[e.effect])}
+              reducedMotion={reducedMotion}
+            >
+              {renderStaticFallback()}
+            </CssAnimationRenderer>
+          ) : (
+            renderStaticFallback()
+          )
         ) : (
           <DotLottiePlayer
-            src={resolvedSrc}
+            src={resolvedSrc!}
             autoplay={shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig)}
             loop={resolvedConfig.loop ?? resolvedConfig.trigger === 'step'}
             speed={resolvedConfig.speed}
