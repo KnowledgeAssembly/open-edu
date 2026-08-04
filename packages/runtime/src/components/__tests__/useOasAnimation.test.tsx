@@ -157,10 +157,9 @@ describe('useOasAnimation', () => {
   });
 
   it('initializes speed from config', () => {
-    const { result } = renderHook(
-      () => useOasAnimation({ ...validConfig, speed: 1.5 }),
-      { wrapper },
-    );
+    const { result } = renderHook(() => useOasAnimation({ ...validConfig, speed: 1.5 }), {
+      wrapper,
+    });
 
     expect(result.current.speed).toBe(1.5);
   });

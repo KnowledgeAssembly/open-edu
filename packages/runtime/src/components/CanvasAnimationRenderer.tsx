@@ -28,8 +28,11 @@ function generateSortingSteps(
     for (let i = 0; i < n - 1; i++) {
       for (let j = 0; j < n - i - 1; j++) {
         steps.push([j, j + 1]);
-        if (arr[j] > arr[j + 1]) {
-          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        const a = arr[j];
+        const b = arr[j + 1];
+        if (a !== undefined && b !== undefined && a > b) {
+          arr[j] = b;
+          arr[j + 1] = a;
         }
       }
     }
@@ -38,18 +41,31 @@ function generateSortingSteps(
       let minIdx = i;
       for (let j = i + 1; j < n; j++) {
         steps.push([minIdx, j]);
-        if (arr[j] < arr[minIdx]) minIdx = j;
+        const a = arr[j];
+        const b = arr[minIdx];
+        if (a !== undefined && b !== undefined && a < b) {
+          minIdx = j;
+        }
       }
       if (minIdx !== i) {
-        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+        const a = arr[i];
+        const b = arr[minIdx];
+        if (a !== undefined && b !== undefined) {
+          arr[i] = b;
+          arr[minIdx] = a;
+        }
       }
     }
   } else {
     for (let i = 1; i < n; i++) {
       let j = i;
-      while (j > 0 && arr[j] < arr[j - 1]) {
+      while (j > 0) {
+        const a = arr[j];
+        const b = arr[j - 1];
+        if (a === undefined || b === undefined || a >= b) break;
         steps.push([j - 1, j]);
-        [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
+        arr[j] = b;
+        arr[j - 1] = a;
         j--;
       }
     }
@@ -92,7 +108,7 @@ export function CanvasAnimationRenderer({
   const totalSteps = steps.length;
 
   const drawFrame = useCallback(
-    (currentStep: number, comparing: [number, number] | null) => {
+    (comparing: [number, number] | null) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -128,7 +144,7 @@ export function CanvasAnimationRenderer({
 
   useEffect(() => {
     if (reducedMotion) {
-      drawFrame(0, null);
+      drawFrame(null);
       return;
     }
 
@@ -137,8 +153,8 @@ export function CanvasAnimationRenderer({
     const delay = 200 / speed;
     const timer = setTimeout(() => {
       if (step < totalSteps) {
-        const comparing = steps[step];
-        drawFrame(step, comparing);
+        const comparing = steps[step] ?? null;
+        drawFrame(comparing);
         announce(
           t('runtime.canvas.comparing', {
             a: String(comparing?.[0] ?? 0),
@@ -167,13 +183,13 @@ export function CanvasAnimationRenderer({
   const handleReset = () => {
     setPlaying(false);
     setStep(0);
-    drawFrame(0, null);
+    drawFrame(null);
   };
 
   const handleStep = () => {
     if (step < totalSteps) {
-      const comparing = steps[step];
-      drawFrame(step, comparing);
+      const comparing = steps[step] ?? null;
+      drawFrame(comparing);
       setStep((s) => s + 1);
     }
   };
@@ -209,7 +225,7 @@ export function CanvasAnimationRenderer({
           <Button variant="outline" size="sm" onClick={handleReset} data-testid="canvas-reset">
             {t('runtime.animation.reset')}
           </Button>
-          <span className="text-on-surface-variant ml-sm text-xs">
+          <span className="text-on-surface-variant ml-sm text-caption">
             {t('runtime.canvas.step_of', {
               step: String(Math.min(step + 1, totalSteps)),
               total: String(totalSteps),

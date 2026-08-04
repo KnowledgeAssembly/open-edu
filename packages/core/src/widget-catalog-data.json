@@ -5,16 +5,8 @@
     "description": "Match pairs of items by dragging or selecting",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "match",
-      "pairs",
-      "connect",
-      "drag"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Compare"
-    ],
+    "keywords": ["match", "pairs", "connect", "drag"],
+    "learningIntents": ["Practice", "Compare"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -36,14 +28,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Mistakes",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Mistakes", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "All pairs matched!",
@@ -54,10 +39,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        12
-      ],
+      "recommendedAge": [5, 12],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Identify correct pairs of related items",
@@ -158,16 +140,8 @@
     "description": "Select the correct answer from a list of options",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "quiz",
-      "test",
-      "select",
-      "options",
-      "choice"
-    ],
-    "learningIntents": [
-      "Assess"
-    ],
+    "keywords": ["quiz", "test", "select", "options", "choice"],
+    "learningIntents": ["Assess"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -190,14 +164,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Mistakes",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Mistakes", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Correct!",
@@ -208,10 +175,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        6,
-        18
-      ],
+      "recommendedAge": [6, 18],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Select the correct answer from multiple alternatives",
@@ -314,16 +278,8 @@
     "status": "deprecated",
     "deprecated": true,
     "replacement": "core.multiple-choice",
-    "keywords": [
-      "quiz",
-      "test",
-      "select",
-      "options",
-      "choice"
-    ],
-    "learningIntents": [
-      "Practice"
-    ],
+    "keywords": ["quiz", "test", "select", "options", "choice"],
+    "learningIntents": ["Practice"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -346,14 +302,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Mistakes",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Mistakes", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Correct!",
@@ -364,10 +313,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        6,
-        18
-      ],
+      "recommendedAge": [6, 18],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Select the correct answer from multiple alternatives",
@@ -391,16 +337,8 @@
     "description": "Count visual objects and identify quantities",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "count",
-      "visual",
-      "number",
-      "quantity"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Practice"
-    ],
+    "keywords": ["count", "visual", "number", "quantity"],
+    "learningIntents": ["Observe", "Practice"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -423,13 +361,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Counting correct!",
@@ -440,10 +372,7 @@
       "estimatedMinutes": 2,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        3,
-        7
-      ],
+      "recommendedAge": [3, 7],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Count objects accurately up to 12",
@@ -539,16 +468,8 @@
     "description": "Drag items to correct locations or categories",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "drag",
-      "drop",
-      "sort",
-      "categorize"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Compare"
-    ],
+    "keywords": ["drag", "drop", "sort", "categorize"],
+    "learningIntents": ["Practice", "Compare"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -570,13 +491,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Items sorted correctly!",
@@ -587,10 +502,7 @@
       "estimatedMinutes": 5,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        5,
-        14
-      ],
+      "recommendedAge": [5, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Classify items into the correct categories",
@@ -691,16 +603,8 @@
     "description": "Arrange items in the correct order",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "sequence",
-      "order",
-      "steps",
-      "sort"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Apply"
-    ],
+    "keywords": ["sequence", "order", "steps", "sort"],
+    "learningIntents": ["Practice", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -722,13 +626,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Sequence is correct!",
@@ -739,10 +637,7 @@
       "estimatedMinutes": 5,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Arrange events in chronological or logical order",
@@ -838,16 +733,8 @@
     "description": "Complete sentences or equations by filling in missing parts",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "fill",
-      "blank",
-      "complete",
-      "gap"
-    ],
-    "learningIntents": [
-      "Assess",
-      "Practice"
-    ],
+    "keywords": ["fill", "blank", "complete", "gap"],
+    "learningIntents": ["Assess", "Practice"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -870,14 +757,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Mistakes",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Mistakes", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "All blanks filled correctly!",
@@ -888,10 +768,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        16
-      ],
+      "recommendedAge": [5, 16],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Complete sentences with the correct word or phrase",
@@ -993,16 +870,8 @@
     "description": "Reading comprehension with story-based questions",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "story",
-      "reading",
-      "comprehension",
-      "question"
-    ],
-    "learningIntents": [
-      "Assess",
-      "Reflect"
-    ],
+    "keywords": ["story", "reading", "comprehension", "question"],
+    "learningIntents": ["Assess", "Reflect"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1027,13 +896,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Story comprehension correct!",
@@ -1044,10 +907,7 @@
       "estimatedMinutes": 5,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Comprehend a short story and identify key details",
@@ -1149,16 +1009,8 @@
     "description": "Apply learning to real-world scenarios and contexts",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "real",
-      "world",
-      "application",
-      "scenario"
-    ],
-    "learningIntents": [
-      "Apply",
-      "Explore"
-    ],
+    "keywords": ["real", "world", "application", "scenario"],
+    "learningIntents": ["Apply", "Explore"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1181,13 +1033,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Scenario completed!",
@@ -1198,10 +1044,7 @@
       "estimatedMinutes": 5,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        8,
-        18
-      ],
+      "recommendedAge": [8, 18],
       "readingLevel": "grade-4",
       "learningObjectives": [
         "Apply learned concepts to a real-world scenario",
@@ -1284,16 +1127,8 @@
     "description": "Read and interpret charts, graphs, and data visualizations",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "chart",
-      "graph",
-      "data",
-      "read"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Apply"
-    ],
+    "keywords": ["chart", "graph", "data", "read"],
+    "learningIntents": ["Observe", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1316,13 +1151,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Chart read correctly!",
@@ -1333,10 +1162,7 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Read values accurately from a bar or pictograph chart",
@@ -1438,15 +1264,8 @@
     "description": "Visualize and manipulate fractions with interactive models",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "fraction",
-      "visual",
-      "math"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Explore"
-    ],
+    "keywords": ["fraction", "visual", "math"],
+    "learningIntents": ["Observe", "Explore"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1470,13 +1289,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Fraction understood!",
@@ -1487,10 +1300,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "understand",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        10
-      ],
+      "recommendedAge": [5, 10],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Understand that a fraction represents parts of a whole",
@@ -1592,17 +1402,8 @@
     "description": "Understand place value with interactive chart manipulation",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "place",
-      "value",
-      "chart",
-      "math",
-      "number"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Practice"
-    ],
+    "keywords": ["place", "value", "chart", "math", "number"],
+    "learningIntents": ["Observe", "Practice"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1625,13 +1426,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Place value correct!",
@@ -1642,10 +1437,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        9
-      ],
+      "recommendedAge": [5, 9],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Identify the value of each digit in a multi-digit number",
@@ -1741,16 +1533,8 @@
     "description": "Calculate and visualize area using grid models",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "grid",
-      "area",
-      "math",
-      "geometry"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Apply"
-    ],
+    "keywords": ["grid", "area", "math", "geometry"],
+    "learningIntents": ["Practice", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1773,13 +1557,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Area calculated correctly!",
@@ -1790,10 +1568,7 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        7,
-        12
-      ],
+      "recommendedAge": [7, 12],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Calculate the area of a shape by counting grid squares",
@@ -1895,17 +1670,8 @@
     "description": "Read and tell time on analog and digital clocks",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "clock",
-      "time",
-      "math",
-      "hours",
-      "minutes"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Apply"
-    ],
+    "keywords": ["clock", "time", "math", "hours", "minutes"],
+    "learningIntents": ["Practice", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -1928,13 +1694,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Time correct!",
@@ -1945,10 +1705,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        9
-      ],
+      "recommendedAge": [5, 9],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Read time to the nearest hour and half-hour",
@@ -2050,17 +1807,8 @@
     "description": "Measure and compare lengths using standard units",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "measurement",
-      "scale",
-      "math",
-      "length",
-      "ruler"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Apply"
-    ],
+    "keywords": ["measurement", "scale", "math", "length", "ruler"],
+    "learningIntents": ["Practice", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2083,13 +1831,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Measurement correct!",
@@ -2100,10 +1842,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "apply",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        9
-      ],
+      "recommendedAge": [5, 9],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Measure object lengths using a ruler or scale",
@@ -2223,18 +1962,8 @@
     "description": "Explore numbers, operations, and fractions on a number line",
     "domain": "math",
     "status": "stable",
-    "keywords": [
-      "number",
-      "line",
-      "math",
-      "count",
-      "fraction"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Practice",
-      "Compare"
-    ],
+    "keywords": ["number", "line", "math", "count", "fraction"],
+    "learningIntents": ["Observe", "Practice", "Compare"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2257,13 +1986,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Number line correct!",
@@ -2274,10 +1997,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "understand",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        10
-      ],
+      "recommendedAge": [5, 10],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Locate numbers on a number line",
@@ -2403,21 +2123,9 @@
     "description": "Highlight key concepts with callout cards",
     "domain": "core",
     "status": "experimental",
-    "keywords": [
-      "callout",
-      "highlight",
-      "info",
-      "card"
-    ],
-    "learningIntents": [
-      "Observe"
-    ],
-    "capabilities": [
-      "Keyboard",
-      "ScreenReader",
-      "Accessibility",
-      "Offline"
-    ],
+    "keywords": ["callout", "highlight", "info", "card"],
+    "learningIntents": ["Observe"],
+    "capabilities": ["Keyboard", "ScreenReader", "Accessibility", "Offline"],
     "accessibility": [
       "HighContrast",
       "KeyboardOnly",
@@ -2435,19 +2143,11 @@
       "estimatedMinutes": 1,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        3,
-        18
-      ],
+      "recommendedAge": [3, 18],
       "readingLevel": "pre-reader",
-      "learningObjectives": [
-        "Read and absorb key information"
-      ],
+      "learningObjectives": ["Read and absorb key information"],
       "commonMisconceptions": [],
-      "generationHints": [
-        "Keep text concise and scannable",
-        "Use bold for emphasis"
-      ]
+      "generationHints": ["Keep text concise and scannable", "Use bold for emphasis"]
     },
     "guide": {
       "oneLiner": "Highlight key information with a styled callout card.",
@@ -2508,16 +2208,8 @@
     "description": "Compare two images and identify differences or similarities",
     "domain": "core",
     "status": "experimental",
-    "keywords": [
-      "image",
-      "compare",
-      "visual",
-      "spot"
-    ],
-    "learningIntents": [
-      "Compare",
-      "Observe"
-    ],
+    "keywords": ["image", "compare", "visual", "spot"],
+    "learningIntents": ["Compare", "Observe"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2540,13 +2232,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Comparison correct!",
@@ -2557,19 +2243,13 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "analyze",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        5,
-        14
-      ],
+      "recommendedAge": [5, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Identify differences between two images",
         "Compare visual elements systematically"
       ],
-      "commonMisconceptions": [
-        "Missing subtle differences",
-        "Focusing on one area only"
-      ],
+      "commonMisconceptions": ["Missing subtle differences", "Focusing on one area only"],
       "generationHints": [
         "Use clear, high-contrast images",
         "Limit differences to 3-5 for manageability"
@@ -2659,17 +2339,8 @@
     "description": "Tap or click specific regions of an image to answer questions",
     "domain": "core",
     "status": "experimental",
-    "keywords": [
-      "hotspot",
-      "tap",
-      "click",
-      "image",
-      "region"
-    ],
-    "learningIntents": [
-      "Explore",
-      "Assess"
-    ],
+    "keywords": ["hotspot", "tap", "click", "image", "region"],
+    "learningIntents": ["Explore", "Assess"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2692,13 +2363,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Hotspot found!",
@@ -2709,19 +2374,13 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        5,
-        14
-      ],
+      "recommendedAge": [5, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Identify specific regions in an image",
         "Apply knowledge to locate correct areas"
       ],
-      "commonMisconceptions": [
-        "Tapping too broadly",
-        "Missing small target regions"
-      ],
+      "commonMisconceptions": ["Tapping too broadly", "Missing small target regions"],
       "generationHints": [
         "Define clear, non-overlapping hotspot regions",
         "Use descriptive labels for each region"
@@ -2811,16 +2470,8 @@
     "description": "Arrange events on a chronological timeline",
     "domain": "core",
     "status": "experimental",
-    "keywords": [
-      "timeline",
-      "events",
-      "chronological",
-      "history"
-    ],
-    "learningIntents": [
-      "Apply",
-      "Observe"
-    ],
+    "keywords": ["timeline", "events", "chronological", "history"],
+    "learningIntents": ["Apply", "Observe"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2844,13 +2495,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Timeline correct!",
@@ -2861,23 +2506,14 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Place events in chronological order",
         "Understand temporal relationships between events"
       ],
-      "commonMisconceptions": [
-        "Confusing earlier and later",
-        "Ignoring date labels"
-      ],
-      "generationHints": [
-        "Use clear date labels",
-        "Space events evenly on the line"
-      ]
+      "commonMisconceptions": ["Confusing earlier and later", "Ignoring date labels"],
+      "generationHints": ["Use clear date labels", "Space events evenly on the line"]
     },
     "guide": {
       "oneLiner": "Display events in chronological order on an interactive timeline.",
@@ -2963,18 +2599,8 @@
     "description": "Step-by-step explanation of a process with progressive reveal",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "process",
-      "explainer",
-      "steps",
-      "step-by-step",
-      "sequence",
-      "how-it-works"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Understand"
-    ],
+    "keywords": ["process", "explainer", "steps", "step-by-step", "sequence", "how-it-works"],
+    "learningIntents": ["Observe", "Understand"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -2995,13 +2621,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Interactions"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Interactions"],
     "reward": {
       "completionXP": 15,
       "positiveMessage": "Process understood!",
@@ -3012,10 +2632,7 @@
       "estimatedMinutes": 5,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        8,
-        18
-      ],
+      "recommendedAge": [8, 18],
       "readingLevel": "grade-4",
       "learningObjectives": [
         "Understand the sequence of steps in a process",
@@ -3108,16 +2725,8 @@
     "description": "Label parts of a scientific diagram by dragging labels",
     "domain": "science",
     "status": "experimental",
-    "keywords": [
-      "label",
-      "diagram",
-      "science",
-      "drag"
-    ],
-    "learningIntents": [
-      "Apply",
-      "Assess"
-    ],
+    "keywords": ["label", "diagram", "science", "drag"],
+    "learningIntents": ["Apply", "Assess"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3140,13 +2749,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Labels correct!",
@@ -3157,10 +2760,7 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        7,
-        14
-      ],
+      "recommendedAge": [7, 14],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Identify parts of a scientific diagram",
@@ -3253,16 +2853,8 @@
     "description": "Label parts of an image by tapping regions",
     "domain": "science",
     "status": "experimental",
-    "keywords": [
-      "image",
-      "label",
-      "science",
-      "tap"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Apply"
-    ],
+    "keywords": ["image", "label", "science", "tap"],
+    "learningIntents": ["Observe", "Apply"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3285,13 +2877,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Labels correct!",
@@ -3302,19 +2888,13 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "apply",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Identify labeled regions in an image",
         "Match terms to visual elements"
       ],
-      "commonMisconceptions": [
-        "Tapping the wrong region",
-        "Not reading the label before tapping"
-      ],
+      "commonMisconceptions": ["Tapping the wrong region", "Not reading the label before tapping"],
       "generationHints": [
         "Use images with clearly defined regions",
         "Provide descriptive label text"
@@ -3398,16 +2978,8 @@
     "description": "Listen to audio clips and answer comprehension questions",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "audio",
-      "listen",
-      "sound",
-      "comprehension"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Listen"
-    ],
+    "keywords": ["audio", "listen", "sound", "comprehension"],
+    "learningIntents": ["Observe", "Listen"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3431,13 +3003,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Listening correct!",
@@ -3448,10 +3014,7 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "understand",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        4,
-        12
-      ],
+      "recommendedAge": [4, 12],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Listen carefully to audio content",
@@ -3461,10 +3024,7 @@
         "Missing details due to fast playback",
         "Confusing similar-sounding words"
       ],
-      "generationHints": [
-        "Use clear, slow-paced audio",
-        "Include captions when possible"
-      ]
+      "generationHints": ["Use clear, slow-paced audio", "Include captions when possible"]
     },
     "guide": {
       "oneLiner": "Play audio clips with transcripts, captions, and comprehension support.",
@@ -3562,16 +3122,8 @@
     "description": "Watch video clips and answer comprehension questions",
     "domain": "core",
     "status": "stable",
-    "keywords": [
-      "video",
-      "watch",
-      "visual",
-      "comprehension"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Understand"
-    ],
+    "keywords": ["video", "watch", "visual", "comprehension"],
+    "learningIntents": ["Observe", "Understand"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3595,13 +3147,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Watching correct!",
@@ -3612,23 +3158,14 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "understand",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        4,
-        14
-      ],
+      "recommendedAge": [4, 14],
       "readingLevel": "pre-reader",
       "learningObjectives": [
         "Watch and understand video content",
         "Identify key events in a video sequence"
       ],
-      "commonMisconceptions": [
-        "Missing visual details",
-        "Focusing on audio and ignoring visuals"
-      ],
-      "generationHints": [
-        "Use short, focused clips (1-3 min)",
-        "Include clear visual content"
-      ]
+      "commonMisconceptions": ["Missing visual details", "Focusing on audio and ignoring visuals"],
+      "generationHints": ["Use short, focused clips (1-3 min)", "Include clear visual content"]
     },
     "guide": {
       "oneLiner": "Play video clips with chapters, captions, and transcripts.",
@@ -3726,16 +3263,8 @@
     "description": "Study terms and concepts with flip-card flashcards",
     "domain": "language",
     "status": "stable",
-    "keywords": [
-      "flashcard",
-      "study",
-      "terms",
-      "vocabulary"
-    ],
-    "learningIntents": [
-      "Practice",
-      "Recall"
-    ],
+    "keywords": ["flashcard", "study", "terms", "vocabulary"],
+    "learningIntents": ["Practice", "Recall"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3758,13 +3287,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Cards studied!",
@@ -3775,19 +3298,13 @@
       "estimatedMinutes": 3,
       "bloomsLevel": "remember",
       "cognitiveLoad": "low",
-      "recommendedAge": [
-        5,
-        18
-      ],
+      "recommendedAge": [5, 18],
       "readingLevel": "grade-2",
       "learningObjectives": [
         "Memorize key terms and definitions",
         "Recall information from memory"
       ],
-      "commonMisconceptions": [
-        "Skimming without reading fully",
-        "Not flipping cards to check"
-      ],
+      "commonMisconceptions": ["Skimming without reading fully", "Not flipping cards to check"],
       "generationHints": [
         "Keep front text concise",
         "Use clear, detailed back text",
@@ -3866,16 +3383,8 @@
     "description": "Explore and label step-by-step scientific processes",
     "domain": "science",
     "status": "stable",
-    "keywords": [
-      "process",
-      "diagram",
-      "science",
-      "steps"
-    ],
-    "learningIntents": [
-      "Observe",
-      "Understand"
-    ],
+    "keywords": ["process", "diagram", "science", "steps"],
+    "learningIntents": ["Observe", "Understand"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -3899,13 +3408,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Process understood!",
@@ -3916,19 +3419,13 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        7,
-        14
-      ],
+      "recommendedAge": [7, 14],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Understand the sequence of a scientific process",
         "Identify cause-and-effect relationships in processes"
       ],
-      "commonMisconceptions": [
-        "Skipping steps",
-        "Confusing cause and effect"
-      ],
+      "commonMisconceptions": ["Skipping steps", "Confusing cause and effect"],
       "generationHints": [
         "Use clear step labels",
         "Show arrows connecting steps",
@@ -4019,16 +3516,8 @@
     "description": "Explore geographic and social concepts on an interactive map",
     "domain": "social",
     "status": "stable",
-    "keywords": [
-      "map",
-      "geography",
-      "social",
-      "explore"
-    ],
-    "learningIntents": [
-      "Explore",
-      "Observe"
-    ],
+    "keywords": ["map", "geography", "social", "explore"],
+    "learningIntents": ["Explore", "Observe"],
     "capabilities": [
       "Keyboard",
       "ScreenReader",
@@ -4051,13 +3540,7 @@
       "FocusManagement",
       "AriaSupport"
     ],
-    "analytics": [
-      "Attempts",
-      "CompletionTime",
-      "SuccessRate",
-      "Hints",
-      "Retries"
-    ],
+    "analytics": ["Attempts", "CompletionTime", "SuccessRate", "Hints", "Retries"],
     "reward": {
       "completionXP": 10,
       "positiveMessage": "Map explored!",
@@ -4068,19 +3551,13 @@
       "estimatedMinutes": 4,
       "bloomsLevel": "understand",
       "cognitiveLoad": "moderate",
-      "recommendedAge": [
-        6,
-        14
-      ],
+      "recommendedAge": [6, 14],
       "readingLevel": "grade-3",
       "learningObjectives": [
         "Identify locations on a map",
         "Understand spatial relationships between regions"
       ],
-      "commonMisconceptions": [
-        "Confusing cardinal directions",
-        "Misreading map scale"
-      ],
+      "commonMisconceptions": ["Confusing cardinal directions", "Misreading map scale"],
       "generationHints": [
         "Use clear, labeled maps",
         "Include a legend when needed",

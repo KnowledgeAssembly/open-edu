@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import { LiveRegionProvider } from '@open-edu/accessibility';
+import type { AnimationConfig } from '@open-edu/schemas';
 import { CanvasAnimationRenderer } from '../CanvasAnimationRenderer.js';
 
 beforeEach(() => {
@@ -11,7 +12,7 @@ beforeEach(() => {
     clearRect: vi.fn(),
     fillRect: vi.fn(),
     fillStyle: '',
-  })) as unknown as CanvasRenderingContext2D;
+  })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 });
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -22,9 +23,10 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
-const sortingConfig = {
-  backend: 'canvas' as const,
-  trigger: 'step' as const,
+const sortingConfig: AnimationConfig = {
+  backend: 'canvas',
+  trigger: 'step',
+  reducedMotion: 'instant',
   effects: [
     { target: 'bar-0', effect: 'flow', step: 30 },
     { target: 'bar-1', effect: 'flow', step: 50 },

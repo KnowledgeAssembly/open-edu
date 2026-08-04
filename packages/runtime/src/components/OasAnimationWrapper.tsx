@@ -113,7 +113,8 @@ export function OasAnimationWrapper({
   }, [resolvedConfig?.trigger, resolvedConfig?.effects?.length, controller.currentStep]);
 
   const effectiveSegments = resolvedConfig?.segments ?? stepSegments;
-  const effectiveShowControls = showControls || (resolvedConfig?.trigger === 'step' && !preserveChildren);
+  const effectiveShowControls =
+    showControls || (resolvedConfig?.trigger === 'step' && !preserveChildren);
 
   const renderControls = () => {
     if (!effectiveShowControls) return null;
@@ -161,7 +162,7 @@ export function OasAnimationWrapper({
         <select
           value={controller.speed}
           onChange={(e) => controller.setSpeed(Number(e.target.value))}
-          className="border-outline-variant px-xs py-xs rounded text-xs"
+          className="border-outline-variant px-xs py-xs text-caption rounded"
           aria-label={t('runtime.animation.speed')}
           data-testid="oas-control-speed"
         >
@@ -273,7 +274,7 @@ export function OasAnimationWrapper({
           )
         ) : (
           <DotLottiePlayer
-            src={resolvedSrc}
+            src={resolvedSrc!}
             autoplay={shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig)}
             loop={resolvedConfig.loop ?? resolvedConfig.trigger === 'step'}
             speed={resolvedConfig.speed}
