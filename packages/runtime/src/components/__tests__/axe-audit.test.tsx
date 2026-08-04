@@ -8,6 +8,8 @@ import { LiveRegionProvider } from '@open-edu/accessibility';
 import { OasAnimationWrapper } from '../OasAnimationWrapper.js';
 import { DotLottiePlayer } from '../DotLottiePlayer.js';
 import { CssAnimationRenderer } from '../CssAnimationRenderer.js';
+import { CanvasAnimationRenderer } from '../CanvasAnimationRenderer.js';
+import type { AnimationConfig } from '@open-edu/schemas';
 
 vi.mock('@dotlottie/react-player', () => ({
   DotLottiePlayer: () => <div data-testid="mocked-dotlottie" />,
@@ -21,6 +23,8 @@ vi.mock('@dotlottie/react-player', () => ({
     Stop: 'stop',
   },
 }));
+
+vi.mock('canvas', () => ({}));
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
@@ -44,6 +48,11 @@ async function runAxe(container: HTMLElement) {
 describe('axe-core accessibility audits', () => {
   beforeEach(() => {
     cleanup();
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+      clearRect: vi.fn(),
+      fillRect: vi.fn(),
+      fillStyle: '',
+    });
   });
 
   it('OasAnimationWrapper with lottie backend is accessible', async () => {
@@ -98,6 +107,25 @@ describe('axe-core accessibility audits', () => {
       <CssAnimationRenderer effects={[{ target: 'test', effect: 'fade' }]} reducedMotion={false}>
         <p>Animated content</p>
       </CssAnimationRenderer>,
+      { wrapper },
+    );
+    const violations = await runAxe(container);
+    expect(violations).toHaveLength(0);
+  });
+
+  it('CanvasAnimationRenderer is accessible', async () => {
+    const config: AnimationConfig = {
+      backend: 'canvas',
+      trigger: 'step',
+      reducedMotion: 'instant',
+      effects: [
+        { target: 'bar-0', effect: 'flow', step: 30 },
+        { target: 'bar-1', effect: 'flow', step: 50 },
+      ],
+    };
+
+    const { container } = render(
+      <CanvasAnimationRenderer config={config} reducedMotion={false} ariaLabel="Sorting visualization" />,
       { wrapper },
     );
     const violations = await runAxe(container);

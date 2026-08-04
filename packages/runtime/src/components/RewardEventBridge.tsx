@@ -16,10 +16,6 @@ interface QueuedReward {
 
 function parseXpAmount(detail: string | undefined): number | undefined {
   if (detail === undefined) return undefined;
-  if (typeof detail === 'object' && detail !== null) {
-    const amount = Number((detail as Record<string, unknown>).amount ?? 0);
-    return Number.isNaN(amount) ? undefined : amount;
-  }
   const parsed = Number(detail);
   return Number.isNaN(parsed) ? undefined : parsed;
 }

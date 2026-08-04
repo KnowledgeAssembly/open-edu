@@ -67,9 +67,9 @@ export function CssAnimationRenderer({
         ? duration.replace(/(\d+)ms/, (_, ms) => `${Math.round(Number(ms) / speed)}ms`)
         : duration;
 
-    if (adjustedDuration) styles['animation-duration'] = adjustedDuration;
-    if (primary.delay) styles['animation-delay'] = `${primary.delay}ms`;
-    if (primary.easing) styles['animation-timing-function'] = primary.easing;
+    if (adjustedDuration) styles.animationDuration = adjustedDuration;
+    if (primary.delay) styles.animationDelay = `${primary.delay}ms`;
+    if (primary.easing) styles.animationTimingFunction = primary.easing;
 
     return Object.keys(styles).length > 0 ? styles : undefined;
   }, [effects, reducedMotion, speed]);

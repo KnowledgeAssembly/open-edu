@@ -107,6 +107,20 @@ export function CanvasAnimationRenderer({
   const steps = useMemo(() => generateSortingSteps(algorithm, data), [algorithm, data]);
   const totalSteps = steps.length;
 
+  const [colors, setColors] = useState<{ primary: string; warning: string }>({
+    primary: '#6750a4',
+    warning: '#f59e0b',
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const styles = getComputedStyle(document.documentElement);
+    setColors({
+      primary: styles.getPropertyValue('--oe-color-primary').trim() || '#6750a4',
+      warning: styles.getPropertyValue('--oe-color-warning').trim() || '#f59e0b',
+    });
+  }, []);
+
   const drawFrame = useCallback(
     (comparing: [number, number] | null) => {
       const canvas = canvasRef.current;
@@ -125,21 +139,15 @@ export function CanvasAnimationRenderer({
         const y = height - barHeight;
 
         if (comparing && (i === comparing[0] || i === comparing[1])) {
-          ctx.fillStyle =
-            getComputedStyle(document.documentElement)
-              .getPropertyValue('--oe-color-warning')
-              .trim() || '#f59e0b';
+          ctx.fillStyle = colors.warning;
         } else {
-          ctx.fillStyle =
-            getComputedStyle(document.documentElement)
-              .getPropertyValue('--oe-color-primary')
-              .trim() || '#6750a4';
+          ctx.fillStyle = colors.primary;
         }
 
         ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
       });
     },
-    [data, width, height],
+    [data, width, height, colors],
   );
 
   useEffect(() => {
@@ -225,7 +233,7 @@ export function CanvasAnimationRenderer({
           <Button variant="outline" size="sm" onClick={handleReset} data-testid="canvas-reset">
             {t('runtime.animation.reset')}
           </Button>
-          <span className="text-on-surface-variant ml-sm text-caption">
+          <span className="text-on-surface-variant ml-sm text-xs">
             {t('runtime.canvas.step_of', {
               step: String(Math.min(step + 1, totalSteps)),
               total: String(totalSteps),
