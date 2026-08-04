@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import type { AnimationConfig } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
@@ -86,9 +86,11 @@ export function OasAnimationWrapper({
     if (status === 'completed') onComplete?.();
   });
 
-  if (controllerRef) {
-    controllerRef.current = controller;
-  }
+  useLayoutEffect(() => {
+    if (controllerRef) {
+      controllerRef.current = controller;
+    }
+  }, [controllerRef, controller]);
 
   const { handlePlayerEvent, reducedMotion } = controller;
 
