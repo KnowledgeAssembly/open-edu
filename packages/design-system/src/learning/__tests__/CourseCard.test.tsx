@@ -147,7 +147,7 @@ describe('CourseCard', () => {
     const cover = screen.getByTestId('course-card-cover');
     const img = cover.querySelector('img');
     expect(img).toBeInTheDocument();
-    expect(img?.getAttribute('src') ?? '').toContain('data:image/svg+xml');
+    expect(img?.getAttribute('src') ?? '').toContain('.svg');
   });
 
   it('uses full-height flex layout for uniform grid cards', () => {

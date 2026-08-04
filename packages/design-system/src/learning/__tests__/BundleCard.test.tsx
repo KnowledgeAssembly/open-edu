@@ -85,7 +85,7 @@ describe('BundleCard', () => {
     const cover = screen.getByTestId('bundle-card-cover');
     const img = cover.querySelector('img');
     expect(img).toBeInTheDocument();
-    expect(img?.getAttribute('src') ?? '').toContain('data:image/svg+xml');
+    expect(img?.getAttribute('src') ?? '').toContain('math.svg');
   });
 
   it('uses full-height flex layout for uniform grid cards', () => {

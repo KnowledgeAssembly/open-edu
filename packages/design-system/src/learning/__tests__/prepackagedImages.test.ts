@@ -29,10 +29,10 @@ describe('prepackagedImages', () => {
     expect(resolveCourseCardImageCategory({ title: 'General Studies' })).toBe('default');
   });
 
-  it('returns data-uri SVGs for each category', () => {
+  it('returns SVG asset URLs for each category', () => {
     for (const category of ['math', 'science', 'language', 'computer', 'art', 'default'] as const) {
       const src = getPrepackagedCourseCardImage(category);
-      expect(src.startsWith('data:image/svg+xml')).toBe(true);
+      expect(src).toContain(`${category}.svg`);
     }
   });
 });
