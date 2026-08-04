@@ -3,6 +3,8 @@ import { mkdtempSync, readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { compile } from './cli/index.js';
+import { validateCourseModel } from './validators/semantic-validator.js';
+import type { CourseModel } from './schemas/index.js';
 
 describe('end-to-end pipeline', () => {
   it('compiles a valid single-module spec and produces correct output', async () => {
@@ -145,5 +147,92 @@ Content here.
     const result = await compile('/nonexistent/path/course-spec.md', {});
     expect(result.success).toBe(false);
     expect(result.diagnostics.some((d) => d.code === 'FILE_READ_ERROR')).toBe(true);
+  });
+});
+
+function validModel(): CourseModel {
+  return {
+    id: 'test-course',
+    version: '1.0.0',
+    title: 'Test Course',
+    modules: [
+      {
+        id: 'mod-1',
+        title: 'Module 1',
+        lessons: [
+          {
+            id: 'lesson-1',
+            title: 'Lesson 1',
+            activities: [],
+          },
+        ],
+      },
+    ],
+  } as unknown as CourseModel;
+}
+
+describe('animation config validation', () => {
+  it('passes for a widget activity with a valid canvas animation config', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-canvas',
+        type: 'widget',
+        widgetId: 'core.sorting-visualizer',
+        config: {
+          animation: {
+            backend: 'canvas',
+            trigger: 'step',
+            effects: [
+              { target: 'bar-0', effect: 'flow', step: 30 },
+              { target: 'bar-1', effect: 'flow', step: 50 },
+            ],
+          },
+        },
+      },
+    ];
+    const diags = validateCourseModel(model);
+    expect(diags.some((d) => d.code === 'INVALID_ANIMATION_CONFIG')).toBe(false);
+  });
+
+  it('passes for a widget activity with a valid CSS animation config', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-css',
+        type: 'widget',
+        widgetId: 'core.multiple-choice',
+        config: {
+          animation: {
+            backend: 'css',
+            trigger: 'answer-correct',
+            effects: [{ target: 'feedback', effect: 'highlight' }],
+          },
+        },
+      },
+    ];
+    const diags = validateCourseModel(model);
+    expect(diags.some((d) => d.code === 'INVALID_ANIMATION_CONFIG')).toBe(false);
+  });
+
+  it('reports an invalid canvas animation effect', () => {
+    const model = validModel();
+    model.modules[0]!.lessons[0]!.activities = [
+      {
+        id: 'act-bad-canvas',
+        type: 'widget',
+        widgetId: 'core.sorting-visualizer',
+        config: {
+          animation: {
+            backend: 'canvas',
+            effects: [{ target: 'x', effect: 'sparkles' }],
+          },
+        },
+      },
+    ];
+    const diags = validateCourseModel(model);
+    const invalid = diags.find((d) => d.code === 'INVALID_ANIMATION_CONFIG');
+    expect(invalid).toBeDefined();
+    expect(invalid?.severity).toBe('error');
   });
 });
