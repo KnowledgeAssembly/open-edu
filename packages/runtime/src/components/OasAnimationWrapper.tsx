@@ -6,6 +6,7 @@ import { Button } from '@open-edu/design-system';
 import { useOasAnimation } from './useOasAnimation';
 import type { OasAnimationController } from './useOasAnimation';
 import { DotLottiePlayer } from './DotLottiePlayer';
+import { CssAnimationRenderer, effectToClass } from './CssAnimationRenderer';
 
 export interface OasAnimationWrapperProps {
   config?: unknown;
@@ -168,7 +169,16 @@ export function OasAnimationWrapper({
   const renderPreservedChildren = () =>
     preserveChildren && staticChildren ? <div className="mt-sm">{staticChildren}</div> : null;
 
-  if (!resolvedConfig || !resolvedSrc) {
+  if (!resolvedConfig) {
+    if (staticChildren) {
+      return <div className={className}>{staticChildren}</div>;
+    }
+    return null;
+  }
+
+  const backendRequiresSrc =
+    resolvedConfig.backend === 'lottie' || resolvedConfig.backend === 'svg';
+  if (backendRequiresSrc && !resolvedSrc) {
     if (staticChildren) {
       return <div className={className}>{staticChildren}</div>;
     }
@@ -198,11 +208,40 @@ export function OasAnimationWrapper({
     );
   }
 
+  if (resolvedConfig.backend === 'css') {
+    return (
+      <div className={className} data-testid="oas-css-backend">
+        <CssAnimationRenderer
+          effects={resolvedConfig.effects ?? []}
+          reducedMotion={reducedMotion}
+          speed={resolvedConfig.speed}
+        >
+          {staticChildren ?? (
+            <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
+              {t('runtime.animation.static_fallback')}
+            </div>
+          )}
+        </CssAnimationRenderer>
+        {renderControls()}
+        {renderPreservedChildren()}
+      </div>
+    );
+  }
+
   if (resolvedConfig.backend === 'lottie') {
     return (
       <div className={className} data-testid="oas-lottie-backend">
         {hasError ? (
-          renderStaticFallback()
+          resolvedConfig.effects && resolvedConfig.effects.length > 0 ? (
+            <CssAnimationRenderer
+              effects={resolvedConfig.effects.filter((e) => effectToClass[e.effect])}
+              reducedMotion={reducedMotion}
+            >
+              {renderStaticFallback()}
+            </CssAnimationRenderer>
+          ) : (
+            renderStaticFallback()
+          )
         ) : (
           <DotLottiePlayer
             src={resolvedSrc}

@@ -107,6 +107,39 @@ describe('OasAnimationWrapper', () => {
     expect(screen.getByTestId('oas-svg-backend')).toBeInTheDocument();
   });
 
+  it('renders css backend with CssAnimationRenderer', () => {
+    render(
+      <OasAnimationWrapper
+        config={{ backend: 'css', effects: [{ target: 'feedback', effect: 'highlight' }] }}
+        staticChildren={<p>CSS content</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('oas-css-backend')).toBeInTheDocument();
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(screen.getByText('CSS content')).toBeInTheDocument();
+  });
+
+  it('falls back to CssAnimationRenderer when the lottie player errors with effects', () => {
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/animations/water-cycle.lottie',
+          effects: [{ target: 'evaporation', effect: 'fade' }],
+        }}
+        staticChildren={<p>Static</p>}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByTestId('mocked-dotlottie')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(screen.getByText('Static')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
+  });
+
   it('renders controls when showControls is true and toggles status', () => {
     render(<OasAnimationWrapper config={lottieConfig} showControls />, { wrapper });
 
