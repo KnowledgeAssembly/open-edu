@@ -1,0 +1,42 @@
+{
+  "type": "exercise",
+  "title": "Animated SVG Water Cycle",
+  "widget": "core.process-explainer",
+  "config": {
+    "title": "The Water Cycle (SVG Animation)",
+    "stepByStep": true,
+    "interactive": true,
+    "steps": [
+      {
+        "id": "evaporation",
+        "title": "Evaporation",
+        "description": "Sun heats water, turning it into vapor",
+        "icon": "☀️"
+      },
+      {
+        "id": "condensation",
+        "title": "Condensation",
+        "description": "Water vapor cools and forms clouds",
+        "icon": "☁️"
+      },
+      {
+        "id": "precipitation",
+        "title": "Precipitation",
+        "description": "Water falls as rain, snow, or hail",
+        "icon": "🌧️"
+      },
+      {
+        "id": "collection",
+        "title": "Collection",
+        "description": "Water gathers in oceans, lakes, and rivers",
+        "icon": "🌊"
+      }
+    ],
+    "animation": {
+      "backend": "svg",
+      "src": "assets/animations/water-cycle.svg",
+      "trigger": "load",
+      "reducedMotion": "static-pose"
+    }
+  }
+}

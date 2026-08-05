@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { loadPackage } from '@open-edu/core';
 import { resolve } from 'path';
+import fs from 'fs';
 
 const WIDGET_IDS = [
   'core.callout',
@@ -37,7 +38,7 @@ describe('widget-showcase example package', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('widget-showcase');
     expect(pkg.manifest.title).toBe('Widget Showcase');
-    expect(pkg.nodes.length).toBe(29);
+    expect(pkg.nodes.length).toBe(30);
   });
 
   it('should have correct node types', async () => {
@@ -46,14 +47,21 @@ describe('widget-showcase example package', () => {
     expect(pkg.nodes.find((n) => n.relativePath === 'nodes/outro.md')?.node.type).toBe('lesson');
 
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
-    expect(exerciseNodes).toHaveLength(27);
+    expect(exerciseNodes).toHaveLength(28);
   });
 
   it('should reference all 27 widget IDs in exercise nodes', async () => {
     const pkg = await loadPackage(resolve(__dirname));
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
 
-    const usedWidgetIds = exerciseNodes.map((n) => (n.node as any).widget).sort();
+    // Animation demo nodes reuse core.process-explainer (animated-water-cycle already does),
+    // so exclude them from the one-node-per-widget assertion; the remaining 27 nodes keep
+    // a 1:1 mapping with the 27 widget IDs.
+    const demoNodes = new Set(['nodes/svg-animation.json', 'nodes/canvas-sorting.json']);
+    const usedWidgetIds = exerciseNodes
+      .filter((n) => !demoNodes.has(n.relativePath))
+      .map((n) => (n.node as any).widget)
+      .sort();
     const expectedIds = [...WIDGET_IDS].sort();
     expect(usedWidgetIds).toEqual(expectedIds);
   });
@@ -75,5 +83,15 @@ describe('widget-showcase example package', () => {
       (key) => routing[key].onComplete === 'COMPLETED',
     );
     expect(terminalPath).toBe('nodes/outro.md');
+  });
+
+  it('should have a valid SVG animation demo node', async () => {
+    const pkg = await loadPackage(resolve(__dirname));
+    const node = pkg.nodes.find((n) => n.relativePath === 'nodes/svg-animation.json');
+    expect(node).toBeDefined();
+    const cfg = (node!.node as any).config as { animation?: { backend?: string; src?: string } };
+    expect(cfg.animation?.backend).toBe('svg');
+    expect(cfg.animation?.src).toBe('assets/animations/water-cycle.svg');
+    expect(fs.existsSync(resolve(__dirname, 'assets/animations/water-cycle.svg'))).toBe(true);
   });
 });
