@@ -2,5 +2,5 @@
   "name": "Open-Edu",
   "install": "corepack enable\ncorepack prepare pnpm@9.0.0 --activate\npnpm install\npnpm build",
   "start": "pnpm --filter @open-edu/learner dev",
-  "ports": [4001]
+  "ports": [{ "name": "learner", "port": 4001 }]
 }
