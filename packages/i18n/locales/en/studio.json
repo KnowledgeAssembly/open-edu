@@ -40,6 +40,7 @@
   "editor.quiz.correct": "Correct",
   "editor.save": "Save",
   "editor.saved": "Saved",
+  "editor.advanced.requiresDeveloper": "Open Developer mode for advanced activity types.",
   "share.title": "Share this course",
   "share.lede": "We’ll check it’s ready, then give you a file students can open in the learner app.",
   "share.readyHeading": "Ready check",
