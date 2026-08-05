@@ -251,6 +251,16 @@ Before marking a story complete, verify:
 - [ ] Accessibility: axe-core audits pass for all affected components
 - [ ] Internationalization: all user-facing strings use `t()` with keys in `packages/i18n/locales/en/`
 
+## Cursor Cloud specific instructions
+
+The learner app is the primary development surface. After `install` completes, the `start` script launches the Vite dev server on **port 4001** (`http://localhost:4001`). Example courses are served from `examples/` by default.
+
+- **Workspace packages require a build.** Monorepo packages resolve to `dist/` outputs; `pnpm build` runs during environment install. If you change package source and imports fail at runtime, rerun `pnpm build`.
+- **Dev-server CSS staleness.** After editing Tailwind classes in `packages/runtime/src/`, regenerate dev-server CSS (see Tailwind CSS & Dev-Server section above).
+- **E2E tests.** Run `pnpm test:e2e:install` once per environment for Playwright Chromium, then `pnpm test:e2e tests/e2e/learner-experience.spec.ts` for the canonical learner smoke test.
+- **Optional services.** Dev-server (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above.
+- **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion.
+
 <!-- OPENWIKI:START -->
 
 ## OpenWiki
