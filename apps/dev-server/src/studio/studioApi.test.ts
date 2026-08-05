@@ -26,13 +26,17 @@ describe('studioApi client', () => {
   });
 
   it('saveOutlineOrder posts orderedPaths', async () => {
-    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true }), { status: 200 }),
+    );
     const api = createStudioApi();
     await api.saveOutlineOrder(['nodes/a.md', 'nodes/b.json']);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/package/outline');
     expect(init?.method).toBe('PUT');
-    expect(JSON.parse(init?.body as string)).toEqual({ orderedPaths: ['nodes/a.md', 'nodes/b.json'] });
+    expect(JSON.parse(init?.body as string)).toEqual({
+      orderedPaths: ['nodes/a.md', 'nodes/b.json'],
+    });
   });
 
   it('exportOep returns blob and filename from Content-Disposition', async () => {

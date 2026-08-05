@@ -41,10 +41,12 @@ export function OutlineView({
   api,
   onEdit,
   onError,
+  onTitleChange,
 }: {
   api: StudioApi;
   onEdit: (path: string) => void;
   onError: (message: string) => void;
+  onTitleChange?: (title: string) => void;
 }) {
   const { t } = useTranslation();
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
@@ -56,12 +58,13 @@ export function OutlineView({
     try {
       const outline = await api.getOutline();
       setActivities(outline.activities);
+      onTitleChange?.(outline.title);
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
     } finally {
       setLoading(false);
     }
-  }, [api, onError, t]);
+  }, [api, onError, onTitleChange, t]);
 
   useEffect(() => {
     void refresh();
@@ -129,13 +132,8 @@ export function OutlineView({
       ) : (
         <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
           {activities.map((activity, index) => (
-            <li
-              key={activity.id}
-              className="flex flex-wrap items-center gap-3 px-4 py-3"
-            >
-              <span className="text-on-surface-variant w-6 text-right text-sm">
-                {index + 1}.
-              </span>
+            <li key={activity.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+              <span className="text-on-surface-variant w-6 text-right text-sm">{index + 1}.</span>
               <div className="min-w-0 flex-1">
                 <p className="text-on-surface truncate text-sm font-medium">{activity.title}</p>
                 <Badge variant="outline" className="text-on-surface-variant mt-1">

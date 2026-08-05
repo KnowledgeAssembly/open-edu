@@ -12,9 +12,7 @@ import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
 
 function renderWithI18n() {
   return render(
-    <I18nProvider
-      dictionaries={{ en: { runtime: runtimeDict, studio: studioDict } }}
-    >
+    <I18nProvider dictionaries={{ en: { runtime: runtimeDict, studio: studioDict } }}>
       <DevApp />
     </I18nProvider>,
   );

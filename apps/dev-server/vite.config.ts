@@ -936,10 +936,7 @@ function eduPackageLoader(): Plugin {
 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/octet-stream');
-              res.setHeader(
-                'Content-Disposition',
-                `attachment; filename="${oepFileName}"`,
-              );
+              res.setHeader('Content-Disposition', `attachment; filename="${oepFileName}"`);
               res.end(Buffer.from(result.bytes));
             } catch (err) {
               const message = err instanceof Error ? err.message : 'Export failed';

@@ -29,9 +29,7 @@ export function StudioTopBar({
           {t('studio.brand.subtitle')}
         </span>
       </div>
-      {courseTitle ? (
-        <span className="text-on-surface-variant text-sm">{courseTitle}</span>
-      ) : null}
+      {courseTitle ? <span className="text-on-surface-variant text-sm">{courseTitle}</span> : null}
       <div className="flex-1" />
       {view !== 'home' ? (
         <>

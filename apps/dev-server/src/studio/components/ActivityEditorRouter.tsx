@@ -47,7 +47,9 @@ export function ActivityEditorRouter({
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <p className="text-on-surface-variant text-sm">{t('studio.editor.advanced.requiresDeveloper')}</p>
+      <p className="text-on-surface-variant text-sm">
+        {t('studio.editor.advanced.requiresDeveloper')}
+      </p>
     </div>
   );
 }

@@ -1,10 +1,6 @@
 import type { TemplateMeta } from '../types.js';
 
-function packageJson(overrides: {
-  id: string;
-  title: string;
-  entry: string;
-}): string {
+function packageJson(overrides: { id: string; title: string; entry: string }): string {
   return JSON.stringify(
     {
       name: `@open-edu/example-${overrides.id}`,
@@ -159,7 +155,11 @@ export const STUDIO_TEMPLATES: TemplateMeta[] = [
     titleKey: 'studio.template.readingLesson.title',
     descriptionKey: 'studio.template.readingLesson.description',
     files: {
-      'package.json': packageJson({ id: 'reading-lesson', title: 'Reading Lesson', entry: 'nodes/lesson.md' }),
+      'package.json': packageJson({
+        id: 'reading-lesson',
+        title: 'Reading Lesson',
+        entry: 'nodes/lesson.md',
+      }),
       'nodes/lesson.md': READING_LESSON_MD,
       'workflow.json': linearWorkflow(['nodes/lesson.md']),
     },
@@ -169,7 +169,11 @@ export const STUDIO_TEMPLATES: TemplateMeta[] = [
     titleKey: 'studio.template.lessonQuiz.title',
     descriptionKey: 'studio.template.lessonQuiz.description',
     files: {
-      'package.json': packageJson({ id: 'lesson-quiz', title: 'Lesson and Quiz', entry: 'nodes/lesson.md' }),
+      'package.json': packageJson({
+        id: 'lesson-quiz',
+        title: 'Lesson and Quiz',
+        entry: 'nodes/lesson.md',
+      }),
       'nodes/lesson.md': LESSON_QUIZ_MD,
       'nodes/quiz.json': LESSON_QUIZ_JSON,
       'workflow.json': linearWorkflow(['nodes/lesson.md', 'nodes/quiz.json']),
@@ -180,7 +184,11 @@ export const STUDIO_TEMPLATES: TemplateMeta[] = [
     titleKey: 'studio.template.practiceStub.title',
     descriptionKey: 'studio.template.practiceStub.description',
     files: {
-      'package.json': packageJson({ id: 'practice-stub', title: 'Practice Warm-Up', entry: 'nodes/lesson.md' }),
+      'package.json': packageJson({
+        id: 'practice-stub',
+        title: 'Practice Warm-Up',
+        entry: 'nodes/lesson.md',
+      }),
       'nodes/lesson.md': PRACTICE_LESSON_MD,
       'nodes/practice.json': PRACTICE_QUIZ_JSON,
       'workflow.json': linearWorkflow(['nodes/lesson.md', 'nodes/practice.json']),
@@ -191,7 +199,11 @@ export const STUDIO_TEMPLATES: TemplateMeta[] = [
     titleKey: 'studio.template.shortUnit.title',
     descriptionKey: 'studio.template.shortUnit.description',
     files: {
-      'package.json': packageJson({ id: 'short-unit', title: 'Short Unit', entry: 'nodes/opening.md' }),
+      'package.json': packageJson({
+        id: 'short-unit',
+        title: 'Short Unit',
+        entry: 'nodes/opening.md',
+      }),
       'nodes/opening.md': SHORT_UNIT_OPEN_MD,
       'nodes/quiz.json': SHORT_UNIT_QUIZ_JSON,
       'nodes/closing.md': SHORT_UNIT_CLOSE_MD,

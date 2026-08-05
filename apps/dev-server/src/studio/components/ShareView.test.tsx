@@ -37,7 +37,9 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     }),
     saveOutlineOrder: vi.fn(),
     applyTemplate: vi.fn(),
-    exportOep: vi.fn().mockResolvedValue({ blob: new Blob(['x']), fileName: 'fractions-1.0.0.oep' }),
+    exportOep: vi
+      .fn()
+      .mockResolvedValue({ blob: new Blob(['x']), fileName: 'fractions-1.0.0.oep' }),
     readFile: vi.fn().mockImplementation((path: string) =>
       Promise.resolve({
         path,
@@ -76,9 +78,11 @@ describe('ShareView', () => {
       ],
     });
     const api = makeApi({
-      readFile: vi.fn().mockImplementation((path: string) =>
-        Promise.resolve({ path, content: path.endsWith('.json') ? badQuiz : validLesson }),
-      ),
+      readFile: vi
+        .fn()
+        .mockImplementation((path: string) =>
+          Promise.resolve({ path, content: path.endsWith('.json') ? badQuiz : validLesson }),
+        ),
     });
     render(wrap(<ShareView api={api} onError={() => {}} />));
     const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });

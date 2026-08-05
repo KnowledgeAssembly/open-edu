@@ -121,7 +121,12 @@ export function ShareView({
       </section>
 
       <div className="flex items-center gap-3">
-        <Button variant="default" size="sm" disabled={!ready || exporting} onClick={() => void handleExport()}>
+        <Button
+          variant="default"
+          size="sm"
+          disabled={!ready || exporting}
+          onClick={() => void handleExport()}
+        >
           {exporting ? t('studio.share.exporting') : t('studio.share.exportOep')}
         </Button>
       </div>

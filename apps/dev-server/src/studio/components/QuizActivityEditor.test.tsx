@@ -47,7 +47,11 @@ describe('QuizActivityEditor', () => {
         }),
       }),
     });
-    render(wrap(<QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />));
+    render(
+      wrap(
+        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
     expect(await screen.findByDisplayValue('Which one?')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Alpha')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Beta')).toBeInTheDocument();
@@ -55,7 +59,14 @@ describe('QuizActivityEditor', () => {
 
   it('adds an option', async () => {
     render(
-      wrap(<QuizActivityEditor api={makeApi()} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <QuizActivityEditor
+          api={makeApi()}
+          path="nodes/q.json"
+          onSaved={() => {}}
+          onError={() => {}}
+        />,
+      ),
     );
     await screen.findByLabelText(/question/i);
     await userEvent.click(screen.getByRole('button', { name: /add option/i }));
@@ -65,7 +76,9 @@ describe('QuizActivityEditor', () => {
   it('saves quiz with exactly one correct option', async () => {
     const api = makeApi();
     render(
-      wrap(<QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
+      ),
     );
     await screen.findByLabelText(/question/i);
     await userEvent.type(screen.getByLabelText(/question/i), 'What is 2+2?');
@@ -90,7 +103,9 @@ describe('QuizActivityEditor', () => {
   it('coerces every option to exactly one correct when saving', async () => {
     const api = makeApi();
     render(
-      wrap(<QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
+      ),
     );
     await screen.findByLabelText(/question/i);
     await userEvent.type(screen.getByLabelText(/question/i), 'Pick one');

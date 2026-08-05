@@ -1,4 +1,11 @@
-import { Button, Card, CardTitle, CardDescription, CardContent, EmptyState } from '@open-edu/design-system';
+import {
+  Button,
+  Card,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  EmptyState,
+} from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { STUDIO_TEMPLATES } from '../templates/catalog.js';
 import { listRecentCourses } from '../recentCourses.js';
@@ -75,10 +82,7 @@ export function HomeView({
         ) : (
           <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
             {recent.map((course) => (
-              <li
-                key={course.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
-              >
+              <li key={course.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <span className="text-on-surface text-sm">{course.title}</span>
                 <Button variant="ghost" size="sm" onClick={onOpened}>
                   {t('studio.home.open')}

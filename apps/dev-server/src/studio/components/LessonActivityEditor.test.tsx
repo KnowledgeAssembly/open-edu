@@ -35,14 +35,28 @@ describe('LessonActivityEditor', () => {
 
   it('loads markdown and extracts title from first heading', async () => {
     render(
-      wrap(<LessonActivityEditor api={makeApi()} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <LessonActivityEditor
+          api={makeApi()}
+          path="nodes/l.md"
+          onSaved={() => {}}
+          onError={() => {}}
+        />,
+      ),
     );
     expect(await screen.findByDisplayValue('Title')).toBeInTheDocument();
   });
 
   it('syncing title updates the first markdown heading', async () => {
     render(
-      wrap(<LessonActivityEditor api={makeApi()} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <LessonActivityEditor
+          api={makeApi()}
+          path="nodes/l.md"
+          onSaved={() => {}}
+          onError={() => {}}
+        />,
+      ),
     );
     await screen.findByDisplayValue('Title');
     const titleInput = screen.getByLabelText(/lesson title/i);
@@ -57,7 +71,9 @@ describe('LessonActivityEditor', () => {
       readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: 'No heading' }),
     });
     render(
-      wrap(<LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
     );
     expect(await screen.findByText('Every lesson has a heading')).toBeInTheDocument();
   });
@@ -65,7 +81,9 @@ describe('LessonActivityEditor', () => {
   it('saves content via writeFile', async () => {
     const api = makeApi();
     render(
-      wrap(<LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />),
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
     );
     await screen.findByDisplayValue('Title');
     await userEvent.click(screen.getByRole('button', { name: /save/i }));

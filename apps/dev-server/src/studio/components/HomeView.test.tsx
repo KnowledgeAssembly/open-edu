@@ -34,9 +34,7 @@ describe('HomeView', () => {
   });
 
   it('renders all studio templates', () => {
-    render(
-      wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />),
-    );
+    render(wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />));
     expect(screen.getByText('Reading lesson')).toBeInTheDocument();
     expect(screen.getByText('Lesson + quiz')).toBeInTheDocument();
     expect(screen.getByText('Practice warm-up')).toBeInTheDocument();

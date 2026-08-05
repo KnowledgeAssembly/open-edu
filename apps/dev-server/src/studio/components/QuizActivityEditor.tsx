@@ -13,7 +13,11 @@ function freshOption(prefix: string, text: string): OptionDraft {
   return { id: `${prefix}-${Math.random().toString(36).slice(2, 7)}`, text };
 }
 
-function serializeQuiz(question: string, options: OptionDraft[], correctIndex: number | null): string {
+function serializeQuiz(
+  question: string,
+  options: OptionDraft[],
+  correctIndex: number | null,
+): string {
   return JSON.stringify(
     {
       type: 'quiz',
@@ -130,7 +134,10 @@ export function QuizActivityEditor({
         <legend className="text-on-surface mb-2 text-sm font-medium">
           {t('studio.editor.quiz.optionsLabel')}
         </legend>
-        <RadioGroup value={correctIndex != null ? String(correctIndex) : undefined} onValueChange={handleCorrect}>
+        <RadioGroup
+          value={correctIndex != null ? String(correctIndex) : undefined}
+          onValueChange={handleCorrect}
+        >
           {options.map((option, index) => (
             <div
               key={option.id}

@@ -466,7 +466,11 @@ function SinglePackageDevApp(): JSX.Element {
   if (studioMode === 'creator') {
     return (
       <RuntimeThemeProvider>
-        <StudioApp mode={studioMode} onModeChange={setStudioModeAndPersist} />
+        <StudioApp
+          mode={studioMode}
+          onModeChange={setStudioModeAndPersist}
+          loadedPackage={loadedPkg}
+        />
       </RuntimeThemeProvider>
     );
   }
