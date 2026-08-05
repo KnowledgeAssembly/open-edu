@@ -225,10 +225,12 @@ describe('AppSidebar', () => {
 
       fireEvent.mouseEnter(sidebar);
       expect(screen.getByText('Home')).toBeInTheDocument();
+      expect(screen.getByText('OpenEdu')).toBeInTheDocument();
       expect(sidebar).not.toHaveClass('w-16');
 
       fireEvent.mouseLeave(sidebar);
       expect(screen.queryByText('Home')).toBeNull();
+      expect(screen.getByText('OE')).toBeInTheDocument();
       expect(sidebar).toHaveClass('w-16');
     });
 

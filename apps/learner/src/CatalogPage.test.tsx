@@ -75,6 +75,12 @@ describe('CatalogPage', () => {
     expect(cards).toHaveLength(2);
   });
 
+  it('renders the course grid inside a course-list-section', () => {
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    const section = screen.getByTestId('course-list-section');
+    expect(section.querySelectorAll('[data-testid="course-card"]')).toHaveLength(2);
+  });
+
   it('renders empty state when no packages', () => {
     renderWithI18n(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
     expect(screen.getByText('No courses yet')).toBeInTheDocument();

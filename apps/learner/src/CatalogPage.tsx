@@ -521,7 +521,10 @@ export function CatalogPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+        <div
+          className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5"
+          data-testid="course-list-section"
+        >
           {sorted.map((pkg) => {
             const prog = progress[pkg.manifest.id] ?? null;
             const isInstalled = installedIds.has(pkg.manifest.id);

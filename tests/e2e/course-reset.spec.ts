@@ -19,7 +19,9 @@ async function goToCatalog(page: Page): Promise<void> {
 
 async function startFirstCourse(page: Page): Promise<void> {
   await goToCatalog(page);
-  const card = page.locator('[data-testid="course-card"]').first();
+  const card = page
+    .locator('[data-testid="course-list-section"] [data-testid="course-card"]')
+    .first();
   await card.waitFor({ state: 'visible', timeout: 10000 });
   await card.click();
 }
@@ -65,7 +67,9 @@ test.describe('Course Reset', () => {
     await goToCatalog(page);
 
     // Hover over a course card to reveal the reset button
-    const courseCard = page.locator('[data-testid="course-card"]').first();
+    const courseCard = page
+      .locator('[data-testid="course-list-section"] [data-testid="course-card"]')
+      .first();
     await courseCard.hover();
 
     const resetButton = page.getByTestId('reset-button').first();
@@ -83,7 +87,9 @@ test.describe('Course Reset', () => {
     await goToCatalog(page);
 
     // Hover and find reset button
-    const courseCard = page.locator('[data-testid="course-card"]').first();
+    const courseCard = page
+      .locator('[data-testid="course-list-section"] [data-testid="course-card"]')
+      .first();
     await courseCard.hover();
 
     const resetButton = page.getByTestId('reset-button').first();
@@ -111,7 +117,9 @@ test.describe('Course Reset', () => {
     await goToCatalog(page);
 
     // Hover and find reset button
-    const courseCard = page.locator('[data-testid="course-card"]').first();
+    const courseCard = page
+      .locator('[data-testid="course-list-section"] [data-testid="course-card"]')
+      .first();
     await courseCard.hover();
 
     const resetButton = page.getByTestId('reset-button').first();

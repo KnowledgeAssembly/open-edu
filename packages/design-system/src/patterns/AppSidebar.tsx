@@ -136,7 +136,7 @@ export function AppSidebar({
         ) : (
           <>
             <h1 className="text-on-surface m-0 text-lg font-bold leading-tight">
-              {collapsed ? 'OE' : title}
+              {expanded ? title : 'OE'}
             </h1>
             {expanded && subtitle && (
               <p className="text-on-surface-variant mt-0.5 truncate text-xs leading-tight">

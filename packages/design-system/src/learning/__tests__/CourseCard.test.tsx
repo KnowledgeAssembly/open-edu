@@ -143,6 +143,10 @@ describe('CourseCard', () => {
     expect(screen.queryByText('Bundle')).not.toBeInTheDocument();
   });
 
+  it('has no accessibility violations with a badge label', async () => {
+    await checkAccessibility(<CourseCard {...makeProps({ badgeLabel: 'Bundle' })} />);
+  });
+
   it('has no accessibility violations', async () => {
     await checkAccessibility(<CourseCard {...makeProps()} />);
   });

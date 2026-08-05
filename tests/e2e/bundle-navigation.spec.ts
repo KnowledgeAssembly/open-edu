@@ -86,7 +86,9 @@ test.describe('Bundle navigation', () => {
 test.describe('Single-package backward compat', () => {
   test('Package card launches course runtime', async ({ page }) => {
     await navigateToCatalog(page);
-    const courseCards = page.locator('[data-testid="course-card"]');
+    const courseCards = page.locator(
+      '[data-testid="course-list-section"] [data-testid="course-card"]',
+    );
     const count = await courseCards.count();
     if (count > 0) {
       await courseCards.first().click();
