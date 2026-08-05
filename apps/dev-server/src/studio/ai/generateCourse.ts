@@ -2,7 +2,10 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { compile as compileFromCourseCompiler, type CompileResult } from '@open-edu/course-compiler';
+import {
+  compile as compileFromCourseCompiler,
+  type CompileResult,
+} from '@open-edu/course-compiler';
 import { loadPackage } from '@open-edu/core';
 import { buildCourseSpecPrompt, extractJsonObject } from './draftPrompt.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
@@ -59,7 +62,7 @@ async function buildOutlinePreview(
           ? titleFromMarkdown(content)
           : kind === 'quiz'
             ? titleFromQuizJson(content)
-            : path.split('/').pop() ?? path;
+            : (path.split('/').pop() ?? path);
       return { title, kind };
     });
   } catch {

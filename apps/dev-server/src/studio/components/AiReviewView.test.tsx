@@ -20,7 +20,12 @@ const SUCCESS_RESULT: AiGenerateResult = {
     { id: 'objectives', labelKey: 'studio.ai.quality.objectives', passed: true },
     { id: 'assessment', labelKey: 'studio.ai.quality.assessment', passed: true },
     { id: 'duration', labelKey: 'studio.ai.quality.duration', passed: false },
-    { id: 'completeness', labelKey: 'studio.ai.quality.completeness', passed: true, detail: 'Fix the quiz title.' },
+    {
+      id: 'completeness',
+      labelKey: 'studio.ai.quality.completeness',
+      passed: true,
+      detail: 'Fix the quiz title.',
+    },
   ],
   outlinePreview: [
     { title: 'Intro', kind: 'lesson' },

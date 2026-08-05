@@ -37,9 +37,7 @@ describe('AiStartPanel', () => {
   });
 
   it('shows the unavailable message and no generate button when AI is offline', async () => {
-    render(
-      wrap(<AiStartPanel api={makeApi()} onGenerated={() => {}} onError={() => {}} />),
-    );
+    render(wrap(<AiStartPanel api={makeApi()} onGenerated={() => {}} onError={() => {}} />));
     expect(
       await screen.findByText(
         'AI is unavailable offline or no API key is configured. Use a template instead.',

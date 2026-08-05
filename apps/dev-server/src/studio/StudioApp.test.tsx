@@ -187,9 +187,7 @@ describe('StudioApp', () => {
     getAiStatusMock.mockResolvedValue({ available: true });
     generateFromNotesMock.mockResolvedValue({
       success: true,
-      quality: [
-        { id: 'objectives', labelKey: 'studio.ai.quality.objectives', passed: true },
-      ],
+      quality: [{ id: 'objectives', labelKey: 'studio.ai.quality.objectives', passed: true }],
       outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
       title: 'AI Course',
     });

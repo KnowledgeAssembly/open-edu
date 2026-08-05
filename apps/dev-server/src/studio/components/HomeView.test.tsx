@@ -31,14 +31,16 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
   } as unknown as StudioApi;
 }
 
-function renderHome(overrides: {
-  api?: StudioApi;
-  onOpened?: () => void;
-  onError?: (message: string) => void;
-  courseTitle?: string;
-  onOpenCurrent?: () => void;
-  onAiGenerated?: (result: AiGenerateResult) => void;
-} = {}) {
+function renderHome(
+  overrides: {
+    api?: StudioApi;
+    onOpened?: () => void;
+    onError?: (message: string) => void;
+    courseTitle?: string;
+    onOpenCurrent?: () => void;
+    onAiGenerated?: (result: AiGenerateResult) => void;
+  } = {},
+) {
   return render(
     wrap(
       <HomeView

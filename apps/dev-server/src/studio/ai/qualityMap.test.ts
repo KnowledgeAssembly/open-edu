@@ -31,7 +31,13 @@ describe('qualityMap', () => {
 
   it('marks completeness unmet on error-severity diagnostics', () => {
     const items = mapDiagnosticsToQuality(
-      [{ severity: 'error', message: 'Invalid question options', code: 'INVALID_QUESTION_OPTIONS' }],
+      [
+        {
+          severity: 'error',
+          message: 'Invalid question options',
+          code: 'INVALID_QUESTION_OPTIONS',
+        },
+      ],
       cleanOutline,
     );
     expect(items.find((i) => i.id === 'completeness')?.passed).toBe(false);
