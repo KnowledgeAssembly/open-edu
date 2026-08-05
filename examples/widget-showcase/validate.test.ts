@@ -38,7 +38,7 @@ describe('widget-showcase example package', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('widget-showcase');
     expect(pkg.manifest.title).toBe('Widget Showcase');
-    expect(pkg.nodes.length).toBe(30);
+    expect(pkg.nodes.length).toBe(31);
   });
 
   it('should have correct node types', async () => {
@@ -47,7 +47,7 @@ describe('widget-showcase example package', () => {
     expect(pkg.nodes.find((n) => n.relativePath === 'nodes/outro.md')?.node.type).toBe('lesson');
 
     const exerciseNodes = pkg.nodes.filter((n) => n.node.type === 'exercise');
-    expect(exerciseNodes).toHaveLength(28);
+    expect(exerciseNodes).toHaveLength(29);
   });
 
   it('should reference all 27 widget IDs in exercise nodes', async () => {
@@ -93,5 +93,18 @@ describe('widget-showcase example package', () => {
     expect(cfg.animation?.backend).toBe('svg');
     expect(cfg.animation?.src).toBe('assets/animations/water-cycle.svg');
     expect(fs.existsSync(resolve(__dirname, 'assets/animations/water-cycle.svg'))).toBe(true);
+  });
+
+  it('should have a valid Canvas animation demo node', async () => {
+    const pkg = await loadPackage(resolve(__dirname));
+    const node = pkg.nodes.find((n) => n.relativePath === 'nodes/canvas-sorting.json');
+    expect(node).toBeDefined();
+    const cfg = (node!.node as any).config as {
+      animation?: { backend?: string; effects?: Array<{ step?: number; effect?: string }> };
+    };
+    expect(cfg.animation?.backend).toBe('canvas');
+    expect(cfg.animation?.effects?.[0]?.effect).toBe('flow');
+    const values = cfg.animation?.effects?.map((e) => e.step).filter((s) => s !== undefined);
+    expect(values).toEqual([30, 50, 20, 80, 40, 60]);
   });
 });

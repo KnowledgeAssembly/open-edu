@@ -1,0 +1,49 @@
+{
+  "type": "exercise",
+  "title": "Bubble Sort Visualization",
+  "widget": "core.process-explainer",
+  "config": {
+    "title": "Bubble Sort (Canvas Animation)",
+    "stepByStep": true,
+    "interactive": true,
+    "steps": [
+      {
+        "id": "compare",
+        "title": "Compare",
+        "description": "Adjacent bars are compared; the active pair is highlighted",
+        "icon": "🔍"
+      },
+      {
+        "id": "swap",
+        "title": "Swap",
+        "description": "Out-of-order bars swap so larger values bubble right",
+        "icon": "🔁"
+      },
+      {
+        "id": "pass",
+        "title": "Pass",
+        "description": "Repeat passes until a full pass makes no swaps",
+        "icon": "↻"
+      },
+      {
+        "id": "sorted",
+        "title": "Sorted",
+        "description": "The array is fully sorted after the final pass",
+        "icon": "✅"
+      }
+    ],
+    "animation": {
+      "backend": "canvas",
+      "trigger": "load",
+      "reducedMotion": "instant",
+      "effects": [
+        { "step": 30, "target": "bar-0", "effect": "flow" },
+        { "step": 50, "target": "bar-1", "effect": "compare" },
+        { "step": 20, "target": "bar-2", "effect": "compare" },
+        { "step": 80, "target": "bar-3", "effect": "compare" },
+        { "step": 40, "target": "bar-4", "effect": "compare" },
+        { "step": 60, "target": "bar-5", "effect": "compare" }
+      ]
+    }
+  }
+}
