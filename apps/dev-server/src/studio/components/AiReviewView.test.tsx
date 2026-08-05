@@ -34,19 +34,24 @@ const SUCCESS_RESULT: AiGenerateResult = {
   title: 'AI Course',
 };
 
+function renderReview(
+  result: AiGenerateResult,
+  handlers: Partial<{ onAccept: () => void; onReject: () => void }> = {},
+) {
+  render(
+    wrap(
+      <AiReviewView
+        result={result}
+        onAccept={handlers.onAccept ?? (() => {})}
+        onReject={handlers.onReject ?? (() => {})}
+      />,
+    ),
+  );
+}
+
 describe('AiReviewView', () => {
   it('renders the draft outline with kind badges', () => {
-    render(
-      wrap(
-        <AiReviewView
-          api={{} as never}
-          result={SUCCESS_RESULT}
-          onAccept={() => {}}
-          onReject={() => {}}
-          onError={() => {}}
-        />,
-      ),
-    );
+    renderReview(SUCCESS_RESULT);
     expect(screen.getByText('Review AI draft')).toBeInTheDocument();
     expect(screen.getByText('Draft outline')).toBeInTheDocument();
     expect(screen.getByText('Intro')).toBeInTheDocument();
@@ -56,17 +61,7 @@ describe('AiReviewView', () => {
   });
 
   it('renders quality checklist with passed and failed states', () => {
-    render(
-      wrap(
-        <AiReviewView
-          api={{} as never}
-          result={SUCCESS_RESULT}
-          onAccept={() => {}}
-          onReject={() => {}}
-          onError={() => {}}
-        />,
-      ),
-    );
+    renderReview(SUCCESS_RESULT);
     expect(screen.getByText('Quality check')).toBeInTheDocument();
     expect(screen.getByText('Learning goals look measurable')).toBeInTheDocument();
     expect(screen.getByText('Practice/quiz aligns with the lesson')).toBeInTheDocument();
@@ -77,57 +72,15 @@ describe('AiReviewView', () => {
 
   it('calls onAccept when Accept draft is clicked', async () => {
     const onAccept = vi.fn();
-    render(
-      wrap(
-        <AiReviewView
-          api={{} as never}
-          result={SUCCESS_RESULT}
-          onAccept={onAccept}
-          onReject={() => {}}
-          onError={() => {}}
-        />,
-      ),
-    );
+    renderReview(SUCCESS_RESULT, { onAccept });
     await userEvent.click(screen.getByRole('button', { name: /accept draft/i }));
     expect(onAccept).toHaveBeenCalledTimes(1);
   });
 
   it('calls onReject when Discard and start over is clicked', async () => {
     const onReject = vi.fn();
-    render(
-      wrap(
-        <AiReviewView
-          api={{} as never}
-          result={SUCCESS_RESULT}
-          onAccept={() => {}}
-          onReject={onReject}
-          onError={() => {}}
-        />,
-      ),
-    );
+    renderReview(SUCCESS_RESULT, { onReject });
     await userEvent.click(screen.getByRole('button', { name: /discard and start over/i }));
     expect(onReject).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows the error message instead of the outline when generation failed', () => {
-    render(
-      wrap(
-        <AiReviewView
-          api={{} as never}
-          result={{
-            success: false,
-            quality: [],
-            outlinePreview: [],
-            error: 'Could not parse the draft',
-          }}
-          onAccept={() => {}}
-          onReject={() => {}}
-          onError={() => {}}
-        />,
-      ),
-    );
-    expect(screen.getByText('Could not parse the draft')).toBeInTheDocument();
-    expect(screen.queryByText('Draft outline')).not.toBeInTheDocument();
-    expect(screen.queryByText('Quality check')).not.toBeInTheDocument();
   });
 });

@@ -78,6 +78,7 @@ describe('AiStartPanel', () => {
       getAiStatus: vi.fn().mockResolvedValue({ available: true }),
       generateFromNotes: vi.fn().mockResolvedValue({
         success: false,
+        code: 'notes-too-short',
         quality: [],
         outlinePreview: [],
         error: 'Add more detail',

@@ -303,6 +303,7 @@ function eduPackageLoader(): Plugin {
   let packageDir = '';
   let bundleDir = '';
   let isBundleMode = false;
+  let aiGenerating = false;
 
   return {
     name: 'edu-package-loader',
@@ -355,7 +356,7 @@ function eduPackageLoader(): Plugin {
 
       srv.watcher.add(watchDir);
       srv.watcher.on('change', async (filePath) => {
-        if (filePath.startsWith(watchDir)) {
+        if (filePath.startsWith(watchDir) && !aiGenerating) {
           try {
             if (isBundleMode) {
               bundleData = await loadBundle(bundleDir);
@@ -439,12 +440,18 @@ function eduPackageLoader(): Plugin {
               res.end(JSON.stringify({ error: 'Missing notes' }));
               return;
             }
-            const result = await generateCourseDraft({
-              notes: body.notes,
-              packageDir,
-              completeText: completeWithLlm,
-              force: body.force === true,
-            });
+            aiGenerating = true;
+            let result: import('./src/studio/ai/types.js').AiGenerateResult;
+            try {
+              result = await generateCourseDraft({
+                notes: body.notes,
+                packageDir,
+                completeText: completeWithLlm,
+                force: body.force === true,
+              });
+            } finally {
+              aiGenerating = false;
+            }
 
             if (result.success) {
               try {
@@ -453,13 +460,23 @@ function eduPackageLoader(): Plugin {
                 if (mod) {
                   srv.moduleGraph.invalidateModule(mod);
                 }
-                srv.ws.send({ type: 'full-reload' });
               } catch (err) {
                 console.error('[edu-dev] Failed to reload after AI generate:', err);
               }
             }
 
             res.end(JSON.stringify(result));
+            if (result.success) {
+              // Defer the full-reload so the generate response reaches the client first;
+              // the review is persisted to sessionStorage before any reload is applied.
+              setImmediate(() => {
+                try {
+                  srv.ws.send({ type: 'full-reload' });
+                } catch (err) {
+                  console.error('[edu-dev] Failed to send AI reload:', err);
+                }
+              });
+            }
             return;
           }
 

@@ -152,7 +152,6 @@ export function StudioApp({
     case 'ai-review':
       content = aiResult ? (
         <AiReviewView
-          api={api}
           result={aiResult}
           onAccept={() => {
             void (async () => {
@@ -171,7 +170,6 @@ export function StudioApp({
             clearAiReview();
             handleNavigate('home');
           }}
-          onError={handleError}
         />
       ) : (
         <EmptyState

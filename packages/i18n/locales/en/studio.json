@@ -145,8 +145,6 @@
   "ai.reviewLede": "Check the outline and quality notes, then accept to edit in Studio.",
   "ai.accept": "Accept draft",
   "ai.reject": "Discard and start over",
-  "ai.improveLesson": "Improve this lesson",
-  "ai.addQuiz": "Add a quiz",
   "ai.qualityHeading": "Quality check",
   "ai.quality.objectives": "Learning goals look measurable",
   "ai.quality.assessment": "Practice/quiz aligns with the lesson",

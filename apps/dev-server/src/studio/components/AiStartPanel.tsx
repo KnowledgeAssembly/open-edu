@@ -55,7 +55,7 @@ export function AiStartPanel({
         onGenerated(result);
       } else {
         setInlineError(
-          result.error?.includes('Add more detail')
+          result.code === 'notes-too-short'
             ? t('studio.ai.notesTooShort')
             : t('studio.ai.errorGeneric'),
         );

@@ -61,7 +61,24 @@ describe('generateCourseDraft', () => {
         .mockResolvedValue('{"format":"openedu-course-spec","version":1,"generatedAt":"now"}');
       const compileForce = vi
         .fn()
-        .mockResolvedValue({ success: true, diagnostics: [], outputPath: packageDir });
+        .mockImplementation(
+          async (_specPath: string, options: { output: string; validate: boolean }) => {
+            expect(options.validate).toBe(true);
+            await mkdir(options.output, { recursive: true });
+            await writeFile(
+              join(options.output, 'package.json'),
+              JSON.stringify({
+                id: 'fractions-basics',
+                title: 'Fractions Basics',
+                version: '1.0.0',
+                author: 'Test Author',
+                entry: 'nodes/intro.md',
+              }),
+              'utf-8',
+            );
+            return { success: true, diagnostics: [], outputPath: options.output };
+          },
+        );
 
       const forced = await generateCourseDraft({
         notes: NOTES,
@@ -115,12 +132,12 @@ describe('generateCourseDraft', () => {
         .mockImplementation(
           async (specPath: string, options: { output: string; validate: boolean }) => {
             expect(specPath.endsWith('.json')).toBe(true);
-            expect(options.output).toBe(packageDir);
+            expect(options.output).not.toBe(packageDir);
             expect(options.validate).toBe(true);
 
-            await mkdir(join(packageDir, 'nodes'), { recursive: true });
+            await mkdir(join(options.output, 'nodes'), { recursive: true });
             await writeFile(
-              join(packageDir, 'package.json'),
+              join(options.output, 'package.json'),
               JSON.stringify(
                 {
                   id: 'fractions-basics',
@@ -135,18 +152,18 @@ describe('generateCourseDraft', () => {
               'utf-8',
             );
             await writeFile(
-              join(packageDir, 'workflow.json'),
+              join(options.output, 'workflow.json'),
               JSON.stringify({
                 routing: { 'nodes/intro.md': { onComplete: 'COMPLETED' } },
               }),
               'utf-8',
             );
             await writeFile(
-              join(packageDir, 'nodes/intro.md'),
+              join(options.output, 'nodes/intro.md'),
               '# Fractions Basics\n\nFractions describe equal parts of a whole.\n',
               'utf-8',
             );
-            return { success: true, diagnostics: [], outputPath: packageDir };
+            return { success: true, diagnostics: [], outputPath: options.output };
           },
         );
 
@@ -164,7 +181,7 @@ describe('generateCourseDraft', () => {
       expect(result.quality).toHaveLength(4);
       expect(compile).toHaveBeenCalledWith(
         expect.stringMatching(/course-spec\.json$/),
-        expect.objectContaining({ output: packageDir, validate: true }),
+        expect.objectContaining({ validate: true }),
       );
     } finally {
       await rm(packageDir, { recursive: true, force: true });

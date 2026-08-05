@@ -1,7 +1,6 @@
 import { Button, Badge } from '@open-edu/design-system';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
-import type { StudioApi } from '../studioApi.js';
 import type { AiGenerateResult } from '../ai/types.js';
 
 function kindLabelKey(kind: string): string {
@@ -22,27 +21,11 @@ export function AiReviewView({
   onAccept,
   onReject,
 }: {
-  api: StudioApi;
   result: AiGenerateResult;
   onAccept: () => void;
   onReject: () => void;
-  onError: (message: string) => void;
 }) {
   const { t } = useTranslation();
-
-  if (!result.success) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
-        <h1 className="text-h1 text-on-surface">{t('studio.ai.reviewTitle')}</h1>
-        <p className="text-error">{result.error || t('studio.ai.errorGeneric')}</p>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onReject}>
-            {t('studio.ai.reject')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -75,15 +58,9 @@ export function AiReviewView({
           {result.quality.map((item) => (
             <li key={item.id} className="flex items-start gap-3 px-4 py-3">
               {item.passed ? (
-                <Check
-                  className="text-success mt-0.5 size-5 shrink-0"
-                  aria-label={t('studio.ai.qualityHeading')}
-                />
+                <Check className="text-success mt-0.5 size-5 shrink-0" aria-hidden="true" />
               ) : (
-                <X
-                  className="text-error mt-0.5 size-5 shrink-0"
-                  aria-label={t('studio.ai.qualityHeading')}
-                />
+                <X className="text-error mt-0.5 size-5 shrink-0" aria-hidden="true" />
               )}
               <div className="min-w-0">
                 <p

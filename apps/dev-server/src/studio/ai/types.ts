@@ -11,12 +11,21 @@ export interface AiQualityItem {
   detail?: string;
 }
 
+export type AiGenerateErrorCode =
+  | 'notes-too-short'
+  | 'has-content'
+  | 'llm'
+  | 'parse'
+  | 'write'
+  | 'compile';
+
 export interface AiGenerateResult {
   success: boolean;
   quality: AiQualityItem[];
   outlinePreview: Array<{ title: string; kind: string }>;
   title?: string;
   error?: string;
+  code?: AiGenerateErrorCode;
 }
 
 export interface AiStatus {

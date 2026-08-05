@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -10,7 +10,7 @@ import { loadPackage } from '@open-edu/core';
 import { buildCourseSpecPrompt, extractJsonObject } from './draftPrompt.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
 import { detectActivityKind, titleFromMarkdown, titleFromQuizJson } from '../outlineModel.js';
-import type { AiGenerateResult } from './types.js';
+import type { AiGenerateErrorCode, AiGenerateResult } from './types.js';
 
 const MIN_NOTES_LENGTH = 40;
 
@@ -22,8 +22,8 @@ export interface GenerateCourseOptions {
   force?: boolean;
 }
 
-function errorResult(error: string): AiGenerateResult {
-  return { success: false, quality: [], outlinePreview: [], error };
+function errorResult(code: AiGenerateErrorCode, error: string): AiGenerateResult {
+  return { success: false, code, quality: [], outlinePreview: [], error };
 }
 
 function hasNodes(packageDir: string): boolean {
@@ -88,11 +88,11 @@ export async function generateCourseDraft(
   const compile = options.compile ?? compileFromCourseCompiler;
 
   if (notes.trim().length < MIN_NOTES_LENGTH) {
-    return errorResult('Add more detail');
+    return errorResult('notes-too-short', 'Add more detail');
   }
 
   if (!force && hasNodes(packageDir)) {
-    return errorResult('Package already has content');
+    return errorResult('has-content', 'Package already has content');
   }
 
   let raw: string;
@@ -100,6 +100,7 @@ export async function generateCourseDraft(
     raw = await completeText(buildCourseSpecPrompt(notes));
   } catch (error) {
     return errorResult(
+      'llm',
       `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
@@ -108,7 +109,7 @@ export async function generateCourseDraft(
   try {
     spec = extractJsonObject(raw);
   } catch {
-    return errorResult('Could not parse the draft');
+    return errorResult('parse', 'Could not parse the draft');
   }
 
   const tempDir = await mkdtemp(join(tmpdir(), 'openedu-studio-ai-'));
@@ -118,30 +119,54 @@ export async function generateCourseDraft(
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     return errorResult(
+      'write',
       `Could not write the draft: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
+  // Compile into a scratch dir so packageDir is only touched on success.
+  const outputDir = join(tempDir, 'out');
   let result: CompileResult;
   try {
-    result = await compile(specPath, { output: packageDir, validate: true });
+    result = await compile(specPath, { output: outputDir, validate: true });
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     return errorResult(
+      'compile',
       `Could not compile the draft: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  const outlinePreview = await buildOutlinePreview(outputDir);
+  const quality = mapDiagnosticsToQuality(result.diagnostics, outlinePreview);
+  const firstError = result.diagnostics.find((diagnostic) => diagnostic.severity === 'error');
+
+  if (!result.success) {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    return {
+      success: false,
+      code: 'compile',
+      quality,
+      outlinePreview,
+      error: firstError?.message ?? 'Could not compile the draft',
+    };
+  }
+
+  try {
+    await cp(outputDir, packageDir, { recursive: true });
+  } catch (error) {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    return errorResult(
+      'write',
+      `Could not save the draft: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
   await rm(tempDir, { recursive: true, force: true }).catch(() => {});
 
-  const outlinePreview = await buildOutlinePreview(packageDir);
-  const quality = mapDiagnosticsToQuality(result.diagnostics, outlinePreview);
-  const firstError = result.diagnostics.find((diagnostic) => diagnostic.severity === 'error');
-
   return {
-    success: result.success,
+    success: true,
     quality,
     outlinePreview,
     title: readManifestTitle(packageDir),
-    error: result.success ? undefined : firstError?.message,
   };
 }
