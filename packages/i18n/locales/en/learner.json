@@ -76,6 +76,7 @@
   "catalog.no_results_description": "Try different keywords or browse the full catalog.",
   "catalog.clear_filter": "Clear Filter",
   "catalog.installed_badge": "Installed",
+  "catalog.bundle_badge": "Bundle",
   "catalog.remove_installed": "Remove",
   "catalog.delete_confirm_title": "Remove course?",
   "catalog.delete_confirm_description": "This will permanently remove \"{{courseTitle}}\" and all associated progress from your library.",

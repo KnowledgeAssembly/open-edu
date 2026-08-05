@@ -71,10 +71,10 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
 
   const lastMessageId = messages.at(-1)?.id;
   const showSuggestedQuestions =
-    suggestedQuestions &&
+    !!suggestedQuestions &&
     suggestedQuestions.length > 0 &&
-    onSuggestedQuestionSelect &&
-    (messages.length === 0 || !isStreaming);
+    !!onSuggestedQuestionSelect &&
+    !isStreaming;
 
   const { getMessageTimestamp } = usePipiliChat();
 
@@ -136,36 +136,43 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
           ),
         )}
         {isStreaming && <ThinkingIndicator label={t('learner.pipili.thinking')} />}
-        {showSuggestedQuestions && (
-          <SuggestedQuestions questions={suggestedQuestions} onSelect={onSuggestedQuestionSelect} />
-        )}
       </div>
-      {(showStop || showRetry) && (
-        <div className="border-outline-variant flex items-center gap-2 border-t px-4 py-2">
-          {showStop && isStreaming && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onStop}
-              className="text-destructive"
-              data-testid="pipili-stop"
-              aria-label={t('learner.pipili.stop')}
-            >
-              {t('learner.pipili.stop')}
-            </Button>
+      {(showStop || showRetry || showSuggestedQuestions) && (
+        <div className="border-outline-variant flex flex-col gap-2 border-t px-4 py-2">
+          {(showStop || showRetry) && (
+            <div className="flex items-center gap-2">
+              {showStop && isStreaming && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onStop}
+                  className="text-destructive"
+                  data-testid="pipili-stop"
+                  aria-label={t('learner.pipili.stop')}
+                >
+                  {t('learner.pipili.stop')}
+                </Button>
+              )}
+              {showRetry && !isStreaming && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onRetry}
+                  data-testid="pipili-retry"
+                  aria-label={t('learner.pipili.retry')}
+                >
+                  {t('learner.pipili.retry')}
+                </Button>
+              )}
+            </div>
           )}
-          {showRetry && !isStreaming && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onRetry}
-              data-testid="pipili-retry"
-              aria-label={t('learner.pipili.retry')}
-            >
-              {t('learner.pipili.retry')}
-            </Button>
+          {showSuggestedQuestions && (
+            <SuggestedQuestions
+              questions={suggestedQuestions}
+              onSelect={onSuggestedQuestionSelect}
+            />
           )}
         </div>
       )}

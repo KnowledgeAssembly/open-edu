@@ -23,7 +23,6 @@
   "reset.button": "प्रगति रीसेट करें",
   "reset.cancel": "रद्द करें",
   "reset.confirm_button": "हाँ, रीसेट करें",
-
   "progress.completed": "{{count}} पूर्ण हुआ",
   "settings.aa_decrease_font_aria": "फ़ॉन्ट का आकार घटाएं",
   "settings.aa_increase_font_aria": "फ़ॉन्ट का आकार बढ़ाएं",
@@ -137,5 +136,6 @@
   "storage.usage": "स्टोरेज उपयोग",
   "update.available": "एक नया संस्करण उपलब्ध है",
   "storage.settings": "स्टोरेज सेटिंग्स",
-  "storage.settings_heading": "स्टोरेज"
+  "storage.settings_heading": "स्टोरेज",
+  "catalog.bundle_badge": "बंडल"
 }

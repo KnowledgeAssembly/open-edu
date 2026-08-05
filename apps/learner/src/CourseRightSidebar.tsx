@@ -132,10 +132,8 @@ function SidebarContent({
               showStop
               showRetry={Boolean(error || status === 'ready')}
               isStreaming={isStreaming}
-              suggestedQuestions={messages.length === 0 ? suggestedQuestions : undefined}
-              onSuggestedQuestionSelect={
-                messages.length === 0 ? handleSuggestedQuestion : undefined
-              }
+              suggestedQuestions={suggestedQuestions}
+              onSuggestedQuestionSelect={handleSuggestedQuestion}
               rewardMessages={rewardMessages}
               placeholder={t('learner.right_sidebar.chat_placeholder')}
               className="min-h-0 flex-1 border-none"

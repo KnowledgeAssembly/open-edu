@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppSidebar } from '../AppSidebar.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
@@ -20,6 +20,30 @@ const sections = [
 ];
 
 describe('AppSidebar', () => {
+  const originalMatchMedia = window.matchMedia;
+
+  afterEach(() => {
+    if (originalMatchMedia) {
+      window.matchMedia = originalMatchMedia;
+    } else {
+      delete (window as Partial<typeof window>).matchMedia;
+    }
+  });
+
+  function setupMatchMedia(matches: boolean): void {
+    const mql = {
+      matches,
+      media: '(hover: hover) and (pointer: fine)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList;
+    window.matchMedia = vi.fn().mockReturnValue(mql) as unknown as typeof window.matchMedia;
+  }
+
   it('renders title and subtitle', () => {
     render(<AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />);
     expect(screen.getByText('OpenEdu')).toBeInTheDocument();
@@ -180,6 +204,85 @@ describe('AppSidebar', () => {
     await checkAccessibility(
       <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />,
     );
+  });
+
+  describe('hover expand (fine pointer only)', () => {
+    it('defaults to collapsed when defaultCollapsed is set', () => {
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      expect(screen.queryByText('Home')).toBeNull();
+      expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
+    });
+
+    it('temporarily expands on hover and collapses on leave', () => {
+      setupMatchMedia(true);
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      const sidebar = screen.getByTestId('app-sidebar');
+      expect(screen.queryByText('Home')).toBeNull();
+
+      fireEvent.mouseEnter(sidebar);
+      expect(screen.getByText('Home')).toBeInTheDocument();
+      expect(sidebar).not.toHaveClass('w-16');
+
+      fireEvent.mouseLeave(sidebar);
+      expect(screen.queryByText('Home')).toBeNull();
+      expect(sidebar).toHaveClass('w-16');
+    });
+
+    it('does not call onCollapseChange when temporarily expanding via hover', () => {
+      setupMatchMedia(true);
+      const onCollapseChange = vi.fn();
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          collapsed
+          onCollapseChange={onCollapseChange}
+        />,
+      );
+      const sidebar = screen.getByTestId('app-sidebar');
+
+      fireEvent.mouseEnter(sidebar);
+      expect(screen.getByText('Home')).toBeInTheDocument();
+      expect(onCollapseChange).not.toHaveBeenCalled();
+
+      fireEvent.mouseLeave(sidebar);
+      expect(screen.queryByText('Home')).toBeNull();
+      expect(onCollapseChange).not.toHaveBeenCalled();
+    });
+
+    it('does not hover-expand on coarse pointer devices', () => {
+      setupMatchMedia(false);
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      const sidebar = screen.getByTestId('app-sidebar');
+      expect(screen.queryByText('Home')).toBeNull();
+
+      fireEvent.mouseEnter(sidebar);
+      expect(screen.queryByText('Home')).toBeNull();
+      expect(sidebar).toHaveClass('w-16');
+    });
+
+    it('toggle pins the sidebar open even while pinned collapsed', () => {
+      setupMatchMedia(true);
+      const onCollapseChange = vi.fn();
+      render(
+        <AppSidebar
+          items={navItems}
+          currentItemId="home"
+          onNavigate={() => {}}
+          collapsed
+          onCollapseChange={onCollapseChange}
+        />,
+      );
+      fireEvent.click(screen.getByLabelText('Expand sidebar'));
+      expect(onCollapseChange).toHaveBeenCalledWith(false);
+    });
   });
 
   describe('logo', () => {

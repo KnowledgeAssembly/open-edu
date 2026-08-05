@@ -341,7 +341,7 @@ function AppShellInner({
     [location.pathname, mergedPackageEntries, allBundleEntries],
   );
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
 
@@ -768,6 +768,7 @@ function AppShellInner({
                   items={navItems}
                   currentItemId={currentNavId}
                   onNavigate={handleNavAction}
+                  defaultCollapsed
                 />
               </div>
             }
@@ -919,7 +920,7 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
   return (
     <Pipili
       mood={!isCourseView && isOpen ? 'curious' : 'idle'}
-      visible={isCourseView ? !isOpen : true}
+      visible={!isOpen}
       hasUnread={messages.length > 0 && !isOpen}
       pendingReward={showRewardState}
       onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}

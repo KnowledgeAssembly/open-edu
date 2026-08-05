@@ -78,6 +78,19 @@ describe('AppShell', () => {
     expect(screen.getByTestId('appsidebar-nav-settings')).toBeInTheDocument();
   });
 
+  it('defaults the left sidebar to collapsed', () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+    );
+    expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
+    expect(screen.getByTestId('appsidebar-nav-home').textContent).toBe('');
+  });
+
   it('renders the app shell', () => {
     renderWithRouter(
       <AppShell
@@ -169,6 +182,107 @@ describe('AppShell', () => {
       ['/'],
     );
     expect(screen.getByRole('button', { name: 'Ask Pipili' })).toBeInTheDocument();
+  });
+
+  it('shows the Pipili FAB on non-course pages while the sidebar is closed', () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/'],
+    );
+    expect(screen.getByTestId('pipili-fab')).toBeInTheDocument();
+  });
+
+  it('hides the Pipili FAB on non-course pages while the sidebar is open', async () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/'],
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Ask Pipili' }));
+    expect(screen.queryByTestId('pipili-fab')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close sidebar' })).toBeInTheDocument();
+  });
+
+  it('shows the Pipili FAB again on non-course pages when the sidebar closes', async () => {
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={emptyBundleEntries}
+      />,
+      ['/'],
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Ask Pipili' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close sidebar' }));
+    expect(screen.getByTestId('pipili-fab')).toBeInTheDocument();
+  });
+
+  it('hides the Pipili FAB on course pages while the sidebar is open', async () => {
+    const bundleModule: LoadedPackage = {
+      rootDir: 'oep://bundle-1/module-a',
+      manifest: {
+        id: 'module-a',
+        title: 'Module A',
+        version: '1.0.0',
+        author: 'Author',
+        entry: 'nodes/a.md',
+      },
+      workflow: {
+        routing: { 'nodes/a.md': { onComplete: 'nodes/a.md' } },
+      },
+      rewards: null,
+      cards: null,
+      nodes: [
+        {
+          path: 'oep://bundle-1/module-a/nodes/a.md',
+          relativePath: 'nodes/a.md',
+          content: '# M',
+          node: { type: 'lesson', title: 'M' },
+        },
+      ],
+      assetPaths: [],
+      assetMap: new Map(),
+    };
+
+    const loadedBundle: LoadedBundle = {
+      rootDir: 'oep://bundle-1',
+      manifest: {
+        id: 'bundle-1',
+        type: 'bundle',
+        title: 'Bundle One',
+        version: '1.0.0',
+        author: 'Author',
+        modules: [{ id: 'module-a', title: 'Module A', path: './modules/module-a', dependsOn: [] }],
+      },
+      modules: [bundleModule],
+      moduleMap: new Map([['module-a', bundleModule]]),
+      rewards: null,
+      cards: null,
+    };
+
+    renderWithRouter(
+      <AppShell
+        catalogPackages={emptyPackages}
+        packageEntries={emptyEntries}
+        catalogBundles={emptyBundles}
+        bundleEntries={{ 'bundle-1': loadedBundle }}
+      />,
+      ['/course/bundle-1/module-a'],
+    );
+
+    expect(await screen.findByTestId('pipili-fab')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'Ask Pipili' }));
+    expect(screen.queryByTestId('pipili-fab')).not.toBeInTheDocument();
   });
 
   it('renders catalog heading at /catalog route', () => {

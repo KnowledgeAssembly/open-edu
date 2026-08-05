@@ -1,5 +1,6 @@
 import { useState, type JSX, type ReactNode } from 'react';
 import { Progress } from '../primitives/progress.js';
+import { Badge } from '../primitives/badge.js';
 import {
   getCourseCardImage,
   getPrepackagedCourseCardImage,
@@ -37,6 +38,8 @@ export interface CourseCardProps {
   indicator?: ReactNode;
   /** Cover image URL or data URI. Falls back to a subject-themed prepackaged SVG. */
   image?: string;
+  /** Optional short label rendered as a badge next to the title (e.g. "Bundle"). */
+  badgeLabel?: string;
 }
 
 function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.Element {
@@ -100,6 +103,7 @@ export function CourseCard({
   onStart,
   indicator,
   image,
+  badgeLabel,
 }: CourseCardProps): JSX.Element {
   const isCompleted = progress?.isCompleted ?? false;
   const isStarted = !!progress;
@@ -126,7 +130,10 @@ export function CourseCard({
       {indicator && <div className="absolute right-4 top-4 z-10">{indicator}</div>}
       <div className="flex flex-1 flex-col justify-between p-5 pb-4 pr-16">
         <div>
-          <h2 className="text-on-surface m-0 mb-2 text-base font-semibold">{manifest.title}</h2>
+          <div className="mb-2 flex items-center gap-2">
+            <h2 className="text-on-surface m-0 text-base font-semibold">{manifest.title}</h2>
+            {badgeLabel && <Badge variant="secondary">{badgeLabel}</Badge>}
+          </div>
           {manifest.author && (
             <p className="text-on-surface-variant m-0 mb-3 text-sm leading-relaxed">
               by {manifest.author}

@@ -16,13 +16,7 @@ const suggestedQuestions = [
 
 function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
-  const {
-    panelState,
-    setPanelState,
-    messages: companionMessages,
-    rewardMessages,
-    clearPendingReward,
-  } = useCompanion();
+  const { panelState, setPanelState, rewardMessages, clearPendingReward } = useCompanion();
   const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
@@ -64,8 +58,6 @@ function PipiliCompanionContent(): JSX.Element {
       document.body.style.overflow = '';
     };
   }, [isOpen, handleClose, clearPendingReward]);
-
-  const showSuggestions = companionMessages.length === 0;
 
   return (
     <>
@@ -110,8 +102,8 @@ function PipiliCompanionContent(): JSX.Element {
           showStop
           showRetry={Boolean(error || status === 'ready')}
           isStreaming={isStreaming}
-          suggestedQuestions={showSuggestions ? suggestedQuestions : undefined}
-          onSuggestedQuestionSelect={showSuggestions ? handleSuggestedQuestion : undefined}
+          suggestedQuestions={suggestedQuestions}
+          onSuggestedQuestionSelect={handleSuggestedQuestion}
           rewardMessages={rewardMessages}
           placeholder={t('learner.right_sidebar.chat_placeholder')}
           className="min-h-0 flex-1"

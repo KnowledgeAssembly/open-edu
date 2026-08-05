@@ -12,19 +12,27 @@ async function navigateToCatalog(page: import('@playwright/test').Page) {
 test.describe('Bundle navigation', () => {
   test('Catalog shows bundle cards', async ({ page }) => {
     await navigateToCatalog(page);
-    const bundleCards = await page.locator('[data-testid="bundle-card"]').count();
+    const bundleCards = await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .count();
     expect(bundleCards).toBeGreaterThanOrEqual(1);
   });
 
   test('Clicking bundle card navigates to bundle overview', async ({ page }) => {
     await navigateToCatalog(page);
-    await page.locator('[data-testid="bundle-card"]').first().click();
+    await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .first()
+      .click();
     await expect(page.locator('[data-testid="bundle-overview"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('Bundle overview shows module cards', async ({ page }) => {
     await navigateToCatalog(page);
-    await page.locator('[data-testid="bundle-card"]').first().click();
+    await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .first()
+      .click();
     await page.waitForSelector('[data-testid="bundle-overview"]', { timeout: 5000 });
     const moduleCards = await page.locator('[data-testid="module-card"]').count();
     expect(moduleCards).toBeGreaterThanOrEqual(1);
@@ -32,7 +40,10 @@ test.describe('Bundle navigation', () => {
 
   test('Start button on unlocked module launches course', async ({ page }) => {
     await navigateToCatalog(page);
-    await page.locator('[data-testid="bundle-card"]').first().click();
+    await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .first()
+      .click();
     await page.waitForSelector('[data-testid="bundle-overview"]', { timeout: 5000 });
     const startButton = page.locator('[data-testid^="start-module-"]').first();
     await startButton.waitFor({ timeout: 5000 });
@@ -42,7 +53,10 @@ test.describe('Bundle navigation', () => {
 
   test('Back to Catalog button works', async ({ page }) => {
     await navigateToCatalog(page);
-    await page.locator('[data-testid="bundle-card"]').first().click();
+    await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .first()
+      .click();
     await page.waitForSelector('[data-testid="bundle-overview"]', { timeout: 5000 });
     await page.locator('[data-testid="back-to-catalog"]').click();
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 5000 });
@@ -50,7 +64,10 @@ test.describe('Bundle navigation', () => {
 
   test('Module card shows correct status label', async ({ page }) => {
     await navigateToCatalog(page);
-    await page.locator('[data-testid="bundle-card"]').first().click();
+    await page
+      .locator('[data-testid="bundle-list-section"] [data-testid="course-card"]')
+      .first()
+      .click();
     await page.waitForSelector('[data-testid="bundle-overview"]', { timeout: 5000 });
     const completedCards = await page
       .locator('[data-testid="module-card"][data-status="completed"]')

@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
 import { Badge } from '../primitives/badge.js';
@@ -36,6 +36,27 @@ export interface AppSidebarProps {
   onCollapseChange?: (collapsed: boolean) => void;
 }
 
+/**
+ * Detects desktop "fine pointer + hover" capabilities via the CSS media query
+ * `(hover: hover) and (pointer: fine)`. Used to gate temporary hover expansion
+ * of a pinned-collapsed sidebar so touch / coarse-pointer devices keep the
+ * toggle-only behavior.
+ */
+function useFinePointer(): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setMatches(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  return matches;
+}
+
 export function AppSidebar({
   title = 'OpenEdu',
   subtitle = 'Interactive learning platform',
@@ -53,7 +74,24 @@ export function AppSidebar({
   const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
   const collapsed = controlledCollapsed ?? internalCollapsed;
 
+  // Temporary visual expansion while hovering a pinned-collapsed sidebar.
+  // Deliberately separate from `collapsed`: it never calls onCollapseChange and
+  // never flips the pinned state.
+  const [hoverExpanded, setHoverExpanded] = useState(false);
+  const finePointer = useFinePointer();
+
+  const expanded = !collapsed || (hoverExpanded && finePointer);
+
+  const handleMouseEnter = useCallback(() => {
+    if (collapsed && finePointer) setHoverExpanded(true);
+  }, [collapsed, finePointer]);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoverExpanded(false);
+  }, []);
+
   const handleToggleCollapse = useCallback(() => {
+    setHoverExpanded(false);
     const next = !collapsed;
     if (controlledCollapsed === undefined) {
       setInternalCollapsed(next);
@@ -83,22 +121,24 @@ export function AppSidebar({
     <aside
       className={cn(
         'bg-surface-container border-outline-variant flex h-full flex-col overflow-hidden border-r transition-[width] duration-200',
-        collapsed ? 'w-16' : 'w-[var(--oe-space-panel-nav)]',
+        expanded ? 'w-[var(--oe-space-panel-nav)]' : 'w-16',
       )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       data-testid="app-sidebar"
       aria-label="Main navigation"
     >
       <div className="border-outline-variant flex h-16 shrink-0 items-center truncate border-b px-4">
-        {!collapsed && logo ? (
+        {expanded && logo ? (
           logo
-        ) : collapsed && logoCollapsed ? (
+        ) : !expanded && logoCollapsed ? (
           logoCollapsed
         ) : (
           <>
             <h1 className="text-on-surface m-0 text-lg font-bold leading-tight">
               {collapsed ? 'OE' : title}
             </h1>
-            {!collapsed && subtitle && (
+            {expanded && subtitle && (
               <p className="text-on-surface-variant mt-0.5 truncate text-xs leading-tight">
                 {subtitle}
               </p>
@@ -114,20 +154,20 @@ export function AppSidebar({
             <Button
               key={item.id}
               variant={isActive ? 'secondary' : 'ghost'}
-              size={collapsed ? 'icon' : 'sm'}
+              size={expanded ? 'sm' : 'icon'}
               className={cn(
                 'gap-2 transition-colors',
                 !isActive &&
                   'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
-                collapsed ? 'w-full justify-center' : 'w-full justify-start',
+                expanded ? 'w-full justify-start' : 'w-full justify-center',
               )}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`appsidebar-nav-${item.id}`}
-              title={collapsed ? item.label : undefined}
+              title={!expanded ? item.label : undefined}
             >
               <span className="shrink-0">{item.icon}</span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {expanded && <span className="truncate">{item.label}</span>}
             </Button>
           );
         })}
@@ -139,7 +179,7 @@ export function AppSidebar({
           <div className="flex-1 overflow-y-auto px-2 py-1">
             {sections.map((section) => (
               <div key={section.title}>
-                {!collapsed && (
+                {expanded && (
                   <div className="px-3 py-1.5">
                     <h2 className="text-on-surface-variant m-0 text-xs font-semibold uppercase tracking-wider">
                       {section.title}
@@ -172,13 +212,13 @@ export function AppSidebar({
                             'w-full gap-2 text-left transition-colors',
                             !isCurrent &&
                               'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
-                            collapsed ? 'justify-center px-0' : 'justify-start px-3',
+                            expanded ? 'justify-start px-3' : 'justify-center px-0',
                           )}
                           onClick={() => step.onClick?.()}
                           aria-current={isCurrent ? 'step' : undefined}
                           aria-label={`${step.label}${stateLabel}`}
                           data-testid={`step-${step.id}`}
-                          title={collapsed ? step.label : undefined}
+                          title={!expanded ? step.label : undefined}
                         >
                           <span className="shrink-0">
                             {isCurrent && (
@@ -195,7 +235,7 @@ export function AppSidebar({
                               <span className="border-outline-variant flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2" />
                             )}
                           </span>
-                          {!collapsed && <span className="truncate text-sm">{step.label}</span>}
+                          {expanded && <span className="truncate text-sm">{step.label}</span>}
                         </Button>
                       </li>
                     );
@@ -207,7 +247,7 @@ export function AppSidebar({
         </>
       )}
 
-      {onBack && !collapsed && (
+      {onBack && expanded && (
         <div className="border-outline-variant border-t px-2 pb-3 pt-2">
           <Button
             variant="outline"

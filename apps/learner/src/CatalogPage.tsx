@@ -2,14 +2,12 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { BundleProgressSnapshot } from '@open-edu/schemas';
 import { CourseCard } from '@open-edu/runtime';
+import type { CourseCardProps } from '@open-edu/runtime';
 import { useTranslation } from '@open-edu/i18n';
 import { getAllProgress, type ProgressData } from './progressStorage';
 import { getAllBadges, type BadgesData } from './badgesStorage';
 import {
-  BundleCard,
-  BundleCardWithModule,
   Button,
-  CourseCardWithModule,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -43,6 +41,33 @@ const overlayActionButtonClassName =
 
 const overlayActionsClassName =
   'absolute bottom-3 right-3 z-10 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100';
+
+/**
+ * Derives a course-like progress snapshot from bundle progress so bundles can
+ * render through the same `CourseCard` as single courses. Visited nodes are
+ * flattened across modules (namespaced by module id to avoid collisions) and a
+ * bundle is considered completed when every module is completed.
+ */
+function bundleToCourseProgress(
+  bundle: BundleSummary,
+  prog: BundleProgressSnapshot | undefined,
+): CourseCardProps['progress'] {
+  if (!prog) return null;
+  const visitedNodes = Object.values(prog.moduleProgress).flatMap((m) =>
+    m.visitedNodes.map((n) => `${m.moduleId}/${n}`),
+  );
+  const statuses = Object.values(prog.moduleStatuses);
+  const isCompleted = statuses.length > 0 && statuses.every((s) => s === 'completed');
+  return {
+    packageId: bundle.manifest.id,
+    packageVersion: bundle.manifest.version,
+    currentNodeId: prog.currentModuleId ?? bundle.manifest.id,
+    visitedNodes,
+    scores: {},
+    isCompleted,
+    updatedAt: prog.updatedAt,
+  };
+}
 
 export interface CatalogPageProps {
   packages: PackageSummary[];
@@ -310,24 +335,19 @@ export function CatalogPage({
                 key={pkg.manifest.id}
                 className="group relative flex h-full flex-col overflow-hidden"
               >
-                <CourseCardWithModule
+                <CourseCard
+                  manifest={pkg.manifest}
+                  nodeCount={pkg.nodeCount}
+                  badgeCount={pkg.availableBadges}
+                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                   progress={progress[pkg.manifest.id] ?? null}
-                  badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                >
-                  <CourseCard
-                    manifest={pkg.manifest}
-                    nodeCount={pkg.nodeCount}
-                    badgeCount={pkg.availableBadges}
-                    earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                    progress={progress[pkg.manifest.id] ?? null}
-                    onStart={() => onStartCourse(pkg.rootDir)}
-                    image={getCourseCardImage({
-                      image: pkg.manifest.image,
-                      tags: pkg.manifest.tags,
-                      title: pkg.manifest.title,
-                    })}
-                  />
-                </CourseCardWithModule>
+                  onStart={() => onStartCourse(pkg.rootDir)}
+                  image={getCourseCardImage({
+                    image: pkg.manifest.image,
+                    tags: pkg.manifest.tags,
+                    title: pkg.manifest.title,
+                  })}
+                />
                 {progress[pkg.manifest.id] && (
                   <div className={overlayActionsClassName} data-testid="card-overlay-actions">
                     <Button
@@ -363,35 +383,43 @@ export function CatalogPage({
           <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {allBundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
-              const completedModules = prog
-                ? Object.values(prog.moduleStatuses).filter((s) => s === 'completed').length
-                : 0;
+              const courseProgress = bundleToCourseProgress(bundle, prog);
+              const earnedBadgeCount =
+                (badgeData[bundle.manifest.id]?.length ?? 0) +
+                bundle.moduleSummaries.reduce(
+                  (sum, m) => sum + (badgeData[m.manifest.id]?.length ?? 0),
+                  0,
+                );
+              const totalBadgeCount = bundle.moduleSummaries.reduce(
+                (sum, m) => sum + m.availableBadges,
+                0,
+              );
               return (
                 <div
                   key={bundle.manifest.id}
                   className="group relative flex h-full flex-col overflow-hidden"
                 >
-                  <BundleCardWithModule
-                    completedModules={completedModules}
-                    totalModules={bundle.moduleCount}
-                  >
-                    <BundleCard
-                      title={bundle.manifest.title}
-                      description={bundle.manifest.description}
-                      moduleCount={bundle.moduleCount}
-                      activityCount={bundle.totalNodeCount}
-                      completedModules={completedModules}
-                      totalModules={bundle.moduleCount}
-                      isStarted={prog !== undefined}
-                      onStart={() => onStartBundle?.(bundle.manifest.id)}
-                      subject={bundle.manifest.subject}
-                      image={getCourseCardImage({
-                        image: bundle.manifest.image,
-                        subject: bundle.manifest.subject,
-                        title: bundle.manifest.title,
-                      })}
-                    />
-                  </BundleCardWithModule>
+                  <CourseCard
+                    manifest={{
+                      id: bundle.manifest.id,
+                      title: bundle.manifest.title,
+                      version: bundle.manifest.version,
+                      author: bundle.manifest.author ?? '',
+                      entry: '',
+                      image: bundle.manifest.image,
+                    }}
+                    nodeCount={bundle.totalNodeCount}
+                    badgeCount={totalBadgeCount}
+                    earnedBadgeCount={earnedBadgeCount}
+                    progress={courseProgress}
+                    onStart={() => onStartBundle?.(bundle.manifest.id)}
+                    badgeLabel={t('learner.catalog.bundle_badge')}
+                    image={getCourseCardImage({
+                      image: bundle.manifest.image,
+                      subject: bundle.manifest.subject,
+                      title: bundle.manifest.title,
+                    })}
+                  />
                   {(prog || installedBundleIds.has(bundle.manifest.id)) && (
                     <div className={overlayActionsClassName} data-testid="card-overlay-actions">
                       {prog && (
@@ -505,31 +533,26 @@ export function CatalogPage({
                 key={pkg.manifest.id}
                 className="group relative flex h-full flex-col overflow-hidden"
               >
-                <CourseCardWithModule
+                <CourseCard
+                  manifest={pkg.manifest}
+                  nodeCount={pkg.nodeCount}
+                  badgeCount={pkg.availableBadges}
+                  earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                   progress={prog}
-                  badgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                >
-                  <CourseCard
-                    manifest={pkg.manifest}
-                    nodeCount={pkg.nodeCount}
-                    badgeCount={pkg.availableBadges}
-                    earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
-                    progress={prog}
-                    onStart={() => onStartCourse(pkg.rootDir)}
-                    image={getCourseCardImage({
-                      image: pkg.manifest.image,
-                      tags: pkg.manifest.tags,
-                      title: pkg.manifest.title,
-                    })}
-                    indicator={
-                      isInstalled ? (
-                        <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
-                          {t('learner.catalog.installed_badge')}
-                        </span>
-                      ) : undefined
-                    }
-                  />
-                </CourseCardWithModule>
+                  onStart={() => onStartCourse(pkg.rootDir)}
+                  image={getCourseCardImage({
+                    image: pkg.manifest.image,
+                    tags: pkg.manifest.tags,
+                    title: pkg.manifest.title,
+                  })}
+                  indicator={
+                    isInstalled ? (
+                      <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
+                        {t('learner.catalog.installed_badge')}
+                      </span>
+                    ) : undefined
+                  }
+                />
                 {(showReset || showDelete) && (
                   <div className={overlayActionsClassName} data-testid="card-overlay-actions">
                     {showReset && (
