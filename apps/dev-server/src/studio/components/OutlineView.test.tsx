@@ -83,6 +83,29 @@ describe('OutlineView', () => {
     expect(parsed.options.some((o: { correct?: boolean }) => o.correct)).toBe(true);
   });
 
+  it('adds a practice via the widget picker and persists outline order', async () => {
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('button', { name: /add practice/i }));
+    const useButtons = await screen.findAllByRole('button', { name: /use this practice/i });
+    await userEvent.click(useButtons[0]!);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    const path = writeCall.mock.calls[0]![0] as string;
+    expect(path.startsWith('nodes/practice-')).toBe(true);
+    expect(path.endsWith('.json')).toBe(true);
+    const content = writeCall.mock.calls[0]![1] as string;
+    const parsed = JSON.parse(content);
+    expect(parsed.type).toBe('exercise');
+    expect(parsed.widget).toBe('core.multiple-choice');
+    expect(api.saveOutlineOrder).toHaveBeenCalled();
+    const orderCall = api.saveOutlineOrder as ReturnType<typeof vi.fn>;
+    expect(orderCall.mock.calls.at(-1)![0]).toEqual([
+      ...sampleActivities.map((a) => a.path),
+      path,
+    ]);
+  });
+
   it('navigates to edit for an activity', async () => {
     const onEdit = vi.fn();
     render(wrap(<OutlineView api={makeApi()} onEdit={onEdit} onError={() => {}} />));

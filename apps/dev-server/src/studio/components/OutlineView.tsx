@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button, Badge, EmptyState } from '@open-edu/design-system';
 import { ArrowDown, ArrowUp, Plus, Pencil } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
+import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
+import type { CuratedWidget } from '../widgets/curatedCatalog.js';
+import { WidgetPicker } from './WidgetPicker.js';
 import type { ActivitySummary, ActivityKind } from '../types.js';
 import type { StudioApi } from '../studioApi.js';
 
@@ -52,6 +55,7 @@ export function OutlineView({
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -115,6 +119,24 @@ export function OutlineView({
     }
   };
 
+  const addPractice = async (widget: CuratedWidget) => {
+    const stamp = Date.now();
+    const path = `nodes/practice-${stamp}.json`;
+    const content = serializeExerciseNode(
+      createEmptyExercise(widget.id, t('studio.outline.newPracticeTitle')),
+    );
+    try {
+      await api.writeFile(path, content);
+      const next: ActivitySummary[] = [
+        ...activities,
+        { id: path, path, title: widget.name, kind: 'practice' },
+      ];
+      await persistOrder(next);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+    }
+  };
+
   if (loading && activities.length === 0) {
     return <p className="p-6 text-sm">…</p>;
   }
@@ -131,6 +153,10 @@ export function OutlineView({
           <Button variant="outline" size="sm" onClick={() => void addActivity('quiz')}>
             <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
             {t('studio.outline.addQuiz')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+            {t('studio.outline.addPractice')}
           </Button>
         </div>
       </div>
@@ -176,6 +202,11 @@ export function OutlineView({
           ))}
         </ul>
       )}
+      <WidgetPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={(widget) => void addPractice(widget)}
+      />
     </div>
   );
 }

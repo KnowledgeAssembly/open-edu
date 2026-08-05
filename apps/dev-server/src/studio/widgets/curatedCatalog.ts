@@ -18,15 +18,20 @@ export const CURATED_WIDGET_IDS = [
   'math.fraction-visual',
 ] as const;
 
-const DEFINITION_TO_CURATED = (def: WidgetDefinitionV2): CuratedWidget => ({
-  id: def.id,
-  name: def.name ?? def.id,
-  description: def.description,
-  domain: def.domain,
-  status: def.status,
-  deprecated: def.deprecated,
-  guide: def.guide,
-});
+type DefinitionWithGuide = WidgetDefinitionV2 & { guide?: CuratedWidget['guide'] };
+
+const DEFINITION_TO_CURATED = (def: WidgetDefinitionV2): CuratedWidget => {
+  const withGuide = def as DefinitionWithGuide;
+  return {
+    id: def.id,
+    name: def.name ?? def.id,
+    description: def.description,
+    domain: def.domain,
+    status: def.status,
+    deprecated: def.deprecated,
+    guide: withGuide.guide,
+  };
+};
 
 function loadRegistryWidgets(): Map<string, CuratedWidget> {
   const registry = createDefaultRegistry();
