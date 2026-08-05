@@ -1,16 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import fs from 'fs';
 import path from 'path';
 import type { LoadedPackage } from '@open-edu/core';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
+import studioDict from '@open-edu/i18n/locales/en/studio.json';
 import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
 
 function renderWithI18n() {
   return render(
-    <I18nProvider dictionaries={{ en: { runtime: runtimeDict } }}>
+    <I18nProvider
+      dictionaries={{ en: { runtime: runtimeDict, studio: studioDict } }}
+    >
       <DevApp />
     </I18nProvider>,
   );
@@ -84,43 +88,75 @@ const { DevApp } = await import('./DevApp');
 describe('DevApp', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
-  it('should render the package title from the manifest', async () => {
-    render(<DevApp />);
+  it('hides developer inspector by default in creator mode', async () => {
+    renderWithI18n();
+    expect(
+      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Telemetry')).not.toBeInTheDocument();
+    expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
+  });
+
+  it('switches to developer mode to show the inspector', async () => {
+    renderWithI18n();
+    expect(
+      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+
+    expect(
+      await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Telemetry')).toBeInTheDocument();
+  });
+
+  it('should render the package title from the manifest in developer mode', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
     expect(await screen.findByText('Test Package')).toBeInTheDocument();
   });
 
-  it('should render the inspector panel', async () => {
-    render(<DevApp />);
+  it('should render the inspector panel in developer mode', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
     expect(
       await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
     ).toBeInTheDocument();
   });
 
-  it('should render telemetry tab button', async () => {
-    render(<DevApp />);
-    expect(screen.getByText('Telemetry')).toBeInTheDocument();
+  it('should render telemetry tab button in developer mode', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+    expect(await screen.findByText('Telemetry')).toBeInTheDocument();
   });
 
-  it('should render accessibility tab button', async () => {
-    render(<DevApp />);
-    expect(screen.getByText('A11y')).toBeInTheDocument();
+  it('should render accessibility tab button in developer mode', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+    expect(await screen.findByText('A11y')).toBeInTheDocument();
   });
 
-  it('should render the reset progress button', async () => {
-    render(<DevApp />);
-    expect(screen.getByText('Reset Progress')).toBeInTheDocument();
+  it('should render the reset progress button in developer mode', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+    expect(await screen.findByText('Reset Progress')).toBeInTheDocument();
   });
 });
 
 describe('DevApp reward overlay wiring', () => {
   beforeEach(() => {
     capturedOnReceipt = undefined;
+    localStorage.clear();
   });
 
   it('shows the reward overlay when the broker delivers a badge receipt', async () => {
     renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+    expect(await screen.findByText('Test Package')).toBeInTheDocument();
     expect(capturedOnReceipt).toBeTypeOf('function');
 
     act(() => {

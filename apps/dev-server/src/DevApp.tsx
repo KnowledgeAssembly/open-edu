@@ -29,6 +29,9 @@ import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 import { EditorShell } from './editor/EditorShell';
 import type { EditorMode } from './editor/types';
+import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
+import type { StudioMode } from './studio/types.js';
+import { StudioApp } from './studio/StudioApp.js';
 
 import {
   packageData as rawPackageData,
@@ -262,7 +265,7 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
   );
 }
 
-function SinglePackageDevApp(): JSX.Element {
+function SinglePackageDeveloperApp(): JSX.Element {
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
   const telemetrySessionRef = useRef<TelemetrySession | null>(null);
   const brokerRef = useRef<RewardBroker | null>(null);
@@ -450,6 +453,25 @@ function SinglePackageDevApp(): JSX.Element {
       </AccessibilityProvider>
     </RuntimeThemeProvider>
   );
+}
+
+function SinglePackageDevApp(): JSX.Element {
+  const [studioMode, setStudioModeState] = useState<StudioMode>(() => getStudioMode());
+
+  const setStudioModeAndPersist = useCallback((mode: StudioMode) => {
+    setStudioMode(mode);
+    setStudioModeState(mode);
+  }, []);
+
+  if (studioMode === 'creator') {
+    return (
+      <RuntimeThemeProvider>
+        <StudioApp mode={studioMode} onModeChange={setStudioModeAndPersist} />
+      </RuntimeThemeProvider>
+    );
+  }
+
+  return <SinglePackageDeveloperApp />;
 }
 
 export function DevApp(): JSX.Element {
