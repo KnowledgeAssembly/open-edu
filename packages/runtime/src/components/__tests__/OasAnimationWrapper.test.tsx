@@ -242,4 +242,42 @@ describe('OasAnimationWrapper', () => {
     expect(screen.getByText('Static')).toBeInTheDocument();
     expect(screen.queryByTestId('mocked-dotlottie')).not.toBeInTheDocument();
   });
+
+  it('calls onComplete when lottie errors and CSS fallback finishes', () => {
+    const onComplete = vi.fn();
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/rewards/missing.lottie',
+          effects: [{ target: 'badge', effect: 'badge' }],
+        }}
+        onComplete={onComplete}
+      />,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    const cssRoot = screen.getByTestId('css-animation-renderer');
+    cssRoot.dispatchEvent(new Event('animationend', { bubbles: true }));
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('calls onComplete when lottie errors with no mappable effects', () => {
+    const onComplete = vi.fn();
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/rewards/missing.lottie',
+        }}
+        onComplete={onComplete}
+      />,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(onComplete).toHaveBeenCalled();
+  });
 });

@@ -33,6 +33,7 @@ describe.skipIf(!hasCatalogAssets)('Build output contains catalog course assets'
       'assets/video/water-cycle.mp4',
       'assets/audio/sample-audio.wav',
       'assets/animations/water-cycle.lottie',
+      'assets/animations/water-cycle.svg',
     ];
     for (const file of expected) {
       expect(fs.existsSync(path.resolve(distPath, file))).toBe(true);

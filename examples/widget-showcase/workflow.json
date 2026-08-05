@@ -81,11 +81,17 @@
     "nodes/social-map.json": {
       "onComplete": "nodes/animated-water-cycle.json"
     },
+    "nodes/animated-water-cycle.json": {
+      "onComplete": "nodes/svg-animation.json"
+    },
+    "nodes/svg-animation.json": {
+      "onComplete": "nodes/canvas-sorting.json"
+    },
+    "nodes/canvas-sorting.json": {
+      "onComplete": "nodes/outro.md"
+    },
     "nodes/outro.md": {
       "onComplete": "COMPLETED"
-    },
-    "nodes/animated-water-cycle.json": {
-      "onComplete": "nodes/outro.md"
     }
   }
 }

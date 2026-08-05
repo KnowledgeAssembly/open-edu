@@ -101,6 +101,7 @@ vi.mock('@open-edu/runtime', () => ({
   },
   LayoutShell: () => null,
   CompletionScreen: () => null,
+  RewardEventBridge: () => null,
   useRuntime: () => ({ currentNodeId: '', visitedNodes: [], navigateToNode: vi.fn() }),
 }));
 

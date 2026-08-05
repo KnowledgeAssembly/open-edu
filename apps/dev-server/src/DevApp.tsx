@@ -4,7 +4,9 @@ import {
   LayoutShell,
   RuntimeThemeProvider,
   BundleOverview,
+  RewardEventBridge,
 } from '@open-edu/runtime';
+import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
 import { WorkflowEngine } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
@@ -269,6 +271,8 @@ function SinglePackageDevApp(): JSX.Element {
   const [editorMode, setEditorMode] = useState<EditorMode>('preview');
   const [editorOpen, setEditorOpen] = useState(false);
 
+  const rewardBridge = useMemo(() => createRewardReceiptBridge(), []);
+
   const initialProgress = useMemo(() => {
     if (!loadedPkg) return undefined;
     return loadProgress(loadedPkg.manifest.id, loadedPkg.manifest.version) ?? undefined;
@@ -298,6 +302,7 @@ function SinglePackageDevApp(): JSX.Element {
           rewards: loadedPkg.rewards,
           source: session.events$,
           onReceipt: (receipt) => {
+            rewardBridge.onReceipt(receipt);
             setRewardReceipts((prev) => [...prev, receipt]);
           },
         })
@@ -337,7 +342,7 @@ function SinglePackageDevApp(): JSX.Element {
       telemetrySessionRef.current = null;
       brokerRef.current = null;
     };
-  }, [engine]);
+  }, [engine, rewardBridge]);
 
   const handleProgressChange = useCallback((snapshot: ProgressSnapshot) => {
     if (loadedPkg) {
@@ -406,6 +411,7 @@ function SinglePackageDevApp(): JSX.Element {
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
         >
+          <RewardEventBridge receipts$={rewardBridge.receipts$} />
           <div className="flex h-screen">
             <div className="min-w-0 flex-1 overflow-auto">
               <div className="fixed bottom-4 right-96 z-50 flex gap-2">

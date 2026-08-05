@@ -1,4 +1,12 @@
-import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import type { AnimationConfig } from '@open-edu/schemas';
 import { useTranslation } from '@open-edu/i18n';
@@ -83,8 +91,11 @@ export function OasAnimationWrapper({
 
   const themeColors = useMemo(() => readThemeColors(), []);
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   const controller = useOasAnimation(resolvedConfig, (status) => {
-    if (status === 'completed') onComplete?.();
+    if (status === 'completed') onCompleteRef.current?.();
   });
 
   useLayoutEffect(() => {
@@ -94,6 +105,10 @@ export function OasAnimationWrapper({
   }, [controllerRef, controller]);
 
   const { handlePlayerEvent, reducedMotion } = controller;
+
+  const handleCssComplete = useCallback(() => {
+    if (!reducedMotion) onCompleteRef.current?.();
+  }, [reducedMotion]);
 
   const resolvedSrc = resolvedConfig?.src
     ? resolveUrl(resolvedConfig.src, assetBaseUrl, resolveSrc)
@@ -231,6 +246,7 @@ export function OasAnimationWrapper({
           effects={resolvedConfig.effects ?? []}
           reducedMotion={reducedMotion}
           speed={resolvedConfig.speed}
+          onComplete={handleCssComplete}
         >
           {staticChildren ?? (
             <div role="img" aria-label={ariaLabel ?? t('runtime.animation.static_fallback')}>
@@ -262,16 +278,13 @@ export function OasAnimationWrapper({
     return (
       <div className={className} data-testid="oas-lottie-backend">
         {hasError ? (
-          resolvedConfig.effects && resolvedConfig.effects.length > 0 ? (
-            <CssAnimationRenderer
-              effects={resolvedConfig.effects.filter((e) => effectToClass[e.effect])}
-              reducedMotion={reducedMotion}
-            >
-              {renderStaticFallback()}
-            </CssAnimationRenderer>
-          ) : (
-            renderStaticFallback()
-          )
+          <CssAnimationRenderer
+            effects={(resolvedConfig.effects ?? []).filter((e) => effectToClass[e.effect])}
+            reducedMotion={reducedMotion}
+            onComplete={handleCssComplete}
+          >
+            {renderStaticFallback()}
+          </CssAnimationRenderer>
         ) : (
           <DotLottiePlayer
             src={resolvedSrc!}
