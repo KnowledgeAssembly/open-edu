@@ -1,4 +1,5 @@
 import { Component, useContext, useRef, type ReactNode } from 'react';
+import { AnimationConfigSchema } from '@open-edu/schemas';
 import { useRuntime } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
@@ -6,6 +7,7 @@ import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widg
 import { WidgetCanvas } from '../components/WidgetCanvas';
 import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
 import type { OasAnimationController } from '../components/useOasAnimation';
+import { useStepSyncMachine } from '../components/useStepSyncMachine';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import type { WidgetAnswer } from '@open-edu/schemas';
 
@@ -66,6 +68,119 @@ export interface WidgetRendererProps {
   nodeId: string;
 }
 
+function countWidgetSteps(config: Record<string, unknown> | undefined): number {
+  const steps = config?.steps;
+  if (Array.isArray(steps)) return steps.length;
+  const nodes = config?.nodes;
+  if (Array.isArray(nodes)) return nodes.length;
+  return 0;
+}
+
+/**
+ * Hosts the shared step-sync state machine so SVG/Lottie animation and widget
+ * step reveal share one source of truth when `animation.trigger === 'step'`.
+ */
+function StepSyncedWidget({
+  widgetId,
+  nodeId,
+  nodeConfig,
+  animationConfig,
+  definitionVersion,
+  WidgetComponent,
+  storedState,
+  resolveAsset,
+  completeNode,
+  saveAnswer,
+  locale,
+}: {
+  widgetId: string;
+  nodeId: string;
+  nodeConfig: Record<string, unknown>;
+  animationConfig: unknown;
+  definitionVersion?: string;
+  WidgetComponent: (props: WidgetRenderProps) => ReactNode;
+  storedState: unknown;
+  resolveAsset: (path: string) => string;
+  completeNode: (score?: number) => void;
+  saveAnswer: (nodeId: string, answer: WidgetAnswer) => void;
+  locale?: string;
+}) {
+  const parsedAnim = AnimationConfigSchema.safeParse(animationConfig);
+  const effectCount = parsedAnim.success ? (parsedAnim.data.effects?.length ?? 0) : 0;
+  const widgetStepCount = countWidgetSteps(nodeConfig);
+  const totalSteps = Math.max(1, effectCount || widgetStepCount || 1);
+
+  const initialRevealed =
+    storedState &&
+    typeof storedState === 'object' &&
+    storedState !== null &&
+    'revealedCount' in storedState &&
+    typeof (storedState as { revealedCount: unknown }).revealedCount === 'number'
+      ? (storedState as { revealedCount: number }).revealedCount
+      : 0;
+
+  const machine = useStepSyncMachine(totalSteps, initialRevealed);
+  const animationControllerRef = useRef<OasAnimationController | null>(null);
+
+  const emitInteraction = (data: Record<string, unknown>) => {
+    console.debug('[widget:interaction]', widgetId, data);
+    if (data.action === 'reveal' && typeof data.step === 'number') {
+      machine.goTo(data.step);
+    } else if (data.action === 'reveal') {
+      machine.revealNext();
+    }
+  };
+
+  const widgetProps: WidgetRenderProps = {
+    nodeId,
+    config: nodeConfig,
+    locale,
+    emitInteraction,
+    resolveAsset,
+    syncedRevealedCount: machine.state.revealedCount,
+    complete: (score?: number, state?: unknown) => {
+      if (state !== undefined) {
+        const answer: WidgetAnswer = {
+          type: 'widget',
+          widgetId,
+          widgetVersion: definitionVersion,
+          data: state,
+          score,
+        };
+        saveAnswer(nodeId, answer);
+      }
+      if (
+        state &&
+        typeof state === 'object' &&
+        state !== null &&
+        'finished' in state &&
+        (state as { finished?: boolean }).finished
+      ) {
+        machine.finish();
+      }
+      completeNode(score);
+    },
+    storedState,
+  };
+
+  const handleAnimStepChange = (stepIndex: number) => {
+    // Animation controls → machine (revealedCount = stepIndex + 1, or 0 when idle)
+    machine.goTo(stepIndex < 0 ? 0 : stepIndex + 1);
+  };
+
+  return (
+    <OasAnimationWrapper
+      config={animationConfig}
+      resolveSrc={resolveAsset}
+      preserveChildren
+      controllerRef={animationControllerRef}
+      controlledStep={machine.animationStepIndex}
+      onStepChange={handleAnimStepChange}
+      staticChildren={<WidgetComponent {...widgetProps} />}
+    />
+  );
+}
+
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
   const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
   const { t } = useTranslation();
@@ -94,8 +209,13 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
   const emitInteraction = (data: Record<string, unknown>) => {
     console.debug('[widget:interaction]', widgetId, data);
+    // Legacy one-way bridge for non-step-synced animations
     if (data.action === 'reveal') {
-      animationControllerRef.current?.nextStep();
+      if (typeof data.step === 'number') {
+        animationControllerRef.current?.goToStep(data.step - 1);
+      } else {
+        animationControllerRef.current?.nextStep();
+      }
     }
   };
 
@@ -123,11 +243,27 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   };
 
   const animationConfig = node.config?.animation;
+  const parsedAnim = AnimationConfigSchema.safeParse(animationConfig);
+  const isStepTriggered = parsedAnim.success && parsedAnim.data.trigger === 'step';
 
   return (
     <WidgetErrorBoundary widgetId={widgetId} message={t('runtime.widget.load_error')}>
       <WidgetCanvas widgetId={widgetId} minHeight={200}>
-        {animationConfig ? (
+        {animationConfig && isStepTriggered ? (
+          <StepSyncedWidget
+            widgetId={widgetId}
+            nodeId={nodeId}
+            nodeConfig={node.config ?? {}}
+            animationConfig={animationConfig}
+            definitionVersion={definition.version}
+            WidgetComponent={WidgetComponent}
+            storedState={storedState}
+            resolveAsset={resolveAsset}
+            completeNode={completeNode}
+            saveAnswer={saveAnswer}
+            locale={locale}
+          />
+        ) : animationConfig ? (
           <OasAnimationWrapper
             config={animationConfig}
             resolveSrc={resolveAsset}

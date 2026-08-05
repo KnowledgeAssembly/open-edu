@@ -15,6 +15,12 @@ export interface WidgetRenderProps<TState = unknown> {
   storedState?: TState;
   locale?: string;
   resolveAsset?: (path: string) => string;
+  /**
+   * When the runtime hosts a step-sync machine (`animation.trigger === 'step'`),
+   * this is the single source of truth for progressive reveal. The widget must
+   * treat it as controlled state and emit `action: 'reveal'` to request advances.
+   */
+  syncedRevealedCount?: number;
 }
 
 export interface WidgetDefinition {

@@ -130,6 +130,41 @@ describe('ProcessExplainer rendering', () => {
     expect(screen.getByTestId('process-explainer')).toBeInTheDocument();
   });
 
+  it('uses syncedRevealedCount as controlled reveal state', () => {
+    const emitInteraction = vi.fn();
+    const complete = vi.fn();
+    const { rerender } = render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={baseConfig}
+        emitInteraction={emitInteraction}
+        complete={complete}
+        syncedRevealedCount={0}
+      />,
+      { wrapper },
+    );
+
+    expect(screen.queryByText('Sun heats water')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('reveal-next'));
+    expect(emitInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'reveal', step: 1 }),
+    );
+    // Controlled: local state does not advance until parent updates the prop
+    expect(screen.queryByText('Sun heats water')).not.toBeInTheDocument();
+
+    rerender(
+      <WidgetComponent
+        nodeId="test-node"
+        config={baseConfig}
+        emitInteraction={emitInteraction}
+        complete={complete}
+        syncedRevealedCount={1}
+      />,
+    );
+    expect(screen.getByText('Sun heats water')).toBeInTheDocument();
+  });
+
   it('passes axe-core accessibility audit', async () => {
     const { container } = renderWidget(baseConfig);
     const results = await axe.run(container, {

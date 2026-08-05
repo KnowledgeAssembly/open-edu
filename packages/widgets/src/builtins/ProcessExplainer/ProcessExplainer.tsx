@@ -35,17 +35,27 @@ function ProcessExplainerComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  /** Controlled reveal count from the runtime step-sync machine. */
+  syncedRevealedCount?: number;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const {
+    config: rawConfig,
+    emitInteraction,
+    complete,
+    storedState,
+    syncedRevealedCount,
+  } = props;
   const { t } = useTranslation();
   const parsed = processExplainerSchema.safeParse(rawConfig);
+  const isSynced = syncedRevealedCount !== undefined;
 
-  const [revealedCount, setRevealedCount] = useState(() => {
+  const [localRevealedCount, setLocalRevealedCount] = useState(() => {
     if (!parsed.success) return 0;
     const restored = ProcessExplainerStateSchema.safeParse(storedState);
     if (restored.success) return restored.data.revealedCount;
     return parsed.data.stepByStep ? 0 : parsed.data.steps.length;
   });
+  const revealedCount = isSynced ? syncedRevealedCount : localRevealedCount;
   const [finished, setFinished] = useState(() => {
     const restored = ProcessExplainerStateSchema.safeParse(storedState);
     return restored.success ? (restored.data.finished ?? false) : false;
@@ -62,14 +72,16 @@ function ProcessExplainerComponent(props: {
   const handleRevealNext = useCallback(() => {
     if (!parsed.success) return;
     const next = revealedCount + 1;
-    setRevealedCount(next);
+    if (!isSynced) {
+      setLocalRevealedCount(next);
+    }
     emitInteraction({
       type: 'widget.interaction',
       widgetId: 'core.process-explainer',
       action: 'reveal',
       step: next,
     });
-  }, [parsed, revealedCount, emitInteraction]);
+  }, [parsed, revealedCount, emitInteraction, isSynced]);
 
   const handleFinish = useCallback(() => {
     if (!parsed.success || finished) return;

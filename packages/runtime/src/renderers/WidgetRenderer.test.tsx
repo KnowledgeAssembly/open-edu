@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import { I18nProvider } from '@open-edu/i18n';
+import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import { WidgetRenderer } from './WidgetRenderer';
 import { RuntimeProvider, useRuntime } from '../context/RuntimeContext';
 import { createWidgetRegistry } from '@open-edu/widgets';
@@ -72,9 +74,11 @@ function renderWithProvider(
 ) {
   const engine = makeEngine(initialNodeId);
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={widgetRegistry}>
-      {children}
-    </RuntimeProvider>
+    <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+      <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={widgetRegistry}>
+        {children}
+      </RuntimeProvider>
+    </I18nProvider>
   );
   const utils = render(<WidgetRenderer node={widgetRendererNode} nodeId={nodeId} />, { wrapper });
   return { ...utils, engine };
@@ -309,5 +313,61 @@ describe('WidgetRenderer', () => {
     );
 
     expect(screen.getByTestId('stored')).toHaveTextContent('{"persisted":true}');
+  });
+
+  it('syncs reveal interactions to animation via step-sync machine', () => {
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'reveal-widget',
+      version: '1.0.0',
+      render: (props) => (
+        <div data-testid="reveal-widget">
+          <span data-testid="synced-count">{String(props.syncedRevealedCount ?? 'uncontrolled')}</span>
+          <button
+            type="button"
+            onClick={() =>
+              props.emitInteraction({
+                action: 'reveal',
+                step: (props.syncedRevealedCount ?? 0) + 1,
+              })
+            }
+          >
+            Reveal
+          </button>
+        </div>
+      ),
+    });
+
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      {
+        type: 'exercise',
+        widget: 'reveal-widget',
+        config: {
+          steps: [
+            { id: 'a', title: 'A' },
+            { id: 'b', title: 'B' },
+          ],
+          animation: {
+            backend: 'svg',
+            src: '<svg xmlns="http://www.w3.org/2000/svg"><g id="a"/></svg>',
+            trigger: 'step',
+            effects: [
+              { step: 1, target: 'a', effect: 'fade' },
+              { step: 2, target: 'b', effect: 'fade' },
+            ],
+          },
+        },
+      },
+      'nodes/ex-01.md',
+      registry,
+    );
+
+    expect(screen.getByTestId('synced-count')).toHaveTextContent('0');
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal' }));
+    expect(screen.getByTestId('synced-count')).toHaveTextContent('1');
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal' }));
+    expect(screen.getByTestId('synced-count')).toHaveTextContent('2');
   });
 });
