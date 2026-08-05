@@ -141,7 +141,9 @@ export function FlowAdvancedPanel({
   };
 
   const updateBranch = (index: number, patch: Partial<ScoreBranchRule>) => {
-    setBranches((prev) => prev.map((branch, i) => (i === index ? { ...branch, ...patch } : branch)));
+    setBranches((prev) =>
+      prev.map((branch, i) => (i === index ? { ...branch, ...patch } : branch)),
+    );
   };
 
   const removeBranch = (index: number) => {
@@ -151,15 +153,16 @@ export function FlowAdvancedPanel({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const base: Workflow =
-        loadedWorkflow ?? {
-          routing: buildLinearWorkflow(orderedPaths, orderedPaths[0] ?? '').routing,
-        };
+      const base: Workflow = loadedWorkflow ?? {
+        routing: buildLinearWorkflow(orderedPaths, orderedPaths[0] ?? '').routing,
+      };
       let final = base;
       for (const branch of branches) {
         final = applyScoreBranch(final, branch);
       }
-      const previouslyManaged = new Set(extractScoreBranches(base).map((branch) => branch.afterPath));
+      const previouslyManaged = new Set(
+        extractScoreBranches(base).map((branch) => branch.afterPath),
+      );
       for (const afterPath of previouslyManaged) {
         if (!branches.some((branch) => branch.afterPath === afterPath)) {
           final = clearScoreBranch(final, afterPath, outlineSuccessor(orderedPaths, afterPath));

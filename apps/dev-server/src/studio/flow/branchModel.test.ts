@@ -245,15 +245,13 @@ describe('branchModel', () => {
 
   describe('outlineSuccessor', () => {
     it('returns the next path in outline order', () => {
-      expect(
-        outlineSuccessor(['nodes/a.md', 'nodes/b.json', 'nodes/c.md'], 'nodes/a.md'),
-      ).toBe('nodes/b.json');
+      expect(outlineSuccessor(['nodes/a.md', 'nodes/b.json', 'nodes/c.md'], 'nodes/a.md')).toBe(
+        'nodes/b.json',
+      );
     });
 
     it('returns COMPLETED for the last path', () => {
-      expect(
-        outlineSuccessor(['nodes/a.md', 'nodes/b.json'], 'nodes/b.json'),
-      ).toBe('COMPLETED');
+      expect(outlineSuccessor(['nodes/a.md', 'nodes/b.json'], 'nodes/b.json')).toBe('COMPLETED');
     });
   });
 

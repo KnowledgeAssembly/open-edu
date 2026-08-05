@@ -38,11 +38,7 @@ function wrap(ui: React.ReactElement) {
 }
 
 function renderPicker(onSelect: (widget: CuratedWidget) => void = () => {}) {
-  render(
-    wrap(
-      <WidgetPicker open onOpenChange={() => {}} onSelect={onSelect} />,
-    ),
-  );
+  render(wrap(<WidgetPicker open onOpenChange={() => {}} onSelect={onSelect} />));
 }
 
 describe('WidgetPicker', () => {
@@ -81,9 +77,7 @@ describe('WidgetPicker', () => {
   it('calls onSelect with the widget and closes on Use this practice', async () => {
     const onSelect = vi.fn();
     const onOpenChange = vi.fn();
-    render(
-      wrap(<WidgetPicker open onOpenChange={onOpenChange} onSelect={onSelect} />),
-    );
+    render(wrap(<WidgetPicker open onOpenChange={onOpenChange} onSelect={onSelect} />));
     const cards = screen.getAllByRole('button', { name: /use this practice/i });
     await userEvent.click(cards[1]!);
     expect(onSelect).toHaveBeenCalledWith(

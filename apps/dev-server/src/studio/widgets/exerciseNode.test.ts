@@ -5,7 +5,12 @@ import { ExerciseNodeSchema } from '@open-edu/schemas';
 describe('exerciseNode', () => {
   it('parses a valid exercise node', () => {
     const node = parseExerciseNode(
-      JSON.stringify({ type: 'exercise', title: 'Practice', widget: 'core.multiple-choice', config: {} }),
+      JSON.stringify({
+        type: 'exercise',
+        title: 'Practice',
+        widget: 'core.multiple-choice',
+        config: {},
+      }),
     );
     expect(node).not.toBeNull();
     expect(node?.widget).toBe('core.multiple-choice');

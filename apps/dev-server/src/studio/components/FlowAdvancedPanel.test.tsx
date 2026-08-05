@@ -30,7 +30,12 @@ const linearWorkflow = {
 const branchingActivities: ActivitySummary[] = [
   { id: 'nodes/checkpoint.json', path: 'nodes/checkpoint.json', title: 'Checkpoint', kind: 'quiz' },
   { id: 'nodes/reflection.md', path: 'nodes/reflection.md', title: 'Reflection', kind: 'lesson' },
-  { id: 'nodes/remediation.md', path: 'nodes/remediation.md', title: 'Remediation', kind: 'lesson' },
+  {
+    id: 'nodes/remediation.md',
+    path: 'nodes/remediation.md',
+    title: 'Remediation',
+    kind: 'lesson',
+  },
 ];
 
 const branchingWorkflow = {
@@ -71,7 +76,9 @@ describe('FlowAdvancedPanel', () => {
   it('shows the add-rule button and linear help when there are no branches', async () => {
     render(wrap(<FlowAdvancedPanel api={makeApi()} onError={() => {}} />));
     expect(await screen.findByRole('button', { name: /add a score rule/i })).toBeInTheDocument();
-    expect(screen.getByText('Learners go through activities in outline order.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Learners go through activities in outline order.'),
+    ).toBeInTheDocument();
   });
 
   it('adding a rule renders a row with the activity selects', async () => {

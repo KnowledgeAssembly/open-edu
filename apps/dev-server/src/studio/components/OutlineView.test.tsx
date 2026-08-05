@@ -73,7 +73,7 @@ describe('OutlineView', () => {
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /add quiz/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Add quiz' }));
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     const path = writeCall.mock.calls[0]![0] as string;
     expect(path.endsWith('.json')).toBe(true);
@@ -100,10 +100,7 @@ describe('OutlineView', () => {
     expect(parsed.widget).toBe('core.multiple-choice');
     expect(api.saveOutlineOrder).toHaveBeenCalled();
     const orderCall = api.saveOutlineOrder as ReturnType<typeof vi.fn>;
-    expect(orderCall.mock.calls.at(-1)![0]).toEqual([
-      ...sampleActivities.map((a) => a.path),
-      path,
-    ]);
+    expect(orderCall.mock.calls.at(-1)![0]).toEqual([...sampleActivities.map((a) => a.path), path]);
   });
 
   it('navigates to edit for an activity', async () => {

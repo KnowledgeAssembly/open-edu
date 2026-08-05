@@ -136,7 +136,12 @@ export function PracticeActivityEditor({
     if (!widgetId) return;
     setSaving(true);
     try {
-      const node: ExerciseNode = { type: 'exercise', title: title || undefined, widget: widgetId, config };
+      const node: ExerciseNode = {
+        type: 'exercise',
+        title: title || undefined,
+        widget: widgetId,
+        config,
+      };
       await api.writeFile(path, serializeExerciseNode(node));
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);

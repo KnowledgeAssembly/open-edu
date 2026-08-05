@@ -68,7 +68,11 @@ describe('ActivityEditorRouter', () => {
   });
 
   it('routes practice json to the practice editor', async () => {
-    const content = JSON.stringify({ type: 'exercise', widget: 'core.multiple-choice', config: {} });
+    const content = JSON.stringify({
+      type: 'exercise',
+      widget: 'core.multiple-choice',
+      config: {},
+    });
     render(
       wrap(
         <ActivityEditorRouter

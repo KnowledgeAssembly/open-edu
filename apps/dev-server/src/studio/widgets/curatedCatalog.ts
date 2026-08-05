@@ -8,7 +8,9 @@ export interface CuratedWidget {
   domain?: string;
   status?: string;
   deprecated?: boolean;
-  guide?: { configFields?: Array<{ name: string; type: string; required: boolean; description: string }> };
+  guide?: {
+    configFields?: Array<{ name: string; type: string; required: boolean; description: string }>;
+  };
 }
 
 export const CURATED_WIDGET_IDS = [

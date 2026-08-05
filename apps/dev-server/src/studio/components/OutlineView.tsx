@@ -5,6 +5,8 @@ import { useTranslation } from '@open-edu/i18n';
 import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
+import { FlowAdvancedPanel } from './FlowAdvancedPanel.js';
+import { RewardsCardsPanel } from './RewardsCardsPanel.js';
 import type { ActivitySummary, ActivityKind } from '../types.js';
 import type { StudioApi } from '../studioApi.js';
 
@@ -207,6 +209,25 @@ export function OutlineView({
         onOpenChange={setPickerOpen}
         onSelect={(widget) => void addPractice(widget)}
       />
+
+      <div className="space-y-4">
+        <details className="border-outline-variant bg-surface rounded-lg border" open={false}>
+          <summary className="text-on-surface cursor-pointer select-none px-4 py-3 text-sm font-medium">
+            {t('studio.flow.title')}
+          </summary>
+          <div className="border-outline-variant border-t px-4 py-4">
+            <FlowAdvancedPanel api={api} onError={onError} />
+          </div>
+        </details>
+        <details className="border-outline-variant bg-surface rounded-lg border" open={false}>
+          <summary className="text-on-surface cursor-pointer select-none px-4 py-3 text-sm font-medium">
+            {t('studio.rewards.title')}
+          </summary>
+          <div className="border-outline-variant border-t px-4 py-4">
+            <RewardsCardsPanel api={api} onError={onError} />
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
