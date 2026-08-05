@@ -92,6 +92,9 @@ importers:
       '@open-edu/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@open-edu/oep-distribution':
+        specifier: workspace:^
+        version: link:../../packages/oep-distribution
       '@open-edu/rewards':
         specifier: workspace:*
         version: link:../../packages/rewards
