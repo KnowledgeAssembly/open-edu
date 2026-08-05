@@ -206,7 +206,7 @@ describe('CatalogPage', () => {
       });
     });
 
-    it('shows OpenModule indicator on completed card', () => {
+    it('renders badge/completion icons on completed card', () => {
       const { container } = renderWithI18n(
         <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />,
       );

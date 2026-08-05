@@ -7,13 +7,6 @@ import { usePipiliChat } from './PipiliChatProvider';
 import { PipiliChat } from './PipiliChat';
 import { ExplanationStylePicker } from './ExplanationStylePicker.js';
 
-const suggestedQuestions = [
-  'Can you explain what I just read?',
-  'Summarize this lesson for me',
-  'Give me a practice question',
-  'What are the key concepts here?',
-];
-
 function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
   const { panelState, setPanelState, rewardMessages, clearPendingReward } = useCompanion();
@@ -21,6 +14,13 @@ function PipiliCompanionContent(): JSX.Element {
 
   const isOpen = panelState !== 'closed';
   const isStreaming = status === 'submitted' || status === 'streaming';
+
+  const suggestedQuestions = [
+    t('learner.right_sidebar.suggest_explain'),
+    t('learner.right_sidebar.suggest_summarize'),
+    t('learner.right_sidebar.suggest_practice'),
+    t('learner.right_sidebar.suggest_concepts'),
+  ];
 
   const handleSend = useCallback(
     (text: string) => {
