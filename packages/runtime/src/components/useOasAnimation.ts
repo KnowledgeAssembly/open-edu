@@ -18,12 +18,19 @@ export interface OasAnimationController {
   stop: () => void;
   nextStep: () => void;
   prevStep: () => void;
+  /** Jump to a 0-based step index. Pass -1 for "no step revealed yet". */
+  goToStep: (step: number) => void;
   handlePlayerEvent: (status: OasAnimationStatus) => void;
 }
 
 export function useOasAnimation(
   config?: AnimationConfigInput,
   onStatusChange?: (s: OasAnimationStatus) => void,
+  options?: {
+    /** Controlled 0-based step index. When set, overrides internal step state for reads. */
+    controlledStep?: number;
+    onStepChange?: (step: number) => void;
+  },
 ): OasAnimationController {
   const { t } = useTranslation();
   const { announce } = useLiveRegion();
@@ -35,8 +42,22 @@ export function useOasAnimation(
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
   const [status, setStatusState] = useState<OasAnimationStatus>('idle');
-  const [currentStep, setCurrentStep] = useState(0);
+  const isControlled = options?.controlledStep !== undefined;
+  const [internalStep, setInternalStep] = useState(0);
+  const currentStep = isControlled ? (options?.controlledStep as number) : internalStep;
+  const onStepChangeRef = useRef(options?.onStepChange);
+  onStepChangeRef.current = options?.onStepChange;
   const [speed, setSpeedState] = useState(config?.speed ?? 1);
+
+  const setCurrentStep = useCallback(
+    (next: number) => {
+      if (!isControlled) {
+        setInternalStep(next);
+      }
+      onStepChangeRef.current?.(next);
+    },
+    [isControlled],
+  );
 
   const setSpeed = useCallback((s: number) => {
     if (s > 0 && s <= 4) {
@@ -88,10 +109,11 @@ export function useOasAnimation(
     if (!parsed.success) return;
     setCurrentStep(0);
     setStatus('idle');
-  }, [parsed.success, setStatus]);
+  }, [parsed.success, setStatus, setCurrentStep]);
 
   const announceStep = useCallback(
     (step: number) => {
+      if (step < 0) return;
       announce(
         t('runtime.animation.step_changed', {
           step: String(step + 1),
@@ -102,21 +124,41 @@ export function useOasAnimation(
     [announce, t, totalSteps],
   );
 
+  const goToStep = useCallback(
+    (step: number) => {
+      if (!parsed.success) return;
+      const next = step < 0 ? -1 : Math.max(0, Math.min(step, totalSteps - 1));
+      setCurrentStep(next);
+      if (next >= 0 && valid) {
+        announceStep(next);
+        setStatus('started');
+      } else if (next < 0) {
+        setStatus('idle');
+      }
+    },
+    [parsed.success, totalSteps, setCurrentStep, announceStep, setStatus, valid],
+  );
+
   const nextStep = useCallback(() => {
     if (!valid) return;
-    const next = Math.min(currentStep + 1, totalSteps - 1);
+    const base = currentStep < 0 ? -1 : currentStep;
+    const next = Math.min(base + 1, totalSteps - 1);
     setCurrentStep(next);
     announceStep(next);
     setStatus('started');
-  }, [valid, totalSteps, setStatus, announceStep, currentStep]);
+  }, [valid, totalSteps, setStatus, announceStep, currentStep, setCurrentStep]);
 
   const prevStep = useCallback(() => {
     if (!valid) return;
-    const next = Math.max(currentStep - 1, 0);
+    const next = currentStep <= 0 ? (currentStep < 0 ? -1 : 0) : currentStep - 1;
     setCurrentStep(next);
-    announceStep(next);
-    setStatus('started');
-  }, [valid, setStatus, announceStep, currentStep]);
+    if (next >= 0) {
+      announceStep(next);
+      setStatus('started');
+    } else {
+      setStatus('idle');
+    }
+  }, [valid, setStatus, announceStep, currentStep, setCurrentStep]);
 
   const handlePlayerEvent = useCallback(
     (s: OasAnimationStatus) => {
@@ -143,6 +185,7 @@ export function useOasAnimation(
     stop,
     nextStep,
     prevStep,
+    goToStep,
     handlePlayerEvent,
   };
 }

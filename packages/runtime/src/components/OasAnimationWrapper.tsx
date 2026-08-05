@@ -16,6 +16,7 @@ import type { OasAnimationController } from './useOasAnimation';
 import { DotLottiePlayer } from './DotLottiePlayer';
 import { CssAnimationRenderer, effectToClass } from './CssAnimationRenderer';
 import { CanvasAnimationRenderer } from './CanvasAnimationRenderer';
+import { SvgStepRenderer } from './SvgStepRenderer';
 
 export interface OasAnimationWrapperProps {
   config?: unknown;
@@ -28,6 +29,12 @@ export interface OasAnimationWrapperProps {
   staticChildren?: ReactNode;
   preserveChildren?: boolean;
   controllerRef?: React.MutableRefObject<OasAnimationController | null>;
+  /**
+   * Controlled 0-based animation step from the shared step-sync machine.
+   * `-1` means no step revealed yet. When provided, the wrapper does not own step state.
+   */
+  controlledStep?: number;
+  onStepChange?: (step: number) => void;
 }
 
 function resolveUrl(
@@ -76,6 +83,8 @@ export function OasAnimationWrapper({
   staticChildren,
   preserveChildren = false,
   controllerRef,
+  controlledStep,
+  onStepChange,
 }: OasAnimationWrapperProps): JSX.Element | null {
   const { t } = useTranslation();
 
@@ -94,9 +103,15 @@ export function OasAnimationWrapper({
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
-  const controller = useOasAnimation(resolvedConfig, (status) => {
-    if (status === 'completed') onCompleteRef.current?.();
-  });
+  const controller = useOasAnimation(
+    resolvedConfig,
+    (status) => {
+      if (status === 'completed') onCompleteRef.current?.();
+    },
+    controlledStep !== undefined || onStepChange
+      ? { controlledStep, onStepChange }
+      : undefined,
+  );
 
   useLayoutEffect(() => {
     if (controllerRef) {
@@ -118,6 +133,7 @@ export function OasAnimationWrapper({
     if (resolvedConfig?.trigger !== 'step') return undefined;
     const steps = resolvedConfig?.effects?.length ?? 1;
     if (steps <= 1) return undefined;
+    if (controller.currentStep < 0) return [0, 0] as [number, number];
     const frameCount = 120;
     const perStep = Math.floor(frameCount / steps);
     const seg: [number, number] = [
@@ -226,13 +242,27 @@ export function OasAnimationWrapper({
   }
 
   if (resolvedConfig.backend === 'svg') {
+    const useStepSync =
+      resolvedConfig.trigger === 'step' || (resolvedConfig.effects?.length ?? 0) > 0;
+
     return (
       <div className={className} data-testid="oas-svg-backend">
-        <img
-          src={resolvedSrc}
-          alt={ariaLabel ?? t('runtime.animation.static_fallback')}
-          className="w-full"
-        />
+        {useStepSync ? (
+          <SvgStepRenderer
+            src={resolvedSrc!}
+            currentStep={controller.currentStep}
+            effects={resolvedConfig.effects}
+            reducedMotion={reducedMotion}
+            speed={controller.speed}
+            ariaLabel={ariaLabel ?? t('runtime.animation.static_fallback')}
+          />
+        ) : (
+          <img
+            src={resolvedSrc}
+            alt={ariaLabel ?? t('runtime.animation.static_fallback')}
+            className="w-full"
+          />
+        )}
         {renderControls()}
         {renderPreservedChildren()}
       </div>
@@ -275,6 +305,7 @@ export function OasAnimationWrapper({
   }
 
   if (resolvedConfig.backend === 'lottie') {
+    const stepIdle = resolvedConfig.trigger === 'step' && controller.currentStep < 0;
     return (
       <div className={className} data-testid="oas-lottie-backend">
         {hasError ? (
@@ -288,7 +319,10 @@ export function OasAnimationWrapper({
         ) : (
           <DotLottiePlayer
             src={resolvedSrc!}
-            autoplay={shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig)}
+            autoplay={
+              !stepIdle &&
+              (shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig))
+            }
             loop={resolvedConfig.loop ?? resolvedConfig.trigger === 'step'}
             speed={resolvedConfig.speed}
             segments={effectiveSegments}

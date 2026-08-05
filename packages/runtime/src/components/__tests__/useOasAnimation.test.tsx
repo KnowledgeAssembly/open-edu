@@ -116,6 +116,49 @@ describe('useOasAnimation', () => {
     expect(result.current.currentStep).toBe(0);
   });
 
+  it('goToStep jumps to a specific 0-based index including idle (-1)', () => {
+    const config: AnimationConfigInput = {
+      backend: 'lottie',
+      effects: [
+        { target: 'a', effect: 'flow', step: 1 },
+        { target: 'b', effect: 'pulse', step: 2 },
+      ],
+    };
+    const { result } = renderHook(() => useOasAnimation(config), { wrapper });
+
+    act(() => result.current.goToStep(1));
+    expect(result.current.currentStep).toBe(1);
+    expect(result.current.status).toBe('started');
+
+    act(() => result.current.goToStep(-1));
+    expect(result.current.currentStep).toBe(-1);
+    expect(result.current.status).toBe('idle');
+  });
+
+  it('respects controlledStep from the step-sync machine', () => {
+    const onStepChange = vi.fn();
+    const config: AnimationConfigInput = {
+      backend: 'svg',
+      effects: [
+        { target: 'a', effect: 'fade', step: 1 },
+        { target: 'b', effect: 'pulse', step: 2 },
+      ],
+    };
+    const { result, rerender } = renderHook(
+      ({ step }: { step: number }) =>
+        useOasAnimation(config, undefined, { controlledStep: step, onStepChange }),
+      { wrapper, initialProps: { step: -1 } },
+    );
+
+    expect(result.current.currentStep).toBe(-1);
+
+    rerender({ step: 0 });
+    expect(result.current.currentStep).toBe(0);
+
+    act(() => result.current.nextStep());
+    expect(onStepChange).toHaveBeenCalledWith(1);
+  });
+
   it('announces step changes via live region', () => {
     const { result } = renderHook(() => useOasAnimation(validConfig), { wrapper });
 

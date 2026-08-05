@@ -35,8 +35,14 @@
     "animation": {
       "backend": "svg",
       "src": "assets/animations/water-cycle.svg",
-      "trigger": "load",
-      "reducedMotion": "static-pose"
+      "trigger": "step",
+      "reducedMotion": "static-steps",
+      "effects": [
+        { "step": 1, "target": "evaporation", "effect": "fade" },
+        { "step": 2, "target": "condensation", "effect": "pulse" },
+        { "step": 3, "target": "precipitation", "effect": "fade" },
+        { "step": 4, "target": "collection", "effect": "highlight" }
+      ]
     }
   }
 }

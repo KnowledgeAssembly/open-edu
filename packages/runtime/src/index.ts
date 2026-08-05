@@ -108,10 +108,24 @@ export { ProgressRing } from './components/ProgressRing.js';
 export type { ProgressRingProps } from './components/ProgressRing.js';
 export { useOasAnimation } from './components/useOasAnimation.js';
 export type { OasAnimationStatus, OasAnimationController } from './components/useOasAnimation.js';
+export {
+  useStepSyncMachine,
+  stepSyncReducer,
+  createInitialStepSyncState,
+  animationStepIndexFromRevealed,
+} from './components/useStepSyncMachine.js';
+export type {
+  StepSyncState,
+  StepSyncEvent,
+  StepSyncPhase,
+  StepSyncMachine,
+} from './components/useStepSyncMachine.js';
 export { DotLottiePlayer } from './components/DotLottiePlayer.js';
 export type { OasDotLottiePlayerProps } from './components/DotLottiePlayer.js';
 export { OasAnimationWrapper } from './components/OasAnimationWrapper.js';
 export type { OasAnimationWrapperProps } from './components/OasAnimationWrapper.js';
+export { SvgStepRenderer } from './components/SvgStepRenderer.js';
+export type { SvgStepRendererProps } from './components/SvgStepRenderer.js';
 export { CssAnimationRenderer } from './components/CssAnimationRenderer.js';
 export type { CssAnimationRendererProps } from './components/CssAnimationRenderer.js';
 export { RewardAnimation } from './components/RewardAnimation.js';
