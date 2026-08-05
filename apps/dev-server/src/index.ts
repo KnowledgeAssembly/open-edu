@@ -33,7 +33,7 @@ export async function startDevServer(
   await server.listen();
 
   const address = server.resolvedUrls?.local?.[0] ?? `http://localhost:${options.port ?? 4000}`;
-  console.log(`\n  ${'\u2728'}  Open-Edu Dev Server`);
+  console.log(`\n  ${'\u2728'}  OpenEdu Course Creator Studio`);
   console.log(`  ${'\u2502'}  Package: ${resolvedPackageDir}`);
   console.log(`  ${'\u2502'}  URL:     ${address}\n`);
 

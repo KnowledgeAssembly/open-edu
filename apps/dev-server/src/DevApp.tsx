@@ -29,6 +29,10 @@ import { InspectorPanel } from './inspectors/InspectorPanel';
 import { loadProgress, saveProgress, clearProgress } from './progressStorage';
 import { EditorShell } from './editor/EditorShell';
 import type { EditorMode } from './editor/types';
+import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
+import type { StudioMode } from './studio/types.js';
+import { StudioApp } from './studio/StudioApp.js';
+import { ModeToggle } from './studio/components/ModeToggle.js';
 
 import {
   packageData as rawPackageData,
@@ -52,7 +56,15 @@ function DevAppFallback({ title, message }: { title: string; message: string }):
   );
 }
 
-function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
+function BundleDevApp({
+  bundle,
+  mode,
+  onModeChange,
+}: {
+  bundle: LoadedBundle;
+  mode: StudioMode;
+  onModeChange: (mode: StudioMode) => void;
+}): JSX.Element {
   const [selectedModuleId, setSelectedModuleId] = useState<string>(
     bundle.modules[0]?.manifest.id ?? '',
   );
@@ -242,6 +254,7 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
                 >
                   Edit Package
                 </Button>
+                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
               </div>
               <div className="fixed bottom-4 right-96 z-50 flex gap-2">
                 <Button variant="destructive" size="sm" tabIndex={-1} onClick={handleReset}>
@@ -262,7 +275,13 @@ function BundleDevApp({ bundle }: { bundle: LoadedBundle }): JSX.Element {
   );
 }
 
-function SinglePackageDevApp(): JSX.Element {
+function SinglePackageDeveloperApp({
+  mode,
+  onModeChange,
+}: {
+  mode: StudioMode;
+  onModeChange: (mode: StudioMode) => void;
+}): JSX.Element {
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
   const telemetrySessionRef = useRef<TelemetrySession | null>(null);
   const brokerRef = useRef<RewardBroker | null>(null);
@@ -414,7 +433,7 @@ function SinglePackageDevApp(): JSX.Element {
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           <div className="flex h-screen">
             <div className="min-w-0 flex-1 overflow-auto">
-              <div className="fixed bottom-4 right-96 z-50 flex gap-2">
+              <div className="fixed bottom-4 right-96 z-50 flex items-center gap-2">
                 <Button
                   variant="default"
                   size="sm"
@@ -427,6 +446,7 @@ function SinglePackageDevApp(): JSX.Element {
                 <Button variant="destructive" size="sm" onClick={handleReset}>
                   Reset Progress
                 </Button>
+                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
               </div>
               <LayoutShell />
             </div>
@@ -453,8 +473,35 @@ function SinglePackageDevApp(): JSX.Element {
 }
 
 export function DevApp(): JSX.Element {
-  if (loadedBundle) {
-    return <BundleDevApp bundle={loadedBundle} />;
+  const [studioMode, setStudioModeState] = useState<StudioMode>(() => getStudioMode());
+
+  const setStudioModeAndPersist = useCallback((mode: StudioMode) => {
+    setStudioMode(mode);
+    setStudioModeState(mode);
+  }, []);
+
+  if (studioMode === 'creator') {
+    return (
+      <RuntimeThemeProvider>
+        <StudioApp
+          mode={studioMode}
+          onModeChange={setStudioModeAndPersist}
+          loadedPackage={loadedPkg}
+          bundleUnsupported={Boolean(loadedBundle)}
+        />
+      </RuntimeThemeProvider>
+    );
   }
-  return <SinglePackageDevApp />;
+
+  if (loadedBundle) {
+    return (
+      <BundleDevApp
+        bundle={loadedBundle}
+        mode={studioMode}
+        onModeChange={setStudioModeAndPersist}
+      />
+    );
+  }
+
+  return <SinglePackageDeveloperApp mode={studioMode} onModeChange={setStudioModeAndPersist} />;
 }

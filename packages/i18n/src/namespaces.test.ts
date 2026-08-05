@@ -22,6 +22,10 @@ describe('namespaces', () => {
     expect(NAMESPACES).toContain('website');
   });
 
+  it('includes studio namespace', () => {
+    expect(NAMESPACES).toContain('studio');
+  });
+
   it('is a typed const array', () => {
     const ns: Namespace = 'runtime';
     expect(NAMESPACES).toContain(ns);

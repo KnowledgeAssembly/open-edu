@@ -11,6 +11,7 @@ export async function startServer(packageDir: string, port = 0): Promise<TestSer
   const devServerRoot = resolve('apps/dev-server');
 
   process.env.OPEN_EDU_PACKAGE_DIR = resolvedPackageDir;
+  process.env.OPEN_EDU_STUDIO_MODE = 'developer';
 
   const server = await createServer({
     root: devServerRoot,

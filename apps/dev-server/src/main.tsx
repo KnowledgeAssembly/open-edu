@@ -13,6 +13,7 @@ import runtimeEn from '@open-edu/i18n/locales/en/runtime.json';
 import learnerEn from '@open-edu/i18n/locales/en/learner.json';
 import widgetsEn from '@open-edu/i18n/locales/en/widgets.json';
 import schemasEn from '@open-edu/i18n/locales/en/schemas.json';
+import studioEn from '@open-edu/i18n/locales/en/studio.json';
 
 const dictionaries = {
   en: {
@@ -20,6 +21,7 @@ const dictionaries = {
     learner: learnerEn as Record<string, string>,
     widgets: widgetsEn as Record<string, string>,
     schemas: schemasEn as Record<string, string>,
+    studio: studioEn as Record<string, string>,
   },
 };
 

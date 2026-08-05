@@ -2,7 +2,7 @@
   "name": "@open-edu/dev-server",
   "version": "0.1.0",
   "private": true,
-  "description": "Vite dev server for Open-Edu",
+  "description": "OpenEdu Course Creator Studio (local hybrid authoring + preview)",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -29,6 +29,7 @@
     "@open-edu/design-system": "workspace:*",
     "@open-edu/i18n": "workspace:*",
     "@open-edu/logger": "workspace:*",
+    "@open-edu/oep-distribution": "workspace:^",
     "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/schemas": "workspace:*",

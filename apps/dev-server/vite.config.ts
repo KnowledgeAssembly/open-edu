@@ -9,7 +9,7 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { readFile, writeFile, unlink, mkdir, rename } from 'node:fs/promises';
+import { readFile, writeFile, unlink, mkdir, rename, rm } from 'node:fs/promises';
 import { join, extname, dirname, relative, sep } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadPackage, loadBundle } from '@open-edu/core';
@@ -21,6 +21,10 @@ import {
   CardDefinitionsSchema,
   ContentNodeSchema,
 } from '@open-edu/schemas';
+import { OepWriter, type DistributionManifest } from '@open-edu/oep-distribution';
+import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
+import { getTemplateById } from './src/studio/templates/catalog.js';
+import type { ActivitySummary } from './src/studio/types.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
@@ -170,13 +174,65 @@ function validateFile(filePath: string, content: string): string | null {
   return null;
 }
 
+function collectCourseFiles(packageDir: string): Map<string, Uint8Array> {
+  const files = new Map<string, Uint8Array>();
+
+  function walk(dir: string) {
+    const entries = readdirSync(dir);
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        if (entry === 'dist' || entry === 'node_modules' || entry === '.git' || entry === '.edu') {
+          continue;
+        }
+        walk(fullPath);
+      } else if (stat.isFile()) {
+        const relPath = relative(packageDir, fullPath);
+        files.set(relPath, new Uint8Array(readFileSync(fullPath)));
+      }
+    }
+  }
+
+  walk(packageDir);
+  return files;
+}
+
+function readNodeFiles(dir: string, nodePaths: string[]): Map<string, string> {
+  const files = new Map<string, string>();
+  for (const relPath of nodePaths) {
+    const absPath = join(dir, relPath);
+    if (!existsSync(absPath)) continue;
+    try {
+      files.set(relPath, readFileSync(absPath, 'utf-8'));
+    } catch {
+      // skip unreadable files
+    }
+  }
+  return files;
+}
+
+function orderNodes(currentDir: string, entry: string | undefined): string[] {
+  const nodesDir = join(currentDir, 'nodes');
+  let paths: string[] = [];
+  if (existsSync(nodesDir)) {
+    paths = readdirSync(nodesDir)
+      .filter((name) => EDITABLE_EXTS.has(extname(name)))
+      .map((name) => `nodes/${name}`)
+      .sort();
+  }
+  if (entry && paths.includes(entry)) {
+    paths = [entry, ...paths.filter((p) => p !== entry)];
+  }
+  return paths;
+}
+
 interface MultipartPart {
   name: string;
   filename?: string;
   data: Buffer;
   contentType?: string;
 }
-
 function multipartParse(body: Buffer, boundary: string): MultipartPart[] {
   const parts: MultipartPart[] = [];
   const boundaryBuf = Buffer.from(`--${boundary}`);
@@ -727,6 +783,235 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
+          // GET /api/package/outline — derive ordered activities + title
+          if (pathname === '/api/package/outline' && method === 'GET') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
+            const manifestPath = join(currentDir, 'package.json');
+            if (!existsSync(manifestPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'No package.json in this directory' }));
+              return;
+            }
+            const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as {
+              title?: string;
+              entry?: string;
+            };
+            const workflowPath = join(currentDir, 'workflow.json');
+            let orderedPaths: string[] = [];
+            if (existsSync(workflowPath)) {
+              const workflow = JSON.parse(readFileSync(workflowPath, 'utf-8')) as {
+                routing?: Record<string, unknown>;
+              };
+              orderedPaths = Object.keys(workflow.routing ?? {});
+            } else {
+              orderedPaths = orderNodes(currentDir, manifest.entry);
+            }
+            const files = readNodeFiles(currentDir, orderedPaths);
+            const activities = activitiesFromEntryOrder(orderedPaths, files);
+            res.end(JSON.stringify({ title: manifest.title ?? '', activities }));
+            return;
+          }
+
+          // PUT /api/package/outline — persist linear order into workflow.json + manifest entry
+          if (pathname === '/api/package/outline' && method === 'PUT') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
+            const body = (await parseJsonBody(req)) as { orderedPaths?: string[] };
+            const orderedPaths = Array.isArray(body.orderedPaths) ? body.orderedPaths : [];
+            if (orderedPaths.length === 0) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'orderedPaths must be a non-empty array' }));
+              return;
+            }
+            const entry = orderedPaths[0]!;
+            const workflow = buildLinearWorkflow(orderedPaths, entry);
+            const workflowResult = WorkflowSchema.safeParse({ routing: workflow.routing });
+            if (!workflowResult.success) {
+              res.statusCode = 422;
+              res.end(
+                JSON.stringify({
+                  error: 'Generated workflow is invalid',
+                  details: workflowResult.error.message,
+                }),
+              );
+              return;
+            }
+
+            const manifestPath = join(currentDir, 'package.json');
+            let manifest = existsSync(manifestPath)
+              ? (JSON.parse(readFileSync(manifestPath, 'utf-8')) as { entry?: string })
+              : null;
+
+            if (manifest) {
+              const nextManifest = { ...manifest, entry };
+              const manifestResult = PackageManifestSchema.safeParse(nextManifest);
+              if (!manifestResult.success) {
+                res.statusCode = 422;
+                res.end(
+                  JSON.stringify({
+                    error: 'Updated manifest is invalid',
+                    details: manifestResult.error.message,
+                  }),
+                );
+                return;
+              }
+              manifest = nextManifest;
+            }
+
+            await writeFile(
+              join(currentDir, 'workflow.json'),
+              JSON.stringify({ routing: workflow.routing }, null, 2),
+              'utf-8',
+            );
+
+            if (manifest) {
+              await writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+            }
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true }));
+            return;
+          }
+
+          // POST /api/package/create-from-template — write a starter template into the package dir
+          if (pathname === '/api/package/create-from-template' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              templateId?: string;
+              force?: boolean;
+            };
+            const template = getTemplateById(body.templateId ?? '');
+            if (!template) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: `Unknown template: ${body.templateId}` }));
+              return;
+            }
+
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
+
+            if (body.force === true) {
+              // Replace the whole course: clear nodes + course sidecars so the
+              // exported .oep never carries orphans from a previous course.
+              const nodesDir = join(currentDir, 'nodes');
+              if (existsSync(nodesDir)) {
+                await rm(nodesDir, { recursive: true, force: true });
+              }
+              const assetsDir = join(currentDir, 'assets');
+              if (existsSync(assetsDir)) {
+                await rm(assetsDir, { recursive: true, force: true });
+              }
+              for (const rel of [
+                'workflow.json',
+                'package.json',
+                'rewards.json',
+                'cards.json',
+              ]) {
+                const abs = join(currentDir, rel);
+                if (existsSync(abs)) {
+                  await rm(abs, { force: true });
+                }
+              }
+            } else {
+              const nodesDir = join(currentDir, 'nodes');
+              const hasNodes = existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
+              if (hasNodes) {
+                res.statusCode = 409;
+                res.end(
+                  JSON.stringify({
+                    error: 'Directory already contains nodes. Pass force: true to overwrite.',
+                  }),
+                );
+                return;
+              }
+            }
+
+            for (const [relPath, content] of Object.entries(template.files)) {
+              const absPath = join(currentDir, relPath);
+              const dir = dirname(absPath);
+              if (!existsSync(dir)) {
+                mkdirSync(dir, { recursive: true });
+              }
+              await writeFile(absPath, content, 'utf-8');
+            }
+
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            srv.ws.send({ type: 'full-reload' });
+
+            res.end(JSON.stringify({ success: true }));
+            return;
+          }
+
+          // POST /api/package/export-oep — build a .oep archive and stream it as a download
+          if (pathname === '/api/package/export-oep' && method === 'POST') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
+            try {
+              const pkg = await loadPackage(currentDir);
+              const courseFiles = collectCourseFiles(currentDir);
+              const distManifest = {
+                format: 'openedu-package' as const,
+                formatVersion: 1 as const,
+                id: pkg.manifest.id,
+                version: pkg.manifest.version,
+                title: pkg.manifest.title,
+                checksum: { algorithm: 'sha256' as const, value: '' },
+                contentRoot: 'course/',
+                signature: { status: 'unsigned' as const },
+              } as DistributionManifest;
+
+              const result = await OepWriter.build({ manifest: distManifest, courseFiles });
+              const oepFileName = `${pkg.manifest.id}-${pkg.manifest.version}.oep`;
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/octet-stream');
+              res.setHeader('Content-Disposition', `attachment; filename="${oepFileName}"`);
+              res.end(Buffer.from(result.bytes));
+            } catch (err) {
+              const message = err instanceof Error ? err.message : 'Export failed';
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: message, errors: [{ path: '', error: message }] }));
+            }
+            return;
+          }
+
           // Fallback route for /api/package/dir — return package directory path
           if (pathname === '/api/package/dir' && method === 'GET') {
             res.end(JSON.stringify({ packageDir: currentDir }));
@@ -770,6 +1055,9 @@ export default defineConfig({
   define: {
     OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
       ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
+      : '""',
+    OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
+      ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
       : '""',
   },
   server: {
