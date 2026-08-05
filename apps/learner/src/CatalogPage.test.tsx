@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CatalogPage } from './CatalogPage';
-import type { PackageSummary } from '@open-edu/core';
+import type { PackageSummary, BundleSummary } from '@open-edu/core';
 import type { StoredCourse } from '@open-edu/storage';
 import { I18nProvider } from '@open-edu/i18n';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
@@ -73,6 +73,12 @@ describe('CatalogPage', () => {
     renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
     const cards = screen.getAllByTestId('course-card');
     expect(cards).toHaveLength(2);
+  });
+
+  it('renders the course grid inside a course-list-section', () => {
+    renderWithI18n(<CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />);
+    const section = screen.getByTestId('course-list-section');
+    expect(section.querySelectorAll('[data-testid="course-card"]')).toHaveLength(2);
   });
 
   it('renders empty state when no packages', () => {
@@ -200,7 +206,7 @@ describe('CatalogPage', () => {
       });
     });
 
-    it('shows OpenModule indicator on completed card', () => {
+    it('renders badge/completion icons on completed card', () => {
       const { container } = renderWithI18n(
         <CatalogPage packages={samplePackages} onStartCourse={vi.fn()} />,
       );
@@ -361,5 +367,110 @@ describe('CatalogPage', () => {
       expect(card.className).toContain('h-full');
       expect(card.parentElement?.className ?? '').toContain('h-full');
     }
+  });
+
+  describe('catalog bundles', () => {
+    const bundle: BundleSummary = {
+      manifest: {
+        id: 'bundle-1',
+        type: 'bundle',
+        title: 'Math Bundle',
+        version: '1.0.0',
+        author: 'Bundle Author',
+        description: 'Bundle description here',
+        modules: [],
+      },
+      moduleCount: 3,
+      totalNodeCount: 12,
+      rootDir: '/test/bundles/bundle-1',
+      moduleSummaries: [],
+    };
+
+    it('renders bundles with the course-card chrome and a Bundle badge', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          onStartCourse={vi.fn()}
+          onStartBundle={vi.fn()}
+        />,
+      );
+      expect(screen.getByTestId('bundle-list-section')).toBeInTheDocument();
+      expect(screen.getAllByTestId('course-card')).toHaveLength(3);
+      expect(screen.getByText('Math Bundle')).toBeInTheDocument();
+      expect(screen.getByText('Bundle')).toBeInTheDocument();
+      expect(screen.getByText('by Bundle Author')).toBeInTheDocument();
+    });
+
+    it('does not render the bundle description on catalog cards', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          onStartCourse={vi.fn()}
+          onStartBundle={vi.fn()}
+        />,
+      );
+      expect(screen.queryByText('Bundle description here')).not.toBeInTheDocument();
+    });
+
+    it('renders no OpenModule orbit icons in the catalog grid', () => {
+      const { container } = renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          onStartCourse={vi.fn()}
+          onStartBundle={vi.fn()}
+        />,
+      );
+      expect(container.querySelector('svg[stroke-dasharray="4 3"]')).toBeNull();
+    });
+
+    it('fires onStartBundle when a bundle card is clicked', () => {
+      const onStartBundle = vi.fn();
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          onStartCourse={vi.fn()}
+          onStartBundle={onStartBundle}
+        />,
+      );
+      // The bundle section renders before the main course grid.
+      fireEvent.click(screen.getAllByTestId('course-card')[0]!);
+      expect(onStartBundle).toHaveBeenCalledWith('bundle-1');
+    });
+
+    it('shows a progress bar on a started bundle', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          bundleProgress={{
+            'bundle-1': {
+              bundleId: 'bundle-1',
+              bundleVersion: '1.0.0',
+              currentModuleId: 'mod-1',
+              moduleStatuses: { 'mod-1': 'in_progress', 'mod-2': 'locked', 'mod-3': 'locked' },
+              moduleProgress: {
+                'mod-1': {
+                  moduleId: 'mod-1',
+                  packageVersion: '1.0.0',
+                  currentNodeId: 'nodes/a.md',
+                  visitedNodes: ['nodes/a.md'],
+                  scores: {},
+                  answers: {},
+                  isCompleted: false,
+                },
+              },
+              updatedAt: '2026-08-05T00:00:00Z',
+            },
+          }}
+          onStartCourse={vi.fn()}
+          onStartBundle={vi.fn()}
+        />,
+      );
+      expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument();
+    });
   });
 });

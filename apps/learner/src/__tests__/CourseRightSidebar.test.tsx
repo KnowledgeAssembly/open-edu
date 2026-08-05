@@ -1,9 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 
+const { chatMockMessages, chatMockSend } = vi.hoisted(() => ({
+  chatMockMessages: { value: [] as unknown[] },
+  chatMockSend: vi.fn(),
+}));
+
 vi.mock('@ai-sdk/react', () => ({
   useChat: () => ({
-    messages: [],
-    sendMessage: vi.fn(),
+    messages: chatMockMessages.value,
+    sendMessage: chatMockSend,
     regenerate: vi.fn(),
     status: 'ready',
     error: undefined,
@@ -36,6 +41,10 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe('CourseRightSidebar', () => {
+  beforeEach(() => {
+    chatMockMessages.value = [];
+  });
+
   it('renders collapsed sidebar with open button when panel is closed', () => {
     renderWithProvider(<CourseRightSidebar />);
     const openBtn = screen.getByRole('button', { name: /open sidebar/i });
@@ -131,5 +140,36 @@ describe('CourseRightSidebar', () => {
     const aside = screen.getByRole('complementary');
     expect(aside).toHaveClass('transition-none');
     expect(aside).not.toHaveClass('transition-[width]');
+  });
+
+  describe('suggested questions', () => {
+    it('shows suggested questions with an empty conversation', () => {
+      renderWithProvider(<CourseRightSidebar />);
+      fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+      expect(screen.getByTestId('suggested-questions')).toBeInTheDocument();
+    });
+
+    it('keeps suggested questions after a conversation has started', () => {
+      chatMockMessages.value = [
+        {
+          id: 'm1',
+          role: 'user',
+          parts: [{ type: 'text', text: 'Hello' }],
+          metadata: undefined,
+        },
+      ];
+      renderWithProvider(<CourseRightSidebar />);
+      fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+      expect(screen.getByTestId('suggested-questions')).toBeInTheDocument();
+    });
+
+    it('sends the selected suggestion through the chat', () => {
+      renderWithProvider(<CourseRightSidebar />);
+      fireEvent.click(screen.getByRole('button', { name: /open sidebar/i }));
+      fireEvent.click(screen.getByText('Can you explain what I just read?'));
+      expect(chatMockSend).toHaveBeenCalledWith({
+        text: 'Can you explain what I just read?',
+      });
+    });
   });
 });

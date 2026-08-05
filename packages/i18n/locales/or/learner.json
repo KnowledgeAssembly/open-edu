@@ -23,7 +23,6 @@
   "reset.button": "ପ୍ରଗତି ରିସେଟ୍ କରନ୍ତୁ",
   "reset.cancel": "ବାତିଲ୍ କରନ୍ତୁ",
   "reset.confirm_button": "ହଁ, ରିସେଟ୍ କରନ୍ତୁ",
-
   "progress.completed": "{{count}} ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି",
   "settings.aa_decrease_font_aria": "ଫଣ୍ଟ ଆକାର କମାନ୍ତୁ",
   "settings.aa_increase_font_aria": "ଫଣ୍ଟ ଆକାର ବଢ଼ାନ୍ତୁ",
@@ -137,5 +136,6 @@
   "storage.usage": "ଷ୍ଟୋରେଜ୍ ବ୍ୟବହାର",
   "update.available": "ଗୋଟିଏ ନୂଆ ସଂସ୍କରଣ ଉପଲବ୍ଧ ଅଛି",
   "storage.settings": "ଷ୍ଟୋରେଜ୍ ସେଟିଂସ",
-  "storage.settings_heading": "ଷ୍ଟୋରେଜ୍"
+  "storage.settings_heading": "ଷ୍ଟୋରେଜ୍",
+  "catalog.bundle_badge": "ବଣ୍ଡଲ୍"
 }

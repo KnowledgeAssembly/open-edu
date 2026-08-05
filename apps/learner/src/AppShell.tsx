@@ -341,7 +341,7 @@ function AppShellInner({
     [location.pathname, mergedPackageEntries, allBundleEntries],
   );
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [courseProgressCurrent, setCourseProgressCurrent] = useState(0);
   const [courseProgressTotal, setCourseProgressTotal] = useState(0);
 
@@ -649,56 +649,6 @@ function AppShellInner({
     [handleNavigate],
   );
 
-  function CourseStepWrapper(): JSX.Element | null {
-    const runtime = useRuntimeOptional();
-    if (!runtime || !isCourseView) return null;
-
-    const orderedIds = getOrderedNodes(
-      runtime.loadedPackage.workflow!,
-      runtime.loadedPackage.manifest.entry!,
-    );
-    if (orderedIds.length === 0) return null;
-
-    const items: AppSidebarStepItem[] = orderedIds.map((nodeId) => {
-      const node = runtime.loadedPackage.nodes.find((n) => n.relativePath === nodeId);
-      const title = node
-        ? (node.node.title ?? nodeId.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '))
-        : nodeId;
-      let status: 'current' | 'completed' | 'future';
-      if (nodeId === runtime.currentNodeId) status = 'current';
-      else if (runtime.visitedNodes.includes(nodeId)) status = 'completed';
-      else status = 'future';
-      return {
-        id: nodeId,
-        label: title,
-        status,
-        onClick: () => runtime.navigateToNode(nodeId),
-      };
-    });
-
-    const section: AppSidebarSection = { title: t('learner.sidebar.course_steps'), items };
-    return (
-      <div className="relative h-full overflow-hidden">
-        <AssemblyFlow
-          density="dense"
-          className="pointer-events-none absolute inset-0 opacity-[0.08]"
-          aria-hidden="true"
-        />
-        <AppSidebar
-          logo={<OpenEduLogo variant="lockup" size="sm" />}
-          logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
-          items={navItems}
-          currentItemId={currentNavId}
-          onNavigate={handleNavAction}
-          sections={[section]}
-          onBack={{ label: t('learner.back_to_catalog'), onClick: handleBackToCatalog }}
-          collapsed={sidebarCollapsed}
-          onCollapseChange={setSidebarCollapsed}
-        />
-      </div>
-    );
-  }
-
   const headerActions = (
     <PipiliHeaderButton
       onOpen={() => setPanelState(panelState === 'closed' ? 'floating' : 'closed')}
@@ -731,7 +681,6 @@ function AppShellInner({
                   pkg={coursePkg}
                   onBackToCatalog={handleBackToCatalog}
                   hideLayoutShellHeader
-                  sidebarCollapsed={sidebarCollapsed}
                   onProgressUpdate={handleProgressUpdate}
                   header={
                     <TopAppBar
@@ -746,7 +695,14 @@ function AppShellInner({
                   }
                   bundleContext={bundleContextMemo}
                 >
-                  <CourseStepWrapper />
+                  <CourseStepWrapper
+                    navItems={navItems}
+                    currentNavId={currentNavId}
+                    onNavigate={handleNavAction}
+                    onBackToCatalog={handleBackToCatalog}
+                    collapsed={sidebarCollapsed}
+                    onCollapseChange={setSidebarCollapsed}
+                  />
                   <ContextBridgeWithCompanion />
                 </CourseRuntime>
                 <TextSelectionToolbar containerRef={courseContentRef} />
@@ -768,6 +724,8 @@ function AppShellInner({
                   items={navItems}
                   currentItemId={currentNavId}
                   onNavigate={handleNavAction}
+                  collapsed={sidebarCollapsed}
+                  onCollapseChange={setSidebarCollapsed}
                 />
               </div>
             }
@@ -919,10 +877,83 @@ function CompanionFloatingUI({ view }: { view: AppView }): JSX.Element | null {
   return (
     <Pipili
       mood={!isCourseView && isOpen ? 'curious' : 'idle'}
-      visible={isCourseView ? !isOpen : true}
+      visible={!isOpen}
       hasUnread={messages.length > 0 && !isOpen}
       pendingReward={showRewardState}
       onClick={() => setPanelState(isOpen ? 'closed' : 'floating')}
     />
+  );
+}
+
+interface CourseStepWrapperProps {
+  navItems: AppSidebarItem[];
+  currentNavId: string;
+  onNavigate: (id: string) => void;
+  onBackToCatalog: () => void;
+  collapsed: boolean;
+  onCollapseChange: (collapsed: boolean) => void;
+}
+
+/**
+ * Module-level (stable identity) wrapper for the course shell sidebar. Defined
+ * outside `AppShellInner` so a re-render of the shell does not create a new
+ * component type and remount the sidebar subtree — which would drop transient
+ * sidebar state such as hover expansion.
+ */
+function CourseStepWrapper({
+  navItems,
+  currentNavId,
+  onNavigate,
+  onBackToCatalog,
+  collapsed,
+  onCollapseChange,
+}: CourseStepWrapperProps): JSX.Element | null {
+  const { t } = useTranslation();
+  const runtime = useRuntimeOptional();
+  if (!runtime) return null;
+
+  const orderedIds = getOrderedNodes(
+    runtime.loadedPackage.workflow!,
+    runtime.loadedPackage.manifest.entry!,
+  );
+  if (orderedIds.length === 0) return null;
+
+  const items: AppSidebarStepItem[] = orderedIds.map((nodeId) => {
+    const node = runtime.loadedPackage.nodes.find((n) => n.relativePath === nodeId);
+    const title = node
+      ? (node.node.title ?? nodeId.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '))
+      : nodeId;
+    let status: 'current' | 'completed' | 'future';
+    if (nodeId === runtime.currentNodeId) status = 'current';
+    else if (runtime.visitedNodes.includes(nodeId)) status = 'completed';
+    else status = 'future';
+    return {
+      id: nodeId,
+      label: title,
+      status,
+      onClick: () => runtime.navigateToNode(nodeId),
+    };
+  });
+
+  const section: AppSidebarSection = { title: t('learner.sidebar.course_steps'), items };
+  return (
+    <div className="relative h-full overflow-hidden">
+      <AssemblyFlow
+        density="dense"
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        aria-hidden="true"
+      />
+      <AppSidebar
+        logo={<OpenEduLogo variant="lockup" size="sm" />}
+        logoCollapsed={<OpenEduLogo variant="symbol" size="sm" />}
+        items={navItems}
+        currentItemId={currentNavId}
+        onNavigate={onNavigate}
+        sections={[section]}
+        onBack={{ label: t('learner.back_to_catalog'), onClick: onBackToCatalog }}
+        collapsed={collapsed}
+        onCollapseChange={onCollapseChange}
+      />
+    </div>
   );
 }

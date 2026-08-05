@@ -130,6 +130,23 @@ describe('CourseCard', () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
+  it('renders an optional badge label next to the title', () => {
+    render(<CourseCard {...makeProps({ badgeLabel: 'Bundle' })} />);
+    expect(screen.getByText('Bundle')).toBeInTheDocument();
+    expect(
+      screen.getByText('Intro to JavaScript').compareDocumentPosition(screen.getByText('Bundle')),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('omits the badge when badgeLabel is not provided', () => {
+    render(<CourseCard {...makeProps()} />);
+    expect(screen.queryByText('Bundle')).not.toBeInTheDocument();
+  });
+
+  it('has no accessibility violations with a badge label', async () => {
+    await checkAccessibility(<CourseCard {...makeProps({ badgeLabel: 'Bundle' })} />);
+  });
+
   it('has no accessibility violations', async () => {
     await checkAccessibility(<CourseCard {...makeProps()} />);
   });

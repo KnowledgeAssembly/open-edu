@@ -7,26 +7,20 @@ import { usePipiliChat } from './PipiliChatProvider';
 import { PipiliChat } from './PipiliChat';
 import { ExplanationStylePicker } from './ExplanationStylePicker.js';
 
-const suggestedQuestions = [
-  'Can you explain what I just read?',
-  'Summarize this lesson for me',
-  'Give me a practice question',
-  'What are the key concepts here?',
-];
-
 function PipiliCompanionContent(): JSX.Element {
   const { t } = useTranslation();
-  const {
-    panelState,
-    setPanelState,
-    messages: companionMessages,
-    rewardMessages,
-    clearPendingReward,
-  } = useCompanion();
+  const { panelState, setPanelState, rewardMessages, clearPendingReward } = useCompanion();
   const { messages, sendMessage, status, stop, regenerate, clearError, error } = usePipiliChat();
 
   const isOpen = panelState !== 'closed';
   const isStreaming = status === 'submitted' || status === 'streaming';
+
+  const suggestedQuestions = [
+    t('learner.right_sidebar.suggest_explain'),
+    t('learner.right_sidebar.suggest_summarize'),
+    t('learner.right_sidebar.suggest_practice'),
+    t('learner.right_sidebar.suggest_concepts'),
+  ];
 
   const handleSend = useCallback(
     (text: string) => {
@@ -64,8 +58,6 @@ function PipiliCompanionContent(): JSX.Element {
       document.body.style.overflow = '';
     };
   }, [isOpen, handleClose, clearPendingReward]);
-
-  const showSuggestions = companionMessages.length === 0;
 
   return (
     <>
@@ -110,8 +102,8 @@ function PipiliCompanionContent(): JSX.Element {
           showStop
           showRetry={Boolean(error || status === 'ready')}
           isStreaming={isStreaming}
-          suggestedQuestions={showSuggestions ? suggestedQuestions : undefined}
-          onSuggestedQuestionSelect={showSuggestions ? handleSuggestedQuestion : undefined}
+          suggestedQuestions={suggestedQuestions}
+          onSuggestedQuestionSelect={handleSuggestedQuestion}
           rewardMessages={rewardMessages}
           placeholder={t('learner.right_sidebar.chat_placeholder')}
           className="min-h-0 flex-1"

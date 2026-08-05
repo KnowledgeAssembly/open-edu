@@ -26,7 +26,9 @@ async function navigateToCatalog(page: Page): Promise<void> {
 async function startFirstCourse(page: Page): Promise<void> {
   await navigateToCatalog(page);
   await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
-  const card = page.locator('[data-testid="course-card"]').first();
+  const card = page
+    .locator('[data-testid="course-list-section"] [data-testid="course-card"]')
+    .first();
   await expect(card).toBeVisible({ timeout: 10000 });
   await card.click();
 }
@@ -75,7 +77,7 @@ test.describe('Learner Experience', () => {
 
     await expect(page.locator('[data-testid="catalog-page"]')).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator('[data-testid="course-card"]');
+    const cards = page.locator('[data-testid="course-list-section"] [data-testid="course-card"]');
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
   });
 

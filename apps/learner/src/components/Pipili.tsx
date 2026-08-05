@@ -52,6 +52,7 @@ export function Pipili({
   return (
     <div
       className={cn('fixed bottom-6 right-6 z-50', onClick && 'cursor-pointer', className)}
+      data-testid="pipili-fab"
       role={onClick ? 'button' : 'status'}
       aria-label={moodLabels[pendingReward ? 'nodding' : effectiveMood]}
       onClick={onClick}
