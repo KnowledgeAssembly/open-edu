@@ -71,12 +71,7 @@ describe('CssAnimationRenderer', () => {
 });
 
 describe('CssAnimationRenderer celebration effects', () => {
-  const celebrationEffects = [
-    'badge',
-    'confetti',
-    'sparkle',
-    'celebrate',
-  ] as const;
+  const celebrationEffects = ['badge', 'confetti', 'sparkle', 'celebrate'] as const;
 
   it('exposes celebration effects in effectToClass', () => {
     for (const effect of celebrationEffects) {
