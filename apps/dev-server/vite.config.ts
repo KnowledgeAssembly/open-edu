@@ -24,6 +24,8 @@ import {
 import { OepWriter, type DistributionManifest } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
+import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
+import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
 import type { ActivitySummary } from './src/studio/types.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
@@ -402,6 +404,73 @@ function eduPackageLoader(): Plugin {
         });
         console.log(`[edu-dev] Serving assets from: ${assetsDir}`);
       }
+
+      // ---- Studio AI API Routes (Node-side only; never exposes API keys) ----
+      const studioAiRegexp = /^\/api\/studio\/ai\//;
+      srv.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const url = req.url ?? '';
+        if (!studioAiRegexp.test(url)) return next();
+
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
+
+        try {
+          const parsedUrl = new URL(url, `http://${req.headers.host ?? 'localhost'}`);
+          const pathname = parsedUrl.pathname;
+          const method = req.method ?? 'GET';
+
+          // GET /api/studio/ai/status — AI availability without leaking secrets
+          if (pathname === '/api/studio/ai/status' && method === 'GET') {
+            const available = isAiAvailable();
+            res.end(JSON.stringify({ available, reason: available ? undefined : 'missing-key' }));
+            return;
+          }
+
+          // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler
+          if (pathname === '/api/studio/ai/generate' && method === 'POST') {
+            if (!packageDir) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'No active package' }));
+              return;
+            }
+            const body = (await parseJsonBody(req)) as { notes?: string; force?: boolean };
+            if (!body.notes || typeof body.notes !== 'string') {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing notes' }));
+              return;
+            }
+            const result = await generateCourseDraft({
+              notes: body.notes,
+              packageDir,
+              completeText: completeWithLlm,
+              force: body.force === true,
+            });
+
+            if (result.success) {
+              try {
+                packageData = await loadPackage(packageDir);
+                const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+                if (mod) {
+                  srv.moduleGraph.invalidateModule(mod);
+                }
+                srv.ws.send({ type: 'full-reload' });
+              } catch (err) {
+                console.error('[edu-dev] Failed to reload after AI generate:', err);
+              }
+            }
+
+            res.end(JSON.stringify(result));
+            return;
+          }
+
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: 'Unknown AI endpoint' }));
+        } catch (err) {
+          console.error('[edu-dev] AI API error:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: (err as Error).message }));
+        }
+      });
 
       // ---- Package Editor API Routes ----
       const currentDir = packageDir || bundleDir;

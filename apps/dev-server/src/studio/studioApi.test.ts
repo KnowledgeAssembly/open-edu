@@ -81,4 +81,44 @@ describe('studioApi client', () => {
     const api = createStudioApi();
     await expect(api.exportOep()).rejects.toThrow('Export failed');
   });
+
+  it('getAiStatus hits the studio AI status endpoint', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ available: true }), { status: 200 }),
+    );
+    const api = createStudioApi();
+    const result = await api.getAiStatus();
+    expect(fetchMock).toHaveBeenCalledWith('/api/studio/ai/status', expect.any(Object));
+    expect(result).toEqual({ available: true });
+  });
+
+  it('generateFromNotes posts notes to the AI generate endpoint', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    const result = await api.generateFromNotes('Teach fractions', true);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/generate');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({ notes: 'Teach fractions', force: true });
+    expect(result.success).toBe(true);
+  });
+
+  it('generateFromNotes omits force when not supplied', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    await api.generateFromNotes('Teach fractions');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/generate');
+    expect(JSON.parse(init?.body as string)).toEqual({ notes: 'Teach fractions' });
+  });
 });

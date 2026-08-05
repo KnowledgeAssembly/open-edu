@@ -1,9 +1,26 @@
+import type { AiGenerateResult } from './ai/types.js';
 import type { ActivitySummary } from './types.js';
 
 const API_BASE = '/api/package';
+const AI_BASE = '/api/studio/ai';
 
 async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || data.details || `Request failed: ${res.status}`);
+  }
+  return data as T;
+}
+
+async function aiRequest<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${AI_BASE}${url}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -52,6 +69,12 @@ export function createStudioApi() {
       apiRequest<{ success: boolean }>('/file', {
         method: 'PUT',
         body: JSON.stringify({ path, content, validate: true }),
+      }),
+    getAiStatus: () => aiRequest<{ available: boolean; reason?: string }>('/status', {}),
+    generateFromNotes: (notes: string, force?: boolean) =>
+      aiRequest<AiGenerateResult>('/generate', {
+        method: 'POST',
+        body: JSON.stringify({ notes, force }),
       }),
   };
 }
