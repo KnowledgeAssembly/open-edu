@@ -3,7 +3,14 @@ import type { StudioView } from './types.js';
 const VIEW_KEY = 'openedu.studio.view';
 const PATH_KEY = 'openedu.studio.selectedPath';
 
-const VALID_VIEWS: StudioView[] = ['home', 'outline', 'edit-activity', 'preview', 'share'];
+const VALID_VIEWS: StudioView[] = [
+  'home',
+  'outline',
+  'edit-activity',
+  'preview',
+  'share',
+  'ai-review',
+];
 
 export function readStudioView(): StudioView {
   try {

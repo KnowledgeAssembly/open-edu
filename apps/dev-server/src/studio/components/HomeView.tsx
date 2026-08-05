@@ -16,7 +16,9 @@ import {
 import { useTranslation } from '@open-edu/i18n';
 import { STUDIO_TEMPLATES } from '../templates/catalog.js';
 import { listRecentCourses } from '../recentCourses.js';
+import { AiStartPanel } from './AiStartPanel.js';
 import type { StudioApi } from '../studioApi.js';
+import type { AiGenerateResult } from '../ai/types.js';
 
 export function HomeView({
   api,
@@ -24,12 +26,14 @@ export function HomeView({
   onError,
   courseTitle,
   onOpenCurrent,
+  onAiGenerated,
 }: {
   api: StudioApi;
   onOpened: () => void;
   onError: (message: string) => void;
   courseTitle?: string;
   onOpenCurrent: () => void;
+  onAiGenerated: (result: AiGenerateResult) => void;
 }) {
   const { t } = useTranslation();
   const recent = listRecentCourses();
@@ -101,15 +105,7 @@ export function HomeView({
         <h2 id="studio-ai-heading" className="text-h2 text-on-surface mb-4">
           {t('studio.home.aiHeading')}
         </h2>
-        <Card className="border-outline-variant bg-surface">
-          <CardTitle className="text-on-surface px-6 pt-6">{t('studio.home.aiHeading')}</CardTitle>
-          <CardDescription className="px-6 pt-2">{t('studio.home.aiLede')}</CardDescription>
-          <CardContent className="flex items-center gap-3 px-6 pt-4">
-            <Button variant="outline" size="sm" disabled>
-              {t('studio.home.aiComingSoon')}
-            </Button>
-          </CardContent>
-        </Card>
+        <AiStartPanel api={api} onGenerated={onAiGenerated} onError={onError} />
       </section>
 
       <section aria-labelledby="studio-recent-heading">

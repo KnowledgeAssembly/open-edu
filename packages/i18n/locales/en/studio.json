@@ -140,6 +140,7 @@
   "ai.generate": "Generate draft",
   "ai.generating": "Generating draft…",
   "ai.unavailable": "AI is unavailable offline or no API key is configured. Use a template instead.",
+  "ai.useTemplateHint": "Templates always work offline.",
   "ai.reviewTitle": "Review AI draft",
   "ai.reviewLede": "Check the outline and quality notes, then accept to edit in Studio.",
   "ai.accept": "Accept draft",

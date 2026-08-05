@@ -4,12 +4,14 @@ import { useTranslation } from '@open-edu/i18n';
 import { HomeView } from './components/HomeView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
+import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioTopBar } from './components/StudioTopBar.js';
 import { ModeToggle } from './components/ModeToggle.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
+import { writeAiReview, readAiReview, clearAiReview } from './ai/aiSession.js';
 import {
   readStudioView,
   writeStudioView,
@@ -17,6 +19,7 @@ import {
   writeSelectedPath,
 } from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
+import type { AiGenerateResult } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
 
 export function StudioApp({
@@ -36,12 +39,22 @@ export function StudioApp({
   const [selectedPath, setSelectedPath] = useState<string | null>(() => readSelectedPath());
   const [courseTitle, setCourseTitle] = useState<string | undefined>(loadedPackage?.manifest.title);
   const [error, setError] = useState<string | null>(null);
+  const [aiResult, setAiResult] = useState<AiGenerateResult | null>(() => readAiReview());
   const api = useMemo(() => createStudioApi(), []);
 
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
     writeStudioView(next);
   }, []);
+
+  const handleAiGenerated = useCallback(
+    (result: AiGenerateResult) => {
+      writeAiReview(result);
+      setAiResult(result);
+      handleNavigate('ai-review');
+    },
+    [handleNavigate],
+  );
 
   const handleOpened = useCallback(() => {
     if (loadedPackage) {
@@ -102,6 +115,7 @@ export function StudioApp({
           onError={handleError}
           courseTitle={loadedPackage?.manifest.title}
           onOpenCurrent={() => handleNavigate('outline')}
+          onAiGenerated={handleAiGenerated}
         />
       );
       break;
@@ -134,6 +148,37 @@ export function StudioApp({
       break;
     case 'share':
       content = <ShareView api={api} onError={handleError} />;
+      break;
+    case 'ai-review':
+      content = aiResult ? (
+        <AiReviewView
+          api={api}
+          result={aiResult}
+          onAccept={() => {
+            void (async () => {
+              const packageDir = await Promise.resolve(api.getPackageDir()).catch(() => '');
+              clearAiReview();
+              recordRecentCourse({
+                id: aiResult.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'ai-course',
+                title: aiResult.title || 'AI draft course',
+                packageDir,
+                updatedAt: Date.now(),
+              });
+              handleNavigate('outline');
+            })();
+          }}
+          onReject={() => {
+            clearAiReview();
+            handleNavigate('home');
+          }}
+          onError={handleError}
+        />
+      ) : (
+        <EmptyState
+          heading={t('studio.ai.reviewTitle')}
+          description={t('studio.ai.errorGeneric')}
+        />
+      );
       break;
   }
 
