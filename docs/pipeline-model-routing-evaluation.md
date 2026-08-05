@@ -77,8 +77,8 @@ Evaluate Lesson 1 (Numbers) with three configurations:
 ## Production Command
 
 ```bash
-pnpm --filter @open-edu/pipeline build
-pnpm --filter @open-edu/pipeline curriculum:generate \
+pnpm build
+pnpm curriculum:generate \
   --pdf /Users/sarthakpatnaik/Code/learn-easy/pdf/Math_Level_B_english_medium.pdf \
   --level B --subject math --chapter 1 \
   --output-dir /tmp/openedu-math-level-b --format both --verbose
@@ -87,7 +87,7 @@ pnpm --filter @open-edu/pipeline curriculum:generate \
 With stage overrides:
 
 ```bash
-pnpm --filter @open-edu/pipeline curriculum:generate \
+pnpm curriculum:generate \
   --pdf /Users/sarthakpatnaik/Code/learn-easy/pdf/Math_Level_B_english_medium.pdf \
   --level B --subject math --chapter 1 \
   --output-dir /tmp/openedu-math-level-b --format both --verbose \
@@ -99,6 +99,6 @@ pnpm --filter @open-edu/pipeline curriculum:generate \
 To resume from intermediate artifacts:
 
 ```bash
-pnpm --filter @open-edu/pipeline curriculum:generate \
+pnpm curriculum:generate \
   ... --resume --output-dir /tmp/openedu-math-level-b
 ```

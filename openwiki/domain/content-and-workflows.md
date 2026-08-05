@@ -141,7 +141,7 @@ All commands are executed as structured `argv` arrays via `spawnSync` — never 
 
 ### Source materials (PDF pipeline)
 
-When users supply PDF textbooks, the skill routes through `@open-edu/pipeline` with profile-aware generation (generic/math/science/nios). Pipeline artifacts (source inventory, concept map, blueprint, coverage report) are preserved in output.
+When users supply PDF textbooks, the skill routes through the standalone `open-edu-pipeline` repo with profile-aware generation (generic/math/science/nios). Pipeline artifacts (source inventory, concept map, blueprint, coverage report) are preserved in output.
 
 ### Evaluation framework
 
@@ -170,31 +170,4 @@ Widget-based exercises depend on the registry and catalog pipeline. The canonica
 
 ## Pipeline: content-to-course-spec generation
 
-The `@open-edu/pipeline` package generates course specifications from educational source files (PDF, DOCX, PPTX, Markdown, Images, ZIP) through an 8-stage AI-driven pipeline. Extraction is handled by a pluggable `Extractor` interface backed by `@llamaindex/liteparse`.
-
-### Profiles
-
-Curriculum profiles adapt generation behavior per subject. Each profile declares its taxonomy labels, concept kinds, widget categories, asset renderers, validators, and prompt context. Four built-in profiles ship with the pipeline:
-
-- **generic** — fallback for any unknown subject, uses core widgets only
-- **math** — mathematics with CPA teaching style, 11 SVG renderers, math-specific widgets and validators
-- **science** — observation→classification→explanation style, process diagrams, classification questions
-- **nios** — NIOS curriculum adapter with Hindi/English bilingual taxonomy labels
-
-Profiles are resolved automatically from the `--subject` flag or explicitly via `--profile`. Subject-specific behavior (NIOS markers, math widgets, science validators) lives entirely in profiles — the pipeline core is profile-agnostic.
-
-### Document scope
-
-The `--scope` option controls which portion of the document is processed: entire document, a single chapter by index or ID, a page range, or specific source unit IDs.
-
-### Resume & artifact identity
-
-The pipeline computes a config hash from PDF content, profile, scope, and stage model configs. On `--resume`, intermediate artifacts are reused if the hash matches. Cross-scope reuse is prevented.
-
-### Adding a new subject
-
-To add a new subject without changing pipeline orchestration:
-
-1. Create a profile in `packages/pipeline/src/profile/builtins/`
-2. Register it in `packages/pipeline/src/profile/registry.ts`
-3. Optionally add validators (`validation/`) and renderers (`assets/registry.ts`)
+The curriculum pipeline moved to the standalone [`open-edu-pipeline`](https://github.com/KnowledgeAssembly/open-edu-pipeline) repository. It generates course specifications from educational source files (PDF, DOCX, PPTX, Markdown, Images, ZIP) through an 8-stage AI-driven pipeline with profile-aware generation (generic/math/science/nios). See that repo's `packages/pipeline/README.md` for CLI usage, profiles, scope options, and resume behavior.

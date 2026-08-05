@@ -53,12 +53,8 @@ pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle
 pnpm --filter @open-edu/course-compiler test  # Run course-compiler tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile course-spec.md -o ./output  # Compile a course spec (also supports .json)
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --level B --subject math  # Generate curriculum from PDF (auto-resolves profile)
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --profile math --scope chapter-index:1  # Single chapter, explicit profile
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --subject science --profile science  # Science profile
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --format json  # JSON-only pipeline output
-pnpm --filter @open-edu/pipeline test  # Run pipeline tests
-pnpm --filter @open-edu/pipeline test -- generic-pipeline  # Run acceptance tests
+# The curriculum pipeline lives in the standalone open-edu-pipeline repo:
+#   cd ../open-edu-pipeline && pnpm curriculum:generate --pdf ./textbook.pdf --level B --subject math
 pnpm --filter @open-edu/registry test  # Run registry package tests
 pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-data.json from canonical source
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales  # Extract translatable strings
@@ -89,7 +85,6 @@ open-edu/
 │   ├── rewards/             # Reward broker + CardBroker + conditions + verification + replay
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
-│   ├── pipeline/            # AI-driven content → course spec pipeline (8-stage, pluggable extraction, profile-aware)
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
 │   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
@@ -143,7 +138,7 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
 - `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
-- `@open-edu/pipeline`, `@open-edu/llm-config`, `@open-edu/i18n`
+- `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
 - `@open-edu/oep-distribution`
 - `@open-edu/registry`
@@ -176,13 +171,11 @@ Epic 29 (Course Compiler)
 Epic 30 (Step Titles)
   └─► Epics 2, 3, 4, 5 (adds `title` to ContentNode schema, extracts from markdown, fixes COMPLETED sentinel, updates runtime UI)
 
-Epic 31 (Pipeline)
-  └─► Epics 2, 3, 29, widgets (AI-generated PDF → course-spec via LLM pipeline — 8 stages, 4 profiles)
-        └─► @open-edu/llm-config (LLM provider abstraction)
-              └─► @open-edu/pipeline (8-stage PDF → course-spec.md)
+Epic 31 (Pipeline) — moved to the standalone open-edu-pipeline repo
+  └─► @open-edu/pipeline-llm (vendored LLM provider abstraction, forked from @open-edu/llm-config)
 
 Epic 32 (LLM Config)
-  └─► Epic 31 (LLM provider abstraction — OpenAI + OpenRouter)
+  └─► @open-edu/llm-config (LLM provider abstraction — OpenAI + OpenRouter, used by apps/learner)
 
 Epic 298 (Recognition Engine)
   └─► Epics 2, 3, 8, 5, 13 (card schemas, loader, CardBroker, card UI components, Collection Binder learner app integration)

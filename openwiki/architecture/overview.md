@@ -91,30 +91,11 @@ Compiles course-spec Markdown or JSON into validated package structures.
 
 The `skills/openedu-course-authoring/` directory contains the portable agentic course-authoring skill. It uses the course-compiler and CLI as its authoritative validation backend, distinguishing between structural-only validation (portable mode) and full compiler validation (repository mode). See [content and workflows](../domain/content-and-workflows.md#agentic-course-authoring) for the complete reference.
 
-### `@open-edu/pipeline` and `@open-edu/llm-config`
+### `@open-edu/llm-config`
 
-Support AI-assisted curriculum generation from PDFs and abstract over model providers.
+LLM provider abstraction (OpenAI + OpenRouter) with per-stage model routing, environment-variable and CLI overrides, and a **ModelFactory** with two-tier routing (fast/escalation) for AI SDK v4 streaming. Consumed by the learner app's Pipili/LLM proxies.
 
-**Pipeline** (`@open-edu/pipeline`) implements an 8-stage content-to-course-spec pipeline:
-
-1. **Extract** — Pluggable extraction via `@llamaindex/liteparse` (PDF, DOCX, PPTX, images, Markdown)
-2. **Source Inventory** — Taxonomy-driven unit classification + LLM reclassification
-3. **Concept Map** — LLM generates teachable concepts with profile-aware prompts
-4. **Lesson Blueprints** — Per-concept blueprints with arcs, widget requests, asset requests
-5. **Activity Generation** — Activities generated from blueprint lesson arcs
-6. **Asset Plan** — LLM-planned visual assets rendered by SVG registry
-7. **Validation** — Pluggable validators (structure, math, science), widget configs, coverage
-8. **Output** — Renders course-spec.json + course-spec.md
-
-Key architecture:
-
-- **Curriculum profiles** (`profile/`) — generic, math, science, nios profiles control widgets, renderers, validators, and prompt context. Unknown subjects fall back to generic.
-- **Document scope** (`scope/`) — Supports `all`, `chapter-index:N`, `chapter-id:ID`, `pages:A-B`, `source-units:id,id`.
-- **Renderer registry** (`assets/registry.ts`) — 11 built-in SVG renderers, extensible per profile.
-- **Validator registry** (`validation/registry.ts`) — Pluggable subject validators run only when profile enables them.
-- **Resume & artifact identity** — Config hash includes PDF content, profile, scope, language, locale; `pipeline-manifest.json` prevents cross-scope reuse.
-
-**LLM Config** (`@open-edu/llm-config`) provides per-stage model routing with environment variable and CLI override support. Stages with low reasoning needs (classification, generation) use `gpt-4o-mini`; structural stages (concept design, blueprinting, review) use stronger reasoning models like `gpt-4o`. Also includes a **ModelFactory** with two-tier routing (fast/escalation) for AI SDK v4 streaming, provider capability reporting, and environment variable-driven model resolution.
+> The curriculum pipeline (`@open-edu/pipeline`) moved to the standalone [`open-edu-pipeline`](https://github.com/KnowledgeAssembly/open-edu-pipeline) repository, which vendors a renamed copy of this package as `@open-edu/pipeline-llm`.
 
 ### `@open-edu/ai-companion`
 

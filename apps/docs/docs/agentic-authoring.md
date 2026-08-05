@@ -141,14 +141,14 @@ When the catalog is unavailable:
 
 ## Source Materials (PDF Pipeline)
 
-When you supply a PDF textbook, the skill integrates with `@open-edu/pipeline`:
+When you supply a PDF textbook, the skill integrates with the standalone `open-edu-pipeline` project:
 
 ```bash
 # Math textbook — auto-resolves the math profile
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --subject math
+pnpm curriculum:generate --pdf ./textbook.pdf --subject math
 
 # Single chapter only
-pnpm --filter @open-edu/pipeline curriculum:generate --pdf ./textbook.pdf --profile science --scope chapter-index:1
+pnpm curriculum:generate --pdf ./textbook.pdf --profile science --scope chapter-index:1
 ```
 
 Pipeline artifacts (source inventory, concept map, blueprint, coverage report) are preserved in the output. The skill transforms `course-spec.md` into canonical `course-spec.json`.
