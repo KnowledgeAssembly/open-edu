@@ -262,4 +262,22 @@ describe('OasAnimationWrapper', () => {
     cssRoot.dispatchEvent(new Event('animationend', { bubbles: true }));
     expect(onComplete).toHaveBeenCalled();
   });
+
+  it('calls onComplete when lottie errors with no mappable effects', () => {
+    const onComplete = vi.fn();
+    render(
+      <OasAnimationWrapper
+        config={{
+          backend: 'lottie',
+          src: 'assets/rewards/missing.lottie',
+        }}
+        onComplete={onComplete}
+      />,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByTestId('mock-error'));
+    expect(screen.getByTestId('css-animation-renderer')).toBeInTheDocument();
+    expect(onComplete).toHaveBeenCalled();
+  });
 });

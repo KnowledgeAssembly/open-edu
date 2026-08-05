@@ -31,9 +31,10 @@ const effectToDuration: Record<string, string> = {
   pulse: oasDurationVar('fast'),
   glow: oasDurationVar('slow'),
   badge: oasDurationVar('slow'),
-  confetti: '1800ms', // 600ms × 3 iterations
-  sparkle: '600ms', // 200ms × 3 iterations
-  celebrate: '600ms', // 300ms × 2 iterations
+  // Per-iteration durations — must match animations.css.ts so iteration-count is not multiplied
+  confetti: '600ms',
+  sparkle: oasDurationVar('normal'),
+  celebrate: oasDurationVar('slow'),
 };
 
 let cssInjected = false;
@@ -69,13 +70,18 @@ export function CssAnimationRenderer({
     onCompleteRef.current?.();
   }, []);
 
+  // Stabilize completion resets on semantic effect changes only — parents often pass new
+  // array/callback identities each render (e.g. .filter() in OasAnimationWrapper).
+  const effectsKey = effects.map((e) => `${e.target}:${e.effect}:${e.step ?? ''}`).join('|');
+  const hasMappableEffect = effects.some((e) => effectToClass[e.effect]);
+
   useEffect(() => {
     completedRef.current = false;
     if (!onCompleteRef.current) return;
-    if (reducedMotion || !effects.some((e) => effectToClass[e.effect])) {
+    if (reducedMotion || !hasMappableEffect) {
       notifyComplete();
     }
-  }, [effects, reducedMotion, onComplete, notifyComplete]);
+  }, [effectsKey, hasMappableEffect, reducedMotion, notifyComplete]);
 
   const animationStyles = useMemo(() => {
     if (reducedMotion || effects.length === 0) return undefined;

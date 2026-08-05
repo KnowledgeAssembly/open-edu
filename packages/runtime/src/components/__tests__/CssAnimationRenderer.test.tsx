@@ -109,6 +109,69 @@ describe('CssAnimationRenderer celebration effects', () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
+  it('does not reset completion when onComplete identity changes after animationend', () => {
+    const first = vi.fn();
+    const { rerender } = render(
+      <CssAnimationRenderer
+        effects={[{ target: 'reward', effect: 'badge' }]}
+        reducedMotion={false}
+        onComplete={first}
+      >
+        <p>Reward</p>
+      </CssAnimationRenderer>,
+      { wrapper },
+    );
+    const el = screen.getByTestId('css-animation-renderer');
+    el.dispatchEvent(new Event('animationend', { bubbles: true }));
+    expect(first).toHaveBeenCalledTimes(1);
+
+    const second = vi.fn();
+    // New effects array + callback identities (common parent pattern) must not reopen completion
+    rerender(
+      <CssAnimationRenderer
+        effects={[{ target: 'reward', effect: 'badge' }]}
+        reducedMotion={false}
+        onComplete={second}
+      >
+        <p>Reward</p>
+      </CssAnimationRenderer>,
+    );
+    el.dispatchEvent(new Event('animationend', { bubbles: true }));
+    expect(second).not.toHaveBeenCalled();
+    expect(first).toHaveBeenCalledTimes(1);
+  });
+
+  it('invokes the latest onComplete when identity changes before animationend', () => {
+    const first = vi.fn();
+    const { rerender } = render(
+      <CssAnimationRenderer
+        effects={[{ target: 'reward', effect: 'badge' }]}
+        reducedMotion={false}
+        onComplete={first}
+      >
+        <p>Reward</p>
+      </CssAnimationRenderer>,
+      { wrapper },
+    );
+
+    const second = vi.fn();
+    rerender(
+      <CssAnimationRenderer
+        effects={[{ target: 'reward', effect: 'badge' }]}
+        reducedMotion={false}
+        onComplete={second}
+      >
+        <p>Reward</p>
+      </CssAnimationRenderer>,
+    );
+
+    screen
+      .getByTestId('css-animation-renderer')
+      .dispatchEvent(new Event('animationend', { bubbles: true }));
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onComplete immediately when reducedMotion is true', () => {
     const onComplete = vi.fn();
     render(

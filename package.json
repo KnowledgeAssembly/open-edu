@@ -61,7 +61,7 @@
   },
   "lint-staged": {
     "packages/runtime/src/**/*.{ts,tsx}": [
-      "eslint --fix",
+      "pnpm --dir packages/runtime exec eslint --fix",
       "prettier --write"
     ],
     "packages/design-system/src/**/*.{ts,tsx}": [
