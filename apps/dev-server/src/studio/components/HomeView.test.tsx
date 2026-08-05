@@ -50,16 +50,32 @@ describe('HomeView', () => {
     expect(screen.getByText('Short unit')).toBeInTheDocument();
   });
 
-  it('applies a template and calls onOpened', async () => {
+  it('applies a template after overwrite confirmation', async () => {
+    const api = makeApi();
+    const onOpened = vi.fn();
+    render(
+      wrap(<HomeView api={api} onOpened={onOpened} onError={() => {}} onOpenCurrent={() => {}} />),
+    );
+    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    expect(api.applyTemplate).not.toHaveBeenCalled();
+    expect(screen.getByText('Replace this course?')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
+    expect(api.applyTemplate).toHaveBeenCalledWith('reading-lesson');
+    expect(onOpened).toHaveBeenCalled();
+  });
+
+  it('cancels template overwrite without applying', async () => {
     const api = makeApi();
     render(
       wrap(<HomeView api={api} onOpened={vi.fn()} onError={() => {}} onOpenCurrent={() => {}} />),
     );
     await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
-    expect(api.applyTemplate).toHaveBeenCalledWith('reading-lesson');
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(api.applyTemplate).not.toHaveBeenCalled();
+    expect(screen.queryByText('Replace this course?')).not.toBeInTheDocument();
   });
 
-  it('calls onError when template apply fails', async () => {
+  it('calls onError when template apply fails after confirm', async () => {
     const onError = vi.fn();
     const api = makeApi({
       applyTemplate: vi.fn().mockRejectedValue(new Error('boom')),
@@ -68,6 +84,7 @@ describe('HomeView', () => {
       wrap(<HomeView api={api} onOpened={() => {}} onError={onError} onOpenCurrent={() => {}} />),
     );
     await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
     expect(onError).toHaveBeenCalledWith('boom');
   });
 

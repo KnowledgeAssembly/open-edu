@@ -487,6 +487,7 @@ export function DevApp(): JSX.Element {
           mode={studioMode}
           onModeChange={setStudioModeAndPersist}
           loadedPackage={loadedPkg}
+          bundleUnsupported={Boolean(loadedBundle)}
         />
       </RuntimeThemeProvider>
     );

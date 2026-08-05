@@ -1,10 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { EmptyState } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { HomeView } from './components/HomeView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioTopBar } from './components/StudioTopBar.js';
+import { ModeToggle } from './components/ModeToggle.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
@@ -21,17 +23,20 @@ export function StudioApp({
   mode,
   onModeChange,
   loadedPackage,
+  bundleUnsupported = false,
 }: {
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
   loadedPackage: LoadedPackage | null;
+  /** When true, Creator is open against a bundle — no package mutations. */
+  bundleUnsupported?: boolean;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<StudioView>(() => readStudioView());
   const [selectedPath, setSelectedPath] = useState<string | null>(() => readSelectedPath());
   const [courseTitle, setCourseTitle] = useState<string | undefined>(loadedPackage?.manifest.title);
   const [error, setError] = useState<string | null>(null);
-  const api = createStudioApi();
+  const api = useMemo(() => createStudioApi(), []);
 
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
@@ -63,6 +68,29 @@ export function StudioApp({
     setError(message);
     window.setTimeout(() => setError(null), 4000);
   }, []);
+
+  if (bundleUnsupported) {
+    return (
+      <div className="flex h-screen flex-col">
+        <header className="border-outline-variant bg-surface flex flex-wrap items-center gap-3 border-b px-4 py-3">
+          <div className="text-on-surface font-semibold tracking-tight">
+            {t('studio.brand.name')}
+            <span className="text-on-surface-variant ml-2 text-sm font-normal">
+              {t('studio.brand.subtitle')}
+            </span>
+          </div>
+          <div className="flex-1" />
+          <ModeToggle mode={mode} onChange={onModeChange} />
+        </header>
+        <main className="bg-surface flex min-h-0 flex-1 items-center justify-center p-6">
+          <EmptyState
+            heading={t('studio.bundle.unsupportedHeading')}
+            description={t('studio.bundle.unsupportedLede')}
+          />
+        </main>
+      </div>
+    );
+  }
 
   let content: React.ReactNode;
   switch (view) {

@@ -785,6 +785,15 @@ function eduPackageLoader(): Plugin {
 
           // GET /api/package/outline — derive ordered activities + title
           if (pathname === '/api/package/outline' && method === 'GET') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
             const manifestPath = join(currentDir, 'package.json');
             if (!existsSync(manifestPath)) {
               res.statusCode = 404;
@@ -813,6 +822,15 @@ function eduPackageLoader(): Plugin {
 
           // PUT /api/package/outline — persist linear order into workflow.json + manifest entry
           if (pathname === '/api/package/outline' && method === 'PUT') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
             const body = (await parseJsonBody(req)) as { orderedPaths?: string[] };
             const orderedPaths = Array.isArray(body.orderedPaths) ? body.orderedPaths : [];
             if (orderedPaths.length === 0) {
@@ -888,14 +906,33 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
+
             if (body.force === true) {
-              // Replace the whole course: clear nodes + generated manifest/workflow so the
+              // Replace the whole course: clear nodes + course sidecars so the
               // exported .oep never carries orphans from a previous course.
               const nodesDir = join(currentDir, 'nodes');
               if (existsSync(nodesDir)) {
                 await rm(nodesDir, { recursive: true, force: true });
               }
-              for (const rel of ['workflow.json', 'package.json']) {
+              const assetsDir = join(currentDir, 'assets');
+              if (existsSync(assetsDir)) {
+                await rm(assetsDir, { recursive: true, force: true });
+              }
+              for (const rel of [
+                'workflow.json',
+                'package.json',
+                'rewards.json',
+                'cards.json',
+              ]) {
                 const abs = join(currentDir, rel);
                 if (existsSync(abs)) {
                   await rm(abs, { force: true });
@@ -936,6 +973,15 @@ function eduPackageLoader(): Plugin {
 
           // POST /api/package/export-oep — build a .oep archive and stream it as a download
           if (pathname === '/api/package/export-oep' && method === 'POST') {
+            if (isBundleMode) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  error: 'Creator package APIs are not available in bundle mode.',
+                }),
+              );
+              return;
+            }
             try {
               const pkg = await loadPackage(currentDir);
               const courseFiles = collectCourseFiles(currentDir);

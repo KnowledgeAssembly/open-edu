@@ -77,6 +77,8 @@ describe('DevApp bundle mode', () => {
   it('defaults to Creator chrome for bundles and hides DevTools', async () => {
     renderWithI18n();
     expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
+    expect(await screen.findByText('Bundles need Developer mode')).toBeInTheDocument();
+    expect(screen.queryByText('Reading lesson')).not.toBeInTheDocument();
     expect(
       screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
     ).not.toBeInTheDocument();
@@ -84,11 +86,11 @@ describe('DevApp bundle mode', () => {
 
   it('switches a bundle to developer mode and back', async () => {
     renderWithI18n();
-    await screen.findByText('OpenEdu Studio');
+    await screen.findByText('Bundles need Developer mode');
     await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
     expect(await screen.findByText('Bundle Mode')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
+    expect(await screen.findByText('Bundles need Developer mode')).toBeInTheDocument();
   });
 });

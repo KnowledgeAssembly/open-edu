@@ -70,6 +70,11 @@ describe('StudioApp', () => {
     sessionStorage.clear();
   });
 
+  async function useTemplateAndConfirm() {
+    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
+  }
+
   it('renders studio chrome with mode toggle', () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     expect(screen.getByText('OpenEdu Studio')).toBeInTheDocument();
@@ -83,20 +88,20 @@ describe('StudioApp', () => {
 
   it('navigates to outline after opening a template', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await useTemplateAndConfirm();
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 
   it('navigates to share via top bar nav', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await useTemplateAndConfirm();
     await userEvent.click(await screen.findByRole('button', { name: /share/i }));
     expect(await screen.findByText('Ready check')).toBeInTheDocument();
   });
 
   it('opens the activity editor from the outline', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await useTemplateAndConfirm();
     await screen.findByText('Intro');
     const editButtons = await screen.findAllByRole('button', { name: /edit/i });
     await userEvent.click(editButtons[0]!);
@@ -105,7 +110,7 @@ describe('StudioApp', () => {
 
   it('records a recent course when opening a template', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    await useTemplateAndConfirm();
     await screen.findByText('Intro');
     const recent = localStorage.getItem('openedu.studio.recent');
     expect(recent).toBeTruthy();
@@ -129,5 +134,21 @@ describe('StudioApp', () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /open this course/i }));
     expect(await screen.findByText('Intro')).toBeInTheDocument();
+  });
+
+  it('shows an unsupported shell for bundles without package mutations', () => {
+    render(
+      wrap(
+        <StudioApp
+          mode="creator"
+          onModeChange={() => {}}
+          loadedPackage={null}
+          bundleUnsupported
+        />,
+      ),
+    );
+    expect(screen.getByText('Bundles need Developer mode')).toBeInTheDocument();
+    expect(screen.queryByText('Reading lesson')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /outline/i })).not.toBeInTheDocument();
   });
 });

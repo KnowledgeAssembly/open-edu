@@ -17,6 +17,9 @@ describe('outlineModel', () => {
     expect(detectActivityKind('nodes/p.json', '{"type":"widget","widget":"flashcard"}')).toBe(
       'practice',
     );
+    expect(detectActivityKind('nodes/w.json', '{"type":"custom","widget":"flashcard"}')).toBe(
+      'practice',
+    );
     expect(detectActivityKind('nodes/x.json', 'not json')).toBe('other');
   });
 

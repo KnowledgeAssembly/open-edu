@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Button,
   Card,
@@ -5,6 +6,12 @@ import {
   CardDescription,
   CardContent,
   EmptyState,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
 } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { STUDIO_TEMPLATES } from '../templates/catalog.js';
@@ -26,13 +33,20 @@ export function HomeView({
 }) {
   const { t } = useTranslation();
   const recent = listRecentCourses();
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
 
-  const handleUseTemplate = async (templateId: string) => {
+  const handleConfirmOverwrite = async () => {
+    if (!pendingTemplateId) return;
+    setApplying(true);
     try {
-      await api.applyTemplate(templateId);
+      await api.applyTemplate(pendingTemplateId);
+      setPendingTemplateId(null);
       onOpened();
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+    } finally {
+      setApplying(false);
     }
   };
 
@@ -70,7 +84,11 @@ export function HomeView({
               <CardTitle className="text-on-surface px-6 pt-6">{t(template.titleKey)}</CardTitle>
               <CardDescription className="px-6 pt-2">{t(template.descriptionKey)}</CardDescription>
               <CardContent className="flex items-center gap-3 px-6 pt-4">
-                <Button variant="default" size="sm" onClick={() => handleUseTemplate(template.id)}>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setPendingTemplateId(template.id)}
+                >
                   {t('studio.home.useTemplate')}
                 </Button>
               </CardContent>
@@ -113,6 +131,38 @@ export function HomeView({
           </ul>
         )}
       </section>
+
+      <Dialog
+        open={pendingTemplateId !== null}
+        onOpenChange={(open) => {
+          if (!open && !applying) setPendingTemplateId(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('studio.home.overwriteTitle')}</DialogTitle>
+            <DialogDescription>{t('studio.home.overwriteLede')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={applying}
+              onClick={() => setPendingTemplateId(null)}
+            >
+              {t('studio.home.overwriteCancel')}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={applying}
+              onClick={() => void handleConfirmOverwrite()}
+            >
+              {t('studio.home.overwriteConfirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
