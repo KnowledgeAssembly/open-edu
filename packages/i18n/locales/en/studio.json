@@ -60,5 +60,13 @@
   "ready.packageValid": "Package files are valid",
   "preview.resetProgress": "Reset progress",
   "developer.openEditors": "Open file editors",
-  "errors.generic": "Something went wrong. Try again."
+  "errors.generic": "Something went wrong. Try again.",
+  "template.readingLesson.title": "Reading lesson",
+  "template.readingLesson.description": "A single Markdown lesson you can edit and share.",
+  "template.lessonQuiz.title": "Lesson + quiz",
+  "template.lessonQuiz.description": "A lesson followed by a multiple-choice check.",
+  "template.practiceStub.title": "Practice warm-up",
+  "template.practiceStub.description": "A lesson with a practice quiz to reinforce it.",
+  "template.shortUnit.title": "Short unit",
+  "template.shortUnit.description": "Lesson, quiz, and a closing lesson for a mini unit."
 }
