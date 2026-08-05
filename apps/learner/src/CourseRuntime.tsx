@@ -22,7 +22,7 @@ import { getProgress, saveProgress } from './progressStorage';
 import { saveBundleProgress } from './bundleProgressStorage';
 import { addBadge } from './badgesStorage';
 import { saveCardProgress, getAllCardProgress } from './cardsStorage';
-import { Button, cn } from '@open-edu/design-system';
+import { Button } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
 import { useCompanion } from './ai';
 
@@ -39,7 +39,6 @@ export interface CourseRuntimeProps {
   children?: ReactNode;
   header?: ReactNode;
   hideLayoutShellHeader?: boolean;
-  sidebarCollapsed?: boolean;
   onProgressUpdate?: (current: number, total: number) => void;
   bundleContext?: BundleCourseContext;
 }
@@ -50,7 +49,6 @@ export function CourseRuntime({
   children,
   header,
   hideLayoutShellHeader,
-  sidebarCollapsed = false,
   onProgressUpdate,
   bundleContext,
 }: CourseRuntimeProps): JSX.Element {
@@ -410,12 +408,7 @@ export function CourseRuntime({
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           {children && (
-            <div
-              className={cn(
-                'border-outline-variant shrink-0 overflow-y-auto border-r transition-[width] duration-200',
-                sidebarCollapsed ? 'w-16' : 'w-[var(--oe-space-panel-nav)]',
-              )}
-            >
+            <div className="border-outline-variant shrink-0 overflow-y-auto border-r">
               {children}
             </div>
           )}

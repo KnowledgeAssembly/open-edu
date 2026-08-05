@@ -41,9 +41,16 @@ export interface AppSidebarProps {
  * `(hover: hover) and (pointer: fine)`. Used to gate temporary hover expansion
  * of a pinned-collapsed sidebar so touch / coarse-pointer devices keep the
  * toggle-only behavior.
+ *
+ * The initial value is read synchronously (lazy initial state) so the sidebar
+ * is hover-ready on the very first render instead of waiting for a mount
+ * effect; the effect keeps the value in sync with live media-query changes.
  */
 function useFinePointer(): boolean {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
