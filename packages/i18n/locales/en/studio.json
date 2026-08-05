@@ -113,6 +113,8 @@
   "flow.removeBranch": "Remove rule",
   "flow.endCourse": "End course",
   "flow.scorePercentHint": "Scores are 0–100. Example: 80 means a learner who scores at least 80% passes.",
+  "flow.advancedPreserved": "Some advanced rules aren't shown here and will be replaced when you save.",
+  "flow.empty": "Add activities in the Outline first, then come back to shape the learning path.",
   "rewards.title": "Rewards & cards",
   "rewards.addBadge": "Add completion badge",
   "rewards.badgeName": "Badge name",
