@@ -67,7 +67,8 @@ export function SvgStepRenderer({
     async function load() {
       try {
         let text: string;
-        if (src.trimStart().startsWith('<svg')) {
+        const trimmed = src.trimStart();
+        if (trimmed.startsWith('<svg') || trimmed.startsWith('<?xml')) {
           text = src;
         } else {
           const res = await fetch(src);

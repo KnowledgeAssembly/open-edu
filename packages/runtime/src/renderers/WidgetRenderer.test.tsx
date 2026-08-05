@@ -122,7 +122,7 @@ describe('WidgetRenderer', () => {
     );
 
     expect(screen.getByTestId('widget-renderer-placeholder')).toBeInTheDocument();
-    expect(screen.getByText(/runtime\.widget\.no_registered/)).toBeInTheDocument();
+    expect(screen.getByText(/No widget registered for ID: nonexistent/)).toBeInTheDocument();
   });
 
   it('renders placeholder when widget registry is undefined', () => {
@@ -322,7 +322,9 @@ describe('WidgetRenderer', () => {
       version: '1.0.0',
       render: (props) => (
         <div data-testid="reveal-widget">
-          <span data-testid="synced-count">{String(props.syncedRevealedCount ?? 'uncontrolled')}</span>
+          <span data-testid="synced-count">
+            {String(props.syncedRevealedCount ?? 'uncontrolled')}
+          </span>
           <button
             type="button"
             onClick={() =>
