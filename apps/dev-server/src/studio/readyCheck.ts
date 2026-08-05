@@ -50,6 +50,39 @@ export function buildReadyCheck(input: ReadyCheckInput): ReadyCheckItem[] {
     labelKey: 'studio.ready.markdownHasHeading',
     passed: lessonsOk,
   });
+
+  let rewardsOk = true;
+  if (input.files.has('rewards.json')) {
+    try {
+      JSON.parse(input.files.get('rewards.json')!);
+    } catch {
+      rewardsOk = false;
+    }
+  }
+  items.push({
+    id: 'rewardsParse',
+    labelKey: 'studio.ready.rewardsParse',
+    passed: rewardsOk,
+  });
+
+  let practiceOk = true;
+  for (const path of nodePaths) {
+    const content = input.files.get(path) ?? '';
+    if (detectActivityKind(path, content) === 'practice') {
+      try {
+        const parsed = JSON.parse(content) as { widget?: unknown };
+        if (typeof parsed.widget !== 'string' || parsed.widget.trim() === '') practiceOk = false;
+      } catch {
+        practiceOk = false;
+      }
+    }
+  }
+  items.push({
+    id: 'practiceWidgetValid',
+    labelKey: 'studio.ready.practiceWidgetValid',
+    passed: practiceOk,
+  });
+
   items.push({
     id: 'packageValid',
     labelKey: 'studio.ready.packageValid',
