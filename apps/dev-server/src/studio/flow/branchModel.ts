@@ -10,8 +10,8 @@ export interface ScoreBranchRule {
 export const SCORE_PATTERN: RegExp = /^score\s*(>=|<=|==|>|<)\s*(\d+)\s*$/;
 
 const COMPLETED = 'COMPLETED';
-const PASS_OPERATORS = new Set(['>=', '>']);
-const FAIL_OPERATORS = new Set(['<', '<=']);
+const MIN_SCORE = 0;
+const MAX_SCORE = 100;
 
 interface ParsedScoreCondition {
   op: string;
@@ -35,13 +35,11 @@ function parsePairedConditions(
   const b = parseScoreCondition(second);
   if (!a || !b || a.threshold !== b.threshold) return null;
 
-  const aPass = PASS_OPERATORS.has(a.op);
-  const aFail = FAIL_OPERATORS.has(a.op);
-  const bPass = PASS_OPERATORS.has(b.op);
-  const bFail = FAIL_OPERATORS.has(b.op);
-
-  if (aPass && bFail) return { minScore: a.threshold, passPath: a.then, failPath: b.then };
-  if (aFail && bPass) return { minScore: b.threshold, passPath: b.then, failPath: a.then };
+  // Canonical paired pattern only: `score >= N` (pass) then `score < N` (fail).
+  // Re-applying preserves the exact boundary, so the round-trip is lossless.
+  if (a.op === '>=' && b.op === '<') {
+    return { minScore: a.threshold, passPath: a.then, failPath: b.then };
+  }
   return null;
 }
 
@@ -57,7 +55,7 @@ export function extractScoreBranches(workflow: Workflow): ScoreBranchRule[] {
 }
 
 export function applyScoreBranch(workflow: Workflow, rule: ScoreBranchRule): Workflow {
-  const minScore = Math.round(rule.minScore);
+  const minScore = Math.min(MAX_SCORE, Math.max(MIN_SCORE, Math.round(rule.minScore)));
   return {
     routing: {
       ...workflow.routing,

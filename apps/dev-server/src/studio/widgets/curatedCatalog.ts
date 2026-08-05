@@ -1,5 +1,5 @@
-import { createDefaultRegistry } from '@open-edu/widgets';
-import type { WidgetDefinitionV2 } from '@open-edu/widgets';
+import { createDefaultRegistry, WIDGET_CATALOG_ENTRIES } from '@open-edu/widgets';
+import type { WidgetDefinitionV2, WidgetGuideConfigField } from '@open-edu/widgets';
 
 export interface CuratedWidget {
   id: string;
@@ -8,9 +8,7 @@ export interface CuratedWidget {
   domain?: string;
   status?: string;
   deprecated?: boolean;
-  guide?: {
-    configFields?: Array<{ name: string; type: string; required: boolean; description: string }>;
-  };
+  guide?: { configFields?: WidgetGuideConfigField[] };
 }
 
 export const CURATED_WIDGET_IDS = [
@@ -20,27 +18,24 @@ export const CURATED_WIDGET_IDS = [
   'math.fraction-visual',
 ] as const;
 
-type DefinitionWithGuide = WidgetDefinitionV2 & { guide?: CuratedWidget['guide'] };
-
-const DEFINITION_TO_CURATED = (def: WidgetDefinitionV2): CuratedWidget => {
-  const withGuide = def as DefinitionWithGuide;
-  return {
-    id: def.id,
-    name: def.name ?? def.id,
-    description: def.description,
-    domain: def.domain,
-    status: def.status,
-    deprecated: def.deprecated,
-    guide: withGuide.guide,
-  };
-};
+const GUIDE_BY_ID: Record<string, CuratedWidget['guide']> = Object.fromEntries(
+  WIDGET_CATALOG_ENTRIES.map((entry) => [entry.id, entry.guide]),
+);
 
 function loadRegistryWidgets(): Map<string, CuratedWidget> {
   const registry = createDefaultRegistry();
   const widgets = new Map<string, CuratedWidget>();
   for (const def of registry.getAll()) {
     const v2 = def as WidgetDefinitionV2;
-    widgets.set(v2.id, DEFINITION_TO_CURATED(v2));
+    widgets.set(v2.id, {
+      id: v2.id,
+      name: v2.name ?? v2.id,
+      description: v2.description,
+      domain: v2.domain,
+      status: v2.status,
+      deprecated: v2.deprecated,
+      guide: GUIDE_BY_ID[v2.id],
+    });
   }
   return widgets;
 }

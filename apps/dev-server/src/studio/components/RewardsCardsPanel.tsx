@@ -387,6 +387,9 @@ export function RewardsCardsPanel({
                 aria-label={t('studio.rewards.cardBody')}
               />
             </label>
+            {activities.length === 0 ? (
+              <p className="text-on-surface-variant text-sm">{t('studio.rewards.noActivity')}</p>
+            ) : null}
             <DialogFooter>
               <Button variant="outline" size="sm" onClick={() => setCardOpen(false)}>
                 {t('studio.rewards.cancel')}
@@ -394,7 +397,9 @@ export function RewardsCardsPanel({
               <Button
                 variant="default"
                 size="sm"
-                disabled={!cardTitle.trim() || !cardBody.trim() || saving}
+                disabled={
+                  !cardTitle.trim() || !cardBody.trim() || activities.length === 0 || saving
+                }
                 onClick={() => void handleAddCard()}
               >
                 {t('studio.rewards.confirm')}

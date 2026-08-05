@@ -43,7 +43,7 @@ describe('branchModel', () => {
       });
     });
 
-    it('recognizes the mirrored `> N` / `<= N` pattern', () => {
+    it('ignores mirrored `> N` / `<= N` patterns (lossless round-trip only)', () => {
       const workflow: Workflow = {
         routing: {
           'nodes/quiz.json': {
@@ -54,13 +54,7 @@ describe('branchModel', () => {
           },
         },
       };
-      const branches = extractScoreBranches(workflow);
-      expect(branches[0]).toEqual({
-        afterPath: 'nodes/quiz.json',
-        minScore: 60,
-        passPath: 'nodes/advanced.md',
-        failPath: 'nodes/remediation.md',
-      });
+      expect(extractScoreBranches(workflow)).toEqual([]);
     });
 
     it('returns [] for a fully linear workflow', () => {
@@ -155,6 +149,28 @@ describe('branchModel', () => {
           { if: 'score < 85', then: 'COMPLETED' },
         ],
       });
+    });
+
+    it('clamps min scores to the 0–100 range', () => {
+      const linear = linearWorkflow(['nodes/a.md', 'nodes/b.json']);
+      const low = applyScoreBranch(linear, {
+        afterPath: 'nodes/a.md',
+        minScore: -5,
+        passPath: 'nodes/b.json',
+        failPath: 'COMPLETED',
+      });
+      expect(
+        (low.routing['nodes/a.md'] as { conditions: Array<{ if: string }> }).conditions[0]?.if,
+      ).toBe('score >= 0');
+      const high = applyScoreBranch(linear, {
+        afterPath: 'nodes/a.md',
+        minScore: 150,
+        passPath: 'nodes/b.json',
+        failPath: 'COMPLETED',
+      });
+      expect(
+        (high.routing['nodes/a.md'] as { conditions: Array<{ if: string }> }).conditions[0]?.if,
+      ).toBe('score >= 100');
     });
 
     it('round-trips linear -> apply -> clear back to the original linear workflow', () => {

@@ -172,7 +172,7 @@ describe('FlowAdvancedPanel', () => {
     render(wrap(<FlowAdvancedPanel api={api} onError={() => {}} />));
     expect(
       await screen.findByText(
-        "Some advanced rules aren't shown here and will be replaced when you save.",
+        "Some advanced rules aren't shown here and will be kept when you save.",
       ),
     ).toBeInTheDocument();
   });

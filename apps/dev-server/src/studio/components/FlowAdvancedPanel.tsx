@@ -225,8 +225,12 @@ export function FlowAdvancedPanel({
                     min={0}
                     max={100}
                     value={branch.minScore}
-                    onChange={(e) => updateBranch(index, { minScore: Number(e.target.value) })}
-                    className="mt-2"
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      updateBranch(index, {
+                        minScore: Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0,
+                      });
+                    }}
                     aria-label={t('studio.flow.ifScoreAtLeast')}
                   />
                 </label>

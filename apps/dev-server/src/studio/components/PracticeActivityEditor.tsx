@@ -10,6 +10,7 @@ import {
 } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
+import { ExerciseNodeSchema } from '@open-edu/schemas';
 import { SchemaForm } from '../../editor/SchemaForm.js';
 import { WidgetPreviewPanel } from '../../editor/WidgetPreviewPanel.js';
 import { validateWidgetConfigForType } from '../../editor/WidgetValidator.js';
@@ -95,6 +96,9 @@ export function PracticeActivityEditor({
       })
       .catch((err) => {
         if (!cancelled) onError(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -119,17 +123,13 @@ export function PracticeActivityEditor({
   }, [curated]);
 
   const nodeJsonValid = useMemo(() => {
-    try {
-      serializeExerciseNode({
-        type: 'exercise',
-        title: title || undefined,
-        widget: widgetId ?? '',
-        config,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    const result = ExerciseNodeSchema.safeParse({
+      type: 'exercise',
+      title: title || undefined,
+      widget: widgetId ?? '',
+      config,
+    });
+    return result.success;
   }, [title, widgetId, config]);
 
   const handleSave = async () => {

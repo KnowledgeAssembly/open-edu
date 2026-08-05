@@ -18,4 +18,11 @@ describe('curatedCatalog', () => {
       expect(CURATED_WIDGET_IDS).toContain(id);
     }
   });
+
+  it('sources guide config fields from the real catalog data', () => {
+    const widget = getCuratedWidget('core.multiple-choice');
+    expect(widget?.guide?.configFields?.length ?? 0).toBeGreaterThan(0);
+    const names = widget?.guide?.configFields?.map((field) => field.name) ?? [];
+    expect(names).toContain('questions');
+  });
 });
