@@ -21,6 +21,18 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
+async function expectLayerRevealed(
+  host: HTMLElement,
+  targetId: string,
+  revealed: boolean,
+): Promise<void> {
+  const el = host.querySelector(`#${targetId}`) as SVGElement;
+  await waitFor(() => {
+    expect(el.getAttribute('data-oas-revealed')).toBe(revealed ? 'true' : 'false');
+    expect(el.style.opacity).toBe(revealed ? '1' : '0');
+  });
+}
+
 describe('SvgStepRenderer', () => {
   beforeEach(() => {
     vi.stubGlobal(
@@ -51,15 +63,9 @@ describe('SvgStepRenderer', () => {
       { wrapper },
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('oas-svg-step-host')).toBeInTheDocument();
-    });
-
-    const host = screen.getByTestId('oas-svg-step-host');
+    const host = await screen.findByTestId('oas-svg-step-host');
     expect(host.getAttribute('data-oas-step')).toBe('-1');
-    const evap = host.querySelector('#evaporation') as SVGElement;
-    expect(evap.getAttribute('data-oas-revealed')).toBe('false');
-    expect(evap.style.opacity).toBe('0');
+    await expectLayerRevealed(host, 'evaporation', false);
   });
 
   it('reveals layers up to the current step', async () => {
@@ -76,13 +82,9 @@ describe('SvgStepRenderer', () => {
       { wrapper },
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('oas-svg-step-host')).toBeInTheDocument();
-    });
-
-    let host = screen.getByTestId('oas-svg-step-host');
-    expect((host.querySelector('#evaporation') as SVGElement).style.opacity).toBe('1');
-    expect((host.querySelector('#condensation') as SVGElement).style.opacity).toBe('0');
+    let host = await screen.findByTestId('oas-svg-step-host');
+    await expectLayerRevealed(host, 'evaporation', true);
+    await expectLayerRevealed(host, 'condensation', false);
 
     rerender(
       <SvgStepRenderer
@@ -96,10 +98,10 @@ describe('SvgStepRenderer', () => {
       />,
     );
 
-    host = screen.getByTestId('oas-svg-step-host');
-    expect((host.querySelector('#evaporation') as SVGElement).style.opacity).toBe('1');
-    expect((host.querySelector('#condensation') as SVGElement).style.opacity).toBe('1');
-    expect((host.querySelector('#precipitation') as SVGElement).style.opacity).toBe('0');
+    host = await screen.findByTestId('oas-svg-step-host');
+    await expectLayerRevealed(host, 'evaporation', true);
+    await expectLayerRevealed(host, 'condensation', true);
+    await expectLayerRevealed(host, 'precipitation', false);
   });
 
   it('accepts inline SVG src without fetching', async () => {
@@ -107,13 +109,15 @@ describe('SvgStepRenderer', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     render(
-      <SvgStepRenderer src={SAMPLE_SVG} currentStep={0} effects={[{ target: 'evaporation', effect: 'fade', step: 1 }]} />,
+      <SvgStepRenderer
+        src={SAMPLE_SVG}
+        currentStep={0}
+        effects={[{ target: 'evaporation', effect: 'fade', step: 1 }]}
+      />,
       { wrapper },
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('oas-svg-step-host')).toBeInTheDocument();
-    });
+    await screen.findByTestId('oas-svg-step-host');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
