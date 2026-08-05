@@ -15,10 +15,14 @@ export function HomeView({
   api,
   onOpened,
   onError,
+  courseTitle,
+  onOpenCurrent,
 }: {
   api: StudioApi;
   onOpened: () => void;
   onError: (message: string) => void;
+  courseTitle?: string;
+  onOpenCurrent: () => void;
 }) {
   const { t } = useTranslation();
   const recent = listRecentCourses();
@@ -38,6 +42,23 @@ export function HomeView({
         <h1 className="text-h1 text-on-surface">{t('studio.home.title')}</h1>
         <p className="text-on-surface-variant mt-2">{t('studio.home.lede')}</p>
       </div>
+
+      {courseTitle ? (
+        <section aria-labelledby="studio-continue-heading">
+          <h2 id="studio-continue-heading" className="text-h2 text-on-surface mb-4">
+            {t('studio.home.continueHeading')}
+          </h2>
+          <Card className="border-outline-variant bg-surface">
+            <CardTitle className="text-on-surface px-6 pt-6">{courseTitle}</CardTitle>
+            <CardDescription className="px-6 pt-2">{t('studio.home.continueLede')}</CardDescription>
+            <CardContent className="flex items-center gap-3 px-6 pt-4">
+              <Button variant="default" size="sm" onClick={onOpenCurrent}>
+                {t('studio.home.openCurrentCourse')}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
 
       <section aria-labelledby="studio-templates-heading">
         <h2 id="studio-templates-heading" className="text-h2 text-on-surface mb-4">

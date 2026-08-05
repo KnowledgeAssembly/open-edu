@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from '@open-edu/i18n';
 import { HomeView } from './components/HomeView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
@@ -7,6 +8,12 @@ import { StudioTopBar } from './components/StudioTopBar.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
+import {
+  readStudioView,
+  writeStudioView,
+  readSelectedPath,
+  writeSelectedPath,
+} from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
 import type { StudioMode, StudioView } from './types.js';
 
@@ -19,13 +26,17 @@ export function StudioApp({
   onModeChange: (mode: StudioMode) => void;
   loadedPackage: LoadedPackage | null;
 }) {
-  const [view, setView] = useState<StudioView>('home');
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const [view, setView] = useState<StudioView>(() => readStudioView());
+  const [selectedPath, setSelectedPath] = useState<string | null>(() => readSelectedPath());
   const [courseTitle, setCourseTitle] = useState<string | undefined>(loadedPackage?.manifest.title);
   const [error, setError] = useState<string | null>(null);
   const api = createStudioApi();
 
-  const handleNavigate = useCallback((next: StudioView) => setView(next), []);
+  const handleNavigate = useCallback((next: StudioView) => {
+    setView(next);
+    writeStudioView(next);
+  }, []);
 
   const handleOpened = useCallback(() => {
     if (loadedPackage) {
@@ -39,10 +50,14 @@ export function StudioApp({
     handleNavigate('outline');
   }, [loadedPackage, handleNavigate]);
 
-  const handleEdit = useCallback((path: string) => {
-    setSelectedPath(path);
-    setView('edit-activity');
-  }, []);
+  const handleEdit = useCallback(
+    (path: string) => {
+      setSelectedPath(path);
+      writeSelectedPath(path);
+      handleNavigate('edit-activity');
+    },
+    [handleNavigate],
+  );
 
   const handleError = useCallback((message: string) => {
     setError(message);
@@ -52,7 +67,15 @@ export function StudioApp({
   let content: React.ReactNode;
   switch (view) {
     case 'home':
-      content = <HomeView api={api} onOpened={handleOpened} onError={handleError} />;
+      content = (
+        <HomeView
+          api={api}
+          onOpened={handleOpened}
+          onError={handleError}
+          courseTitle={loadedPackage?.manifest.title}
+          onOpenCurrent={() => handleNavigate('outline')}
+        />
+      );
       break;
     case 'outline':
       content = (
@@ -75,7 +98,11 @@ export function StudioApp({
       ) : null;
       break;
     case 'preview':
-      content = loadedPackage ? <CreatorPreview pkg={loadedPackage} /> : <p>No package loaded.</p>;
+      content = loadedPackage ? (
+        <CreatorPreview pkg={loadedPackage} />
+      ) : (
+        <p className="text-on-surface-variant p-6 text-sm">{t('studio.preview.noPackageLoaded')}</p>
+      );
       break;
     case 'share':
       content = <ShareView api={api} onError={handleError} />;
@@ -87,7 +114,6 @@ export function StudioApp({
       <StudioTopBar
         mode={mode}
         onModeChange={onModeChange}
-        view={view}
         onNavigate={handleNavigate}
         courseTitle={courseTitle}
       />

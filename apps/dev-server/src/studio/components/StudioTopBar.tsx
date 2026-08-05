@@ -6,13 +6,11 @@ import type { StudioMode, StudioView } from '../types.js';
 export function StudioTopBar({
   mode,
   onModeChange,
-  view,
   onNavigate,
   courseTitle,
 }: {
   mode: StudioMode;
   onModeChange: (m: StudioMode) => void;
-  view: StudioView;
   onNavigate: (view: StudioView) => void;
   courseTitle?: string;
 }) {
@@ -31,19 +29,18 @@ export function StudioTopBar({
       </div>
       {courseTitle ? <span className="text-on-surface-variant text-sm">{courseTitle}</span> : null}
       <div className="flex-1" />
-      {view !== 'home' ? (
-        <>
-          <Button variant="ghost" size="sm" onClick={() => onNavigate('outline')}>
-            {t('studio.nav.outline')}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => onNavigate('preview')}>
-            {t('studio.nav.preview')}
-          </Button>
-          <Button variant="default" size="sm" onClick={() => onNavigate('share')}>
-            {t('studio.nav.share')}
-          </Button>
-        </>
-      ) : null}
+      <Button variant="ghost" size="sm" onClick={() => onNavigate('home')}>
+        {t('studio.nav.home')}
+      </Button>
+      <Button variant="ghost" size="sm" onClick={() => onNavigate('outline')}>
+        {t('studio.nav.outline')}
+      </Button>
+      <Button variant="ghost" size="sm" onClick={() => onNavigate('preview')}>
+        {t('studio.nav.preview')}
+      </Button>
+      <Button variant="default" size="sm" onClick={() => onNavigate('share')}>
+        {t('studio.nav.share')}
+      </Button>
       <ModeToggle mode={mode} onChange={onModeChange} />
     </header>
   );

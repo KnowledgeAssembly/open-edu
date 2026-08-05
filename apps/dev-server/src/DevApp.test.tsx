@@ -112,6 +112,21 @@ describe('DevApp', () => {
     expect(screen.getByText('Telemetry')).toBeInTheDocument();
   });
 
+  it('switches back to creator mode from the developer shell', async () => {
+    renderWithI18n();
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+    expect(
+      await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
+
+    expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('should render the package title from the manifest in developer mode', async () => {
     renderWithI18n();
     await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));

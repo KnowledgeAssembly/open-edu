@@ -9,7 +9,7 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { readFile, writeFile, unlink, mkdir, rename } from 'node:fs/promises';
+import { readFile, writeFile, unlink, mkdir, rename, rm } from 'node:fs/promises';
 import { join, extname, dirname, relative, sep } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadPackage, loadBundle } from '@open-edu/core';
@@ -833,32 +833,36 @@ function eduPackageLoader(): Plugin {
               );
               return;
             }
+
+            const manifestPath = join(currentDir, 'package.json');
+            let manifest = existsSync(manifestPath)
+              ? (JSON.parse(readFileSync(manifestPath, 'utf-8')) as { entry?: string })
+              : null;
+
+            if (manifest) {
+              const nextManifest = { ...manifest, entry };
+              const manifestResult = PackageManifestSchema.safeParse(nextManifest);
+              if (!manifestResult.success) {
+                res.statusCode = 422;
+                res.end(
+                  JSON.stringify({
+                    error: 'Updated manifest is invalid',
+                    details: manifestResult.error.message,
+                  }),
+                );
+                return;
+              }
+              manifest = nextManifest;
+            }
+
             await writeFile(
               join(currentDir, 'workflow.json'),
               JSON.stringify({ routing: workflow.routing }, null, 2),
               'utf-8',
             );
 
-            const manifestPath = join(currentDir, 'package.json');
-            if (existsSync(manifestPath)) {
-              const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as {
-                entry?: string;
-              };
-              if (manifest.entry !== entry) {
-                manifest.entry = entry;
-                const manifestResult = PackageManifestSchema.safeParse(manifest);
-                if (!manifestResult.success) {
-                  res.statusCode = 422;
-                  res.end(
-                    JSON.stringify({
-                      error: 'Updated manifest is invalid',
-                      details: manifestResult.error.message,
-                    }),
-                  );
-                  return;
-                }
-                await writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
-              }
+            if (manifest) {
+              await writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
             }
 
             const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
@@ -884,16 +888,31 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const nodesDir = join(currentDir, 'nodes');
-            const hasNodes = existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
-            if (hasNodes && body.force !== true) {
-              res.statusCode = 409;
-              res.end(
-                JSON.stringify({
-                  error: 'Directory already contains nodes. Pass force: true to overwrite.',
-                }),
-              );
-              return;
+            if (body.force === true) {
+              // Replace the whole course: clear nodes + generated manifest/workflow so the
+              // exported .oep never carries orphans from a previous course.
+              const nodesDir = join(currentDir, 'nodes');
+              if (existsSync(nodesDir)) {
+                await rm(nodesDir, { recursive: true, force: true });
+              }
+              for (const rel of ['workflow.json', 'package.json']) {
+                const abs = join(currentDir, rel);
+                if (existsSync(abs)) {
+                  await rm(abs, { force: true });
+                }
+              }
+            } else {
+              const nodesDir = join(currentDir, 'nodes');
+              const hasNodes = existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
+              if (hasNodes) {
+                res.statusCode = 409;
+                res.end(
+                  JSON.stringify({
+                    error: 'Directory already contains nodes. Pass force: true to overwrite.',
+                  }),
+                );
+                return;
+              }
             }
 
             for (const [relPath, content] of Object.entries(template.files)) {

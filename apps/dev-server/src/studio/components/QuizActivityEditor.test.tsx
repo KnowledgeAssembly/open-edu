@@ -70,7 +70,7 @@ describe('QuizActivityEditor', () => {
     );
     await screen.findByLabelText(/question/i);
     await userEvent.click(screen.getByRole('button', { name: /add option/i }));
-    expect(screen.getByLabelText('Option 3')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Option 3').length).toBeGreaterThan(0);
   });
 
   it('saves quiz with exactly one correct option', async () => {
@@ -88,7 +88,7 @@ describe('QuizActivityEditor', () => {
     await userEvent.clear(inputs[1]!);
     await userEvent.type(inputs[1]!, '5');
 
-    await userEvent.click(screen.getByRole('radio', { name: /correct 2/i }));
+    await userEvent.click(screen.getByRole('radio', { name: /option 2/i }));
     await userEvent.click(screen.getByRole('button', { name: /save/i }));
 
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
@@ -115,5 +115,32 @@ describe('QuizActivityEditor', () => {
     const parsed = JSON.parse(writeCall.mock.calls[0]![1] as string);
     const trueCount = parsed.options.filter((o: { correct: boolean }) => o.correct).length;
     expect(trueCount).toBe(1);
+  });
+
+  it('disables save and warns when no correct answer is selected', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({
+        path: 'nodes/q.json',
+        content: JSON.stringify({
+          type: 'quiz',
+          question: 'Q?',
+          options: [
+            { id: 'a', text: 'A', correct: false },
+            { id: 'b', text: 'B', correct: false },
+          ],
+        }),
+      }),
+    });
+    render(
+      wrap(
+        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByDisplayValue('Q?');
+    expect(screen.getByText('Choose the correct answer before saving.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('radio', { name: /option 2/i }));
+    expect(screen.getByRole('button', { name: /save/i })).toBeEnabled();
   });
 });

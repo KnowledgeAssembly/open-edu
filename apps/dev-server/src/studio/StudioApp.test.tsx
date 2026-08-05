@@ -67,6 +67,7 @@ describe('StudioApp', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('renders studio chrome with mode toggle', () => {
@@ -110,5 +111,23 @@ describe('StudioApp', () => {
     expect(recent).toBeTruthy();
     const parsed = JSON.parse(recent!);
     expect(parsed[0].id).toBe('test');
+  });
+
+  it('reaches outline directly from Home via the top bar (no dead end)', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    await userEvent.click(screen.getByRole('button', { name: /outline/i }));
+    expect(await screen.findByText('Intro')).toBeInTheDocument();
+  });
+
+  it('restores the last view after a full reload (session persistence)', async () => {
+    sessionStorage.setItem('openedu.studio.view', 'outline');
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    expect(await screen.findByText('Intro')).toBeInTheDocument();
+  });
+
+  it('navigates Home to the loaded package via Open this course', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    await userEvent.click(screen.getByRole('button', { name: /open this course/i }));
+    expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 });

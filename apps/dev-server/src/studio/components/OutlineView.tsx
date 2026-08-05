@@ -99,7 +99,15 @@ export function OutlineView({
       await api.writeFile(path, content);
       const next = [
         ...activities,
-        { id: path, path, title: kind === 'lesson' ? 'New lesson' : 'New quiz', kind },
+        {
+          id: path,
+          path,
+          title:
+            kind === 'lesson'
+              ? t('studio.outline.newLessonTitle')
+              : t('studio.outline.newQuizTitle'),
+          kind,
+        },
       ];
       await persistOrder(next);
     } catch (err) {
@@ -144,7 +152,7 @@ export function OutlineView({
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Move ${activity.title} up`}
+                  aria-label={t('studio.outline.moveUp', { title: activity.title })}
                   disabled={index === 0 || saving}
                   onClick={() => move(index, -1)}
                 >
@@ -153,7 +161,7 @@ export function OutlineView({
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Move ${activity.title} down`}
+                  aria-label={t('studio.outline.moveDown', { title: activity.title })}
                   disabled={index === activities.length - 1 || saving}
                   onClick={() => move(index, 1)}
                 >

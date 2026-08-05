@@ -42,7 +42,7 @@ export function CreatorPreview({ pkg }: { pkg: LoadedPackage }): JSX.Element {
   if (!engine) {
     return (
       <div className="text-error p-8">
-        <p>No workflow defined.</p>
+        <p>{t('studio.preview.noWorkflow')}</p>
       </div>
     );
   }

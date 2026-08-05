@@ -33,7 +33,7 @@ export function createStudioApi() {
     applyTemplate: (templateId: string) =>
       apiRequest<{ success: boolean }>('/create-from-template', {
         method: 'POST',
-        body: JSON.stringify({ templateId }),
+        body: JSON.stringify({ templateId, force: true }),
       }),
     exportOep: async () => {
       const res = await fetch(`${API_BASE}/export-oep`, { method: 'POST' });

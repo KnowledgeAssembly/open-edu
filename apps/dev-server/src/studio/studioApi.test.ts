@@ -39,6 +39,21 @@ describe('studioApi client', () => {
     });
   });
 
+  it('applyTemplate sends force overwrite so it works on existing packages', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true }), { status: 200 }),
+    );
+    const api = createStudioApi();
+    await api.applyTemplate('reading-lesson');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/package/create-from-template');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      templateId: 'reading-lesson',
+      force: true,
+    });
+  });
+
   it('exportOep returns blob and filename from Content-Disposition', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(new Blob(['oep-bytes']), {

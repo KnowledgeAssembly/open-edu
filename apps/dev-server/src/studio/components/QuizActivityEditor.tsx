@@ -146,14 +146,14 @@ export function QuizActivityEditor({
               <RadioGroupItem
                 value={String(index)}
                 id={`option-${index}`}
-                aria-label={`${t('studio.editor.quiz.correct')} ${index + 1}`}
+                aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
               />
               <Input
                 className="flex-1"
                 value={option.text}
                 onChange={(e) => handleOptionText(index, e.target.value)}
-                aria-label={`Option ${index + 1}`}
-                placeholder={`Option ${index + 1}`}
+                aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
+                placeholder={t('studio.editor.quiz.option', { number: String(index + 1) })}
               />
               {correctIndex === index ? (
                 <Check className="text-primary h-4 w-4" aria-hidden="true" />
@@ -167,9 +167,17 @@ export function QuizActivityEditor({
         <Button variant="outline" size="sm" onClick={handleAddOption}>
           {t('studio.editor.quiz.addOption')}
         </Button>
-        <Button variant="default" size="sm" onClick={() => void handleSave()} disabled={saving}>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => void handleSave()}
+          disabled={saving || correctIndex === null}
+        >
           {t('studio.editor.save')}
         </Button>
+        {correctIndex === null ? (
+          <span className="text-error text-sm">{t('studio.editor.quiz.noCorrectSelected')}</span>
+        ) : null}
         {saved ? (
           <span className="text-on-surface-variant text-sm">{t('studio.editor.saved')}</span>
         ) : null}

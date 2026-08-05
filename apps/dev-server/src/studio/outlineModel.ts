@@ -8,7 +8,9 @@ export function detectActivityKind(path: string, content: string): ActivityKind 
     try {
       const parsed = JSON.parse(content) as { type?: string };
       if (parsed.type === 'quiz') return 'quiz';
-      if (parsed.type === 'widget' || parsed.type === 'exercise') return 'practice';
+      if (parsed.type === 'custom' || parsed.type === 'widget' || parsed.type === 'exercise') {
+        return 'practice';
+      }
     } catch {
       return 'other';
     }

@@ -34,7 +34,16 @@ describe('HomeView', () => {
   });
 
   it('renders all studio templates', () => {
-    render(wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />));
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={() => {}}
+          onError={() => {}}
+          onOpenCurrent={() => {}}
+        />,
+      ),
+    );
     expect(screen.getByText('Reading lesson')).toBeInTheDocument();
     expect(screen.getByText('Lesson + quiz')).toBeInTheDocument();
     expect(screen.getByText('Practice warm-up')).toBeInTheDocument();
@@ -43,7 +52,9 @@ describe('HomeView', () => {
 
   it('applies a template and calls onOpened', async () => {
     const api = makeApi();
-    render(wrap(<HomeView api={api} onOpened={vi.fn()} onError={() => {}} />));
+    render(
+      wrap(<HomeView api={api} onOpened={vi.fn()} onError={() => {}} onOpenCurrent={() => {}} />),
+    );
     await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
     expect(api.applyTemplate).toHaveBeenCalledWith('reading-lesson');
   });
@@ -53,13 +64,24 @@ describe('HomeView', () => {
     const api = makeApi({
       applyTemplate: vi.fn().mockRejectedValue(new Error('boom')),
     });
-    render(wrap(<HomeView api={api} onOpened={() => {}} onError={onError} />));
+    render(
+      wrap(<HomeView api={api} onOpened={() => {}} onError={onError} onOpenCurrent={() => {}} />),
+    );
     await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
     expect(onError).toHaveBeenCalledWith('boom');
   });
 
   it('AI start button is disabled with Coming soon', () => {
-    render(wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />));
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={() => {}}
+          onError={() => {}}
+          onOpenCurrent={() => {}}
+        />,
+      ),
+    );
     const aiButton = screen.getByRole('button', { name: /coming soon/i });
     expect(aiButton).toBeDisabled();
   });
@@ -71,12 +93,30 @@ describe('HomeView', () => {
         { id: 'a', title: 'My Course', packageDir: '/tmp/a', updatedAt: Date.now() },
       ]),
     );
-    render(wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />));
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={() => {}}
+          onError={() => {}}
+          onOpenCurrent={() => {}}
+        />,
+      ),
+    );
     expect(screen.getByText('My Course')).toBeInTheDocument();
   });
 
   it('shows empty recent message when no courses', () => {
-    render(wrap(<HomeView api={makeApi()} onOpened={() => {}} onError={() => {}} />));
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={() => {}}
+          onError={() => {}}
+          onOpenCurrent={() => {}}
+        />,
+      ),
+    );
     expect(screen.getByText('No recent courses yet.')).toBeInTheDocument();
   });
 
@@ -88,9 +128,36 @@ describe('HomeView', () => {
         { id: 'a', title: 'My Course', packageDir: '/tmp/a', updatedAt: Date.now() },
       ]),
     );
-    render(wrap(<HomeView api={makeApi()} onOpened={onOpened} onError={() => {}} />));
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={onOpened}
+          onError={() => {}}
+          onOpenCurrent={() => {}}
+        />,
+      ),
+    );
     const list = screen.getByRole('list');
     await userEvent.click(within(list).getByRole('button', { name: /open/i }));
     expect(onOpened).toHaveBeenCalled();
+  });
+
+  it('shows an Open this course CTA for the loaded package', async () => {
+    const onOpenCurrent = vi.fn();
+    render(
+      wrap(
+        <HomeView
+          api={makeApi()}
+          onOpened={() => {}}
+          onError={() => {}}
+          courseTitle="Fractions"
+          onOpenCurrent={onOpenCurrent}
+        />,
+      ),
+    );
+    expect(screen.getByText('Fractions')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /open this course/i }));
+    expect(onOpenCurrent).toHaveBeenCalled();
   });
 });
