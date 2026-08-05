@@ -33,4 +33,9 @@ describe('ModeToggle', () => {
     expect(screen.getByText('Creator')).toBeInTheDocument();
     expect(screen.getByText('Developer')).toBeInTheDocument();
   });
+
+  it('forwards tabIndex to the switch', () => {
+    render(wrap(<ModeToggle mode="creator" onChange={() => {}} tabIndex={-1} />));
+    expect(screen.getByRole('switch', { name: /studio mode/i })).toHaveAttribute('tabindex', '-1');
+  });
 });

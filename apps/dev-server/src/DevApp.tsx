@@ -254,7 +254,7 @@ function BundleDevApp({
                 >
                   Edit Package
                 </Button>
-                <ModeToggle mode={mode} onChange={onModeChange} />
+                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
               </div>
               <div className="fixed bottom-4 right-96 z-50 flex gap-2">
                 <Button variant="destructive" size="sm" tabIndex={-1} onClick={handleReset}>
@@ -446,7 +446,7 @@ function SinglePackageDeveloperApp({
                 <Button variant="destructive" size="sm" onClick={handleReset}>
                   Reset Progress
                 </Button>
-                <ModeToggle mode={mode} onChange={onModeChange} />
+                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
               </div>
               <LayoutShell />
             </div>

@@ -3,3 +3,5 @@ declare module 'virtual:open-edu-package' {
   export const packageData: LoadedPackage | null;
   export const bundleData: LoadedBundle | null;
 }
+
+declare const OPEN_EDU_STUDIO_MODE: string | undefined;

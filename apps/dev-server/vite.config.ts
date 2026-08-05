@@ -1056,6 +1056,9 @@ export default defineConfig({
     OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
       ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
       : '""',
+    OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
+      ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
+      : '""',
   },
   server: {
     port: 4000,

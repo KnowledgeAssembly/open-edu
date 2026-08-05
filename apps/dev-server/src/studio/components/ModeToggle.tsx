@@ -5,9 +5,11 @@ import type { StudioMode } from '../types.js';
 export function ModeToggle({
   mode,
   onChange,
+  tabIndex,
 }: {
   mode: StudioMode;
   onChange: (mode: StudioMode) => void;
+  tabIndex?: number;
 }) {
   const { t } = useTranslation();
   const checked = mode === 'developer';
@@ -18,6 +20,7 @@ export function ModeToggle({
         checked={checked}
         onCheckedChange={(value) => onChange(value ? 'developer' : 'creator')}
         aria-label={t('studio.mode.toggleLabel')}
+        tabIndex={tabIndex}
       />
       <span>{t('studio.mode.developer')}</span>
     </label>
