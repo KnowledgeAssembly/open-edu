@@ -28,10 +28,17 @@ const readFileMock = vi
     Promise.resolve({ path, content: path.endsWith('.json') ? '{"type":"quiz"}' : '# Hi' }),
   );
 const saveOutlineOrderMock = vi.fn().mockResolvedValue({ success: true });
+const getAiStatusMock = vi.fn().mockResolvedValue({ available: false });
+const generateFromNotesMock = vi.fn().mockResolvedValue({
+  success: false,
+  quality: [],
+  outlinePreview: [],
+  error: 'Add more detail',
+});
 
 vi.mock('./studioApi.js', () => ({
   createStudioApi: () => ({
-    getPackageDir: vi.fn(),
+    getPackageDir: vi.fn().mockResolvedValue('/test'),
     validate: vi.fn().mockResolvedValue({ valid: true, errors: [] }),
     getOutline: getOutlineMock,
     saveOutlineOrder: saveOutlineOrderMock,
@@ -39,6 +46,8 @@ vi.mock('./studioApi.js', () => ({
     exportOep: vi.fn(),
     readFile: readFileMock,
     writeFile: vi.fn().mockResolvedValue({ success: true }),
+    getAiStatus: getAiStatusMock,
+    generateFromNotes: generateFromNotesMock,
   }),
 }));
 
@@ -66,6 +75,13 @@ vi.mock('@dotlottie/react-player', () => ({
 describe('StudioApp', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getAiStatusMock.mockResolvedValue({ available: false });
+    generateFromNotesMock.mockResolvedValue({
+      success: false,
+      quality: [],
+      outlinePreview: [],
+      error: 'Add more detail',
+    });
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -75,15 +91,15 @@ describe('StudioApp', () => {
     await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
   }
 
-  it('renders studio chrome with mode toggle', () => {
+  it('renders studio chrome with mode toggle', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    expect(screen.getByText('OpenEdu Studio')).toBeInTheDocument();
+    expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: /studio mode/i })).toBeInTheDocument();
   });
 
-  it('starts on Home with template gallery', () => {
+  it('starts on Home with template gallery', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    expect(screen.getByText('Reading lesson')).toBeInTheDocument();
+    expect(await screen.findByText('Reading lesson')).toBeInTheDocument();
   });
 
   it('navigates to outline after opening a template', async () => {
@@ -165,5 +181,22 @@ describe('StudioApp', () => {
     expect(
       await screen.findByRole('button', { name: /add completion badge/i }),
     ).toBeInTheDocument();
+  });
+
+  it('generates a draft from notes and navigates to the AI review view', async () => {
+    getAiStatusMock.mockResolvedValue({ available: true });
+    generateFromNotesMock.mockResolvedValue({
+      success: true,
+      quality: [{ id: 'objectives', labelKey: 'studio.ai.quality.objectives', passed: true }],
+      outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
+      title: 'AI Course',
+    });
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    const textarea = await screen.findByLabelText(/your notes/i);
+    await userEvent.type(textarea, 'Teach fractions to beginners.');
+    await userEvent.click(screen.getByRole('button', { name: /generate draft/i }));
+    expect(await screen.findByText('Review AI draft')).toBeInTheDocument();
+    expect(screen.getByText('Intro')).toBeInTheDocument();
+    expect(screen.getByText('Learning goals look measurable')).toBeInTheDocument();
   });
 });
