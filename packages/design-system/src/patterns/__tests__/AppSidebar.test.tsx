@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import axe from 'axe-core';
 import { AppSidebar } from '../AppSidebar.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
@@ -21,30 +20,6 @@ const sections = [
 ];
 
 describe('AppSidebar', () => {
-  const originalMatchMedia = window.matchMedia;
-
-  afterEach(() => {
-    if (originalMatchMedia) {
-      window.matchMedia = originalMatchMedia;
-    } else {
-      delete (window as Partial<typeof window>).matchMedia;
-    }
-  });
-
-  function setupMatchMedia(matches: boolean): void {
-    const mql = {
-      matches,
-      media: '(hover: hover) and (pointer: fine)',
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    } as unknown as MediaQueryList;
-    window.matchMedia = vi.fn().mockReturnValue(mql) as unknown as typeof window.matchMedia;
-  }
-
   it('renders title and subtitle', () => {
     render(<AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />);
     expect(screen.getByText('OpenEdu')).toBeInTheDocument();
@@ -207,17 +182,7 @@ describe('AppSidebar', () => {
     );
   });
 
-  it('has no accessibility violations when flyout is open', async () => {
-    setupMatchMedia(true);
-    const { container } = render(
-      <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
-    );
-    fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
-    const result = await axe.run(container);
-    expect(result.violations).toHaveLength(0);
-  });
-
-  describe('hover flyout (fine pointer only)', () => {
+  describe('collapsed rail', () => {
     it('defaults to collapsed when defaultCollapsed is set', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
@@ -226,101 +191,50 @@ describe('AppSidebar', () => {
       expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
     });
 
-    it('temporarily shows a flyout on hover without resizing the rail', () => {
-      setupMatchMedia(true);
+    it('expands inline on toggle and collapses again', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
       const sidebar = screen.getByTestId('app-sidebar');
-      const host = screen.getByTestId('app-sidebar-host');
+      expect(sidebar).toHaveClass('w-16');
       expect(screen.queryByText('Home')).toBeNull();
 
-      fireEvent.mouseEnter(host);
+      fireEvent.click(screen.getByLabelText('Expand sidebar'));
+      expect(sidebar).not.toHaveClass('w-16');
       expect(screen.getByText('Home')).toBeInTheDocument();
       expect(screen.getByText('OpenEdu')).toBeInTheDocument();
-      expect(sidebar).toHaveClass('w-16');
-      const flyout = screen.getByTestId('app-sidebar-flyout');
-      expect(flyout).toBeInTheDocument();
-      expect(flyout.className).toContain('w-[var(--oe-space-panel-nav');
 
-      fireEvent.mouseLeave(host);
+      fireEvent.click(screen.getByLabelText('Collapse sidebar'));
+      expect(sidebar).toHaveClass('w-16');
       expect(screen.queryByText('Home')).toBeNull();
       expect(screen.getByText('OE')).toBeInTheDocument();
-      expect(sidebar).toHaveClass('w-16');
+    });
+
+    it('does not render an overlay flyout while collapsed', () => {
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      expect(screen.queryByTestId('app-sidebar-host')).toBeNull();
       expect(screen.queryByTestId('app-sidebar-flyout')).toBeNull();
     });
 
-    it('marks the rail inert and removes its landmark while flyout is open', () => {
-      setupMatchMedia(true);
-      render(
-        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
-      );
-      const rail = screen.getByTestId('app-sidebar');
-
-      fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
-      expect(rail.inert).toBe(true);
-      expect(rail).toHaveAttribute('aria-hidden', 'true');
-      expect(rail).not.toHaveAttribute('aria-label');
-      expect(screen.getByTestId('app-sidebar-flyout')).toHaveAttribute(
-        'aria-label',
-        'Main navigation',
-      );
-    });
-
-    it('keeps nav icon alignment stable while the flyout is open', () => {
-      setupMatchMedia(true);
-      render(
-        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
-      );
-      const host = screen.getByTestId('app-sidebar-host');
-      const homeBtn = screen.getByTestId('appsidebar-nav-home');
-
-      expect(homeBtn).toHaveClass('justify-start', 'pl-3.5');
-
-      fireEvent.mouseEnter(host);
-      const flyoutHomeBtn = screen.getByTestId('appsidebar-nav-home');
-      expect(flyoutHomeBtn).toHaveClass('justify-start', 'pl-3.5');
-      expect(flyoutHomeBtn).not.toHaveClass('justify-center');
-    });
-
-    it('does not call onCollapseChange when temporarily opening the flyout via hover', () => {
-      setupMatchMedia(true);
-      const onCollapseChange = vi.fn();
-      render(
-        <AppSidebar
-          items={navItems}
-          currentItemId="home"
-          onNavigate={() => {}}
-          collapsed
-          onCollapseChange={onCollapseChange}
-        />,
-      );
-
-      fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(onCollapseChange).not.toHaveBeenCalled();
-
-      fireEvent.mouseLeave(screen.getByTestId('app-sidebar-host'));
-      expect(screen.queryByText('Home')).toBeNull();
-      expect(onCollapseChange).not.toHaveBeenCalled();
-    });
-
-    it('does not show a hover flyout on coarse pointer devices', () => {
-      setupMatchMedia(false);
+    it('does not expand on hover; expansion is explicit via the toggle', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
       const sidebar = screen.getByTestId('app-sidebar');
-      expect(screen.queryByText('Home')).toBeNull();
-
-      fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
-      expect(screen.queryByText('Home')).toBeNull();
+      fireEvent.mouseEnter(sidebar);
       expect(sidebar).toHaveClass('w-16');
-      expect(screen.queryByTestId('app-sidebar-flyout')).toBeNull();
+      expect(screen.queryByText('Home')).toBeNull();
+    });
+
+    it('has no accessibility violations when collapsed', async () => {
+      await checkAccessibility(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
     });
 
     it('toggle pins the sidebar open even while pinned collapsed', () => {
-      setupMatchMedia(true);
       const onCollapseChange = vi.fn();
       render(
         <AppSidebar
