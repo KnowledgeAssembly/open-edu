@@ -42,3 +42,16 @@ export const MathQuestions: Story = {
     onSelect: () => {},
   },
 };
+
+export const Compact: Story = {
+  args: {
+    questions: [
+      'Can you explain what I just read?',
+      'Summarize this lesson for me',
+      'Give me a practice question',
+      'What are the key concepts here?',
+    ],
+    variant: 'compact',
+    onSelect: () => {},
+  },
+};

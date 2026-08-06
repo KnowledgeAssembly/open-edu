@@ -99,4 +99,9 @@ describe('PipiliChat suggested questions', () => {
       suggestions.compareDocumentPosition(textarea) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
+
+  it('renders suggested questions in compact variant for the narrow sidebar', () => {
+    renderChat();
+    expect(screen.getByTestId('suggested-questions-compact')).toBeInTheDocument();
+  });
 });

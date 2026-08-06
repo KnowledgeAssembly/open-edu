@@ -380,7 +380,7 @@ export function CatalogPage({
           <h2 className="text-h2 font-display text-on-surface mb-md">
             {t('learner.catalog.learning_bundles')}
           </h2>
-          <div className="gap-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {allBundleSummaries.map((bundle) => {
               const prog = bundleProgress?.[bundle.manifest.id];
               const courseProgress = bundleToCourseProgress(bundle, prog);

@@ -22,4 +22,15 @@ describe('SuggestedQuestions', () => {
   it('has no accessibility violations', async () => {
     await checkAccessibility(<SuggestedQuestions questions={['Question 1']} onSelect={vi.fn()} />);
   });
+
+  it('renders compact variant with flex-wrap layout', () => {
+    render(
+      <SuggestedQuestions
+        questions={['Short question', 'Another one']}
+        onSelect={() => {}}
+        variant="compact"
+      />,
+    );
+    expect(screen.getByTestId('suggested-questions-compact')).toBeInTheDocument();
+  });
 });
