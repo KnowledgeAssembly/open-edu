@@ -35,6 +35,9 @@ export async function startDevServer(
   const address = server.resolvedUrls?.local?.[0] ?? `http://localhost:${options.port ?? 4000}`;
   console.log(`\n  ${'\u2728'}  OpenEdu Course Creator Studio`);
   console.log(`  ${'\u2502'}  Package: ${resolvedPackageDir}`);
+  if (process.env.OPEN_EDU_STUDIO_WORKSPACE) {
+    console.log(`  │  Workspace: ${process.env.OPEN_EDU_STUDIO_WORKSPACE}`);
+  }
   console.log(`  ${'\u2502'}  URL:     ${address}\n`);
 
   await new Promise<void>((resolvePromise) => {

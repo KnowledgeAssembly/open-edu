@@ -10,6 +10,8 @@ const VALID_VIEWS: StudioView[] = [
   'preview',
   'share',
   'ai-review',
+  'library',
+  'unit-builder',
 ];
 
 export function readStudioView(): StudioView {

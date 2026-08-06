@@ -1,6 +1,14 @@
 export type StudioMode = 'creator' | 'developer';
 
-export type StudioView = 'home' | 'outline' | 'edit-activity' | 'preview' | 'share' | 'ai-review';
+export type StudioView =
+  | 'home'
+  | 'outline'
+  | 'edit-activity'
+  | 'preview'
+  | 'share'
+  | 'ai-review'
+  | 'library'
+  | 'unit-builder';
 
 export type ActivityKind = 'lesson' | 'quiz' | 'practice' | 'other';
 

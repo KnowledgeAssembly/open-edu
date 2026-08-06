@@ -39,6 +39,7 @@ function renderHome(
     courseTitle?: string;
     onOpenCurrent?: () => void;
     onAiGenerated?: (result: AiGenerateResult) => void;
+    onOpenLibrary?: () => void;
   } = {},
 ) {
   return render(
@@ -50,6 +51,7 @@ function renderHome(
         courseTitle={overrides.courseTitle}
         onOpenCurrent={overrides.onOpenCurrent ?? (() => {})}
         onAiGenerated={overrides.onAiGenerated ?? (() => {})}
+        onOpenLibrary={overrides.onOpenLibrary ?? (() => {})}
       />,
     ),
   );
@@ -153,5 +155,12 @@ describe('HomeView', () => {
     expect(screen.getByText('Fractions')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /open this course/i }));
     expect(onOpenCurrent).toHaveBeenCalled();
+  });
+
+  it('calls onOpenLibrary when the My courses button is clicked', async () => {
+    const onOpenLibrary = vi.fn();
+    renderHome({ onOpenLibrary });
+    await userEvent.click(await screen.findByRole('button', { name: /my courses/i }));
+    expect(onOpenLibrary).toHaveBeenCalled();
   });
 });

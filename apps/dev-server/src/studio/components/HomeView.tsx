@@ -27,6 +27,7 @@ export function HomeView({
   courseTitle,
   onOpenCurrent,
   onAiGenerated,
+  onOpenLibrary,
 }: {
   api: StudioApi;
   onOpened: () => void;
@@ -34,6 +35,7 @@ export function HomeView({
   courseTitle?: string;
   onOpenCurrent: () => void;
   onAiGenerated: (result: AiGenerateResult) => void;
+  onOpenLibrary: () => void;
 }) {
   const { t } = useTranslation();
   const recent = listRecentCourses();
@@ -109,9 +111,14 @@ export function HomeView({
       </section>
 
       <section aria-labelledby="studio-recent-heading">
-        <h2 id="studio-recent-heading" className="text-h2 text-on-surface mb-4">
-          {t('studio.home.recentHeading')}
-        </h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="studio-recent-heading" className="text-h2 text-on-surface">
+            {t('studio.home.recentHeading')}
+          </h2>
+          <Button variant="outline" size="sm" onClick={onOpenLibrary}>
+            {t('studio.nav.library')}
+          </Button>
+        </div>
         {recent.length === 0 ? (
           <EmptyState heading={t('studio.home.emptyRecent')} description="" />
         ) : (

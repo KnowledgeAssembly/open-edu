@@ -1,8 +1,10 @@
 import type { AiEndpointErrorCode, AiGenerateResult } from './ai/types.js';
+import type { LibraryEntry } from './library/types.js';
 import type { ActivitySummary } from './types.js';
 
 const API_BASE = '/api/package';
 const AI_BASE = '/api/studio/ai';
+const LIBRARY_BASE = '/api/studio/library';
 
 export interface StudioApiError extends Error {
   code?: AiEndpointErrorCode;
@@ -41,6 +43,21 @@ async function aiRequest<T>(url: string, options?: RequestInit): Promise<T> {
     const error = new Error(message) as StudioApiError;
     error.code = data?.code as AiEndpointErrorCode | undefined;
     throw error;
+  }
+  return data as T;
+}
+
+async function libraryRequest<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${LIBRARY_BASE}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || data.details || `Request failed: ${res.status}`);
   }
   return data as T;
 }
@@ -87,6 +104,52 @@ export function createStudioApi() {
         method: 'POST',
         body: JSON.stringify({ notes, force }),
       }),
+    getLibrary: () => libraryRequest<{ workspace: string; entries: LibraryEntry[] }>(''),
+    openLibraryCourse: (relativePath: string) =>
+      libraryRequest<{ success: boolean; packageDir: string }>('/open', {
+        method: 'POST',
+        body: JSON.stringify({ relativePath }),
+      }),
+    duplicateCourse: (relativePath: string, newId: string, newTitle: string) =>
+      libraryRequest<{ success: boolean; entry: LibraryEntry }>('/duplicate', {
+        method: 'POST',
+        body: JSON.stringify({ relativePath, newId, newTitle }),
+      }),
+    renameCourse: (relativePath: string, newTitle: string) =>
+      libraryRequest<{ success: boolean; entry: LibraryEntry }>('/rename', {
+        method: 'POST',
+        body: JSON.stringify({ relativePath, newTitle }),
+      }),
+    archiveCourse: (relativePath: string) =>
+      libraryRequest<{ success: boolean; archivedPath: string }>('/archive', {
+        method: 'POST',
+        body: JSON.stringify({ relativePath }),
+      }),
+    importCourseFolder: (sourcePath: string) =>
+      libraryRequest<{ success: boolean; entry: LibraryEntry }>('/import', {
+        method: 'POST',
+        body: JSON.stringify({ sourcePath }),
+      }),
+    createUnit: (title: string, courseRelativePaths: string[]) =>
+      libraryRequest<{ success: boolean; entry: LibraryEntry }>('/create-unit', {
+        method: 'POST',
+        body: JSON.stringify({ title, courseRelativePaths }),
+      }),
+    exportUnitOep: async (relativePath: string) => {
+      const res = await fetch(`${LIBRARY_BASE}/export-unit-oep`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relativePath }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Export failed');
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      return { blob, fileName: match?.[1] || 'unit.oep' };
+    },
   };
 }
 

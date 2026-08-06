@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { EmptyState } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { HomeView } from './components/HomeView.js';
+import { LibraryView } from './components/LibraryView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
+import { UnitBuilderView } from './components/UnitBuilderView.js';
 import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioTopBar } from './components/StudioTopBar.js';
@@ -116,6 +118,7 @@ export function StudioApp({
           courseTitle={loadedPackage?.manifest.title}
           onOpenCurrent={() => handleNavigate('outline')}
           onAiGenerated={handleAiGenerated}
+          onOpenLibrary={() => handleNavigate('library')}
         />
       );
       break;
@@ -178,6 +181,34 @@ export function StudioApp({
         />
       );
       break;
+    case 'library':
+      content = (
+        <LibraryView
+          api={api}
+          onOpen={(relativePath) =>
+            void (async () => {
+              try {
+                await api.openLibraryCourse(relativePath);
+                handleNavigate('outline');
+              } catch (err) {
+                handleError(err instanceof Error ? err.message : t('studio.errors.generic'));
+              }
+            })()
+          }
+          onError={handleError}
+          onCreateUnit={() => handleNavigate('unit-builder')}
+        />
+      );
+      break;
+    case 'unit-builder':
+      content = (
+        <UnitBuilderView
+          api={api}
+          onError={handleError}
+          onCreated={() => handleNavigate('library')}
+        />
+      );
+      break;
   }
 
   return (
@@ -187,6 +218,7 @@ export function StudioApp({
         onModeChange={onModeChange}
         onNavigate={handleNavigate}
         courseTitle={courseTitle}
+        view={view}
       />
       <main className="bg-surface min-h-0 flex-1 overflow-auto">
         {content}
