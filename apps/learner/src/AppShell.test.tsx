@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { act } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
@@ -50,30 +50,6 @@ const emptyBundleEntries: Record<string, LoadedBundle> = {};
 function renderWithRouter(ui: React.ReactElement, initialEntries = ['/']) {
   const router = createMemoryRouter([{ path: '*', element: ui }], { initialEntries });
   return render(<RouterProvider router={router} />);
-}
-
-const originalMatchMedia = window.matchMedia;
-
-afterEach(() => {
-  if (originalMatchMedia) {
-    window.matchMedia = originalMatchMedia;
-  } else {
-    delete (window as Partial<typeof window>).matchMedia;
-  }
-});
-
-function setupMatchMedia(matches: boolean): void {
-  const mql = {
-    matches,
-    media: '(hover: hover) and (pointer: fine)',
-    onchange: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  } as unknown as MediaQueryList;
-  window.matchMedia = vi.fn().mockReturnValue(mql) as unknown as typeof window.matchMedia;
 }
 
 function makeBundleCourse(): LoadedBundle {
@@ -181,19 +157,19 @@ describe('AppShell', () => {
     expect(screen.getByTestId('appsidebar-nav-home').textContent).toBe('');
   });
 
-  it('expands the course sidebar fully on hover for fine pointers', async () => {
-    setupMatchMedia(true);
+  it('expands the sidebar inline on toggle and collapses again', async () => {
     renderAtCourse();
 
     await screen.findByTestId('app-sidebar');
     expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
 
-    fireEvent.mouseEnter(screen.getByTestId('app-sidebar'));
+    fireEvent.click(screen.getByLabelText('Expand sidebar'));
     expect(screen.getByTestId('app-sidebar')).not.toHaveClass('w-16');
     expect(screen.getByTestId('appsidebar-nav-catalog').textContent).not.toBe('');
 
-    fireEvent.mouseLeave(screen.getByTestId('app-sidebar'));
+    fireEvent.click(screen.getByLabelText('Collapse sidebar'));
     expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
+    expect(screen.getByTestId('appsidebar-nav-catalog').textContent).toBe('');
   });
 
   it('shares the sidebar open/close state between course and non-course pages', async () => {

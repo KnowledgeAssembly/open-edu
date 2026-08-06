@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
 import { Badge } from '../primitives/badge.js';
@@ -36,34 +36,6 @@ export interface AppSidebarProps {
   onCollapseChange?: (collapsed: boolean) => void;
 }
 
-/**
- * Detects desktop "fine pointer + hover" capabilities via the CSS media query
- * `(hover: hover) and (pointer: fine)`. Used to gate temporary hover expansion
- * of a pinned-collapsed sidebar so touch / coarse-pointer devices keep the
- * toggle-only behavior.
- *
- * The initial value is read synchronously (lazy initial state) so the sidebar
- * is hover-ready on the very first render instead of waiting for a mount
- * effect; the effect keeps the value in sync with live media-query changes.
- */
-function useFinePointer(): boolean {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const update = () => setMatches(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
-
-  return matches;
-}
-
 export function AppSidebar({
   title = 'OpenEdu',
   subtitle = 'Interactive learning platform',
@@ -80,25 +52,9 @@ export function AppSidebar({
 }: AppSidebarProps): JSX.Element {
   const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
   const collapsed = controlledCollapsed ?? internalCollapsed;
-
-  // Temporary visual expansion while hovering a pinned-collapsed sidebar.
-  // Deliberately separate from `collapsed`: it never calls onCollapseChange and
-  // never flips the pinned state.
-  const [hoverExpanded, setHoverExpanded] = useState(false);
-  const finePointer = useFinePointer();
-
-  const expanded = !collapsed || (hoverExpanded && finePointer);
-
-  const handleMouseEnter = useCallback(() => {
-    if (collapsed && finePointer) setHoverExpanded(true);
-  }, [collapsed, finePointer]);
-
-  const handleMouseLeave = useCallback(() => {
-    setHoverExpanded(false);
-  }, []);
+  const expanded = !collapsed;
 
   const handleToggleCollapse = useCallback(() => {
-    setHoverExpanded(false);
     const next = !collapsed;
     if (controlledCollapsed === undefined) {
       setInternalCollapsed(next);
@@ -130,8 +86,6 @@ export function AppSidebar({
         'bg-surface-container border-outline-variant flex h-full flex-col overflow-hidden border-r transition-[width] duration-200',
         expanded ? 'w-[var(--oe-space-panel-nav)]' : 'w-16',
       )}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       data-testid="app-sidebar"
       aria-label="Main navigation"
     >

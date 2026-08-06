@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppSidebar } from '../AppSidebar.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
@@ -20,30 +20,6 @@ const sections = [
 ];
 
 describe('AppSidebar', () => {
-  const originalMatchMedia = window.matchMedia;
-
-  afterEach(() => {
-    if (originalMatchMedia) {
-      window.matchMedia = originalMatchMedia;
-    } else {
-      delete (window as Partial<typeof window>).matchMedia;
-    }
-  });
-
-  function setupMatchMedia(matches: boolean): void {
-    const mql = {
-      matches,
-      media: '(hover: hover) and (pointer: fine)',
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    } as unknown as MediaQueryList;
-    window.matchMedia = vi.fn().mockReturnValue(mql) as unknown as typeof window.matchMedia;
-  }
-
   it('renders title and subtitle', () => {
     render(<AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />);
     expect(screen.getByText('OpenEdu')).toBeInTheDocument();
@@ -206,7 +182,7 @@ describe('AppSidebar', () => {
     );
   });
 
-  describe('hover expand (fine pointer only)', () => {
+  describe('collapsed rail', () => {
     it('defaults to collapsed when defaultCollapsed is set', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
@@ -215,63 +191,50 @@ describe('AppSidebar', () => {
       expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
     });
 
-    it('temporarily expands on hover and collapses on leave', () => {
-      setupMatchMedia(true);
+    it('expands inline on toggle and collapses again', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
       const sidebar = screen.getByTestId('app-sidebar');
+      expect(sidebar).toHaveClass('w-16');
       expect(screen.queryByText('Home')).toBeNull();
 
-      fireEvent.mouseEnter(sidebar);
+      fireEvent.click(screen.getByLabelText('Expand sidebar'));
+      expect(sidebar).not.toHaveClass('w-16');
       expect(screen.getByText('Home')).toBeInTheDocument();
       expect(screen.getByText('OpenEdu')).toBeInTheDocument();
-      expect(sidebar).not.toHaveClass('w-16');
 
-      fireEvent.mouseLeave(sidebar);
+      fireEvent.click(screen.getByLabelText('Collapse sidebar'));
+      expect(sidebar).toHaveClass('w-16');
       expect(screen.queryByText('Home')).toBeNull();
       expect(screen.getByText('OE')).toBeInTheDocument();
-      expect(sidebar).toHaveClass('w-16');
     });
 
-    it('does not call onCollapseChange when temporarily expanding via hover', () => {
-      setupMatchMedia(true);
-      const onCollapseChange = vi.fn();
+    it('does not render an overlay flyout while collapsed', () => {
       render(
-        <AppSidebar
-          items={navItems}
-          currentItemId="home"
-          onNavigate={() => {}}
-          collapsed
-          onCollapseChange={onCollapseChange}
-        />,
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
-      const sidebar = screen.getByTestId('app-sidebar');
-
-      fireEvent.mouseEnter(sidebar);
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(onCollapseChange).not.toHaveBeenCalled();
-
-      fireEvent.mouseLeave(sidebar);
-      expect(screen.queryByText('Home')).toBeNull();
-      expect(onCollapseChange).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('app-sidebar-host')).toBeNull();
+      expect(screen.queryByTestId('app-sidebar-flyout')).toBeNull();
     });
 
-    it('does not hover-expand on coarse pointer devices', () => {
-      setupMatchMedia(false);
+    it('does not expand on hover; expansion is explicit via the toggle', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
       );
       const sidebar = screen.getByTestId('app-sidebar');
-      expect(screen.queryByText('Home')).toBeNull();
-
       fireEvent.mouseEnter(sidebar);
-      expect(screen.queryByText('Home')).toBeNull();
       expect(sidebar).toHaveClass('w-16');
+      expect(screen.queryByText('Home')).toBeNull();
+    });
+
+    it('has no accessibility violations when collapsed', async () => {
+      await checkAccessibility(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
     });
 
     it('toggle pins the sidebar open even while pinned collapsed', () => {
-      setupMatchMedia(true);
       const onCollapseChange = vi.fn();
       render(
         <AppSidebar
