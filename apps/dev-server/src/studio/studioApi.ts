@@ -1,10 +1,14 @@
-import type { AiGenerateResult } from './ai/types.js';
+import type { AiEndpointErrorCode, AiGenerateResult } from './ai/types.js';
 import type { LibraryEntry } from './library/types.js';
 import type { ActivitySummary } from './types.js';
 
 const API_BASE = '/api/package';
 const AI_BASE = '/api/studio/ai';
 const LIBRARY_BASE = '/api/studio/library';
+
+export interface StudioApiError extends Error {
+  code?: AiEndpointErrorCode;
+}
 
 async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {
@@ -29,9 +33,16 @@ async function aiRequest<T>(url: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
   });
-  const data = await res.json();
+  const data = (await res.json().catch(() => null)) as {
+    error?: string;
+    details?: string;
+    code?: string;
+  } | null;
   if (!res.ok) {
-    throw new Error(data.error || data.details || `Request failed: ${res.status}`);
+    const message = data?.error || data?.details || `Request failed: ${res.status}`;
+    const error = new Error(message) as StudioApiError;
+    error.code = data?.code as AiEndpointErrorCode | undefined;
+    throw error;
   }
   return data as T;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Card,
@@ -41,18 +41,30 @@ function hasUnrecognizedRoutes(workflow: Workflow, orderedPaths: string[]): bool
   return false;
 }
 
+function protectedAfterPaths(workflow: Workflow | null): Set<string> {
+  const protectedPaths = new Set<string>();
+  if (!workflow) return protectedPaths;
+  const managed = new Set(extractScoreBranches(workflow).map((branch) => branch.afterPath));
+  for (const [key, route] of Object.entries(workflow.routing)) {
+    if ('conditions' in route && !managed.has(key)) protectedPaths.add(key);
+  }
+  return protectedPaths;
+}
+
 function ActivityTargetSelect({
   value,
   onChange,
   activities,
   label,
   allowEndCourse,
+  disabledPaths,
 }: {
   value: string;
   onChange: (value: string) => void;
   activities: ActivitySummary[];
   label: string;
   allowEndCourse: boolean;
+  disabledPaths?: Set<string>;
 }) {
   const { t } = useTranslation();
   return (
@@ -62,7 +74,11 @@ function ActivityTargetSelect({
       </SelectTrigger>
       <SelectContent>
         {activities.map((activity) => (
-          <SelectItem key={activity.path} value={activity.path}>
+          <SelectItem
+            key={activity.path}
+            value={activity.path}
+            disabled={disabledPaths?.has(activity.path) ?? false}
+          >
             {activity.title}
           </SelectItem>
         ))}
@@ -85,11 +101,19 @@ export function FlowAdvancedPanel({
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
   const [orderedPaths, setOrderedPaths] = useState<string[]>([]);
   const [loadedWorkflow, setLoadedWorkflow] = useState<Workflow | null>(null);
+  const [protectedPaths, setProtectedPaths] = useState<Set<string>>(new Set());
   const [branches, setBranches] = useState<ScoreBranchRule[]>([]);
   const [unrecognized, setUnrecognized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +137,7 @@ export function FlowAdvancedPanel({
         }
         if (cancelled) return;
         setLoadedWorkflow(workflow);
+        setProtectedPaths(protectedAfterPaths(workflow));
         if (workflow) {
           setBranches(extractScoreBranches(workflow));
           setUnrecognized(hasUnrecognizedRoutes(workflow, paths));
@@ -128,13 +153,21 @@ export function FlowAdvancedPanel({
     };
   }, [api, onError]);
 
+  const flashSaved = () => {
+    setSaved(true);
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setSaved(false), 2000);
+  };
+
   const addBranch = () => {
+    const defaultAfter = orderedPaths.find((path) => !protectedPaths.has(path)) ?? '';
+    const afterIndex = orderedPaths.indexOf(defaultAfter);
     setBranches((prev) => [
       ...prev,
       {
-        afterPath: orderedPaths[0] ?? '',
+        afterPath: defaultAfter,
         minScore: 80,
-        passPath: orderedPaths[1] ?? COMPLETED,
+        passPath: orderedPaths[afterIndex + 1] ?? COMPLETED,
         failPath: COMPLETED,
       },
     ]);
@@ -169,8 +202,7 @@ export function FlowAdvancedPanel({
         }
       }
       await api.writeFile('workflow.json', JSON.stringify(final, null, 2));
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+      flashSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -217,6 +249,7 @@ export function FlowAdvancedPanel({
                   activities={activities}
                   label={t('studio.flow.afterActivity')}
                   allowEndCourse={false}
+                  disabledPaths={protectedPaths}
                 />
                 <label className="text-on-surface block text-sm font-medium">
                   {t('studio.flow.ifScoreAtLeast')}
@@ -260,7 +293,12 @@ export function FlowAdvancedPanel({
         )}
         <p className="text-on-surface-variant text-sm">{t('studio.flow.scorePercentHint')}</p>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={addBranch}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addBranch}
+            disabled={!orderedPaths.some((path) => !protectedPaths.has(path))}
+          >
             <Plus className="mr-1 size-4" aria-hidden="true" />
             {t('studio.flow.addBranch')}
           </Button>

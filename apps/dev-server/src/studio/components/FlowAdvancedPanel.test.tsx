@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
@@ -6,6 +6,21 @@ import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { FlowAdvancedPanel } from './FlowAdvancedPanel';
 import type { StudioApi } from '../studioApi.js';
 import type { ActivitySummary } from '../types.js';
+
+beforeAll(() => {
+  Object.defineProperty(Element.prototype, 'hasPointerCapture', {
+    configurable: true,
+    value: () => false,
+  });
+  Object.defineProperty(Element.prototype, 'releasePointerCapture', {
+    configurable: true,
+    value: () => {},
+  });
+  Object.defineProperty(Element.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: () => {},
+  });
+});
 
 function wrap(ui: React.ReactElement) {
   return (
@@ -175,6 +190,72 @@ describe('FlowAdvancedPanel', () => {
         "Some advanced rules aren't shown here and will be kept when you save.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it('protects routes with unrecognized advanced rules from being overwritten', async () => {
+    const complexWorkflow = {
+      routing: {
+        'nodes/a.md': { onComplete: 'nodes/b.json' },
+        'nodes/b.json': {
+          conditions: [
+            { if: 'score >= 90 && attempts < 3', then: 'nodes/a.md' },
+            { if: 'score < 90', then: 'COMPLETED' },
+          ],
+        },
+      },
+    };
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({
+        path: 'workflow.json',
+        content: JSON.stringify(complexWorkflow),
+      }),
+    });
+    render(wrap(<FlowAdvancedPanel api={api} onError={() => {}} />));
+
+    await userEvent.click(await screen.findByRole('button', { name: /add a score rule/i }));
+
+    const afterSelect = screen.getByRole('combobox', { name: 'After this activity' });
+    expect(afterSelect).toHaveTextContent('Intro');
+
+    fireEvent.click(afterSelect);
+    const protectedOption = await screen.findByRole('option', { name: 'Check' });
+    expect(protectedOption).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.keyboard('{Escape}');
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).toHaveBeenCalledTimes(1);
+    const parsed = JSON.parse(writeCall.mock.calls[0]![1] as string);
+    expect(parsed.routing['nodes/a.md'].conditions).toEqual([
+      { if: 'score >= 80', then: 'nodes/b.json' },
+      { if: 'score < 80', then: 'COMPLETED' },
+    ]);
+    expect(parsed.routing['nodes/b.json']).toEqual(complexWorkflow.routing['nodes/b.json']);
+  });
+
+  it('disables adding branches when every activity has unrecognized advanced rules', async () => {
+    const allProtected = {
+      routing: {
+        'nodes/a.md': {
+          conditions: [{ if: 'audience == educator', then: 'nodes/b.json' }],
+        },
+        'nodes/b.json': {
+          conditions: [
+            { if: 'score >= 90 && attempts < 3', then: 'nodes/a.md' },
+            { if: 'score < 90', then: 'COMPLETED' },
+          ],
+        },
+      },
+    };
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({
+        path: 'workflow.json',
+        content: JSON.stringify(allProtected),
+      }),
+    });
+    render(wrap(<FlowAdvancedPanel api={api} onError={() => {}} />));
+    expect(await screen.findByRole('button', { name: /add a score rule/i })).toBeDisabled();
   });
 
   it('reports write errors through onError', async () => {

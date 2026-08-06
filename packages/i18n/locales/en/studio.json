@@ -17,7 +17,6 @@
   "home.previewTemplate": "Preview template",
   "home.aiHeading": "Or start with AI",
   "home.aiLede": "Paste your notes or lesson outline. We’ll draft a course you can edit.",
-  "home.aiComingSoon": "Coming soon",
   "home.recentHeading": "Recent",
   "home.open": "Open",
   "home.emptyRecent": "No recent courses yet.",
@@ -191,5 +190,10 @@
   "import.invalid": "That folder is not a valid OpenEdu package.",
   "share.kitHeading": "Share kit",
   "share.copyClassroomNote": "Copy note for students/parents",
-  "share.classroomNote": "Here is our OpenEdu course file ({{fileName}}). Open the OpenEdu learner app → Install course → choose this file."
+  "share.classroomNote": "Here is our OpenEdu course file ({{fileName}}). Open the OpenEdu learner app → Install course → choose this file.",
+  "ai.noActivePackage": "No course is open. Open or create a course first.",
+  "ai.overwriteTitle": "Replace course content?",
+  "ai.overwriteLede": "This course already has content. Generating a new draft replaces it, and this cannot be undone from Studio.",
+  "ai.overwriteConfirm": "Replace content",
+  "ai.overwriteCancel": "Cancel"
 }

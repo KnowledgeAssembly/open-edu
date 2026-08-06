@@ -128,6 +128,84 @@ describe('AiStartPanel', () => {
     await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('network down'));
   });
 
+  it('translates known API error codes instead of leaking server strings', async () => {
+    const onError = vi.fn();
+    const api = makeApi({
+      getAiStatus: vi.fn().mockResolvedValue({ available: true }),
+      generateFromNotes: vi
+        .fn()
+        .mockRejectedValue(
+          Object.assign(new Error('No active package'), { code: 'no-active-package' }),
+        ),
+    });
+    render(wrap(<AiStartPanel api={api} onGenerated={() => {}} onError={onError} />));
+    const textarea = await screen.findByLabelText(/your notes/i);
+    await userEvent.type(textarea, 'A short topic for a course');
+    await userEvent.click(screen.getByRole('button', { name: /generate draft/i }));
+    await vi.waitFor(() =>
+      expect(onError).toHaveBeenCalledWith('No course is open. Open or create a course first.'),
+    );
+  });
+
+  it('asks for overwrite confirmation when the course already has content', async () => {
+    const result: AiGenerateResult = {
+      success: true,
+      quality: [],
+      outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
+      title: 'X',
+    };
+    const generate = vi
+      .fn()
+      .mockResolvedValueOnce({
+        success: false,
+        code: 'has-content',
+        quality: [],
+        outlinePreview: [],
+        error: 'Package already has content',
+      })
+      .mockResolvedValueOnce(result);
+    const onGenerated = vi.fn();
+    const api = makeApi({
+      getAiStatus: vi.fn().mockResolvedValue({ available: true }),
+      generateFromNotes: generate,
+    });
+    render(wrap(<AiStartPanel api={api} onGenerated={onGenerated} onError={() => {}} />));
+    const textarea = await screen.findByLabelText(/your notes/i);
+    await userEvent.type(textarea, 'A short topic for a course');
+    await userEvent.click(screen.getByRole('button', { name: /generate draft/i }));
+    expect(
+      await screen.findByText(
+        'This course already has content. Generating a new draft replaces it, and this cannot be undone from Studio.',
+      ),
+    ).toBeInTheDocument();
+    expect(generate).toHaveBeenLastCalledWith('A short topic for a course', false);
+    await userEvent.click(screen.getByRole('button', { name: /replace content/i }));
+    await vi.waitFor(() => expect(onGenerated).toHaveBeenCalledWith(result));
+    expect(generate).toHaveBeenLastCalledWith('A short topic for a course', true);
+  });
+
+  it('does not force-overwrite when the user cancels the confirmation', async () => {
+    const generate = vi.fn().mockResolvedValue({
+      success: false,
+      code: 'has-content',
+      quality: [],
+      outlinePreview: [],
+      error: 'Package already has content',
+    });
+    const onGenerated = vi.fn();
+    const api = makeApi({
+      getAiStatus: vi.fn().mockResolvedValue({ available: true }),
+      generateFromNotes: generate,
+    });
+    render(wrap(<AiStartPanel api={api} onGenerated={onGenerated} onError={() => {}} />));
+    const textarea = await screen.findByLabelText(/your notes/i);
+    await userEvent.type(textarea, 'A short topic for a course');
+    await userEvent.click(screen.getByRole('button', { name: /generate draft/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /cancel/i }));
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(onGenerated).not.toHaveBeenCalled();
+  });
+
   it('keeps the generate button disabled until notes are typed', async () => {
     const api = makeApi({ getAiStatus: vi.fn().mockResolvedValue({ available: true }) });
     render(wrap(<AiStartPanel api={api} onGenerated={() => {}} onError={() => {}} />));

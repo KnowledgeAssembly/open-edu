@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Button,
   Card,
@@ -69,6 +69,13 @@ export function PracticeActivityEditor({
   const [saved, setSaved] = useState(false);
   const [notPractice, setNotPractice] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -144,7 +151,8 @@ export function PracticeActivityEditor({
       };
       await api.writeFile(path, serializeExerciseNode(node));
       setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      savedTimer.current = setTimeout(() => setSaved(false), 2000);
       onSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : String(err));

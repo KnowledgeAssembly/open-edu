@@ -32,3 +32,5 @@ export interface AiStatus {
   available: boolean;
   reason?: 'missing-key' | 'disabled';
 }
+
+export type AiEndpointErrorCode = 'no-active-package' | 'missing-notes' | 'unknown-ai-endpoint';
