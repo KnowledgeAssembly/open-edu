@@ -185,6 +185,8 @@
   "unit.needMax": "Pick up to five courses.",
   "unit.exportOep": "Export unit .oep",
   "unit.exporting": "Exporting…",
+  "unit.creating": "Creating…",
+  "unit.emptyCourses": "Create or import at least two courses first.",
   "import.title": "Import a course folder",
   "import.help": "Choose a folder that already contains an OpenEdu package.json.",
   "import.folderLabel": "Folder path",

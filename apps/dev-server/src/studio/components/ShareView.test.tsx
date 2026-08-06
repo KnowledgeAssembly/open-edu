@@ -119,4 +119,26 @@ describe('ShareView', () => {
     expect(globalThis.navigator.clipboard.writeText).toHaveBeenCalled();
     expect(await screen.findByText('Copied')).toBeInTheDocument();
   });
+
+  it('shows the share kit with the exported file name after a successful export', async () => {
+    render(wrap(<ShareView api={makeApi()} onError={() => {}} />));
+    const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
+    await userEvent.click(exportButton);
+    expect(await screen.findByText('Share kit')).toBeInTheDocument();
+    expect(screen.getByText(/fractions-1\.0\.0\.oep/)).toBeInTheDocument();
+  });
+
+  it('copies the interpolated classroom note and shows Copied', async () => {
+    render(wrap(<ShareView api={makeApi()} onError={() => {}} />));
+    const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
+    await userEvent.click(exportButton);
+    const copyNoteButton = await screen.findByRole('button', {
+      name: /copy note for students\/parents/i,
+    });
+    await userEvent.click(copyNoteButton);
+    expect(globalThis.navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'Here is our OpenEdu course file (fractions-1.0.0.oep). Open the OpenEdu learner app → Install course → choose this file.',
+    );
+    expect(await screen.findByText('Copied')).toBeInTheDocument();
+  });
 });

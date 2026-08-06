@@ -17,6 +17,8 @@ export function ShareView({
   const [items, setItems] = useState<ReadyCheckItem[] | null>(null);
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [exportedFileName, setExportedFileName] = useState<string | null>(null);
+  const [noteCopied, setNoteCopied] = useState(false);
 
   const runReadyCheck = useCallback(async () => {
     try {
@@ -50,6 +52,7 @@ export function ShareView({
     setExporting(true);
     try {
       const { blob, fileName } = await api.exportOep();
+      setExportedFileName(fileName);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
@@ -76,6 +79,18 @@ export function ShareView({
       await navigator.clipboard.writeText(steps.join('\n'));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable
+    }
+  };
+
+  const handleCopyClassroomNote = async () => {
+    if (!exportedFileName) return;
+    const note = t('studio.share.classroomNote', { fileName: exportedFileName });
+    try {
+      await navigator.clipboard.writeText(note);
+      setNoteCopied(true);
+      window.setTimeout(() => setNoteCopied(false), 2000);
     } catch {
       // clipboard unavailable
     }
@@ -146,6 +161,22 @@ export function ShareView({
           {copied ? t('studio.share.copied') : t('studio.share.copyInstructions')}
         </Button>
       </section>
+
+      {exportedFileName ? (
+        <section aria-labelledby="studio-share-kit-heading">
+          <h2 id="studio-share-kit-heading" className="text-h2 text-on-surface mb-4">
+            {t('studio.share.kitHeading')}
+          </h2>
+          <div className="border-outline-variant bg-surface space-y-4 rounded-lg border p-4">
+            <p className="text-on-surface-variant text-sm">
+              {t('studio.share.classroomNote', { fileName: exportedFileName })}
+            </p>
+            <Button variant="outline" size="sm" onClick={() => void handleCopyClassroomNote()}>
+              {noteCopied ? t('studio.share.copied') : t('studio.share.copyClassroomNote')}
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { HomeView } from './components/HomeView.js';
 import { LibraryView } from './components/LibraryView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
+import { UnitBuilderView } from './components/UnitBuilderView.js';
 import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioTopBar } from './components/StudioTopBar.js';
@@ -196,7 +197,13 @@ export function StudioApp({
       );
       break;
     case 'unit-builder':
-      content = <EmptyState heading={t('studio.unit.title')} description={t('studio.unit.lede')} />;
+      content = (
+        <UnitBuilderView
+          api={api}
+          onError={handleError}
+          onCreated={() => handleNavigate('library')}
+        />
+      );
       break;
   }
 
