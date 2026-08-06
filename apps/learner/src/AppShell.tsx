@@ -712,10 +712,10 @@ function AppShellInner({
         ) : (
           <AppLayout
             sidebar={
-              <div className="relative h-full overflow-hidden">
+              <div className="relative h-full">
                 <AssemblyFlow
                   density="dense"
-                  className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                  className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.08]"
                   aria-hidden="true"
                 />
                 <AppSidebar
@@ -937,10 +937,10 @@ function CourseStepWrapper({
 
   const section: AppSidebarSection = { title: t('learner.sidebar.course_steps'), items };
   return (
-    <div className="relative h-full overflow-hidden">
+    <div className="relative h-full">
       <AssemblyFlow
         density="dense"
-        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.08]"
         aria-hidden="true"
       />
       <AppSidebar

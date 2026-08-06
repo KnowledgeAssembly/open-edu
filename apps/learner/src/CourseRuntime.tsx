@@ -408,7 +408,7 @@ export function CourseRuntime({
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           {children && (
-            <div className="border-outline-variant shrink-0 overflow-y-auto border-r">
+            <div className="border-outline-variant relative shrink-0 border-r">
               {children}
             </div>
           )}

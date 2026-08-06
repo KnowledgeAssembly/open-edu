@@ -181,19 +181,21 @@ describe('AppShell', () => {
     expect(screen.getByTestId('appsidebar-nav-home').textContent).toBe('');
   });
 
-  it('expands the course sidebar fully on hover for fine pointers', async () => {
+  it('shows a flyout on hover without resizing the sidebar rail for fine pointers', async () => {
     setupMatchMedia(true);
     renderAtCourse();
 
     await screen.findByTestId('app-sidebar');
     expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
 
-    fireEvent.mouseEnter(screen.getByTestId('app-sidebar'));
-    expect(screen.getByTestId('app-sidebar')).not.toHaveClass('w-16');
+    fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
+    expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
+    expect(screen.getByTestId('app-sidebar-flyout')).toBeInTheDocument();
     expect(screen.getByTestId('appsidebar-nav-catalog').textContent).not.toBe('');
 
-    fireEvent.mouseLeave(screen.getByTestId('app-sidebar'));
+    fireEvent.mouseLeave(screen.getByTestId('app-sidebar-host'));
     expect(screen.getByTestId('app-sidebar')).toHaveClass('w-16');
+    expect(screen.queryByTestId('app-sidebar-flyout')).toBeNull();
   });
 
   it('shares the sidebar open/close state between course and non-course pages', async () => {
