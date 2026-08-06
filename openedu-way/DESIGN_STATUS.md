@@ -174,7 +174,7 @@ Engineering is running in parallel with design (as it should for an MVP), but th
 | Component library    | ✅     | 28 primitives in `packages/design-system/src/primitives/` (includes Visual DNA)                |
 | Theme system         | ✅     | 3 themes (Light, Dark, Zen) with `ThemeDefinition`, `RuntimeThemeProvider`, CSS var flattening |
 | Tailwind integration | ✅     | All 14 token categories wired (elevation added in Epic #332)                                   |
-| Widget system        | ✅     | 14 built-in widgets, ThemedButton migrated to design-system Button                             |
+| Widget system        | ✅     | 28 built-in widgets, ThemedButton migrated to design-system Button                             |
 | Accessibility        | ✅     | axe-core audit passes on all 28 components (0 violations)                                      |
 | Tests                | ✅     | Full test suite passes: `pnpm test && pnpm lint && pnpm typecheck`                             |
 

@@ -3857,7 +3857,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
     guide: {
       oneLiner: 'Explore geographic and social concepts on an interactive map.',
       whatItDoes:
-        'The Social Map widget shows an interactive map with regions, markers, and a legend. Students can explore regions, read descriptions, and find specific locations. It supports zooming, labels, and region highlighting.',
+        'The Social Map widget shows an interactive map with regions, markers, and a legend. Students can explore regions, read descriptions, and find specific locations. It supports zooming, labels, and region highlighting. Optionally, an SVG file can be used as the map background via svgSrc for accurate region boundaries.',
       whenToUse: [
         'Teaching geography and map reading',
         'Exploring continents and countries',
@@ -3870,6 +3870,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Define map regions with id, name, color, and description',
         'Optionally add markers for specific locations',
         'Add a legend to explain region colors',
+        'Optionally set svgSrc to an SVG map file for accurate region shapes',
       ],
       configFields: [
         {
@@ -3877,7 +3878,34 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
           type: 'array of objects',
           required: true,
           description:
-            'Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string).',
+            'Map regions. Each has id (string), name (string), and optional color (CSS variable or hex), description (string), tooltip (string), image (string), and path (SVG path data string).',
+        },
+        {
+          name: 'regions[].tooltip',
+          type: 'string',
+          required: false,
+          description: 'Tooltip text shown when hovering over the region.',
+        },
+        {
+          name: 'regions[].image',
+          type: 'string',
+          required: false,
+          description:
+            'Image URL for the region. Accepted by the schema but not currently rendered in the UI.',
+        },
+        {
+          name: 'regions[].path',
+          type: 'string',
+          required: false,
+          description:
+            'SVG path d attribute for the region shape. Used when no svgSrc background is set.',
+        },
+        {
+          name: 'svgSrc',
+          type: 'string',
+          required: false,
+          description:
+            "URL to an SVG file used as the map background. When set, region shapes come from the SVG file and each region's own path field is ignored.",
         },
         {
           name: 'title',
@@ -3952,6 +3980,7 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
         'Include a legend when using multiple colors',
         'Keep region descriptions brief and informative',
         'Start with simple geographic features before complex ones',
+        'Use svgSrc with an SVG map file for accurate region boundaries',
       ],
       sidebarPosition: 1,
       relatedWidgets: [{ id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' }],
