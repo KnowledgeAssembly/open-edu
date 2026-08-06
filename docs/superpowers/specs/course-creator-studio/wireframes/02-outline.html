@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>02 · Course outline</title>
+    <link rel="stylesheet" href="./wireframe.css" />
+  </head>
+  <body>
+    <a class="back" href="./index.html">← All wireframes</a>
+    <header class="topbar">
+      <div class="brand">OpenEdu <span>Studio</span></div>
+      <div class="crumb">Fractions warm-up · Outline</div>
+      <div class="spacer"></div>
+      <button class="ghost">Preview</button>
+      <button class="btn">Share</button>
+      <div class="toggle"><span class="on">Creator</span><span>Developer</span></div>
+    </header>
+
+    <div class="shell two">
+      <aside class="panel stack">
+        <div>
+          <div class="kicker">Course</div>
+          <h2>Fractions warm-up</h2>
+          <p class="muted">Grade 4 · ~20 min</p>
+        </div>
+        <button class="ghost">Course settings</button>
+        <button class="ghost">Rewards & cards ▾</button>
+        <button class="ghost">Flow (advanced) ▾</button>
+        <div class="tip">Tip: Keep 3–5 activities for a class session.</div>
+      </aside>
+
+      <section class="canvas">
+        <div class="row" style="margin-bottom: 16px">
+          <h1>Outline</h1>
+          <div class="spacer"></div>
+          <button class="ghost">+ Lesson</button>
+          <button class="ghost">+ Quiz</button>
+          <button class="ghost">+ Practice</button>
+        </div>
+
+        <div class="stack">
+          <div class="activity selected">
+            <div class="handle">⋮⋮</div>
+            <div>
+              <div class="row"><span class="badge">LESSON</span><strong>What is a fraction?</strong></div>
+              <div class="muted">Intro reading · 1 image</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="ghost">Edit</button>
+          </div>
+          <div class="activity">
+            <div class="handle">⋮⋮</div>
+            <div>
+              <div class="row"><span class="badge">QUIZ</span><strong>Quick check</strong></div>
+              <div class="muted">3 multiple-choice questions</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="ghost">Edit</button>
+          </div>
+          <div class="activity">
+            <div class="handle">⋮⋮</div>
+            <div>
+              <div class="row"><span class="badge">PRACTICE</span><strong>Build a fraction</strong></div>
+              <div class="muted">Widget · fraction-builder</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="ghost">Edit</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="anno">
+      <strong>UX note:</strong> Outline is the spine (maps to nodes + linear workflow). Drag reorder updates
+      order automatically. Rewards/Flow stay collapsed until needed.
+    </p>
+  </body>
+</html>

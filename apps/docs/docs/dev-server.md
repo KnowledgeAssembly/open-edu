@@ -4,7 +4,7 @@ sidebar_position: 12
 
 # Dev Server (`@open-edu/dev-server`)
 
-The dev server is a Vite-based development environment with hot reload, runtime mounting, and three built-in inspector panels for debugging accessibility, telemetry, and rewards.
+The `@open-edu/dev-server` package powers the [**OpenEdu Course Creator Studio**](./course-creator-studio). It is a Vite-based development environment with hot reload, runtime mounting, and inspector panels for debugging accessibility, telemetry, and rewards. In the Studio these tools live in **Developer mode**; Creator mode (default) hides them behind the teacher-facing authoring UI.
 
 ## Quick Start
 
@@ -24,6 +24,7 @@ edu dev ./my-package
 - **Hot reload** — Markdown and JSON changes reflect instantly without full page reload
 - **Runtime mounting** — Automatically loads and renders any educational package or bundle
 - **Inspector panels** — Debug accessibility, telemetry, rewards, and bundles in real time
+- **Creator/Developer modes** — Creator mode (default) is the teacher authoring UI; Developer mode restores the file editors and inspectors below
 
 ## Multi-Module Bundle Mode
 
@@ -60,6 +61,8 @@ When running in bundle mode, a **Bundle** tab lists all modules with their IDs, 
 The dev server wraps the `@open-edu/runtime` embed adapter in a Vite application with the inspector panels overlaid. When a package directory is provided, it loads the package via `loadPackage()`, sets up a `WorkflowEngine` and `RewardBroker`, and renders the runtime inside a `LayoutShell` with the sidebar.
 
 The inspector panels read from the same contexts — `AxesValidator` for a11y, `TelemetrySession.events$` for telemetry, and `RewardBroker` status for rewards.
+
+The Studio adds a `StudioAPI` façade (`apps/dev-server/src/studio/studioApi.ts`) over Vite middleware (`/api/package/*` for files, outline, validate, assets, and `.oep` export; `/api/studio/*` for AI generation, the course library, and units). See [Course Creator Studio](./course-creator-studio) for the product view.
 
 ### Tailwind CSS
 

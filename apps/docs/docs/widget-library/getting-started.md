@@ -179,7 +179,7 @@ The `routing` object maps each node to the next one. When a student finishes a n
 
 ## Step 7: Preview your lesson
 
-Run the dev server to see your lesson:
+Run the dev server (now the Course Creator Studio) to see your lesson:
 
 ```bash
 edu dev ./my-first-lesson

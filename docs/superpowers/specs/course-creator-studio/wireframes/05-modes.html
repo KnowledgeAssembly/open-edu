@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>05 · Creator vs Developer</title>
+    <link rel="stylesheet" href="./wireframe.css" />
+  </head>
+  <body>
+    <a class="back" href="./index.html">← All wireframes</a>
+    <header class="topbar">
+      <div class="brand">OpenEdu <span>Studio</span></div>
+      <div class="crumb">Same course · two surfaces</div>
+      <div class="spacer"></div>
+    </header>
+
+    <div class="shell home">
+      <div class="split">
+        <div class="card stack">
+          <div class="kicker">Creator mode (default)</div>
+          <h2>Human words</h2>
+          <div class="activity"><strong>Outline</strong></div>
+          <div class="activity"><strong>Activity editors</strong></div>
+          <div class="activity"><strong>Preview</strong></div>
+          <div class="activity"><strong>Share .oep</strong></div>
+          <p class="muted">No DevTools, no raw JSON, no file tree unless user expands Advanced.</p>
+        </div>
+
+        <div class="card stack">
+          <div class="kicker">Developer mode</div>
+          <h2>Power tools</h2>
+          <div class="dev-panel">
+            files/<br />
+            &nbsp;&nbsp;package.json<br />
+            &nbsp;&nbsp;workflow.json<br />
+            &nbsp;&nbsp;nodes/quiz-1.json<br />
+            <br />
+            [Telemetry] [Logs] [A11y] [Rewards]
+          </div>
+          <p class="muted">Today’s `dev-server` editor + inspectors, preserved behind the toggle.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="anno">
+      <strong>UX note:</strong> One product, one package model. Mode is a presentation layer — never fork the
+      on-disk format. Preference persists per user.
+    </p>
+  </body>
+</html>
