@@ -81,3 +81,102 @@ describe('buildReadyCheck', () => {
     expect(items.find((i) => i.id === 'hasActivity')?.passed).toBe(false);
   });
 });
+
+describe('buildReadyCheck rewards + practice checks', () => {
+  it('passes rewardsParse when rewards.json is absent', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({ 'nodes/lesson.md': '# Fractions' }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'rewardsParse')?.passed).toBe(true);
+  });
+
+  it('fails rewardsParse when rewards.json is present but invalid JSON', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({
+        'nodes/lesson.md': '# Fractions',
+        'rewards.json': '{ not json',
+      }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'rewardsParse')?.passed).toBe(false);
+  });
+
+  it('passes rewardsParse when rewards.json parses', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({
+        'nodes/lesson.md': '# Fractions',
+        'rewards.json': JSON.stringify({ triggers: [] }),
+      }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'rewardsParse')?.passed).toBe(true);
+  });
+
+  it('passes practiceWidgetValid when there are no practice nodes', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({ 'nodes/lesson.md': '# Fractions' }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'practiceWidgetValid')?.passed).toBe(true);
+  });
+
+  it('fails practiceWidgetValid for a practice node with an empty widget', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({
+        'nodes/practice.json': JSON.stringify({ type: 'exercise', widget: '', config: {} }),
+      }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'practiceWidgetValid')?.passed).toBe(false);
+  });
+
+  it('fails practiceWidgetValid for a practice node with a missing widget', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({
+        'nodes/practice.json': JSON.stringify({ type: 'exercise', config: {} }),
+      }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'practiceWidgetValid')?.passed).toBe(false);
+  });
+
+  it('passes practiceWidgetValid for a practice node with a widget', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({
+        'nodes/practice.json': JSON.stringify({
+          type: 'exercise',
+          widget: 'core.multiple-choice',
+          config: {},
+        }),
+      }),
+      validationErrors: [],
+    });
+    expect(items.find((i) => i.id === 'practiceWidgetValid')?.passed).toBe(true);
+  });
+
+  it('applies the new checks before packageValid in a deterministic order', () => {
+    const items = buildReadyCheck({
+      title: 'Fractions',
+      files: files({ 'nodes/lesson.md': '# Fractions' }),
+      validationErrors: [],
+    });
+    const order = items.map((i) => i.id);
+    expect(order).toEqual([
+      'hasTitle',
+      'hasActivity',
+      'quizHasCorrect',
+      'markdownHasHeading',
+      'rewardsParse',
+      'practiceWidgetValid',
+      'packageValid',
+    ]);
+  });
+});

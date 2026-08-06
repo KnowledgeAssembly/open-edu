@@ -139,16 +139,31 @@ describe('StudioApp', () => {
   it('shows an unsupported shell for bundles without package mutations', () => {
     render(
       wrap(
-        <StudioApp
-          mode="creator"
-          onModeChange={() => {}}
-          loadedPackage={null}
-          bundleUnsupported
-        />,
+        <StudioApp mode="creator" onModeChange={() => {}} loadedPackage={null} bundleUnsupported />,
       ),
     );
     expect(screen.getByText('Bundles need Developer mode')).toBeInTheDocument();
     expect(screen.queryByText('Reading lesson')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /outline/i })).not.toBeInTheDocument();
+  });
+
+  it('exposes the Learning path and Rewards & cards panels from the outline', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    await userEvent.click(screen.getByRole('button', { name: /outline/i }));
+    await screen.findByText('Intro');
+    expect(screen.getByText('Learning path', { selector: 'summary' })).toBeInTheDocument();
+    expect(screen.getByText('Rewards & cards', { selector: 'summary' })).toBeInTheDocument();
+  });
+
+  it('renders flow and rewards panel content when expanded', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    await userEvent.click(screen.getByRole('button', { name: /outline/i }));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByText('Learning path', { selector: 'summary' }));
+    expect(await screen.findByRole('button', { name: /add a score rule/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Rewards & cards', { selector: 'summary' }));
+    expect(
+      await screen.findByRole('button', { name: /add completion badge/i }),
+    ).toBeInTheDocument();
   });
 });

@@ -1,5 +1,12 @@
 export const WIDGETS_VERSION = '0.2.0';
 
+export { WIDGET_CATALOG_ENTRIES } from './widget-catalog-source.js';
+export type {
+  WidgetCatalogEntry,
+  WidgetGuideData,
+  WidgetGuideConfigField,
+} from './widget-catalog-source.js';
+
 export type {
   WidgetRenderProps,
   WidgetDefinition,

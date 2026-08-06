@@ -67,13 +67,32 @@ describe('ActivityEditorRouter', () => {
     expect(await screen.findByLabelText(/question/i)).toBeInTheDocument();
   });
 
-  it('shows advanced-activity message for practice nodes', async () => {
-    const content = JSON.stringify({ type: 'exercise', widget: 'flashcard' });
+  it('routes practice json to the practice editor', async () => {
+    const content = JSON.stringify({
+      type: 'exercise',
+      widget: 'core.multiple-choice',
+      config: {},
+    });
     render(
       wrap(
         <ActivityEditorRouter
           api={makeApi(content, 'nodes/p.json')}
           path="nodes/p.json"
+          onSaved={() => {}}
+          onError={() => {}}
+        />,
+      ),
+    );
+    expect(await screen.findByLabelText(/lesson title/i)).toBeInTheDocument();
+  });
+
+  it('shows advanced-activity message for other activity types', async () => {
+    const content = JSON.stringify({ type: 'reflection', prompt: 'Think about it' });
+    render(
+      wrap(
+        <ActivityEditorRouter
+          api={makeApi(content, 'nodes/r.json')}
+          path="nodes/r.json"
           onSaved={() => {}}
           onError={() => {}}
         />,

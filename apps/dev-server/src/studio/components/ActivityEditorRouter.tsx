@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from '@open-edu/i18n';
 import { LessonActivityEditor } from './LessonActivityEditor.js';
 import { QuizActivityEditor } from './QuizActivityEditor.js';
+import { PracticeActivityEditor } from './PracticeActivityEditor.js';
 import { detectActivityKind } from '../outlineModel.js';
 import type { ActivityKind } from '../types.js';
 import type { StudioApi } from '../studioApi.js';
@@ -43,6 +44,10 @@ export function ActivityEditorRouter({
 
   if (kind === 'quiz') {
     return <QuizActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} />;
+  }
+
+  if (kind === 'practice') {
+    return <PracticeActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} />;
   }
 
   return (

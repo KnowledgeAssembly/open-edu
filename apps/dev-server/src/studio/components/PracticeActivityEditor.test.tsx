@@ -1,0 +1,194 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@open-edu/i18n';
+import studioEn from '@open-edu/i18n/locales/en/studio.json';
+import { PracticeActivityEditor } from './PracticeActivityEditor';
+import type { StudioApi } from '../studioApi.js';
+import type { CuratedWidget } from '../widgets/curatedCatalog.js';
+
+vi.mock('../../editor/WidgetPreviewPanel.js', () => ({
+  WidgetPreviewPanel: () => <div data-testid="preview" />,
+}));
+
+const { mockCatalog } = vi.hoisted(() => {
+  const multipleChoice: CuratedWidget = {
+    id: 'core.multiple-choice',
+    name: 'Multiple Choice',
+    description: 'Select the correct answer from a list of options',
+    domain: 'core',
+    guide: {
+      configFields: [
+        {
+          name: 'questions',
+          type: 'array of objects',
+          required: true,
+          description: 'The questions to ask.',
+        },
+        {
+          name: 'questions[].question',
+          type: 'string',
+          required: true,
+          description: 'The question text shown to the student.',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description: 'Allow students to answer.',
+        },
+      ],
+    },
+  };
+  const matching: CuratedWidget = {
+    id: 'core.matching',
+    name: 'Matching',
+    description: 'Match pairs of items',
+    domain: 'core',
+  };
+  return { mockCatalog: { multipleChoice, matching } };
+});
+
+vi.mock('../widgets/curatedCatalog.js', () => ({
+  listCuratedWidgets: () => [mockCatalog.multipleChoice, mockCatalog.matching],
+  getCuratedWidget: (id: string) =>
+    id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
+}));
+
+function wrap(ui: React.ReactElement) {
+  return (
+    <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
+      {ui}
+    </I18nProvider>
+  );
+}
+
+const validNodeContent = JSON.stringify({
+  type: 'exercise',
+  title: 'Planets quiz',
+  widget: 'core.multiple-choice',
+  config: {
+    questions: [
+      { question: 'What is the largest planet?', options: ['Earth', 'Jupiter'], correctIndex: 1 },
+    ],
+    interactive: true,
+  },
+});
+
+function makeApi(content: string, overrides: Partial<StudioApi> = {}): StudioApi {
+  return {
+    getPackageDir: vi.fn(),
+    validate: vi.fn(),
+    getOutline: vi.fn(),
+    saveOutlineOrder: vi.fn(),
+    applyTemplate: vi.fn(),
+    exportOep: vi.fn(),
+    readFile: vi.fn().mockResolvedValue({ path: 'nodes/p.json', content }),
+    writeFile: vi.fn().mockResolvedValue({ success: true }),
+    ...overrides,
+  } as unknown as StudioApi;
+}
+
+function renderEditor(
+  content: string,
+  overrides: { onSaved?: () => void; onError?: (message: string) => void; api?: StudioApi } = {},
+) {
+  const api = overrides.api ?? makeApi(content);
+  render(
+    wrap(
+      <PracticeActivityEditor
+        api={api}
+        path="nodes/p.json"
+        onSaved={overrides.onSaved ?? (() => {})}
+        onError={overrides.onError ?? (() => {})}
+      />,
+    ),
+  );
+  return api;
+}
+
+describe('PracticeActivityEditor', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders the title, settings form, and preview stub after loading an exercise node', async () => {
+    renderEditor(validNodeContent);
+    expect(await screen.findByDisplayValue('Planets quiz')).toBeInTheDocument();
+    expect(screen.getByText('Questions')).toBeInTheDocument();
+    expect(screen.getAllByText('Interactive').length).toBeGreaterThan(0);
+    expect(screen.getByText('Practice settings')).toBeInTheDocument();
+    expect(screen.getByText('Live preview')).toBeInTheDocument();
+    expect(screen.getByTestId('preview')).toBeInTheDocument();
+    expect(screen.queryByText(/fix the highlighted settings/i)).not.toBeInTheDocument();
+  });
+
+  it('saves a serialized exercise node and calls onSaved', async () => {
+    const api = makeApi(validNodeContent);
+    const onSaved = vi.fn();
+    renderEditor(validNodeContent, { api, onSaved });
+    await screen.findByDisplayValue('Planets quiz');
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).toHaveBeenCalledWith('nodes/p.json', expect.any(String));
+    const parsed = JSON.parse(writeCall.mock.calls[0]![1] as string);
+    expect(parsed.type).toBe('exercise');
+    expect(parsed.widget).toBe('core.multiple-choice');
+    expect(parsed.title).toBe('Planets quiz');
+    expect(parsed.config).toEqual({
+      questions: [
+        { question: 'What is the largest planet?', options: ['Earth', 'Jupiter'], correctIndex: 1 },
+      ],
+      interactive: true,
+    });
+    expect(onSaved).toHaveBeenCalled();
+  });
+
+  it('seeds default settings for an empty config and shows a coaching banner', async () => {
+    renderEditor(JSON.stringify({ type: 'exercise', widget: 'core.multiple-choice', config: {} }));
+    expect(
+      await screen.findByText('Fix the highlighted settings before saving'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Some settings need attention before learners can use this practice.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Questions')).toBeInTheDocument();
+    expect(screen.getAllByText('Interactive').length).toBeGreaterThan(0);
+  });
+
+  it('still allows saving when validation errors exist but the JSON is valid', async () => {
+    const api = renderEditor(
+      JSON.stringify({ type: 'exercise', widget: 'core.multiple-choice', config: {} }),
+    );
+    await screen.findByText('Fix the highlighted settings before saving');
+    const save = screen.getByRole('button', { name: /save/i });
+    expect(save).toBeEnabled();
+    await userEvent.click(save);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows an empty state when the node is not a practice node', async () => {
+    renderEditor(JSON.stringify({ type: 'quiz', question: 'Q?' }));
+    expect(await screen.findByText('This isn’t a practice activity.')).toBeInTheDocument();
+  });
+
+  it('prompts to choose another practice when the widget is unknown', async () => {
+    renderEditor(JSON.stringify({ type: 'exercise', widget: 'no.such-widget' }));
+    expect(
+      await screen.findByText('This practice uses a widget that isn’t in the curated catalog.'),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /choose another practice/i }));
+    expect(await screen.findByText('Choose a practice activity')).toBeInTheDocument();
+  });
+
+  it('reports read errors through onError', async () => {
+    const onError = vi.fn();
+    const api = makeApi('{}', {
+      readFile: vi.fn().mockRejectedValue(new Error('nope')),
+    });
+    renderEditor('{}', { api, onError });
+    expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
+  });
+});
