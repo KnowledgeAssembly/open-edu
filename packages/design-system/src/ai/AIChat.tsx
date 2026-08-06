@@ -72,7 +72,11 @@ export function AIChat({
         ))}
         {isThinking && <ThinkingIndicator />}
         {showSuggestedQuestions && (
-          <SuggestedQuestions questions={suggestedQuestions} onSelect={onSuggestedQuestionSelect} />
+          <SuggestedQuestions
+            questions={suggestedQuestions}
+            onSelect={onSuggestedQuestionSelect}
+            heading="Suggested questions"
+          />
         )}
       </div>
       <div className="border-outline-variant flex items-end gap-2 border-t p-4">

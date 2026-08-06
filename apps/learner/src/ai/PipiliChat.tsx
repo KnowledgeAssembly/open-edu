@@ -172,6 +172,7 @@ export const PipiliChat = React.forwardRef<HTMLDivElement, PipiliChatProps>(func
             <SuggestedQuestions
               questions={suggestedQuestions}
               onSelect={onSuggestedQuestionSelect}
+              heading={t('learner.pipili.suggested_questions')}
               variant="compact"
             />
           )}

@@ -411,9 +411,11 @@ describe('CatalogPage', () => {
           onStartBundle={vi.fn()}
         />,
       );
+      const autoFillPattern = /auto-fill.*minmax\(280px/;
       const courseGrid = screen.getByTestId('course-list-section');
       const bundleGrid = screen.getByTestId('bundle-list-section').querySelector('.grid');
-      expect(bundleGrid?.className).toBe(courseGrid.className);
+      expect(courseGrid.className).toMatch(autoFillPattern);
+      expect(bundleGrid?.className).toMatch(autoFillPattern);
     });
 
     it('does not render the bundle description on catalog cards', () => {

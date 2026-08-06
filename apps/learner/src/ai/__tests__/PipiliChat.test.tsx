@@ -102,6 +102,7 @@ describe('PipiliChat suggested questions', () => {
 
   it('renders suggested questions in compact variant for the narrow sidebar', () => {
     renderChat();
-    expect(screen.getByTestId('suggested-questions-compact')).toBeInTheDocument();
+    expect(screen.getByTestId('suggested-questions')).toHaveAttribute('data-variant', 'compact');
+    expect(screen.getByText('Suggested questions')).toBeInTheDocument();
   });
 });
