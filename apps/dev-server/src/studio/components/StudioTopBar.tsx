@@ -8,11 +8,13 @@ export function StudioTopBar({
   onModeChange,
   onNavigate,
   courseTitle,
+  view,
 }: {
   mode: StudioMode;
   onModeChange: (m: StudioMode) => void;
   onNavigate: (view: StudioView) => void;
   courseTitle?: string;
+  view: StudioView;
 }) {
   const { t } = useTranslation();
   return (
@@ -29,6 +31,11 @@ export function StudioTopBar({
       </div>
       {courseTitle ? <span className="text-on-surface-variant text-sm">{courseTitle}</span> : null}
       <div className="flex-1" />
+      {view !== 'library' ? (
+        <Button variant="ghost" size="sm" onClick={() => onNavigate('library')}>
+          {t('studio.nav.library')}
+        </Button>
+      ) : null}
       <Button variant="ghost" size="sm" onClick={() => onNavigate('home')}>
         {t('studio.nav.home')}
       </Button>

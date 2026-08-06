@@ -48,6 +48,28 @@ vi.mock('./studioApi.js', () => ({
     writeFile: vi.fn().mockResolvedValue({ success: true }),
     getAiStatus: getAiStatusMock,
     generateFromNotes: generateFromNotesMock,
+    getLibrary: vi.fn().mockResolvedValue({
+      workspace: '/workspace',
+      entries: [
+        {
+          id: 'fractions',
+          title: 'Fractions',
+          kind: 'course',
+          relativePath: 'fractions',
+          version: '1.0.0',
+          updatedAt: 1,
+        },
+      ],
+    }),
+    openLibraryCourse: vi
+      .fn()
+      .mockResolvedValue({ success: true, packageDir: '/workspace/fractions' }),
+    duplicateCourse: vi.fn(),
+    renameCourse: vi.fn(),
+    archiveCourse: vi.fn(),
+    importCourseFolder: vi.fn(),
+    createUnit: vi.fn(),
+    exportUnitOep: vi.fn(),
   }),
 }));
 
@@ -181,6 +203,29 @@ describe('StudioApp', () => {
     expect(
       await screen.findByRole('button', { name: /add completion badge/i }),
     ).toBeInTheDocument();
+  });
+
+  it('navigates to the library via the My courses top-bar button', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
+    await userEvent.click(myCourses[0]!);
+    expect(await screen.findByText('Fractions')).toBeInTheDocument();
+  });
+
+  it('opens a library course into the outline view', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
+    await userEvent.click(myCourses[0]!);
+    await userEvent.click(await screen.findByRole('button', { name: /^open$/i }));
+    expect(await screen.findByText('Intro')).toBeInTheDocument();
+  });
+
+  it('reaches the unit-builder placeholder from the library', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
+    await userEvent.click(myCourses[0]!);
+    await userEvent.click(await screen.findByRole('button', { name: /create unit/i }));
+    expect(await screen.findByText('Create a unit')).toBeInTheDocument();
   });
 
   it('generates a draft from notes and navigates to the AI review view', async () => {

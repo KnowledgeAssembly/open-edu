@@ -20,6 +20,13 @@ describe('studioSession', () => {
     expect(readStudioView()).toBe('outline');
   });
 
+  it('persists the library and unit-builder views', () => {
+    writeStudioView('library');
+    expect(readStudioView()).toBe('library');
+    writeStudioView('unit-builder');
+    expect(readStudioView()).toBe('unit-builder');
+  });
+
   it('ignores invalid stored views', () => {
     sessionStorage.setItem('openedu.studio.view', 'nope');
     expect(readStudioView()).toBe('home');
