@@ -87,6 +87,15 @@ Provides the widget registry and built-in widgets used by content nodes and runt
 
 Compiles course-spec Markdown or JSON into validated package structures.
 
+### `@open-edu/dev-server` — OpenEdu Course Creator Studio
+
+The `apps/dev-server` app (package `@open-edu/dev-server`) evolved from the original local Vite preview + inspector + file editor into **OpenEdu Course Creator Studio**, a single authoring product with two modes over the same on-disk packages:
+
+- **Creator mode** (default, for teachers/tutors) — starts from a template, AI draft, recent course, or the course library. The **Outline** is the course spine (add lessons/quizzes/practice, reorder → linear workflow). Form editors author lessons (Markdown), quizzes (MCQ with correct-answer coaching), and practice widgets (curated picker + live preview + schema forms). Guided **flow** (score-based branching), **rewards & cards** forms, preview without DevTools, and a **Share** flow (Ready check → `.oep` export → learner-install instructions / classroom note). Units bundle 2–5 courses via a canonical `bundle.json`.
+- **Developer mode** — preserves the original dev-server power tools: file tree, Markdown/JSON editors, manifest/workflow/rewards/cards editors, and the Telemetry / Logs / Rewards / A11y / Bundle inspector panels.
+
+Architecturally, the Studio UI is a façade over the package model. It talks to a thin `StudioAPI` (`apps/dev-server/src/studio/studioApi.ts`) implemented by a local adapter — Vite middleware for `/api/package/*` (file read/write, outline, validate, assets, export `.oep`) and `/api/studio/*` (AI generate/status, library scan/open/duplicate/rename/archive/import, unit creation/export) — so a hosted cloud Studio can later reuse the same UX. AI drafting runs server-side (LLM → `course-spec.json` → `@open-edu/course-compiler`) with keys kept out of the client. The workspace root for the course library comes from `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
+
 ### Agentic Course Authoring Skill
 
 The `skills/openedu-course-authoring/` directory contains the portable agentic course-authoring skill. It uses the course-compiler and CLI as its authoritative validation backend, distinguishing between structural-only validation (portable mode) and full compiler validation (repository mode). See [content and workflows](../domain/content-and-workflows.md#agentic-course-authoring) for the complete reference.
@@ -186,4 +195,5 @@ The repo is organized to keep learning content portable and the runtime platform
 - course distribution (`.oep` build, install, catalog, updates): `packages/oep-distribution`
 - course registry (catalog build, release validation, schema generation): `packages/registry` + the `openedu-library` repo
 - Pipili AI companion (chat, hints, context mapping): `packages/ai-companion/src/pipili/` and `apps/learner/src/pipili/`
+- Course Creator Studio authoring (Creator/Developer modes, StudioAPI, AI drafts, library/units, share/export): `apps/dev-server/src/studio/` and `apps/dev-server/vite.config.ts`
 - end-user navigation and app composition: `apps/learner`

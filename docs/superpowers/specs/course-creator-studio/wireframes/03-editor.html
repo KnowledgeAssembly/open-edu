@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>03 · Activity editor</title>
+    <link rel="stylesheet" href="./wireframe.css" />
+  </head>
+  <body>
+    <a class="back" href="./index.html">← All wireframes</a>
+    <header class="topbar">
+      <div class="brand">OpenEdu <span>Studio</span></div>
+      <div class="crumb">Outline / Quick check</div>
+      <div class="spacer"></div>
+      <button class="ghost">Back to outline</button>
+      <button class="btn">Save</button>
+    </header>
+
+    <div class="shell">
+      <aside class="panel stack">
+        <div class="kicker">Activity type</div>
+        <div class="card selected"><strong>Quiz</strong><div class="muted">Multiple choice</div></div>
+        <div class="card"><strong>Lesson</strong><div class="muted">Reading / markdown</div></div>
+        <div class="card"><strong>Practice</strong><div class="muted">Interactive widget</div></div>
+        <div class="tip">Plain language only. No JSON unless Developer mode is on.</div>
+      </aside>
+
+      <section class="canvas stack">
+        <div>
+          <h1>Quick check</h1>
+          <p class="muted">Ask one clear question. Mark the correct answer.</p>
+        </div>
+        <div class="card stack">
+          <label class="muted">Question</label>
+          <div class="editor-box">Which picture shows 1/2?</div>
+          <div class="stack">
+            <div class="activity"><span class="badge">A</span><div>Full pizza</div></div>
+            <div class="activity selected"><span class="badge">B ✓</span><div>Half pizza</div></div>
+            <div class="activity"><span class="badge">C</span><div>Three slices</div></div>
+          </div>
+          <button class="ghost">+ Add option</button>
+        </div>
+      </section>
+
+      <aside class="panel right stack">
+        <div class="kicker">Learner check</div>
+        <div class="check"><span class="ok">✓</span><div>Has a correct answer</div></div>
+        <div class="check"><span class="ok">✓</span><div>Question is under 120 characters</div></div>
+        <div class="check"><span class="bad">!</span><div>Add an image for younger learners (optional)</div></div>
+        <hr style="border: 0; border-top: 1px solid var(--line); width: 100%" />
+        <div class="kicker">Mini preview</div>
+        <div class="card muted">Learner sees this quiz as in the learner app.</div>
+        <button class="ghost">Open full preview</button>
+      </aside>
+    </div>
+
+    <p class="anno">
+      <strong>UX note:</strong> Validation is coaching (“add a correct answer”), not schema errors
+      (`options.1.correct`). Widget editors in Phase 2 use the same pattern with form fields + live preview.
+    </p>
+  </body>
+</html>

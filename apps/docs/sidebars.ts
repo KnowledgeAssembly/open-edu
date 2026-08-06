@@ -5,6 +5,7 @@ const sidebars: SidebarsConfig = {
     'intro',
     'architecture',
     'learner',
+    'course-creator-studio',
     'package-format',
     'package-authoring',
     'agentic-authoring',

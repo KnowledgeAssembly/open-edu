@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, course distribution (`.oep` format), an AI companion (Pipili), and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, course distribution (`.oep` format), an AI companion (Pipili), and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling. It also ships **OpenEdu Course Creator Studio** (in `apps/dev-server`) — a teacher-facing authoring product with Creator/Developer modes that produces the same OpenEdu packages.
 
 ## OpenWiki
 
@@ -65,6 +65,10 @@ node packages/i18n/src/i18n-keys.test.ts          # Run i18n key validation test
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js oep:build ./my-course -o ./dist  # Build .oep distribution artifact
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
+# Start the Course Creator Studio (Creator mode default; Developer toggle in-app)
+pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js dev ./examples/hello-world
+# Run the dev-server package tests (Studio UI + library/ai/flow logic)
+pnpm --filter @open-edu/dev-server test
 ```
 
 ## Monorepo Structure
@@ -72,7 +76,7 @@ pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # Vite dev server with inspector panels
+│   ├── dev-server/          # OpenEdu Course Creator Studio (Creator + Developer modes, StudioAPI)
 │   ├── docs/                # Docusaurus documentation site
 │   └── learner/             # Standalone learner app with 8-page router + theme switching + Pipili chat + course install
 ├── packages/
@@ -153,7 +157,7 @@ Epic 1 (Foundation)  ← CURRENT
         ├─► Epic 3 (Package Loader)
         │     └─► Epic 5 (Runtime Renderer)
         │           ├─► Epic 6 (Accessibility)
-        │           ├─► Epic 10 (Dev Server)
+        │           ├─► Epic 10 (Course Creator Studio / dev-server)
         │           │     └─► Epic 9 (CLI)
         │           └─► Epic 12 (Testing)
         ├─► Epic 4 (Workflow Engine)
@@ -258,8 +262,8 @@ The learner app is the primary development surface. After `install` completes, t
 - **Workspace packages require a build.** Monorepo packages resolve to `dist/` outputs; `pnpm build` runs during environment install. If you change package source and imports fail at runtime, rerun `pnpm build`.
 - **Dev-server CSS staleness.** After editing Tailwind classes in `packages/runtime/src/`, regenerate dev-server CSS (see Tailwind CSS & Dev-Server section above).
 - **E2E tests.** Run `pnpm test:e2e:install` once per environment for Playwright Chromium, then `pnpm test:e2e tests/e2e/learner-experience.spec.ts` for the canonical learner smoke test.
-- **Optional services.** Dev-server (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above.
-- **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion.
+- **Optional services.** The Course Creator Studio (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above. The Studio defaults to Creator mode for teachers; Developer mode (file editors + inspectors) is toggled in-app and persisted in `localStorage`. The course library uses `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
+- **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion. Studio AI drafting is server-side and uses `OPEN_EDU_STUDIO_LLM_*` (or existing llm-config env vars); it degrades to templates when unavailable.
 
 <!-- OPENWIKI:START -->
 

@@ -53,7 +53,7 @@ pnpm build
 # Start the learner app (course catalog with full runtime)
 pnpm --filter @open-edu/learner dev
 
-# Or run the dev server for a specific package
+# Or run the Course Creator Studio for a specific package
 pnpm --filter @open-edu/cli build
 node packages/cli/dist/cli.js dev ./examples/hello-world
 ```
@@ -69,6 +69,7 @@ node packages/cli/dist/cli.js --help
 
 - [Architecture](./architecture) — How the framework is built
 - [Learner App](./learner) — Standalone course player with catalog, bundle overview, progress, and theme switching
+- [Course Creator Studio](./course-creator-studio) — Teacher-facing authoring UI (templates, outline, AI drafts, library, share)
 - [Package Format](./package-format) — Structure of educational packages and multi-module bundles
 - [Package Authoring Guide](./package-authoring) — How to create packages
 - [Runtime Packages](./runtime) — Node renderers, layout components, theming, and bundle overview

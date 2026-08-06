@@ -20,7 +20,10 @@ pnpm --filter @open-edu/learner dev
 # Use a custom course directory (defaults to ../../examples)
 EDU_CATALOG_DIR=/path/to/my/courses pnpm --filter @open-edu/learner dev
 
-# Run the dev server for a specific package
+# Start the Course Creator Studio for a specific package (port 4000)
+# Creator mode (default) is a teacher-friendly authoring UI — templates,
+# outline, form editors, preview, share; Developer mode keeps the file editors
+# and inspectors.
 pnpm --filter @open-edu/cli build
 node packages/cli/dist/cli.js dev ./examples/hello-world
 ```
@@ -59,6 +62,36 @@ The skill auto-detects whether it's running inside an Open-Edu monorepo:
 - **Repository mode** (inside monorepo): adds full compilation + package validation + content linting
 
 See the [Agentic Course Authoring Guide](apps/docs/docs/agentic-authoring.md) for the full workflow, quality rubric, and widget catalog integration. Skill code lives at `skills/openedu-course-authoring/`.
+
+## Course Creator Studio
+
+**OpenEdu Course Creator Studio** is the authoring companion to the learner app. It evolved from the original dev-server (a local Vite preview + inspector + file editor) into a single product with two modes, so teachers can author shareable courses without CLI, file paths, or schema jargon:
+
+| Mode                  | Audience                               | Experience                                                                                                                        |
+| --------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Creator** (default) | Teachers / tutors                      | Template gallery → Outline → activity editors → Preview → Share. Plain-language validation, no DevTools.                          |
+| **Developer**         | Framework contributors / power authors | File tree, Markdown/JSON editors, manifest/workflow/rewards/cards editors, Telemetry / Logs / Rewards / A11y / Bundle inspectors. |
+
+Both modes edit the **same on-disk OpenEdu packages** — mode is presentation, not a format fork.
+
+**Creator capabilities** (implemented across Phase 0–4 of the [design spec](docs/superpowers/specs/2026-08-05-course-creator-studio-design.md)):
+
+- **Home / Library** — start from a template, an **AI draft**, or a recent course; manage a local **course library** (open, duplicate, rename, archive, import folder)
+- **Outline** — the course spine; add lessons, quizzes, and practice activities, then reorder (order drives linear workflow automatically)
+- **Activity editors** — form-based editing for lessons (Markdown), quizzes (MCQ with correct-answer coaching), and practice widgets (curated picker + live preview + schema forms)
+- **Guided flow** — simple score-based branching ("If score is at least… then go to…") writes `workflow.json` for you
+- **Guided rewards & cards** — add completion badges, quiz-pass badges, and knowledge cards via plain forms
+- **Preview** — the full learner runtime with no DevTools in Creator mode
+- **Share** — Ready check → export `.oep` → copyable "open in the learner app" instructions (plus a classroom note and optional unit export)
+
+**AI-assisted authoring** — paste notes and Studio drafts a full course (LLM → `course-spec.json` → course-compiler) with a plain-language quality checklist and accept/reject review. Templates remain the offline fallback when AI is unavailable. API keys stay server-side (`OPEN_EDU_STUDIO_LLM_*` / existing llm-config env vars).
+
+**Architecture** — Studio is a façade over the package model. The UI talks to a thin `StudioAPI` (`apps/dev-server/src/studio/studioApi.ts`) implemented by a local adapter (Vite `/api/package/*` + `/api/studio/*` middleware) so a hosted cloud Studio (Phase 5) can reuse the same UX. Start via `edu dev <packageDir>`; set `OPEN_EDU_STUDIO_WORKSPACE` to a folder of courses to enable the library.
+
+```bash
+edu dev ./examples/hello-world          # opens Course Creator Studio (Creator mode)
+OPEN_EDU_STUDIO_WORKSPACE=~/courses edu dev ./examples/hello-world  # with course library
+```
 
 ## Theming System
 
@@ -206,7 +239,7 @@ level-b-math/
 
 Each module reference supports `dependsOn` for prerequisite chaining. The `BundleEngine` (from `@open-edu/workflow`) orchestrates per-module `WorkflowEngine` instances, manages module-level status (`locked` / `unlocked` / `in_progress` / `completed`), and emits `module.changed`, `module.completed`, `module.unlocked`, and `bundle.completed` events.
 
-The learner app renders bundle cards in the catalog and provides a `BundleOverviewPage` with module status badges and progress bars. The dev-server includes a **Bundle Inspector** tab with a module selector dropdown.
+The learner app renders bundle cards in the catalog and provides a `BundleOverviewPage` with module status badges and progress bars. The Course Creator Studio's Developer mode includes a **Bundle Inspector** tab with a module selector dropdown; Creator mode can also compose 2–5 courses into a light **unit** bundle from the Library.
 
 ### Importing Learn-Easy Content
 
@@ -229,7 +262,7 @@ Converts Learn-Easy curriculum directories into Open-Edu bundles with auto-gener
 | `@open-edu/telemetry`        | RxJS event emitter, JSONL append-only persistence, session management, JSONL reader + summary, **optional bundleId/moduleId correlation**                                                                                                                                                                                                                                                                                                                                                                 | Done   |
 | `@open-edu/rewards`          | Reward broker — badge award, webhook, script actions, conditional rules, verification, replay, **CardBroker** (Living Knowledge Cards unlock/level-up), **moduleCompleted/bundleCompleted reward conditions**                                                                                                                                                                                                                                                                                             | Done   |
 | `@open-edu/cli`              | Commander-based CLI — `validate`, `dev`, `build`, `package`, `create`, `report`, `lint-content`, `patch`, `generate`, **`import learn-easy`**, **`compile`**                                                                                                                                                                                                                                                                                                                                              | Done   |
-| `@open-edu/dev-server`       | Vite dev server with hot reload, runtime mounting, telemetry + rewards + accessibility inspector, **bundle inspector tab**, **multi-module bundle mode**                                                                                                                                                                                                                                                                                                                                                  | Done   |
+| `@open-edu/dev-server`       | **OpenEdu Course Creator Studio** (local hybrid authoring + preview) — Creator mode (default: templates, outline, form editors, guided flow/rewards, AI drafts, library/units, share/export `.oep`) and Developer mode (file editors + telemetry/rewards/a11y/bundle inspectors), StudioAPI façade over Vite `/api/package/*` + `/api/studio/*`                                                                                                                                                           | Done   |
 | `@open-edu/widgets`          | Widget SDK — registry, **27 built-in widgets** (26 stable + 1 deprecated), **enriched metadata** (AI, capabilities, accessibility, analytics, reward), **metadata validation**, **catalog generation** (source-of-truth in `widget-catalog-source.ts` → auto-generated JSON → `@open-edu/core`), remote widget loader, NPM scaffold template                                                                                                                                                              | Done   |
 | `@open-edu/course-compiler`  | Remark/Unified-based compiler that converts `course-spec.md` or `course-spec.json` into validated OpenEdu packages — auto-detects format by extension                                                                                                                                                                                                                                                                                                                                                     | Done   |
 | `@open-edu/llm-config`       | LLM provider abstraction — `generateStructured<T>()` with Zod validation, supports OpenAI + OpenRouter providers, **ModelFactory** with two-tier routing (fast/escalation), provider capability reporting, AI SDK v4 integration                                                                                                                                                                                                                                                                          | Done   |
@@ -301,10 +334,10 @@ schemas
   │            ───► learner
   ├──► workflow ──► runtime
   │                ───► learner
-  ├──► telemetry ──► rewards ──► dev-server
+  ├──► telemetry ──► rewards ──► dev-server (Course Creator Studio)
   │                            ───► learner
   ├──► runtime ──► accessibility
-  │             ──► dev-server ──► cli
+  │             ──► dev-server (Course Creator Studio) ──► cli
   │             ──► learner
   │             ──► e2e (Playwright)
   ├──► i18n ──► runtime
@@ -445,7 +478,7 @@ E2E tests start the learner dev server on port 4001 and run against all example 
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # Vite dev server with inspector panels
+│   ├── dev-server/          # OpenEdu Course Creator Studio (Creator + Developer modes)
 │   ├── docs/                # Docusaurus documentation site
 │   └── learner/             # Standalone learner app — catalog + course view + progress
 ├── packages/

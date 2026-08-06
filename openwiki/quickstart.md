@@ -23,7 +23,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 ### Apps
 
 - `apps/learner` — standalone learner experience. It is the main user-facing app and stitches together catalog, course runtime, progress, settings, bundle overview, collection binder, course install UI (`.oep` files, URL, catalog), and Pipili AI companion chat.
-- `apps/dev-server` — local development server and inspector UI.
+- `apps/dev-server` — **OpenEdu Course Creator Studio** (local hybrid authoring + preview). Creator mode (default) is a teacher-facing authoring UI: template gallery, AI drafting, outline, form-based activity editors, guided flow/rewards, course library, and `.oep` share/export. Developer mode preserves the original dev-server surface: file tree + Markdown/JSON editors and Telemetry / Logs / Rewards / A11y / Bundle inspectors.
 - `apps/docs` — docs site that mirrors some of the framework guidance.
 
 ### Core packages
@@ -95,6 +95,7 @@ The UI is intentionally split between low-level primitives and opinionated visua
 - Change PWA behavior (install, update, offline, caching): start in `packages/pwa-core` and `apps/learner/vite.config.ts`.
 - Change widget IDs, catalog entries, or metadata validation: start in `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, and `packages/core/src/widget-catalog.ts`.
 - Change CLI behavior: start in `packages/cli`.
+- Change the Course Creator Studio (Creator/Developer modes, outline, activity editors, AI drafting, library/units, share/export): start in `apps/dev-server/src/studio/` (UI + `StudioAPI` client), `apps/dev-server/vite.config.ts` (local `/api/package/*` + `/api/studio/*` adapters), and `packages/i18n/locales/en/studio.json` (Creator copy). The product spec lives in `docs/superpowers/specs/2026-08-05-course-creator-studio-design.md`.
 - Change course-authoring skill behavior: start in `skills/openedu-course-authoring/` — see [agentic course authoring](domain/content-and-workflows.md#agentic-course-authoring).
 - Change course distribution (`.oep` build, install, catalog, updates): start in `packages/oep-distribution` and `apps/learner/src/courseDownload.ts`.
 - Change course registry tooling (catalog generation, release validation): start in `packages/registry` and the `openedu-library` repo.

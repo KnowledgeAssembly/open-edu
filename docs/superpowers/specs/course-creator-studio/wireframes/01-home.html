@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>01 · Home / Library</title>
+    <link rel="stylesheet" href="./wireframe.css" />
+  </head>
+  <body>
+    <a class="back" href="./index.html">← All wireframes</a>
+    <header class="topbar">
+      <div class="brand">OpenEdu <span>Studio</span></div>
+      <div class="crumb">Home</div>
+      <div class="spacer"></div>
+      <div class="toggle" title="Mode switch">
+        <span class="on">Creator</span>
+        <span>Developer</span>
+      </div>
+    </header>
+
+    <div class="shell home">
+      <div class="stack">
+        <div>
+          <h1>Create a course</h1>
+          <p class="muted">Start from a template or paste your notes. You’ll leave with a shareable package.</p>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Start from a template</div>
+          <div class="template-grid">
+            <div class="card template selected">
+              <strong>Reading lesson</strong>
+              <span class="muted">1 lesson · ~15 min</span>
+            </div>
+            <div class="card template">
+              <strong>Lesson + quiz</strong>
+              <span class="muted">Teach, then check</span>
+            </div>
+            <div class="card template">
+              <strong>Practice widget</strong>
+              <span class="muted">Interactive exercise</span>
+            </div>
+            <div class="card template">
+              <strong>Short unit</strong>
+              <span class="muted">3 activities</span>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 14px">
+            <button class="btn">Use template</button>
+            <button class="ghost">Preview template</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Or start with AI</div>
+          <h2>Paste notes, outline, or upload a PDF</h2>
+          <div class="editor-box muted">Teacher notes go here…</div>
+          <div class="row" style="margin-top: 12px">
+            <button class="btn">Generate draft</button>
+            <span class="chip">Falls back to templates if AI is offline</span>
+          </div>
+        </div>
+
+        <div>
+          <h2>Recent</h2>
+          <div class="stack" style="margin-top: 10px">
+            <div class="activity">
+              <div>
+                <strong>Fractions warm-up</strong>
+                <div class="muted">Edited yesterday · Ready to share</div>
+              </div>
+              <div class="spacer"></div>
+              <button class="ghost">Open</button>
+            </div>
+            <div class="activity">
+              <div>
+                <strong>Living vs nonliving</strong>
+                <div class="muted">Draft · 2 activities</div>
+              </div>
+              <div class="spacer"></div>
+              <button class="ghost">Open</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="anno">
+      <strong>UX note:</strong> No file paths, no “package dir”, no CLI. First action is pick a template or paste
+      notes. Recent courses replace hunting folders.
+    </p>
+  </body>
+</html>
