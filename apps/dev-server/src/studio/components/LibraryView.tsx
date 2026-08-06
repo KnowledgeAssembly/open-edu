@@ -127,24 +127,26 @@ export function LibraryView({
     }
   };
 
-  const active = entries.filter((entry) => !entry.archived);
-
   const actions = (entry: LibraryEntry) => (
     <div className="flex flex-wrap items-center gap-2">
-      <Button variant="default" size="sm" onClick={() => onOpen(entry.relativePath)}>
-        <FolderOpen className="mr-1.5 h-4 w-4" />
-        {t('studio.library.open')}
-      </Button>
+      {entry.kind === 'course' ? (
+        <Button variant="default" size="sm" onClick={() => onOpen(entry.relativePath)}>
+          <FolderOpen className="mr-1.5 h-4 w-4" />
+          {t('studio.library.open')}
+        </Button>
+      ) : null}
       {entry.kind === 'unit' ? (
         <Button variant="outline" size="sm" onClick={() => void handleExportUnit(entry)}>
           <FileDown className="mr-1.5 h-4 w-4" />
           {t('studio.unit.exportOep')}
         </Button>
       ) : null}
-      <Button variant="ghost" size="sm" onClick={() => void handleDuplicate(entry)}>
-        <Copy className="mr-1.5 h-4 w-4" />
-        {t('studio.library.duplicate')}
-      </Button>
+      {entry.kind === 'course' ? (
+        <Button variant="ghost" size="sm" onClick={() => void handleDuplicate(entry)}>
+          <Copy className="mr-1.5 h-4 w-4" />
+          {t('studio.library.duplicate')}
+        </Button>
+      ) : null}
       <Button variant="ghost" size="sm" onClick={() => handleOpenRename(entry)}>
         <Pencil className="mr-1.5 h-4 w-4" />
         {t('studio.library.rename')}
@@ -223,7 +225,7 @@ export function LibraryView({
           {t('studio.library.title')}
         </h2>
         <ul className="space-y-3">
-          {active.map((entry) => (
+          {entries.map((entry) => (
             <li key={entry.relativePath}>
               <Card className="border-outline-variant bg-surface">
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">

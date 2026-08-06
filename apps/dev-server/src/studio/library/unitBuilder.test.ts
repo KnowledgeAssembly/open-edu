@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, basename, relative } from 'node:path';
 import { createUnit, buildUnitOep } from './unitBuilder';
 import { scanWorkspace } from './libraryIndex';
 import { BundleManifestSchema } from '@open-edu/schemas';
@@ -120,6 +120,27 @@ describe('createUnit', () => {
       }),
     ).rejects.toThrow(/at least two/);
     expect(await readdir(join(ws, 'units')).catch(() => [])).toHaveLength(0);
+  });
+
+  it('rejects a course path that escapes to a sibling sharing the workspace prefix', async () => {
+    await makeCourse('one', 'one', 'Course One');
+    const sibling = await mkdtemp(join(tmpdir(), `${basename(ws)}-evil`));
+    try {
+      await mkdir(join(sibling, 'nodes'), { recursive: true });
+      await writeFile(join(sibling, 'package.json'), courseManifest('sneaky', 'Sneaky'), 'utf-8');
+      await writeFile(join(sibling, 'nodes/intro.md'), '# Sneaky\n', 'utf-8');
+      await expect(
+        createUnit({
+          workspaceRoot: ws,
+          courseRelativePaths: ['one', relative(ws, sibling)],
+          unitId: 'escape-unit',
+          unitTitle: 'Escape Unit',
+          author: 'T',
+        }),
+      ).rejects.toThrow(/escapes/);
+    } finally {
+      await rm(sibling, { recursive: true, force: true });
+    }
   });
 });
 

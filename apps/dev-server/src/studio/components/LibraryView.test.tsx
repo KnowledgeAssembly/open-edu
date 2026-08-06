@@ -99,6 +99,16 @@ describe('LibraryView', () => {
     expect(screen.getByText('Unit')).toBeInTheDocument();
   });
 
+  it('offers Open and Duplicate only for course rows, not unit rows', async () => {
+    renderLibrary();
+    await screen.findByText('Numbers unit');
+    expect(screen.getAllByRole('button', { name: /^open$/i })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /^duplicate$/i })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /export unit .oep/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^rename$/i })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /^archive$/i })).toHaveLength(2);
+  });
+
   it('calls onOpen with the relative path when Open is clicked', async () => {
     const onOpen = vi.fn();
     renderLibrary({ onOpen });

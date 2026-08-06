@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile, readFile, readdir, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { duplicateCourse, renameCourse, archiveCourse, importCourseFolder } from './courseOps';
 
 let ws = '';
@@ -70,6 +70,16 @@ describe('duplicateCourse', () => {
       await expect(duplicateCourse(outside, ws, 'ext-copy', 'Copy')).rejects.toThrow(/escapes/);
     } finally {
       await rm(outside, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects a sibling source whose name merely shares the workspace prefix', async () => {
+    const sibling = await mkdtemp(join(tmpdir(), `${basename(ws)}-evil`));
+    try {
+      await makeCourseAt(sibling, 'sneaky', 'Sneaky');
+      await expect(duplicateCourse(sibling, ws, 'sneaky-copy', 'Copy')).rejects.toThrow(/escapes/);
+    } finally {
+      await rm(sibling, { recursive: true, force: true });
     }
   });
 });

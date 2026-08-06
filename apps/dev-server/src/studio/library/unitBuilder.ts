@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { cp, mkdir } from 'node:fs/promises';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import {
   BundleManifestSchema,
   PackageManifestSchema,
@@ -66,7 +66,7 @@ export async function createUnit(options: CreateUnitOptions): Promise<LibraryEnt
     const modules: Array<{ id: string; title: string; path: string; dependsOn: string[] }> = [];
     for (const courseRel of uniquePaths) {
       const courseDir = resolve(rootResolved, courseRel);
-      if (!courseDir.startsWith(rootResolved)) {
+      if (courseDir !== rootResolved && !courseDir.startsWith(`${rootResolved}${sep}`)) {
         throw new Error(`Course path escapes the workspace: ${courseRel}`);
       }
       const manifest = readJson(join(courseDir, 'package.json'));

@@ -683,6 +683,14 @@ function eduPackageLoader(): Plugin {
             const courseRelativePaths = Array.isArray(body.courseRelativePaths)
               ? body.courseRelativePaths
               : [];
+            const unsafePath = courseRelativePaths.find(
+              (path) => typeof path !== 'string' || !isSafeRelativePath(path),
+            );
+            if (unsafePath !== undefined) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid courseRelativePaths' }));
+              return;
+            }
             const unitId = slugify(title);
             const workspace = resolveWorkspace(packageDir);
             const entry = await createUnit({

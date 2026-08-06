@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { cp, mkdir, rename, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { PackageManifestSchema, BundleManifestSchema } from '@open-edu/schemas';
 
 export interface CourseOpResult {
@@ -10,7 +10,8 @@ export interface CourseOpResult {
 }
 
 function assertInsideWorkspace(resolvedPath: string, workspaceRoot: string): void {
-  if (!resolvedPath.startsWith(resolve(workspaceRoot))) {
+  const root = resolve(workspaceRoot);
+  if (resolvedPath !== root && !resolvedPath.startsWith(`${root}${sep}`)) {
     throw new Error(`Path escapes the workspace: ${resolvedPath}`);
   }
 }
