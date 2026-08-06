@@ -66,8 +66,17 @@ describe('scanWorkspace', () => {
     expect(entries).toHaveLength(2);
     const course = entries.find((entry) => entry.kind === 'course');
     const unit = entries.find((entry) => entry.kind === 'unit');
-    expect(course).toMatchObject({ id: 'fractions', title: 'Fractions', relativePath: 'fractions' });
-    expect(unit).toMatchObject({ id: 'my-unit', title: 'My Unit', relativePath: 'my-unit', kind: 'unit' });
+    expect(course).toMatchObject({
+      id: 'fractions',
+      title: 'Fractions',
+      relativePath: 'fractions',
+    });
+    expect(unit).toMatchObject({
+      id: 'my-unit',
+      title: 'My Unit',
+      relativePath: 'my-unit',
+      kind: 'unit',
+    });
   });
 
   it('skips node_modules, .git, .archive, .edu and dist', async () => {
@@ -89,7 +98,11 @@ describe('scanWorkspace', () => {
 
     const entries = scanWorkspace(root);
     expect(entries).toHaveLength(1);
-    expect(entries[0]).toMatchObject({ id: 'math-unit', kind: 'unit', relativePath: 'units/math-unit' });
+    expect(entries[0]).toMatchObject({
+      id: 'math-unit',
+      kind: 'unit',
+      relativePath: 'units/math-unit',
+    });
   });
 
   it('ignores directories whose package.json is not an OpenEdu manifest', async () => {

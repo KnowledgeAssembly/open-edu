@@ -92,7 +92,11 @@ export async function renameCourse(
     const parsed = PackageManifestSchema.safeParse({ ...manifest, title: newTitle });
     if (!parsed.success) throw new Error('New title produces an invalid manifest');
     await writeFile(packageJsonPath, JSON.stringify(parsed.data, null, 2), 'utf-8');
-    return { relativePath: resolved.split('/').pop() ?? '', id: parsed.data.id, title: parsed.data.title };
+    return {
+      relativePath: resolved.split('/').pop() ?? '',
+      id: parsed.data.id,
+      title: parsed.data.title,
+    };
   }
 
   if (existsSync(bundleJsonPath)) {
@@ -101,7 +105,11 @@ export async function renameCourse(
     const parsed = BundleManifestSchema.safeParse({ ...manifest, title: newTitle });
     if (!parsed.success) throw new Error('New title produces an invalid bundle manifest');
     await writeFile(bundleJsonPath, JSON.stringify(parsed.data, null, 2), 'utf-8');
-    return { relativePath: resolved.split('/').pop() ?? '', id: parsed.data.id, title: parsed.data.title };
+    return {
+      relativePath: resolved.split('/').pop() ?? '',
+      id: parsed.data.id,
+      title: parsed.data.title,
+    };
   }
 
   throw new Error('Folder is not a valid OpenEdu course or unit');
@@ -111,10 +119,7 @@ export async function renameCourse(
  * Move a course/unit into the workspace .archive/ folder (soft delete).
  * Returns the archived absolute path.
  */
-export async function archiveCourse(
-  dir: string,
-  workspaceRoot: string,
-): Promise<string> {
+export async function archiveCourse(dir: string, workspaceRoot: string): Promise<string> {
   const resolved = resolve(dir);
   const rootResolved = resolve(workspaceRoot);
   assertInsideWorkspace(resolved, rootResolved);

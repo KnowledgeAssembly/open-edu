@@ -45,7 +45,11 @@ describe('createUnit', () => {
       author: 'Test',
     });
 
-    expect(entry).toMatchObject({ kind: 'unit', relativePath: 'units/mini-unit', title: 'Mini Unit' });
+    expect(entry).toMatchObject({
+      kind: 'unit',
+      relativePath: 'units/mini-unit',
+      title: 'Mini Unit',
+    });
 
     const unitDir = join(ws, 'units', 'mini-unit');
     const bundleRaw = JSON.parse(await readFile(join(unitDir, 'bundle.json'), 'utf-8'));
@@ -71,7 +75,9 @@ describe('createUnit', () => {
       author: 'Test',
     });
     const entries = scanWorkspace(ws);
-    expect(entries.some((entry) => entry.kind === 'unit' && entry.relativePath === 'units/mini-unit')).toBe(true);
+    expect(
+      entries.some((entry) => entry.kind === 'unit' && entry.relativePath === 'units/mini-unit'),
+    ).toBe(true);
   });
 
   it('rejects fewer than two or more than five courses', async () => {
@@ -92,7 +98,13 @@ describe('createUnit', () => {
       many.push(`c${i}`);
     }
     await expect(
-      createUnit({ workspaceRoot: ws, courseRelativePaths: many, unitId: 'u', unitTitle: 'U', author: 'T' }),
+      createUnit({
+        workspaceRoot: ws,
+        courseRelativePaths: many,
+        unitId: 'u',
+        unitTitle: 'U',
+        author: 'T',
+      }),
     ).rejects.toThrow(/up to five/);
   });
 });

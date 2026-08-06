@@ -2,12 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile, readFile, readdir, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import {
-  duplicateCourse,
-  renameCourse,
-  archiveCourse,
-  importCourseFolder,
-} from './courseOps';
+import { duplicateCourse, renameCourse, archiveCourse, importCourseFolder } from './courseOps';
 
 let ws = '';
 

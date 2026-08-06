@@ -171,9 +171,12 @@ describe('studioApi client', () => {
 
   it('renameCourse posts relativePath + newTitle to /rename', async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ success: true, entry: { id: 'fractions', title: 'Fractions' } }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({ success: true, entry: { id: 'fractions', title: 'Fractions' } }),
+        {
+          status: 200,
+        },
+      ),
     );
     const api = createStudioApi();
     await api.renameCourse('fractions', 'Fractions Basics');
@@ -203,9 +206,12 @@ describe('studioApi client', () => {
 
   it('importCourseFolder posts sourcePath to /import', async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ success: true, entry: { id: 'imported', title: 'Imported' } }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({ success: true, entry: { id: 'imported', title: 'Imported' } }),
+        {
+          status: 200,
+        },
+      ),
     );
     const api = createStudioApi();
     await api.importCourseFolder('/some/absolute/path');
