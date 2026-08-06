@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
             'widget-library/core/hotspot',
             'widget-library/core/timeline',
             'widget-library/core/audio-player',
+            'widget-library/core/process-explainer',
             'widget-library/core/video-player',
           ],
         },

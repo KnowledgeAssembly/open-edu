@@ -90,7 +90,7 @@ open-edu/
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
-│   ├── widgets/             # Widget SDK + registry + 27 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
+│   ├── widgets/             # Widget SDK + registry + 28 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
 │   ├── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
 │   └── registry/             # Course registry tooling (catalog builder, release validation, open-edu-registry CLI)

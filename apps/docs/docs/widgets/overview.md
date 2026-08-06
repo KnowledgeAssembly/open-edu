@@ -106,27 +106,28 @@ const filtered = registry.searchWithFilters({ domain: 'core', intent: 'practice'
 
 ## Built-in Widgets
 
-27 built-in widgets across 5 content domains (26 stable + 1 deprecated alias):
+28 built-in widgets across 5 content domains (27 stable + 1 deprecated alias):
 
 ### Core Widgets
 
-| Widget ID              | Domain | Description                                                    |
-| ---------------------- | ------ | -------------------------------------------------------------- |
-| `core.multiple-choice` | core   | Single or multi-question multiple choice                       |
-| `core.matching`        | core   | Match items between two columns                                |
-| `core.drag-drop`       | core   | Drag and drop items into categorized zones                     |
-| `core.sequencing`      | core   | Arrange items in the correct order                             |
-| `core.fill-blank`      | core   | Type the missing word or phrase in a sentence                  |
-| `core.story-question`  | core   | Read a passage and answer a comprehension question             |
-| `core.real-world`      | core   | Identify real-world examples of a concept                      |
-| `core.chart-reader`    | core   | Read and interpret data from bar charts and graphs             |
-| `core.visual-counting` | core   | Count objects in a visual grid and select the correct number   |
-| `core.callout`         | core   | Highlighted information callout with configurable styling      |
-| `core.image-compare`   | core   | Side-by-side image comparison with slider                      |
-| `core.hotspot`         | core   | Clickable regions on images with feedback                      |
-| `core.timeline`        | core   | Horizontal timeline visualization with events                  |
-| `core.audio-player`    | core   | Play audio with transcript, captions, bookmarks, speed control |
-| `core.video-player`    | core   | Play video with chapters, captions, transcript, bookmarks      |
+| Widget ID                | Domain | Description                                                    |
+| ------------------------ | ------ | -------------------------------------------------------------- |
+| `core.multiple-choice`   | core   | Single or multi-question multiple choice                       |
+| `core.matching`          | core   | Match items between two columns                                |
+| `core.drag-drop`         | core   | Drag and drop items into categorized zones                     |
+| `core.sequencing`        | core   | Arrange items in the correct order                             |
+| `core.fill-blank`        | core   | Type the missing word or phrase in a sentence                  |
+| `core.story-question`    | core   | Read a passage and answer a comprehension question             |
+| `core.real-world`        | core   | Identify real-world examples of a concept                      |
+| `core.chart-reader`      | core   | Read and interpret data from bar charts and graphs             |
+| `core.visual-counting`   | core   | Count objects in a visual grid and select the correct number   |
+| `core.callout`           | core   | Highlighted information callout with configurable styling      |
+| `core.image-compare`     | core   | Side-by-side image comparison with slider                      |
+| `core.hotspot`           | core   | Clickable regions on images with feedback                      |
+| `core.timeline`          | core   | Horizontal timeline visualization with events                  |
+| `core.process-explainer` | core   | Step-by-step explanation of a process with progressive reveal  |
+| `core.audio-player`      | core   | Play audio with transcript, captions, bookmarks, speed control |
+| `core.video-player`      | core   | Play video with chapters, captions, transcript, bookmarks      |
 
 ### Math Widgets
 
@@ -165,7 +166,7 @@ const filtered = registry.searchWithFilters({ domain: 'core', intent: 'practice'
 | ----------------------------------- | ---------------------- |
 | `open-edu.multiple-choice-practice` | `core.multiple-choice` |
 
-All 26 stable widgets have enriched metadata across all categories (AI, capabilities, accessibility, analytics, reward). Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.
+All 27 stable widgets have enriched metadata across all categories (AI, capabilities, accessibility, analytics, reward). Legacy `open-edu.*` IDs are automatically resolved to their new domain-prefixed equivalents.
 
 For a live demo of every widget, run the [Widget Showcase](../examples/widget-showcase) example package.
 
@@ -200,7 +201,7 @@ The widget catalog provides structured Markdown descriptions of all available wi
 packages/widgets/src/widget-catalog-source.ts   ← Canonical source (pure data, no React imports)
         │
         ▼  pnpm --filter @open-edu/widgets generate:catalog
-packages/core/src/widget-catalog-data.json      ← Auto-generated JSON (27 entries)
+packages/core/src/widget-catalog-data.json      ← Auto-generated JSON (28 entries)
         │
         ▼  fs.readFileSync at runtime
 packages/core/src/widget-catalog.ts             ← Reads JSON, exposes getDefaultWidgetCatalog()
