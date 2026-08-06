@@ -20,12 +20,21 @@ import {
   RewardsSchema,
   CardDefinitionsSchema,
   ContentNodeSchema,
+  type DistributionManifest,
 } from '@open-edu/schemas';
-import { OepWriter, type DistributionManifest } from '@open-edu/oep-distribution';
+import { OepWriter } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
 import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
+import { resolveWorkspace, scanWorkspace } from './src/studio/library/libraryIndex.js';
+import {
+  duplicateCourse,
+  renameCourse,
+  archiveCourse,
+  importCourseFolder,
+} from './src/studio/library/courseOps.js';
+import { createUnit, buildUnitOep } from './src/studio/library/unitBuilder.js';
 import type { ActivitySummary } from './src/studio/types.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
@@ -374,37 +383,36 @@ function eduPackageLoader(): Plugin {
         }
       });
 
-      // Serve static assets from the package's assets/ directory
-      const assetsDir = packageDir ? join(packageDir, 'assets') : null;
-      if (assetsDir && existsSync(assetsDir)) {
-        const regexp = /^\/assets\//;
-        srv.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-          const requestPath = decodeURIComponent(req.url ?? '');
-          const match = requestPath.match(regexp);
-          if (!match) return next();
-          const relativePath = requestPath.slice(match[0].length);
-          const filePath = join(assetsDir, relativePath);
-          if (!filePath.startsWith(assetsDir)) {
-            res.statusCode = 403;
-            res.end('Forbidden');
+      // Serve static assets from the active package's assets/ directory.
+      // The directory is resolved per request so switching courses updates it live.
+      const regexp = /^\/assets\//;
+      srv.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const requestPath = decodeURIComponent(req.url ?? '');
+        const match = requestPath.match(regexp);
+        if (!match) return next();
+        const currentAssetsDir = packageDir ? join(packageDir, 'assets') : null;
+        if (!currentAssetsDir || !existsSync(currentAssetsDir)) return next();
+        const relativePath = requestPath.slice(match[0].length);
+        const filePath = join(currentAssetsDir, relativePath);
+        if (!filePath.startsWith(currentAssetsDir)) {
+          res.statusCode = 403;
+          res.end('Forbidden');
+          return;
+        }
+        try {
+          const stat = statSync(filePath);
+          if (stat.isFile()) {
+            const ext = extname(filePath).toLowerCase();
+            res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.end(readFileSync(filePath));
             return;
           }
-          try {
-            const stat = statSync(filePath);
-            if (stat.isFile()) {
-              const ext = extname(filePath).toLowerCase();
-              res.setHeader('Content-Type', ASSET_MIME_TYPES[ext] ?? 'application/octet-stream');
-              res.setHeader('Cache-Control', 'no-cache');
-              res.end(readFileSync(filePath));
-              return;
-            }
-          } catch {
-            // file not found, fall through
-          }
-          next();
-        });
-        console.log(`[edu-dev] Serving assets from: ${assetsDir}`);
-      }
+        } catch {
+          // file not found, fall through
+        }
+        next();
+      });
 
       // ---- Studio AI API Routes (Node-side only; never exposes API keys) ----
       const studioAiRegexp = /^\/api\/studio\/ai\//;
@@ -489,9 +497,248 @@ function eduPackageLoader(): Plugin {
         }
       });
 
+      // ---- Studio Library API Routes ----
+      // Registered before the package API catch-all so /api/studio/library/*
+      // requests are not swallowed by it. Lets the creator switch the active
+      // course (mutates packageDir) without restarting Vite.
+      const studioLibraryRegexp = /^\/api\/studio\/library/;
+      srv.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const url = req.url ?? '';
+        if (!studioLibraryRegexp.test(url)) return next();
+
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
+
+        const slugify = (title: string): string => {
+          const slug = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          return slug || 'unit';
+        };
+
+        const rejectRelativePath = (relativePath: string): string | null => {
+          if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) {
+            return 'Invalid relativePath';
+          }
+          return null;
+        };
+
+        try {
+          const parsedUrl = new URL(url, `http://${req.headers.host ?? 'localhost'}`);
+          const pathname = parsedUrl.pathname;
+          const method = req.method ?? 'GET';
+
+          // GET /api/studio/library — list workspace entries
+          if (pathname === '/api/studio/library' && method === 'GET') {
+            const workspace = resolveWorkspace(packageDir);
+            res.end(JSON.stringify({ workspace, entries: scanWorkspace(workspace) }));
+            return;
+          }
+
+          if (!packageDir) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'No active package' }));
+            return;
+          }
+
+          // POST /api/studio/library/open — switch the active course package
+          if (pathname === '/api/studio/library/open' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { relativePath?: string };
+            const guardError = rejectRelativePath(body.relativePath ?? '');
+            if (guardError) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: guardError }));
+              return;
+            }
+            const workspace = resolveWorkspace(packageDir);
+            const newDir = join(workspace, body.relativePath ?? '');
+            if (!existsSync(join(newDir, 'package.json'))) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'No package.json in that directory' }));
+              return;
+            }
+            let loaded: LoadedPackage;
+            try {
+              loaded = await loadPackage(newDir);
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: (err as Error).message }));
+              return;
+            }
+            packageDir = newDir;
+            packageData = loaded;
+            srv.watcher.add(newDir);
+            const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+            if (mod) {
+              srv.moduleGraph.invalidateModule(mod);
+            }
+            res.end(JSON.stringify({ success: true, packageDir }));
+            // Defer the full-reload so the open response reaches the client first.
+            setImmediate(() => {
+              try {
+                srv.ws.send({ type: 'full-reload' });
+              } catch (err) {
+                console.error('[edu-dev] Failed to send library reload:', err);
+              }
+            });
+            return;
+          }
+
+          // POST /api/studio/library/duplicate — copy a course under a new id/title
+          if (pathname === '/api/studio/library/duplicate' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              relativePath?: string;
+              newId?: string;
+              newTitle?: string;
+            };
+            const guardError = rejectRelativePath(body.relativePath ?? '');
+            if (guardError) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: guardError }));
+              return;
+            }
+            const workspace = resolveWorkspace(packageDir);
+            const entry = await duplicateCourse(
+              join(workspace, body.relativePath ?? ''),
+              workspace,
+              body.newId ?? '',
+              body.newTitle ?? '',
+            );
+            res.end(JSON.stringify({ success: true, entry }));
+            return;
+          }
+
+          // POST /api/studio/library/rename — retitle a course/unit in place
+          if (pathname === '/api/studio/library/rename' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              relativePath?: string;
+              newTitle?: string;
+            };
+            const guardError = rejectRelativePath(body.relativePath ?? '');
+            if (guardError) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: guardError }));
+              return;
+            }
+            const workspace = resolveWorkspace(packageDir);
+            const entry = await renameCourse(
+              join(workspace, body.relativePath ?? ''),
+              workspace,
+              body.newTitle ?? '',
+            );
+            res.end(JSON.stringify({ success: true, entry }));
+            return;
+          }
+
+          // POST /api/studio/library/archive — move a course/unit into .archive/
+          if (pathname === '/api/studio/library/archive' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { relativePath?: string };
+            const guardError = rejectRelativePath(body.relativePath ?? '');
+            if (guardError) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: guardError }));
+              return;
+            }
+            const workspace = resolveWorkspace(packageDir);
+            const archivedPath = await archiveCourse(
+              join(workspace, body.relativePath ?? ''),
+              workspace,
+            );
+            res.end(JSON.stringify({ success: true, archivedPath }));
+            return;
+          }
+
+          // POST /api/studio/library/import — copy an external course folder in
+          if (pathname === '/api/studio/library/import' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { sourcePath?: string };
+            if (!body.sourcePath || typeof body.sourcePath !== 'string') {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing sourcePath' }));
+              return;
+            }
+            try {
+              const workspace = resolveWorkspace(packageDir);
+              const entry = await importCourseFolder(body.sourcePath, workspace);
+              res.end(JSON.stringify({ success: true, entry }));
+            } catch (err) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: (err as Error).message }));
+            }
+            return;
+          }
+
+          // POST /api/studio/library/create-unit — bundle 2-5 courses into a unit
+          if (pathname === '/api/studio/library/create-unit' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as {
+              title?: string;
+              courseRelativePaths?: string[];
+            };
+            const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Unit';
+            const courseRelativePaths = Array.isArray(body.courseRelativePaths)
+              ? body.courseRelativePaths
+              : [];
+            const unitId = slugify(title);
+            const workspace = resolveWorkspace(packageDir);
+            const entry = await createUnit({
+              workspaceRoot: workspace,
+              courseRelativePaths,
+              unitId,
+              unitTitle: title,
+              author: 'OpenEdu Studio',
+            });
+            res.end(JSON.stringify({ success: true, entry }));
+            return;
+          }
+
+          // POST /api/studio/library/export-unit-oep — download a unit bundle .oep
+          if (pathname === '/api/studio/library/export-unit-oep' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { relativePath?: string };
+            const guardError = rejectRelativePath(body.relativePath ?? '');
+            if (guardError) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: guardError }));
+              return;
+            }
+            const workspace = resolveWorkspace(packageDir);
+            const unitDir = join(workspace, body.relativePath ?? '');
+            try {
+              const bytes = await buildUnitOep(unitDir);
+              const bundlePath = join(unitDir, 'bundle.json');
+              const bundleJson = existsSync(bundlePath)
+                ? (JSON.parse(readFileSync(bundlePath, 'utf-8')) as {
+                    id?: string;
+                    version?: string;
+                  })
+                : {};
+              const entryId = bundleJson.id ?? 'unit';
+              const version = bundleJson.version ?? '1.0.0';
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/octet-stream');
+              res.setHeader(
+                'Content-Disposition',
+                `attachment; filename="${entryId}-${version}.oep"`,
+              );
+              res.end(Buffer.from(bytes));
+            } catch (err) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: (err as Error).message }));
+            }
+            return;
+          }
+
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: 'Unknown library endpoint' }));
+        } catch (err) {
+          console.error('[edu-dev] Library API error:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: (err as Error).message }));
+        }
+      });
+
       // ---- Package Editor API Routes ----
-      const currentDir = packageDir || bundleDir;
-      if (!currentDir) return;
+      const getCurrentDir = () => packageDir || bundleDir;
+      if (!getCurrentDir()) return;
 
       const apiRegexp = /^\/api\//;
 
@@ -513,8 +760,8 @@ function eduPackageLoader(): Plugin {
 
             if (filePath) {
               const normalizedPath = toForwardSlashes(filePath);
-              const absPath = join(currentDir, normalizedPath);
-              if (!absPath.startsWith(currentDir)) {
+              const absPath = join(getCurrentDir(), normalizedPath);
+              if (!absPath.startsWith(getCurrentDir())) {
                 res.statusCode = 403;
                 res.end(JSON.stringify({ error: 'Forbidden' }));
                 return;
@@ -535,10 +782,10 @@ function eduPackageLoader(): Plugin {
                 }),
               );
             } else {
-              const allFiles = collectAllFiles(currentDir);
+              const allFiles = collectAllFiles(getCurrentDir());
               const files: FileEntry[] = allFiles
                 .map((f) => {
-                  const relPath = toForwardSlashes(relative(currentDir, f));
+                  const relPath = toForwardSlashes(relative(getCurrentDir(), f));
                   return {
                     path: relPath,
                     label: getFileLabel(relPath),
@@ -562,8 +809,8 @@ function eduPackageLoader(): Plugin {
               res.end(JSON.stringify({ error: 'Missing path parameter' }));
               return;
             }
-            const absPath = join(currentDir, filePath);
-            if (!absPath.startsWith(currentDir)) {
+            const absPath = join(getCurrentDir(), filePath);
+            if (!absPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -602,8 +849,8 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const absPath = join(currentDir, filePath);
-            if (!absPath.startsWith(currentDir)) {
+            const absPath = join(getCurrentDir(), filePath);
+            if (!absPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -641,6 +888,7 @@ function eduPackageLoader(): Plugin {
               path: string;
               content?: string;
               entry?: boolean;
+              validate?: boolean;
             };
             const filePath = toForwardSlashes(body.path);
 
@@ -650,8 +898,8 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const absPath = join(currentDir, filePath);
-            if (!absPath.startsWith(currentDir)) {
+            const absPath = join(getCurrentDir(), filePath);
+            if (!absPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -704,8 +952,8 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const absPath = join(currentDir, filePath);
-            if (!absPath.startsWith(currentDir)) {
+            const absPath = join(getCurrentDir(), filePath);
+            if (!absPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -744,10 +992,10 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const absOldPath = join(currentDir, oldPath);
-            const absNewPath = join(currentDir, newPath);
+            const absOldPath = join(getCurrentDir(), oldPath);
+            const absNewPath = join(getCurrentDir(), newPath);
 
-            if (!absOldPath.startsWith(currentDir) || !absNewPath.startsWith(currentDir)) {
+            if (!absOldPath.startsWith(getCurrentDir()) || !absNewPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -786,9 +1034,9 @@ function eduPackageLoader(): Plugin {
           if (pathname === '/api/package/validate' && method === 'POST') {
             try {
               const errors: Array<{ path: string; error: string }> = [];
-              const allFiles = collectAllFiles(currentDir);
+              const allFiles = collectAllFiles(getCurrentDir());
               for (const f of allFiles) {
-                const relPath = toForwardSlashes(relative(currentDir, f));
+                const relPath = toForwardSlashes(relative(getCurrentDir(), f));
                 if (!EDITABLE_EXTS.has(extname(f).toLowerCase())) continue;
                 if (IGNORE_DIRS.has(f.split('/').pop() ?? '')) continue;
                 try {
@@ -844,9 +1092,9 @@ function eduPackageLoader(): Plugin {
             const targetPath = toForwardSlashes(
               pathPart?.data.toString('utf-8').trim() || `assets/${filePart.filename}`,
             );
-            const absPath = join(currentDir, targetPath);
+            const absPath = join(getCurrentDir(), targetPath);
 
-            if (!absPath.startsWith(currentDir)) {
+            if (!absPath.startsWith(getCurrentDir())) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -880,7 +1128,7 @@ function eduPackageLoader(): Plugin {
               );
               return;
             }
-            const manifestPath = join(currentDir, 'package.json');
+            const manifestPath = join(getCurrentDir(), 'package.json');
             if (!existsSync(manifestPath)) {
               res.statusCode = 404;
               res.end(JSON.stringify({ error: 'No package.json in this directory' }));
@@ -890,7 +1138,7 @@ function eduPackageLoader(): Plugin {
               title?: string;
               entry?: string;
             };
-            const workflowPath = join(currentDir, 'workflow.json');
+            const workflowPath = join(getCurrentDir(), 'workflow.json');
             let orderedPaths: string[] = [];
             if (existsSync(workflowPath)) {
               const workflow = JSON.parse(readFileSync(workflowPath, 'utf-8')) as {
@@ -898,9 +1146,9 @@ function eduPackageLoader(): Plugin {
               };
               orderedPaths = Object.keys(workflow.routing ?? {});
             } else {
-              orderedPaths = orderNodes(currentDir, manifest.entry);
+              orderedPaths = orderNodes(getCurrentDir(), manifest.entry);
             }
-            const files = readNodeFiles(currentDir, orderedPaths);
+            const files = readNodeFiles(getCurrentDir(), orderedPaths);
             const activities = activitiesFromEntryOrder(orderedPaths, files);
             res.end(JSON.stringify({ title: manifest.title ?? '', activities }));
             return;
@@ -938,7 +1186,7 @@ function eduPackageLoader(): Plugin {
               return;
             }
 
-            const manifestPath = join(currentDir, 'package.json');
+            const manifestPath = join(getCurrentDir(), 'package.json');
             let manifest = existsSync(manifestPath)
               ? (JSON.parse(readFileSync(manifestPath, 'utf-8')) as { entry?: string })
               : null;
@@ -960,7 +1208,7 @@ function eduPackageLoader(): Plugin {
             }
 
             await writeFile(
-              join(currentDir, 'workflow.json'),
+              join(getCurrentDir(), 'workflow.json'),
               JSON.stringify({ routing: workflow.routing }, null, 2),
               'utf-8',
             );
@@ -1005,11 +1253,11 @@ function eduPackageLoader(): Plugin {
             if (body.force === true) {
               // Replace the whole course: clear nodes + course sidecars so the
               // exported .oep never carries orphans from a previous course.
-              const nodesDir = join(currentDir, 'nodes');
+              const nodesDir = join(getCurrentDir(), 'nodes');
               if (existsSync(nodesDir)) {
                 await rm(nodesDir, { recursive: true, force: true });
               }
-              const assetsDir = join(currentDir, 'assets');
+              const assetsDir = join(getCurrentDir(), 'assets');
               if (existsSync(assetsDir)) {
                 await rm(assetsDir, { recursive: true, force: true });
               }
@@ -1019,13 +1267,13 @@ function eduPackageLoader(): Plugin {
                 'rewards.json',
                 'cards.json',
               ]) {
-                const abs = join(currentDir, rel);
+                const abs = join(getCurrentDir(), rel);
                 if (existsSync(abs)) {
                   await rm(abs, { force: true });
                 }
               }
             } else {
-              const nodesDir = join(currentDir, 'nodes');
+              const nodesDir = join(getCurrentDir(), 'nodes');
               const hasNodes = existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
               if (hasNodes) {
                 res.statusCode = 409;
@@ -1039,7 +1287,7 @@ function eduPackageLoader(): Plugin {
             }
 
             for (const [relPath, content] of Object.entries(template.files)) {
-              const absPath = join(currentDir, relPath);
+              const absPath = join(getCurrentDir(), relPath);
               const dir = dirname(absPath);
               if (!existsSync(dir)) {
                 mkdirSync(dir, { recursive: true });
@@ -1069,11 +1317,12 @@ function eduPackageLoader(): Plugin {
               return;
             }
             try {
-              const pkg = await loadPackage(currentDir);
-              const courseFiles = collectCourseFiles(currentDir);
+              const pkg = await loadPackage(getCurrentDir());
+              const courseFiles = collectCourseFiles(getCurrentDir());
               const distManifest = {
                 format: 'openedu-package' as const,
                 formatVersion: 1 as const,
+                type: 'course' as const,
                 id: pkg.manifest.id,
                 version: pkg.manifest.version,
                 title: pkg.manifest.title,
@@ -1100,7 +1349,7 @@ function eduPackageLoader(): Plugin {
 
           // Fallback route for /api/package/dir — return package directory path
           if (pathname === '/api/package/dir' && method === 'GET') {
-            res.end(JSON.stringify({ packageDir: currentDir }));
+            res.end(JSON.stringify({ packageDir: getCurrentDir() }));
             return;
           }
 

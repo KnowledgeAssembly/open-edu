@@ -1,9 +1,14 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { cp, mkdir } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
-import { BundleManifestSchema, PackageManifestSchema } from '@open-edu/schemas';
-import { OepWriter, type DistributionManifest } from '@open-edu/oep-distribution';
-import { OEP_FORMAT, OEP_FORMAT_VERSION } from '@open-edu/schemas';
+import {
+  BundleManifestSchema,
+  PackageManifestSchema,
+  OEP_FORMAT,
+  OEP_FORMAT_VERSION,
+  type DistributionManifest,
+} from '@open-edu/schemas';
+import { OepWriter } from '@open-edu/oep-distribution';
 import type { LibraryEntry } from './types.js';
 
 const SKIP_DIRS = new Set(['node_modules', '.git', '.edu', 'dist']);
@@ -154,6 +159,7 @@ export async function buildUnitOep(unitDir: string): Promise<Uint8Array> {
   const distManifest: DistributionManifest = {
     format: OEP_FORMAT,
     formatVersion: OEP_FORMAT_VERSION,
+    type: 'bundle',
     id: bundleManifest.id,
     version: bundleManifest.version,
     title: bundleManifest.title,

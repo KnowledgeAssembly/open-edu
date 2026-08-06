@@ -18,7 +18,6 @@ function readJson(dir: string, fileName: string): Record<string, unknown> | null
 
 function classifyDir(
   dir: string,
-  relativePath: string,
 ): Pick<LibraryEntry, 'id' | 'title' | 'kind' | 'version' | 'updatedAt'> | null {
   const bundleJson = readJson(dir, 'bundle.json');
   if (bundleJson) {
@@ -85,7 +84,7 @@ export function scanWorkspace(workspaceRoot: string): LibraryEntry[] {
     if (!isDirectory || SKIP_DIRS.has(name)) return;
     const absolute = join(workspaceRoot, parentPath, name);
     const relativePath = parentPath ? `${parentPath}/${name}` : name;
-    const classified = classifyDir(absolute, relativePath);
+    const classified = classifyDir(absolute);
     if (classified) {
       entries.push({ ...classified, relativePath });
       return;
