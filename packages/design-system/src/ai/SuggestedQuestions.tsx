@@ -3,26 +3,44 @@ import { cn } from '../lib/utils.js';
 export interface SuggestedQuestionsProps {
   questions: string[];
   onSelect: (question: string) => void;
+  /** Localized section heading (omit to hide the heading). */
+  heading?: string;
   className?: string;
+  /** Compact chip layout for narrow panels (e.g. Pipili sidebar). */
+  variant?: 'default' | 'compact';
 }
 
 export function SuggestedQuestions({
   questions,
   onSelect,
+  heading,
   className,
+  variant = 'default',
 }: SuggestedQuestionsProps): JSX.Element {
+  const isCompact = variant === 'compact';
+
   return (
-    <div className={cn('', className)} data-testid="suggested-questions">
-      <h3 className="text-on-surface-muted mb-2 text-sm font-medium">Suggested questions</h3>
-      <div className="grid grid-cols-2 gap-2">
+    <div className={cn('', className)} data-testid="suggested-questions" data-variant={variant}>
+      {heading && (
+        <h3
+          className={cn(
+            'text-on-surface-muted font-medium',
+            isCompact ? 'text-caption mb-1' : 'mb-2 text-sm',
+          )}
+        >
+          {heading}
+        </h3>
+      )}
+      <div className={cn(isCompact ? 'flex flex-wrap gap-1.5' : 'grid grid-cols-2 gap-2')}>
         {questions.map((question, index) => (
           <button
             key={index}
             type="button"
             onClick={() => onSelect(question)}
             className={cn(
-              'border-primary bg-surface-container text-on-surface rounded-md border-l-2 px-3 py-2 text-left text-sm',
+              'border-primary bg-surface-container text-on-surface rounded-md border-l-2 text-left',
               'hover:bg-surface-container-high transition-colors',
+              isCompact ? 'text-caption px-2 py-1 leading-snug' : 'px-3 py-2 text-sm',
             )}
           >
             {question}

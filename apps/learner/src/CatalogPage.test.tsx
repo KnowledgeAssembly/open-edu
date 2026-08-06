@@ -402,6 +402,22 @@ describe('CatalogPage', () => {
       expect(screen.getByText('by Bundle Author')).toBeInTheDocument();
     });
 
+    it('uses the same responsive auto-fill grid as the course list', () => {
+      renderWithI18n(
+        <CatalogPage
+          packages={samplePackages}
+          bundleSummaries={[bundle]}
+          onStartCourse={vi.fn()}
+          onStartBundle={vi.fn()}
+        />,
+      );
+      const autoFillPattern = /auto-fill.*minmax\(280px/;
+      const courseGrid = screen.getByTestId('course-list-section');
+      const bundleGrid = screen.getByTestId('bundle-list-section').querySelector('.grid');
+      expect(courseGrid.className).toMatch(autoFillPattern);
+      expect(bundleGrid?.className).toMatch(autoFillPattern);
+    });
+
     it('does not render the bundle description on catalog cards', () => {
       renderWithI18n(
         <CatalogPage
