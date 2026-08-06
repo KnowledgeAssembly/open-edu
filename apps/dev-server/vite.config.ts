@@ -431,13 +431,13 @@ function eduPackageLoader(): Plugin {
           if (pathname === '/api/studio/ai/generate' && method === 'POST') {
             if (!packageDir) {
               res.statusCode = 400;
-              res.end(JSON.stringify({ error: 'No active package' }));
+              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
               return;
             }
             const body = (await parseJsonBody(req)) as { notes?: string; force?: boolean };
             if (!body.notes || typeof body.notes !== 'string') {
               res.statusCode = 400;
-              res.end(JSON.stringify({ error: 'Missing notes' }));
+              res.end(JSON.stringify({ code: 'missing-notes', error: 'Missing notes' }));
               return;
             }
             aiGenerating = true;
@@ -481,7 +481,7 @@ function eduPackageLoader(): Plugin {
           }
 
           res.statusCode = 404;
-          res.end(JSON.stringify({ error: 'Unknown AI endpoint' }));
+          res.end(JSON.stringify({ code: 'unknown-ai-endpoint', error: 'Unknown AI endpoint' }));
         } catch (err) {
           console.error('[edu-dev] AI API error:', err);
           res.statusCode = 500;
