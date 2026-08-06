@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Badge,
   Button,
@@ -86,6 +86,13 @@ export function RewardsCardsPanel({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, []);
 
   const [completionOpen, setCompletionOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
@@ -146,7 +153,8 @@ export function RewardsCardsPanel({
 
   const flashSaved = () => {
     setSaved(true);
-    window.setTimeout(() => setSaved(false), 2000);
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setSaved(false), 2000);
   };
 
   const handleAddCompletion = async () => {
