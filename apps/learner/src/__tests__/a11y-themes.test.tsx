@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { RuntimeThemeProvider, themeIds } from '@open-edu/runtime';
 import type { ThemeId } from '@open-edu/runtime';
 import axe from 'axe-core';
@@ -123,6 +123,38 @@ describe.each(themes)('Accessibility in %s theme', (themeId) => {
       themeId,
     );
     await expectNoViolations(container);
+  });
+
+  it('AppSidebar flyout has no axe violations', async () => {
+    const mql = {
+      matches: true,
+      media: '(hover: hover) and (pointer: fine)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList;
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockReturnValue(mql) as unknown as typeof window.matchMedia;
+
+    const { container } = renderWithTheme(
+      <AppSidebar
+        items={[
+          { id: 'home', label: 'Home', icon: <span aria-hidden="true">🏠</span> },
+          { id: 'catalog', label: 'Catalog', icon: <span aria-hidden="true">📚</span> },
+        ]}
+        currentItemId="home"
+        onNavigate={vi.fn()}
+        defaultCollapsed
+      />,
+      themeId,
+    );
+    fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
+    await expectNoViolations(container);
+
+    window.matchMedia = originalMatchMedia;
   });
 
   it('CourseExitWarningDialog has no axe violations', async () => {

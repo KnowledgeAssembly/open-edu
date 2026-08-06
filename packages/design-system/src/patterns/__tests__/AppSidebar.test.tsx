@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import axe from 'axe-core';
 import { AppSidebar } from '../AppSidebar.js';
 import { checkAccessibility } from '@open-edu/design-system/test-utils';
 
@@ -206,6 +207,16 @@ describe('AppSidebar', () => {
     );
   });
 
+  it('has no accessibility violations when flyout is open', async () => {
+    setupMatchMedia(true);
+    const { container } = render(
+      <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+    );
+    fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
+    const result = await axe.run(container);
+    expect(result.violations).toHaveLength(0);
+  });
+
   describe('hover flyout (fine pointer only)', () => {
     it('defaults to collapsed when defaultCollapsed is set', () => {
       render(
@@ -237,6 +248,23 @@ describe('AppSidebar', () => {
       expect(screen.getByText('OE')).toBeInTheDocument();
       expect(sidebar).toHaveClass('w-16');
       expect(screen.queryByTestId('app-sidebar-flyout')).toBeNull();
+    });
+
+    it('marks the rail inert and removes its landmark while flyout is open', () => {
+      setupMatchMedia(true);
+      render(
+        <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
+      );
+      const rail = screen.getByTestId('app-sidebar');
+
+      fireEvent.mouseEnter(screen.getByTestId('app-sidebar-host'));
+      expect(rail.inert).toBe(true);
+      expect(rail).toHaveAttribute('aria-hidden', 'true');
+      expect(rail).not.toHaveAttribute('aria-label');
+      expect(screen.getByTestId('app-sidebar-flyout')).toHaveAttribute(
+        'aria-label',
+        'Main navigation',
+      );
     });
 
     it('keeps nav icon alignment stable while the flyout is open', () => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
 import { Badge } from '../primitives/badge.js';
@@ -77,8 +77,8 @@ interface SidebarPanelProps {
   onBack?: { label: string; onClick: () => void };
   collapsed: boolean;
   onToggleCollapse: () => void;
-  /** When true, interactive nav items are hidden from assistive tech (flyout is active). */
-  inertNav?: boolean;
+  /** When false, interactive controls omit data-testid (duplicate panel is inert). */
+  exposeTestIds?: boolean;
 }
 
 function SidebarPanel({
@@ -94,7 +94,7 @@ function SidebarPanel({
   onBack,
   collapsed,
   onToggleCollapse,
-  inertNav = false,
+  exposeTestIds = true,
 }: SidebarPanelProps): JSX.Element {
   const ChevronLeft = (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
@@ -135,11 +135,7 @@ function SidebarPanel({
         )}
       </div>
 
-      <nav
-        className="flex flex-col gap-0.5 p-2"
-        aria-label="App navigation"
-        aria-hidden={inertNav ? true : undefined}
-      >
+      <nav className="flex flex-col gap-0.5 p-2" aria-label="App navigation">
         {items.map((item) => {
           const isActive = item.id === currentItemId;
           return (
@@ -151,11 +147,10 @@ function SidebarPanel({
                 'w-full justify-start gap-3 pl-3.5 pr-3 transition-colors',
                 !isActive &&
                   'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
-                inertNav && 'pointer-events-none',
               )}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
-              data-testid={inertNav ? undefined : `appsidebar-nav-${item.id}`}
+              data-testid={exposeTestIds ? `appsidebar-nav-${item.id}` : undefined}
               title={!showExpandedContent ? item.label : undefined}
             >
               <span className="shrink-0">{item.icon}</span>
@@ -167,14 +162,8 @@ function SidebarPanel({
 
       {sections && sections.length > 0 && (
         <>
-          <hr
-            className="bg-outline-variant mx-4 my-2 h-px border-none"
-            aria-hidden={inertNav ? true : undefined}
-          />
-          <div
-            className={cn('flex-1 overflow-y-auto px-2 py-1', inertNav && 'pointer-events-none')}
-            aria-hidden={inertNav ? true : undefined}
-          >
+          <hr className="bg-outline-variant mx-4 my-2 h-px border-none" aria-hidden="true" />
+          <div className="flex-1 overflow-y-auto px-2 py-1">
             {sections.map((section) => (
               <div key={section.title}>
                 {showExpandedContent && (
@@ -214,7 +203,7 @@ function SidebarPanel({
                           onClick={() => step.onClick?.()}
                           aria-current={isCurrent ? 'step' : undefined}
                           aria-label={`${step.label}${stateLabel}`}
-                          data-testid={inertNav ? undefined : `step-${step.id}`}
+                          data-testid={exposeTestIds ? `step-${step.id}` : undefined}
                           title={!showExpandedContent ? step.label : undefined}
                         >
                           <span className="shrink-0">
@@ -253,7 +242,7 @@ function SidebarPanel({
             size="sm"
             className="w-full gap-1"
             onClick={onBack.onClick}
-            data-testid="appsidebar-back"
+            data-testid={exposeTestIds ? 'appsidebar-back' : undefined}
           >
             {BackIcon}
             {onBack.label}
@@ -297,9 +286,16 @@ export function AppSidebar({
   // never flips the pinned state.
   const [hoverFlyout, setHoverFlyout] = useState(false);
   const finePointer = useFinePointer();
+  const railRef = useRef<HTMLElement>(null);
 
   const pinnedOpen = !collapsed;
   const showFlyout = collapsed && hoverFlyout && finePointer;
+
+  useEffect(() => {
+    if (railRef.current) {
+      railRef.current.inert = showFlyout;
+    }
+  }, [showFlyout]);
 
   const handleMouseEnter = useCallback(() => {
     if (collapsed && finePointer) setHoverFlyout(true);
@@ -340,21 +336,25 @@ export function AppSidebar({
       data-testid="app-sidebar-host"
     >
       <aside
+        ref={railRef}
         className={cn(
           'bg-surface-container border-outline-variant flex h-full flex-col overflow-hidden border-r transition-[width] duration-200',
           pinnedOpen ? 'w-[var(--oe-space-panel-nav)]' : 'w-16',
         )}
         data-testid="app-sidebar"
-        aria-label="Main navigation"
+        aria-label={showFlyout ? undefined : 'Main navigation'}
+        aria-hidden={showFlyout ? true : undefined}
       >
-        <SidebarPanel showExpandedContent={pinnedOpen} inertNav={showFlyout} {...panelProps} />
+        <SidebarPanel
+          showExpandedContent={pinnedOpen}
+          exposeTestIds={!showFlyout}
+          {...panelProps}
+        />
       </aside>
 
       {showFlyout && (
         <aside
-          className={cn(
-            'bg-surface-container border-outline-variant animate-in fade-in slide-in-from-left-2 absolute left-0 top-0 z-[100] flex h-full w-[var(--oe-space-panel-nav,240px)] min-w-[var(--oe-space-panel-nav,240px)] flex-col overflow-hidden border-r shadow-lg duration-150',
-          )}
+          className="bg-surface-container border-outline-variant animate-in fade-in slide-in-from-left-2 absolute left-0 top-0 z-[100] flex h-full w-[var(--oe-space-panel-nav,240px)] min-w-[var(--oe-space-panel-nav,240px)] flex-col overflow-hidden border-r shadow-lg duration-150"
           data-testid="app-sidebar-flyout"
           aria-label="Main navigation"
         >
