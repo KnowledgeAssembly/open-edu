@@ -187,8 +187,12 @@ export function StudioApp({
           api={api}
           onOpen={(relativePath) =>
             void (async () => {
-              await api.openLibraryCourse(relativePath);
-              handleNavigate('outline');
+              try {
+                await api.openLibraryCourse(relativePath);
+                handleNavigate('outline');
+              } catch (err) {
+                handleError(err instanceof Error ? err.message : t('studio.errors.generic'));
+              }
             })()
           }
           onError={handleError}

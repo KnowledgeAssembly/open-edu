@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { cp, mkdir, rename, writeFile, readdir } from 'node:fs/promises';
+import { cp, mkdir, rename, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { PackageManifestSchema, BundleManifestSchema } from '@open-edu/schemas';
 
@@ -35,6 +35,8 @@ function uniqueDir(baseDir: string, name: string): string {
   return candidate;
 }
 
+const PACKAGE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
+
 /**
  * Deep-copy a course directory into the workspace under a new id/title.
  * The source is left untouched.
@@ -45,6 +47,10 @@ export async function duplicateCourse(
   newId: string,
   newTitle: string,
 ): Promise<CourseOpResult> {
+  if (!PACKAGE_ID_PATTERN.test(newId)) {
+    throw new Error('New id must be kebab-case (lowercase, hyphens, underscores).');
+  }
+
   const srcResolved = resolve(src);
   const rootResolved = resolve(workspaceRoot);
   assertInsideWorkspace(srcResolved, rootResolved);
@@ -52,24 +58,20 @@ export async function duplicateCourse(
   const manifest = readJson(join(srcResolved, 'package.json'));
   if (!manifest) throw new Error('Source folder has no package.json');
 
-  const destName = uniqueDir(rootResolved, newId);
-  const dest = join(rootResolved, destName);
-  await cp(srcResolved, dest, { recursive: true });
-
   const updated = { ...manifest, id: newId, title: newTitle };
   const parsed = PackageManifestSchema.safeParse(updated);
   if (!parsed.success) {
-    await rmTree(dest);
     throw new Error('Duplicate would produce an invalid package manifest');
   }
+
+  const destName = uniqueDir(rootResolved, newId);
+  const dest = join(rootResolved, destName);
+  assertInsideWorkspace(dest, rootResolved);
+  await cp(srcResolved, dest, { recursive: true });
+
   await writeFile(join(dest, 'package.json'), JSON.stringify(parsed.data, null, 2), 'utf-8');
 
   return { relativePath: destName, id: parsed.data.id, title: parsed.data.title };
-}
-
-async function rmTree(dir: string): Promise<void> {
-  const { rm } = await import('node:fs/promises');
-  await rm(dir, { recursive: true, force: true }).catch(() => {});
 }
 
 /**
@@ -155,13 +157,8 @@ export async function importCourseFolder(
   const rootResolved = resolve(workspaceRoot);
   const destName = uniqueDir(rootResolved, parsed.data.id);
   const dest = join(rootResolved, destName);
+  assertInsideWorkspace(dest, rootResolved);
   await cp(srcResolved, dest, { recursive: true });
 
   return { relativePath: destName, id: parsed.data.id, title: parsed.data.title };
-}
-
-/** List relative paths directly inside a directory (used for workspace discovery in ops). */
-export async function listChildDirectories(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true });
-  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 }

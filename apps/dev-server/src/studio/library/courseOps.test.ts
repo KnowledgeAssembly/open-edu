@@ -54,6 +54,24 @@ describe('duplicateCourse', () => {
     const second = await duplicateCourse(src, ws, 'fractions-copy', 'Fractions Copy 2');
     expect(second.relativePath).not.toBe('fractions-copy');
   });
+
+  it('rejects a path-traversal newId and writes nothing outside the workspace', async () => {
+    const src = await makeCourse('fractions', 'fractions', 'Fractions');
+    const outside = join(ws, '..', `escape-${Date.now()}`);
+    await expect(duplicateCourse(src, ws, outside, 'Escape')).rejects.toThrow(/kebab-case/);
+    const { stat } = await import('node:fs/promises');
+    await expect(stat(outside)).rejects.toThrow();
+  });
+
+  it('rejects a source that escapes the workspace', async () => {
+    const outside = await mkdtemp(join(tmpdir(), 'openedu-studio-dup-src-'));
+    try {
+      await makeCourseAt(outside, 'ext', 'External');
+      await expect(duplicateCourse(outside, ws, 'ext-copy', 'Copy')).rejects.toThrow(/escapes/);
+    } finally {
+      await rm(outside, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('renameCourse', () => {

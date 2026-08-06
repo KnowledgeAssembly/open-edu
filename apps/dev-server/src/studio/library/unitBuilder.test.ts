@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createUnit, buildUnitOep } from './unitBuilder';
@@ -106,6 +106,20 @@ describe('createUnit', () => {
         author: 'T',
       }),
     ).rejects.toThrow(/up to five/);
+  });
+
+  it('dedupes duplicate course selections and leaves no partial unit on failure', async () => {
+    await makeCourse('one', 'one', 'Course One');
+    await expect(
+      createUnit({
+        workspaceRoot: ws,
+        courseRelativePaths: ['one', 'one'],
+        unitId: 'dup-unit',
+        unitTitle: 'Dup Unit',
+        author: 'T',
+      }),
+    ).rejects.toThrow(/at least two/);
+    expect(await readdir(join(ws, 'units')).catch(() => [])).toHaveLength(0);
   });
 });
 

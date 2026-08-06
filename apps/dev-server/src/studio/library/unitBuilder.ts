@@ -48,10 +48,11 @@ function uniqueDir(baseDir: string, name: string): string {
  */
 export async function createUnit(options: CreateUnitOptions): Promise<LibraryEntry> {
   const { workspaceRoot, courseRelativePaths, unitId, unitTitle, author } = options;
-  if (courseRelativePaths.length < 2) {
+  const uniquePaths = [...new Set(courseRelativePaths.map((path) => path.replace(/\/+$/, '')))];
+  if (uniquePaths.length < 2) {
     throw new Error('Pick at least two courses to create a unit.');
   }
-  if (courseRelativePaths.length > 5) {
+  if (uniquePaths.length > 5) {
     throw new Error('Pick up to five courses for a unit.');
   }
 
@@ -61,54 +62,60 @@ export async function createUnit(options: CreateUnitOptions): Promise<LibraryEnt
   const destName = uniqueDir(unitsRoot, unitId);
   const dest = join(unitsRoot, destName);
 
-  const modules: Array<{ id: string; title: string; path: string; dependsOn: string[] }> = [];
-  for (const courseRel of courseRelativePaths) {
-    const courseDir = resolve(rootResolved, courseRel);
-    if (!courseDir.startsWith(rootResolved)) {
-      throw new Error(`Course path escapes the workspace: ${courseRel}`);
+  try {
+    const modules: Array<{ id: string; title: string; path: string; dependsOn: string[] }> = [];
+    for (const courseRel of uniquePaths) {
+      const courseDir = resolve(rootResolved, courseRel);
+      if (!courseDir.startsWith(rootResolved)) {
+        throw new Error(`Course path escapes the workspace: ${courseRel}`);
+      }
+      const manifest = readJson(join(courseDir, 'package.json'));
+      if (!manifest) throw new Error(`Course has no package.json: ${courseRel}`);
+      const parsed = PackageManifestSchema.safeParse(manifest);
+      if (!parsed.success) {
+        throw new Error(`Course is not a valid OpenEdu package: ${courseRel}`);
+      }
+      const moduleId = parsed.data.id;
+      await cp(courseDir, join(dest, 'modules', moduleId), { recursive: true });
+      modules.push({
+        id: moduleId,
+        title: parsed.data.title,
+        path: `./modules/${moduleId}`,
+        dependsOn: [],
+      });
     }
-    const manifest = readJson(join(courseDir, 'package.json'));
-    if (!manifest) throw new Error(`Course has no package.json: ${courseRel}`);
-    const parsed = PackageManifestSchema.safeParse(manifest);
-    if (!parsed.success) {
-      throw new Error(`Course is not a valid OpenEdu package: ${courseRel}`);
+
+    const bundle = {
+      id: destName,
+      title: unitTitle,
+      version: '1.0.0',
+      author,
+      description: `A unit combining ${modules.length} courses.`,
+      modules,
+    };
+    const parsedBundle = BundleManifestSchema.safeParse(bundle);
+    if (!parsedBundle.success) {
+      throw new Error('Unit bundle could not be validated.');
     }
-    const moduleId = parsed.data.id;
-    await cp(courseDir, join(dest, 'modules', moduleId), { recursive: true });
-    modules.push({
-      id: moduleId,
-      title: parsed.data.title,
-      path: `./modules/${moduleId}`,
-      dependsOn: [],
-    });
+
+    await mkdir(dest, { recursive: true });
+    const bundlePath = join(dest, 'bundle.json');
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(bundlePath, JSON.stringify(parsedBundle.data, null, 2), 'utf-8');
+
+    return {
+      id: parsedBundle.data.id,
+      title: parsedBundle.data.title,
+      kind: 'unit',
+      relativePath: `units/${destName}`,
+      version: parsedBundle.data.version,
+      updatedAt: Date.now(),
+    };
+  } catch (error) {
+    const { rm } = await import('node:fs/promises');
+    await rm(dest, { recursive: true, force: true }).catch(() => {});
+    throw error;
   }
-
-  const bundle = {
-    id: destName,
-    title: unitTitle,
-    version: '1.0.0',
-    author,
-    description: `A unit combining ${modules.length} courses.`,
-    modules,
-  };
-  const parsedBundle = BundleManifestSchema.safeParse(bundle);
-  if (!parsedBundle.success) {
-    throw new Error('Unit bundle could not be validated.');
-  }
-
-  await mkdir(dest, { recursive: true });
-  const bundlePath = join(dest, 'bundle.json');
-  const { writeFile } = await import('node:fs/promises');
-  await writeFile(bundlePath, JSON.stringify(parsedBundle.data, null, 2), 'utf-8');
-
-  return {
-    id: parsedBundle.data.id,
-    title: parsedBundle.data.title,
-    kind: 'unit',
-    relativePath: `units/${destName}`,
-    version: parsedBundle.data.version,
-    updatedAt: Date.now(),
-  };
 }
 
 function collectModuleFiles(moduleDir: string): Map<string, Uint8Array> {

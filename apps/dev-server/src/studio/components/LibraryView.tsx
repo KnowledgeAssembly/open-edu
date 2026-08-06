@@ -13,7 +13,7 @@ import {
   DialogDescription,
   Input,
 } from '@open-edu/design-system';
-import { FolderOpen, Copy, Pencil, Archive, Upload, Plus } from 'lucide-react';
+import { FolderOpen, Copy, Pencil, Archive, Upload, Plus, FileDown } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { ImportCourseDialog } from './ImportCourseDialog.js';
 import type { StudioApi } from '../studioApi.js';
@@ -111,7 +111,22 @@ export function LibraryView({
     }
   };
 
-  const archived = entries.filter((entry) => entry.archived);
+  const handleExportUnit = async (entry: LibraryEntry) => {
+    try {
+      const { blob, fileName } = await api.exportUnitOep(entry.relativePath);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+    }
+  };
+
   const active = entries.filter((entry) => !entry.archived);
 
   const actions = (entry: LibraryEntry) => (
@@ -120,6 +135,12 @@ export function LibraryView({
         <FolderOpen className="mr-1.5 h-4 w-4" />
         {t('studio.library.open')}
       </Button>
+      {entry.kind === 'unit' ? (
+        <Button variant="outline" size="sm" onClick={() => void handleExportUnit(entry)}>
+          <FileDown className="mr-1.5 h-4 w-4" />
+          {t('studio.unit.exportOep')}
+        </Button>
+      ) : null}
       <Button variant="ghost" size="sm" onClick={() => void handleDuplicate(entry)}>
         <Copy className="mr-1.5 h-4 w-4" />
         {t('studio.library.duplicate')}
@@ -144,7 +165,8 @@ export function LibraryView({
       <div className="mx-auto max-w-5xl space-y-8 p-6">
         <div>
           <h1 className="text-h1 text-on-surface">{t('studio.library.title')}</h1>
-          <p className="text-on-surface-variant mt-2 text-sm">
+          <p className="text-on-surface-variant mt-2 text-sm">{t('studio.library.lede')}</p>
+          <p className="text-on-surface-variant mt-1 text-sm">
             {t('studio.library.workspace', { workspace })}
           </p>
         </div>
@@ -179,7 +201,8 @@ export function LibraryView({
     <div className="mx-auto max-w-5xl space-y-8 p-6">
       <div>
         <h1 className="text-h1 text-on-surface">{t('studio.library.title')}</h1>
-        <p className="text-on-surface-variant mt-2 text-sm">
+        <p className="text-on-surface-variant mt-2 text-sm">{t('studio.library.lede')}</p>
+        <p className="text-on-surface-variant mt-1 text-sm">
           {t('studio.library.workspace', { workspace })}
         </p>
       </div>
@@ -225,39 +248,6 @@ export function LibraryView({
           ))}
         </ul>
       </section>
-
-      {archived.length > 0 ? (
-        <section aria-labelledby="studio-library-archived-heading">
-          <h2 id="studio-library-archived-heading" className="text-h2 text-on-surface mb-4">
-            {t('studio.library.archivedHeading')}
-          </h2>
-          <ul className="space-y-3">
-            {archived.map((entry) => (
-              <li key={entry.relativePath}>
-                <Card className="border-outline-variant bg-surface opacity-70">
-                  <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-on-surface font-semibold">{entry.title}</span>
-                        <Badge variant="outline">
-                          {entry.kind === 'unit'
-                            ? t('studio.library.kind.unit')
-                            : t('studio.library.kind.course')}
-                        </Badge>
-                      </div>
-                      <p className="text-on-surface-variant mt-1 text-xs">
-                        {entry.relativePath}
-                        <span className="ml-2">v{entry.version}</span>
-                      </p>
-                    </div>
-                    {actions(entry)}
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       <ImportCourseDialog
         api={api}

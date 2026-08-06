@@ -27,7 +27,7 @@ import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outl
 import { getTemplateById } from './src/studio/templates/catalog.js';
 import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
-import { resolveWorkspace, scanWorkspace } from './src/studio/library/libraryIndex.js';
+import { resolveWorkspace, scanWorkspace, isSafeRelativePath } from './src/studio/library/libraryIndex.js';
 import {
   duplicateCourse,
   renameCourse,
@@ -360,12 +360,13 @@ function eduPackageLoader(): Plugin {
     configureServer(srv) {
       server = srv;
 
+      const getCurrentDir = () => packageDir || bundleDir;
       const watchDir = bundleDir || packageDir;
       if (!watchDir) return;
 
       srv.watcher.add(watchDir);
       srv.watcher.on('change', async (filePath) => {
-        if (filePath.startsWith(watchDir) && !aiGenerating) {
+        if (filePath.startsWith(getCurrentDir()) && !aiGenerating) {
           try {
             if (isBundleMode) {
               bundleData = await loadBundle(bundleDir);
@@ -518,7 +519,7 @@ function eduPackageLoader(): Plugin {
         };
 
         const rejectRelativePath = (relativePath: string): string | null => {
-          if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) {
+          if (!isSafeRelativePath(relativePath)) {
             return 'Invalid relativePath';
           }
           return null;
@@ -531,6 +532,10 @@ function eduPackageLoader(): Plugin {
 
           // GET /api/studio/library — list workspace entries
           if (pathname === '/api/studio/library' && method === 'GET') {
+            if (!packageDir) {
+              res.end(JSON.stringify({ workspace: '', entries: [] }));
+              return;
+            }
             const workspace = resolveWorkspace(packageDir);
             res.end(JSON.stringify({ workspace, entries: scanWorkspace(workspace) }));
             return;
@@ -737,7 +742,6 @@ function eduPackageLoader(): Plugin {
       });
 
       // ---- Package Editor API Routes ----
-      const getCurrentDir = () => packageDir || bundleDir;
       if (!getCurrentDir()) return;
 
       const apiRegexp = /^\/api\//;

@@ -121,4 +121,18 @@ export function parentOf(dir: string): string {
   return `/${parts.join('/')}`;
 }
 
+/**
+ * Validate a relative path supplied by the client before it is used to touch
+ * the filesystem. Rejects empty paths, absolute paths, `..` segments,
+ * backslashes, and null bytes (Windows-safe).
+ */
+export function isSafeRelativePath(relativePath: string): boolean {
+  if (!relativePath || relativePath.length === 0) return false;
+  if (relativePath.includes('\\') || relativePath.includes('\0')) return false;
+  if (relativePath.startsWith('/')) return false;
+  const segments = relativePath.split('/');
+  if (segments.some((segment) => segment === '..' || segment === '.')) return false;
+  return true;
+}
+
 export type { LibraryKind };

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { scanWorkspace, resolveWorkspace, parentOf } from './libraryIndex';
+import { scanWorkspace, resolveWorkspace, parentOf, isSafeRelativePath } from './libraryIndex';
 
 let root = '';
 
@@ -143,5 +143,25 @@ describe('resolveWorkspace', () => {
   it('falls back to the parent of the active package dir', () => {
     expect(resolveWorkspace('/tmp/ws/some-course')).toBe('/tmp/ws');
     expect(parentOf('/a/b/c')).toBe('/a/b');
+  });
+});
+
+describe('isSafeRelativePath', () => {
+  it('accepts simple relative paths', () => {
+    expect(isSafeRelativePath('fractions')).toBe(true);
+    expect(isSafeRelativePath('units/mini-unit')).toBe(true);
+  });
+
+  it('rejects traversal and absolute paths', () => {
+    expect(isSafeRelativePath('../escape')).toBe(false);
+    expect(isSafeRelativePath('a/../../b')).toBe(false);
+    expect(isSafeRelativePath('/abs')).toBe(false);
+    expect(isSafeRelativePath('')).toBe(false);
+  });
+
+  it('rejects backslashes and null bytes (Windows-safe)', () => {
+    expect(isSafeRelativePath('..\\escape')).toBe(false);
+    expect(isSafeRelativePath('a\\b')).toBe(false);
+    expect(isSafeRelativePath('a\u0000b')).toBe(false);
   });
 });
