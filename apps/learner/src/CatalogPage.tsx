@@ -29,9 +29,10 @@ import { RotateCcw, Trash2 } from 'lucide-react';
 import { InstallCourseDialog } from './components/InstallCourseDialog.js';
 import { installFromSource } from './courseDownload';
 import { AvailableUpdatesList } from './components/AvailableUpdatesList';
-import { parseCatalog } from '@open-edu/oep-distribution';
-import type { Catalog } from '@open-edu/oep-distribution';
-import { proxyFetch } from './oep-proxy/client';
+import { parseCatalog, catalogSource } from '@open-edu/oep-distribution';
+import type { Catalog, CatalogPackageEntry, InstallResult } from '@open-edu/oep-distribution';
+import { proxyFetch, proxyUrl } from './oep-proxy/client';
+import { toast } from 'sonner';
 import type { StoredCourse, StoredBundle } from '@open-edu/storage';
 import { deleteCourse, deleteBundle } from '@open-edu/storage';
 import { isOepCourse, storedBundleToBundleSummary } from './oepAdapters';
@@ -174,15 +175,10 @@ export function CatalogPage({
     return counts;
   }, [progress, badgeData]);
 
-  const tags = useMemo(() => {
-    const tagSet = new Set<string>();
-    packages.forEach((p) => (p.manifest.tags ?? []).forEach((t) => tagSet.add(t)));
-    return Array.from(tagSet).sort();
-  }, [packages]);
-
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'inProgress' | 'alphabetical'>('newest');
   const [showInstallDialog, setShowInstallDialog] = useState(false);
+  const [installingId, setInstallingId] = useState<string | null>(null);
   const [remoteCatalog, setRemoteCatalog] = useState<Catalog | null>(null);
 
   const allBundleSummaries = useMemo(() => {
@@ -209,11 +205,70 @@ export function CatalogPage({
     }
   }, []);
 
+  const localIds = useMemo(() => new Set(packages.map((p) => p.manifest.id)), [packages]);
+
+  const remotePackages = useMemo<PackageSummary[]>(() => {
+    if (!remoteCatalog) return [];
+    return remoteCatalog.packages
+      .filter((entry) => !installedIds.has(entry.id) && !localIds.has(entry.id))
+      .map((entry) => ({
+        manifest: {
+          id: entry.id,
+          title: entry.title,
+          version: entry.latestVersion,
+          author: entry.author ?? '',
+          entry: '',
+          tags: entry.tags,
+          image: entry.thumbnail,
+        },
+        nodeCount: 0,
+        availableBadges: 0,
+        rootDir: `remote:${entry.id}`,
+      }));
+  }, [remoteCatalog, installedIds, localIds]);
+
+  const allPackages = useMemo(() => [...packages, ...remotePackages], [packages, remotePackages]);
+
+  const handleRemoteInstall = useCallback(
+    async (entry: CatalogPackageEntry) => {
+      if (installingId === entry.id) return;
+      const version = entry.versions[entry.versions.length - 1]!;
+      setInstallingId(entry.id);
+      try {
+        const source = catalogSource({
+          downloadUrl: proxyUrl(version.downloadUrl),
+          label: `${entry.title} v${version.version}`,
+          expectedChecksum: version.checksum,
+        });
+        const result = await installFromSource(source);
+        if (result.success) {
+          toast.success(t('learner.install.success'));
+          if (onRefreshInstalled) {
+            await onRefreshInstalled();
+          }
+        } else {
+          toast.error(t(installErrorKey(result)));
+        }
+      } catch {
+        toast.error(t('learner.install.error_unknown'));
+      } finally {
+        setInstallingId(null);
+      }
+    },
+    [installingId, onRefreshInstalled, t],
+  );
+
+  const tags = useMemo(() => {
+    const tagSet = new Set<string>();
+    allPackages.forEach((p) => (p.manifest.tags ?? []).forEach((t) => tagSet.add(t)));
+    return Array.from(tagSet).sort();
+  }, [allPackages]);
+
   const filtered = useMemo(() => {
     return activeTag
-      ? packages.filter((p) => (p.manifest.tags ?? []).includes(activeTag!))
-      : packages;
-  }, [packages, activeTag]);
+      ? allPackages.filter((p) => (p.manifest.tags ?? []).includes(activeTag!))
+      : allPackages;
+  }, [allPackages, activeTag]);
 
   const sorted = useMemo(() => {
     const list = [...filtered];
@@ -258,26 +313,6 @@ export function CatalogPage({
 
   const continueList = useMemo(() => inProgressItems.slice(0, 4), [inProgressItems]);
 
-  if (packages.length === 0) {
-    return (
-      <div className="p-xl">
-        <h1 className="text-h1 font-display text-on-surface mb-lg">
-          {t('learner.catalog.courses_heading')}
-        </h1>
-        <EmptyState
-          variant="no-courses"
-          heading={t('learner.catalog.empty_heading')}
-          description={t('learner.catalog.empty_description')}
-          action={
-            <Button onClick={() => onNavigate?.({ view: 'catalog' })}>
-              {t('learner.catalog.browse')}
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="p-xl max-w-content mx-auto w-full" data-testid="catalog-page">
       <PageHeader
@@ -307,7 +342,20 @@ export function CatalogPage({
         onInstall={handleInstall}
       />
 
-      {continueList.length > 0 && (
+      {allPackages.length === 0 ? (
+        <EmptyState
+          variant="no-courses"
+          heading={t('learner.catalog.empty_heading')}
+          description={t('learner.catalog.empty_description')}
+          action={
+            <Button onClick={() => setShowInstallDialog(true)} data-testid="empty-install-button">
+              {t('learner.install.title')}
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          {continueList.length > 0 && (
         <section className="mb-xl" data-testid="continue-learning-shelf">
           <div className="mb-md flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -529,6 +577,10 @@ export function CatalogPage({
             const prog = progress[pkg.manifest.id] ?? null;
             const isInstalled = installedIds.has(pkg.manifest.id);
             const isOep = isOepCourse(pkg.rootDir);
+            const isRemote = pkg.rootDir.startsWith('remote:');
+            const remoteEntry = isRemote
+              ? remoteCatalog?.packages.find((e) => e.id === pkg.manifest.id)
+              : undefined;
             const showReset = !!progress[pkg.manifest.id];
             const showDelete = isOep;
             return (
@@ -542,16 +594,25 @@ export function CatalogPage({
                   badgeCount={pkg.availableBadges}
                   earnedBadgeCount={badgeCounts[pkg.manifest.id] ?? 0}
                   progress={prog}
-                  onStart={() => onStartCourse(pkg.rootDir)}
+                  onStart={() =>
+                    remoteEntry ? handleRemoteInstall(remoteEntry) : onStartCourse(pkg.rootDir)
+                  }
                   image={getCourseCardImage({
                     image: pkg.manifest.image,
                     tags: pkg.manifest.tags,
                     title: pkg.manifest.title,
                   })}
+                  metaText={isRemote ? t('learner.catalog.remote_meta') : undefined}
                   indicator={
                     isInstalled ? (
                       <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
                         {t('learner.catalog.installed_badge')}
+                      </span>
+                    ) : isRemote ? (
+                      <span className="bg-primary/10 text-primary text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium">
+                        {installingId === pkg.manifest.id
+                          ? t('learner.install.installing')
+                          : t('learner.catalog.remote_badge')}
                       </span>
                     ) : undefined
                   }
@@ -594,6 +655,8 @@ export function CatalogPage({
           })}
         </div>
       )}
+        </>
+      )}
 
       <Dialog
         open={deleteTarget !== null}
@@ -633,4 +696,22 @@ export function CatalogPage({
       </Dialog>
     </div>
   );
+}
+
+const installErrorKeyMap: Record<string, string> = {
+  ARCHIVE_TOO_LARGE: 'learner.install.error_archive_too_large',
+  DECOMPRESSED_TOO_LARGE: 'learner.install.error_decompressed_too_large',
+  MALFORMED_ARCHIVE: 'learner.install.error_malformed_archive',
+  CHECKSUM_MISMATCH: 'learner.install.error_checksum_mismatch',
+  MANIFEST_MISMATCH: 'learner.install.error_manifest_mismatch',
+  COURSE_VALIDATION_ERROR: 'learner.install.error_course_validation',
+  SOURCE_READ_ERROR: 'learner.install.error_network',
+  STORAGE_ERROR: 'learner.install.error_storage',
+  VERSION_DOWNGRADE: 'learner.install.error_version_downgrade',
+  VERSION_SAME: 'learner.install.error_version_same',
+  NOT_FOUND: 'learner.install.error_not_found',
+};
+
+function installErrorKey(result: InstallResult): string {
+  return installErrorKeyMap[result.errorCode ?? ''] ?? 'learner.install.error_unknown';
 }

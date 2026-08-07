@@ -40,6 +40,11 @@ export interface CourseCardProps {
   image?: string;
   /** Optional short label rendered as a badge next to the title (e.g. "Bundle"). */
   badgeLabel?: string;
+  /**
+   * Optional text that replaces the "N lessons" meta line (e.g. for catalog
+   * entries whose node count is unknown).
+   */
+  metaText?: string;
 }
 
 function BadgeIcons({ total, earned }: { total: number; earned: number }): JSX.Element {
@@ -104,6 +109,7 @@ export function CourseCard({
   indicator,
   image,
   badgeLabel,
+  metaText,
 }: CourseCardProps): JSX.Element {
   const isCompleted = progress?.isCompleted ?? false;
   const isStarted = !!progress;
@@ -145,7 +151,7 @@ export function CourseCard({
                 {new Set(progress!.visitedNodes).size} of {nodeCount} lessons
               </span>
             ) : (
-              <span>{nodeCount} lessons</span>
+              <span>{metaText ?? `${nodeCount} lessons`}</span>
             )}
             {badgeCount > 0 && <BadgeIcons total={badgeCount} earned={earnedBadgeCount} />}
             {isCompleted && (

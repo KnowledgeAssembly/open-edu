@@ -18,6 +18,12 @@ describe('Button', () => {
     expect(btn.className).toContain('bg-destructive');
   });
 
+  it('renders default variant with visible hover classes', () => {
+    render(<Button>Click me</Button>);
+    const btn = screen.getByRole('button');
+    expect(btn.className).toContain('hover:bg-primary/85');
+  });
+
   it('renders with size classes', () => {
     render(<Button size="sm">Small</Button>);
     const btn = screen.getByRole('button');

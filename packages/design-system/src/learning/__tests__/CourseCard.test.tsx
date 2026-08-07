@@ -123,6 +123,17 @@ describe('CourseCard', () => {
     expect(screen.getByText('10 lessons')).toBeInTheDocument();
   });
 
+  it('renders metaText instead of the lesson count when provided', () => {
+    render(<CourseCard {...makeProps({ metaText: 'Available to install' })} />);
+    expect(screen.getByText('Available to install')).toBeInTheDocument();
+    expect(screen.queryByText('10 lessons')).not.toBeInTheDocument();
+  });
+
+  it('omits the lesson count replacement when metaText is not provided', () => {
+    render(<CourseCard {...makeProps()} />);
+    expect(screen.queryByText('Available to install')).not.toBeInTheDocument();
+  });
+
   it('calls onStart when card clicked', () => {
     const onStart = vi.fn();
     render(<CourseCard {...makeProps({ onStart })} />);

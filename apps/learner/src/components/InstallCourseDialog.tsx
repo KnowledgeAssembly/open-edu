@@ -116,7 +116,7 @@ export function InstallCourseDialog({
               type="file"
               accept=".oep"
               data-testid="oep-file-input"
-              className="text-caption text-on-surface file:bg-surface-container file:text-on-surface w-full file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:px-3 file:py-1.5"
+              className="text-caption text-on-surface file:bg-surface-container file:text-on-surface w-full file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:px-3 file:py-1.5 file:transition-colors file:hover:bg-surface-container-highest"
             />
             <Button
               onClick={handleFileInstall}

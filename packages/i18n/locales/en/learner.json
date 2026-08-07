@@ -76,6 +76,8 @@
   "catalog.no_results_description": "Try different keywords or browse the full catalog.",
   "catalog.clear_filter": "Clear Filter",
   "catalog.installed_badge": "Installed",
+  "catalog.remote_badge": "In catalog",
+  "catalog.remote_meta": "Available to install",
   "catalog.bundle_badge": "Bundle",
   "catalog.remove_installed": "Remove",
   "catalog.delete_confirm_title": "Remove course?",
