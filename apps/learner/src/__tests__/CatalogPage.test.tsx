@@ -155,6 +155,15 @@ describe('CatalogPage', () => {
     });
   });
 
+  it('shows a notice when the remote catalog fails to load', async () => {
+    vi.stubEnv('VITE_CATALOG_URL', 'https://example.org/catalog.json');
+    (proxyFetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('network down'));
+
+    render(<CatalogPage packages={[]} onStartCourse={vi.fn()} />);
+
+    expect(await screen.findByTestId('remote-catalog-error')).toBeInTheDocument();
+  });
+
   it('does not list an installed course as a remote catalog entry', async () => {
     vi.stubEnv('VITE_CATALOG_URL', 'https://example.org/catalog.json');
     mockProxyFetchForCatalog();
