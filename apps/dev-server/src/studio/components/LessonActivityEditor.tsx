@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Button, Input, Textarea } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import type { StudioApi } from '../studioApi.js';
-
 function syncHeading(content: string, title: string): string {
   const lines = content.split('\n');
   const firstHeading = lines.findIndex((line) => /^#{1,6}\s/.test(line));
@@ -19,11 +18,13 @@ export function LessonActivityEditor({
   path,
   onSaved,
   onError,
+  onCancel,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -96,6 +97,11 @@ export function LessonActivityEditor({
         <p className="text-on-surface-variant text-sm">{t('studio.editor.lesson.bodyHint')}</p>
       )}
       <div className="flex items-center gap-3">
+        {onCancel ? (
+          <Button variant="outline" size="sm" onClick={onCancel}>
+            {t('studio.editor.cancel')}
+          </Button>
+        ) : null}
         <Button variant="default" size="sm" onClick={() => void handleSave()} disabled={saving}>
           {t('studio.editor.save')}
         </Button>

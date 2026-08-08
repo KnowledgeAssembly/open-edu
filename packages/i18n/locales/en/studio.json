@@ -54,6 +54,7 @@
   "editor.quiz.noCorrectSelected": "Choose the correct answer before saving.",
   "editor.save": "Save",
   "editor.saved": "Saved",
+  "editor.cancel": "Cancel",
   "editor.advanced.requiresDeveloper": "Open Developer mode for advanced activity types.",
   "preview.noPackageLoaded": "No package loaded.",
   "preview.noWorkflow": "No workflow defined.",

@@ -139,6 +139,7 @@ export function StudioApp({
           path={selectedPath}
           onSaved={() => {}}
           onError={handleError}
+          onCancel={() => handleNavigate('outline')}
         />
       ) : null;
       break;

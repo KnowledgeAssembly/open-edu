@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { ActivityEditorRouter } from './ActivityEditorRouter';
@@ -101,5 +102,23 @@ describe('ActivityEditorRouter', () => {
     expect(
       await screen.findByText('Open Developer mode for advanced activity types.'),
     ).toBeInTheDocument();
+  });
+
+  it('forwards onCancel to the active editor and cancels from a lesson', async () => {
+    const onCancel = vi.fn();
+    render(
+      wrap(
+        <ActivityEditorRouter
+          api={makeApi('# Hi', 'nodes/l.md')}
+          path="nodes/l.md"
+          onSaved={() => {}}
+          onError={() => {}}
+          onCancel={onCancel}
+        />,
+      ),
+    );
+    await screen.findByLabelText(/lesson content/i);
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });

@@ -143,4 +143,25 @@ describe('QuizActivityEditor', () => {
     await userEvent.click(screen.getByRole('radio', { name: /option 2/i }));
     expect(screen.getByRole('button', { name: /save/i })).toBeEnabled();
   });
+
+  it('cancels without writing when onCancel is provided', async () => {
+    const api = makeApi();
+    const onCancel = vi.fn();
+    render(
+      wrap(
+        <QuizActivityEditor
+          api={api}
+          path="nodes/q.json"
+          onSaved={() => {}}
+          onError={() => {}}
+          onCancel={onCancel}
+        />,
+      ),
+    );
+    await screen.findByLabelText(/question/i);
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).not.toHaveBeenCalled();
+  });
 });

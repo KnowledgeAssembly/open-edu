@@ -91,7 +91,12 @@ function makeApi(content: string, overrides: Partial<StudioApi> = {}): StudioApi
 
 function renderEditor(
   content: string,
-  overrides: { onSaved?: () => void; onError?: (message: string) => void; api?: StudioApi } = {},
+  overrides: {
+    onSaved?: () => void;
+    onError?: (message: string) => void;
+    onCancel?: () => void;
+    api?: StudioApi;
+  } = {},
 ) {
   const api = overrides.api ?? makeApi(content);
   render(
@@ -101,6 +106,7 @@ function renderEditor(
         path="nodes/p.json"
         onSaved={overrides.onSaved ?? (() => {})}
         onError={overrides.onError ?? (() => {})}
+        onCancel={overrides.onCancel}
       />,
     ),
   );
@@ -190,5 +196,16 @@ describe('PracticeActivityEditor', () => {
     });
     renderEditor('{}', { api, onError });
     expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
+  });
+
+  it('cancels without writing when onCancel is provided', async () => {
+    const api = makeApi(validNodeContent);
+    const onCancel = vi.fn();
+    renderEditor(validNodeContent, { api, onCancel });
+    await screen.findByDisplayValue('Planets quiz');
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).not.toHaveBeenCalled();
   });
 });

@@ -12,11 +12,13 @@ export function ActivityEditorRouter({
   path,
   onSaved,
   onError,
+  onCancel,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [kind, setKind] = useState<ActivityKind | null>(null);
@@ -39,15 +41,21 @@ export function ActivityEditorRouter({
   if (kind === null) return <p className="p-6 text-sm">…</p>;
 
   if (kind === 'lesson') {
-    return <LessonActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} />;
+    return (
+      <LessonActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+    );
   }
 
   if (kind === 'quiz') {
-    return <QuizActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} />;
+    return (
+      <QuizActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+    );
   }
 
   if (kind === 'practice') {
-    return <PracticeActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} />;
+    return (
+      <PracticeActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+    );
   }
 
   return (

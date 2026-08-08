@@ -54,11 +54,13 @@ export function PracticeActivityEditor({
   path,
   onSaved,
   onError,
+  onCancel,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -234,6 +236,11 @@ export function PracticeActivityEditor({
             </div>
           ) : null}
           <div className="flex items-center gap-3">
+            {onCancel ? (
+              <Button variant="outline" size="sm" onClick={onCancel}>
+                {t('studio.editor.cancel')}
+              </Button>
+            ) : null}
             <Button
               variant="default"
               size="sm"
