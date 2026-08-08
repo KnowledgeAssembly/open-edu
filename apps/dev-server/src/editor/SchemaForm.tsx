@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useState, Children, isValidElement, cloneElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  Children,
+  isValidElement,
+  cloneElement,
+} from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { Input } from '../components/ui/input';
@@ -189,8 +197,11 @@ function JsonTextarea({ value, onChange }: { value: object; onChange: (parsed: o
   const { t } = useTranslation();
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
   const [error, setError] = useState<string | null>(null);
+  const lastEmitted = useRef<string | null>(null);
 
   useEffect(() => {
+    if (lastEmitted.current === JSON.stringify(value)) return;
+    lastEmitted.current = null;
     setText(JSON.stringify(value, null, 2));
     setError(null);
   }, [value]);
@@ -199,7 +210,9 @@ function JsonTextarea({ value, onChange }: { value: object; onChange: (parsed: o
     const trimmed = raw.trim();
     if (!trimmed) return;
     try {
-      onChange(JSON.parse(trimmed) as object);
+      const parsed = JSON.parse(trimmed) as object;
+      lastEmitted.current = JSON.stringify(parsed);
+      onChange(parsed);
       setError(null);
     } catch {
       setError(t('studio.editor.jsonInvalid'));
