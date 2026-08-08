@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useFontSize } from '../font-size-context.js';
 import { Button } from '../primitives/button.js';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../primitives/tooltip.js';
 import { cn } from '../lib/utils.js';
 
 export interface TopAppBarBreadcrumb {
@@ -138,31 +139,46 @@ export function TopAppBar({
         {actions}
         {showA11yControls && (
           <div className="relative">
-            <Button
-              ref={triggerRef}
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setA11yOpen((o) => !o)}
-              aria-label="Accessibility settings"
-              title="Accessibility settings"
-              aria-expanded={a11yOpen}
-              data-testid="top-appbar-a11y"
-              className={headerIconButtonClasses}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                fill="currentColor"
-                aria-hidden="true"
-                className="h-4 w-4"
-              >
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M12 6a2 2 0 100-4 2 2 0 000 4z" />
-                <path d="M12 8c-3 0-5 1-5 1l1 2s1.5-.5 4-.5v5l-1 5h2l1-4 1 4h2l-1-5v-5c2.5 0 4 .5 4 .5l1-2s-2-1-5-1z" />
-              </svg>
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    ref={triggerRef}
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setA11yOpen((o) => !o)}
+                    aria-label="Accessibility settings"
+                    aria-expanded={a11yOpen}
+                    data-testid="top-appbar-a11y"
+                    className={headerIconButtonClasses}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      className="h-4 w-4"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path d="M12 6a2 2 0 100-4 2 2 0 000 4z" />
+                      <path d="M12 8c-3 0-5 1-5 1l1 2s1.5-.5 4-.5v5l-1 5h2l1-4 1 4h2l-1-5v-5c2.5 0 4 .5 4 .5l1-2s-2-1-5-1z" />
+                    </svg>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  Accessibility settings
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {a11yOpen && (
               <div
                 ref={panelRef}

@@ -2,6 +2,7 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { cn } from '../lib/utils.js';
 import { Button } from '../primitives/button.js';
 import { Badge } from '../primitives/badge.js';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../primitives/tooltip.js';
 
 export interface AppSidebarStepItem {
   id: string;
@@ -111,9 +112,8 @@ export function AppSidebar({
       <nav className="flex flex-col gap-0.5 p-2" aria-label="App navigation">
         {items.map((item) => {
           const isActive = item.id === currentItemId;
-          return (
+          const navButton = (
             <Button
-              key={item.id}
               variant={isActive ? 'secondary' : 'ghost'}
               size={expanded ? 'sm' : 'icon'}
               className={cn(
@@ -125,11 +125,21 @@ export function AppSidebar({
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`appsidebar-nav-${item.id}`}
-              title={!expanded ? item.label : undefined}
+              aria-label={!expanded ? item.label : undefined}
             >
               <span className="shrink-0">{item.icon}</span>
               {expanded && <span className="truncate">{item.label}</span>}
             </Button>
+          );
+          return !expanded ? (
+            <TooltipProvider key={item.id} delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>{navButton}</TooltipTrigger>
+                <TooltipContent side="right">{item.label}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            navButton
           );
         })}
       </nav>
@@ -163,41 +173,52 @@ export function AppSidebar({
                         ? ' (completed)'
                         : ' (future)';
 
+                    const stepButton = (
+                      <Button
+                        variant={isCurrent ? 'secondary' : 'ghost'}
+                        size="sm"
+                        disabled={isFuture}
+                        className={cn(
+                          'w-full gap-2 text-left transition-colors',
+                          !isCurrent &&
+                            'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
+                          expanded ? 'justify-start px-3' : 'justify-center px-0',
+                        )}
+                        onClick={() => step.onClick?.()}
+                        aria-current={isCurrent ? 'step' : undefined}
+                        aria-label={`${step.label}${stateLabel}`}
+                        data-testid={`step-${step.id}`}
+                      >
+                        <span className="shrink-0">
+                          {isCurrent && (
+                            <span className="bg-primary text-on-primary flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                              {section.items.indexOf(step) + 1}
+                            </span>
+                          )}
+                          {isCompleted && (
+                            <Badge className="flex h-5 w-5 items-center justify-center rounded-full p-0">
+                              {CheckIcon}
+                            </Badge>
+                          )}
+                          {isFuture && (
+                            <span className="border-outline-variant flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2" />
+                          )}
+                        </span>
+                        {expanded && <span className="truncate text-sm">{step.label}</span>}
+                      </Button>
+                    );
                     return (
                       <li key={step.id}>
-                        <Button
-                          variant={isCurrent ? 'secondary' : 'ghost'}
-                          size="sm"
-                          disabled={isFuture}
-                          className={cn(
-                            'w-full gap-2 text-left transition-colors',
-                            !isCurrent &&
-                              'hover:bg-surface-variant/30 hover:text-on-surface text-on-surface-variant',
-                            expanded ? 'justify-start px-3' : 'justify-center px-0',
-                          )}
-                          onClick={() => step.onClick?.()}
-                          aria-current={isCurrent ? 'step' : undefined}
-                          aria-label={`${step.label}${stateLabel}`}
-                          data-testid={`step-${step.id}`}
-                          title={!expanded ? step.label : undefined}
-                        >
-                          <span className="shrink-0">
-                            {isCurrent && (
-                              <span className="bg-primary text-on-primary flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                                {section.items.indexOf(step) + 1}
-                              </span>
-                            )}
-                            {isCompleted && (
-                              <Badge className="flex h-5 w-5 items-center justify-center rounded-full p-0">
-                                {CheckIcon}
-                              </Badge>
-                            )}
-                            {isFuture && (
-                              <span className="border-outline-variant flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2" />
-                            )}
-                          </span>
-                          {expanded && <span className="truncate text-sm">{step.label}</span>}
-                        </Button>
+                        {!expanded ? (
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>{stepButton}</TooltipTrigger>
+                              <TooltipContent side="right">{step.label}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          stepButton
+                        )}
                       </li>
                     );
                   })}
@@ -223,16 +244,25 @@ export function AppSidebar({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={handleToggleCollapse}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="border-outline-variant text-on-surface-variant hover:bg-surface-container-high flex w-full cursor-pointer items-center justify-center border-t bg-transparent py-2 transition-colors"
-      >
-        <span className={cn('transition-transform duration-200', collapsed && 'rotate-180')}>
-          {ChevronLeft}
-        </span>
-      </button>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={handleToggleCollapse}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="border-outline-variant text-on-surface-variant hover:bg-surface-container-high flex w-full cursor-pointer items-center justify-center border-t bg-transparent py-2 transition-colors"
+            >
+              <span className={cn('transition-transform duration-200', collapsed && 'rotate-180')}>
+                {ChevronLeft}
+              </span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </aside>
   );
 }

@@ -45,11 +45,14 @@ describe('TopAppBar', () => {
     expect(screen.getByTestId('top-appbar-a11y')).toBeInTheDocument();
   });
 
-  it('a11y controls button has correct aria-label and title', () => {
+  it('a11y controls button has correct aria-label and shows a tooltip on focus', async () => {
     renderWithProvider(<TopAppBar showA11yControls />);
     const btn = screen.getByTestId('top-appbar-a11y');
     expect(btn.getAttribute('aria-label')).toBe('Accessibility settings');
-    expect(btn.getAttribute('title')).toBe('Accessibility settings');
+    expect(btn.hasAttribute('title')).toBe(false);
+    fireEvent.focus(btn);
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('Accessibility settings');
   });
 
   it('a11y controls panel opens on click', () => {

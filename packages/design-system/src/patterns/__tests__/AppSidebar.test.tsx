@@ -183,6 +183,12 @@ describe('AppSidebar', () => {
   });
 
   describe('collapsed rail', () => {
+    it('shows a tooltip with the label when collapsed', async () => {
+      render(<AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} collapsed />);
+      fireEvent.focus(screen.getByTestId('appsidebar-nav-home'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Home');
+    });
+
     it('defaults to collapsed when defaultCollapsed is set', () => {
       render(
         <AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} defaultCollapsed />,
