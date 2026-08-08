@@ -99,10 +99,9 @@ export function createStudioApi() {
         body: JSON.stringify({ path, content, validate: true }),
       }),
     deleteFile: (path: string) =>
-      apiRequest<{ success: boolean; path: string }>(
-        `/file?path=${encodeURIComponent(path)}`,
-        { method: 'DELETE' },
-      ),
+      apiRequest<{ success: boolean; path: string }>(`/file?path=${encodeURIComponent(path)}`, {
+        method: 'DELETE',
+      }),
     getAiStatus: () => aiRequest<{ available: boolean; reason?: string }>('/status', {}),
     generateFromNotes: (notes: string, force?: boolean) =>
       aiRequest<AiGenerateResult>('/generate', {

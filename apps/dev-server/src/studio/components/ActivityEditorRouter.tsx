@@ -42,19 +42,37 @@ export function ActivityEditorRouter({
 
   if (kind === 'lesson') {
     return (
-      <LessonActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+      <LessonActivityEditor
+        api={api}
+        path={path}
+        onSaved={onSaved}
+        onError={onError}
+        onCancel={onCancel}
+      />
     );
   }
 
   if (kind === 'quiz') {
     return (
-      <QuizActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+      <QuizActivityEditor
+        api={api}
+        path={path}
+        onSaved={onSaved}
+        onError={onError}
+        onCancel={onCancel}
+      />
     );
   }
 
   if (kind === 'practice') {
     return (
-      <PracticeActivityEditor api={api} path={path} onSaved={onSaved} onError={onError} onCancel={onCancel} />
+      <PracticeActivityEditor
+        api={api}
+        path={path}
+        onSaved={onSaved}
+        onError={onError}
+        onCancel={onCancel}
+      />
     );
   }
 

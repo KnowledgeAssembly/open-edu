@@ -5,7 +5,9 @@ describe('curatedCatalog', () => {
   it('returns only non-deprecated stable widgets with a guide', () => {
     const list = listCuratedWidgets();
     expect(list.length).toBeGreaterThanOrEqual(20);
-    expect(list.every((w) => w.id && w.name && !w.deprecated && w.status !== 'deprecated' && w.guide)).toBe(true);
+    expect(
+      list.every((w) => w.id && w.name && !w.deprecated && w.status !== 'deprecated' && w.guide),
+    ).toBe(true);
     expect(getCuratedWidget('core.multiple-choice')?.id).toBe('core.multiple-choice');
   });
 

@@ -19,7 +19,12 @@ const { mockCatalog } = vi.hoisted(() => {
   return {
     mockCatalog: {
       multipleChoice,
-      matching: { id: 'core.matching', name: 'Matching', domain: 'core', guide: { configFields: [] } } as CuratedWidget,
+      matching: {
+        id: 'core.matching',
+        name: 'Matching',
+        domain: 'core',
+        guide: { configFields: [] },
+      } as CuratedWidget,
     },
   };
 });
