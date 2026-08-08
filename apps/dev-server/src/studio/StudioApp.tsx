@@ -47,6 +47,10 @@ export function StudioApp({
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
     writeStudioView(next);
+    if (next === 'outline' || next === 'home') {
+      setSelectedPath(null);
+      writeSelectedPath(null);
+    }
   }, []);
 
   const handleAiGenerated = useCallback(
@@ -139,6 +143,7 @@ export function StudioApp({
           path={selectedPath}
           onSaved={() => {}}
           onError={handleError}
+          onCancel={() => handleNavigate('outline')}
         />
       ) : null;
       break;

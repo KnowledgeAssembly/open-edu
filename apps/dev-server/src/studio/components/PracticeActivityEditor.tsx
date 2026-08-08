@@ -20,6 +20,7 @@ import type { ExerciseNode } from '../widgets/exerciseNode.js';
 import { getCuratedWidget } from '../widgets/curatedCatalog.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
+import { WidgetGuidePanel } from './WidgetGuidePanel.js';
 import type { StudioApi } from '../studioApi.js';
 
 function titleCase(name: string): string {
@@ -54,11 +55,13 @@ export function PracticeActivityEditor({
   path,
   onSaved,
   onError,
+  onCancel,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -118,6 +121,16 @@ export function PracticeActivityEditor({
     () => (curated && widgetId ? validateWidgetConfigForType(widgetId, config) : []),
     [curated, widgetId, config],
   );
+
+  const fieldErrors = useMemo(() => {
+    const map: Record<string, ValidationError[]> = {};
+    for (const err of validationErrors) {
+      const key = topLevelKey(err.path);
+      if (!key) continue;
+      (map[key] ??= []).push(err);
+    }
+    return map;
+  }, [validationErrors]);
 
   const fieldLabels = useMemo(() => {
     const labels: Record<string, string> = {};
@@ -216,7 +229,12 @@ export function PracticeActivityEditor({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SchemaForm data={config} onChange={setConfig} fieldLabels={fieldLabels} />
+              <SchemaForm
+                data={config}
+                onChange={setConfig}
+                fieldLabels={fieldLabels}
+                fieldErrors={fieldErrors}
+              />
             </CardContent>
           </Card>
           {validationErrors.length > 0 ? (
@@ -234,6 +252,11 @@ export function PracticeActivityEditor({
             </div>
           ) : null}
           <div className="flex items-center gap-3">
+            {onCancel ? (
+              <Button variant="outline" size="sm" onClick={onCancel}>
+                {t('studio.editor.cancel')}
+              </Button>
+            ) : null}
             <Button
               variant="default"
               size="sm"
@@ -242,6 +265,9 @@ export function PracticeActivityEditor({
             >
               {t('studio.editor.save')}
             </Button>
+            {!nodeJsonValid ? (
+              <span className="text-error text-sm">{t('studio.widget.validationFix')}</span>
+            ) : null}
             {saved ? (
               <span className="text-on-surface-variant text-sm">{t('studio.editor.saved')}</span>
             ) : null}
@@ -264,6 +290,7 @@ export function PracticeActivityEditor({
           </CardContent>
         </Card>
       </div>
+      {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
     </div>
   );
 }

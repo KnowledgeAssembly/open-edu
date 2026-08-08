@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Badge, EmptyState } from '@open-edu/design-system';
-import { ArrowDown, ArrowUp, Plus, Pencil } from 'lucide-react';
+import {
+  Button,
+  Badge,
+  EmptyState,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '@open-edu/design-system';
+import { ArrowDown, ArrowUp, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
@@ -58,6 +68,7 @@ export function OutlineView({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ActivitySummary | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -139,6 +150,22 @@ export function OutlineView({
     }
   };
 
+  const removeActivity = async (activity: ActivitySummary) => {
+    setSaving(true);
+    try {
+      await api.deleteFile(activity.path);
+      const remaining = activities.filter((a) => a.id !== activity.id);
+      await api.saveOutlineOrder(remaining.map((a) => a.path));
+      setActivities(remaining);
+      setDeleteTarget(null);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+      await refresh();
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading && activities.length === 0) {
     return <p className="p-6 text-sm">…</p>;
   }
@@ -199,6 +226,15 @@ export function OutlineView({
                   <Pencil className="mr-1 h-4 w-4" aria-hidden="true" />
                   {t('studio.nav.editActivity')}
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t('studio.outline.delete', { title: activity.title })}
+                  disabled={saving}
+                  onClick={() => setDeleteTarget(activity)}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </Button>
               </div>
             </li>
           ))}
@@ -209,6 +245,35 @@ export function OutlineView({
         onOpenChange={setPickerOpen}
         onSelect={(widget) => void addPractice(widget)}
       />
+
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('studio.outline.deleteConfirmTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('studio.outline.deleteConfirmLede', { title: deleteTarget?.title ?? '' })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
+              {t('studio.outline.deleteCancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => deleteTarget && void removeActivity(deleteTarget)}
+              disabled={saving}
+            >
+              {t('studio.outline.deleteConfirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="space-y-4">
         <details className="border-outline-variant bg-surface rounded-lg border" open={false}>

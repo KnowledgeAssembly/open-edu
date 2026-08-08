@@ -1180,8 +1180,17 @@ function eduPackageLoader(): Plugin {
             const body = (await parseJsonBody(req)) as { orderedPaths?: string[] };
             const orderedPaths = Array.isArray(body.orderedPaths) ? body.orderedPaths : [];
             if (orderedPaths.length === 0) {
-              res.statusCode = 400;
-              res.end(JSON.stringify({ error: 'orderedPaths must be a non-empty array' }));
+              await writeFile(
+                join(getCurrentDir(), 'workflow.json'),
+                JSON.stringify({ routing: {} }, null, 2),
+                'utf-8',
+              );
+              const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+              if (mod) {
+                srv.moduleGraph.invalidateModule(mod);
+              }
+              srv.ws.send({ type: 'full-reload' });
+              res.end(JSON.stringify({ success: true }));
               return;
             }
             const entry = orderedPaths[0]!;

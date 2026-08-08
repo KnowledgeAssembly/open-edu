@@ -39,6 +39,7 @@ const { mockCatalog } = vi.hoisted(() => {
         },
       ],
     },
+    guideMarkdown: '# Multiple Choice',
   };
   const matching: CuratedWidget = {
     id: 'core.matching',
@@ -52,9 +53,12 @@ const { mockCatalog } = vi.hoisted(() => {
 vi.mock('../widgets/curatedCatalog.js', () => ({
   listCuratedWidgets: () => [mockCatalog.multipleChoice, mockCatalog.matching],
   getCuratedWidget: (id: string) =>
-    id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
+    id === 'core.multiple-choice'
+      ? mockCatalog.multipleChoice
+      : id === 'core.matching'
+        ? mockCatalog.matching
+        : undefined,
 }));
-
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -91,7 +95,12 @@ function makeApi(content: string, overrides: Partial<StudioApi> = {}): StudioApi
 
 function renderEditor(
   content: string,
-  overrides: { onSaved?: () => void; onError?: (message: string) => void; api?: StudioApi } = {},
+  overrides: {
+    onSaved?: () => void;
+    onError?: (message: string) => void;
+    onCancel?: () => void;
+    api?: StudioApi;
+  } = {},
 ) {
   const api = overrides.api ?? makeApi(content);
   render(
@@ -101,6 +110,7 @@ function renderEditor(
         path="nodes/p.json"
         onSaved={overrides.onSaved ?? (() => {})}
         onError={overrides.onError ?? (() => {})}
+        onCancel={overrides.onCancel}
       />,
     ),
   );
@@ -190,5 +200,40 @@ describe('PracticeActivityEditor', () => {
     });
     renderEditor('{}', { api, onError });
     expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
+  });
+
+  it('cancels without writing when onCancel is provided', async () => {
+    const api = makeApi(validNodeContent);
+    const onCancel = vi.fn();
+    renderEditor(validNodeContent, { api, onCancel });
+    await screen.findByDisplayValue('Planets quiz');
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).not.toHaveBeenCalled();
+  });
+
+  it('renders the widget guide when guideMarkdown is present and hides it otherwise', async () => {
+    renderEditor(validNodeContent);
+    await screen.findByDisplayValue('Planets quiz');
+    expect(screen.getByText('How this practice works')).toBeInTheDocument();
+  });
+
+  it('does not render the widget guide when guideMarkdown is absent', async () => {
+    renderEditor(
+      JSON.stringify({ type: 'exercise', widget: 'core.matching', config: { pairs: [] } }),
+    );
+    await screen.findByLabelText(/lesson title/i);
+    expect(screen.queryByText('How this practice works')).not.toBeInTheDocument();
+  });
+
+  it('shows field-level validation errors in the settings form', async () => {
+    renderEditor(
+      JSON.stringify({ type: 'exercise', widget: 'core.matching', config: { pairs: [{}] } }),
+    );
+    await screen.findByLabelText(/lesson title/i);
+    expect(screen.getByText('Fix the highlighted settings before saving')).toBeInTheDocument();
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts.length).toBeGreaterThanOrEqual(2);
   });
 });

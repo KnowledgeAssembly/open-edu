@@ -90,4 +90,25 @@ describe('LessonActivityEditor', () => {
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     expect(writeCall).toHaveBeenCalledWith('nodes/l.md', '# Title\n\nBody');
   });
+
+  it('cancels without writing when onCancel is provided', async () => {
+    const api = makeApi();
+    const onCancel = vi.fn();
+    render(
+      wrap(
+        <LessonActivityEditor
+          api={api}
+          path="nodes/l.md"
+          onSaved={() => {}}
+          onError={() => {}}
+          onCancel={onCancel}
+        />,
+      ),
+    );
+    await screen.findByDisplayValue('Title');
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    expect(writeCall).not.toHaveBeenCalled();
+  });
 });
