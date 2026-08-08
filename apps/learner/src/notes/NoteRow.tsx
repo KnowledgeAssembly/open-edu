@@ -9,6 +9,10 @@ import {
   DialogDescription,
   DialogFooter,
   Button,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from '@open-edu/design-system';
 import { Star, Trash2 } from 'lucide-react';
 import { useLiveRegion } from '@open-edu/accessibility';
@@ -84,25 +88,39 @@ export function NoteRow({
             {note.title || t('notes.editor.title.placeholder')}
           </h3>
           <div className="flex shrink-0 items-center gap-1">
-            <button
-              onClick={handleToggleFavorite}
-              className="focus-visible:ring-primary rounded p-0.5 focus-visible:outline-none focus-visible:ring-2"
-              aria-pressed={note.favorite}
-              aria-label={
-                note.favorite ? t('notes.row.favorite.remove') : t('notes.row.favorite.add')
-              }
-            >
-              <Star
-                className={`h-4 w-4 ${note.favorite ? 'fill-primary text-primary' : 'text-on-surface-variant'}`}
-              />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="focus-visible:ring-primary rounded p-0.5 focus-visible:outline-none focus-visible:ring-2"
-              aria-label={t('notes.row.delete')}
-            >
-              <Trash2 className="text-on-surface-variant h-4 w-4" />
-            </button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleToggleFavorite}
+                    className="focus-visible:ring-primary rounded p-0.5 focus-visible:outline-none focus-visible:ring-2"
+                    aria-pressed={note.favorite}
+                    aria-label={
+                      note.favorite ? t('notes.row.favorite.remove') : t('notes.row.favorite.add')
+                    }
+                  >
+                    <Star
+                      className={`h-4 w-4 ${note.favorite ? 'fill-primary text-primary' : 'text-on-surface-variant'}`}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {note.favorite ? t('notes.row.favorite.remove') : t('notes.row.favorite.add')}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleDeleteClick}
+                    className="focus-visible:ring-primary rounded p-0.5 focus-visible:outline-none focus-visible:ring-2"
+                    aria-label={t('notes.row.delete')}
+                  >
+                    <Trash2 className="text-on-surface-variant h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">{t('notes.row.delete')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         <p className="text-body-ui text-on-surface-variant line-clamp-2">{snippet}</p>

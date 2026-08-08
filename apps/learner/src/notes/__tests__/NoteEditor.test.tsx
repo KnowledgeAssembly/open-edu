@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import notesDict from '@open-edu/i18n/locales/en/notes.json';
@@ -47,5 +47,12 @@ describe('NoteEditor', () => {
     await user.type(titleInput, 'Updated Title');
 
     expect(screen.getByDisplayValue('Updated Title')).toBeInTheDocument();
+  });
+
+  it('shows a tooltip on the export button when focused', async () => {
+    renderWithProvider(<NoteEditor initial={baseNote} />);
+
+    fireEvent.focus(screen.getByRole('button', { name: /export/i }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Export');
   });
 });

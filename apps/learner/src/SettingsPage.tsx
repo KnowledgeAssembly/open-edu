@@ -11,6 +11,10 @@ import {
   RadioGroup,
   RadioGroupItem,
   Pipili,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from '@open-edu/design-system';
 import { Sun, Eye, Type, Minus, Plus, Languages, Smile } from 'lucide-react';
 import { LanguageSwitcher, useTranslation } from '@open-edu/i18n';
@@ -97,23 +101,41 @@ export function SettingsPage({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={decreaseFontSize}
-                  aria-label={t('learner.settings.aa_decrease_font_aria')}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={decreaseFontSize}
+                        aria-label={t('learner.settings.aa_decrease_font_aria')}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      {t('learner.settings.aa_decrease_font_aria')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <span className="text-body-ui w-12 text-center font-mono">{fontSize}%</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={increaseFontSize}
-                  aria-label={t('learner.settings.aa_increase_font_aria')}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={increaseFontSize}
+                        aria-label={t('learner.settings.aa_increase_font_aria')}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      {t('learner.settings.aa_increase_font_aria')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
 

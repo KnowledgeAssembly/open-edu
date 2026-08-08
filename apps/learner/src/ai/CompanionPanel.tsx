@@ -1,5 +1,12 @@
 import { useCallback, useEffect } from 'react';
-import { Button, cn } from '@open-edu/design-system';
+import {
+  Button,
+  cn,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@open-edu/design-system';
 import { X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useCompanion } from './CompanionProvider';
@@ -81,15 +88,22 @@ function PipiliCompanionContent(): JSX.Element {
       >
         <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
           <h2 className="text-h3 font-display">{t('learner.ai.companion')}</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleClose}
-            aria-label={t('learner.right_sidebar.close')}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  aria-label={t('learner.right_sidebar.close')}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">{t('learner.right_sidebar.close')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="border-outline-variant shrink-0 border-b px-4 py-2">
           <ExplanationStylePicker />

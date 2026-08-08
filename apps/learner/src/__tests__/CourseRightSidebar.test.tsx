@@ -51,6 +51,12 @@ describe('CourseRightSidebar', () => {
     expect(openBtn).toBeInTheDocument();
   });
 
+  it('shows a tooltip on the open sidebar button when focused', async () => {
+    renderWithProvider(<CourseRightSidebar />);
+    fireEvent.focus(screen.getByRole('button', { name: /open sidebar/i }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Open sidebar');
+  });
+
   it('renders expanded sidebar with tabs when panel is open', () => {
     renderWithProvider(<CourseRightSidebar />);
     const openBtn = screen.getByRole('button', { name: /open sidebar/i });

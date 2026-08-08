@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import notesDict from '@open-edu/i18n/locales/en/notes.json';
@@ -67,6 +67,21 @@ describe('NoteRow', () => {
 
     await user.click(screen.getByRole('button', { name: /delete note/i }));
     expect(screen.getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('shows a tooltip on the delete button when focused', async () => {
+    renderWithProvider(
+      <NoteRow
+        note={baseNote}
+        tags={[]}
+        onOpen={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+
+    fireEvent.focus(screen.getByRole('button', { name: /delete note/i }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Delete note');
   });
 
   it('renders note row container with test id', () => {
