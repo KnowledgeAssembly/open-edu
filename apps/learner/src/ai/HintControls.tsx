@@ -18,13 +18,6 @@ const HINT_LABEL_KEYS: Record<HintLevel, string> = {
   4: 'learner.pipili.hint.level_4',
 };
 
-const HINT_DESCRIPTION_KEYS: Record<HintLevel, string> = {
-  1: 'learner.pipili.hint.level_1',
-  2: 'learner.pipili.hint.level_2',
-  3: 'learner.pipili.hint.level_3',
-  4: 'learner.pipili.hint.level_4',
-};
-
 export const HintControls = React.forwardRef<HTMLDivElement, HintControlsProps>(
   function HintControls(
     { currentLevel, onRequestLevel, disabled = false, assessmentActive = false, className },
@@ -48,7 +41,6 @@ export const HintControls = React.forwardRef<HTMLDivElement, HintControlsProps>(
               size="sm"
               onClick={() => isAvailable && onRequestLevel(level)}
               disabled={disabled || !isAvailable}
-              title={t(HINT_DESCRIPTION_KEYS[level])}
               aria-label={t(HINT_LABEL_KEYS[level])}
               className={cn(
                 'text-caption h-auto px-2 py-1 font-medium',

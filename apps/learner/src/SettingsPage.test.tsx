@@ -66,6 +66,18 @@ describe('SettingsPage', () => {
     expect(onThemeChange).toHaveBeenCalledWith('zen');
   });
 
+  it('shows a tooltip on the font decrease button when focused', async () => {
+    renderWithProvider(
+      <SettingsPage
+        currentThemeId="lumina-scholastica"
+        onThemeChange={vi.fn()}
+        breakTimer={mockBreakTimer}
+      />,
+    );
+    fireEvent.focus(screen.getByRole('button', { name: /decrease font size/i }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Decrease font size');
+  });
+
   it('renders the emoji pack section with both options', () => {
     renderWithProvider(
       <SettingsPage

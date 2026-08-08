@@ -9,6 +9,10 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from '@open-edu/design-system';
 import { Trash2, Download } from 'lucide-react';
 import { useLiveRegion } from '@open-edu/accessibility';
@@ -105,23 +109,37 @@ export function NoteEditor({ initial, compact, onSaved, onDeleted }: NoteEditorP
             </span>
           )}
           {!compact && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowExportDialog(true)}
-              aria-label={t('notes.editor.export')}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowExportDialog(true)}
+                    aria-label={t('notes.editor.export')}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">{t('notes.editor.export')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowDeleteDialog(true)}
-            aria-label={t('notes.editor.delete')}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDeleteDialog(true)}
+                  aria-label={t('notes.editor.delete')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">{t('notes.editor.delete')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 

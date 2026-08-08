@@ -1,5 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Button, Tabs, TabsList, TabsTrigger, TabsContent, cn } from '@open-edu/design-system';
+import {
+  Button,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  cn,
+} from '@open-edu/design-system';
 import { FileText, Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useRuntimeOptional } from '@open-edu/runtime';
@@ -81,14 +92,21 @@ function SidebarContent({
     >
       {!isOpen ? (
         <div className="flex justify-center py-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanelState('floating')}
-            aria-label={t('learner.right_sidebar.open')}
-          >
-            <ChevronLeft className="text-on-surface-variant h-5 w-5" />
-          </Button>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setPanelState('floating')}
+                  aria-label={t('learner.right_sidebar.open')}
+                >
+                  <ChevronLeft className="text-on-surface-variant h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">{t('learner.right_sidebar.open')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ) : (
         <Tabs
@@ -107,14 +125,21 @@ function SidebarContent({
                 {t('learner.right_sidebar.tab_notepad')}
               </TabsTrigger>
             </TabsList>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setPanelState('closed')}
-              aria-label={t('learner.right_sidebar.close')}
-            >
-              <ChevronRight className="text-on-surface-variant h-5 w-5" />
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setPanelState('closed')}
+                    aria-label={t('learner.right_sidebar.close')}
+                  >
+                    <ChevronRight className="text-on-surface-variant h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">{t('learner.right_sidebar.close')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           <TabsContent
