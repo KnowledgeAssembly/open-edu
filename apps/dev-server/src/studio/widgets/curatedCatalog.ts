@@ -1,6 +1,10 @@
 import { createDefaultRegistry, WIDGET_CATALOG_ENTRIES } from '@open-edu/widgets';
 import { renderWidgetGuideMarkdown } from '@open-edu/widgets';
-import type { WidgetDefinitionV2, WidgetGuideConfigField } from '@open-edu/widgets';
+import type {
+  WidgetDefinitionV2,
+  WidgetGuideConfigField,
+  WidgetGuideData,
+} from '@open-edu/widgets';
 
 export interface CuratedWidget {
   id: string;
@@ -13,7 +17,7 @@ export interface CuratedWidget {
   guideMarkdown?: string;
 }
 
-const GUIDE_BY_ID: Record<string, CuratedWidget['guide']> = Object.fromEntries(
+const GUIDE_BY_ID: Record<string, WidgetGuideData | undefined> = Object.fromEntries(
   WIDGET_CATALOG_ENTRIES.map((entry) => [entry.id, entry.guide]),
 );
 
