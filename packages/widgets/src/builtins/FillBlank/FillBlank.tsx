@@ -120,7 +120,6 @@ function FillBlankComponent(props: {
       (b) => String(userAnswers[b.id]) === String(b.correctAnswer),
     ).length;
     const accuracy = correctCount / sortedBlanks.length;
-    const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
@@ -132,9 +131,17 @@ function FillBlankComponent(props: {
       correctCount,
       totalBlanks: sortedBlanks.length,
     });
-    complete(score, { submitted: true, userAnswers, hintIndex });
     setSubmitted(true);
-  }, [submitted, config, sortedBlanks, userAnswers, hintIndex, emitInteraction, complete]);
+  }, [submitted, config, sortedBlanks, userAnswers, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    const correctCount = sortedBlanks.filter(
+      (b) => String(userAnswers[b.id]) === String(b.correctAnswer),
+    ).length;
+    const accuracy = correctCount / sortedBlanks.length;
+    const score = Math.round(accuracy * 100);
+    complete(score, { submitted: true, userAnswers, hintIndex });
+  }, [sortedBlanks, userAnswers, hintIndex, complete]);
 
   const handleHintClick = useCallback(() => {
     if (config?.hints && hintIndex < config.hints.length - 1) {
@@ -355,13 +362,8 @@ function FillBlankComponent(props: {
             Submit
           </Button>
         ) : (
-          <Button variant="outline" disabled data-testid="result-display">
-            {(() => {
-              const correct = sortedBlanks.every(
-                (b) => String(userAnswers[b.id]) === String(b.correctAnswer),
-              );
-              return correct ? 'Correct!' : 'Incorrect';
-            })()}
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
           </Button>
         )}
       </div>

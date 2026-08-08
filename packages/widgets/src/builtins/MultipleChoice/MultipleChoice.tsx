@@ -76,6 +76,7 @@ function MultipleChoiceComponent(props: {
     return legacy.data.options[storedIdx]?.id ?? null;
   });
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [showResults, setShowResults] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
   const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
   const [responses, setResponses] = useState<{ correct: boolean; selectedIndex: number }[]>(
@@ -110,18 +111,21 @@ function MultipleChoiceComponent(props: {
   const handleLegacySubmit = useCallback(() => {
     if (!selectedId || submitted || !legacyParsed.success) return;
     setSubmitted(true);
-    const correctOption = legacyParsed.data.options.find((o) => o.correct);
-    const isCorrect = selectedId === correctOption?.id;
-    const score = isCorrect ? 100 : 0;
-    const selectedIdx = legacyParsed.data.options.findIndex((o) => o.id === selectedId);
-    const correctIdx = legacyParsed.data.options.findIndex((o) => o.correct);
     emitInteraction({
       type: 'widget.interaction',
       widgetId: 'core.multiple-choice',
       action: 'submit',
       selectedId,
-      score,
     });
+  }, [selectedId, submitted, legacyParsed, emitInteraction]);
+
+  const handleLegacyContinue = useCallback(() => {
+    if (!legacyParsed.success || !selectedId) return;
+    const correctOption = legacyParsed.data.options.find((o) => o.correct);
+    const isCorrect = selectedId === correctOption?.id;
+    const score = isCorrect ? 100 : 0;
+    const selectedIdx = legacyParsed.data.options.findIndex((o) => o.id === selectedId);
+    const correctIdx = legacyParsed.data.options.findIndex((o) => o.correct);
     complete(score, {
       submitted: true,
       currentIndex: 0,
@@ -134,7 +138,7 @@ function MultipleChoiceComponent(props: {
         explanation: legacyParsed.data.explanation,
       },
     });
-  }, [selectedId, submitted, legacyParsed, emitInteraction, complete]);
+  }, [selectedId, legacyParsed, complete]);
 
   const handleMultiSelect = useCallback(
     (optionIndex: number) => {
@@ -184,27 +188,32 @@ function MultipleChoiceComponent(props: {
     if (currentIndex < multiParsed.data.questions.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      const correctCount = responses.filter((r) => r.correct).length;
-      const totalQuestions = multiParsed.data.questions.length;
-      const accuracy = correctCount / totalQuestions;
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'core.multiple-choice',
-        action: 'submit',
-        responses,
-        correctCount,
-        totalQuestions,
-        accuracy,
-      });
-      complete(accuracy * 100, {
-        submitted: true,
-        currentIndex,
-        selections,
-        responses,
-        feedback: null,
-      });
-      setSubmitted(true);
+      setShowResults(true);
     }
+  }, [multiParsed, currentIndex]);
+
+  const handleContinue = useCallback(() => {
+    if (!multiParsed.success) return;
+    const correctCount = responses.filter((r) => r.correct).length;
+    const totalQuestions = multiParsed.data.questions.length;
+    const accuracy = correctCount / totalQuestions;
+    emitInteraction({
+      type: 'widget.interaction',
+      widgetId: 'core.multiple-choice',
+      action: 'submit',
+      responses,
+      correctCount,
+      totalQuestions,
+      accuracy,
+    });
+    complete(accuracy * 100, {
+      submitted: true,
+      currentIndex,
+      selections,
+      responses,
+      feedback: null,
+    });
+    setSubmitted(true);
   }, [multiParsed, currentIndex, selections, responses, emitInteraction, complete]);
 
   if (!legacyParsed.success && !multiParsed.success) {
@@ -249,8 +258,20 @@ function MultipleChoiceComponent(props: {
             {isCorrect ? (
               <p className="text-success font-semibold">✓ Correct!</p>
             ) : (
-              <p className="text-error font-semibold">✗ Incorrect</p>
+              <div>
+                <p className="text-error font-semibold">✗ Incorrect</p>
+                <p className="mt-xs text-on-surface/70">
+                  The correct answer is: {correctOption?.text}
+                </p>
+              </div>
             )}
+          </div>
+        )}
+        {submitted && (
+          <div className="mt-md">
+            <Button variant="default" onClick={handleLegacyContinue} data-testid="continue-button">
+              Continue
+            </Button>
           </div>
         )}
         {submitted && cfg.explanation && <p role="status">{cfg.explanation}</p>}
@@ -335,6 +356,57 @@ function MultipleChoiceComponent(props: {
       );
     }
 
+    if (showResults) {
+      const correctCount = responses.filter((r) => r.correct).length;
+      const totalQuestions = cfg.questions.length;
+      const accuracy = totalQuestions > 0 ? correctCount / totalQuestions : 0;
+
+      return (
+        <div role="group" aria-label="Multiple choice activity" data-testid="multiple-choice">
+          <div role="status" aria-live="assertive" data-testid="multi-result">
+            <p className="text-on-surface font-semibold">
+              You answered {correctCount} of {totalQuestions} correctly.
+            </p>
+            <p className="text-on-surface/70 mt-xs text-sm">Score: {Math.round(accuracy * 100)}%</p>
+          </div>
+          <div className="mt-md space-y-sm">
+            {cfg.questions.map((q, idx) => {
+              const selectedIdx = selections[idx];
+              const response = responses[idx];
+              const isCorrect = response?.correct ?? false;
+              const selectedText = selectedIdx != null ? q.options[selectedIdx] : 'No answer';
+              const correctText = q.options[q.correctIndex]!;
+              return (
+                <div
+                  key={idx}
+                  data-testid={`result-question-${idx}`}
+                  className={`p-sm rounded-lg border ${isCorrect ? 'border-success/30 bg-success-container/20' : 'border-error/30 bg-error-container/20'}`}
+                >
+                  <p className="text-on-surface font-medium">{q.question}</p>
+                  <p className="text-on-surface-variant mt-xs text-sm">
+                    Your answer: {selectedText}
+                  </p>
+                  {!isCorrect && (
+                    <p className="text-success mt-xs text-sm font-medium">
+                      Correct answer: {correctText}
+                    </p>
+                  )}
+                  {q.explanation && (
+                    <p className="text-on-surface/70 mt-xs text-sm">{q.explanation}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-md">
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     if (submitted) {
       const correctCount = responses.filter((r) => r.correct).length;
       const totalQuestions = cfg.questions.length;
@@ -343,7 +415,7 @@ function MultipleChoiceComponent(props: {
         <div role="group" aria-label="Multiple choice activity" data-testid="multiple-choice">
           <div role="status" aria-live="assertive" data-testid="multi-result">
             <p className="text-on-surface font-semibold">
-              You got {correctCount} of {totalQuestions} correct.
+              You answered {correctCount} of {totalQuestions} correctly.
             </p>
           </div>
           <div className="mt-md space-y-sm">

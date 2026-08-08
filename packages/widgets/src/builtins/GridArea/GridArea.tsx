@@ -10,6 +10,9 @@ export const gridAreaSchema = z.object({
   cols: z.number().min(1).max(20),
   mode: z.enum(['area', 'perimeter']).default('area'),
   highlighted: z.array(z.object({ row: z.number(), col: z.number() })).optional(),
+  targetHighlights: z.array(z.object({ row: z.number(), col: z.number() })).optional(),
+  targetCount: z.number().int().min(0).optional(),
+  showQuestionArea: z.boolean().optional().default(false),
   interactive: z.boolean().optional().default(true),
   maxHighlights: z.number().min(1).optional(),
   cellSize: z.number().min(10).max(100).optional().default(40),
@@ -65,8 +68,16 @@ function GridAreaComponent(props: {
 
   const expectedCells = useMemo(() => {
     if (!config) return new Set<CellKey>();
+    if (config.targetHighlights && config.targetHighlights.length > 0) {
+      return new Set<CellKey>(config.targetHighlights.map((c) => toKey(c.row, c.col)));
+    }
     return new Set<CellKey>((config.highlighted ?? []).map((c) => toKey(c.row, c.col)));
   }, [config]);
+
+  const targetCells = useMemo(() => {
+    if (!config?.targetHighlights) return expectedCells;
+    return new Set<CellKey>(config.targetHighlights.map((c) => toKey(c.row, c.col)));
+  }, [config, expectedCells]);
 
   const parsedState = useMemo(() => {
     const result = GridAreaStateSchema.safeParse(storedState);
@@ -95,11 +106,27 @@ function GridAreaComponent(props: {
 
   const expectedCount = useMemo(() => {
     if (!config) return 0;
+    if (config.targetCount !== undefined) return config.targetCount;
     if (config.mode === 'perimeter') {
-      return computePerimeter(expectedCells).size;
+      return computePerimeter(targetCells).size;
     }
-    return expectedCells.size;
-  }, [config, expectedCells]);
+    return targetCells.size;
+  }, [config, targetCells]);
+
+  const isAnswerCorrect = useCallback(() => {
+    if (!config) return false;
+    if (config.targetHighlights && config.targetHighlights.length > 0) {
+      if (highlighted.size !== targetCells.size) return false;
+      for (const key of targetCells) {
+        if (!highlighted.has(key)) return false;
+      }
+      return true;
+    }
+    if (config.targetCount !== undefined) {
+      return count === config.targetCount;
+    }
+    return count === expectedCount;
+  }, [config, highlighted, targetCells, count, expectedCount]);
 
   const {
     acknowledged,
@@ -147,7 +174,7 @@ function GridAreaComponent(props: {
 
   const handleSubmit = useCallback(() => {
     if (submitted || !config) return;
-    const correct = count === expectedCount;
+    const correct = isAnswerCorrect();
 
     emitInteraction({
       type: 'widget.interaction',
@@ -158,9 +185,13 @@ function GridAreaComponent(props: {
       mode: config.mode,
       widgetId: 'math.grid-area',
     });
-    complete(correct ? 100 : 0, { submitted: true, highlighted: Array.from(highlighted) });
     setSubmitted(true);
-  }, [submitted, config, count, expectedCount, highlighted, emitInteraction, complete]);
+  }, [submitted, config, count, expectedCount, isAnswerCorrect, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    const correct = isAnswerCorrect();
+    complete(correct ? 100 : 0, { submitted: true, highlighted: Array.from(highlighted) });
+  }, [isAnswerCorrect, complete, highlighted]);
 
   const handleGridKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -230,6 +261,42 @@ function GridAreaComponent(props: {
 
   const cellSizePx = config.cellSize ?? 40;
 
+  const renderReferenceGrid = () => {
+    if (!config.showQuestionArea || !config.targetHighlights?.length) return null;
+    const refCells: React.ReactNode[] = [];
+    for (let r = 0; r < config.rows; r++) {
+      for (let c = 0; c < config.cols; c++) {
+        const key = toKey(r, c);
+        const isTarget = targetCells.has(key);
+        refCells.push(
+          <div
+            key={`ref-${key}`}
+            data-testid={`reference-cell-${key}`}
+            aria-hidden="true"
+            className={`border-outline-variant border ${isTarget ? 'bg-primary/40' : 'bg-surface'}`}
+            style={{ width: cellSizePx, height: cellSizePx }}
+          />,
+        );
+      }
+    }
+    return (
+      <div style={{ marginBottom: '0.75rem' }}>
+        <p className="text-on-surface-variant mb-xs text-sm">Reference area:</p>
+        <div
+          data-testid="reference-grid"
+          style={{
+            display: 'inline-grid',
+            gridTemplateColumns: `repeat(${config.cols}, ${cellSizePx}px)`,
+            gap: 0,
+            border: '2px solid var(--oe-color-outline-variant, #94a3b8)',
+          }}
+        >
+          {refCells}
+        </div>
+      </div>
+    );
+  };
+
   const renderGrid = () => {
     const cells: React.ReactNode[] = [];
     for (let r = 0; r < config.rows; r++) {
@@ -267,6 +334,8 @@ function GridAreaComponent(props: {
   return (
     <div data-testid="grid-area" aria-label={`${label}, ${modeLabel} mode`}>
       {config.description && <p>{config.description}</p>}
+
+      {renderReferenceGrid()}
 
       <div
         role="grid"
@@ -311,6 +380,14 @@ function GridAreaComponent(props: {
         </div>
       )}
 
+      {submitted && config.interactive && (
+        <div style={{ marginTop: '0.5rem' }}>
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
+        </div>
+      )}
+
       {showAcknowledgeButton && (
         <div role="status" aria-live="assertive" data-testid="observe-acknowledge-container">
           <Button
@@ -331,7 +408,7 @@ function GridAreaComponent(props: {
 
       {submitted && config.interactive && (
         <div role="status" aria-live="assertive" data-testid="feedback">
-          {count === expectedCount ? (
+          {isAnswerCorrect() ? (
             <p>
               Correct! The {modeLabel.toLowerCase()} count is {count}.
             </p>

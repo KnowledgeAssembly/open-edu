@@ -107,6 +107,8 @@ describe('ClockTime interactive read mode', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-10'));
     fireEvent.click(screen.getByTestId('confirm-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 10, displayedHour: 10, correct: true }),
@@ -117,6 +119,8 @@ describe('ClockTime interactive read mode', () => {
     const { complete, emitInteraction } = renderWidget(readConfig);
     fireEvent.click(screen.getByTestId('hour-marker-3'));
     fireEvent.click(screen.getByTestId('confirm-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ mode: 'read', selectedHour: 3, displayedHour: 10, correct: false }),
@@ -263,12 +267,16 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
   it('scores 0 when hour does not match', () => {
     const { complete } = renderWidget(setConfig);
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -279,6 +287,8 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -292,6 +302,8 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
@@ -305,6 +317,8 @@ describe('ClockTime interactive set mode', () => {
       fireEvent.click(screen.getByTestId('minute-up'));
     }
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(25, expect.any(Object));
   });
 
@@ -372,6 +386,8 @@ describe('ClockTime set mode keyboard navigation', () => {
     const { complete } = renderWidget(setConfig);
     const svg = screen.getByTestId('clock-svg');
     fireEvent.keyDown(svg, { key: 'Enter' });
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalled();
   });
 
@@ -444,5 +460,16 @@ describe('ClockTime accessibility', () => {
     });
     const group = screen.getByRole('group', { name: 'Time adjustment mode' });
     expect(group).toBeInTheDocument();
+  });
+
+  it('shows target time prompt in set mode when targetTime is configured', () => {
+    renderWidget({
+      hour: 9,
+      minute: 0,
+      mode: 'set' as const,
+      interactive: true,
+      targetTime: { hour: 10, minute: 15 },
+    });
+    expect(screen.getByTestId('target-time-prompt')).toHaveTextContent('Set the clock to 10:15');
   });
 });

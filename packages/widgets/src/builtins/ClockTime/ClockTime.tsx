@@ -16,6 +16,7 @@ export const configSchema = z.object({
       minute: z.number().int().min(0).max(59),
     })
     .optional(),
+  showTargetTime: z.boolean().optional().default(true),
   interactive: z.boolean().optional().default(true),
   size: z.number().positive().optional().default(250),
 });
@@ -127,7 +128,6 @@ function ClockTimeComponent(props: {
   const handleReadConfirm = useCallback(() => {
     if (!config || !isInteractive || !isReadMode || submitted || selectedHour === null) return;
     const correct = selectedHour === displayHour;
-    const score = correct ? 100 : 0;
     setSubmitted(true);
     setAwaitingConfirm(false);
     emitInteraction({
@@ -139,17 +139,13 @@ function ClockTimeComponent(props: {
       displayedHour: displayHour,
       correct,
     });
+  }, [config, isInteractive, isReadMode, submitted, selectedHour, displayHour, emitInteraction]);
+
+  const handleReadContinue = useCallback(() => {
+    const correct = selectedHour === displayHour;
+    const score = correct ? 100 : 0;
     complete(score, { submitted: true, currentHour, currentMinute, selectedHour });
-  }, [
-    config,
-    isInteractive,
-    isReadMode,
-    submitted,
-    selectedHour,
-    displayHour,
-    emitInteraction,
-    complete,
-  ]);
+  }, [selectedHour, displayHour, complete, currentHour, currentMinute]);
 
   const computeSetScore = useCallback(() => {
     if (!config) return 0;
@@ -185,7 +181,6 @@ function ClockTimeComponent(props: {
       minuteCorrect,
       score,
     });
-    complete(score, { submitted: true, currentHour, currentMinute, selectedHour });
   }, [
     config,
     isInteractive,
@@ -195,8 +190,12 @@ function ClockTimeComponent(props: {
     currentMinute,
     computeSetScore,
     emitInteraction,
-    complete,
   ]);
+
+  const handleSetContinue = useCallback(() => {
+    const score = computeSetScore();
+    complete(score, { submitted: true, currentHour, currentMinute, selectedHour });
+  }, [computeSetScore, complete, currentHour, currentMinute, selectedHour]);
 
   const cycleHour = useCallback((dir: 1 | -1) => {
     setCurrentHour((h) => (h + dir + 24) % 24);
@@ -386,6 +385,18 @@ function ClockTimeComponent(props: {
         </div>
       )}
 
+      {isSetMode && isInteractive && config.targetTime && config.showTargetTime && !submitted && (
+        <p
+          data-testid="target-time-prompt"
+          role="status"
+          aria-live="polite"
+          className="text-on-surface mb-sm font-medium"
+        >
+          Set the clock to {to12(config.targetTime.hour)}:
+          {String(config.targetTime.minute).padStart(2, '0')}
+        </p>
+      )}
+
       <div role="status" aria-live="polite" data-testid="time-live-region" aria-atomic="true">
         {showDigitalReadout ? timeAnnouncement : ''}
       </div>
@@ -516,6 +527,14 @@ function ClockTimeComponent(props: {
         </div>
       )}
 
+      {isSetMode && isInteractive && submitted && (
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="default" onClick={handleSetContinue} data-testid="continue-button">
+            Continue
+          </Button>
+        </div>
+      )}
+
       {isReadMode && isInteractive && !submitted && awaitingConfirm && selectedHour !== null && (
         <div style={{ marginTop: '0.75rem' }} role="status" aria-live="polite">
           <p className="mb-xs">You selected {selectedHour} o&apos;clock</p>
@@ -530,6 +549,14 @@ function ClockTimeComponent(props: {
           {selectedHour === displayHour
             ? 'Correct!'
             : `Not quite. The hour shown was ${displayHour}.`}
+        </div>
+      )}
+
+      {isReadMode && isInteractive && submitted && (
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="default" onClick={handleReadContinue} data-testid="continue-button">
+            Continue
+          </Button>
         </div>
       )}
 

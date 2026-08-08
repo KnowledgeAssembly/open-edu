@@ -85,7 +85,6 @@ function ChartReaderComponent(props: {
     (label: string) => {
       if (submitted || !parsed.success || !parsed.data.correctLabel) return;
       const isCorrect = label === parsed.data.correctLabel;
-      const score = isCorrect ? 100 : 0;
       setLastResult({ selectedLabel: label, correct: isCorrect });
       emitInteraction({
         type: 'widget.interaction',
@@ -94,14 +93,19 @@ function ChartReaderComponent(props: {
         selectedLabel: label,
         correct: isCorrect,
       });
-      complete(score, {
-        submitted: true,
-        lastResult: { selectedLabel: label, correct: isCorrect },
-      });
       setSubmitted(true);
     },
-    [submitted, parsed, emitInteraction, complete],
+    [submitted, parsed, emitInteraction],
   );
+
+  const handleContinue = useCallback(() => {
+    if (!lastResult) return;
+    const score = lastResult.correct ? 100 : 0;
+    complete(score, {
+      submitted: true,
+      lastResult,
+    });
+  }, [lastResult, complete]);
 
   if (!parsed.success) {
     return (
@@ -171,6 +175,13 @@ function ChartReaderComponent(props: {
           ) : (
             <p className="font-semibold">Not quite. The correct answer is {config.correctLabel}.</p>
           )}
+        </div>
+      )}
+      {!showAcknowledgeButton && submitted && lastResult && (
+        <div className="mt-md">
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
         </div>
       )}
     </div>

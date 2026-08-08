@@ -139,7 +139,6 @@ function MeasurementScaleComponent(props: {
       const diff = Math.abs(value - target);
       correct = diff <= config.step;
     }
-    const score = correct ? 100 : 0;
     emitInteraction({
       type: 'widget.interaction',
       widgetId: 'math.measurement-scale',
@@ -148,9 +147,20 @@ function MeasurementScaleComponent(props: {
       targetValue: target,
       correct,
     });
-    complete(score, { submitted: true, value });
     setSubmitted(true);
-  }, [config, submitted, value, emitInteraction, complete]);
+  }, [config, submitted, value, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!config) return;
+    const target = config.targetValue;
+    let correct = false;
+    if (target != null) {
+      const diff = Math.abs(value - target);
+      correct = diff <= config.step;
+    }
+    const score = correct ? 100 : 0;
+    complete(score, { submitted: true, value });
+  }, [config, value, complete]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -577,6 +587,14 @@ function MeasurementScaleComponent(props: {
               ? 'Correct!'
               : `Not quite. Expected ${cfg.targetValue}${cfg.unit}.`
             : 'Complete.'}
+        </div>
+      )}
+
+      {isInteractive && submitted && (
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
         </div>
       )}
 

@@ -253,6 +253,16 @@ describe('DragDrop interactive mode (interactive: true)', () => {
     );
   });
 
+  it('shows correct answer panel after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('unplaced-item-dog'));
+    fireEvent.click(screen.getByTestId('target-fish'));
+    fireEvent.click(screen.getByTestId('unplaced-item-cat'));
+    fireEvent.click(screen.getByTestId('target-mammal'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('correct-answer-panel')).toHaveTextContent('Dog → Mammal');
+  });
+
   it('handles single item single target', () => {
     const { complete } = renderWidget({
       items: [{ id: 'apple', label: 'Apple' }],
