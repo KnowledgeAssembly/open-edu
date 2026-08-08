@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -164,8 +164,12 @@ describe('OutlineView', () => {
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
-    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
+    });
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    });
     expect(api.deleteFile).toHaveBeenCalledWith('nodes/q.json');
     expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/a.md']);
     expect(screen.queryByText('Check')).not.toBeInTheDocument();
@@ -175,8 +179,12 @@ describe('OutlineView', () => {
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
-    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
+    });
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    });
     expect(api.deleteFile).not.toHaveBeenCalled();
     expect(screen.getByText('Check')).toBeInTheDocument();
   });
@@ -190,10 +198,33 @@ describe('OutlineView', () => {
     });
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /delete intro/i }));
-    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /delete intro/i }));
+    });
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    });
     expect(api.deleteFile).toHaveBeenCalledWith('nodes/a.md');
     expect(api.saveOutlineOrder).toHaveBeenCalledWith([]);
     expect(await screen.findByText('Add your first activity to get started.')).toBeInTheDocument();
+  });
+
+  it('reconciles with the server when persisting the new order fails', async () => {
+    const getOutline = vi.fn().mockResolvedValue({ activities: sampleActivities, title: 'Test' });
+    const onError = vi.fn();
+    const api = makeApi({
+      getOutline,
+      saveOutlineOrder: vi.fn().mockRejectedValue(new Error('save failed')),
+    });
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={onError} />));
+    await screen.findByText('Intro');
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
+    });
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    });
+    expect(onError).toHaveBeenCalledWith('save failed');
+    expect(await screen.findByText('Check')).toBeInTheDocument();
   });
 });

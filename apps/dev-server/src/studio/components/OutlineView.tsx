@@ -155,11 +155,12 @@ export function OutlineView({
     try {
       await api.deleteFile(activity.path);
       const remaining = activities.filter((a) => a.id !== activity.id);
-      setActivities(remaining);
       await api.saveOutlineOrder(remaining.map((a) => a.path));
+      setActivities(remaining);
       setDeleteTarget(null);
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+      await refresh();
     } finally {
       setSaving(false);
     }
