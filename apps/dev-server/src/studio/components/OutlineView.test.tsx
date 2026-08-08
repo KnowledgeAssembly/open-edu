@@ -30,6 +30,7 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     exportOep: vi.fn(),
     readFile: vi.fn(),
     writeFile: vi.fn().mockResolvedValue({ success: true }),
+    deleteFile: vi.fn().mockResolvedValue({ success: true }),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -129,5 +130,42 @@ describe('OutlineView', () => {
     render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
     const list = await screen.findByRole('list');
     expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+  });
+
+  it('deletes an activity and persists the new order', async () => {
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(api.deleteFile).toHaveBeenCalledWith('nodes/q.json');
+    expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/a.md']);
+    expect(screen.queryByText('Check')).not.toBeInTheDocument();
+  });
+
+  it('cancel does not delete', async () => {
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(api.deleteFile).not.toHaveBeenCalled();
+    expect(screen.getByText('Check')).toBeInTheDocument();
+  });
+
+  it('deleting the last activity succeeds with an empty order', async () => {
+    const api = makeApi({
+      getOutline: vi.fn().mockResolvedValue({
+        activities: [{ id: 'nodes/a.md', path: 'nodes/a.md', title: 'Intro', kind: 'lesson' }],
+        title: 'Test',
+      }),
+    });
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('button', { name: /delete intro/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(api.deleteFile).toHaveBeenCalledWith('nodes/a.md');
+    expect(api.saveOutlineOrder).toHaveBeenCalledWith([]);
+    expect(await screen.findByText('Add your first activity to get started.')).toBeInTheDocument();
   });
 });

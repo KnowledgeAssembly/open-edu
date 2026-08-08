@@ -47,6 +47,10 @@ export function StudioApp({
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
     writeStudioView(next);
+    if (next === 'outline' || next === 'home') {
+      setSelectedPath(null);
+      writeSelectedPath(null);
+    }
   }, []);
 
   const handleAiGenerated = useCallback(
