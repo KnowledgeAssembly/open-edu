@@ -13,13 +13,6 @@ export interface CuratedWidget {
   guideMarkdown?: string;
 }
 
-export const CURATED_WIDGET_IDS = [
-  'core.multiple-choice',
-  'core.matching',
-  'core.ordering', // only included if present in the catalog; dropped otherwise
-  'math.fraction-visual',
-] as const;
-
 const GUIDE_BY_ID: Record<string, CuratedWidget['guide']> = Object.fromEntries(
   WIDGET_CATALOG_ENTRIES.map((entry) => [entry.id, entry.guide]),
 );
@@ -60,12 +53,9 @@ function getRegistryMap(): Map<string, CuratedWidget> {
 }
 
 export function listCuratedWidgets(): CuratedWidget[] {
-  const map = getRegistryMap();
-  return CURATED_WIDGET_IDS.flatMap((id) => {
-    const widget = map.get(id);
-    if (!widget || widget.status === 'deprecated' || widget.deprecated === true) return [];
-    return [widget];
-  });
+  return [...getRegistryMap().values()].filter(
+    (widget) => widget.status !== 'deprecated' && widget.deprecated !== true && widget.guide,
+  );
 }
 
 export function getCuratedWidget(id: string): CuratedWidget | undefined {

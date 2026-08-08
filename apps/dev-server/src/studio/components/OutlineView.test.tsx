@@ -6,6 +6,29 @@ import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { OutlineView } from './OutlineView';
 import type { StudioApi } from '../studioApi.js';
 import type { ActivitySummary } from '../types.js';
+import type { CuratedWidget } from '../widgets/curatedCatalog.js';
+
+const { mockCatalog } = vi.hoisted(() => {
+  const multipleChoice: CuratedWidget = {
+    id: 'core.multiple-choice',
+    name: 'Multiple Choice',
+    description: 'Select the correct answer from a list of options',
+    domain: 'core',
+    guide: { configFields: [] },
+  };
+  return {
+    mockCatalog: {
+      multipleChoice,
+      matching: { id: 'core.matching', name: 'Matching', domain: 'core', guide: { configFields: [] } } as CuratedWidget,
+    },
+  };
+});
+
+vi.mock('../widgets/curatedCatalog.js', () => ({
+  listCuratedWidgets: () => [mockCatalog.multipleChoice, mockCatalog.matching],
+  getCuratedWidget: (id: string) =>
+    id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
+}));
 
 function wrap(ui: React.ReactElement) {
   return (
