@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ValidationError } from './WidgetValidator';
 import { WidgetPreviewProvider, useWidgetPreview } from './WidgetPreviewProvider';
 import type { WidgetRenderProps } from '@open-edu/widgets';
@@ -103,6 +103,7 @@ export function WidgetPreviewPanel({
 }: WidgetPreviewPanelProps): JSX.Element {
   const errorCount = validationErrors.filter((e) => e.severity === 'error').length;
   const warningCount = validationErrors.filter((e) => e.severity === 'warning').length;
+  const [resetToken, setResetToken] = useState(0);
 
   return (
     <div className="flex h-full flex-col" data-testid="widget-preview-panel">
@@ -134,6 +135,7 @@ export function WidgetPreviewPanel({
               className="h-6 w-6 p-0"
               title="Reset preview"
               aria-label="Reset preview"
+              onClick={() => setResetToken((t) => t + 1)}
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </Button>
@@ -182,7 +184,7 @@ export function WidgetPreviewPanel({
             />
           </div>
         ) : (
-          <WidgetPreviewProvider>
+          <WidgetPreviewProvider key={resetToken}>
             <WidgetPreviewRenderer widgetType={widgetType} widgetConfig={widgetConfig ?? {}} />
           </WidgetPreviewProvider>
         )}

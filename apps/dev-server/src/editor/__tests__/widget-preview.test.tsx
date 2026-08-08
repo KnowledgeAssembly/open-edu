@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useWidgetConfig } from '../hooks/useWidgetConfig';
 import { validateWidgetConfig } from '../WidgetValidator';
 import { z } from 'zod';
@@ -161,6 +162,22 @@ describe('WidgetPreviewPanel', () => {
       />,
     );
     expect(screen.getByText('Test?')).toBeInTheDocument();
+  });
+
+  it('reset preview clears widget interaction state', async () => {
+    render(
+      <WidgetPreviewPanel
+        widgetType="core.visual-counting"
+        widgetConfig={{ items: ['🍎', '🍎', '🍎'], count: 3, interactive: true }}
+        validationErrors={[]}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Count 3' }));
+    await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+    expect(screen.getByText('Correct! The answer is 3.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Reset preview' }));
+    expect(screen.queryByText('Correct! The answer is 3.')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
   });
 });
 
