@@ -25,4 +25,10 @@ describe('curatedCatalog', () => {
     const names = widget?.guide?.configFields?.map((field) => field.name) ?? [];
     expect(names).toContain('questions');
   });
+
+  it('exposes a guideMarkdown string for widgets with a guide', () => {
+    const markdown = getCuratedWidget('core.multiple-choice')?.guideMarkdown ?? '';
+    expect(markdown.length).toBeGreaterThan(0);
+    expect(markdown).toContain('Multiple Choice');
+  });
 });

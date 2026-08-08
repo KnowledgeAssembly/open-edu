@@ -39,6 +39,7 @@ const { mockCatalog } = vi.hoisted(() => {
         },
       ],
     },
+    guideMarkdown: '# Multiple Choice',
   };
   const matching: CuratedWidget = {
     id: 'core.matching',
@@ -52,9 +53,12 @@ const { mockCatalog } = vi.hoisted(() => {
 vi.mock('../widgets/curatedCatalog.js', () => ({
   listCuratedWidgets: () => [mockCatalog.multipleChoice, mockCatalog.matching],
   getCuratedWidget: (id: string) =>
-    id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
+    id === 'core.multiple-choice'
+      ? mockCatalog.multipleChoice
+      : id === 'core.matching'
+        ? mockCatalog.matching
+        : undefined,
 }));
-
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -207,5 +211,19 @@ describe('PracticeActivityEditor', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     expect(writeCall).not.toHaveBeenCalled();
+  });
+
+  it('renders the widget guide when guideMarkdown is present and hides it otherwise', async () => {
+    renderEditor(validNodeContent);
+    await screen.findByDisplayValue('Planets quiz');
+    expect(screen.getByText('How this practice works')).toBeInTheDocument();
+  });
+
+  it('does not render the widget guide when guideMarkdown is absent', async () => {
+    renderEditor(
+      JSON.stringify({ type: 'exercise', widget: 'core.matching', config: { pairs: [] } }),
+    );
+    await screen.findByLabelText(/lesson title/i);
+    expect(screen.queryByText('How this practice works')).not.toBeInTheDocument();
   });
 });

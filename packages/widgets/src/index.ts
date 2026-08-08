@@ -7,6 +7,8 @@ export type {
   WidgetGuideConfigField,
 } from './widget-catalog-source.js';
 
+export { renderWidgetGuideMarkdown } from './guide-markdown.js';
+
 export type {
   WidgetRenderProps,
   WidgetDefinition,

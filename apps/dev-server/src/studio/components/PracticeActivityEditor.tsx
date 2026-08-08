@@ -20,6 +20,7 @@ import type { ExerciseNode } from '../widgets/exerciseNode.js';
 import { getCuratedWidget } from '../widgets/curatedCatalog.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
+import { WidgetGuidePanel } from './WidgetGuidePanel.js';
 import type { StudioApi } from '../studioApi.js';
 
 function titleCase(name: string): string {
@@ -271,6 +272,7 @@ export function PracticeActivityEditor({
           </CardContent>
         </Card>
       </div>
+      {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
     </div>
   );
 }

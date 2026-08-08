@@ -1,4 +1,5 @@
 import { createDefaultRegistry, WIDGET_CATALOG_ENTRIES } from '@open-edu/widgets';
+import { renderWidgetGuideMarkdown } from '@open-edu/widgets';
 import type { WidgetDefinitionV2, WidgetGuideConfigField } from '@open-edu/widgets';
 
 export interface CuratedWidget {
@@ -9,6 +10,7 @@ export interface CuratedWidget {
   status?: string;
   deprecated?: boolean;
   guide?: { configFields?: WidgetGuideConfigField[] };
+  guideMarkdown?: string;
 }
 
 export const CURATED_WIDGET_IDS = [
@@ -27,6 +29,7 @@ function loadRegistryWidgets(): Map<string, CuratedWidget> {
   const widgets = new Map<string, CuratedWidget>();
   for (const def of registry.getAll()) {
     const v2 = def as WidgetDefinitionV2;
+    const guide = GUIDE_BY_ID[v2.id];
     widgets.set(v2.id, {
       id: v2.id,
       name: v2.name ?? v2.id,
@@ -34,7 +37,16 @@ function loadRegistryWidgets(): Map<string, CuratedWidget> {
       domain: v2.domain,
       status: v2.status,
       deprecated: v2.deprecated,
-      guide: GUIDE_BY_ID[v2.id],
+      guide,
+      guideMarkdown: guide
+        ? renderWidgetGuideMarkdown({
+            id: v2.id,
+            name: v2.name ?? v2.id,
+            domain: v2.domain,
+            status: v2.status,
+            guide,
+          })
+        : undefined,
     });
   }
   return widgets;
