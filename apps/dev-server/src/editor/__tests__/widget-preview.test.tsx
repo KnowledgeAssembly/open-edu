@@ -1,13 +1,23 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@open-edu/i18n';
+import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { useWidgetConfig } from '../hooks/useWidgetConfig';
 import { validateWidgetConfig } from '../WidgetValidator';
 import { z } from 'zod';
 import { WidgetPreviewProvider, useWidgetPreview } from '../WidgetPreviewProvider';
 import { WidgetPreviewPanel } from '../WidgetPreviewPanel';
 import { SplitPaneLayout } from '../SplitPaneLayout';
+
+function wrap(ui: React.ReactElement) {
+  return (
+    <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
+      {ui}
+    </I18nProvider>
+  );
+}
 
 describe('useWidgetConfig', () => {
   it('returns isWidgetNode=true for exercise nodes', () => {
@@ -124,17 +134,21 @@ describe('WidgetPreviewProvider', () => {
 
 describe('WidgetPreviewPanel', () => {
   it('shows empty state when widgetType is null', () => {
-    render(<WidgetPreviewPanel widgetType={null} widgetConfig={null} validationErrors={[]} />);
+    render(
+      wrap(<WidgetPreviewPanel widgetType={null} widgetConfig={null} validationErrors={[]} />),
+    );
     expect(screen.getByText(/no widget to preview/i)).toBeInTheDocument();
   });
 
   it('shows widget-not-found for unknown widget type', () => {
     render(
-      <WidgetPreviewPanel
-        widgetType="nonexistent.widget"
-        widgetConfig={{}}
-        validationErrors={[]}
-      />,
+      wrap(
+        <WidgetPreviewPanel
+          widgetType="nonexistent.widget"
+          widgetConfig={{}}
+          validationErrors={[]}
+        />,
+      ),
     );
     expect(screen.getByText(/not found/i)).toBeInTheDocument();
   });
@@ -144,38 +158,50 @@ describe('WidgetPreviewPanel', () => {
       { path: 'prompt', message: 'Required', severity: 'error' as const, code: 'invalid_type' },
     ];
     render(
-      <WidgetPreviewPanel
-        widgetType="core.multiple-choice"
-        widgetConfig={{}}
-        validationErrors={errors}
-      />,
+      wrap(
+        <WidgetPreviewPanel
+          widgetType="core.multiple-choice"
+          widgetConfig={{}}
+          validationErrors={errors}
+        />,
+      ),
     );
     expect(screen.getByText(/Required/)).toBeInTheDocument();
   });
 
   it('renders widget for known type with valid config', () => {
     render(
-      <WidgetPreviewPanel
-        widgetType="core.multiple-choice"
-        widgetConfig={{ prompt: 'Test?', options: [{ id: 'a', text: 'Answer' }] }}
-        validationErrors={[]}
-      />,
+      wrap(
+        <WidgetPreviewPanel
+          widgetType="core.multiple-choice"
+          widgetConfig={{ prompt: 'Test?', options: [{ id: 'a', text: 'Answer' }] }}
+          validationErrors={[]}
+        />,
+      ),
     );
     expect(screen.getByText('Test?')).toBeInTheDocument();
   });
 
   it('reset preview clears widget interaction state', async () => {
     render(
-      <WidgetPreviewPanel
-        widgetType="core.visual-counting"
-        widgetConfig={{ items: ['🍎', '🍎', '🍎'], count: 3, interactive: true }}
-        validationErrors={[]}
-      />,
+      wrap(
+        <WidgetPreviewPanel
+          widgetType="core.visual-counting"
+          widgetConfig={{ items: ['🍎', '🍎', '🍎'], count: 3, interactive: true }}
+          validationErrors={[]}
+        />,
+      ),
     );
-    await userEvent.click(screen.getByRole('button', { name: 'Count 3' }));
-    await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Count 3' }));
+    });
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+    });
     expect(screen.getByText('Correct! The answer is 3.')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Reset preview' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Reset preview' }));
+    });
     expect(screen.queryByText('Correct! The answer is 3.')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
   });

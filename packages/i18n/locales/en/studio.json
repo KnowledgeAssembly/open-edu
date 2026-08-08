@@ -102,6 +102,7 @@
   "widget.useWidget": "Use this practice",
   "widget.configTitle": "Practice settings",
   "widget.previewTitle": "Live preview",
+  "widget.resetPreview": "Reset preview",
   "widget.guideTitle": "How this practice works",
   "widget.validationFix": "Fix the highlighted settings before saving",
   "widget.noResults": "No practices match your search.",
