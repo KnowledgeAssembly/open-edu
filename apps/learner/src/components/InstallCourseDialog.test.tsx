@@ -45,6 +45,17 @@ describe('InstallCourseDialog', () => {
     expect(screen.getByTestId('install-file-button')).toBeDefined();
   });
 
+  it('renders the browse button with hover feedback classes', () => {
+    render(
+      <I18nProvider locale="en" dictionaries={{ en: {} }}>
+        <InstallCourseDialog open={true} onClose={vi.fn()} onInstall={vi.fn()} />
+      </I18nProvider>,
+    );
+    const input = screen.getByTestId('oep-file-input');
+    expect(input.className).toContain('file:hover:bg-surface-container-highest');
+    expect(input.className).toContain('file:transition-colors');
+  });
+
   it('does not render when closed', () => {
     const { container } = render(
       <I18nProvider locale="en" dictionaries={{ en: {} }}>

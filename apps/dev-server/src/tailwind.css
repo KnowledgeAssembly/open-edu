@@ -3579,8 +3579,8 @@ body,
   background-color: rgb(var(--oe-color-primary-rgb) / var(--oe-opacity-80));
 }
 
-.hover\:bg-primary\/90:hover {
-  background-color: rgb(var(--oe-color-primary-rgb) / var(--oe-opacity-90));
+.hover\:bg-primary\/85:hover {
+  background-color: rgb(var(--oe-color-primary-rgb) / 0.85);
 }
 
 .hover\:bg-secondary\/80:hover {
@@ -3613,6 +3613,11 @@ body,
 .hover\:text-error:hover {
   --tw-text-opacity: 1;
   color: rgb(var(--oe-color-error-rgb) / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-foreground:hover {
+  --tw-text-opacity: 1;
+  color: rgb(var(--oe-color-on-surface-rgb) / var(--tw-text-opacity, 1));
 }
 
 .hover\:text-on-surface:hover {

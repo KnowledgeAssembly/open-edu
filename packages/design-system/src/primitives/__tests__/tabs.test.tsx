@@ -14,6 +14,20 @@ describe('Tabs', () => {
       </Tabs>,
     );
   });
+  it('renders triggers with hover feedback classes', () => {
+    render(
+      <Tabs defaultValue="tab1">
+        <TabsList>
+          <TabsTrigger value="tab1">Tab 1</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tab1">Content 1</TabsContent>
+      </Tabs>,
+    );
+    const trigger = screen.getByRole('tab');
+    expect(trigger.className).toContain('hover:bg-surface-container');
+    expect(trigger.className).toContain('hover:text-foreground');
+  });
+
   it('renders tabs with trigger and content', () => {
     render(
       <Tabs defaultValue="tab1">
