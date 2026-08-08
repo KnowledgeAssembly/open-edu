@@ -185,6 +185,7 @@ describe('StoryQuestion interactive mode', () => {
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(emitInteraction).toHaveBeenLastCalledWith(
       expect.objectContaining({
         action: 'submit',
@@ -204,7 +205,7 @@ describe('StoryQuestion interactive mode', () => {
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('story-result')).toHaveTextContent('You got 2 of 2 correct.');
+    expect(screen.getByTestId('story-result')).toHaveTextContent('You answered 2 of 2 correctly.');
   });
 
   it('shows aggregate score on completion with some incorrect', () => {
@@ -215,7 +216,7 @@ describe('StoryQuestion interactive mode', () => {
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('story-result')).toHaveTextContent('You got 1 of 2 correct.');
+    expect(screen.getByTestId('story-result')).toHaveTextContent('You answered 1 of 2 correctly.');
   });
 
   it('computes correct percentage', () => {
@@ -226,6 +227,7 @@ describe('StoryQuestion interactive mode', () => {
     fireEvent.click(screen.getByLabelText('Brave'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 });
@@ -425,7 +427,7 @@ describe('StoryQuestion edge cases', () => {
     fireEvent.click(btn);
     expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('story-result')).toHaveTextContent('You got 1 of 1 correct.');
+    expect(screen.getByTestId('story-result')).toHaveTextContent('You answered 1 of 1 correctly.');
   });
 
   it('uses widgetId in interactions', () => {

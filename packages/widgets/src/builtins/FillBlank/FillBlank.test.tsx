@@ -174,6 +174,8 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -188,6 +190,8 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
@@ -198,6 +202,8 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-0'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -262,7 +268,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('result-display')).toHaveTextContent('Correct!');
+    expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
   });
 
   it('result button shows Incorrect after any wrong', () => {
@@ -272,7 +278,7 @@ describe('FillBlank interactive select mode', () => {
     fireEvent.click(screen.getByTestId('blank-select-landmark'));
     fireEvent.click(screen.getByTestId('option-landmark-1'));
     fireEvent.click(screen.getByText('Submit'));
-    expect(screen.getByTestId('result-display')).toHaveTextContent('Incorrect');
+    expect(screen.getByTestId('feedback')).toHaveTextContent('1 of 2 blanks correct');
   });
 
   it('emits interaction with widget ID on submit', () => {
@@ -339,6 +345,8 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'Paris' } });
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -347,6 +355,8 @@ describe('FillBlank interactive type mode', () => {
     const input = screen.getByTestId('blank-input-b1');
     fireEvent.change(input, { target: { value: 'London' } });
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -417,6 +427,8 @@ describe('FillBlank pipeline variant', () => {
     const input = screen.getByTestId('blank-input-blank-0');
     fireEvent.change(input, { target: { value: 'Paris' } });
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 

@@ -211,6 +211,8 @@ describe('PlaceValueChart interactive mode', () => {
     fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -223,6 +225,8 @@ describe('PlaceValueChart interactive mode', () => {
     fireEvent.click(screen.getByTestId('bank-digit-2'));
     fireEvent.click(screen.getByTestId('slot-O'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 

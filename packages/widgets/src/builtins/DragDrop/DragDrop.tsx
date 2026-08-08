@@ -110,6 +110,7 @@ function DroppableTarget({
   onTargetClick,
   onRemoveItem,
   submitted,
+  expectedPositions,
 }: {
   target: { id: string; label: string };
   items: Array<{ id: string; label: string; emoji?: string }>;
@@ -120,6 +121,7 @@ function DroppableTarget({
   onTargetClick: (id: string) => void;
   onRemoveItem: (id: string) => void;
   submitted: boolean;
+  expectedPositions?: Record<string, string>;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: target.id,
@@ -166,55 +168,72 @@ function DroppableTarget({
       style={style}
     >
       <strong>{target.label}</strong>
-      {itemsInTarget.map((item) => (
-        <div
-          key={item.id}
-          data-testid={`placed-item-${item.id}`}
-          style={{
-            marginTop: '0.25rem',
-            padding: '0.25rem 0.5rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-            border: '1px solid var(--oe-color-outline-variant, #d1d5db)',
-            borderRadius: '0.25rem',
-            backgroundColor: 'var(--oe-color-surface, #ffffff)',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {item.emoji && <span>{item.emoji}</span>}
-          <span>{item.label}</span>
-          {!submitted && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemoveItem(item.id);
-              }}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                color: 'var(--oe-color-on-surface-variant, #6b7280)',
-                padding: '0 0.25rem',
-                borderRadius: '0.25rem',
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.backgroundColor =
-                  'var(--oe-color-surface-variant, #f3f4f6)';
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.backgroundColor = 'transparent';
-              }}
-              aria-label={`Remove ${item.label} from ${target.label}`}
-            >
-              ✕
-            </Button>
-          )}
-        </div>
-      ))}
+      {itemsInTarget.map((item) => {
+        const placedTarget = placedItems[item.id];
+        const expectedTarget = expectedPositions?.[item.id];
+        const isCorrectPlacement =
+          submitted && placedTarget && expectedTarget && placedTarget === expectedTarget;
+        const isWrongPlacement =
+          submitted && placedTarget && expectedTarget && placedTarget !== expectedTarget;
+        return (
+          <div
+            key={item.id}
+            data-testid={`placed-item-${item.id}`}
+            data-correct={isCorrectPlacement ? 'true' : isWrongPlacement ? 'false' : undefined}
+            style={{
+              marginTop: '0.25rem',
+              padding: '0.25rem 0.5rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              border: isCorrectPlacement
+                ? '2px solid var(--oe-success, #22c55e)'
+                : isWrongPlacement
+                  ? '2px solid var(--oe-error, #ef4444)'
+                  : '1px solid var(--oe-color-outline-variant, #d1d5db)',
+              borderRadius: '0.25rem',
+              backgroundColor: isCorrectPlacement
+                ? 'var(--oe-color-success-container, #f0fdf4)'
+                : isWrongPlacement
+                  ? 'var(--oe-color-error-container, #fee2e2)'
+                  : 'var(--oe-color-surface, #ffffff)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {item.emoji && <span>{item.emoji}</span>}
+            <span>{item.label}</span>
+            {!submitted && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveItem(item.id);
+                }}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  color: 'var(--oe-color-on-surface-variant, #6b7280)',
+                  padding: '0 0.25rem',
+                  borderRadius: '0.25rem',
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor =
+                    'var(--oe-color-surface-variant, #f3f4f6)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+                aria-label={`Remove ${item.label} from ${target.label}`}
+              >
+                ✕
+              </Button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -548,6 +567,7 @@ function DragDropComponent(props: {
                 onTargetClick={handleTargetClick}
                 onRemoveItem={handleRemoveItem}
                 submitted={submitted}
+                expectedPositions={content.expectedPositions}
               />
             );
           })}
@@ -624,6 +644,19 @@ function DragDropComponent(props: {
                 </p>
               );
             })()}
+            <div data-testid="correct-answer-panel" style={{ marginTop: '0.5rem' }}>
+              <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Correct placements:</p>
+              {items.map((item) => {
+                const expectedTargetId = content!.expectedPositions[item.id];
+                const expectedTarget = targets.find((t) => t.id === expectedTargetId);
+                return (
+                  <p key={item.id} style={{ margin: '0.125rem 0' }}>
+                    {item.emoji ? `${item.emoji} ` : ''}
+                    {item.label} → {expectedTarget?.label ?? expectedTargetId}
+                  </p>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

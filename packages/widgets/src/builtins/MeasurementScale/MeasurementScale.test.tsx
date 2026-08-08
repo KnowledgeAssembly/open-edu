@@ -158,6 +158,8 @@ describe('MeasurementScale interactive mode', () => {
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
 
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'submit', value: 5, targetValue: 5, correct: true }),
@@ -170,6 +172,8 @@ describe('MeasurementScale interactive mode', () => {
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
 
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'submit', value: 1, targetValue: 5, correct: false }),
@@ -201,6 +205,8 @@ describe('MeasurementScale interactive mode', () => {
       fireEvent.keyDown(svg, { key: 'ArrowRight' });
     }
     fireEvent.keyDown(svg, { key: 'Enter' });
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -211,6 +217,8 @@ describe('MeasurementScale interactive mode', () => {
       fireEvent.keyDown(svg, { key: 'ArrowRight' });
     }
     fireEvent.keyDown(svg, { key: ' ' });
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -411,6 +419,8 @@ describe('MeasurementScale scoring tolerance', () => {
       value: 6,
     });
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -426,6 +436,8 @@ describe('MeasurementScale scoring tolerance', () => {
       value: 3,
     });
     fireEvent.click(screen.getByTestId('submit-btn'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 });

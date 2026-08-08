@@ -247,6 +247,24 @@ function MatchingComponent(props: {
     [submitted],
   );
 
+  const pairCorrectness = useMemo(() => {
+    if (!content) return new Map<string, boolean>();
+    const map = new Map<string, boolean>();
+    for (const pair of content.pairs) {
+      const pairId = getPairId(pair, content.pairs.indexOf(pair));
+      const connectedRight = connections.get(pairId);
+      map.set(pairId, connectedRight === pairId);
+    }
+    return map;
+  }, [content, connections]);
+
+  const computeScore = useCallback(() => {
+    if (!content) return 0;
+    const totalPairs = content.pairs.length;
+    const correctCount = Array.from(pairCorrectness.values()).filter(Boolean).length;
+    return totalPairs > 0 ? Math.round((correctCount / totalPairs) * 100) : 0;
+  }, [content, pairCorrectness]);
+
   const handleSubmit = useCallback(() => {
     if (submitted || !content) return;
     const totalPairs = content.pairs.length;
@@ -254,14 +272,12 @@ function MatchingComponent(props: {
 
     for (const pair of content.pairs) {
       const pairId = getPairId(pair, content.pairs.indexOf(pair));
-      const connectedRight = connections.get(pairId);
-      results.push({ id: pairId, correct: connectedRight === pairId });
+      results.push({ id: pairId, correct: pairCorrectness.get(pairId) ?? false });
     }
 
     const correctCount = results.filter((r) => r.correct).length;
     const allCorrect = correctCount === totalPairs;
     const accuracy = totalPairs > 0 ? correctCount / totalPairs : 0;
-    const score = Math.round(accuracy * 100);
 
     emitInteraction({
       type: 'widget.interaction',
@@ -271,13 +287,17 @@ function MatchingComponent(props: {
       accuracy,
       widgetId: 'core.matching',
     });
+    setSubmitted(true);
+  }, [submitted, content, pairCorrectness, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
     const connObj: Record<string, string> = {};
     for (const [k, v] of connections.entries()) {
       connObj[k] = v;
     }
-    complete(score, { submitted: true, connections: connObj, hintIndex });
-    setSubmitted(true);
-  }, [submitted, content, connections, hintIndex, emitInteraction, complete]);
+    complete(computeScore(), { submitted: true, connections: connObj, hintIndex });
+  }, [content, connections, hintIndex, computeScore, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -613,19 +633,58 @@ function MatchingComponent(props: {
           }}
           aria-hidden="true"
         >
-          {allDrawingLines.map((conn, i) => (
-            <line
-              key={`${conn.leftId}-${conn.rightId}-${i}`}
-              x1={conn.x1}
-              y1={conn.y1}
-              x2={conn.x2}
-              y2={conn.y2}
-              stroke="var(--oe-color-primary, #3b82f6)"
-              strokeWidth={2}
-              strokeDasharray={conn.rightId === 'drawing' ? '4 3' : 'none'}
-              opacity={conn.rightId === 'drawing' ? 0.7 : 1}
-            />
-          ))}
+          {allDrawingLines.map((conn, i) => {
+            const isLearnerLine = conn.rightId !== 'drawing';
+            const isCorrect =
+              isLearnerLine && submitted ? (pairCorrectness.get(conn.leftId) ?? false) : false;
+            const stroke =
+              submitted && isLearnerLine
+                ? isCorrect
+                  ? 'var(--oe-success, #22c55e)'
+                  : 'var(--oe-error, #ef4444)'
+                : 'var(--oe-color-primary, #3b82f6)';
+            return (
+              <line
+                key={`${conn.leftId}-${conn.rightId}-${i}`}
+                x1={conn.x1}
+                y1={conn.y1}
+                x2={conn.x2}
+                y2={conn.y2}
+                stroke={stroke}
+                strokeWidth={2}
+                strokeDasharray={conn.rightId === 'drawing' ? '4 3' : 'none'}
+                opacity={conn.rightId === 'drawing' ? 0.7 : 1}
+              />
+            );
+          })}
+          {submitted &&
+            pairs.map((pair, idx) => {
+              const pairId = getPairId(pair, idx);
+              if (connections.has(pairId)) return null;
+              const leftEl = containerRef.current?.querySelector(
+                `[data-connector-left="${pairId}"]`,
+              );
+              const rightEl = containerRef.current?.querySelector(
+                `[data-connector-right="${pairId}"]`,
+              );
+              if (!leftEl || !rightEl || !containerRef.current) return null;
+              const containerRect = containerRef.current.getBoundingClientRect();
+              const leftRect = leftEl.getBoundingClientRect();
+              const rightRect = rightEl.getBoundingClientRect();
+              return (
+                <line
+                  key={`correct-${pairId}`}
+                  x1={leftRect.right - containerRect.left}
+                  y1={leftRect.top + leftRect.height / 2 - containerRect.top}
+                  x2={rightRect.left - containerRect.left}
+                  y2={rightRect.top + rightRect.height / 2 - containerRect.top}
+                  stroke="var(--oe-success, #22c55e)"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  opacity={0.8}
+                />
+              );
+            })}
         </svg>
       </div>
 
@@ -673,16 +732,31 @@ function MatchingComponent(props: {
           <Button variant="default" onClick={handleSubmit} disabled={!allLeftConnected}>
             Submit
           </Button>
-        ) : null}
+        ) : (
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
+        )}
       </div>
 
       {submitted && (
         <div role="status" aria-live="assertive" data-testid="feedback">
-          {Array.from(connections.entries()).every(([leftId, rightId]) => leftId === rightId) ? (
+          {Array.from(pairCorrectness.values()).every(Boolean) ? (
             <p>Correct! All pairs matched.</p>
           ) : (
             <p>Some pairs are not matched correctly.</p>
           )}
+          <div data-testid="correct-answer-panel" style={{ marginTop: '0.5rem' }}>
+            <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Correct pairs:</p>
+            {pairs.map((pair, idx) => {
+              const pairId = getPairId(pair, idx);
+              return (
+                <p key={pairId} style={{ margin: '0.125rem 0' }}>
+                  {pair.itemA} → {pair.itemB}
+                </p>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

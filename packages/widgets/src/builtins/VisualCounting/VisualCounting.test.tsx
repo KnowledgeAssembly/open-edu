@@ -111,6 +111,8 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -126,6 +128,8 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     });
     fireEvent.click(screen.getByLabelText('Count 3'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(60, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -203,6 +207,8 @@ describe('VisualCounting interactive mode (interactive: true)', () => {
     const { complete } = renderWidget({ left: 3, right: 2, sum: 5, interactive: true });
     fireEvent.click(screen.getByLabelText('Count 5'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 

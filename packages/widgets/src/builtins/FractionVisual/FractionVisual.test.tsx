@@ -138,6 +138,8 @@ describe('FractionVisual interactive mode', () => {
     });
     expect(getShaded(container, 'circle-segment')).toHaveLength(2);
     fireEvent.click(screen.getByText('Submit')!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: true, shaded: 2 }),
@@ -155,6 +157,8 @@ describe('FractionVisual interactive mode', () => {
     fireEvent.click(segments[2]!);
     expect(getShaded(container, 'bar-segment')).toHaveLength(3);
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ correct: false, shaded: 3 }),
@@ -221,6 +225,8 @@ describe('FractionVisual compare mode', () => {
     const segments = screen.getAllByTestId('bar-segment');
     fireEvent.click(segments[0]!);
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 });

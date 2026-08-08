@@ -220,6 +220,8 @@ describe('LabelDiagram interactive mode', () => {
     fireEvent.click(screen.getByTestId('unplaced-label-flower'));
     fireEvent.click(screen.getByTestId('label-target-3'));
     fireEvent.click(screen.getByTestId('submit-button'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(screen.getByTestId('feedback')).toHaveTextContent('All labels placed correctly!');
   });
@@ -235,6 +237,8 @@ describe('LabelDiagram interactive mode', () => {
     fireEvent.click(screen.getByTestId('unplaced-label-flower'));
     fireEvent.click(screen.getByTestId('label-target-3'));
     fireEvent.click(screen.getByTestId('submit-button'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(50, expect.any(Object));
   });
 
@@ -428,6 +432,8 @@ describe('LabelDiagram edge cases', () => {
     fireEvent.click(screen.getByTestId('unplaced-label-r1'));
     fireEvent.click(screen.getByTestId('label-target-0'));
     fireEvent.click(screen.getByTestId('submit-button'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 

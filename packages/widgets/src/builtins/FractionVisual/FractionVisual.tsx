@@ -135,7 +135,6 @@ function FractionVisualComponent(props: {
   const handleSubmit = useCallback(() => {
     if (!content || submitted) return;
     const correct = shadedCount === content.numerator;
-    const score = correct ? 100 : 0;
     emitInteraction({
       type: 'widget.interaction',
       action: 'submit',
@@ -144,9 +143,15 @@ function FractionVisualComponent(props: {
       correct,
       widgetId: 'math.fraction-visual',
     });
-    complete(score, { submitted: true, shadedMask });
     setSubmitted(true);
-  }, [content, submitted, shadedMask, shadedCount, emitInteraction, complete]);
+  }, [content, submitted, shadedCount, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const correct = shadedCount === content.numerator;
+    const score = correct ? 100 : 0;
+    complete(score, { submitted: true, shadedMask });
+  }, [content, shadedCount, shadedMask, complete]);
 
   if (!parsed.success || !content) {
     return (
@@ -376,6 +381,13 @@ function FractionVisualComponent(props: {
             )}
           </div>
         )}
+        {submitted && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+              Continue
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -411,6 +423,14 @@ function FractionVisualComponent(props: {
               You shaded {shadedCount} out of {content.numerator} segments.
             </p>
           )}
+        </div>
+      )}
+
+      {isInteractive && submitted && (
+        <div style={{ marginTop: '0.5rem' }}>
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
         </div>
       )}
 

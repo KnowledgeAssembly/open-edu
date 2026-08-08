@@ -402,9 +402,26 @@ function LabelDiagramComponent(props: {
         ? 'All labels placed correctly!'
         : `${correctCount} of ${totalLabels} labels placed correctly.`,
     );
-    complete(score, { placedLabels, submitted: true, hintIndex });
     setSubmitted(true);
-  }, [submitted, content, placedLabels, hintIndex, emitInteraction, complete]);
+  }, [submitted, content, placedLabels, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const totalLabels = content.labels.length;
+    let correctCount = 0;
+    for (const label of content.labels) {
+      const placedAt = placedLabels[label.id];
+      if (placedAt !== undefined) {
+        const expectedIndex = content.labels.indexOf(label);
+        if (parseInt(placedAt, 10) === expectedIndex) {
+          correctCount++;
+        }
+      }
+    }
+    const accuracy = totalLabels > 0 ? correctCount / totalLabels : 0;
+    const score = Math.round(accuracy * 100);
+    complete(score, { placedLabels, submitted: true, hintIndex });
+  }, [content, placedLabels, hintIndex, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content?.hints && hintIndex < content.hints.length - 1) {
@@ -672,9 +689,14 @@ function LabelDiagramComponent(props: {
               Submit
             </Button>
           ) : (
-            <Button variant="default" onClick={handleRetry} data-testid="retry-button">
-              Try Again
-            </Button>
+            <>
+              <Button variant="default" onClick={handleRetry} data-testid="retry-button">
+                Try Again
+              </Button>
+              <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+                Continue
+              </Button>
+            </>
           )}
         </div>
 
