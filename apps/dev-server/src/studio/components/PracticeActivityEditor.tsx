@@ -122,6 +122,16 @@ export function PracticeActivityEditor({
     [curated, widgetId, config],
   );
 
+  const fieldErrors = useMemo(() => {
+    const map: Record<string, ValidationError[]> = {};
+    for (const err of validationErrors) {
+      const key = topLevelKey(err.path);
+      if (!key) continue;
+      (map[key] ??= []).push(err);
+    }
+    return map;
+  }, [validationErrors]);
+
   const fieldLabels = useMemo(() => {
     const labels: Record<string, string> = {};
     for (const field of curated?.guide?.configFields ?? []) {
@@ -219,7 +229,12 @@ export function PracticeActivityEditor({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SchemaForm data={config} onChange={setConfig} fieldLabels={fieldLabels} />
+              <SchemaForm
+                data={config}
+                onChange={setConfig}
+                fieldLabels={fieldLabels}
+                fieldErrors={fieldErrors}
+              />
             </CardContent>
           </Card>
           {validationErrors.length > 0 ? (
@@ -250,6 +265,9 @@ export function PracticeActivityEditor({
             >
               {t('studio.editor.save')}
             </Button>
+            {!nodeJsonValid ? (
+              <span className="text-error text-sm">{t('studio.widget.validationFix')}</span>
+            ) : null}
             {saved ? (
               <span className="text-on-surface-variant text-sm">{t('studio.editor.saved')}</span>
             ) : null}

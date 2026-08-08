@@ -60,6 +60,7 @@
   "editor.save": "Save",
   "editor.saved": "Saved",
   "editor.cancel": "Cancel",
+  "editor.jsonInvalid": "Invalid JSON",
   "editor.advanced.requiresDeveloper": "Open Developer mode for advanced activity types.",
   "preview.noPackageLoaded": "No package loaded.",
   "preview.noWorkflow": "No workflow defined.",

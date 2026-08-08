@@ -226,4 +226,14 @@ describe('PracticeActivityEditor', () => {
     await screen.findByLabelText(/lesson title/i);
     expect(screen.queryByText('How this practice works')).not.toBeInTheDocument();
   });
+
+  it('shows field-level validation errors in the settings form', async () => {
+    renderEditor(
+      JSON.stringify({ type: 'exercise', widget: 'core.matching', config: { pairs: [{}] } }),
+    );
+    await screen.findByLabelText(/lesson title/i);
+    expect(screen.getByText('Fix the highlighted settings before saving')).toBeInTheDocument();
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts.length).toBeGreaterThanOrEqual(2);
+  });
 });

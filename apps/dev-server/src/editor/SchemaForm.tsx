@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, Children, isValidElement, cloneElement } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from '@open-edu/i18n';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import type { ValidationError } from './WidgetValidator';
@@ -185,29 +186,45 @@ export function SchemaForm({
 }
 
 function JsonTextarea({ value, onChange }: { value: object; onChange: (parsed: object) => void }) {
+  const { t } = useTranslation();
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setText(JSON.stringify(value, null, 2));
+    setError(null);
   }, [value]);
 
+  const validate = (raw: string): void => {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+    try {
+      onChange(JSON.parse(trimmed) as object);
+      setError(null);
+    } catch {
+      setError(t('studio.editor.jsonInvalid'));
+    }
+  };
+
   return (
-    <textarea
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-      className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1"
-      rows={10}
-      onBlur={(e) => {
-        const raw = e.target.value.trim();
-        if (!raw) return;
-        try {
-          const parsed = JSON.parse(raw);
-          onChange(parsed);
-        } catch {
-          // keep invalid JSON in the textarea, don't overwrite
-        }
-      }}
-    />
+    <div>
+      <textarea
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          validate(e.target.value);
+        }}
+        onBlur={(e) => validate(e.target.value)}
+        aria-invalid={error ? 'true' : undefined}
+        className={`border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 ${error ? 'border-error' : ''}`}
+        rows={10}
+      />
+      {error ? (
+        <p className="text-error mt-1 text-xs" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
