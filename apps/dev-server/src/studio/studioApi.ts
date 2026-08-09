@@ -108,6 +108,11 @@ export function createStudioApi() {
         method: 'POST',
         body: JSON.stringify({ notes, force }),
       }),
+    uploadSpec: (spec: string, specExt: '.json' | '.md', force?: boolean) =>
+      aiRequest<AiGenerateResult>('/generate', {
+        method: 'POST',
+        body: JSON.stringify({ spec, specExt, force }),
+      }),
     getLibrary: () => libraryRequest<{ workspace: string; entries: LibraryEntry[] }>(''),
     openLibraryCourse: (relativePath: string) =>
       libraryRequest<{ success: boolean; packageDir: string }>('/open', {

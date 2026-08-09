@@ -122,6 +122,43 @@ describe('studioApi client', () => {
     expect(JSON.parse(init?.body as string)).toEqual({ notes: 'Teach fractions' });
   });
 
+  it('uploadSpec posts spec + specExt to the AI generate endpoint', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    const result = await api.uploadSpec('{"format":"openedu-course-spec"}', '.json', true);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/generate');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      spec: '{"format":"openedu-course-spec"}',
+      specExt: '.json',
+      force: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('uploadSpec omits force when not supplied', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    await api.uploadSpec('# My Course\n\nContent', '.md');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/generate');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      spec: '# My Course\n\nContent',
+      specExt: '.md',
+    });
+  });
+
   it('getLibrary hits the library root and returns workspace + entries', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(

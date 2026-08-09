@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import axe from 'axe-core';
 import { I18nProvider } from '@open-edu/i18n';
@@ -31,6 +31,7 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     writeFile: vi.fn(),
     getAiStatus: vi.fn().mockResolvedValue({ available: false }),
     generateFromNotes: vi.fn(),
+    uploadSpec: vi.fn(),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -73,6 +74,16 @@ describe('AI Studio components — axe-core accessibility audits', () => {
       <AiStartPanel api={makeApi()} onGenerated={() => {}} onError={() => {}} />,
       { wrapper },
     );
+    const violations = await runAxe(container);
+    expect(violations).toHaveLength(0);
+  });
+
+  it('AiStartPanel upload spec tab is accessible', async () => {
+    const { container } = render(
+      <AiStartPanel api={makeApi()} onGenerated={() => {}} onError={() => {}} />,
+      { wrapper },
+    );
+    fireEvent.click(screen.getByRole('tab', { name: /upload spec/i }));
     const violations = await runAxe(container);
     expect(violations).toHaveLength(0);
   });
