@@ -17,7 +17,8 @@ export type AiGenerateErrorCode =
   | 'llm'
   | 'parse'
   | 'write'
-  | 'compile';
+  | 'compile'
+  | 'spec-invalid';
 
 export interface AiGenerateResult {
   success: boolean;
@@ -33,4 +34,8 @@ export interface AiStatus {
   reason?: 'missing-key' | 'disabled';
 }
 
-export type AiEndpointErrorCode = 'no-active-package' | 'missing-notes' | 'unknown-ai-endpoint';
+export type AiEndpointErrorCode =
+  | 'no-active-package'
+  | 'missing-notes'
+  | 'missing-spec'
+  | 'unknown-ai-endpoint';
