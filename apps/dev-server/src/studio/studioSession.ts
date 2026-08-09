@@ -39,8 +39,12 @@ export function readSelectedPath(): string | null {
   }
 }
 
-export function writeSelectedPath(path: string): void {
+export function writeSelectedPath(path: string | null): void {
   try {
+    if (path === null) {
+      sessionStorage.removeItem(PATH_KEY);
+      return;
+    }
     sessionStorage.setItem(PATH_KEY, path);
   } catch {
     // storage unavailable

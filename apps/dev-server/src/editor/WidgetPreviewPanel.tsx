@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ValidationError } from './WidgetValidator';
 import { WidgetPreviewProvider, useWidgetPreview } from './WidgetPreviewProvider';
 import type { WidgetRenderProps } from '@open-edu/widgets';
@@ -6,6 +6,7 @@ import { Badge, Button, EmptyState } from '@open-edu/design-system';
 import { OasAnimationWrapper } from '@open-edu/runtime';
 import type { OasAnimationController } from '@open-edu/runtime';
 import { PanelRightClose, RotateCcw } from 'lucide-react';
+import { useTranslation } from '@open-edu/i18n';
 
 interface WidgetPreviewPanelProps {
   widgetType: string | null;
@@ -103,6 +104,8 @@ export function WidgetPreviewPanel({
 }: WidgetPreviewPanelProps): JSX.Element {
   const errorCount = validationErrors.filter((e) => e.severity === 'error').length;
   const warningCount = validationErrors.filter((e) => e.severity === 'warning').length;
+  const [resetToken, setResetToken] = useState(0);
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-full flex-col" data-testid="widget-preview-panel">
@@ -132,8 +135,9 @@ export function WidgetPreviewPanel({
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0"
-              title="Reset preview"
-              aria-label="Reset preview"
+              title={t('studio.widget.resetPreview')}
+              aria-label={t('studio.widget.resetPreview')}
+              onClick={() => setResetToken((t) => t + 1)}
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </Button>
@@ -182,7 +186,7 @@ export function WidgetPreviewPanel({
             />
           </div>
         ) : (
-          <WidgetPreviewProvider>
+          <WidgetPreviewProvider key={resetToken}>
             <WidgetPreviewRenderer widgetType={widgetType} widgetConfig={widgetConfig ?? {}} />
           </WidgetPreviewProvider>
         )}

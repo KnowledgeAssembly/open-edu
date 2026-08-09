@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { WidgetGuideData } from '../src/widget-catalog-source.ts';
+import { renderWidgetGuideMarkdown } from '../src/guide-markdown.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -33,77 +33,11 @@ for (const domain of domains) {
 
 for (const entry of entriesWithGuide) {
   const g = entry.guide!;
-  const md = renderPage(
-    entry.id,
-    entry.name ?? entry.id,
-    entry.domain ?? 'core',
-    entry.status ?? 'stable',
-    g,
-  );
+  const body = renderWidgetGuideMarkdown(entry);
+  const md = `---\nsidebar_position: ${g.sidebarPosition}\n---\n\n` + body;
   const filename = entry.id.split('.').slice(1).join('-') + '.md';
   const filePath = join(outputBaseDir, entry.domain!, filename);
   writeFileSync(filePath, md, 'utf-8');
 }
 
 console.log(`Generated ${entriesWithGuide.length} widget doc pages → ${outputBaseDir}`);
-
-function renderPage(
-  id: string,
-  name: string,
-  domain: string,
-  status: string,
-  g: WidgetGuideData,
-): string {
-  return (
-    [
-      `---`,
-      `sidebar_position: ${g.sidebarPosition}`,
-      `---`,
-      ``,
-      `# ${name}`,
-      ``,
-      `**Widget ID:** \`${id}\` | **Domain:** ${domain} | **Status:** ${status}`,
-      ``,
-      `> ${g.oneLiner}`,
-      ``,
-      `## What it does`,
-      ``,
-      g.whatItDoes,
-      ``,
-      ...(g.whenToUse.length > 0
-        ? [``, `## When to use this widget`, ``, ...g.whenToUse.map((item) => `- ${item}`)]
-        : []),
-      ``,
-      `## Setting it up`,
-      ``,
-      ...g.setupSteps.map((step, i) => `${i + 1}. ${step}`),
-      ``,
-      `## Configuration fields`,
-      ``,
-      `| Field | Type | Required | Description |`,
-      `|-------|------|----------|-------------|`,
-      ...g.configFields.map(
-        (f) => `| \`${f.name}\` | ${f.type} | ${f.required ? 'Yes' : 'No'} | ${f.description} |`,
-      ),
-      ``,
-      `## Example`,
-      ``,
-      '```json',
-      g.exampleJson.trim(),
-      '```',
-      ...(g.tips.length > 0 ? [``, `## Tips`, ``, ...g.tips.map((tip) => `- ${tip}`)] : []),
-      ...(g.relatedWidgets && g.relatedWidgets.length > 0
-        ? [
-            ``,
-            `## See also`,
-            ``,
-            ...g.relatedWidgets.map((r) =>
-              r.domain === domain
-                ? `- [${r.name}](${r.slug}.md)`
-                : `- [${r.name}](../${r.domain}/${r.slug}.md)`,
-            ),
-          ]
-        : []),
-    ].join('\n') + '\n'
-  );
-}
