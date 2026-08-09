@@ -1739,8 +1739,9 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       generationHints: [
         'Keep grids under 10x10 for visual clarity',
-        'Use maxHighlights to limit interactive cell selections',
-        'Provide pre-highlighted shapes for observe/learn mode',
+        'Use targetHighlights or targetCount to define the answer in interactive mode',
+        'Use maxHighlights to limit selections when targeting a specific area',
+        'Provide pre-highlighted shapes for observe/learn mode via highlighted',
       ],
     },
     guide: {
@@ -1786,6 +1787,34 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
           description: 'Maximum number of cells a student can highlight.',
         },
         {
+          name: 'highlighted',
+          type: 'array',
+          required: false,
+          description:
+            'Pre-shaded cells for observe mode display (array of {row, col}). Not used for interactive grading unless no target fields are set.',
+        },
+        {
+          name: 'targetHighlights',
+          type: 'array',
+          required: false,
+          description:
+            'Exact cells the learner must shade in interactive mode (array of {row, col}). Graded by set equality.',
+        },
+        {
+          name: 'targetCount',
+          type: 'number',
+          required: false,
+          description:
+            'Simpler grading: learner must shade exactly this many cells. Used when targetHighlights is not set.',
+        },
+        {
+          name: 'showQuestionArea',
+          type: 'boolean',
+          required: false,
+          description:
+            'When true with targetHighlights, shows a read-only reference grid beside the interactive grid. Defaults to false.',
+        },
+        {
           name: 'description',
           type: 'string',
           required: false,
@@ -1809,10 +1838,20 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
   "title": "Grid Area Practice",
   "widget": "math.grid-area",
   "config": {
-    "description": "Highlight 6 cells to show an area of 6 square units.",
+    "description": "Highlight 6 cells to match the area shown.",
     "rows": 5,
     "cols": 5,
     "mode": "area",
+    "targetCount": 6,
+    "targetHighlights": [
+      { "row": 0, "col": 0 },
+      { "row": 0, "col": 1 },
+      { "row": 0, "col": 2 },
+      { "row": 1, "col": 0 },
+      { "row": 1, "col": 1 },
+      { "row": 1, "col": 2 }
+    ],
+    "showQuestionArea": true,
     "maxHighlights": 25,
     "showCount": true,
     "interactive": true
