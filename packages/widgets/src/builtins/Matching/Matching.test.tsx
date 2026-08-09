@@ -135,6 +135,8 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-3'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -147,6 +149,8 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-3'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(67, expect.any(Object));
   });
 
@@ -159,6 +163,8 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-3'));
     fireEvent.click(screen.getByTestId('right-item-1'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -209,6 +215,31 @@ describe('Matching interactive mode (interactive: true)', () => {
     expect(screen.getByTestId('feedback')).toBeTruthy();
   });
 
+  it('shows correct answer panel after submission', () => {
+    renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-2'));
+    fireEvent.click(screen.getByTestId('left-item-2'));
+    fireEvent.click(screen.getByTestId('right-item-2'));
+    fireEvent.click(screen.getByTestId('left-item-3'));
+    fireEvent.click(screen.getByTestId('right-item-3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(screen.getByTestId('correct-answer-panel')).toHaveTextContent('🐶 → Dog');
+  });
+
+  it('does not call complete on submit before continue', () => {
+    const { complete } = renderWidget(interactiveConfig);
+    fireEvent.click(screen.getByTestId('left-item-1'));
+    fireEvent.click(screen.getByTestId('right-item-1'));
+    fireEvent.click(screen.getByTestId('left-item-2'));
+    fireEvent.click(screen.getByTestId('right-item-2'));
+    fireEvent.click(screen.getByTestId('left-item-3'));
+    fireEvent.click(screen.getByTestId('right-item-3'));
+    fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('continue-button')).toBeVisible();
+  });
+
   it('handles single pair matching', () => {
     const { complete } = renderWidget({
       pairs: [{ id: '1', itemA: '🍎', itemB: 'Apple' }],
@@ -219,6 +250,8 @@ describe('Matching interactive mode (interactive: true)', () => {
     fireEvent.click(screen.getByTestId('left-item-1'));
     fireEvent.click(screen.getByTestId('right-item-1'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -432,6 +465,8 @@ describe('Matching persistence (storedState restoration)', () => {
     fireEvent.click(screen.getByTestId('left-item-2'));
     fireEvent.click(screen.getByTestId('right-item-2'));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, {
       submitted: true,
       connections: { '1': '1', '2': '2' },

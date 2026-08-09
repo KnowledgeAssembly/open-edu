@@ -25,6 +25,7 @@ const config: Config = {
     './src/**/*.{ts,tsx}',
     '../../packages/runtime/src/**/*.{ts,tsx}',
     '../../packages/design-system/src/**/*.{ts,tsx}',
+    '../../packages/widgets/src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {

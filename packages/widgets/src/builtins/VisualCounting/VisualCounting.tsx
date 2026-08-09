@@ -124,9 +124,15 @@ function VisualCountingComponent(props: {
       accuracy,
       widgetId: 'core.visual-counting',
     });
-    complete(accuracy * 100, { submitted: true, selectedCount });
     setSubmitted(true);
-  }, [selectedCount, submitted, expected, emitInteraction, complete]);
+  }, [selectedCount, submitted, expected, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (selectedCount === null) return;
+    const accuracy =
+      expected > 0 ? Math.max(0, 1 - Math.abs(selectedCount - expected) / expected) : 0;
+    complete(accuracy * 100, { submitted: true, selectedCount });
+  }, [selectedCount, expected, complete]);
 
   const handleHintClick = useCallback(() => {
     if (content.hints && hintIndex < content.hints.length - 1) {
@@ -292,7 +298,11 @@ function VisualCountingComponent(props: {
           <Button variant="default" onClick={handleSubmit} disabled={selectedCount === null}>
             Submit
           </Button>
-        ) : null}
+        ) : (
+          <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+            Continue
+          </Button>
+        )}
       </div>
 
       {selectedCount !== null && !submitted && (

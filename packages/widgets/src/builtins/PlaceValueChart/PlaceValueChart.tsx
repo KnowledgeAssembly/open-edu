@@ -163,7 +163,6 @@ function PlaceValueChartComponent(props: {
     } else {
       correct = placedDigits.some((d) => d !== null);
     }
-    const score = correct ? 100 : 0;
     emitInteraction({
       type: 'widget.interaction',
       action: 'submit',
@@ -173,9 +172,22 @@ function PlaceValueChartComponent(props: {
       correct,
       widgetId: 'math.place-value-chart',
     });
-    complete(score, { submitted: true, placedDigits });
     setSubmitted(true);
-  }, [content, submitted, placedDigits, emitInteraction, complete]);
+  }, [content, submitted, placedDigits, emitInteraction]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const placedNum = computeNumber(placedDigits);
+    const expected = content.targetNumber;
+    let correct = false;
+    if (expected !== undefined) {
+      correct = placedNum === expected;
+    } else {
+      correct = placedDigits.some((d) => d !== null);
+    }
+    const score = correct ? 100 : 0;
+    complete(score, { submitted: true, placedDigits });
+  }, [content, placedDigits, complete]);
 
   if (!parsed.success || !content) {
     return (
@@ -384,7 +396,11 @@ function PlaceValueChartComponent(props: {
               <Button variant="default" onClick={handleSubmit} disabled={isAllNull}>
                 Submit
               </Button>
-            ) : null}
+            ) : (
+              <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+                Continue
+              </Button>
+            )}
           </div>
 
           {submitted && (

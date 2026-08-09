@@ -186,6 +186,8 @@ describe('GridArea interactive mode - area', () => {
     fireEvent.click(cell(0));
     fireEvent.click(cell(1));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
@@ -203,6 +205,8 @@ describe('GridArea interactive mode - area', () => {
     fireEvent.click(cell(0));
     fireEvent.click(cell(1));
     fireEvent.click(screen.getByText('Submit'));
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -477,5 +481,47 @@ describe('GridArea edge cases', () => {
   it('handles 20x20 grid', () => {
     renderWidget({ rows: 20, cols: 20, interactive: false });
     expect(getCells()).toHaveLength(400);
+  });
+
+  it('grades by targetCount when configured', () => {
+    const { complete } = renderWidget({
+      rows: 3,
+      cols: 3,
+      targetCount: 2,
+      interactive: true,
+    });
+    fireEvent.click(cell(0));
+    fireEvent.click(cell(1));
+    fireEvent.click(screen.getByText('Submit'));
+    fireEvent.click(screen.getByTestId('continue-button'));
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
+  });
+
+  it('grades by exact targetHighlights when configured', () => {
+    const { complete } = renderWidget({
+      rows: 2,
+      cols: 2,
+      targetHighlights: [
+        { row: 0, col: 0 },
+        { row: 1, col: 1 },
+      ],
+      interactive: true,
+    });
+    fireEvent.click(cell(0));
+    fireEvent.click(cell(3));
+    fireEvent.click(screen.getByText('Submit'));
+    fireEvent.click(screen.getByTestId('continue-button'));
+    expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
+  });
+
+  it('shows reference grid when showQuestionArea is true', () => {
+    renderWidget({
+      rows: 2,
+      cols: 2,
+      targetHighlights: [{ row: 0, col: 0 }],
+      showQuestionArea: true,
+      interactive: true,
+    });
+    expect(screen.getByTestId('reference-grid')).toBeInTheDocument();
   });
 });

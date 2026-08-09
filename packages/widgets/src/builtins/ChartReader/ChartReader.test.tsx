@@ -193,6 +193,8 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -200,6 +202,8 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete, emitInteraction } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Bananas', correct: true }),
@@ -210,6 +214,8 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete, emitInteraction } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[0]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Apples', correct: false }),
@@ -226,6 +232,8 @@ describe('ChartReader interactive mode - bar', () => {
     const { complete } = renderWidget(interactiveBarConfig);
     const bars = screen.getAllByRole('button');
     fireEvent.click(bars[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     fireEvent.click(bars[0]!);
     expect(complete).toHaveBeenCalledTimes(1);
@@ -293,6 +301,8 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -300,6 +310,8 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete, emitInteraction } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
     expect(emitInteraction).toHaveBeenCalledWith(
       expect.objectContaining({ selectedLabel: 'Cats', correct: true }),
@@ -310,6 +322,8 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[0]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -317,6 +331,8 @@ describe('ChartReader interactive mode - pictograph', () => {
     const { complete } = renderWidget(interactivePictoConfig);
     const rows = screen.getAllByRole('button');
     fireEvent.click(rows[1]!);
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledTimes(1);
     fireEvent.click(rows[0]!);
     expect(complete).toHaveBeenCalledTimes(1);

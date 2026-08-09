@@ -68,6 +68,7 @@ function StoryQuestionComponent(props: {
   }, [storedState]);
 
   const [submitted, setSubmitted] = useState(parsedState?.submitted ?? false);
+  const [showResults, setShowResults] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(parsedState?.currentIndex ?? 0);
   const [selections, setSelections] = useState<(number | null)[]>(parsedState?.selections ?? []);
   const [responses, setResponses] = useState<ResponseRecord[]>(parsedState?.responses ?? []);
@@ -141,27 +142,32 @@ function StoryQuestionComponent(props: {
     if (currentIndex < content.questions.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      const correctCount = responses.filter((r) => r.correct).length;
-      const totalQuestions = content.questions.length;
-      const accuracy = correctCount / totalQuestions;
-      emitInteraction({
-        type: 'widget.interaction',
-        widgetId: 'core.story-question',
-        action: 'submit',
-        responses,
-        correctCount,
-        totalQuestions,
-        accuracy,
-      });
-      complete(accuracy * 100, {
-        submitted: true,
-        currentIndex,
-        selections,
-        responses,
-        feedback: null,
-      });
-      setSubmitted(true);
+      setShowResults(true);
     }
+  }, [content, currentIndex]);
+
+  const handleContinue = useCallback(() => {
+    if (!content) return;
+    const correctCount = responses.filter((r) => r.correct).length;
+    const totalQuestions = content.questions.length;
+    const accuracy = correctCount / totalQuestions;
+    emitInteraction({
+      type: 'widget.interaction',
+      widgetId: 'core.story-question',
+      action: 'submit',
+      responses,
+      correctCount,
+      totalQuestions,
+      accuracy,
+    });
+    complete(accuracy * 100, {
+      submitted: true,
+      currentIndex,
+      selections,
+      responses,
+      feedback: null,
+    });
+    setSubmitted(true);
   }, [content, currentIndex, selections, responses, emitInteraction, complete]);
 
   if (!parsed.success) {
@@ -231,6 +237,65 @@ function StoryQuestionComponent(props: {
     );
   }
 
+  if (showResults) {
+    const correctCount = responses.filter((r) => r.correct).length;
+    const totalQuestions = questions.length;
+    const accuracy = totalQuestions > 0 ? correctCount / totalQuestions : 0;
+
+    return (
+      <div data-testid="story-question">
+        {storyCallout}
+        <div
+          role="status"
+          aria-live="assertive"
+          data-testid="story-result"
+          className="mb-lg p-md bg-surface-container border-outline-variant rounded-lg border"
+        >
+          <p className="text-lg font-semibold">
+            You answered {correctCount} of {totalQuestions} correctly.
+          </p>
+          <p className="text-on-surface/70 mt-xs text-sm">Score: {Math.round(accuracy * 100)}%</p>
+        </div>
+        {questions.map((q, qIdx) => {
+          const response = responses[qIdx];
+          if (!response) return null;
+          return (
+            <div key={qIdx} className="mb-lg">
+              <p className="mb-xs font-semibold">
+                Question {qIdx + 1}: {q.question}
+              </p>
+              {q.options.map((opt, optIdx) => {
+                const isSelected = response.selectedIndex === optIdx;
+                const isCorrectOption = optIdx === q.correctIndex;
+                const isWrongSelected = isSelected && !isCorrectOption;
+
+                return (
+                  <div
+                    key={optIdx}
+                    className={`my-xs p-sm rounded-lg ${
+                      isCorrectOption
+                        ? 'border-success border-2 opacity-100'
+                        : isWrongSelected
+                          ? 'border-error border-2 opacity-60'
+                          : 'opacity-60'
+                    }`}
+                  >
+                    {isCorrectOption && <span aria-hidden="true">✓ </span>}
+                    {isWrongSelected && <span aria-hidden="true">✗ </span>}
+                    {opt}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+        <Button variant="default" onClick={handleContinue} data-testid="continue-button">
+          Continue
+        </Button>
+      </div>
+    );
+  }
+
   if (submitted) {
     const correctCount = responses.filter((r) => r.correct).length;
     const totalQuestions = questions.length;
@@ -245,7 +310,7 @@ function StoryQuestionComponent(props: {
           className="mb-lg p-md bg-surface-container border-outline-variant rounded-lg border"
         >
           <p className="text-lg font-semibold">
-            You got {correctCount} of {totalQuestions} correct.
+            You answered {correctCount} of {totalQuestions} correctly.
           </p>
         </div>
         {questions.map((q, qIdx) => {

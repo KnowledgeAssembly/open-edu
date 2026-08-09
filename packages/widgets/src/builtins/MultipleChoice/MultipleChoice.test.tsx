@@ -61,6 +61,8 @@ describe('MultipleChoice legacy single-question mode', () => {
     fireEvent.click(screen.getByLabelText('4'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!');
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(100, expect.any(Object));
   });
 
@@ -69,6 +71,8 @@ describe('MultipleChoice legacy single-question mode', () => {
     fireEvent.click(screen.getByLabelText('3'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(screen.getByTestId('feedback')).toHaveTextContent('Incorrect');
+    expect(complete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(complete).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
@@ -226,6 +230,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
+    fireEvent.click(screen.getByTestId('continue-button'));
     expect(emitInteraction).toHaveBeenLastCalledWith(
       expect.objectContaining({
         action: 'submit',
@@ -245,7 +250,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 2 of 2 correct.');
+    expect(screen.getByTestId('multi-result')).toHaveTextContent('You answered 2 of 2 correctly.');
   });
 
   it('shows aggregate score on completion with some incorrect', () => {
@@ -256,7 +261,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
     fireEvent.click(screen.getByLabelText('9'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 2 correct.');
+    expect(screen.getByTestId('multi-result')).toHaveTextContent('You answered 1 of 2 correctly.');
   });
 
   it('handles single question in multi format', () => {
@@ -271,7 +276,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
     fireEvent.click(btn);
     expect(screen.getByTestId('question-feedback')).toHaveTextContent('Correct!');
     fireEvent.click(screen.getByTestId('feedback-next'));
-    expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 1 correct.');
+    expect(screen.getByTestId('multi-result')).toHaveTextContent('You answered 1 of 1 correctly.');
   });
 
   it('shows per-question results after submission', () => {
@@ -302,7 +307,7 @@ describe('MultipleChoice multi-question interactive mode', () => {
       ],
       feedback: null,
     });
-    expect(screen.getByTestId('multi-result')).toHaveTextContent('You got 1 of 2 correct.');
+    expect(screen.getByTestId('multi-result')).toHaveTextContent('You answered 1 of 2 correctly.');
     const result0 = screen.getByTestId('result-question-0');
     expect(result0).toHaveTextContent('Your answer: 4');
     const result1 = screen.getByTestId('result-question-1');
