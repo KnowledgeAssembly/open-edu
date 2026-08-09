@@ -442,26 +442,43 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler
+          // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler,
+          // or an uploaded course-spec.json / course-spec.md compiled without the LLM.
           if (pathname === '/api/studio/ai/generate' && method === 'POST') {
             if (!packageDir) {
               res.statusCode = 400;
               res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
               return;
             }
-            const body = (await parseJsonBody(req)) as { notes?: string; force?: boolean };
-            if (!body.notes || typeof body.notes !== 'string') {
+            const body = (await parseJsonBody(req)) as {
+              notes?: string;
+              spec?: string;
+              specExt?: string;
+              force?: boolean;
+            };
+            let source: import('./src/studio/ai/generateCourse.js').CourseDraftSource;
+            if (body.notes && typeof body.notes === 'string') {
+              source = { kind: 'notes', notes: body.notes, completeText: completeWithLlm };
+            } else if (body.spec && typeof body.spec === 'string') {
+              if (body.specExt !== '.json' && body.specExt !== '.md') {
+                res.statusCode = 400;
+                res.end(
+                  JSON.stringify({ code: 'spec-invalid', error: 'Unsupported spec extension' }),
+                );
+                return;
+              }
+              source = { kind: 'spec', spec: body.spec, extension: body.specExt };
+            } else {
               res.statusCode = 400;
-              res.end(JSON.stringify({ code: 'missing-notes', error: 'Missing notes' }));
+              res.end(JSON.stringify({ code: 'missing-spec', error: 'Missing spec or notes' }));
               return;
             }
             aiGenerating = true;
             let result: import('./src/studio/ai/types.js').AiGenerateResult;
             try {
               result = await generateCourseDraft({
-                notes: body.notes,
+                source,
                 packageDir,
-                completeText: completeWithLlm,
                 force: body.force === true,
               });
             } finally {
@@ -685,7 +702,8 @@ function eduPackageLoader(): Plugin {
               title?: string;
               courseRelativePaths?: string[];
             };
-            const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Unit';
+            const title =
+              typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Unit';
             const courseRelativePaths = Array.isArray(body.courseRelativePaths)
               ? body.courseRelativePaths
               : [];
@@ -1013,7 +1031,10 @@ function eduPackageLoader(): Plugin {
             const absOldPath = join(getCurrentDir(), oldPath);
             const absNewPath = join(getCurrentDir(), newPath);
 
-            if (!absOldPath.startsWith(getCurrentDir()) || !absNewPath.startsWith(getCurrentDir())) {
+            if (
+              !absOldPath.startsWith(getCurrentDir()) ||
+              !absNewPath.startsWith(getCurrentDir())
+            ) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -1288,12 +1309,7 @@ function eduPackageLoader(): Plugin {
               if (existsSync(assetsDir)) {
                 await rm(assetsDir, { recursive: true, force: true });
               }
-              for (const rel of [
-                'workflow.json',
-                'package.json',
-                'rewards.json',
-                'cards.json',
-              ]) {
+              for (const rel of ['workflow.json', 'package.json', 'rewards.json', 'cards.json']) {
                 const abs = join(getCurrentDir(), rel);
                 if (existsSync(abs)) {
                   await rm(abs, { force: true });
