@@ -1,4 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mkdirSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { PackageLoadError } from '@open-edu/core';
 import type { LoadedPackage } from '@open-edu/core';
 
@@ -36,22 +39,38 @@ const validPkg: LoadedPackage = {
   assetPaths: [],
 };
 
+function makeTempDir(prefix: string): string {
+  const dir = join(tmpdir(), `${prefix}-${Date.now()}`);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
 describe('devPackage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should load package and start dev server on success', async () => {
+    const pkgDir = makeTempDir('edu-dev-pkg');
     mockLoadPackage.mockResolvedValue(validPkg);
-    const result = await devPackage('/tmp/pkg');
+    const result = await devPackage(pkgDir);
     expect(result.success).toBe(true);
-    expect(mockLoadPackage).toHaveBeenCalledWith('/tmp/pkg');
-    expect(mockStartDevServer).toHaveBeenCalledWith('/tmp/pkg');
+    expect(mockLoadPackage).toHaveBeenCalledWith(pkgDir);
+    expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir);
+    rmSync(pkgDir, { recursive: true, force: true });
   });
 
-  it('should return failure on load error and not start dev server', async () => {
-    mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'fail'));
-    const result = await devPackage('/tmp/pkg');
+  it('should start dev server for an existing empty directory', async () => {
+    const emptyDir = makeTempDir('edu-dev-empty');
+    mockLoadPackage.mockRejectedValue(new PackageLoadError('MANIFEST_VALIDATION_ERROR', 'no pkg'));
+    const result = await devPackage(emptyDir);
+    expect(result.success).toBe(true);
+    expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir);
+    rmSync(emptyDir, { recursive: true, force: true });
+  });
+
+  it('should fail for a directory that does not exist', async () => {
+    const result = await devPackage('/nonexistent/edu-dev-path');
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.code).toBe(1);
@@ -61,8 +80,9 @@ describe('devPackage', () => {
 
   describe('--json output', () => {
     it('should return structured data on success in json mode', async () => {
+      const pkgDir = makeTempDir('edu-dev-json-pkg');
       mockLoadPackage.mockResolvedValue(validPkg);
-      const result = await devPackage('/tmp/pkg', { json: true });
+      const result = await devPackage(pkgDir, { json: true });
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toMatchObject({
@@ -71,15 +91,32 @@ describe('devPackage', () => {
           serverUrl: 'http://localhost:4000',
         });
       }
-      expect(mockStartDevServer).toHaveBeenCalledWith('/tmp/pkg');
+      expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir);
+      rmSync(pkgDir, { recursive: true, force: true });
+    });
+
+    it('should return structured data for an empty directory in json mode', async () => {
+      const emptyDir = makeTempDir('edu-dev-json-empty');
+      mockLoadPackage.mockRejectedValue(
+        new PackageLoadError('MANIFEST_VALIDATION_ERROR', 'no pkg'),
+      );
+      const result = await devPackage(emptyDir, { json: true });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          title: emptyDir.split('/').pop() ?? '',
+          serverUrl: 'http://localhost:4000',
+        });
+      }
+      expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir);
+      rmSync(emptyDir, { recursive: true, force: true });
     });
 
     it('should return error info on failure in json mode', async () => {
-      mockLoadPackage.mockRejectedValue(new PackageLoadError('ERR', 'fail'));
-      const result = await devPackage('/tmp/pkg', { json: true });
+      const result = await devPackage('/nonexistent/edu-dev-path', { json: true });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe('fail');
+        expect(result.error).toContain('Directory does not exist');
         expect(result.code).toBe(1);
       }
     });
