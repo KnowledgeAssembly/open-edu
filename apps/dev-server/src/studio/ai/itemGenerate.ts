@@ -11,6 +11,7 @@ import {
   buildLessonEditPrompt,
   buildQuizEditPrompt,
   buildPracticeEditPrompt,
+  renderCourseContext,
 } from './prompts/index.js';
 import { parseExerciseNode, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import { getCuratedWidget } from '../widgets/curatedCatalog.js';
@@ -453,9 +454,4 @@ export function assertItemEditBody(body: unknown): {
     throw invalidRequest(`Intent "${intent}" does not accept params`);
   }
   return { kind: candidate.kind, intent, currentContent: candidate.currentContent };
-}
-
-function renderCourseContext(titles: string[]): string {
-  if (titles.length === 0) return '';
-  return `EXISTING COURSE ITEMS:\n${titles.map((title, index) => `${index + 1}. ${title}`).join('\n')}`;
 }

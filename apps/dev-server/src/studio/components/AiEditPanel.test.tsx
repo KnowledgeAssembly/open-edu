@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
+import type { Locale } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { AiEditPanel } from './AiEditPanel';
 import type { StudioApi } from '../studioApi.js';
@@ -14,7 +15,7 @@ vi.mock('./ItemDraftPreview.js', () => ({
 function wrap(ui: React.ReactElement, locale = 'en') {
   return (
     <I18nProvider
-      locale={locale}
+      locale={locale as Locale}
       dictionaries={{ en: { studio: studioEn as Record<string, string> } }}
     >
       {ui}
