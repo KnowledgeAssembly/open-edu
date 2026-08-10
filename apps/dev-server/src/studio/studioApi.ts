@@ -1,4 +1,11 @@
-import type { AiEndpointErrorCode, AiGenerateResult } from './ai/types.js';
+import type {
+  AiEndpointErrorCode,
+  AiGenerateResult,
+  AiItemAddResult,
+  AiItemEditResult,
+  ItemIntent,
+  ItemIntentParams,
+} from './ai/types.js';
 import type { LibraryEntry } from './library/types.js';
 import type { ActivitySummary } from './types.js';
 
@@ -112,6 +119,21 @@ export function createStudioApi() {
       aiRequest<AiGenerateResult>('/generate', {
         method: 'POST',
         body: JSON.stringify({ spec, specExt, force }),
+      }),
+    generateItemAdd: (kind: 'lesson' | 'quiz' | 'practice', description: string) =>
+      aiRequest<AiItemAddResult>('/item/add', {
+        method: 'POST',
+        body: JSON.stringify({ kind, description }),
+      }),
+    generateItemEdit: (
+      kind: 'lesson' | 'quiz' | 'practice',
+      intent: ItemIntent,
+      currentContent: string,
+      params?: ItemIntentParams,
+    ) =>
+      aiRequest<AiItemEditResult>('/item/edit', {
+        method: 'POST',
+        body: JSON.stringify({ kind, intent, currentContent, params }),
       }),
     getLibrary: () => libraryRequest<{ workspace: string; entries: LibraryEntry[] }>(''),
     openLibraryCourse: (relativePath: string) =>

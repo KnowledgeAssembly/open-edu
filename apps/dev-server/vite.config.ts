@@ -27,6 +27,13 @@ import { OepWriter } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
 import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
+import {
+  generateItemAdd,
+  generateItemEdit,
+  assertItemAddBody,
+  assertItemEditBody,
+  ItemRequestError,
+} from './src/studio/ai/itemGenerate.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
 import {
   resolveWorkspace,
@@ -512,9 +519,61 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
+          // POST /api/studio/ai/item/add — draft a single new lesson/quiz/practice item.
+          // Draft-then-commit: the server never writes to packageDir; the client's
+          // Accept goes through the normal writeFile + saveOutlineOrder path.
+          if (pathname === '/api/studio/ai/item/add' && method === 'POST') {
+            if (!packageDir) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
+              return;
+            }
+            if (!isAiAvailable()) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'ai-unavailable', error: 'AI is unavailable' }));
+              return;
+            }
+            const body = await parseJsonBody(req);
+            const { kind, description } = assertItemAddBody(body);
+            const result = await generateItemAdd({ kind, description, packageDir });
+            res.end(JSON.stringify(result));
+            return;
+          }
+
+          // POST /api/studio/ai/item/edit — draft a revised item (or a batch of new
+          // quizzes for add-questions). Never writes to packageDir.
+          if (pathname === '/api/studio/ai/item/edit' && method === 'POST') {
+            if (!packageDir) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
+              return;
+            }
+            if (!isAiAvailable()) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'ai-unavailable', error: 'AI is unavailable' }));
+              return;
+            }
+            const body = await parseJsonBody(req);
+            const { kind, intent, currentContent, params } = assertItemEditBody(body);
+            const result = await generateItemEdit({
+              kind,
+              intent,
+              currentContent,
+              params,
+              packageDir,
+            });
+            res.end(JSON.stringify(result));
+            return;
+          }
+
           res.statusCode = 404;
           res.end(JSON.stringify({ code: 'unknown-ai-endpoint', error: 'Unknown AI endpoint' }));
         } catch (err) {
+          if (err instanceof ItemRequestError) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ code: 'invalid-request', reason: err.reason }));
+            return;
+          }
           console.error('[edu-dev] AI API error:', err);
           res.statusCode = 500;
           res.end(JSON.stringify({ error: (err as Error).message }));

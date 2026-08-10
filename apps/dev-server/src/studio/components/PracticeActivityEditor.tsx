@@ -21,7 +21,9 @@ import { getCuratedWidget } from '../widgets/curatedCatalog.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
 import { WidgetGuidePanel } from './WidgetGuidePanel.js';
+import { AiEditPanel } from './AiEditPanel.js';
 import type { StudioApi } from '../studioApi.js';
+import type { DraftItem } from '../ai/types.js';
 
 function titleCase(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -56,12 +58,14 @@ export function PracticeActivityEditor({
   onSaved,
   onError,
   onCancel,
+  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
+  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -211,7 +215,7 @@ export function PracticeActivityEditor({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
         <div className="space-y-4">
           <label className="text-on-surface block text-sm font-medium">
             {t('studio.editor.lesson.titleLabel')}
@@ -289,6 +293,27 @@ export function PracticeActivityEditor({
             </RuntimeThemeProvider>
           </CardContent>
         </Card>
+        <AiEditPanel
+          api={api}
+          kind="practice"
+          getCurrentContent={() =>
+            serializeExerciseNode({
+              type: 'exercise',
+              title: title || undefined,
+              widget: widgetId ?? '',
+              config,
+            })
+          }
+          onApply={(item) => {
+            const node = parseExerciseNode(item.content);
+            if (!node) return;
+            setTitle(node.title ?? '');
+            setWidgetId(node.widget);
+            setConfig(node.config);
+          }}
+          onApplyBatch={(items) => onApplyBatch?.(items)}
+          onError={onError}
+        />
       </div>
       {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
     </div>

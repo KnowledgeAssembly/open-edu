@@ -1,10 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { LessonActivityEditor } from './LessonActivityEditor';
 import type { StudioApi } from '../studioApi.js';
+
+const { mockPanelHandlers } = vi.hoisted(() => ({
+  mockPanelHandlers: { onApply: vi.fn(), onApplyBatch: vi.fn() },
+}));
+
+vi.mock('./AiEditPanel.js', () => ({
+  AiEditPanel: ({
+    onApply,
+    onApplyBatch,
+  }: {
+    onApply: (item: unknown) => void;
+    onApplyBatch: (items: unknown[]) => void;
+  }) => {
+    mockPanelHandlers.onApply.mockImplementation(onApply);
+    mockPanelHandlers.onApplyBatch.mockImplementation(onApplyBatch);
+    return <div data-testid="ai-edit-panel" />;
+  },
+}));
 
 function wrap(ui: React.ReactElement) {
   return (
@@ -24,6 +42,8 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     exportOep: vi.fn(),
     readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: '# Title\n\nBody' }),
     writeFile: vi.fn().mockResolvedValue({ success: true }),
+    getAiStatus: vi.fn().mockResolvedValue({ available: false }),
+    generateItemEdit: vi.fn(),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -31,6 +51,28 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
 describe('LessonActivityEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('applies an AI draft by replacing the body and re-syncing the title', async () => {
+    const api = makeApi();
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByDisplayValue('Title');
+    mockPanelHandlers.onApply.mockClear();
+    await act(async () => {
+      mockPanelHandlers.onApply({
+        kind: 'lesson',
+        title: 'Fractions',
+        content: '# Fractions\n\nAll about halves.',
+      });
+    });
+    expect(screen.getByDisplayValue('Fractions')).toBeInTheDocument();
+    expect((screen.getByLabelText(/lesson content/i) as HTMLTextAreaElement).value).toContain(
+      '# Fractions',
+    );
   });
 
   it('loads markdown and extracts title from first heading', async () => {
