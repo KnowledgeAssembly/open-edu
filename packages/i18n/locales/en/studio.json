@@ -204,5 +204,14 @@
   "ai.overwriteTitle": "Replace course content?",
   "ai.overwriteLede": "This course already has content. Generating a new draft replaces it, and this cannot be undone from Studio.",
   "ai.overwriteConfirm": "Replace content",
-  "ai.overwriteCancel": "Cancel"
+  "ai.overwriteCancel": "Cancel",
+  "ai.aiTab": "Describe with AI",
+  "ai.specTab": "Upload spec",
+  "ai.specLabel": "course-spec.json / course-spec.md",
+  "ai.specHint": "Drop a course spec or choose a file",
+  "ai.browse": "Choose file",
+  "ai.upload": "Upload spec",
+  "ai.uploading": "Uploading…",
+  "ai.specInvalid": "Not a valid course spec. Use a .json or .md file that follows the openedu-course-spec format.",
+  "ai.uploadError": "Could not compile the spec. Check the file and try again."
 }

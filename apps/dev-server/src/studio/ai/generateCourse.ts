@@ -14,10 +14,13 @@ import type { AiGenerateErrorCode, AiGenerateResult } from './types.js';
 
 const MIN_NOTES_LENGTH = 40;
 
+export type CourseDraftSource =
+  | { kind: 'notes'; notes: string; completeText: (prompt: string) => Promise<string> }
+  | { kind: 'spec'; spec: string; extension: '.json' | '.md' };
+
 export interface GenerateCourseOptions {
-  notes: string;
+  source: CourseDraftSource;
   packageDir: string;
-  completeText: (prompt: string) => Promise<string>;
   compile?: typeof compileFromCourseCompiler;
   force?: boolean;
 }
@@ -84,10 +87,14 @@ function readManifestTitle(packageDir: string): string | undefined {
 export async function generateCourseDraft(
   options: GenerateCourseOptions,
 ): Promise<AiGenerateResult> {
-  const { notes, packageDir, completeText, force = false } = options;
+  const { source, packageDir, force = false } = options;
   const compile = options.compile ?? compileFromCourseCompiler;
 
-  if (notes.trim().length < MIN_NOTES_LENGTH) {
+  if (source.kind === 'spec' && source.spec.trim().length === 0) {
+    return errorResult('spec-invalid', 'Spec file is empty');
+  }
+
+  if (source.kind === 'notes' && source.notes.trim().length < MIN_NOTES_LENGTH) {
     return errorResult('notes-too-short', 'Add more detail');
   }
 
@@ -96,26 +103,38 @@ export async function generateCourseDraft(
   }
 
   let raw: string;
-  try {
-    raw = await completeText(buildCourseSpecPrompt(notes));
-  } catch (error) {
-    return errorResult(
-      'llm',
-      `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
+  if (source.kind === 'notes') {
+    try {
+      raw = await source.completeText(buildCourseSpecPrompt(source.notes));
+    } catch (error) {
+      return errorResult(
+        'llm',
+        `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  } else {
+    raw = source.spec;
   }
 
-  let spec: Record<string, unknown>;
-  try {
-    spec = extractJsonObject(raw);
-  } catch {
-    return errorResult('parse', 'Could not parse the draft');
+  let specText: string;
+  if (source.kind === 'notes') {
+    let spec: Record<string, unknown>;
+    try {
+      spec = extractJsonObject(raw);
+    } catch {
+      return errorResult('parse', 'Could not parse the draft');
+    }
+    specText = JSON.stringify(spec, null, 2);
+  } else {
+    specText = raw;
   }
 
   const tempDir = await mkdtemp(join(tmpdir(), 'openedu-studio-ai-'));
-  const specPath = join(tempDir, 'course-spec.json');
+  const scratchName =
+    source.kind === 'notes' ? 'course-spec.json' : `course-spec${source.extension}`;
+  const specPath = join(tempDir, scratchName);
   try {
-    await writeFile(specPath, JSON.stringify(spec, null, 2), 'utf-8');
+    await writeFile(specPath, specText, 'utf-8');
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     return errorResult(

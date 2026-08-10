@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -141,7 +141,9 @@ describe('QuizActivityEditor', () => {
     expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
 
     await userEvent.click(screen.getByRole('radio', { name: /option 2/i }));
-    expect(screen.getByRole('button', { name: /save/i })).toBeEnabled();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /save/i })).toBeEnabled();
+    });
   });
 
   it('cancels without writing when onCancel is provided', async () => {

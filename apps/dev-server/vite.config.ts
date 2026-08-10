@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
+import { defineConfig, loadEnv, type Plugin, type ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import {
   existsSync,
@@ -10,8 +10,9 @@ import {
   readdirSync,
 } from 'node:fs';
 import { readFile, writeFile, unlink, mkdir, rename, rm } from 'node:fs/promises';
-import { join, extname, dirname, relative, sep } from 'node:path';
+import { join, extname, dirname, relative, sep, resolve } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { fileURLToPath } from 'node:url';
 import { loadPackage, loadBundle } from '@open-edu/core';
 import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
 import {
@@ -27,7 +28,11 @@ import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outl
 import { getTemplateById } from './src/studio/templates/catalog.js';
 import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
-import { resolveWorkspace, scanWorkspace, isSafeRelativePath } from './src/studio/library/libraryIndex.js';
+import {
+  resolveWorkspace,
+  scanWorkspace,
+  isSafeRelativePath,
+} from './src/studio/library/libraryIndex.js';
 import {
   duplicateCourse,
   renameCourse,
@@ -39,6 +44,7 @@ import type { ActivitySummary } from './src/studio/types.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const ASSET_MIME_TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
@@ -436,26 +442,43 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler
+          // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler,
+          // or an uploaded course-spec.json / course-spec.md compiled without the LLM.
           if (pathname === '/api/studio/ai/generate' && method === 'POST') {
             if (!packageDir) {
               res.statusCode = 400;
               res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
               return;
             }
-            const body = (await parseJsonBody(req)) as { notes?: string; force?: boolean };
-            if (!body.notes || typeof body.notes !== 'string') {
+            const body = (await parseJsonBody(req)) as {
+              notes?: string;
+              spec?: string;
+              specExt?: string;
+              force?: boolean;
+            };
+            let source: import('./src/studio/ai/generateCourse.js').CourseDraftSource;
+            if (body.notes && typeof body.notes === 'string') {
+              source = { kind: 'notes', notes: body.notes, completeText: completeWithLlm };
+            } else if (body.spec && typeof body.spec === 'string') {
+              if (body.specExt !== '.json' && body.specExt !== '.md') {
+                res.statusCode = 400;
+                res.end(
+                  JSON.stringify({ code: 'spec-invalid', error: 'Unsupported spec extension' }),
+                );
+                return;
+              }
+              source = { kind: 'spec', spec: body.spec, extension: body.specExt };
+            } else {
               res.statusCode = 400;
-              res.end(JSON.stringify({ code: 'missing-notes', error: 'Missing notes' }));
+              res.end(JSON.stringify({ code: 'missing-spec', error: 'Missing spec or notes' }));
               return;
             }
             aiGenerating = true;
             let result: import('./src/studio/ai/types.js').AiGenerateResult;
             try {
               result = await generateCourseDraft({
-                notes: body.notes,
+                source,
                 packageDir,
-                completeText: completeWithLlm,
                 force: body.force === true,
               });
             } finally {
@@ -679,7 +702,8 @@ function eduPackageLoader(): Plugin {
               title?: string;
               courseRelativePaths?: string[];
             };
-            const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Unit';
+            const title =
+              typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Unit';
             const courseRelativePaths = Array.isArray(body.courseRelativePaths)
               ? body.courseRelativePaths
               : [];
@@ -1007,7 +1031,10 @@ function eduPackageLoader(): Plugin {
             const absOldPath = join(getCurrentDir(), oldPath);
             const absNewPath = join(getCurrentDir(), newPath);
 
-            if (!absOldPath.startsWith(getCurrentDir()) || !absNewPath.startsWith(getCurrentDir())) {
+            if (
+              !absOldPath.startsWith(getCurrentDir()) ||
+              !absNewPath.startsWith(getCurrentDir())
+            ) {
               res.statusCode = 403;
               res.end(JSON.stringify({ error: 'Forbidden' }));
               return;
@@ -1282,12 +1309,7 @@ function eduPackageLoader(): Plugin {
               if (existsSync(assetsDir)) {
                 await rm(assetsDir, { recursive: true, force: true });
               }
-              for (const rel of [
-                'workflow.json',
-                'package.json',
-                'rewards.json',
-                'cards.json',
-              ]) {
+              for (const rel of ['workflow.json', 'package.json', 'rewards.json', 'cards.json']) {
                 const abs = join(getCurrentDir(), rel);
                 if (existsSync(abs)) {
                   await rm(abs, { force: true });
@@ -1406,18 +1428,28 @@ function eduPackageLoader(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), eduPackageLoader()],
-  define: {
-    OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
-      ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
-      : '""',
-    OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
-      ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
-      : '""',
-  },
-  server: {
-    port: 4000,
-    open: true,
-  },
+export default defineConfig(({ mode }) => {
+  const envDir = resolve(__dirname);
+  const env = loadEnv(mode, envDir, '');
+  for (const [key, value] of Object.entries(env)) {
+    if (key.startsWith('LLM_') && !process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+
+  return {
+    plugins: [react(), eduPackageLoader()],
+    define: {
+      OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
+        ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
+        : '""',
+      OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
+        ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
+        : '""',
+    },
+    server: {
+      port: 4000,
+      open: true,
+    },
+  };
 });
