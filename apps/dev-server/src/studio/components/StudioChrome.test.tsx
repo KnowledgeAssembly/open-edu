@@ -19,12 +19,13 @@ function wrap(ui: React.ReactElement) {
 
 function renderChrome(props: {
   mode?: StudioMode;
+  onModeChange?: (m: StudioMode) => void;
   view?: StudioView;
   courseTitle?: string;
   minimal?: boolean;
   activityLabel?: string;
 }) {
-  const onModeChange = vi.fn();
+  const onModeChange = props.onModeChange ?? vi.fn();
   const onNavigate = vi.fn();
   return {
     onModeChange,

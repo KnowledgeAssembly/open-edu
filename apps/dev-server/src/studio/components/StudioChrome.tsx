@@ -175,10 +175,10 @@ export function StudioChrome({
                     {t(navItem.labelKey)}
                   </DropdownMenuItem>
                 ))}
-              <DropdownMenuSeparator />
-              <div className="px-2 py-2 md:hidden">
-                <ModeToggle mode={mode} onChange={onModeChange} />
-              </div>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-2 md:hidden">
+                  <ModeToggle mode={mode} onChange={onModeChange} />
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
