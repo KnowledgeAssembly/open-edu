@@ -88,18 +88,22 @@ describe('OutlineView', () => {
   });
 
   it('saves new order on move down', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /move intro down/i }));
+    await user.click(screen.getByRole('button', { name: /activity actions for intro/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /move intro down/i }));
     expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/q.json', 'nodes/a.md']);
   });
 
   it('adds a lesson and persists outline order', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /add lesson/i }));
+    await user.click(screen.getByRole('button', { name: /add activity/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /add lesson/i }));
     expect(api.writeFile).toHaveBeenCalled();
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     const path = writeCall.mock.calls[0]![0] as string;
@@ -110,10 +114,12 @@ describe('OutlineView', () => {
   });
 
   it('adds a quiz with a correct option', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: 'Add quiz' }));
+    await user.click(screen.getByRole('button', { name: /add activity/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /add quiz/i }));
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     const path = writeCall.mock.calls[0]![0] as string;
     expect(path.endsWith('.json')).toBe(true);
@@ -124,12 +130,14 @@ describe('OutlineView', () => {
   });
 
   it('adds a practice via the widget picker and persists outline order', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /add practice/i }));
+    await user.click(screen.getByRole('button', { name: /add activity/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /add practice/i }));
     const useButtons = await screen.findAllByRole('button', { name: /use this practice/i });
-    await userEvent.click(useButtons[0]!);
+    await user.click(useButtons[0]!);
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     const path = writeCall.mock.calls[0]![0] as string;
     expect(path.startsWith('nodes/practice-')).toBe(true);
@@ -143,12 +151,12 @@ describe('OutlineView', () => {
     expect(orderCall.mock.calls.at(-1)![0]).toEqual([...sampleActivities.map((a) => a.path), path]);
   });
 
-  it('navigates to edit for an activity', async () => {
+  it('navigates to edit for an activity by clicking the title', async () => {
+    const user = userEvent.setup();
     const onEdit = vi.fn();
     render(wrap(<OutlineView api={makeApi()} onEdit={onEdit} onError={() => {}} />));
     await screen.findByText('Intro');
-    const list = screen.getByRole('list');
-    await userEvent.click(within(list).getAllByRole('button', { name: /edit/i })[0]!);
+    await user.click(screen.getByRole('button', { name: 'Intro' }));
     expect(onEdit).toHaveBeenCalledWith('nodes/a.md');
   });
 
@@ -165,10 +173,12 @@ describe('OutlineView', () => {
     expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
   });
 
-  it('opens the AI draft dialog from the outline button', async () => {
+  it('opens the AI draft dialog from the add menu', async () => {
+    const user = userEvent.setup();
     render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /ai draft/i }));
+    await user.click(screen.getByRole('button', { name: /add activity/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /ai draft/i }));
     expect(screen.getByTestId('ai-add-dialog')).toBeInTheDocument();
   });
 
@@ -203,42 +213,39 @@ describe('OutlineView', () => {
     expect(orderCall.mock.calls.at(-1)![0]).toEqual([...sampleActivities.map((a) => a.path), path]);
   });
 
-  it('renders empty (not spinner) via within list when activities present', async () => {
+  it('renders listitems when activities present', async () => {
     render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
     const list = await screen.findByRole('list');
     expect(within(list).getAllByRole('listitem')).toHaveLength(2);
   });
 
-  it('deletes an activity and persists the new order', async () => {
+  it('deletes an activity via row menu and persists the new order', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
-    });
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    });
+    await user.click(screen.getByRole('button', { name: /activity actions for check/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /delete check/i }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
     expect(api.deleteFile).toHaveBeenCalledWith('nodes/q.json');
     expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/a.md']);
     expect(screen.queryByText('Check')).not.toBeInTheDocument();
   });
 
   it('cancel does not delete', async () => {
+    const user = userEvent.setup();
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
-    });
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-    });
+    await user.click(screen.getByRole('button', { name: /activity actions for check/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /delete check/i }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(api.deleteFile).not.toHaveBeenCalled();
     expect(screen.getByText('Check')).toBeInTheDocument();
   });
 
   it('deleting the last activity succeeds with an empty order', async () => {
+    const user = userEvent.setup();
     const api = makeApi({
       getOutline: vi.fn().mockResolvedValue({
         activities: [{ id: 'nodes/a.md', path: 'nodes/a.md', title: 'Intro', kind: 'lesson' }],
@@ -247,18 +254,16 @@ describe('OutlineView', () => {
     });
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: /delete intro/i }));
-    });
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    });
+    await user.click(screen.getByRole('button', { name: /activity actions for intro/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /delete intro/i }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
     expect(api.deleteFile).toHaveBeenCalledWith('nodes/a.md');
     expect(api.saveOutlineOrder).toHaveBeenCalledWith([]);
     expect(await screen.findByText('Add your first activity to get started.')).toBeInTheDocument();
   });
 
   it('reconciles with the server when persisting the new order fails', async () => {
+    const user = userEvent.setup();
     const getOutline = vi.fn().mockResolvedValue({ activities: sampleActivities, title: 'Test' });
     const onError = vi.fn();
     const api = makeApi({
@@ -267,13 +272,17 @@ describe('OutlineView', () => {
     });
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={onError} />));
     await screen.findByText('Intro');
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: /delete check/i }));
-    });
-    await act(async () => {
-      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    });
+    await user.click(screen.getByRole('button', { name: /activity actions for check/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /delete check/i }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onError).toHaveBeenCalledWith('save failed');
     expect(await screen.findByText('Check')).toBeInTheDocument();
+  });
+
+  it('only one Add control exists and no standalone Add lesson button outside a menu', async () => {
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    const addTriggers = screen.getAllByRole('button', { name: /add activity/i });
+    expect(addTriggers).toHaveLength(1);
   });
 });

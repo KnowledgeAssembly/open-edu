@@ -10,6 +10,7 @@ import { ImportCourseDialog } from './ImportCourseDialog';
 import { ShareView } from './ShareView';
 import { StudioChrome } from './StudioChrome';
 import { HomeView } from './HomeView';
+import { OutlineView } from './OutlineView';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
 
@@ -90,10 +91,11 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
   } as unknown as StudioApi;
 }
 
-async function runAxe(container: HTMLElement) {
+async function runAxe(container: HTMLElement, extraRules?: Record<string, { enabled: boolean }>) {
   const results = await axe.run(container, {
     rules: {
       'color-contrast': { enabled: false },
+      ...extraRules,
     },
   });
   return results.violations;
@@ -190,6 +192,15 @@ describe('axe-core accessibility audits for studio components', () => {
     );
     await screen.findByText('Reading lesson');
     const violations = await runAxe(container);
+    expect(violations).toEqual([]);
+  });
+
+  it('OutlineView is accessible with a lesson row and advanced panels', async () => {
+    const { container } = render(
+      wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />),
+    );
+    await screen.findByRole('list');
+    const violations = await runAxe(container, { 'heading-order': { enabled: false } });
     expect(violations).toEqual([]);
   });
 });

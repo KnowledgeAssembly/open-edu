@@ -251,7 +251,7 @@ describe('PracticeActivityEditor', () => {
     const onCancel = vi.fn();
     renderEditor(validNodeContent, { api, onCancel });
     await screen.findByDisplayValue('Planets quiz');
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     expect(writeCall).not.toHaveBeenCalled();

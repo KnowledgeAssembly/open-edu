@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Spinner } from '@open-edu/design-system';
+import { Button, PageHeader, Spinner } from '@open-edu/design-system';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { buildReadyCheck, isReadyToExport } from '../readyCheck.js';
@@ -100,10 +100,7 @@ export function ShareView({
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-6">
-      <div>
-        <h1 className="text-h1 text-on-surface">{t('studio.share.title')}</h1>
-        <p className="text-on-surface-variant mt-2">{t('studio.share.lede')}</p>
-      </div>
+      <PageHeader title={t('studio.share.title')} subtitle={t('studio.share.lede')} />
 
       <section aria-labelledby="studio-ready-heading">
         <h2 id="studio-ready-heading" className="text-h2 text-on-surface mb-4">

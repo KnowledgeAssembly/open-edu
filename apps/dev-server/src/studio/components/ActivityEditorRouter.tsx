@@ -41,7 +41,13 @@ export function ActivityEditorRouter({
     };
   }, [api, path, onError]);
 
-  if (kind === null) return <p className="p-6 text-sm">…</p>;
+  if (kind === null) {
+    return (
+      <div className="p-6" aria-busy>
+        <p className="text-on-surface-variant text-sm">{t('studio.editor.loading')}</p>
+      </div>
+    );
+  }
 
   if (kind === 'lesson') {
     return (

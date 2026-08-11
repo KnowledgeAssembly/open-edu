@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, EmptyState, Input } from '@open-edu/design-system';
+import { Badge, Button, EmptyState, Input, PageHeader } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
@@ -74,7 +74,7 @@ export function UnitBuilderView({
     return (
       <div className="mx-auto max-w-3xl space-y-8 p-6">
         <div>
-          <h1 className="text-h1 text-on-surface">{t('studio.unit.title')}</h1>
+          <PageHeader title={t('studio.unit.title')} />
           <p className="text-on-surface-variant mt-2">{t('studio.unit.lede')}</p>
         </div>
         <EmptyState heading={t('studio.unit.emptyCourses')} description="" />
@@ -85,7 +85,7 @@ export function UnitBuilderView({
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-6">
       <div>
-        <h1 className="text-h1 text-on-surface">{t('studio.unit.title')}</h1>
+        <PageHeader title={t('studio.unit.title')} />
         <p className="text-on-surface-variant mt-2">{t('studio.unit.lede')}</p>
       </div>
 

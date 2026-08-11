@@ -117,7 +117,7 @@ describe('LessonActivityEditor', () => {
         <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
       ),
     );
-    expect(await screen.findByText('Every lesson has a heading')).toBeInTheDocument();
+    expect(await screen.findByText('Needs a heading')).toBeInTheDocument();
   });
 
   it('saves content via writeFile', async () => {
@@ -148,9 +148,37 @@ describe('LessonActivityEditor', () => {
       ),
     );
     await screen.findByDisplayValue('Title');
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     expect(writeCall).not.toHaveBeenCalled();
+  });
+
+  it('shows coaching panel heading-missing label when body has no markdown heading', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: 'No heading here' }),
+    });
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    expect(await screen.findByText('Needs a heading')).toBeInTheDocument();
+  });
+
+  it('shows coaching panel heading-present after typing a heading', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: 'No heading here' }),
+    });
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByText('Needs a heading');
+    const textarea = screen.getByLabelText(/lesson content/i) as HTMLTextAreaElement;
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, '# A heading\n\nBody');
+    expect(await screen.findByText('Has a clear heading')).toBeInTheDocument();
   });
 });

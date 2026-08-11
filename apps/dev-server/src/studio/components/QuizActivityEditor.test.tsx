@@ -212,9 +212,32 @@ describe('QuizActivityEditor', () => {
       ),
     );
     await screen.findByLabelText(/question/i);
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
     const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
     expect(writeCall).not.toHaveBeenCalled();
+  });
+
+  it('shows coaching panel with positive checks for correct answer and min options', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({
+        path: 'nodes/q.json',
+        content: JSON.stringify({
+          type: 'quiz',
+          question: 'Q?',
+          options: [
+            { id: 'a', text: 'A', correct: true },
+            { id: 'b', text: 'B', correct: false },
+          ],
+        }),
+      }),
+    });
+    render(
+      wrap(
+        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    expect(await screen.findByText('A correct answer is selected')).toBeInTheDocument();
+    expect(screen.getByText('At least two answers')).toBeInTheDocument();
   });
 });

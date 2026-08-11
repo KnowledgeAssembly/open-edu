@@ -153,8 +153,7 @@ describe('StudioApp', () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     await screen.findByText('Intro');
-    const editButtons = await screen.findAllByRole('button', { name: /edit/i });
-    await userEvent.click(editButtons[0]!);
+    await userEvent.click(screen.getByRole('button', { name: 'Intro' }));
     expect(await screen.findByLabelText(/lesson content/i)).toBeInTheDocument();
   });
 
@@ -201,17 +200,17 @@ describe('StudioApp', () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     await screen.findByText('Intro');
-    expect(screen.getByText('Learning path', { selector: 'summary' })).toBeInTheDocument();
-    expect(screen.getByText('Rewards & cards', { selector: 'summary' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /learning path/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /rewards & cards/i })).toBeInTheDocument();
   });
 
   it('renders flow and rewards panel content when expanded', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     await screen.findByText('Intro');
-    await userEvent.click(screen.getByText('Learning path', { selector: 'summary' }));
+    await userEvent.click(screen.getByRole('button', { name: /learning path/i }));
     expect(await screen.findByRole('button', { name: /add a score rule/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByText('Rewards & cards', { selector: 'summary' }));
+    await userEvent.click(screen.getByRole('button', { name: /rewards & cards/i }));
     expect(
       await screen.findByRole('button', { name: /add completion badge/i }),
     ).toBeInTheDocument();
@@ -261,8 +260,8 @@ describe('StudioApp', () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     await screen.findByText('Intro');
-    const editButtons = screen.getAllByRole('button', { name: /edit/i });
-    await userEvent.click(editButtons[1]!);
+    await userEvent.click(screen.getByRole('button', { name: /activity actions for check/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /edit/i }));
     await screen.findByLabelText(/question/i);
     await waitFor(() => expect(mockBatchApply).toBeDefined());
     mockBatchApply.mockClear();

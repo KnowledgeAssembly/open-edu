@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Button,
-  Badge,
   Skeleton,
   EmptyState,
   Dialog,
@@ -10,8 +9,11 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
 } from '@open-edu/design-system';
-import { ArrowDown, ArrowUp, Plus, Pencil, Sparkles, Trash2 } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
@@ -19,22 +21,11 @@ import { WidgetPicker } from './WidgetPicker.js';
 import { AiAddDialog } from './AiAddDialog.js';
 import { FlowAdvancedPanel } from './FlowAdvancedPanel.js';
 import { RewardsCardsPanel } from './RewardsCardsPanel.js';
-import type { ActivitySummary, ActivityKind } from '../types.js';
+import { AddActivityMenu } from './AddActivityMenu.js';
+import { OutlineActivityRow } from './OutlineActivityRow.js';
+import type { ActivitySummary } from '../types.js';
 import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
-
-function kindLabelKey(kind: ActivityKind): string {
-  switch (kind) {
-    case 'lesson':
-      return 'studio.outline.kind.lesson';
-    case 'quiz':
-      return 'studio.outline.kind.quiz';
-    case 'practice':
-      return 'studio.outline.kind.practice';
-    default:
-      return 'studio.outline.kind.other';
-  }
-}
 
 function newLessonContent(): string {
   return '# New lesson\n\nStart writing here...\n';
@@ -207,24 +198,12 @@ export function OutlineView({
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-h1 text-on-surface">{t('studio.outline.title')}</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => void addActivity('lesson')}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
-            {t('studio.outline.addLesson')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => void addActivity('quiz')}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
-            {t('studio.outline.addQuiz')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
-            {t('studio.outline.addPractice')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setAiDialogOpen(true)}>
-            <Sparkles className="mr-1 h-4 w-4" aria-hidden="true" />
-            {t('studio.ai.item.addTitle')}
-          </Button>
-        </div>
+        <AddActivityMenu
+          onAddLesson={() => void addActivity('lesson')}
+          onAddQuiz={() => void addActivity('quiz')}
+          onAddPractice={() => setPickerOpen(true)}
+          onAddAi={() => setAiDialogOpen(true)}
+        />
       </div>
 
       {activities.length === 0 ? (
@@ -235,48 +214,17 @@ export function OutlineView({
       ) : (
         <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
           {activities.map((activity, index) => (
-            <li key={activity.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <span className="text-on-surface-variant w-6 text-right text-sm">{index + 1}.</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-on-surface truncate text-sm font-medium">{activity.title}</p>
-                <Badge variant="outline" className="text-on-surface-variant mt-1">
-                  {t(kindLabelKey(activity.kind))}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={t('studio.outline.moveUp', { title: activity.title })}
-                  disabled={index === 0 || saving}
-                  onClick={() => move(index, -1)}
-                >
-                  <ArrowUp className="h-4 w-4" aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={t('studio.outline.moveDown', { title: activity.title })}
-                  disabled={index === activities.length - 1 || saving}
-                  onClick={() => move(index, 1)}
-                >
-                  <ArrowDown className="h-4 w-4" aria-hidden="true" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => onEdit(activity.path)}>
-                  <Pencil className="mr-1 h-4 w-4" aria-hidden="true" />
-                  {t('studio.nav.editActivity')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={t('studio.outline.delete', { title: activity.title })}
-                  disabled={saving}
-                  onClick={() => setDeleteTarget(activity)}
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </div>
-            </li>
+            <OutlineActivityRow
+              key={activity.id}
+              activity={activity}
+              index={index}
+              total={activities.length}
+              saving={saving}
+              onEdit={onEdit}
+              onMoveUp={() => move(index, -1)}
+              onMoveDown={() => move(index, 1)}
+              onDelete={() => setDeleteTarget(activity)}
+            />
           ))}
         </ul>
       )}
@@ -322,23 +270,21 @@ export function OutlineView({
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-4">
-        <details className="border-outline-variant bg-surface rounded-lg border" open={false}>
-          <summary className="text-on-surface cursor-pointer select-none px-4 py-3 text-sm font-medium">
-            {t('studio.flow.title')}
-          </summary>
-          <div className="border-outline-variant border-t px-4 py-4">
-            <FlowAdvancedPanel api={api} onError={onError} />
-          </div>
-        </details>
-        <details className="border-outline-variant bg-surface rounded-lg border" open={false}>
-          <summary className="text-on-surface cursor-pointer select-none px-4 py-3 text-sm font-medium">
-            {t('studio.rewards.title')}
-          </summary>
-          <div className="border-outline-variant border-t px-4 py-4">
-            <RewardsCardsPanel api={api} onError={onError} />
-          </div>
-        </details>
+      <div className="border-outline-variant rounded-lg border px-4">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="flow">
+            <AccordionTrigger>{t('studio.flow.title')}</AccordionTrigger>
+            <AccordionContent>
+              <FlowAdvancedPanel api={api} onError={onError} />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="rewards">
+            <AccordionTrigger>{t('studio.rewards.title')}</AccordionTrigger>
+            <AccordionContent>
+              <RewardsCardsPanel api={api} onError={onError} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );
