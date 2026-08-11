@@ -102,6 +102,22 @@ export function ShareView({
     <div className="mx-auto max-w-3xl space-y-8 p-6">
       <PageHeader title={t('studio.share.title')} subtitle={t('studio.share.lede')} />
 
+      {exportedFileName ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="border-success bg-success/10 flex items-start gap-3 rounded-lg border p-4"
+        >
+          <Check className="text-success mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <div>
+            <p className="text-on-surface text-sm font-medium">
+              {t('studio.share.exportSuccess', { fileName: exportedFileName })}
+            </p>
+            <p className="text-on-surface-variant text-sm">{t('studio.share.exportSuccessLede')}</p>
+          </div>
+        </div>
+      ) : null}
+
       <section aria-labelledby="studio-ready-heading">
         <h2 id="studio-ready-heading" className="text-h2 text-on-surface mb-4">
           {t('studio.share.readyHeading')}

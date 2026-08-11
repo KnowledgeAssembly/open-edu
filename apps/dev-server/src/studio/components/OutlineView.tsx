@@ -23,6 +23,8 @@ import { FlowAdvancedPanel } from './FlowAdvancedPanel.js';
 import { RewardsCardsPanel } from './RewardsCardsPanel.js';
 import { AddActivityMenu } from './AddActivityMenu.js';
 import { OutlineActivityRow } from './OutlineActivityRow.js';
+import { OutlineHealthStrip } from './OutlineHealthStrip.js';
+import { buildReadyCheck, isReadyToExport } from '../readyCheck.js';
 import type { ActivitySummary } from '../types.js';
 import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
@@ -51,11 +53,13 @@ export function OutlineView({
   onEdit,
   onError,
   onTitleChange,
+  onShare,
 }: {
   api: StudioApi;
   onEdit: (path: string) => void;
   onError: (message: string) => void;
   onTitleChange?: (title: string) => void;
+  onShare?: () => void;
 }) {
   const { t } = useTranslation();
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
@@ -66,12 +70,17 @@ export function OutlineView({
   const [deleteTarget, setDeleteTarget] = useState<ActivitySummary | null>(null);
   const [settledPath, setSettledPath] = useState<string | null>(null);
   const [settleKey, setSettleKey] = useState(0);
+  const [title, setTitle] = useState('');
+  // title used in C3 left rail
+  void title;
+  const [health, setHealth] = useState<{ count: number; ready: boolean } | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const outline = await api.getOutline();
       setActivities(outline.activities);
+      setTitle(outline.title);
       onTitleChange?.(outline.title);
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
@@ -83,6 +92,41 @@ export function OutlineView({
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (loading || activities.length === 0) {
+      setHealth(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const outline = await api.getOutline();
+        const validation = await api.validate();
+        const files = new Map<string, string>();
+        for (const activity of outline.activities) {
+          try {
+            const file = await api.readFile(activity.path);
+            files.set(activity.path, file.content);
+          } catch {
+            // unreadable node counts as missing content
+          }
+        }
+        if (cancelled) return;
+        const items = buildReadyCheck({
+          title: outline.title,
+          files,
+          validationErrors: validation.errors,
+        });
+        setHealth({ count: outline.activities.length, ready: isReadyToExport(items) });
+      } catch {
+        if (!cancelled) setHealth(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activities, api, loading]);
 
   const persistOrder = async (next: ActivitySummary[]) => {
     setSaving(true);
@@ -217,6 +261,10 @@ export function OutlineView({
           onAddAi={() => setAiDialogOpen(true)}
         />
       </div>
+
+      {health ? (
+        <OutlineHealthStrip count={health.count} ready={health.ready} onShare={() => onShare?.()} />
+      ) : null}
 
       {activities.length === 0 ? (
         <EmptyState

@@ -125,7 +125,7 @@ describe('ShareView', () => {
     const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
     await userEvent.click(exportButton);
     expect(await screen.findByText('Share kit')).toBeInTheDocument();
-    expect(screen.getByText(/fractions-1\.0\.0\.oep/)).toBeInTheDocument();
+    expect(screen.getAllByText(/fractions-1\.0\.0\.oep/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('copies the interpolated classroom note and shows Copied', async () => {
@@ -140,5 +140,13 @@ describe('ShareView', () => {
       'Here is our OpenEdu course file (fractions-1.0.0.oep). Open the OpenEdu learner app → Install course → choose this file.',
     );
     expect(await screen.findByText('Copied')).toBeInTheDocument();
+  });
+
+  it('announces export success after downloading', async () => {
+    render(wrap(<ShareView api={makeApi()} onError={() => {}} />));
+    const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
+    await userEvent.click(exportButton);
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent('Exported fractions-1.0.0.oep');
   });
 });

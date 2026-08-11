@@ -145,7 +145,8 @@ describe('StudioApp', () => {
   it('navigates to share via top bar nav', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
-    await userEvent.click(await screen.findByRole('button', { name: /share/i }));
+    const shareButtons = await screen.findAllByRole('button', { name: /share/i });
+    await userEvent.click(shareButtons[0]!);
     expect(await screen.findByText('Ready check')).toBeInTheDocument();
   });
 
