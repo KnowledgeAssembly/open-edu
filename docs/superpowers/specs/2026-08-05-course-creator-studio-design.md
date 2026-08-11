@@ -217,6 +217,13 @@ Low-fidelity HTML wireframes for manual browser review:
 open docs/superpowers/specs/course-creator-studio/wireframes/index.html
 ```
 
+### 5.4 Visual modernization (follow-on)
+
+Capability Phases 0–4 largely shipped the teacher loop; visual craft still lags the wireframe intent. See:
+
+- Design: [`2026-08-10-studio-visual-modernization-design.md`](./2026-08-10-studio-visual-modernization-design.md)
+- Plan: [`../plans/2026-08-10-studio-visual-modernization.md`](../plans/2026-08-10-studio-visual-modernization.md)
+
 ---
 
 ## 6. Current state: audit & gaps
