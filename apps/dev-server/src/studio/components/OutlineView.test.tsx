@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within, act } from '@testing-library/react';
+import { render, screen, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -284,5 +284,18 @@ describe('OutlineView', () => {
     await screen.findByText('Intro');
     const addTriggers = screen.getAllByRole('button', { name: /add activity/i });
     expect(addTriggers).toHaveLength(1);
+  });
+
+  it('settles the moved row and restores focus to its menu trigger', async () => {
+    const user = userEvent.setup();
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await user.click(screen.getByRole('button', { name: /activity actions for intro/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /move intro down/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /activity actions for intro/i })).toHaveFocus();
+    });
+    expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/q.json', 'nodes/a.md']);
   });
 });

@@ -48,4 +48,15 @@ describe('HomeTemplateGallery', () => {
     await userEvent.click(useButton);
     expect(onApply).toHaveBeenCalledWith('reading-lesson');
   });
+
+  it('marks the selected template with the settle transition and elevation', () => {
+    const { container } = render(
+      wrap(
+        <HomeTemplateGallery selectedId="reading-lesson" onSelect={() => {}} onApply={() => {}} />,
+      ),
+    );
+    const card = container.querySelector('button');
+    expect(card?.className).toContain('studio-select-settle');
+    expect(card?.className).toContain('shadow-raised');
+  });
 });

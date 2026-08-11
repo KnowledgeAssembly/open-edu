@@ -64,6 +64,8 @@ export function OutlineView({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ActivitySummary | null>(null);
+  const [settledPath, setSettledPath] = useState<string | null>(null);
+  const [settleKey, setSettleKey] = useState(0);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -100,8 +102,18 @@ export function OutlineView({
     if (target < 0 || target >= next.length) return;
     const [item] = next.splice(index, 1);
     next.splice(target, 0, item!);
+    setSettledPath(item!.path);
+    setSettleKey((key) => key + 1);
     void persistOrder(next);
   };
+
+  useEffect(() => {
+    if (!settledPath) return;
+    const frame = requestAnimationFrame(() => {
+      document.querySelector<HTMLButtonElement>(`[data-row-menu="${settledPath}"]`)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [settledPath, settleKey]);
 
   const addActivity = async (kind: 'lesson' | 'quiz') => {
     const stamp = Date.now();
@@ -215,11 +227,14 @@ export function OutlineView({
         <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
           {activities.map((activity, index) => (
             <OutlineActivityRow
-              key={activity.id}
+              key={
+                activity.path === settledPath ? `${activity.id}-settle-${settleKey}` : activity.id
+              }
               activity={activity}
               index={index}
               total={activities.length}
               saving={saving}
+              settling={activity.path === settledPath}
               onEdit={onEdit}
               onMoveUp={() => move(index, -1)}
               onMoveDown={() => move(index, 1)}
