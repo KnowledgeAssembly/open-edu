@@ -162,7 +162,7 @@ export function LibraryView({
   if (loading) {
     return (
       <div className="mx-auto max-w-5xl p-6">
-        <Spinner aria-label={t('studio.library.title')} />
+        <Spinner aria-label={t('studio.library.loading')} />
       </div>
     );
   }

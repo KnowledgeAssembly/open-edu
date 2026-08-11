@@ -14,7 +14,7 @@ export function ModeToggle({
   const { t } = useTranslation();
   const checked = mode === 'developer';
   return (
-    <label className="text-on-surface-variant flex items-center gap-2 text-sm">
+    <label className="text-on-surface-variant flex items-center gap-2 text-xs">
       <span>{t('studio.mode.creator')}</span>
       <Switch
         checked={checked}

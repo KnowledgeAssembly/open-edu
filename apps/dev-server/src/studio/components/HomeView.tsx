@@ -10,11 +10,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@open-edu/design-system';
-import { cn } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
-import { STUDIO_TEMPLATES } from '../templates/catalog.js';
 import { listRecentCourses } from '../recentCourses.js';
 import { AiStartPanel } from './AiStartPanel.js';
+import { HomeTemplateGallery } from './HomeTemplateGallery.js';
 import type { StudioApi } from '../studioApi.js';
 import type { AiGenerateResult } from '../ai/types.js';
 
@@ -71,42 +70,11 @@ export function HomeView({
         </section>
       ) : null}
 
-      <section aria-labelledby="studio-templates-heading">
-        <h2 id="studio-templates-heading" className="text-h2 text-on-surface mb-4">
-          {t('studio.home.templatesHeading')}
-        </h2>
-        <p className="text-on-surface-variant mb-4 text-sm">{t('studio.home.templatesHint')}</p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {STUDIO_TEMPLATES.map((template) => {
-            const selected = selectedTemplateId === template.id;
-            return (
-              <button
-                key={template.id}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setSelectedTemplateId(selected ? null : template.id)}
-                className={cn(
-                  'border text-left transition-colors',
-                  selected ? 'border-primary bg-primary/5' : 'border-outline-variant bg-surface',
-                  'rounded-lg px-6 py-5',
-                )}
-              >
-                <h3 className="text-on-surface text-sm font-semibold">{t(template.titleKey)}</h3>
-                <p className="text-on-surface-variant mt-1 text-sm">{t(template.descriptionKey)}</p>
-              </button>
-            );
-          })}
-        </div>
-        <Button
-          variant="default"
-          size="sm"
-          className="mt-4"
-          disabled={!selectedTemplateId}
-          onClick={() => setPendingTemplateId(selectedTemplateId)}
-        >
-          {t('studio.home.useTemplate')}
-        </Button>
-      </section>
+      <HomeTemplateGallery
+        selectedId={selectedTemplateId}
+        onSelect={setSelectedTemplateId}
+        onApply={setPendingTemplateId}
+      />
 
       <section aria-labelledby="studio-ai-heading">
         <h2 id="studio-ai-heading" className="text-h2 text-on-surface mb-4">

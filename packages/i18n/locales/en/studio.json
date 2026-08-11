@@ -165,6 +165,7 @@
   "nav.library": "My courses",
   "library.title": "My courses",
   "library.lede": "Open, duplicate, or package lessons into a unit.",
+  "library.loading": "Loading your courses…",
   "library.workspace": "Workspace: {{workspace}}",
   "library.open": "Open",
   "library.duplicate": "Duplicate",

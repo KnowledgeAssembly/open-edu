@@ -66,6 +66,24 @@ export function StudioChrome({
 
   const needsCourse = !courseTitle;
 
+  const shareBtn = (
+    <Button variant="default" size="sm" disabled={needsCourse} onClick={() => onNavigate('share')}>
+      {t('studio.nav.share')}
+    </Button>
+  );
+  const shareAction = needsCourse ? (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span tabIndex={0}>{shareBtn}</span>
+        </TooltipTrigger>
+        <TooltipContent>{t('studio.nav.needsCourse')}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    shareBtn
+  );
+
   const renderNavButton = (navItem: { view: StudioView; labelKey: string }) => {
     const isActive = view === navItem.view;
     const btn = (
@@ -159,9 +177,7 @@ export function StudioChrome({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button variant="default" size="sm" onClick={() => onNavigate('share')}>
-            {t('studio.nav.share')}
-          </Button>
+          {shareAction}
         </>
       ) : null}
 

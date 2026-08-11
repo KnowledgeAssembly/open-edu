@@ -63,6 +63,12 @@ describe('StudioChrome', () => {
     expect(outlineBtn).toBeDisabled();
   });
 
+  it('disables the Share CTA when no courseTitle', () => {
+    renderChrome({ view: 'home', courseTitle: undefined });
+    const shareBtn = screen.getByRole('button', { name: /share/i });
+    expect(shareBtn).toBeDisabled();
+  });
+
   it('calls onNavigate on Share click', async () => {
     const { onNavigate } = renderChrome({ courseTitle: 'Test' });
     await userEvent.click(screen.getByRole('button', { name: /share/i }));
