@@ -8,6 +8,7 @@ import { LibraryView } from './LibraryView';
 import { UnitBuilderView } from './UnitBuilderView';
 import { ImportCourseDialog } from './ImportCourseDialog';
 import { ShareView } from './ShareView';
+import { StudioChrome } from './StudioChrome';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
 
@@ -151,6 +152,23 @@ describe('axe-core accessibility audits for studio components', () => {
     const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
     await user.click(exportButton);
     await screen.findByText('Share kit');
+    const violations = await runAxe(container);
+    expect(violations).toEqual([]);
+  });
+
+  it('StudioChrome is accessible on outline view', async () => {
+    const { container } = render(
+      wrap(
+        <StudioChrome
+          mode="creator"
+          onModeChange={() => {}}
+          onNavigate={() => {}}
+          courseTitle="Test Course"
+          view="outline"
+        />,
+      ),
+    );
+    await screen.findByText('OpenEdu Studio');
     const violations = await runAxe(container);
     expect(violations).toEqual([]);
   });

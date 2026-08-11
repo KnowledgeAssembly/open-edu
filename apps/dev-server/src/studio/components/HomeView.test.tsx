@@ -70,11 +70,14 @@ describe('HomeView', () => {
     expect(screen.getByText('Short unit')).toBeInTheDocument();
   });
 
-  it('applies a template after overwrite confirmation', async () => {
+  it('selects a template card and applies via single Use template button', async () => {
     const api = makeApi();
     const onOpened = vi.fn();
     renderHome({ api, onOpened });
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    const templateCard = await screen.findByRole('button', { name: /reading lesson/i });
+    await userEvent.click(templateCard);
+    expect(templateCard).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByRole('button', { name: /use template/i }));
     expect(api.applyTemplate).not.toHaveBeenCalled();
     expect(screen.getByText('Replace this course?')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
@@ -85,7 +88,9 @@ describe('HomeView', () => {
   it('cancels template overwrite without applying', async () => {
     const api = makeApi();
     renderHome({ api });
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    const templateCard = await screen.findByRole('button', { name: /reading lesson/i });
+    await userEvent.click(templateCard);
+    await userEvent.click(screen.getByRole('button', { name: /use template/i }));
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(api.applyTemplate).not.toHaveBeenCalled();
     expect(screen.queryByText('Replace this course?')).not.toBeInTheDocument();
@@ -97,7 +102,9 @@ describe('HomeView', () => {
       applyTemplate: vi.fn().mockRejectedValue(new Error('boom')),
     });
     renderHome({ api, onError });
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    const templateCard = await screen.findByRole('button', { name: /reading lesson/i });
+    await userEvent.click(templateCard);
+    await userEvent.click(screen.getByRole('button', { name: /use template/i }));
     await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
     expect(onError).toHaveBeenCalledWith('boom');
   });
@@ -130,9 +137,12 @@ describe('HomeView', () => {
     expect(await screen.findByText('My Course')).toBeInTheDocument();
   });
 
-  it('shows empty recent message when no courses', async () => {
+  it('shows empty recent with description when no courses', async () => {
     renderHome();
     expect(await screen.findByText('No recent courses yet.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Start from a template or import a course folder to see it here.'),
+    ).toBeInTheDocument();
   });
 
   it('opens a recent course via Open button', async () => {

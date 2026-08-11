@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardTitle,
   Textarea,
+  Spinner,
   EmptyState,
   Dialog,
   DialogContent,
@@ -172,13 +173,13 @@ export function AiStartPanel({
             </TabsList>
 
             <TabsContent value="ai" className="mt-4">
-              {status === 'unavailable' ? (
+              {status === 'checking' ? (
+                <Spinner aria-label={t('studio.ai.checking')} />
+              ) : status === 'unavailable' ? (
                 <EmptyState
                   heading={t('studio.ai.unavailable')}
                   description={t('studio.ai.useTemplateHint')}
                 />
-              ) : status === 'checking' ? (
-                <p className="text-on-surface-variant text-sm">…</p>
               ) : (
                 <div className="space-y-4">
                   <label className="text-on-surface block text-sm font-medium">

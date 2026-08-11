@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
@@ -67,5 +68,12 @@ describe('CreatorPreview', () => {
   it('shows a reset progress button', async () => {
     render(wrap(<CreatorPreview pkg={mockPkg} />));
     expect(await screen.findByRole('button', { name: /reset progress/i })).toBeInTheDocument();
+  });
+
+  it('calls onExit when Exit preview button is clicked', async () => {
+    const onExit = vi.fn();
+    render(wrap(<CreatorPreview pkg={mockPkg} onExit={onExit} />));
+    await userEvent.click(await screen.findByRole('button', { name: /exit preview/i }));
+    expect(onExit).toHaveBeenCalled();
   });
 });

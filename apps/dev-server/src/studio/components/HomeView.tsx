@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import {
   Button,
-  Card,
-  CardTitle,
-  CardDescription,
-  CardContent,
+  PageHeader,
   EmptyState,
   Dialog,
   DialogContent,
@@ -13,6 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@open-edu/design-system';
+import { cn } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { STUDIO_TEMPLATES } from '../templates/catalog.js';
 import { listRecentCourses } from '../recentCourses.js';
@@ -39,6 +37,7 @@ export function HomeView({
 }) {
   const { t } = useTranslation();
   const recent = listRecentCourses();
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
 
@@ -48,6 +47,7 @@ export function HomeView({
     try {
       await api.applyTemplate(pendingTemplateId);
       setPendingTemplateId(null);
+      setSelectedTemplateId(null);
       onOpened();
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
@@ -58,25 +58,16 @@ export function HomeView({
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6">
-      <div>
-        <h1 className="text-h1 text-on-surface">{t('studio.home.title')}</h1>
-        <p className="text-on-surface-variant mt-2">{t('studio.home.lede')}</p>
-      </div>
+      <PageHeader title={t('studio.home.title')} subtitle={t('studio.home.lede')} />
 
       {courseTitle ? (
         <section aria-labelledby="studio-continue-heading">
-          <h2 id="studio-continue-heading" className="text-h2 text-on-surface mb-4">
-            {t('studio.home.continueHeading')}
-          </h2>
-          <Card className="border-outline-variant bg-surface">
-            <CardTitle className="text-on-surface px-6 pt-6">{courseTitle}</CardTitle>
-            <CardDescription className="px-6 pt-2">{t('studio.home.continueLede')}</CardDescription>
-            <CardContent className="flex items-center gap-3 px-6 pt-4">
-              <Button variant="default" size="sm" onClick={onOpenCurrent}>
-                {t('studio.home.openCurrentCourse')}
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="border-outline-variant bg-surface flex items-center justify-between rounded-lg border px-4 py-3">
+            <span className="text-on-surface text-sm font-medium">{courseTitle}</span>
+            <Button variant="default" size="sm" onClick={onOpenCurrent}>
+              {t('studio.home.openCurrentCourse')}
+            </Button>
+          </div>
         </section>
       ) : null}
 
@@ -84,23 +75,37 @@ export function HomeView({
         <h2 id="studio-templates-heading" className="text-h2 text-on-surface mb-4">
           {t('studio.home.templatesHeading')}
         </h2>
+        <p className="text-on-surface-variant mb-4 text-sm">{t('studio.home.templatesHint')}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {STUDIO_TEMPLATES.map((template) => (
-            <Card key={template.id} className="border-outline-variant bg-surface">
-              <CardTitle className="text-on-surface px-6 pt-6">{t(template.titleKey)}</CardTitle>
-              <CardDescription className="px-6 pt-2">{t(template.descriptionKey)}</CardDescription>
-              <CardContent className="flex items-center gap-3 px-6 pt-4">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setPendingTemplateId(template.id)}
-                >
-                  {t('studio.home.useTemplate')}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {STUDIO_TEMPLATES.map((template) => {
+            const selected = selectedTemplateId === template.id;
+            return (
+              <button
+                key={template.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setSelectedTemplateId(selected ? null : template.id)}
+                className={cn(
+                  'border text-left transition-colors',
+                  selected ? 'border-primary bg-primary/5' : 'border-outline-variant bg-surface',
+                  'rounded-lg px-6 py-5',
+                )}
+              >
+                <h3 className="text-on-surface text-sm font-semibold">{t(template.titleKey)}</h3>
+                <p className="text-on-surface-variant mt-1 text-sm">{t(template.descriptionKey)}</p>
+              </button>
+            );
+          })}
         </div>
+        <Button
+          variant="default"
+          size="sm"
+          className="mt-4"
+          disabled={!selectedTemplateId}
+          onClick={() => setPendingTemplateId(selectedTemplateId)}
+        >
+          {t('studio.home.useTemplate')}
+        </Button>
       </section>
 
       <section aria-labelledby="studio-ai-heading">
@@ -115,12 +120,22 @@ export function HomeView({
           <h2 id="studio-recent-heading" className="text-h2 text-on-surface">
             {t('studio.home.recentHeading')}
           </h2>
-          <Button variant="outline" size="sm" onClick={onOpenLibrary}>
-            {t('studio.nav.library')}
-          </Button>
+          {recent.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={onOpenLibrary}>
+              {t('studio.nav.library')}
+            </Button>
+          ) : null}
         </div>
         {recent.length === 0 ? (
-          <EmptyState heading={t('studio.home.emptyRecent')} description="" />
+          <EmptyState
+            heading={t('studio.home.emptyRecent')}
+            description={t('studio.home.emptyRecentDescription')}
+            action={
+              <Button variant="default" size="sm" onClick={onOpenLibrary}>
+                {t('studio.nav.library')}
+              </Button>
+            }
+          />
         ) : (
           <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
             {recent.map((course) => (

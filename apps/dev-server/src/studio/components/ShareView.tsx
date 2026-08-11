@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button } from '@open-edu/design-system';
+import { Button, Spinner } from '@open-edu/design-system';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { buildReadyCheck, isReadyToExport } from '../readyCheck.js';
@@ -110,7 +110,7 @@ export function ShareView({
           {t('studio.share.readyHeading')}
         </h2>
         {items === null ? (
-          <p className="text-on-surface-variant text-sm">…</p>
+          <Spinner aria-label={t('studio.share.readyHeading')} />
         ) : (
           <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
             {items.map((item) => (
