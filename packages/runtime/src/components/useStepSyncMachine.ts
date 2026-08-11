@@ -110,10 +110,7 @@ export function stepSyncReducer(
   }
 }
 
-export function useStepSyncMachine(
-  totalSteps: number,
-  initialRevealed = 0,
-): StepSyncMachine {
+export function useStepSyncMachine(totalSteps: number, initialRevealed = 0): StepSyncMachine {
   const safeTotal = Math.max(1, totalSteps);
 
   const [state, rawDispatch] = useReducer(

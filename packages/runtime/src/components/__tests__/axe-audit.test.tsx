@@ -125,7 +125,11 @@ describe('axe-core accessibility audits', () => {
     };
 
     const { container } = render(
-      <CanvasAnimationRenderer config={config} reducedMotion={false} ariaLabel="Sorting visualization" />,
+      <CanvasAnimationRenderer
+        config={config}
+        reducedMotion={false}
+        ariaLabel="Sorting visualization"
+      />,
       { wrapper },
     );
     const violations = await runAxe(container);

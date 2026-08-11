@@ -82,8 +82,9 @@ export const DownloadedCourseList = React.forwardRef<HTMLDivElement, DownloadedC
                       {(bundle.bundleManifest.title as string) ?? bundle.id}
                     </p>
                     <p className="text-on-surface/60 text-caption">
-                      v{bundle.version} · {t('learner.downloads.modules', { count: String(bundle.modules.length) })} · Downloaded{' '}
-                      {formatDate(bundle.downloadedAt)}
+                      v{bundle.version} ·{' '}
+                      {t('learner.downloads.modules', { count: String(bundle.modules.length) })} ·
+                      Downloaded {formatDate(bundle.downloadedAt)}
                     </p>
                   </div>
                 </div>

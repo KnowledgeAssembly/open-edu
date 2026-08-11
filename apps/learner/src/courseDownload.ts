@@ -112,15 +112,13 @@ export async function installFromSource(source: CourseSource): Promise<InstallRe
           modules: (course.modules as Array<Record<string, unknown>>).map((m) => ({
             manifest: m.manifest as Record<string, unknown>,
             nodes: (m.nodes as Array<{ relativePath: string; content: string }>) ?? [],
-            assets: ((m.assets as Array<{ path: string; data: ArrayBuffer }>) ?? []).map(
-              (a) => ({
-                path: a.path,
-                data:
-                  a.data instanceof ArrayBuffer
-                    ? a.data
-                    : new Uint8Array(a.data as Iterable<number>).buffer,
-              }),
-            ),
+            assets: ((m.assets as Array<{ path: string; data: ArrayBuffer }>) ?? []).map((a) => ({
+              path: a.path,
+              data:
+                a.data instanceof ArrayBuffer
+                  ? a.data
+                  : new Uint8Array(a.data as Iterable<number>).buffer,
+            })),
             workflow: m.workflow as Record<string, unknown> | undefined,
             rewards: m.rewards as Record<string, unknown> | undefined,
             cards: m.cards as Record<string, unknown> | undefined,
@@ -176,15 +174,13 @@ export async function installFromSource(source: CourseSource): Promise<InstallRe
           modules: (course.modules as Array<Record<string, unknown>>).map((m) => ({
             manifest: m.manifest as Record<string, unknown>,
             nodes: (m.nodes as Array<{ relativePath: string; content: string }>) ?? [],
-            assets: ((m.assets as Array<{ path: string; data: ArrayBuffer }>) ?? []).map(
-              (a) => ({
-                path: a.path,
-                data:
-                  a.data instanceof ArrayBuffer
-                    ? a.data
-                    : new Uint8Array(a.data as Iterable<number>).buffer,
-              }),
-            ),
+            assets: ((m.assets as Array<{ path: string; data: ArrayBuffer }>) ?? []).map((a) => ({
+              path: a.path,
+              data:
+                a.data instanceof ArrayBuffer
+                  ? a.data
+                  : new Uint8Array(a.data as Iterable<number>).buffer,
+            })),
             workflow: m.workflow as Record<string, unknown> | undefined,
             rewards: m.rewards as Record<string, unknown> | undefined,
             cards: m.cards as Record<string, unknown> | undefined,

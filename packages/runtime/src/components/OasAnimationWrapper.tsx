@@ -108,9 +108,7 @@ export function OasAnimationWrapper({
     (status) => {
       if (status === 'completed') onCompleteRef.current?.();
     },
-    controlledStep !== undefined || onStepChange
-      ? { controlledStep, onStepChange }
-      : undefined,
+    controlledStep !== undefined || onStepChange ? { controlledStep, onStepChange } : undefined,
   );
 
   useLayoutEffect(() => {
@@ -320,8 +318,7 @@ export function OasAnimationWrapper({
           <DotLottiePlayer
             src={resolvedSrc!}
             autoplay={
-              !stepIdle &&
-              (shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig))
+              !stepIdle && (shouldAutoplay(resolvedConfig) || shouldAutoplayStep(resolvedConfig))
             }
             loop={resolvedConfig.loop ?? resolvedConfig.trigger === 'step'}
             speed={resolvedConfig.speed}

@@ -432,11 +432,11 @@ export function CatalogPage({
               </div>
             </section>
           )}
-    
+
           {continueList.length > 0 && allBundleSummaries.length > 0 && (
             <SectionDivider density="minimal" className="mb-xl" />
           )}
-    
+
           {allBundleSummaries.length > 0 && (
             <section className="mb-xl" data-testid="bundle-list-section">
               <h2 className="text-h2 font-display text-on-surface mb-md">
@@ -514,7 +514,9 @@ export function CatalogPage({
                               }
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">{t('learner.catalog.remove_installed')}</span>
+                              <span className="sr-only">
+                                {t('learner.catalog.remove_installed')}
+                              </span>
                             </Button>
                           )}
                         </div>
@@ -525,9 +527,9 @@ export function CatalogPage({
               </div>
             </section>
           )}
-    
+
           <SectionDivider density="minimal" className="mb-xl" />
-    
+
           {tags.length > 0 && (
             <div className="gap-sm mb-md flex flex-wrap" data-testid="filter-chips">
               <Button
@@ -551,7 +553,7 @@ export function CatalogPage({
               ))}
             </div>
           )}
-    
+
           <div className="gap-md mb-md flex items-center" data-testid="sort-controls">
             <span className="text-on-surface-variant text-body-ui font-semibold">
               {t('learner.catalog.sort_label')}
@@ -566,11 +568,13 @@ export function CatalogPage({
               <SelectContent>
                 <SelectItem value="newest">{t('learner.catalog.sort_newest')}</SelectItem>
                 <SelectItem value="inProgress">{t('learner.catalog.in_progress_first')}</SelectItem>
-                <SelectItem value="alphabetical">{t('learner.catalog.sort_alphabetical')}</SelectItem>
+                <SelectItem value="alphabetical">
+                  {t('learner.catalog.sort_alphabetical')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
-    
+
           {sorted.length === 0 ? (
             <EmptyState
               variant="no-results"
