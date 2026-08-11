@@ -15,7 +15,6 @@ import {
 } from './prompts/index.js';
 import { parseExerciseNode, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import { getCuratedWidget } from '../widgets/curatedCatalog.js';
-import { validateWidgetConfigForType } from '../../editor/WidgetValidator.js';
 import type { ItemIntent, ItemIntentParams } from './types.js';
 import type { DraftItem } from './types.js';
 import type { AiItemAddResult, AiItemEditResult } from './types.js';
@@ -162,12 +161,6 @@ export function validateItemDraft(item: DraftItem, opts: ItemValidationOptions):
   }
   if (!getCuratedWidget(node.widget)) {
     return `Widget "${node.widget}" is not in the curated catalog`;
-  }
-  const errors = validateWidgetConfigForType(node.widget, node.config);
-  if (errors.length > 0) {
-    return `Widget config is invalid: ${errors
-      .map((error) => `${error.path}: ${error.message}`)
-      .join('; ')}`;
   }
   let parsedJson: unknown;
   try {

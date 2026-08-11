@@ -30,14 +30,6 @@ vi.mock('../widgets/curatedCatalog.js', () => ({
   listCuratedWidgets: () => [multipleChoice],
 }));
 
-vi.mock('../../editor/WidgetValidator.js', () => ({
-  validateWidgetConfigForType: vi.fn(() => []),
-}));
-
-const validateWidgetConfigForType = vi.mocked(
-  (await import('../../editor/WidgetValidator.js')).validateWidgetConfigForType,
-);
-
 function validQuizJson(optionCount: number, correctIndex = 0): string {
   const options = Array.from({ length: optionCount }, (_, i) => ({
     id: String.fromCharCode(97 + i),
@@ -158,18 +150,6 @@ describe('mapToDraftItem / validateItemDraft', () => {
       config: { questions: [] },
     });
     expect(validateItemDraft(item, { expectedOptionCount: 1 })).toBeNull();
-  });
-
-  it('rejects a practice with an invalid config', () => {
-    validateWidgetConfigForType.mockReturnValueOnce([
-      { path: 'questions', message: 'must be an array', severity: 'error', code: 'invalid_type' },
-    ]);
-    const item = mapToDraftItem('practice', {
-      widget: 'core.multiple-choice',
-      title: 'P',
-      config: { questions: 'nope' },
-    });
-    expect(validateItemDraft(item, { expectedOptionCount: 1 })).toMatch(/config is invalid/);
   });
 });
 
