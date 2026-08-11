@@ -167,6 +167,7 @@ export function StudioApp({
           onEdit={handleEdit}
           onError={handleError}
           onTitleChange={setCourseTitle}
+          onShare={() => handleNavigate('share')}
         />
       );
       break;
