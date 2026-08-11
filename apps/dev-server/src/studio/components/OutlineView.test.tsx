@@ -35,6 +35,15 @@ vi.mock('../widgets/curatedCatalog.js', () => ({
     id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
 }));
 
+const { mockAcceptDraft } = vi.hoisted(() => ({ mockAcceptDraft: vi.fn() }));
+
+vi.mock('./AiAddDialog.js', () => ({
+  AiAddDialog: ({ onAccept }: { onAccept: (item: unknown) => void }) => {
+    mockAcceptDraft.mockImplementation(onAccept);
+    return <div data-testid="ai-add-dialog" />;
+  },
+}));
+
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -59,6 +68,8 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     readFile: vi.fn(),
     writeFile: vi.fn().mockResolvedValue({ success: true }),
     deleteFile: vi.fn().mockResolvedValue({ success: true }),
+    getAiStatus: vi.fn().mockResolvedValue({ available: true }),
+    generateItemAdd: vi.fn(),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -152,6 +163,44 @@ describe('OutlineView', () => {
     const api = makeApi({ getOutline: vi.fn().mockRejectedValue(new Error('nope')) });
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={onError} />));
     expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
+  });
+
+  it('opens the AI draft dialog from the outline button', async () => {
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('button', { name: /ai draft/i }));
+    expect(screen.getByTestId('ai-add-dialog')).toBeInTheDocument();
+  });
+
+  it('accepting an AI draft writes the file, appends the row, and persists order', async () => {
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    mockAcceptDraft.mockClear();
+
+    await act(async () => {
+      mockAcceptDraft({
+        kind: 'quiz',
+        title: 'Drafted quiz',
+        content: JSON.stringify({
+          type: 'quiz',
+          question: 'Drafted?',
+          options: [
+            { id: 'a', text: 'A', correct: true },
+            { id: 'b', text: 'B', correct: false },
+            { id: 'c', text: 'C', correct: false },
+            { id: 'd', text: 'D', correct: false },
+          ],
+        }),
+      });
+    });
+
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    const path = writeCall.mock.calls[0]![0] as string;
+    expect(path).toMatch(/^nodes\/quiz-\d+\.json$/);
+    expect(api.saveOutlineOrder).toHaveBeenCalled();
+    const orderCall = api.saveOutlineOrder as ReturnType<typeof vi.fn>;
+    expect(orderCall.mock.calls.at(-1)![0]).toEqual([...sampleActivities.map((a) => a.path), path]);
   });
 
   it('renders empty (not spinner) via within list when activities present', async () => {

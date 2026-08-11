@@ -6,6 +6,24 @@ import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { ActivityEditorRouter } from './ActivityEditorRouter';
 import type { StudioApi } from '../studioApi.js';
 
+const { mockPanelHandlers } = vi.hoisted(() => ({
+  mockPanelHandlers: { onApply: vi.fn(), onApplyBatch: vi.fn() },
+}));
+
+vi.mock('./AiEditPanel.js', () => ({
+  AiEditPanel: ({
+    onApply,
+    onApplyBatch,
+  }: {
+    onApply: (item: unknown) => void;
+    onApplyBatch: (items: unknown[]) => void;
+  }) => {
+    mockPanelHandlers.onApply.mockImplementation(onApply);
+    mockPanelHandlers.onApplyBatch.mockImplementation(onApplyBatch);
+    return <div data-testid="ai-edit-panel" />;
+  },
+}));
+
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -24,6 +42,8 @@ function makeApi(content: string, path = 'nodes/x.md'): StudioApi {
     exportOep: vi.fn(),
     readFile: vi.fn().mockResolvedValue({ path, content }),
     writeFile: vi.fn().mockResolvedValue({ success: true }),
+    getAiStatus: vi.fn().mockResolvedValue({ available: false }),
+    generateItemEdit: vi.fn(),
   } as unknown as StudioApi;
 }
 
@@ -120,5 +140,26 @@ describe('ActivityEditorRouter', () => {
     await screen.findByLabelText(/lesson content/i);
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('threads onApplyBatch to the active editor', async () => {
+    const onApplyBatch = vi.fn();
+    render(
+      wrap(
+        <ActivityEditorRouter
+          api={makeApi('# Hi', 'nodes/l.md')}
+          path="nodes/l.md"
+          onSaved={() => {}}
+          onError={() => {}}
+          onApplyBatch={onApplyBatch}
+        />,
+      ),
+    );
+    await screen.findByLabelText(/lesson content/i);
+    expect(mockPanelHandlers.onApplyBatch).toBeDefined();
+    mockPanelHandlers.onApplyBatch.mockClear();
+    const items = [{ kind: 'lesson', title: 'New', content: '# New\n\nBody' }];
+    mockPanelHandlers.onApplyBatch(items);
+    expect(onApplyBatch).toHaveBeenCalledWith(items);
   });
 });

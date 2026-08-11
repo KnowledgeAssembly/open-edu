@@ -28,6 +28,17 @@ export interface WidgetCatalogEntry {
     commonMisconceptions?: string[];
     generationHints?: string[];
   };
+  guide?: {
+    oneLiner: string;
+    whatItDoes: string;
+    whenToUse: string[];
+    setupSteps: string[];
+    configFields: Array<{ name: string; type: string; required: boolean; description: string }>;
+    exampleJson: string;
+    tips: string[];
+    sidebarPosition: number;
+    relatedWidgets?: Array<{ id: string; name: string; domain: string; slug: string }>;
+  };
 }
 
 export interface WidgetCatalogInput {

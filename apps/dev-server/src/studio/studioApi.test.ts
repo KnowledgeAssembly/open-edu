@@ -92,6 +92,63 @@ describe('studioApi client', () => {
     expect(result).toEqual({ available: true });
   });
 
+  it('generateItemAdd posts kind + description to /item/add', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ ok: true, item: { kind: 'lesson', title: 'L', content: '# L' } }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    const result = await api.generateItemAdd('lesson', 'Explain fractions');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/item/add');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      kind: 'lesson',
+      description: 'Explain fractions',
+    });
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it('generateItemEdit posts kind + intent + currentContent + params to /item/edit', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          items: [{ kind: 'lesson', title: 'L', content: '# L' }],
+        }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    await api.generateItemEdit('lesson', 'translate', '# Hi', { targetLocale: 'es' });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/item/edit');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      kind: 'lesson',
+      intent: 'translate',
+      currentContent: '# Hi',
+      params: { targetLocale: 'es' },
+    });
+  });
+
+  it('generateItemEdit omits params when undefined', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: true, items: [] }), { status: 200 }),
+    );
+    const api = createStudioApi();
+    await api.generateItemEdit('lesson', 'rewrite', '# Hi');
+    const [, init] = fetchMock.mock.calls[0]!;
+    expect(JSON.parse(init?.body as string)).toEqual({
+      kind: 'lesson',
+      intent: 'rewrite',
+      currentContent: '# Hi',
+      params: undefined,
+    });
+  });
+
   it('generateFromNotes posts notes to the AI generate endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(

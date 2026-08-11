@@ -10,14 +10,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@open-edu/design-system';
-import { ArrowDown, ArrowUp, Plus, Pencil, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Pencil, Sparkles, Trash2 } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
+import { AiAddDialog } from './AiAddDialog.js';
 import { FlowAdvancedPanel } from './FlowAdvancedPanel.js';
 import { RewardsCardsPanel } from './RewardsCardsPanel.js';
 import type { ActivitySummary, ActivityKind } from '../types.js';
+import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
 
 function kindLabelKey(kind: ActivityKind): string {
@@ -68,6 +70,7 @@ export function OutlineView({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ActivitySummary | null>(null);
 
   const refresh = useCallback(async () => {
@@ -150,6 +153,22 @@ export function OutlineView({
     }
   };
 
+  const addAiDraft = async (item: DraftItem) => {
+    const stamp = Date.now();
+    const ext = item.kind === 'lesson' ? '.md' : '.json';
+    const path = `nodes/${item.kind}-${stamp}${ext}`;
+    try {
+      await api.writeFile(path, item.content);
+      const next: ActivitySummary[] = [
+        ...activities,
+        { id: path, path, title: item.title, kind: item.kind },
+      ];
+      await persistOrder(next);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : t('studio.errors.generic'));
+    }
+  };
+
   const removeActivity = async (activity: ActivitySummary) => {
     setSaving(true);
     try {
@@ -186,6 +205,10 @@ export function OutlineView({
           <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
             <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
             {t('studio.outline.addPractice')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setAiDialogOpen(true)}>
+            <Sparkles className="mr-1 h-4 w-4" aria-hidden="true" />
+            {t('studio.ai.item.addTitle')}
           </Button>
         </div>
       </div>
@@ -244,6 +267,13 @@ export function OutlineView({
         open={pickerOpen}
         onOpenChange={setPickerOpen}
         onSelect={(widget) => void addPractice(widget)}
+      />
+      <AiAddDialog
+        api={api}
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
+        onAccept={(item) => void addAiDraft(item)}
+        onError={onError}
       />
 
       <Dialog
