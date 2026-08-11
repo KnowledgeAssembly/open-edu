@@ -1,4 +1,4 @@
-import { Button, Badge } from '@open-edu/design-system';
+import { Button, Badge, PageHeader } from '@open-edu/design-system';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import type { AiGenerateResult } from '../ai/types.js';
@@ -29,10 +29,8 @@ export function AiReviewView({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
-      <div>
-        <h1 className="text-h1 text-on-surface">{t('studio.ai.reviewTitle')}</h1>
-        <p className="text-on-surface-variant mt-2">{t('studio.ai.reviewLede')}</p>
-      </div>
+      <PageHeader title={t('studio.ai.reviewTitle')} />
+      <p className="text-on-surface-variant mt-2">{t('studio.ai.reviewLede')}</p>
 
       <section aria-labelledby="ai-draft-outline-heading">
         <h2 id="ai-draft-outline-heading" className="text-h2 text-on-surface mb-4">

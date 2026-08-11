@@ -138,7 +138,7 @@ describe('ActivityEditorRouter', () => {
       ),
     );
     await screen.findByLabelText(/lesson content/i);
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 

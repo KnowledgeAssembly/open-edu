@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
   Input,
+  PageHeader,
 } from '@open-edu/design-system';
 import { FolderOpen, Copy, Pencil, Archive, Upload, Plus, FileDown } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
@@ -171,8 +172,7 @@ export function LibraryView({
     return (
       <div className="mx-auto max-w-5xl space-y-8 p-6">
         <div>
-          <h1 className="text-h1 text-on-surface">{t('studio.library.title')}</h1>
-          <p className="text-on-surface-variant mt-2 text-sm">{t('studio.library.lede')}</p>
+          <PageHeader title={t('studio.library.title')} subtitle={t('studio.library.lede')} />
           <p className="text-on-surface-variant mt-1 text-sm">
             {t('studio.library.workspace', { workspace })}
           </p>
@@ -207,8 +207,7 @@ export function LibraryView({
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6">
       <div>
-        <h1 className="text-h1 text-on-surface">{t('studio.library.title')}</h1>
-        <p className="text-on-surface-variant mt-2 text-sm">{t('studio.library.lede')}</p>
+        <PageHeader title={t('studio.library.title')} subtitle={t('studio.library.lede')} />
         <p className="text-on-surface-variant mt-1 text-sm">
           {t('studio.library.workspace', { workspace })}
         </p>

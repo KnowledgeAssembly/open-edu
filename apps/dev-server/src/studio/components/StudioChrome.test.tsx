@@ -116,5 +116,7 @@ describe('StudioChrome', () => {
     expect(toggle).not.toBeChecked();
     expect(within(menu).getByText('Creator')).toBeInTheDocument();
     expect(within(menu).getByText('Developer')).toBeInTheDocument();
+    await user.click(toggle);
+    expect(onModeChange).toHaveBeenCalledWith('developer');
   });
 });

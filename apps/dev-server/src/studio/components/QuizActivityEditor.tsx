@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, RadioGroup, RadioGroupItem, Textarea } from '@open-edu/design-system';
-import { Check } from 'lucide-react';
+import { Check, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { AiEditPanel } from './AiEditPanel.js';
+import { EditorCoachingPanel } from './EditorCoachingPanel.js';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -122,7 +123,13 @@ export function QuizActivityEditor({
     }
   };
 
-  if (loading) return <p className="p-6 text-sm">…</p>;
+  if (loading) {
+    return (
+      <div className="p-6" aria-busy>
+        <p className="text-on-surface-variant text-sm">{t('studio.editor.quiz.loading')}</p>
+      </div>
+    );
+  }
 
   const applyDraft = (item: DraftItem) => {
     try {
@@ -140,85 +147,118 @@ export function QuizActivityEditor({
     }
   };
 
+  const hasCorrect = correctIndex !== null;
+  const minOptions = options.length >= 2;
+
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:flex-row">
-      <div className="min-w-0 flex-1 space-y-4">
-        <label className="text-on-surface block text-sm font-medium">
-          {t('studio.editor.quiz.questionLabel')}
-          <Textarea
-            className="mt-2"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            aria-label={t('studio.editor.quiz.questionLabel')}
-          />
-        </label>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
+        {onCancel ? (
+          <Button variant="ghost" size="sm" onClick={onCancel} aria-label={t('studio.editor.back')}>
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        ) : null}
+        <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.quiz')}</h1>
+      </div>
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:flex-row">
+        <div className="min-w-0 flex-1 space-y-4">
+          <label className="text-on-surface block text-sm font-medium">
+            {t('studio.editor.quiz.questionLabel')}
+            <Textarea
+              className="mt-2"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              aria-label={t('studio.editor.quiz.questionLabel')}
+            />
+          </label>
 
-        <fieldset className="space-y-2">
-          <legend className="text-on-surface mb-2 text-sm font-medium">
-            {t('studio.editor.quiz.optionsLabel')}
-          </legend>
-          <RadioGroup
-            value={correctIndex != null ? String(correctIndex) : undefined}
-            onValueChange={handleCorrect}
-          >
-            {options.map((option, index) => (
-              <div
-                key={option.id}
-                className="border-outline-variant bg-surface flex items-center gap-2 rounded-lg border px-3 py-2"
-              >
-                <RadioGroupItem
-                  value={String(index)}
-                  id={`option-${index}`}
-                  aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
-                />
-                <Input
-                  className="flex-1"
-                  value={option.text}
-                  onChange={(e) => handleOptionText(index, e.target.value)}
-                  aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
-                  placeholder={t('studio.editor.quiz.option', { number: String(index + 1) })}
-                />
-                {correctIndex === index ? (
-                  <Check className="text-primary h-4 w-4" aria-hidden="true" />
-                ) : null}
-              </div>
-            ))}
-          </RadioGroup>
-        </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-on-surface mb-2 text-sm font-medium">
+              {t('studio.editor.quiz.optionsLabel')}
+            </legend>
+            <RadioGroup
+              value={correctIndex != null ? String(correctIndex) : undefined}
+              onValueChange={handleCorrect}
+            >
+              {options.map((option, index) => (
+                <div
+                  key={option.id}
+                  className="border-outline-variant bg-surface flex items-center gap-2 rounded-lg border px-3 py-2"
+                >
+                  <RadioGroupItem
+                    value={String(index)}
+                    id={`option-${index}`}
+                    aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
+                  />
+                  <Input
+                    className="flex-1"
+                    value={option.text}
+                    onChange={(e) => handleOptionText(index, e.target.value)}
+                    aria-label={t('studio.editor.quiz.option', { number: String(index + 1) })}
+                    placeholder={t('studio.editor.quiz.option', { number: String(index + 1) })}
+                  />
+                  {correctIndex === index ? (
+                    <Check className="text-primary h-4 w-4" aria-hidden="true" />
+                  ) : null}
+                </div>
+              ))}
+            </RadioGroup>
+          </fieldset>
 
-        <div className="flex items-center gap-3">
-          {onCancel ? (
-            <Button variant="outline" size="sm" onClick={onCancel}>
-              {t('studio.editor.cancel')}
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleAddOption}>
+              {t('studio.editor.quiz.addOption')}
             </Button>
-          ) : null}
-          <Button variant="outline" size="sm" onClick={handleAddOption}>
-            {t('studio.editor.quiz.addOption')}
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => void handleSave()}
-            disabled={saving || correctIndex === null}
-          >
-            {t('studio.editor.save')}
-          </Button>
-          {correctIndex === null ? (
-            <span className="text-error text-sm">{t('studio.editor.quiz.noCorrectSelected')}</span>
-          ) : null}
-          {saved ? (
-            <span className="text-on-surface-variant text-sm">{t('studio.editor.saved')}</span>
-          ) : null}
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => void handleSave()}
+              disabled={saving || correctIndex === null}
+            >
+              {t('studio.editor.save')}
+            </Button>
+            {correctIndex === null ? (
+              <span className="text-error text-sm">
+                {t('studio.editor.quiz.noCorrectSelected')}
+              </span>
+            ) : null}
+            {saved ? (
+              <span role="status" aria-live="polite" className="text-on-surface-variant text-sm">
+                {t('studio.editor.saved')}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex w-full flex-col gap-6 lg:w-80 lg:shrink-0">
+          <EditorCoachingPanel
+            checks={[
+              {
+                id: 'correct',
+                passed: hasCorrect,
+                label: hasCorrect
+                  ? t('studio.editor.coaching.quiz.hasCorrect')
+                  : t('studio.editor.coaching.quiz.noCorrect'),
+              },
+              {
+                id: 'options',
+                passed: minOptions,
+                label: minOptions
+                  ? t('studio.editor.coaching.quiz.minOptions')
+                  : t('studio.editor.coaching.quiz.minOptionsMissing'),
+              },
+            ]}
+            tips={[t('studio.editor.coaching.quiz.questionTip')]}
+          />
+          <AiEditPanel
+            api={api}
+            kind="quiz"
+            getCurrentContent={() => serializeQuiz(question, options, correctIndex)}
+            onApply={applyDraft}
+            onApplyBatch={(items) => onApplyBatch?.(items)}
+            onError={onError}
+          />
         </div>
       </div>
-      <AiEditPanel
-        api={api}
-        kind="quiz"
-        getCurrentContent={() => serializeQuiz(question, options, correctIndex)}
-        onApply={applyDraft}
-        onApplyBatch={(items) => onApplyBatch?.(items)}
-        onError={onError}
-      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   EmptyState,
   Input,
 } from '@open-edu/design-system';
+import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { RuntimeThemeProvider } from '@open-edu/runtime';
 import { ExerciseNodeSchema } from '@open-edu/schemas';
@@ -193,129 +194,151 @@ export function PracticeActivityEditor({
 
   if (!widgetId || !curated) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4 p-6">
-        <EmptyState
-          heading={t('studio.practice.unknownWidget')}
-          description={t('studio.practice.unknownWidgetLede')}
-        />
-        <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
-          {t('studio.practice.chooseAnother')}
-        </Button>
-        <WidgetPicker
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onSelect={(widget) => {
-            setWidgetId(widget.id);
-            setConfig(seedConfigFor(widget));
-          }}
-        />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
+          {onCancel ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onCancel}
+              aria-label={t('studio.editor.back')}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          ) : null}
+          <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
+        </div>
+        <div className="mx-auto max-w-3xl space-y-4 p-6">
+          <EmptyState
+            heading={t('studio.practice.unknownWidget')}
+            description={t('studio.practice.unknownWidgetLede')}
+          />
+          <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+            {t('studio.practice.chooseAnother')}
+          </Button>
+          <WidgetPicker
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            onSelect={(widget) => {
+              setWidgetId(widget.id);
+              setConfig(seedConfigFor(widget));
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
-        <div className="space-y-4">
-          <label className="text-on-surface block text-sm font-medium">
-            {t('studio.editor.lesson.titleLabel')}
-            <Input
-              className="mt-2"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              aria-label={t('studio.editor.lesson.titleLabel')}
-            />
-          </label>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
+        {onCancel ? (
+          <Button variant="ghost" size="sm" onClick={onCancel} aria-label={t('studio.editor.back')}>
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        ) : null}
+        <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
+      </div>
+      <div className="mx-auto max-w-6xl space-y-6 p-6">
+        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
+          <div className="space-y-4">
+            <label className="text-on-surface block text-sm font-medium">
+              {t('studio.editor.lesson.titleLabel')}
+              <Input
+                className="mt-2"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                aria-label={t('studio.editor.lesson.titleLabel')}
+              />
+            </label>
+            <Card className="border-outline-variant bg-surface">
+              <CardHeader>
+                <CardTitle className="text-h3 text-on-surface">
+                  {t('studio.widget.configTitle')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SchemaForm
+                  data={config}
+                  onChange={setConfig}
+                  fieldLabels={fieldLabels}
+                  fieldErrors={fieldErrors}
+                />
+              </CardContent>
+            </Card>
+            {validationErrors.length > 0 ? (
+              <div
+                role="alert"
+                className="border-error-container bg-error-container rounded-lg border p-4"
+              >
+                <p className="text-error text-sm font-medium">{t('studio.widget.validationFix')}</p>
+                <p className="text-error mt-1 text-sm">{t('studio.practice.validationSummary')}</p>
+                {validationErrors[0] ? (
+                  <p className="text-error/70 mt-1 text-xs">
+                    {validationErrors[0].path}: {validationErrors[0].message}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => void handleSave()}
+                disabled={saving || !nodeJsonValid}
+              >
+                {t('studio.editor.save')}
+              </Button>
+              {!nodeJsonValid ? (
+                <span className="text-error text-sm">{t('studio.widget.validationFix')}</span>
+              ) : null}
+              {saved ? (
+                <span role="status" aria-live="polite" className="text-on-surface-variant text-sm">
+                  {t('studio.editor.saved')}
+                </span>
+              ) : null}
+            </div>
+          </div>
           <Card className="border-outline-variant bg-surface">
             <CardHeader>
               <CardTitle className="text-h3 text-on-surface">
-                {t('studio.widget.configTitle')}
+                {t('studio.widget.previewTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SchemaForm
-                data={config}
-                onChange={setConfig}
-                fieldLabels={fieldLabels}
-                fieldErrors={fieldErrors}
-              />
+              <RuntimeThemeProvider>
+                <WidgetPreviewPanel
+                  widgetType={widgetId}
+                  widgetConfig={config}
+                  validationErrors={validationErrors}
+                />
+              </RuntimeThemeProvider>
             </CardContent>
           </Card>
-          {validationErrors.length > 0 ? (
-            <div
-              role="alert"
-              className="border-error-container bg-error-container rounded-lg border p-4"
-            >
-              <p className="text-error text-sm font-medium">{t('studio.widget.validationFix')}</p>
-              <p className="text-error mt-1 text-sm">{t('studio.practice.validationSummary')}</p>
-              {validationErrors[0] ? (
-                <p className="text-error/70 mt-1 text-xs">
-                  {validationErrors[0].path}: {validationErrors[0].message}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-          <div className="flex items-center gap-3">
-            {onCancel ? (
-              <Button variant="outline" size="sm" onClick={onCancel}>
-                {t('studio.editor.cancel')}
-              </Button>
-            ) : null}
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => void handleSave()}
-              disabled={saving || !nodeJsonValid}
-            >
-              {t('studio.editor.save')}
-            </Button>
-            {!nodeJsonValid ? (
-              <span className="text-error text-sm">{t('studio.widget.validationFix')}</span>
-            ) : null}
-            {saved ? (
-              <span className="text-on-surface-variant text-sm">{t('studio.editor.saved')}</span>
-            ) : null}
-          </div>
+          <AiEditPanel
+            api={api}
+            kind="practice"
+            getCurrentContent={() =>
+              serializeExerciseNode({
+                type: 'exercise',
+                title: title || undefined,
+                widget: widgetId ?? '',
+                config,
+              })
+            }
+            onApply={(item) => {
+              const node = parseExerciseNode(item.content);
+              if (!node) return;
+              setTitle(node.title ?? '');
+              setWidgetId(node.widget);
+              setConfig(node.config);
+            }}
+            onApplyBatch={(items) => onApplyBatch?.(items)}
+            onError={onError}
+          />
         </div>
-        <Card className="border-outline-variant bg-surface">
-          <CardHeader>
-            <CardTitle className="text-h3 text-on-surface">
-              {t('studio.widget.previewTitle')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RuntimeThemeProvider>
-              <WidgetPreviewPanel
-                widgetType={widgetId}
-                widgetConfig={config}
-                validationErrors={validationErrors}
-              />
-            </RuntimeThemeProvider>
-          </CardContent>
-        </Card>
-        <AiEditPanel
-          api={api}
-          kind="practice"
-          getCurrentContent={() =>
-            serializeExerciseNode({
-              type: 'exercise',
-              title: title || undefined,
-              widget: widgetId ?? '',
-              config,
-            })
-          }
-          onApply={(item) => {
-            const node = parseExerciseNode(item.content);
-            if (!node) return;
-            setTitle(node.title ?? '');
-            setWidgetId(node.widget);
-            setConfig(node.config);
-          }}
-          onApplyBatch={(items) => onApplyBatch?.(items)}
-          onError={onError}
-        />
+        {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
       </div>
-      {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
     </div>
   );
 }
