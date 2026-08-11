@@ -1,4 +1,6 @@
-const COURSE_SPEC_CONTRACT = `
+import { renderWidgetCatalogSection } from './buildPrompt.js';
+
+export const COURSE_SPEC_CONTRACT = `
 Output ONLY a single JSON object that conforms EXACTLY to this JSON schema (no markdown, no comments, no extra text):
 
 {
@@ -33,7 +35,7 @@ Output ONLY a single JSON object that conforms EXACTLY to this JSON schema (no m
           "questions": [
             { "question": "<question>", "options": ["<exactly 4 options>"], "correctIndex": <0-3> }
           ],
-          "widgetId": "core.multiple-choice",
+          "widgetId": "<canonical-widget-id>",
           "widgetConfig": {}
         }
       ]
@@ -45,7 +47,7 @@ RULES:
 - 1 to 6 lessons only (teachers build short courses).
 - Exactly one activity per lesson with "type": "quiz"; its questions are multiple-choice with exactly 4 options each.
 - Use measurable objectives, never "understand", "know", or "learn".
-- Widget ids must be canonical ("core.multiple-choice", "core.matching", "math.fraction-visual", "core.fill-blank", "core.drag-drop"); never "open-edu.*".
+- Widget ids must be chosen from the AVAILABLE WIDGETS table in this prompt (canonical catalog ids); never "open-edu.*".
 - All required fields above must be present and non-empty.
 `;
 
@@ -57,19 +59,7 @@ export function buildCourseSpecPrompt(notes: string): string {
     notes.trim(),
     '',
     COURSE_SPEC_CONTRACT,
+    '',
+    renderWidgetCatalogSection(),
   ].join('\n');
-}
-
-export function extractJsonObject(text: string): Record<string, unknown> {
-  let cleaned = text.trim();
-  const fence = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fence) cleaned = fence[1]!.trim();
-
-  const start = cleaned.indexOf('{');
-  const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1 || end <= start) {
-    throw new Error('No JSON object found in response');
-  }
-
-  return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
 }

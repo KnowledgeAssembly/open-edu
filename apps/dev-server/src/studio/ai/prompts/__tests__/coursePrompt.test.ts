@@ -1,7 +1,20 @@
-import { describe, it, expect } from 'vitest';
-import { buildCourseSpecPrompt, extractJsonObject } from './draftPrompt';
+import { describe, it, expect, vi } from 'vitest';
+import { buildCourseSpecPrompt } from '../coursePrompt.js';
+import { extractJsonObject } from '../extract.js';
 
-describe('draftPrompt', () => {
+vi.mock('../../../widgets/curatedCatalog.js', () => ({
+  listCuratedWidgets: () => [
+    {
+      id: 'core.multiple-choice',
+      name: 'Multiple Choice',
+      domain: 'core',
+      guide: { configFields: [] },
+    },
+    { id: 'core.matching', name: 'Matching', domain: 'core', guide: { configFields: [] } },
+  ],
+}));
+
+describe('coursePrompt', () => {
   it('includes the teacher notes text', () => {
     const prompt = buildCourseSpecPrompt('Fractions for grade 4 students');
     expect(prompt).toContain('Fractions for grade 4 students');
@@ -19,6 +32,13 @@ describe('draftPrompt', () => {
     expect(prompt).toMatch(/1 to 6 lessons/);
     expect(prompt).toMatch(/measurable objective/);
     expect(prompt).toMatch(/never "understand", "know", or "learn"/);
+  });
+
+  it('injects the live widget catalog instead of hardcoded widget ids', () => {
+    const prompt = buildCourseSpecPrompt('notes');
+    expect(prompt).toContain('AVAILABLE WIDGETS');
+    expect(prompt).toContain('core.multiple-choice');
+    expect(prompt).toContain('core.matching');
   });
 });
 

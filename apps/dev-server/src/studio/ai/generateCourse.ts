@@ -7,7 +7,7 @@ import {
   type CompileResult,
 } from '@open-edu/course-compiler';
 import { loadPackage } from '@open-edu/core';
-import { buildCourseSpecPrompt, extractJsonObject } from './draftPrompt.js';
+import { buildCourseSpecPrompt, extractJsonObject } from './prompts/index.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
 import { detectActivityKind, titleFromMarkdown, titleFromQuizJson } from '../outlineModel.js';
 import type { AiGenerateErrorCode, AiGenerateResult } from './types.js';

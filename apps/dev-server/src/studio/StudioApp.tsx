@@ -22,6 +22,7 @@ import {
 } from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
 import type { AiGenerateResult } from './ai/types.js';
+import type { DraftItem } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
 
 export function StudioApp({
@@ -88,6 +89,43 @@ export function StudioApp({
     window.setTimeout(() => setError(null), 4000);
   }, []);
 
+  const handleSaveDraftItems = useCallback(
+    (items: DraftItem[]) => {
+      void (async () => {
+        const stamp = Date.now();
+        const written: string[] = [];
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i]!;
+          const ext = item.kind === 'lesson' ? '.md' : '.json';
+          const path = `nodes/${item.kind}-${stamp + i}${ext}`;
+          try {
+            await api.writeFile(path, item.content);
+            written.push(path);
+          } catch (err) {
+            handleError(
+              `${err instanceof Error ? err.message : String(err)} (${written.length} of ${
+                items.length
+              } saved)`,
+            );
+            return;
+          }
+        }
+        try {
+          const outline = await api.getOutline();
+          await api.saveOutlineOrder([
+            ...outline.activities.map((activity) => activity.path),
+            ...written,
+          ]);
+        } catch (err) {
+          handleError(err instanceof Error ? err.message : t('studio.errors.generic'));
+          return;
+        }
+        handleNavigate('outline');
+      })();
+    },
+    [api, handleError, handleNavigate, t],
+  );
+
   if (bundleUnsupported) {
     return (
       <div className="flex h-screen flex-col">
@@ -144,6 +182,7 @@ export function StudioApp({
           onSaved={() => {}}
           onError={handleError}
           onCancel={() => handleNavigate('outline')}
+          onApplyBatch={handleSaveDraftItems}
         />
       ) : null;
       break;

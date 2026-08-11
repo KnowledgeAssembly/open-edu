@@ -10,13 +10,17 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./widget-catalog-data": {
+      "types": "./dist/widget-catalog-data.d.ts",
+      "import": "./dist/widget-catalog-data.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc && cp src/widget-catalog-data.json dist/",
+    "build": "tsc && cp src/widget-catalog-data.json dist/ && node scripts/generate-catalog-data-module.mjs",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
