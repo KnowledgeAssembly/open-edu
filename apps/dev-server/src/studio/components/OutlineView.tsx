@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Button,
   Badge,
+  Skeleton,
   EmptyState,
   Dialog,
   DialogContent,
@@ -186,7 +187,20 @@ export function OutlineView({
   };
 
   if (loading && activities.length === 0) {
-    return <p className="p-6 text-sm">…</p>;
+    return (
+      <div
+        className="mx-auto max-w-3xl space-y-6 p-6"
+        aria-busy
+        aria-label={t('studio.outline.loading')}
+      >
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-3/4" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -214,7 +228,10 @@ export function OutlineView({
       </div>
 
       {activities.length === 0 ? (
-        <EmptyState heading={t('studio.outline.empty')} description="" />
+        <EmptyState
+          heading={t('studio.outline.empty')}
+          description={t('studio.outline.emptyDescription')}
+        />
       ) : (
         <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
           {activities.map((activity, index) => (

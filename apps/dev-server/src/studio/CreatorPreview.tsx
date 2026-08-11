@@ -9,7 +9,13 @@ import { loadProgress, saveProgress, clearProgress } from '../progressStorage.js
 import type { ProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage } from '@open-edu/core';
 
-export function CreatorPreview({ pkg }: { pkg: LoadedPackage }): JSX.Element {
+export function CreatorPreview({
+  pkg,
+  onExit,
+}: {
+  pkg: LoadedPackage;
+  onExit?: () => void;
+}): JSX.Element {
   const { t } = useTranslation();
   const [progressKey, setProgressKey] = useState(0);
 
@@ -57,7 +63,10 @@ export function CreatorPreview({ pkg }: { pkg: LoadedPackage }): JSX.Element {
         widgetRegistry={widgetRegistry}
       >
         <div className="relative flex h-full flex-col">
-          <div className="border-outline-variant bg-surface flex items-center justify-end border-b px-4 py-2">
+          <div className="border-outline-variant bg-surface flex items-center justify-between border-b px-4 py-2">
+            <Button variant="outline" size="sm" onClick={() => onExit?.()}>
+              {t('studio.preview.exit')}
+            </Button>
             <Button variant="outline" size="sm" onClick={handleReset}>
               {t('studio.preview.resetProgress')}
             </Button>

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, type TestServer } from './helpers';
+import { startServer, tabTo, type TestServer } from './helpers';
 
 const HELLO_WORLD = resolve('examples/hello-world');
 const FRACTIONS = resolve('examples/fractions');
@@ -20,10 +20,8 @@ test.describe('keyboard navigation - hello-world', () => {
     await page.goto(server.url);
     await page.waitForTimeout(500);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-
     const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
     await expect(nextButton).toBeFocused();
 
     await page.keyboard.press('Enter');
@@ -34,9 +32,9 @@ test.describe('keyboard navigation - hello-world', () => {
     await page.goto(server.url);
     await page.waitForTimeout(500);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
+    const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
+    await nextButton.press('Enter');
     await page.waitForTimeout(500);
 
     const heading = page.getByRole('heading').first();
@@ -67,9 +65,9 @@ test.describe('keyboard navigation - fractions (conditional branching)', () => {
     await page.goto(server.url);
     await page.waitForTimeout(500);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
+    const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
+    await nextButton.press('Enter');
     await page.waitForTimeout(500);
 
     await page.keyboard.press('Space');
@@ -85,9 +83,9 @@ test.describe('keyboard navigation - fractions (conditional branching)', () => {
     await page.goto(server.url);
     await page.waitForTimeout(500);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
+    const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
+    await nextButton.press('Enter');
     await page.waitForTimeout(500);
 
     await page.keyboard.press('Escape');

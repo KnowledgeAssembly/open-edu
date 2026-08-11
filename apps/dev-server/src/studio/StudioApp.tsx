@@ -8,8 +8,7 @@ import { ShareView } from './components/ShareView.js';
 import { UnitBuilderView } from './components/UnitBuilderView.js';
 import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
-import { StudioTopBar } from './components/StudioTopBar.js';
-import { ModeToggle } from './components/ModeToggle.js';
+import { StudioChrome } from './components/StudioChrome.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
@@ -129,16 +128,13 @@ export function StudioApp({
   if (bundleUnsupported) {
     return (
       <div className="flex h-screen flex-col">
-        <header className="border-outline-variant bg-surface flex flex-wrap items-center gap-3 border-b px-4 py-3">
-          <div className="text-on-surface font-semibold tracking-tight">
-            {t('studio.brand.name')}
-            <span className="text-on-surface-variant ml-2 text-sm font-normal">
-              {t('studio.brand.subtitle')}
-            </span>
-          </div>
-          <div className="flex-1" />
-          <ModeToggle mode={mode} onChange={onModeChange} />
-        </header>
+        <StudioChrome
+          minimal
+          mode={mode}
+          onModeChange={onModeChange}
+          onNavigate={handleNavigate}
+          view={view}
+        />
         <main className="bg-surface flex min-h-0 flex-1 items-center justify-center p-6">
           <EmptyState
             heading={t('studio.bundle.unsupportedHeading')}
@@ -188,7 +184,7 @@ export function StudioApp({
       break;
     case 'preview':
       content = loadedPackage ? (
-        <CreatorPreview pkg={loadedPackage} />
+        <CreatorPreview pkg={loadedPackage} onExit={() => handleNavigate('outline')} />
       ) : (
         <p className="text-on-surface-variant p-6 text-sm">{t('studio.preview.noPackageLoaded')}</p>
       );
@@ -257,20 +253,23 @@ export function StudioApp({
 
   return (
     <div className="flex h-screen flex-col">
-      <StudioTopBar
+      <StudioChrome
         mode={mode}
         onModeChange={onModeChange}
         onNavigate={handleNavigate}
         courseTitle={courseTitle}
         view={view}
+        activityLabel={selectedPath?.split('/').pop()}
       />
       <main className="bg-surface min-h-0 flex-1 overflow-auto">
-        {content}
-        {error ? (
-          <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
-            {error}
-          </div>
-        ) : null}
+        <div key={view} className="studio-view-enter min-h-0 flex-1">
+          {content}
+          {error ? (
+            <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
+              {error}
+            </div>
+          ) : null}
+        </div>
       </main>
     </div>
   );

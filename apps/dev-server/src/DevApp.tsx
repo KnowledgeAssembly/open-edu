@@ -16,7 +16,6 @@ import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
 import { createDefaultRegistry } from '@open-edu/widgets';
 import { RewardBroker } from '@open-edu/rewards';
 import type { RewardReceipt } from '@open-edu/rewards';
-import { Button } from './components/ui/button';
 import { Badge } from './components/ui/badge';
 import {
   Select,
@@ -32,7 +31,8 @@ import type { EditorMode } from './editor/types';
 import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
 import type { StudioMode } from './studio/types.js';
 import { StudioApp } from './studio/StudioApp.js';
-import { ModeToggle } from './studio/components/ModeToggle.js';
+import { DeveloperToolbar } from './components/DeveloperToolbar.js';
+import { useTranslation } from '@open-edu/i18n';
 
 import {
   packageData as rawPackageData,
@@ -65,6 +65,7 @@ function BundleDevApp({
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
 }): JSX.Element {
+  const { t } = useTranslation();
   const [selectedModuleId, setSelectedModuleId] = useState<string>(
     bundle.modules[0]?.manifest.id ?? '',
   );
@@ -226,12 +227,19 @@ function BundleDevApp({
         >
           <div className="flex h-screen">
             <div className="min-w-0 flex-1 overflow-auto">
+              <DeveloperToolbar
+                mode={mode}
+                onModeChange={onModeChange}
+                onEdit={handleEditorToggle}
+                onReset={handleReset}
+                onOverview={() => setShowOverview(true)}
+              />
               <div className="border-outline-variant bg-surface-container-low flex flex-wrap items-center gap-3 border-b px-4 py-2">
                 <Badge>Bundle Mode</Badge>
                 <Select value={selectedModuleId} onValueChange={setSelectedModuleId}>
                   <SelectTrigger
                     className="border-outline-variant bg-surface text-on-surface w-auto min-w-[200px] px-2 py-1 text-sm"
-                    aria-label="Select module"
+                    aria-label={t('studio.developer.selectModule')}
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -243,23 +251,6 @@ function BundleDevApp({
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="sm" onClick={() => setShowOverview(true)}>
-                  Bundle Overview
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-success hover:bg-success/90"
-                  onClick={handleEditorToggle}
-                >
-                  Edit Package
-                </Button>
-                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
-              </div>
-              <div className="fixed bottom-4 right-96 z-50 flex gap-2">
-                <Button variant="destructive" size="sm" tabIndex={-1} onClick={handleReset}>
-                  Reset Progress
-                </Button>
               </div>
               <LayoutShell />
             </div>
@@ -433,21 +424,12 @@ function SinglePackageDeveloperApp({
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           <div className="flex h-screen">
             <div className="min-w-0 flex-1 overflow-auto">
-              <div className="fixed bottom-4 right-96 z-50 flex items-center gap-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-success hover:bg-success/90"
-                  tabIndex={-1}
-                  onClick={handleEditorToggle}
-                >
-                  Edit Package
-                </Button>
-                <Button variant="destructive" size="sm" onClick={handleReset}>
-                  Reset Progress
-                </Button>
-                <ModeToggle mode={mode} onChange={onModeChange} tabIndex={-1} />
-              </div>
+              <DeveloperToolbar
+                mode={mode}
+                onModeChange={onModeChange}
+                onEdit={handleEditorToggle}
+                onReset={handleReset}
+              />
               <LayoutShell />
             </div>
             <InspectorPanel

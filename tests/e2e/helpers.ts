@@ -1,5 +1,6 @@
 import { createServer, type ViteDevServer } from 'vite';
 import { resolve } from 'path';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export interface TestServer {
   url: string;
@@ -30,4 +31,11 @@ export async function startServer(packageDir: string, port = 0): Promise<TestSer
       await server.close();
     },
   };
+}
+
+export async function tabTo(page: Page, target: Locator) {
+  await expect(async () => {
+    await page.keyboard.press('Tab');
+    await expect(target).toBeFocused({ timeout: 500 });
+  }).toPass({ timeout: 15000 });
 }

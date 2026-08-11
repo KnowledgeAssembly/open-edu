@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Badge,
+  Spinner,
   EmptyState,
   Dialog,
   DialogContent,
@@ -159,7 +160,11 @@ export function LibraryView({
   );
 
   if (loading) {
-    return <p className="text-on-surface-variant p-6 text-sm">…</p>;
+    return (
+      <div className="mx-auto max-w-5xl p-6">
+        <Spinner aria-label={t('studio.library.loading')} />
+      </div>
+    );
   }
 
   if (entries.length === 0) {
@@ -174,7 +179,7 @@ export function LibraryView({
         </div>
         <EmptyState
           heading={t('studio.library.empty')}
-          description=""
+          description={t('studio.library.emptyDescription')}
           action={
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="default" size="sm" onClick={() => setImportOpen(true)}>

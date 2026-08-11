@@ -8,6 +8,8 @@ import { LibraryView } from './LibraryView';
 import { UnitBuilderView } from './UnitBuilderView';
 import { ImportCourseDialog } from './ImportCourseDialog';
 import { ShareView } from './ShareView';
+import { StudioChrome } from './StudioChrome';
+import { HomeView } from './HomeView';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
 
@@ -151,6 +153,42 @@ describe('axe-core accessibility audits for studio components', () => {
     const exportButton = await screen.findByRole('button', { name: /export \.oep file/i });
     await user.click(exportButton);
     await screen.findByText('Share kit');
+    const violations = await runAxe(container);
+    expect(violations).toEqual([]);
+  });
+
+  it('StudioChrome is accessible on outline view', async () => {
+    const { container } = render(
+      wrap(
+        <StudioChrome
+          mode="creator"
+          onModeChange={() => {}}
+          onNavigate={() => {}}
+          courseTitle="Test Course"
+          view="outline"
+        />,
+      ),
+    );
+    await screen.findByText('OpenEdu Studio');
+    const violations = await runAxe(container);
+    expect(violations).toEqual([]);
+  });
+
+  it('HomeView is accessible with template gallery and AI start panel', async () => {
+    const { container } = render(
+      wrap(
+        <HomeView
+          api={makeApi({ getAiStatus: vi.fn().mockResolvedValue({ available: false }) })}
+          onOpened={() => {}}
+          onError={() => {}}
+          courseTitle="Fractions"
+          onOpenCurrent={() => {}}
+          onAiGenerated={() => {}}
+          onOpenLibrary={() => {}}
+        />,
+      ),
+    );
+    await screen.findByText('Reading lesson');
     const violations = await runAxe(container);
     expect(violations).toEqual([]);
   });

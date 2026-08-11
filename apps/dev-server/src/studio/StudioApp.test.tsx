@@ -119,7 +119,9 @@ describe('StudioApp', () => {
   });
 
   async function useTemplateAndConfirm() {
-    await userEvent.click(screen.getAllByRole('button', { name: /use template/i })[0]!);
+    const templateCards = await screen.findAllByRole('button', { name: /reading lesson/i });
+    await userEvent.click(templateCards[0]!);
+    await userEvent.click(screen.getByRole('button', { name: /use template/i }));
     await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
   }
 
