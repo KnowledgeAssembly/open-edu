@@ -34,7 +34,9 @@ describe('dictionary Vercel adapter', () => {
       res as unknown as ServerResponse,
     );
     expect(res.end).toHaveBeenCalled();
-    const body = JSON.parse((res.end as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string) as Record<string, unknown>;
+    const body = JSON.parse(
+      (res.end as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string,
+    ) as Record<string, unknown>;
     expect(body.word).toBe('test');
   });
 

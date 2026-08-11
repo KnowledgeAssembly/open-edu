@@ -38,13 +38,7 @@ function ProcessExplainerComponent(props: {
   /** Controlled reveal count from the runtime step-sync machine. */
   syncedRevealedCount?: number;
 }) {
-  const {
-    config: rawConfig,
-    emitInteraction,
-    complete,
-    storedState,
-    syncedRevealedCount,
-  } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, syncedRevealedCount } = props;
   const { t } = useTranslation();
   const parsed = processExplainerSchema.safeParse(rawConfig);
   const isSynced = syncedRevealedCount !== undefined;

@@ -130,10 +130,7 @@ function isConnectionError(err: unknown): boolean {
   );
 }
 
-function requestAttempt(
-  lib: typeof httpRequest,
-  options: RequestOptions,
-): Promise<PinnedResponse> {
+function requestAttempt(lib: typeof httpRequest, options: RequestOptions): Promise<PinnedResponse> {
   return new Promise((resolve, reject) => {
     const req = lib(options);
     const attemptTimer = setTimeout(() => {
@@ -187,7 +184,10 @@ async function requestPinned(
     throw new Error('Proxy target resolved to no addresses');
   }
 
-  const attemptFor = (address: LookupAddress, attemptSignal: AbortSignal): Promise<PinnedResponse> =>
+  const attemptFor = (
+    address: LookupAddress,
+    attemptSignal: AbortSignal,
+  ): Promise<PinnedResponse> =>
     requestAttempt(lib, {
       ...baseOptions,
       signal: attemptSignal,
@@ -230,7 +230,8 @@ async function requestPinned(
       reject(
         nonConnection
           ? nonConnection.error
-          : (errors[errors.length - 1]?.error ?? new Error('Proxy target resolved to no addresses')),
+          : (errors[errors.length - 1]?.error ??
+              new Error('Proxy target resolved to no addresses')),
       );
     };
 
