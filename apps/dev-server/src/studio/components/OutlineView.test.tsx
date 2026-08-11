@@ -358,4 +358,19 @@ describe('OutlineView', () => {
     expect(await screen.findByText('Add your first activity to get started.')).toBeInTheDocument();
     expect(screen.queryByText(/activities/)).not.toBeInTheDocument();
   });
+
+  it('renders a left rail with course meta, tip, and advanced accordions', async () => {
+    const user = userEvent.setup();
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    const aside = screen.getByRole('complementary');
+    expect(within(aside).getByText('Test')).toBeInTheDocument();
+    expect(
+      within(aside).getByText('Drag to reorder, or use the menu to move rows.'),
+    ).toBeInTheDocument();
+    await user.click(within(aside).getByRole('button', { name: /learning path/i }));
+    expect(
+      await within(aside).findByText('Learners go through activities in outline order.'),
+    ).toBeInTheDocument();
+  });
 });
