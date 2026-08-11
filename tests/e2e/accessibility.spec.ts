@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, type TestServer } from './helpers';
+import { startServer, tabTo, type TestServer } from './helpers';
 
 const AUTISM = resolve('examples/autism-reading');
 const HELLO_WORLD = resolve('examples/hello-world');
@@ -20,9 +20,8 @@ test.describe('keyboard navigation', () => {
     await page.goto(server.url);
     await page.waitForTimeout(1000);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
     const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
     await expect(nextButton).toBeFocused();
   });
 
@@ -30,9 +29,9 @@ test.describe('keyboard navigation', () => {
     await page.goto(server.url);
     await page.waitForTimeout(1000);
 
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
+    const nextButton = page.getByRole('button', { name: 'Next' });
+    await tabTo(page, nextButton);
+    await nextButton.press('Enter');
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
   });
 });
