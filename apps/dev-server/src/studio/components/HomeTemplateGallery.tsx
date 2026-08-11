@@ -28,8 +28,10 @@ export function HomeTemplateGallery({
               aria-pressed={selected}
               onClick={() => onSelect(selected ? null : template.id)}
               className={cn(
-                'border text-left transition-colors',
-                selected ? 'border-primary bg-primary/5' : 'border-outline-variant bg-surface',
+                'studio-select-settle border text-left',
+                selected
+                  ? 'border-primary bg-primary/5 shadow-raised'
+                  : 'border-outline-variant bg-surface',
                 'rounded-lg px-6 py-5',
               )}
             >

@@ -23,6 +23,8 @@ import { FlowAdvancedPanel } from './FlowAdvancedPanel.js';
 import { RewardsCardsPanel } from './RewardsCardsPanel.js';
 import { AddActivityMenu } from './AddActivityMenu.js';
 import { OutlineActivityRow } from './OutlineActivityRow.js';
+import { OutlineHealthStrip } from './OutlineHealthStrip.js';
+import { buildReadyCheck, isReadyToExport } from '../readyCheck.js';
 import type { ActivitySummary } from '../types.js';
 import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
@@ -51,11 +53,13 @@ export function OutlineView({
   onEdit,
   onError,
   onTitleChange,
+  onShare,
 }: {
   api: StudioApi;
   onEdit: (path: string) => void;
   onError: (message: string) => void;
   onTitleChange?: (title: string) => void;
+  onShare?: () => void;
 }) {
   const { t } = useTranslation();
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
@@ -64,12 +68,17 @@ export function OutlineView({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ActivitySummary | null>(null);
+  const [settledPath, setSettledPath] = useState<string | null>(null);
+  const [settleKey, setSettleKey] = useState(0);
+  const [title, setTitle] = useState('');
+  const [health, setHealth] = useState<{ count: number; ready: boolean } | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const outline = await api.getOutline();
       setActivities(outline.activities);
+      setTitle(outline.title);
       onTitleChange?.(outline.title);
     } catch (err) {
       onError(err instanceof Error ? err.message : t('studio.errors.generic'));
@@ -81,6 +90,41 @@ export function OutlineView({
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (loading || activities.length === 0) {
+      setHealth(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const outline = await api.getOutline();
+        const validation = await api.validate();
+        const files = new Map<string, string>();
+        for (const activity of outline.activities) {
+          try {
+            const file = await api.readFile(activity.path);
+            files.set(activity.path, file.content);
+          } catch {
+            // unreadable node counts as missing content
+          }
+        }
+        if (cancelled) return;
+        const items = buildReadyCheck({
+          title: outline.title,
+          files,
+          validationErrors: validation.errors,
+        });
+        setHealth({ count: outline.activities.length, ready: isReadyToExport(items) });
+      } catch {
+        if (!cancelled) setHealth(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activities, api, loading]);
 
   const persistOrder = async (next: ActivitySummary[]) => {
     setSaving(true);
@@ -100,8 +144,18 @@ export function OutlineView({
     if (target < 0 || target >= next.length) return;
     const [item] = next.splice(index, 1);
     next.splice(target, 0, item!);
+    setSettledPath(item!.path);
+    setSettleKey((key) => key + 1);
     void persistOrder(next);
   };
+
+  useEffect(() => {
+    if (!settledPath) return;
+    const frame = requestAnimationFrame(() => {
+      document.querySelector<HTMLButtonElement>(`[data-row-menu="${settledPath}"]`)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [settledPath, settleKey]);
 
   const addActivity = async (kind: 'lesson' | 'quiz') => {
     const stamp = Date.now();
@@ -195,96 +249,112 @@ export function OutlineView({
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-h1 text-on-surface">{t('studio.outline.title')}</h1>
-        <AddActivityMenu
-          onAddLesson={() => void addActivity('lesson')}
-          onAddQuiz={() => void addActivity('quiz')}
-          onAddPractice={() => setPickerOpen(true)}
-          onAddAi={() => setAiDialogOpen(true)}
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6 lg:flex-row">
+      <aside className="w-full shrink-0 space-y-4 lg:w-64">
+        <h2 className="text-h3 text-on-surface">{title}</h2>
+        {health ? (
+          <OutlineHealthStrip
+            count={health.count}
+            ready={health.ready}
+            onShare={() => onShare?.()}
+          />
+        ) : null}
+        <div className="border-outline-variant rounded-lg border px-4">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="flow">
+              <AccordionTrigger>{t('studio.flow.title')}</AccordionTrigger>
+              <AccordionContent>
+                <FlowAdvancedPanel api={api} onError={onError} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="rewards">
+              <AccordionTrigger>{t('studio.rewards.title')}</AccordionTrigger>
+              <AccordionContent>
+                <RewardsCardsPanel api={api} onError={onError} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+        <p className="text-on-surface-variant text-sm">{t('studio.outline.dragHint')}</p>
+      </aside>
+
+      <div className="min-w-0 flex-1 space-y-6">
+        <div className="bg-surface sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-h1 text-on-surface">{t('studio.outline.title')}</h1>
+          <AddActivityMenu
+            onAddLesson={() => void addActivity('lesson')}
+            onAddQuiz={() => void addActivity('quiz')}
+            onAddPractice={() => setPickerOpen(true)}
+            onAddAi={() => setAiDialogOpen(true)}
+          />
+        </div>
+
+        {activities.length === 0 ? (
+          <EmptyState
+            heading={t('studio.outline.empty')}
+            description={t('studio.outline.emptyDescription')}
+          />
+        ) : (
+          <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
+            {activities.map((activity, index) => (
+              <OutlineActivityRow
+                key={
+                  activity.path === settledPath ? `${activity.id}-settle-${settleKey}` : activity.id
+                }
+                activity={activity}
+                index={index}
+                total={activities.length}
+                saving={saving}
+                settling={activity.path === settledPath}
+                onEdit={onEdit}
+                onMoveUp={() => move(index, -1)}
+                onMoveDown={() => move(index, 1)}
+                onDelete={() => setDeleteTarget(activity)}
+              />
+            ))}
+          </ul>
+        )}
+        <WidgetPicker
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={(widget) => void addPractice(widget)}
         />
-      </div>
-
-      {activities.length === 0 ? (
-        <EmptyState
-          heading={t('studio.outline.empty')}
-          description={t('studio.outline.emptyDescription')}
+        <AiAddDialog
+          api={api}
+          open={aiDialogOpen}
+          onOpenChange={setAiDialogOpen}
+          onAccept={(item) => void addAiDraft(item)}
+          onError={onError}
         />
-      ) : (
-        <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
-          {activities.map((activity, index) => (
-            <OutlineActivityRow
-              key={activity.id}
-              activity={activity}
-              index={index}
-              total={activities.length}
-              saving={saving}
-              onEdit={onEdit}
-              onMoveUp={() => move(index, -1)}
-              onMoveDown={() => move(index, 1)}
-              onDelete={() => setDeleteTarget(activity)}
-            />
-          ))}
-        </ul>
-      )}
-      <WidgetPicker
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        onSelect={(widget) => void addPractice(widget)}
-      />
-      <AiAddDialog
-        api={api}
-        open={aiDialogOpen}
-        onOpenChange={setAiDialogOpen}
-        onAccept={(item) => void addAiDraft(item)}
-        onError={onError}
-      />
 
-      <Dialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('studio.outline.deleteConfirmTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('studio.outline.deleteConfirmLede', { title: deleteTarget?.title ?? '' })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
-              {t('studio.outline.deleteCancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => deleteTarget && void removeActivity(deleteTarget)}
-              disabled={saving}
-            >
-              {t('studio.outline.deleteConfirm')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <div className="border-outline-variant rounded-lg border px-4">
-        <Accordion type="single" collapsible>
-          <AccordionItem value="flow">
-            <AccordionTrigger>{t('studio.flow.title')}</AccordionTrigger>
-            <AccordionContent>
-              <FlowAdvancedPanel api={api} onError={onError} />
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="rewards">
-            <AccordionTrigger>{t('studio.rewards.title')}</AccordionTrigger>
-            <AccordionContent>
-              <RewardsCardsPanel api={api} onError={onError} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <Dialog
+          open={deleteTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t('studio.outline.deleteConfirmTitle')}</DialogTitle>
+              <DialogDescription>
+                {t('studio.outline.deleteConfirmLede', { title: deleteTarget?.title ?? '' })}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
+                {t('studio.outline.deleteCancel')}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => deleteTarget && void removeActivity(deleteTarget)}
+                disabled={saving}
+              >
+                {t('studio.outline.deleteConfirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

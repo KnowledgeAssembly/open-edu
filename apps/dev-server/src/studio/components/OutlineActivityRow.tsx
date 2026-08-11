@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,6 +29,7 @@ export function OutlineActivityRow({
   index,
   total,
   saving,
+  settling,
   onEdit,
   onMoveUp,
   onMoveDown,
@@ -37,6 +39,7 @@ export function OutlineActivityRow({
   index: number;
   total: number;
   saving: boolean;
+  settling?: boolean;
   onEdit: (path: string) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -44,7 +47,12 @@ export function OutlineActivityRow({
 }) {
   const { t } = useTranslation();
   return (
-    <li className="hover:bg-surface-container-low group flex flex-wrap items-center gap-3 px-4 py-3 transition-colors">
+    <li
+      className={cn(
+        'hover:bg-surface-container-low group flex flex-wrap items-center gap-3 px-4 py-3 transition-colors',
+        settling && 'studio-row-enter',
+      )}
+    >
       <span className="text-on-surface-variant w-6 shrink-0 text-right text-sm" aria-hidden="true">
         {index + 1}.
       </span>
@@ -67,6 +75,7 @@ export function OutlineActivityRow({
             size="sm"
             aria-label={t('studio.outline.rowMenu', { title: activity.title })}
             disabled={saving}
+            data-row-menu={activity.path}
           >
             <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
           </Button>

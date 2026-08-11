@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within, act } from '@testing-library/react';
+import { render, screen, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -57,15 +57,30 @@ const sampleActivities: ActivitySummary[] = [
   { id: 'nodes/q.json', path: 'nodes/q.json', title: 'Check', kind: 'quiz' },
 ];
 
+const validLesson = '# Fractions\n\nHello';
+const validQuiz = JSON.stringify({
+  type: 'quiz',
+  question: 'Q?',
+  options: [
+    { id: 'a', text: 'A', correct: true },
+    { id: 'b', text: 'B', correct: false },
+  ],
+});
+
 function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
   return {
     getPackageDir: vi.fn(),
-    validate: vi.fn(),
+    validate: vi.fn().mockResolvedValue({ valid: true, errors: [] }),
     getOutline: vi.fn().mockResolvedValue({ activities: sampleActivities, title: 'Test' }),
     saveOutlineOrder: vi.fn().mockResolvedValue({ success: true }),
     applyTemplate: vi.fn(),
     exportOep: vi.fn(),
-    readFile: vi.fn(),
+    readFile: vi.fn().mockImplementation((path: string) =>
+      Promise.resolve({
+        path,
+        content: path.endsWith('.json') ? validQuiz : validLesson,
+      }),
+    ),
     writeFile: vi.fn().mockResolvedValue({ success: true }),
     deleteFile: vi.fn().mockResolvedValue({ success: true }),
     getAiStatus: vi.fn().mockResolvedValue({ available: true }),
@@ -284,5 +299,78 @@ describe('OutlineView', () => {
     await screen.findByText('Intro');
     const addTriggers = screen.getAllByRole('button', { name: /add activity/i });
     expect(addTriggers).toHaveLength(1);
+  });
+
+  it('settles the moved row and restores focus to its menu trigger', async () => {
+    const user = userEvent.setup();
+    const api = makeApi();
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    await user.click(screen.getByRole('button', { name: /activity actions for intro/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /move intro down/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /activity actions for intro/i })).toHaveFocus();
+    });
+    expect(api.saveOutlineOrder).toHaveBeenCalledWith(['nodes/q.json', 'nodes/a.md']);
+  });
+
+  it('shows the health strip with the activity count when ready', async () => {
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    expect(await screen.findByText('2 activities')).toBeInTheDocument();
+    expect(screen.getByText('Ready to share')).toBeInTheDocument();
+  });
+
+  it('shows the review-ready label when a quiz has no correct answer', async () => {
+    const badQuiz = JSON.stringify({
+      type: 'quiz',
+      question: 'Q?',
+      options: [{ id: 'a', text: 'A', correct: false }],
+    });
+    const api = makeApi({
+      readFile: vi
+        .fn()
+        .mockImplementation((path: string) =>
+          Promise.resolve({ path, content: path.endsWith('.json') ? badQuiz : validLesson }),
+        ),
+    });
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    expect(await screen.findByText('Review ready check')).toBeInTheDocument();
+  });
+
+  it('navigates to Share from the health strip', async () => {
+    const user = userEvent.setup();
+    const onShare = vi.fn();
+    render(
+      wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} onShare={onShare} />),
+    );
+    expect(await screen.findByText('2 activities')).toBeInTheDocument();
+    const buttons = screen.getAllByRole('button');
+    const shareBtn = buttons.find((b) => b.textContent?.trim() === 'Share')!;
+    expect(shareBtn).toBeTruthy();
+    expect(shareBtn.getAttribute('disabled')).toBeNull();
+    await user.click(shareBtn);
+    expect(onShare).toHaveBeenCalled();
+  });
+
+  it('hides the health strip when the course is empty', async () => {
+    const api = makeApi({ getOutline: vi.fn().mockResolvedValue({ activities: [], title: 'T' }) });
+    render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
+    expect(await screen.findByText('Add your first activity to get started.')).toBeInTheDocument();
+    expect(screen.queryByText(/activities/)).not.toBeInTheDocument();
+  });
+
+  it('renders a left rail with course meta, tip, and advanced accordions', async () => {
+    const user = userEvent.setup();
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    const aside = screen.getByRole('complementary');
+    expect(within(aside).getByText('Test')).toBeInTheDocument();
+    expect(
+      within(aside).getByText('Drag to reorder, or use the menu to move rows.'),
+    ).toBeInTheDocument();
+    await user.click(within(aside).getByRole('button', { name: /learning path/i }));
+    expect(
+      await within(aside).findByText('Learners go through activities in outline order.'),
+    ).toBeInTheDocument();
   });
 });

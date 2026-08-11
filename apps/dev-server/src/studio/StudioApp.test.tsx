@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -145,7 +145,18 @@ describe('StudioApp', () => {
   it('navigates to share via top bar nav', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
-    await userEvent.click(await screen.findByRole('button', { name: /share/i }));
+    await userEvent.click(
+      within(screen.getByRole('banner')).getByRole('button', { name: /share/i }),
+    );
+    expect(await screen.findByText('Ready check')).toBeInTheDocument();
+  });
+
+  it('navigates to Share from the outline health strip', async () => {
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    await useTemplateAndConfirm();
+    await screen.findByText('Intro');
+    const aside = await screen.findByRole('complementary');
+    await userEvent.click(within(aside).getByRole('button', { name: /share/i }));
     expect(await screen.findByText('Ready check')).toBeInTheDocument();
   });
 
