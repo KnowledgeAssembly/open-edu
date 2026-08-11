@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@open-edu/design-system';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
@@ -174,6 +175,10 @@ export function StudioChrome({
                     {t(navItem.labelKey)}
                   </DropdownMenuItem>
                 ))}
+              <DropdownMenuSeparator />
+              <div className="px-2 py-2 md:hidden">
+                <ModeToggle mode={mode} onChange={onModeChange} />
+              </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -181,7 +186,9 @@ export function StudioChrome({
         </>
       ) : null}
 
-      <ModeToggle mode={mode} onChange={onModeChange} />
+      <div className="hidden md:flex">
+        <ModeToggle mode={mode} onChange={onModeChange} />
+      </div>
     </header>
   );
 }
