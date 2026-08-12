@@ -181,4 +181,57 @@ describe('LessonActivityEditor', () => {
     await userEvent.type(textarea, '# A heading\n\nBody');
     expect(await screen.findByText('Has a clear heading')).toBeInTheDocument();
   });
+
+  it('toggles to the preview tab and renders the markdown body', async () => {
+    const api = makeApi({
+      readFile: vi
+        .fn()
+        .mockResolvedValue({ path: 'nodes/l.md', content: '# Fractions\n\n**Key idea:** halves' }),
+    });
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByDisplayValue('Fractions');
+    await userEvent.click(screen.getByRole('tab', { name: /preview/i }));
+    expect(screen.getByRole('tabpanel')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Fractions', level: 1 })).toBeInTheDocument();
+    expect(screen.getByText('Key idea:', { exact: false })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/lesson content/i)).not.toBeInTheDocument();
+  });
+
+  it('returns to the write tab and re-shows the textarea', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: '# Fractions\n\nBody' }),
+    });
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByDisplayValue('Fractions');
+    await userEvent.click(screen.getByRole('tab', { name: /preview/i }));
+    expect(screen.queryByLabelText(/lesson content/i)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: /write/i }));
+    expect(screen.getByLabelText(/lesson content/i)).toBeInTheDocument();
+  });
+
+  it('shows an empty-state message when previewing an empty body', async () => {
+    const api = makeApi({
+      readFile: vi.fn().mockResolvedValue({ path: 'nodes/l.md', content: '# Title' }),
+    });
+    render(
+      wrap(
+        <LessonActivityEditor api={api} path="nodes/l.md" onSaved={() => {}} onError={() => {}} />,
+      ),
+    );
+    await screen.findByDisplayValue('Title');
+    const textarea = screen.getByLabelText(/lesson content/i) as HTMLTextAreaElement;
+    await userEvent.clear(textarea);
+    await userEvent.click(screen.getByRole('tab', { name: /preview/i }));
+    expect(
+      await screen.findByText('Nothing to preview yet — add some content.'),
+    ).toBeInTheDocument();
+  });
 });

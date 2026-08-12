@@ -249,7 +249,7 @@ export function OutlineView({
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6 lg:flex-row">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6 lg:flex-row">
       <aside className="w-full shrink-0 space-y-4 lg:w-64">
         <h2 className="text-h3 text-on-surface">{title}</h2>
         {health ? (

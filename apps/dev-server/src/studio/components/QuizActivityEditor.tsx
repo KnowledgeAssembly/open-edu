@@ -160,7 +160,7 @@ export function QuizActivityEditor({
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.quiz')}</h1>
       </div>
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:flex-row">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 lg:flex-row">
         <div className="min-w-0 flex-1 space-y-4">
           <label className="text-on-surface block text-sm font-medium">
             {t('studio.editor.quiz.questionLabel')}

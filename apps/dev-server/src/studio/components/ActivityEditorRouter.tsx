@@ -3,6 +3,8 @@ import { useTranslation } from '@open-edu/i18n';
 import { LessonActivityEditor } from './LessonActivityEditor.js';
 import { QuizActivityEditor } from './QuizActivityEditor.js';
 import { PracticeActivityEditor } from './PracticeActivityEditor.js';
+import { ReflectionActivityEditor } from './ReflectionActivityEditor.js';
+import { RawActivityEditor } from './RawActivityEditor.js';
 import { detectActivityKind } from '../outlineModel.js';
 import type { ActivityKind } from '../types.js';
 import type { DraftItem } from '../ai/types.js';
@@ -88,11 +90,25 @@ export function ActivityEditorRouter({
     );
   }
 
+  if (kind === 'reflection') {
+    return (
+      <ReflectionActivityEditor
+        api={api}
+        path={path}
+        onSaved={onSaved}
+        onError={onError}
+        onCancel={onCancel}
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <p className="text-on-surface-variant text-sm">
-        {t('studio.editor.advanced.requiresDeveloper')}
-      </p>
-    </div>
+    <RawActivityEditor
+      api={api}
+      path={path}
+      onSaved={onSaved}
+      onError={onError}
+      onCancel={onCancel}
+    />
   );
 }
