@@ -77,9 +77,6 @@ importers:
 
   apps/dev-server:
     dependencies:
-      '@ai-sdk/react':
-        specifier: ^4.0.0
-        version: 4.0.40(react@18.3.1)(zod@3.25.76)
       '@open-edu/accessibility':
         specifier: workspace:*
         version: link:../../packages/accessibility

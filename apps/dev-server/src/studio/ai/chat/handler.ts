@@ -3,7 +3,7 @@ import { createModelFactoryFromEnv } from '@open-edu/llm-config';
 import { StudioChatRequestSchema, MAX_MESSAGES, MAX_CONTEXT_CHARS } from './config';
 import { buildSystemPrompt } from './policy';
 
-export async function createStudioAssistantHandler(req: any) {
+export async function createStudioAssistantHandler(req: unknown) {
   try {
     const body = StudioChatRequestSchema.parse(req);
 
@@ -19,12 +19,9 @@ export async function createStudioAssistantHandler(req: any) {
     const factory = createModelFactoryFromEnv();
     const model = factory.getModel('fast');
 
-    const messages = [
-      { role: 'system' as const, content: systemPrompt },
-      ...body.messages,
-    ];
+    const messages = [{ role: 'system' as const, content: systemPrompt }, ...body.messages];
 
-    const { text } = await generateText({ model, messages: messages as any });
+    const { text } = await generateText({ model, messages: messages as never });
 
     return {
       status: 200,
@@ -38,6 +35,7 @@ export async function createStudioAssistantHandler(req: any) {
     if (err instanceof Error && err.name === 'ZodError') {
       return { status: 400, body: { error: 'Invalid request body' } };
     }
-    return { status: 500, body: { error: err instanceof Error ? err.message : 'An error occurred' } };
+    console.error('[studio-assistant] chat handler error:', err); // eslint-disable-line no-console
+    return { status: 500, body: { error: 'An error occurred' } };
   }
 }

@@ -1,6 +1,5 @@
 import { useTranslation } from '@open-edu/i18n';
-import { useStudioAssistant } from '../ai';
-import { resolveSuggestions } from '../ai';
+import { useStudioAssistant, resolveSuggestions } from '../ai';
 import type { SuggestionChip } from '../ai/suggestions';
 
 interface SuggestionChipProps {
@@ -11,8 +10,9 @@ interface SuggestionChipProps {
 function SuggestionChipItem({ chip, onSend }: SuggestionChipProps) {
   return (
     <button
+      type="button"
       onClick={() => onSend(chip.action.message)}
-      className="border-border bg-background text-muted-foreground hover:border-primary hover:text-primary whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+      className="border-outline-variant bg-surface text-on-surface-variant hover:border-primary hover:text-primary whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors"
     >
       {chip.label}
     </button>
@@ -30,16 +30,23 @@ export function AssistantContextStrip({ onSend }: { onSend: (msg: string) => voi
   return (
     <div className="flex flex-col gap-3 p-4">
       <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
-        {suggestions.map(chip => (
+        {suggestions.map((chip) => (
           <SuggestionChipItem key={chip.id} chip={chip} onSend={onSend} />
         ))}
       </div>
-      
-      <div className="text-muted-foreground/60 text-[10px] font-medium uppercase tracking-wider">
-        {context.view === 'home' ? t('studio.assistant.context.home') : 
-         context.view === 'outline' ? t('studio.assistant.context.outline', { count: String(context.course?.activityCount ?? '') }) :
-         context.view === 'edit-activity' ? t('studio.assistant.context.editing', { title: context.activity?.title ?? '' }) :
-         context.view}
+
+      <div className="text-on-surface-variant text-[10px] font-medium uppercase tracking-wider">
+        {context.view === 'home'
+          ? t('studio.assistant.context.home')
+          : context.view === 'outline'
+            ? t('studio.assistant.context.outline', {
+                count: String(context.course?.activityCount ?? ''),
+              })
+            : context.view === 'edit-activity'
+              ? t('studio.assistant.context.editing', {
+                  title: context.activity?.title ?? '',
+                })
+              : context.view}
       </div>
     </div>
   );

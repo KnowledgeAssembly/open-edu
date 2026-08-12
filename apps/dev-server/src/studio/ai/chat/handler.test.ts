@@ -45,7 +45,7 @@ describe('createStudioAssistantHandler', () => {
     mockGenerateText.mockRejectedValueOnce(new Error('LLM Failure'));
     const result = await createStudioAssistantHandler(validRequest);
     expect(result.status).toBe(500);
-    expect(result.body.error).toBe('LLM Failure');
+    expect(result.body.error).toBe('An error occurred');
   });
 
   it('returns 400 when messages exceed MAX_MESSAGES', async () => {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { EmptyState } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { HomeView } from './components/HomeView.js';
@@ -24,12 +24,13 @@ import type { LoadedPackage } from '@open-edu/core';
 import type { AiGenerateResult } from './ai/types.js';
 import type { DraftItem } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
-import { 
-  StudioAssistantProvider, 
-  StudioChatProvider, 
+import {
+  StudioAssistantProvider,
+  StudioChatProvider,
   StudioContextBridge,
   useStudioAssistant,
 } from './ai';
+import { isAssistantEnabled } from './ai/assistantFlags.js';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
 
 export function StudioApp({
@@ -49,7 +50,24 @@ export function StudioApp({
   const [courseTitle, setCourseTitle] = useState<string | undefined>(loadedPackage?.manifest.title);
   const [error, setError] = useState<string | null>(null);
   const [aiResult, setAiResult] = useState<AiGenerateResult | null>(() => readAiReview());
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [assistantEnabled] = useState(() => isAssistantEnabled());
   const api = useMemo(() => createStudioApi(), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void api
+      .getAiStatus()
+      .then((status) => {
+        if (!cancelled) setAiAvailable(status.available);
+      })
+      .catch(() => {
+        if (!cancelled) setAiAvailable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [api]);
 
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
@@ -259,15 +277,40 @@ export function StudioApp({
       break;
   }
 
+  if (!assistantEnabled) {
+    return (
+      <div className="flex h-screen flex-col">
+        <StudioChrome
+          mode={mode}
+          onModeChange={onModeChange}
+          onNavigate={handleNavigate}
+          courseTitle={courseTitle}
+          view={view}
+          activityLabel={selectedPath?.split('/').pop()}
+        />
+        <StudioLayout className="bg-surface min-h-0 flex-1 overflow-hidden">
+          <div key={view} className="studio-view-enter min-h-0 flex-1">
+            {content}
+            {error ? (
+              <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
+                {error}
+              </div>
+            ) : null}
+          </div>
+        </StudioLayout>
+      </div>
+    );
+  }
+
   return (
     <StudioAssistantProvider>
       <StudioChatProvider courseId={loadedPackage?.manifest.id}>
-        <StudioContextBridge 
-          view={view} 
-          selectedPath={selectedPath} 
-          loadedPackage={loadedPackage} 
-          aiAvailable={true}
-          locale='en'
+        <StudioContextBridge
+          view={view}
+          selectedPath={selectedPath}
+          loadedPackage={loadedPackage}
+          aiAvailable={aiAvailable}
+          locale="en"
           api={api}
         />
         <StudioAppInner
@@ -307,7 +350,7 @@ function StudioAppInner({
   courseTitle?: string;
   view: StudioView;
   selectedPath?: string | null;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { panelOpen, setPanelOpen } = useStudioAssistant();
 
@@ -323,7 +366,7 @@ function StudioAppInner({
         panelOpen={panelOpen}
         setPanelOpen={setPanelOpen}
       />
-      <StudioLayout 
+      <StudioLayout
         className="bg-surface min-h-0 flex-1 overflow-hidden"
         sidebar={<StudioRightSidebar />}
       >

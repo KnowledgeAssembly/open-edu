@@ -1,7 +1,7 @@
 import { cn } from '@open-edu/design-system';
+import { useCallback, useRef } from 'react';
 import { useResizablePanel } from '../hooks/useResizablePanel';
-import { useStudioAssistant } from '../ai';
-import { useStudioChat } from '../ai';
+import { useStudioAssistant, useStudioChat } from '../ai';
 import { AssistantContextStrip } from './AssistantContextStrip';
 import { StudioAssistantChat } from './StudioAssistantChat';
 import { useTranslation } from '@open-edu/i18n';
@@ -12,8 +12,14 @@ export function StudioRightSidebar() {
   const { t } = useTranslation();
   const { panelOpen, setPanelOpen, panelWidth, setPanelWidth } = useStudioAssistant();
   const { sendMessage } = useStudioChat();
+  const panelOpenRef = useRef(panelOpen);
+  panelOpenRef.current = panelOpen;
 
-  useAssistantShortcut();
+  const togglePanel = useCallback(() => {
+    setPanelOpen(!panelOpenRef.current);
+  }, [setPanelOpen]);
+
+  useAssistantShortcut(togglePanel);
 
   const { width, isDragging, handleProps } = useResizablePanel({
     initialWidth: panelWidth,
@@ -25,11 +31,13 @@ export function StudioRightSidebar() {
 
   if (!panelOpen) {
     return (
-      <div className="flex shrink-0 flex-col items-center border-l border-border bg-background w-12 py-2">
+      <div className="border-outline-variant bg-surface flex w-12 shrink-0 flex-col items-center border-l py-2">
         <button
+          type="button"
           onClick={() => setPanelOpen(true)}
-          className="text-muted-foreground hover:text-foreground flex items-center justify-center rounded-md p-2 transition-colors"
+          className="text-on-surface-variant hover:text-on-surface flex items-center justify-center rounded-md p-2 transition-colors"
           title={t('studio.assistant.rail.collapsed')}
+          aria-label={t('studio.assistant.open')}
         >
           <Sparkles className="size-5" />
         </button>
@@ -42,29 +50,31 @@ export function StudioRightSidebar() {
       role="complementary"
       aria-label={t('studio.assistant.label')}
       className={cn(
-        'flex shrink-0 flex-col overflow-hidden border-l border-border bg-background transition-all duration-300',
+        'border-outline-variant bg-surface relative flex shrink-0 flex-col overflow-hidden border-l transition-all duration-300',
         isDragging ? 'transition-none' : '',
       )}
       style={{ width }}
     >
-      <div 
-        {...handleProps} 
-        className="absolute left-0 top-0 z-10 h-full w-1 cursor-col-resize hover:bg-primary/50" 
+      <div
+        {...handleProps}
+        className="bg-primary-container absolute left-0 top-0 z-10 h-full w-1 cursor-col-resize opacity-0 hover:opacity-100"
       />
-      
+
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border p-4">
-          <h3 className="text-sm font-semibold">{t('studio.assistant.label')}</h3>
-          <button 
+        <div className="border-outline-variant flex items-center justify-between border-b p-4">
+          <h3 className="text-on-surface text-sm font-semibold">{t('studio.assistant.label')}</h3>
+          <button
+            type="button"
             onClick={() => setPanelOpen(false)}
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="text-on-surface-variant hover:text-on-surface text-xs"
+            aria-label={t('studio.assistant.close')}
           >
             {t('studio.assistant.close')}
           </button>
         </div>
-        
-        <AssistantContextStrip onSend={(msg) => sendMessage(msg)} /> 
-        
+
+        <AssistantContextStrip onSend={(msg) => sendMessage(msg)} />
+
         <div className="min-h-0 flex-1">
           <StudioAssistantChat />
         </div>

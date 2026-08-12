@@ -329,7 +329,6 @@
   "assistant.error.generic": "Something went wrong. Try again.",
   "assistant.shortcut.hint": "Toggle with {{shortcut}}",
   "assistant.thinking": "Thinking...",
-  "assistant.thinking": "Thinking...",
   "assistant.regenerate": "Regenerate",
   "assistant.toggle": "Toggle Author Assistant",
   "assistant.chat.retry": "Retry",

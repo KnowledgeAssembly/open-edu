@@ -54,12 +54,16 @@ export function truncateExcerpt(text: string, limit = 4000): string {
   return text.slice(0, limit) + '... [truncated]';
 }
 
-export function buildOutlineSummary(activities: any[], limit = 30) {
-  return activities
-    .slice(0, limit)
-    .map((a) => ({
+export function buildOutlineSummary(
+  activities: Array<{ title?: string; kind?: string; path: string }>,
+  limit = 30,
+) {
+  return activities.slice(0, limit).map((a) => {
+    const kindParse = ActivityKindSchema.safeParse(a.kind);
+    return {
       title: a.title || 'Untitled',
-      kind: a.kind || 'other',
+      kind: kindParse.success ? kindParse.data : ('other' as const),
       path: a.path,
-    }));
+    };
+  });
 }

@@ -1,24 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
-export function useAssistantShortcut() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleAssistant = useCallback(() => {
-    setIsOpen(prev => !prev);
-    return !isOpen;
-  }, [isOpen]);
+/** Toggle Author Assistant with Cmd/Ctrl+Shift+A (skips editable fields). */
+export function useAssistantShortcut(handler: () => void): void {
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        toggleAssistant();
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName ?? '';
+      const isEditable =
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        target?.isContentEditable === true ||
+        target?.contentEditable === 'true' ||
+        target?.getAttribute?.('contenteditable') === 'true';
+      if (isEditable) return;
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        handlerRef.current();
       }
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleAssistant]);
-
-  return { isOpen, toggleAssistant };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 }

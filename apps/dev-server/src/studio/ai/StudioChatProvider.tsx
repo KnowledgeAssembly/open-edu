@@ -1,6 +1,14 @@
-import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from 'react';
 import { getConversationId, setConversationId } from './assistantStorage';
-import { useStudioAssistant } from './index';
+import { useStudioAssistant } from './StudioAssistantProvider';
 
 interface ChatMessage {
   id: string;
@@ -20,86 +28,134 @@ interface StudioChatContextType {
 
 const StudioChatContext = createContext<StudioChatContextType | null>(null);
 
-export function StudioChatProvider({ 
-  children, 
-  courseId 
-}: { 
-  children: ReactNode; 
-  courseId?: string; 
+function createConversationId(): string {
+  return `studio-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function StudioChatProvider({
+  children,
+  courseId,
+}: {
+  children: ReactNode;
+  courseId?: string;
 }) {
   const { context } = useStudioAssistant();
   const contextRef = useRef(context);
   contextRef.current = context;
 
-  const conversationId = getConversationId(courseId || 'default') ?? `studio-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-  
+  const courseKey = courseId || 'default';
+  const [conversationId, setConversationIdState] = useState(() => {
+    const existing = getConversationId(courseKey);
+    if (existing) return existing;
+    const id = createConversationId();
+    setConversationId(courseKey, id);
+    return id;
+  });
+
+  useEffect(() => {
+    const existing = getConversationId(courseKey);
+    if (existing) {
+      setConversationIdState(existing);
+      return;
+    }
+    const id = createConversationId();
+    setConversationId(courseKey, id);
+    setConversationIdState(id);
+  }, [courseKey]);
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const abortRef = useRef<AbortController | null>(null);
 
-  const sendMessage = useCallback(async (content: string) => {
-    const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: 'user', content };
-    setMessages(prev => [...prev, userMsg]);
-    setStatus('loading');
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const response = await fetch('/api/studio/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId,
-          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          context: contextRef.current,
-        }),
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({ error: 'Request failed' }));
-        throw new Error(err.error || 'Request failed');
-      }
-
-      const data = await response.json();
-      const assistantMsg: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.content || data.text || '',
-      };
-      setMessages(prev => [...prev, assistantMsg]);
-      setStatus('idle');
-      
-      if (!getConversationId(courseId || 'default')) {
-        setConversationId(courseId || 'default', conversationId);
-      }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
+  const sendMessage = useCallback(
+    async (content: string) => {
+      const snapshot = contextRef.current;
+      if (!snapshot) {
         setStatus('error');
+        return;
       }
-    } finally {
-      abortRef.current = null;
-    }
-  }, [conversationId, courseId, messages]);
+
+      const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: 'user', content };
+      const history = [...messagesRef.current, userMsg];
+      messagesRef.current = history;
+      setMessages(history);
+      setStatus('loading');
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const response = await fetch('/api/studio/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            messages: history.map((m) => ({ role: m.role, content: m.content })),
+            context: snapshot,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ error: 'Request failed' }));
+          throw new Error(err.error || 'Request failed');
+        }
+
+        const data = await response.json();
+        const assistantMsg: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: data.content || data.text || '',
+        };
+        const next = [...messagesRef.current, assistantMsg];
+        messagesRef.current = next;
+        setMessages(next);
+        setStatus('idle');
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          setStatus('idle');
+        } else {
+          setStatus('error');
+        }
+      } finally {
+        abortRef.current = null;
+      }
+    },
+    [conversationId],
+  );
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
   const regenerate = useCallback(() => {
-    const lastUserMsg = messages.filter(m => m.role === 'user').pop();
-    if (lastUserMsg) {
-      setMessages(prev => prev.slice(0, -1));
-      sendMessage(lastUserMsg.content);
+    const msgs = messagesRef.current;
+    const lastUser = [...msgs].reverse().find((m) => m.role === 'user');
+    if (!lastUser) return;
+
+    let base = msgs;
+    if (base[base.length - 1]?.role === 'assistant') {
+      base = base.slice(0, -1);
     }
-  }, [messages, sendMessage]);
+    if (base[base.length - 1]?.role === 'user') {
+      base = base.slice(0, -1);
+    }
+    messagesRef.current = base;
+    setMessages(base);
+    void sendMessage(lastUser.content);
+  }, [sendMessage]);
 
   const clearError = useCallback(() => setStatus('idle'), []);
-  const clearMessages = useCallback(() => setMessages([]), []);
+  const clearMessages = useCallback(() => {
+    messagesRef.current = [];
+    setMessages([]);
+  }, []);
 
   return (
-    <StudioChatContext.Provider 
+    <StudioChatContext.Provider
       value={{ messages, sendMessage, status, stop, regenerate, clearError, clearMessages }}
     >
       {children}
