@@ -12,6 +12,8 @@
 **Spec:** `docs/superpowers/specs/2026-08-05-course-creator-studio-design.md` § Phase 3  
 **Authoring references:** `skills/openedu-course-authoring/`, `packages/course-compiler/`
 
+**Follow-on (persistent Author Assistant sidebar):** After the initial generate/review/item AI surfaces land, consolidate them into a Pipili-style right sidebar — see [`2026-08-12-studio-author-assistant-index.md`](./2026-08-12-studio-author-assistant-index.md) and [`../specs/2026-08-12-studio-author-assistant-design.md`](../specs/2026-08-12-studio-author-assistant-design.md).
+
 **Out of scope:** Full agentic multi-agent orchestration in-process; replacing the portable skill; LMS features; Phase 5 hosting; mandatory PDF pipeline (PDF is stretch — notes/outline is MVP).
 
 ---
