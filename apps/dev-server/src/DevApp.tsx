@@ -219,6 +219,7 @@ function BundleDevApp({
     <RuntimeThemeProvider>
       <AccessibilityProvider>
         <RuntimeProvider
+          key={progressKey}
           loadedPackage={currentPkg}
           engine={engine}
           initialProgress={initialProgress}
@@ -415,6 +416,7 @@ function SinglePackageDeveloperApp({
     <RuntimeThemeProvider>
       <AccessibilityProvider>
         <RuntimeProvider
+          key={progressKey}
           loadedPackage={loadedPkg}
           engine={engine}
           initialProgress={initialProgress}

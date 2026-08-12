@@ -262,7 +262,7 @@ export function StudioApp({
         view={view}
         activityLabel={selectedPath?.split('/').pop()}
       />
-      <main className="bg-surface min-h-0 flex-1 overflow-auto">
+      <main className="bg-surface flex min-h-0 flex-1 flex-col overflow-auto">
         <div key={view} className="studio-view-enter min-h-0 flex-1">
           {content}
           {error ? (
