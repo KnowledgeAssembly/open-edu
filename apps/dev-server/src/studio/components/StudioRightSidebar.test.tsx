@@ -7,6 +7,7 @@ import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { StudioAssistantProvider, useStudioAssistant } from '../ai/StudioAssistantProvider';
 import { StudioChatProvider } from '../ai/StudioChatProvider';
+import * as studioAi from '../ai';
 import { StudioRightSidebar } from './StudioRightSidebar';
 import type { StudioContextSnapshot } from '../ai/context';
 
@@ -15,7 +16,7 @@ import type { StudioContextSnapshot } from '../ai/context';
 const sendSpy = vi.fn();
 
 vi.mock('../ai', async () => {
-  const actual = await vi.importActual<typeof import('../ai')>('../ai');
+  const actual = (await vi.importActual('../ai')) as typeof studioAi;
   return {
     ...actual,
     useStudioChat: () => ({
