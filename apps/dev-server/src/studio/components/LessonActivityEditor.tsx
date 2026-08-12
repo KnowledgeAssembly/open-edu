@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, Textarea } from '@open-edu/design-system';
+import {
+  Button,
+  Input,
+  Textarea,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '@open-edu/design-system';
+import { MarkdownRenderer } from '@open-edu/runtime';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { AiEditPanel } from './AiEditPanel.js';
@@ -37,6 +46,7 @@ export function LessonActivityEditor({
   const [body, setBody] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [tab, setTab] = useState('write');
 
   useEffect(() => {
     let cancelled = false;
@@ -93,7 +103,7 @@ export function LessonActivityEditor({
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.lesson')}</h1>
       </div>
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:flex-row">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 lg:flex-row">
         <div className="min-w-0 flex-1 space-y-4">
           <label className="text-on-surface block text-sm font-medium">
             {t('studio.editor.lesson.titleLabel')}
@@ -104,15 +114,36 @@ export function LessonActivityEditor({
               aria-label={t('studio.editor.lesson.titleLabel')}
             />
           </label>
-          <label className="text-on-surface block text-sm font-medium">
-            {t('studio.editor.lesson.bodyLabel')}
-            <Textarea
-              className="mt-2 min-h-[320px]"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              aria-label={t('studio.editor.lesson.bodyLabel')}
-            />
-          </label>
+          <div>
+            <span className="text-on-surface block text-sm font-medium">
+              {t('studio.editor.lesson.bodyLabel')}
+            </span>
+            <Tabs value={tab} onValueChange={setTab} className="mt-2">
+              <TabsList className="grid w-full grid-cols-2 lg:w-64">
+                <TabsTrigger value="write">{t('studio.editor.writeTab')}</TabsTrigger>
+                <TabsTrigger value="preview">{t('studio.editor.previewTab')}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="write" className="mt-4">
+                <Textarea
+                  className="min-h-[320px] w-full"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  aria-label={t('studio.editor.lesson.bodyLabel')}
+                />
+              </TabsContent>
+              <TabsContent value="preview" className="mt-4">
+                <div className="border-outline-variant bg-surface min-h-[320px] rounded-lg border p-4">
+                  {body.trim() ? (
+                    <MarkdownRenderer content={body} />
+                  ) : (
+                    <p className="text-on-surface-variant text-sm">
+                      {t('studio.editor.previewEmpty')}
+                    </p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
           <div className="flex items-center gap-3">
             <Button variant="default" size="sm" onClick={() => void handleSave()} disabled={saving}>
               {t('studio.editor.save')}

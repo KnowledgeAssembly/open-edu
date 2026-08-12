@@ -19,6 +19,8 @@ function kindLabelKey(kind: ActivitySummary['kind']): string {
       return 'studio.outline.kind.quiz';
     case 'practice':
       return 'studio.outline.kind.practice';
+    case 'reflection':
+      return 'studio.outline.kind.reflection';
     default:
       return 'studio.outline.kind.other';
   }

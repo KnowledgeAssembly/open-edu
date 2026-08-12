@@ -10,7 +10,7 @@ export type StudioView =
   | 'library'
   | 'unit-builder';
 
-export type ActivityKind = 'lesson' | 'quiz' | 'practice' | 'other';
+export type ActivityKind = 'lesson' | 'quiz' | 'practice' | 'reflection' | 'other';
 
 export interface ActivitySummary {
   id: string;

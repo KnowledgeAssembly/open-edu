@@ -5,6 +5,7 @@ import {
   activitiesFromEntryOrder,
   titleFromMarkdown,
   titleFromQuizJson,
+  titleFromReflectionJson,
 } from './outlineModel';
 import { WorkflowSchema } from '@open-edu/schemas';
 
@@ -20,6 +21,9 @@ describe('outlineModel', () => {
     expect(detectActivityKind('nodes/w.json', '{"type":"custom","widget":"flashcard"}')).toBe(
       'practice',
     );
+    expect(
+      detectActivityKind('nodes/r.json', '{"type":"reflection","prompt":"What did you notice?"}'),
+    ).toBe('reflection');
     expect(detectActivityKind('nodes/x.json', 'not json')).toBe('other');
   });
 
@@ -53,15 +57,30 @@ describe('outlineModel', () => {
     );
   });
 
-  it('derives activity summaries from ordered paths', () => {
+  it('extracts reflection titles from explicit title first, then prompt excerpt', () => {
+    expect(
+      titleFromReflectionJson('{"type":"reflection","title":"Reflect","prompt":"Think."}'),
+    ).toBe('Reflect');
+    expect(titleFromReflectionJson('{"type":"reflection","prompt":"What did you notice?"}')).toBe(
+      'What did you notice?',
+    );
+    expect(titleFromReflectionJson('not json')).toBe('Untitled reflection');
+  });
+
+  it('derives reflection activity summaries from ordered paths', () => {
     const files = new Map([
       ['nodes/a.md', '# Intro'],
-      ['nodes/q.json', '{"type":"quiz","question":"Q?","options":[]}'],
+      ['nodes/r.json', '{"type":"reflection","prompt":"What did you notice?"}'],
     ]);
-    const summaries = activitiesFromEntryOrder(['nodes/a.md', 'nodes/q.json'], files);
+    const summaries = activitiesFromEntryOrder(['nodes/a.md', 'nodes/r.json'], files);
     expect(summaries).toEqual([
       { id: 'nodes/a.md', path: 'nodes/a.md', title: 'Intro', kind: 'lesson' },
-      { id: 'nodes/q.json', path: 'nodes/q.json', title: 'Q?', kind: 'quiz' },
+      {
+        id: 'nodes/r.json',
+        path: 'nodes/r.json',
+        title: 'What did you notice?',
+        kind: 'reflection',
+      },
     ]);
   });
 });

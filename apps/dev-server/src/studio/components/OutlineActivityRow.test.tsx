@@ -64,6 +64,19 @@ describe('OutlineActivityRow', () => {
     expect(screen.getByRole('button', { name: /activity actions for intro/i })).toBeInTheDocument();
   });
 
+  it('shows "Reflection" badge for reflection activities', () => {
+    renderRow({
+      activity: {
+        id: 'nodes/r.json',
+        path: 'nodes/r.json',
+        title: 'Reflect',
+        kind: 'reflection',
+      },
+    });
+    expect(screen.getByText('Reflect')).toBeInTheDocument();
+    expect(screen.getByText('Reflection')).toBeInTheDocument();
+  });
+
   it('clicking the title button calls onEdit', async () => {
     const user = userEvent.setup();
     const { onEdit } = renderRow();

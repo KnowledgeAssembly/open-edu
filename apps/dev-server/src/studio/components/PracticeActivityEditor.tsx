@@ -183,7 +183,7 @@ export function PracticeActivityEditor({
 
   if (notPractice) {
     return (
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto w-full max-w-3xl p-6">
         <EmptyState
           heading={t('studio.practice.notPracticeNode')}
           description={t('studio.practice.notPracticeLede')}
@@ -208,7 +208,7 @@ export function PracticeActivityEditor({
           ) : null}
           <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
         </div>
-        <div className="mx-auto max-w-3xl space-y-4 p-6">
+        <div className="mx-auto w-full max-w-3xl space-y-4 p-6">
           <EmptyState
             heading={t('studio.practice.unknownWidget')}
             description={t('studio.practice.unknownWidgetLede')}
@@ -239,7 +239,7 @@ export function PracticeActivityEditor({
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
       </div>
-      <div className="mx-auto max-w-6xl space-y-6 p-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6 p-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
           <div className="space-y-4">
             <label className="text-on-surface block text-sm font-medium">

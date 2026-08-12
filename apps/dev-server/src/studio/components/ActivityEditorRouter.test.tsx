@@ -107,8 +107,12 @@ describe('ActivityEditorRouter', () => {
     expect(await screen.findByLabelText(/lesson title/i)).toBeInTheDocument();
   });
 
-  it('shows advanced-activity message for other activity types', async () => {
-    const content = JSON.stringify({ type: 'reflection', prompt: 'Think about it' });
+  it('routes reflection json to the reflection editor', async () => {
+    const content = JSON.stringify({
+      type: 'reflection',
+      title: 'Reflect',
+      prompt: 'Think about it',
+    });
     render(
       wrap(
         <ActivityEditorRouter
@@ -119,9 +123,23 @@ describe('ActivityEditorRouter', () => {
         />,
       ),
     );
-    expect(
-      await screen.findByText('Open Developer mode for advanced activity types.'),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText(/reflection prompt/i)).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Reflect')).toBeInTheDocument();
+  });
+
+  it('routes unknown activity types to the raw file editor', async () => {
+    const content = 'custom text content';
+    render(
+      wrap(
+        <ActivityEditorRouter
+          api={makeApi(content, 'nodes/notes.txt')}
+          path="nodes/notes.txt"
+          onSaved={() => {}}
+          onError={() => {}}
+        />,
+      ),
+    );
+    expect(await screen.findByLabelText(/file content/i)).toBeInTheDocument();
   });
 
   it('forwards onCancel to the active editor and cancels from a lesson', async () => {

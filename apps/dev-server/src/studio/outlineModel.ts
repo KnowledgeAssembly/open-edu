@@ -8,6 +8,7 @@ export function detectActivityKind(path: string, content: string): ActivityKind 
     try {
       const parsed = JSON.parse(content) as { type?: string };
       if (parsed.type === 'quiz') return 'quiz';
+      if (parsed.type === 'reflection') return 'reflection';
       if (parsed.type === 'custom' || parsed.type === 'widget' || parsed.type === 'exercise') {
         return 'practice';
       }
@@ -29,6 +30,17 @@ export function titleFromQuizJson(content: string): string {
     return parsed.title || parsed.question || 'Untitled quiz';
   } catch {
     return 'Untitled quiz';
+  }
+}
+
+export function titleFromReflectionJson(content: string): string {
+  try {
+    const parsed = JSON.parse(content) as { title?: string; prompt?: string };
+    const prompt = parsed.prompt?.trim();
+    const excerpt = prompt ? (prompt.length > 60 ? `${prompt.slice(0, 60)}…` : prompt) : '';
+    return parsed.title?.trim() || excerpt || 'Untitled reflection';
+  } catch {
+    return 'Untitled reflection';
   }
 }
 
@@ -56,7 +68,9 @@ export function activitiesFromEntryOrder(
         ? titleFromMarkdown(content)
         : kind === 'quiz'
           ? titleFromQuizJson(content)
-          : path.split('/').pop() || path;
+          : kind === 'reflection'
+            ? titleFromReflectionJson(content)
+            : path.split('/').pop() || path;
     return { id: path, path, title, kind };
   });
 }
