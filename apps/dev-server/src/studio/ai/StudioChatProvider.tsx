@@ -9,11 +9,16 @@ import {
 } from 'react';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
+import type { DraftItem, ItemIntent, ItemIntentParams } from './types';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  metadata?: {
+    mode?: 'explain' | 'draft';
+    drafts?: DraftItem[];
+  };
 }
 
 interface StudioChatContextType {
@@ -24,6 +29,12 @@ interface StudioChatContextType {
   regenerate: () => void;
   clearError: () => void;
   clearMessages: () => void;
+  runIntent: (
+    kind: 'lesson' | 'quiz' | 'practice',
+    intent: ItemIntent,
+    currentContent: string,
+    params?: ItemIntentParams,
+  ) => void;
 }
 
 const StudioChatContext = createContext<StudioChatContextType | null>(null);
@@ -35,11 +46,20 @@ function createConversationId(): string {
 export function StudioChatProvider({
   children,
   courseId,
+  api,
 }: {
   children: ReactNode;
   courseId?: string;
+  api?: {
+    generateItemEdit: (
+      kind: 'lesson' | 'quiz' | 'practice',
+      intent: ItemIntent,
+      currentContent: string,
+      params?: ItemIntentParams,
+    ) => Promise<{ ok: true; items: DraftItem[] } | { ok: false; code: string; error: string }>;
+  };
 }) {
-  const { context } = useStudioAssistant();
+  const { context, setPendingDrafts } = useStudioAssistant();
   const contextRef = useRef(context);
   contextRef.current = context;
 
@@ -109,10 +129,25 @@ export function StudioChatProvider({
           id: `assistant-${Date.now()}`,
           role: 'assistant',
           content: data.content || data.text || '',
+          metadata: data.metadata
+            ? { mode: data.metadata.mode, drafts: data.drafts }
+            : undefined,
         };
         const next = [...messagesRef.current, assistantMsg];
         messagesRef.current = next;
         setMessages(next);
+
+        if (assistantMsg.metadata?.drafts) {
+          setPendingDrafts({
+            items: assistantMsg.metadata.drafts,
+            source: 'chat',
+            context: {
+              kind: snapshot.activity?.kind as 'lesson' | 'quiz' | 'practice' | undefined,
+              path: snapshot.activity?.path,
+            },
+          });
+        }
+
         setStatus('idle');
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
@@ -124,7 +159,76 @@ export function StudioChatProvider({
         abortRef.current = null;
       }
     },
-    [conversationId],
+    [conversationId, setPendingDrafts],
+  );
+
+  const runIntent = useCallback(
+    async (
+      kind: 'lesson' | 'quiz' | 'practice',
+      intent: ItemIntent,
+      currentContent: string,
+      params?: ItemIntentParams,
+    ) => {
+      const snapshot = contextRef.current;
+      if (!snapshot || !api) {
+        setStatus('error');
+        return;
+      }
+
+      const locale = snapshot.locale || 'en';
+      const resolvedParams: ItemIntentParams | undefined =
+        intent === 'translate' ? { targetLocale: locale } : params;
+
+      const intentLabel = `[${intent}]`;
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: `${intentLabel} Improve this ${kind}`,
+      };
+      const history = [...messagesRef.current, userMsg];
+      messagesRef.current = history;
+      setMessages(history);
+      setStatus('loading');
+
+      try {
+        const result = await api.generateItemEdit(kind, intent, currentContent, resolvedParams);
+
+        if (result.ok) {
+          const assistantMsg: ChatMessage = {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: `Here's the updated ${kind}. Take a look and use it or discard it.`,
+            metadata: {
+              mode: 'draft',
+              drafts: result.items,
+            },
+          };
+          const next = [...messagesRef.current, assistantMsg];
+          messagesRef.current = next;
+          setMessages(next);
+
+          setPendingDrafts({
+            items: result.items,
+            source: 'intent',
+            context: { kind, path: snapshot.activity?.path },
+          });
+        } else {
+          const errorMsg: ChatMessage = {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: `Could not complete this action: ${result.error}. Try again.`,
+          };
+          const next = [...messagesRef.current, errorMsg];
+          messagesRef.current = next;
+          setMessages(next);
+        }
+
+        setStatus('idle');
+      } catch (err: unknown) {
+        setStatus('error');
+      }
+    },
+    [api, setPendingDrafts],
   );
 
   const stop = useCallback(() => {
@@ -156,7 +260,16 @@ export function StudioChatProvider({
 
   return (
     <StudioChatContext.Provider
-      value={{ messages, sendMessage, status, stop, regenerate, clearError, clearMessages }}
+      value={{
+        messages,
+        sendMessage,
+        status,
+        stop,
+        regenerate,
+        clearError,
+        clearMessages,
+        runIntent,
+      }}
     >
       {children}
     </StudioChatContext.Provider>

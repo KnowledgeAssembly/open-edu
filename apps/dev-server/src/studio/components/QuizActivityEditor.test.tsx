@@ -1,33 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { QuizActivityEditor } from './QuizActivityEditor';
+import { EditorBridgeProvider } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
-
-const { mockPanelHandlers } = vi.hoisted(() => ({
-  mockPanelHandlers: { onApply: vi.fn(), onApplyBatch: vi.fn() },
-}));
-
-vi.mock('./AiEditPanel.js', () => ({
-  AiEditPanel: ({
-    onApply,
-    onApplyBatch,
-  }: {
-    onApply: (item: unknown) => void;
-    onApplyBatch: (items: unknown[]) => void;
-  }) => {
-    mockPanelHandlers.onApply.mockImplementation(onApply);
-    mockPanelHandlers.onApplyBatch.mockImplementation(onApplyBatch);
-    return <div data-testid="ai-edit-panel" />;
-  },
-}));
 
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
-      {ui}
+      <EditorBridgeProvider>
+        {ui}
+      </EditorBridgeProvider>
     </I18nProvider>
   );
 }
@@ -51,37 +36,6 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
 describe('QuizActivityEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it('applies a rewritten quiz draft and restores question, options, and correct answer', async () => {
-    const api = makeApi();
-    render(
-      wrap(
-        <QuizActivityEditor api={api} path="nodes/q.json" onSaved={() => {}} onError={() => {}} />,
-      ),
-    );
-    await screen.findByLabelText(/question/i);
-    mockPanelHandlers.onApply.mockClear();
-    await act(async () => {
-      mockPanelHandlers.onApply({
-        kind: 'quiz',
-        title: 'Rewritten',
-        content: JSON.stringify({
-          type: 'quiz',
-          question: 'New Q?',
-          options: [
-            { id: 'a', text: 'Alpha', correct: true },
-            { id: 'b', text: 'Beta', correct: false },
-            { id: 'c', text: 'Gamma', correct: false },
-            { id: 'd', text: 'Delta', correct: false },
-          ],
-        }),
-      });
-    });
-    expect(screen.getByDisplayValue('New Q?')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Alpha')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Delta')).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /option 1/i })).toBeChecked();
   });
 
   it('loads existing quiz content', async () => {

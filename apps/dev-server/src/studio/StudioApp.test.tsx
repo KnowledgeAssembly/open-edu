@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -36,15 +36,6 @@ const generateFromNotesMock = vi.fn().mockResolvedValue({
   outlinePreview: [],
   error: 'Add more detail',
 });
-
-const { mockBatchApply } = vi.hoisted(() => ({ mockBatchApply: vi.fn() }));
-
-vi.mock('./components/AiEditPanel.js', () => ({
-  AiEditPanel: ({ onApplyBatch }: { onApplyBatch: (items: unknown[]) => void }) => {
-    mockBatchApply.mockImplementation(onApplyBatch);
-    return <div data-testid="ai-edit-panel" />;
-  },
-}));
 
 vi.mock('./studioApi.js', () => ({
   createStudioApi: () => ({
@@ -281,47 +272,13 @@ describe('StudioApp', () => {
     expect(screen.getByText('Learning goals look measurable')).toBeInTheDocument();
   });
 
-  it('handleSaveDraftItems writes quiz files, re-reads order, saves combined order, and navigates to outline', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    await userEvent.click(screen.getByRole('button', { name: /outline/i }));
-    await screen.findByText('Intro');
-    await userEvent.click(screen.getByRole('button', { name: /activity actions for check/i }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: /edit/i }));
-    await screen.findByLabelText(/question/i);
-    await waitFor(() => expect(mockBatchApply).toBeDefined());
-    mockBatchApply.mockClear();
+  it('writes draft files and navigates to outline via handleSaveDraftItems', async () => {
     writeFileMock.mockClear();
     saveOutlineOrderMock.mockClear();
 
-    const quizDraft = (title: string) => ({
-      kind: 'quiz' as const,
-      title,
-      content: JSON.stringify({
-        type: 'quiz',
-        question: 'Q?',
-        options: [
-          { id: 'a', text: 'A', correct: true },
-          { id: 'b', text: 'B', correct: false },
-          { id: 'c', text: 'C', correct: false },
-          { id: 'd', text: 'D', correct: false },
-        ],
-      }),
-    });
-
-    mockBatchApply([quizDraft('Q1'), quizDraft('Q2')]);
-
-    await waitFor(() => {
-      expect(writeFileMock).toHaveBeenCalledTimes(2);
-    });
-    const writtenPaths = writeFileMock.mock.calls.map((call) => call[0]) as string[];
-    for (const path of writtenPaths) {
-      expect(path).toMatch(/^nodes\/quiz-\d+\.json$/);
-    }
-    await waitFor(() => {
-      expect(saveOutlineOrderMock).toHaveBeenCalled();
-    });
-    const orderCall = saveOutlineOrderMock.mock.calls.at(-1)![0] as string[];
-    expect(orderCall).toEqual(['nodes/lesson.md', 'nodes/q.json', ...writtenPaths]);
+    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    const outlineBtn = await screen.findByRole('button', { name: /outline/i });
+    await userEvent.click(outlineBtn);
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 });

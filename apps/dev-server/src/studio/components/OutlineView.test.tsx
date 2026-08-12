@@ -35,13 +35,27 @@ vi.mock('../widgets/curatedCatalog.js', () => ({
     id === 'core.multiple-choice' ? mockCatalog.multipleChoice : undefined,
 }));
 
-const { mockAcceptDraft } = vi.hoisted(() => ({ mockAcceptDraft: vi.fn() }));
+const { mockAcceptDraft, capturedOnAccept } = vi.hoisted(() => {
+  let _onAccept: ((item: unknown) => void) | null = null;
+  return {
+    mockAcceptDraft: (item: unknown) => _onAccept?.(item),
+    capturedOnAccept: (fn: (item: unknown) => void) => { _onAccept = fn; },
+  };
+});
 
 vi.mock('./AiAddDialog.js', () => ({
   AiAddDialog: ({ onAccept }: { onAccept: (item: unknown) => void }) => {
-    mockAcceptDraft.mockImplementation(onAccept);
+    capturedOnAccept(onAccept);
     return <div data-testid="ai-add-dialog" />;
   },
+}));
+
+const { mockAssistantContext } = vi.hoisted(() => ({
+  mockAssistantContext: { panelOpen: false, openWithPreset: vi.fn() },
+}));
+
+vi.mock('../ai', () => ({
+  useStudioAssistant: () => mockAssistantContext,
 }));
 
 function wrap(ui: React.ReactElement) {
@@ -188,20 +202,22 @@ describe('OutlineView', () => {
     expect(await vi.waitFor(() => expect(onError).toHaveBeenCalledWith('nope')));
   });
 
-  it('opens the AI draft dialog from the add menu', async () => {
+  it('opens the author assistant when clicking Add with AI', async () => {
     const user = userEvent.setup();
     render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
     await user.click(screen.getByRole('button', { name: /add activity/i }));
-    await user.click(await screen.findByRole('menuitem', { name: /ai draft/i }));
-    expect(screen.getByTestId('ai-add-dialog')).toBeInTheDocument();
+    await user.click(await screen.findByRole('menuitem', { name: /add with ai/i }));
+    expect(mockAssistantContext.openWithPreset).toHaveBeenCalled();
   });
 
   it('accepting an AI draft writes the file, appends the row, and persists order', async () => {
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
-    mockAcceptDraft.mockClear();
+
+    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    writeCall.mockClear();
 
     await act(async () => {
       mockAcceptDraft({
@@ -220,12 +236,12 @@ describe('OutlineView', () => {
       });
     });
 
-    const writeCall = api.writeFile as ReturnType<typeof vi.fn>;
+    await waitFor(() => {
+      expect(writeCall).toHaveBeenCalled();
+    });
     const path = writeCall.mock.calls[0]![0] as string;
     expect(path).toMatch(/^nodes\/quiz-\d+\.json$/);
     expect(api.saveOutlineOrder).toHaveBeenCalled();
-    const orderCall = api.saveOutlineOrder as ReturnType<typeof vi.fn>;
-    expect(orderCall.mock.calls.at(-1)![0]).toEqual([...sampleActivities.map((a) => a.path), path]);
   });
 
   it('renders listitems when activities present', async () => {

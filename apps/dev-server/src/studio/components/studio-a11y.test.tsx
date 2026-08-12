@@ -16,6 +16,12 @@ import type { LibraryEntry } from '../library/types.js';
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
+const mockAssistantContext = { panelOpen: false, openWithPreset: vi.fn() };
+
+vi.mock('../ai', () => ({
+  useStudioAssistant: () => mockAssistantContext,
+}));
+
 const courseEntry: LibraryEntry = {
   id: 'fractions',
   title: 'Fractions',

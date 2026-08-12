@@ -1,11 +1,15 @@
+import type { DraftItem } from '../types';
+
 export interface StudioChatMetadata {
-  mode: 'explain';
+  mode: 'explain' | 'draft';
   timestamp: number;
+  drafts?: DraftItem[];
+  suggestedNextSteps?: string[];
 }
 
-export function createChatMetadata(): StudioChatMetadata {
+export function createChatMetadata(mode: 'explain' | 'draft' = 'explain'): StudioChatMetadata {
   return {
-    mode: 'explain',
+    mode,
     timestamp: Date.now(),
   };
 }

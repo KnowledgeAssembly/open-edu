@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   Button,
   Card,
@@ -22,7 +22,7 @@ import { getCuratedWidget } from '../widgets/curatedCatalog.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
 import { WidgetGuidePanel } from './WidgetGuidePanel.js';
-import { AiEditPanel } from './AiEditPanel.js';
+import { useEditorBridge } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -59,14 +59,12 @@ export function PracticeActivityEditor({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -78,6 +76,37 @@ export function PracticeActivityEditor({
   const [notPractice, setNotPractice] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { register, unregister } = useEditorBridge();
+
+  const getCurrentContent = useCallback(
+    () =>
+      serializeExerciseNode({
+        type: 'exercise',
+        title: title || undefined,
+        widget: widgetId ?? '',
+        config,
+      }),
+    [title, widgetId, config],
+  );
+  const isDirty = useCallback(() => true, []);
+
+  useEffect(() => {
+    register({
+      getCurrentContent,
+      applyToEditor: (item: DraftItem) => {
+        const node = parseExerciseNode(item.content);
+        if (!node) return;
+        setTitle(node.title ?? '');
+        setWidgetId(node.widget);
+        setConfig(node.config);
+      },
+      isDirty,
+      kind: 'practice',
+      path,
+      title,
+    });
+    return () => unregister();
+  }, [getCurrentContent, isDirty, path, register, title, unregister]);
 
   useEffect(() => {
     return () => {
@@ -315,27 +344,6 @@ export function PracticeActivityEditor({
               </RuntimeThemeProvider>
             </CardContent>
           </Card>
-          <AiEditPanel
-            api={api}
-            kind="practice"
-            getCurrentContent={() =>
-              serializeExerciseNode({
-                type: 'exercise',
-                title: title || undefined,
-                widget: widgetId ?? '',
-                config,
-              })
-            }
-            onApply={(item) => {
-              const node = parseExerciseNode(item.content);
-              if (!node) return;
-              setTitle(node.title ?? '');
-              setWidgetId(node.widget);
-              setConfig(node.config);
-            }}
-            onApplyBatch={(items) => onApplyBatch?.(items)}
-            onError={onError}
-          />
         </div>
         {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
       </div>

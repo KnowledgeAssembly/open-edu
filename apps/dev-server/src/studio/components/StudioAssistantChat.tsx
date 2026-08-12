@@ -1,14 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Send, Square, RotateCcw } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useStudioAssistant, useStudioChat } from '../ai';
 import { StudioAssistantMessage } from './StudioAssistantMessage';
+import { AssistantIntentRow } from './AssistantIntentRow';
+import { useEditorBridge } from '../ai/EditorBridgeContext';
+import type { DraftItem, ItemIntent, ItemIntentParams } from '../ai/types';
 
 export function StudioAssistantChat() {
   const { t } = useTranslation();
-  const { context } = useStudioAssistant();
-  const { messages, sendMessage, status, stop, regenerate, clearError } = useStudioChat();
+  const { context, pendingDrafts, setPendingDrafts } = useStudioAssistant();
+  const { messages, sendMessage, status, stop, regenerate, clearError, runIntent } = useStudioChat();
+  const { currentEditor } = useEditorBridge();
   const [input, setInput] = useState('');
+  const [intentRunning, setIntentRunning] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const preset = e.detail;
+      if (preset.message) {
+        sendMessage(preset.message);
+      }
+    };
+    window.addEventListener('studio:assistant:preset', handler as EventListener);
+    return () => window.removeEventListener('studio:assistant:preset', handler as EventListener);
+  }, [sendMessage]);
 
   const aiAvailable = context?.aiAvailable !== false;
 
@@ -26,6 +49,32 @@ export function StudioAssistantChat() {
     }
   };
 
+  const handleUseDraft = (item: DraftItem) => {
+    if (currentEditor) {
+      currentEditor.applyToEditor(item);
+    }
+    setPendingDrafts(null);
+  };
+
+  const handleDiscardDraft = (_item: DraftItem) => {
+    setPendingDrafts(null);
+  };
+
+  const handleIntent = async (intent: ItemIntent, params?: ItemIntentParams) => {
+    if (!currentEditor || intentRunning) return;
+    setIntentRunning(true);
+    try {
+      await runIntent(
+        currentEditor.kind as 'lesson' | 'quiz' | 'practice',
+        intent,
+        currentEditor.getCurrentContent(),
+        params,
+      );
+    } finally {
+      setIntentRunning(false);
+    }
+  };
+
   if (context && !context.aiAvailable) {
     return (
       <div className="text-on-surface-variant flex h-full items-center justify-center p-6 text-center text-sm">
@@ -34,18 +83,45 @@ export function StudioAssistantChat() {
     );
   }
 
+  const isEditing = context?.view === 'edit-activity' && currentEditor;
+  const editKind = isEditing ? (currentEditor!.kind as 'lesson' | 'quiz' | 'practice') : null;
+
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="text-on-surface-variant py-10 text-center text-sm">
             {t('studio.assistant.placeholder')}
           </div>
         ) : (
           messages.map((m) => (
-            <StudioAssistantMessage key={m.id} role={m.role} content={m.content} />
+            <StudioAssistantMessage
+              key={m.id}
+              role={m.role}
+              content={m.content}
+              metadata={(m as unknown as { metadata?: { mode?: 'explain' | 'draft'; drafts?: DraftItem[] } }).metadata}
+              onUseDraft={handleUseDraft}
+              onDiscardDraft={handleDiscardDraft}
+              isDirty={currentEditor?.isDirty()}
+            />
           ))
         )}
+        {pendingDrafts && !messages.some((m) => (m as { metadata?: { drafts?: unknown } }).metadata?.drafts) ? (
+          <div className="space-y-2">
+            <p className="text-on-surface-variant text-xs">{t('studio.assistant.draft.previewLabel')}</p>
+            {pendingDrafts.items.map((item, i) => (
+              <StudioAssistantMessage
+                key={`pending-${i}`}
+                role="assistant"
+                content=""
+                metadata={{ mode: 'draft', drafts: [item] }}
+                onUseDraft={handleUseDraft}
+                onDiscardDraft={handleDiscardDraft}
+                isDirty={currentEditor?.isDirty()}
+              />
+            ))}
+          </div>
+        ) : null}
         {status === 'loading' && (
           <div className="text-on-surface-variant mr-auto animate-pulse text-xs">
             {t('studio.assistant.thinking')}
@@ -64,6 +140,14 @@ export function StudioAssistantChat() {
           </div>
         )}
       </div>
+
+      {isEditing && editKind ? (
+        <AssistantIntentRow
+          kind={editKind}
+          onRunIntent={handleIntent}
+          running={intentRunning || status === 'loading'}
+        />
+      ) : null}
 
       <div className="border-outline-variant bg-surface border-t p-4">
         <div className="relative">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Button,
   Input,
@@ -11,10 +11,11 @@ import {
 import { MarkdownRenderer } from '@open-edu/runtime';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
-import { AiEditPanel } from './AiEditPanel.js';
 import { EditorCoachingPanel } from './EditorCoachingPanel.js';
+import { useEditorBridge } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
+
 function syncHeading(content: string, title: string): string {
   const lines = content.split('\n');
   const firstHeading = lines.findIndex((line) => /^#{1,6}\s/.test(line));
@@ -32,14 +33,12 @@ export function LessonActivityEditor({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -47,6 +46,7 @@ export function LessonActivityEditor({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState('write');
+  const { register, unregister } = useEditorBridge();
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +65,25 @@ export function LessonActivityEditor({
       cancelled = true;
     };
   }, [api, path, onError]);
+
+  const getCurrentContent = useCallback(() => body, [body]);
+  const isDirty = useCallback(() => true, []);
+
+  useEffect(() => {
+    register({
+      getCurrentContent,
+      applyToEditor: (item: DraftItem) => {
+        setBody(item.content);
+        const match = item.content.match(/^#{1,6}\s+(.+)$/m);
+        setTitle(match?.[1]?.trim() ?? '');
+      },
+      isDirty,
+      kind: 'lesson',
+      path,
+      title,
+    });
+    return () => unregister();
+  }, [getCurrentContent, isDirty, path, register, title, unregister]);
 
   const handleTitleChange = (next: string) => {
     setTitle(next);
@@ -86,12 +105,6 @@ export function LessonActivityEditor({
   };
 
   const hasHeading = /^#{1,6}\s/m.test(body);
-
-  const applyDraft = (item: DraftItem) => {
-    setBody(item.content);
-    const match = item.content.match(/^#{1,6}\s+(.+)$/m);
-    setTitle(match?.[1]?.trim() ?? '');
-  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -170,14 +183,6 @@ export function LessonActivityEditor({
               t('studio.editor.coaching.lesson.addHeading'),
               t('studio.editor.coaching.lesson.oneIdea'),
             ]}
-          />
-          <AiEditPanel
-            api={api}
-            kind="lesson"
-            getCurrentContent={() => body}
-            onApply={applyDraft}
-            onApplyBatch={(items) => onApplyBatch?.(items)}
-            onError={onError}
           />
         </div>
       </div>
