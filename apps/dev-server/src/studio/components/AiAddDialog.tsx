@@ -154,7 +154,7 @@ export function AiAddDialog({
                 onClick={() => void handleGenerate()}
                 disabled={!canGenerate}
               >
-                <Sparkles className="mr-1 h-4 w-4" aria-hidden="true" />
+                <Sparkles className="mr-1 size-4" aria-hidden="true" />
                 {generating ? t('studio.ai.item.generating') : t('studio.ai.item.generate')}
               </Button>
             </div>

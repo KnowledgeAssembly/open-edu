@@ -35,6 +35,7 @@ import {
   ItemRequestError,
 } from './src/studio/ai/itemGenerate.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
+import { createStudioAssistantHandler } from './src/studio/ai/chat/handler.js';
 import {
   resolveWorkspace,
   scanWorkspace,
@@ -563,6 +564,24 @@ function eduPackageLoader(): Plugin {
               packageDir,
             });
             res.end(JSON.stringify(result));
+            return;
+          }
+
+          // POST /api/studio/ai/chat — Author Assistant explain-only chat
+          if (pathname === '/api/studio/ai/chat' && method === 'POST') {
+            if (!isAiAvailable()) {
+              res.statusCode = 503;
+              res.end(JSON.stringify({ error: 'ai-unavailable' }));
+              return;
+            }
+            const body = await parseJsonBody(req);
+            const result = await createStudioAssistantHandler(body);
+            if (result.status !== 200) {
+              res.statusCode = result.status;
+              res.end(JSON.stringify(result.body));
+              return;
+            }
+            res.end(JSON.stringify(result.body));
             return;
           }
 

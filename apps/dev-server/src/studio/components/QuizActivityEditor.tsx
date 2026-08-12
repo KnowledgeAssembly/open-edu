@@ -155,7 +155,7 @@ export function QuizActivityEditor({
       <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
         {onCancel ? (
           <Button variant="ghost" size="sm" onClick={onCancel} aria-label={t('studio.editor.back')}>
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="size-4" aria-hidden="true" />
           </Button>
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.quiz')}</h1>
@@ -198,7 +198,7 @@ export function QuizActivityEditor({
                     placeholder={t('studio.editor.quiz.option', { number: String(index + 1) })}
                   />
                   {correctIndex === index ? (
-                    <Check className="text-primary h-4 w-4" aria-hidden="true" />
+                    <Check className="text-primary size-4" aria-hidden="true" />
                   ) : null}
                 </div>
               ))}

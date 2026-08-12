@@ -114,7 +114,7 @@ export function UnitBuilderView({
                   aria-label={course.title}
                   checked={selected.has(course.relativePath)}
                   onChange={() => toggleCourse(course.relativePath)}
-                  className="accent-primary h-4 w-4"
+                  className="accent-primary size-4"
                 />
                 <span className="text-on-surface flex-1 text-sm font-medium">{course.title}</span>
                 <Badge variant="secondary">{t('studio.library.kind.course')}</Badge>

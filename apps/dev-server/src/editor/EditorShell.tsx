@@ -744,9 +744,9 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                     title={showPreview ? 'Hide preview' : 'Show preview'}
                   >
                     {showPreview ? (
-                      <EyeOff className="h-3.5 w-3.5" />
+                      <EyeOff className="size-3.5" />
                     ) : (
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="size-3.5" />
                     )}
                     <span className="ml-1">{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
                   </Button>
@@ -804,7 +804,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">
                     <FileText
-                      className="text-on-surface-variant/40 mx-auto mb-2 h-10 w-10"
+                      className="text-on-surface-variant/40 mx-auto mb-2 size-10"
                       strokeWidth={1}
                     />
                     <p className="text-on-surface-variant text-sm">
@@ -819,7 +819,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       ) : (
         <div className="bg-surface-container-low flex flex-1 items-center justify-center">
           <div className="text-center">
-            <Eye className="text-on-surface-variant/40 mx-auto mb-3 h-12 w-12" strokeWidth={1} />
+            <Eye className="text-on-surface-variant/40 mx-auto mb-3 size-12" strokeWidth={1} />
             <p className="text-on-surface-variant text-sm font-medium">Package Preview Below</p>
             <p className="text-on-surface-variant mt-1 text-xs">
               Click "Edit Package" to start editing files
@@ -952,7 +952,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                           setContextMenu(null);
                         }}
                       >
-                        <Pencil className="mr-2 h-3.5 w-3.5" />
+                        <Pencil className="mr-2 size-3.5" />
                         Rename
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -963,7 +963,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                           setContextMenu(null);
                         }}
                       >
-                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        <Trash2 className="mr-2 size-3.5" />
                         Delete
                       </DropdownMenuItem>
                     </>
@@ -975,7 +975,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                         setShowNewNode(true);
                       }}
                     >
-                      <Plus className="mr-2 h-3.5 w-3.5" />
+                      <Plus className="mr-2 size-3.5" />
                       New Content Node
                     </DropdownMenuItem>
                   )}
@@ -986,7 +986,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                         document.getElementById('asset-upload-input')?.click();
                       }}
                     >
-                      <Upload className="mr-2 h-3.5 w-3.5" />
+                      <Upload className="mr-2 size-3.5" />
                       Upload Asset
                     </DropdownMenuItem>
                   )}
@@ -999,7 +999,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                           handleCreateConfigFile(contextMenu.section!);
                         }}
                       >
-                        <Plus className="mr-2 h-3.5 w-3.5" />
+                        <Plus className="mr-2 size-3.5" />
                         Create{' '}
                         {contextMenu.section === 'manifest'
                           ? 'package.json'

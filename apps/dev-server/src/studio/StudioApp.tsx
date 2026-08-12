@@ -9,6 +9,7 @@ import { UnitBuilderView } from './components/UnitBuilderView.js';
 import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioChrome } from './components/StudioChrome.js';
+import { StudioLayout } from './components/StudioLayout.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
@@ -23,6 +24,13 @@ import type { LoadedPackage } from '@open-edu/core';
 import type { AiGenerateResult } from './ai/types.js';
 import type { DraftItem } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
+import { 
+  StudioAssistantProvider, 
+  StudioChatProvider, 
+  StudioContextBridge,
+  useStudioAssistant,
+} from './ai';
+import { StudioRightSidebar } from './components/StudioRightSidebar.js';
 
 export function StudioApp({
   mode,
@@ -33,7 +41,6 @@ export function StudioApp({
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
   loadedPackage: LoadedPackage | null;
-  /** When true, Creator is open against a bundle — no package mutations. */
   bundleUnsupported?: boolean;
 }) {
   const { t } = useTranslation();
@@ -253,6 +260,58 @@ export function StudioApp({
   }
 
   return (
+    <StudioAssistantProvider>
+      <StudioChatProvider courseId={loadedPackage?.manifest.id}>
+        <StudioContextBridge 
+          view={view} 
+          selectedPath={selectedPath} 
+          loadedPackage={loadedPackage} 
+          aiAvailable={true}
+          locale='en'
+          api={api}
+        />
+        <StudioAppInner
+          mode={mode}
+          onModeChange={onModeChange}
+          handleNavigate={handleNavigate}
+          courseTitle={courseTitle}
+          view={view}
+          selectedPath={selectedPath}
+        >
+          <div key={view} className="studio-view-enter min-h-0 flex-1">
+            {content}
+            {error ? (
+              <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
+                {error}
+              </div>
+            ) : null}
+          </div>
+        </StudioAppInner>
+      </StudioChatProvider>
+    </StudioAssistantProvider>
+  );
+}
+
+function StudioAppInner({
+  mode,
+  onModeChange,
+  handleNavigate,
+  courseTitle,
+  view,
+  selectedPath,
+  children,
+}: {
+  mode: StudioMode;
+  onModeChange: (mode: StudioMode) => void;
+  handleNavigate: (view: StudioView) => void;
+  courseTitle?: string;
+  view: StudioView;
+  selectedPath?: string | null;
+  children: React.ReactNode;
+}) {
+  const { panelOpen, setPanelOpen } = useStudioAssistant();
+
+  return (
     <div className="flex h-screen flex-col">
       <StudioChrome
         mode={mode}
@@ -261,17 +320,15 @@ export function StudioApp({
         courseTitle={courseTitle}
         view={view}
         activityLabel={selectedPath?.split('/').pop()}
+        panelOpen={panelOpen}
+        setPanelOpen={setPanelOpen}
       />
-      <main className="bg-surface flex min-h-0 flex-1 flex-col overflow-auto">
-        <div key={view} className="studio-view-enter min-h-0 flex-1">
-          {content}
-          {error ? (
-            <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
-              {error}
-            </div>
-          ) : null}
-        </div>
-      </main>
+      <StudioLayout 
+        className="bg-surface min-h-0 flex-1 overflow-hidden"
+        sidebar={<StudioRightSidebar />}
+      >
+        {children}
+      </StudioLayout>
     </div>
   );
 }

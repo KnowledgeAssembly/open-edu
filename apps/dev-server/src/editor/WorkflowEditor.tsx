@@ -90,7 +90,7 @@ export function WorkflowEditor({ data, onChange }: WorkflowEditorProps) {
         className="text-primary hover:bg-primary-container flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium"
         onClick={handleAddRoute}
       >
-        <Plus className="h-3.5 w-3.5" />
+        <Plus className="size-3.5" />
         Add Route
       </button>
 
@@ -133,7 +133,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
           onClick={onRemove}
           aria-label="Remove route"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-3.5" />
         </button>
       </div>
 
@@ -209,7 +209,7 @@ function RouteCard({ routeKey, route, onKeyChange, onRouteChange, onRemove }: Ro
                   }}
                   aria-label="Remove condition"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="size-3.5" />
                 </button>
               </div>
             ))}

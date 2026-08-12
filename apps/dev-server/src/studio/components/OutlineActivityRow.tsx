@@ -79,24 +79,24 @@ export function OutlineActivityRow({
             disabled={saving}
             data-row-menu={activity.path}
           >
-            <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+            <MoreHorizontal className="size-4" aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => onEdit(activity.path)}>
-            <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
+            <Pencil className="mr-2 size-4" aria-hidden="true" />
             {t('studio.nav.editActivity')}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onMoveUp} disabled={index === 0}>
-            <ArrowUp className="mr-2 h-4 w-4" aria-hidden="true" />
+            <ArrowUp className="mr-2 size-4" aria-hidden="true" />
             {t('studio.outline.moveUp', { title: activity.title })}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onMoveDown} disabled={index === total - 1}>
-            <ArrowDown className="mr-2 h-4 w-4" aria-hidden="true" />
+            <ArrowDown className="mr-2 size-4" aria-hidden="true" />
             {t('studio.outline.moveDown', { title: activity.title })}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={onDelete} className="focus:text-error text-error">
-            <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+            <Trash2 className="mr-2 size-4" aria-hidden="true" />
             {t('studio.outline.delete', { title: activity.title })}
           </DropdownMenuItem>
         </DropdownMenuContent>

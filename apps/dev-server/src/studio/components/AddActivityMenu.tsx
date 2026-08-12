@@ -24,7 +24,7 @@ export function AddActivityMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="default" size="sm" aria-label={t('studio.outline.addMenuLabel')}>
-          <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+          <Plus className="mr-1 size-4" aria-hidden="true" />
           {t('studio.outline.add')}
         </Button>
       </DropdownMenuTrigger>

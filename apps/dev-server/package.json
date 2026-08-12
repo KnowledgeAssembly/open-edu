@@ -38,6 +38,7 @@
     "@open-edu/telemetry": "workspace:*",
     "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",
+    "@ai-sdk/react": "^4.0.0",
     "@vitejs/plugin-react": "^4.2.0",
     "ai": "^7.0.0",
     "axe-core": "^4.7.0",

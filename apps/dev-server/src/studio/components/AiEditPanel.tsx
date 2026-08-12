@@ -101,7 +101,7 @@ export function AiEditPanel({
     <Card className="border-outline-variant bg-surface w-full lg:w-80 lg:shrink-0">
       <CardHeader>
         <CardTitle className="text-h3 text-on-surface flex items-center gap-2">
-          <Sparkles className="text-primary h-4 w-4" aria-hidden="true" />
+          <Sparkles className="text-primary size-4" aria-hidden="true" />
           {t('studio.ai.item.panelTitle')}
         </CardTitle>
       </CardHeader>

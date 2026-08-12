@@ -270,15 +270,15 @@ export function RewardsCardsPanel({
 
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" size="sm" onClick={() => setCompletionOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+            <Plus className="mr-1 size-4" aria-hidden="true" />
             {t('studio.rewards.addBadge')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setQuizOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+            <Plus className="mr-1 size-4" aria-hidden="true" />
             {t('studio.rewards.addQuizBadge')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setCardOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+            <Plus className="mr-1 size-4" aria-hidden="true" />
             {t('studio.rewards.addCard')}
           </Button>
           {saved ? (

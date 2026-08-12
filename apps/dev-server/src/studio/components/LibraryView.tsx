@@ -133,28 +133,28 @@ export function LibraryView({
     <div className="flex flex-wrap items-center gap-2">
       {entry.kind === 'course' ? (
         <Button variant="default" size="sm" onClick={() => onOpen(entry.relativePath)}>
-          <FolderOpen className="mr-1.5 h-4 w-4" />
+          <FolderOpen className="mr-1.5 size-4" />
           {t('studio.library.open')}
         </Button>
       ) : null}
       {entry.kind === 'unit' ? (
         <Button variant="outline" size="sm" onClick={() => void handleExportUnit(entry)}>
-          <FileDown className="mr-1.5 h-4 w-4" />
+          <FileDown className="mr-1.5 size-4" />
           {t('studio.unit.exportOep')}
         </Button>
       ) : null}
       {entry.kind === 'course' ? (
         <Button variant="ghost" size="sm" onClick={() => void handleDuplicate(entry)}>
-          <Copy className="mr-1.5 h-4 w-4" />
+          <Copy className="mr-1.5 size-4" />
           {t('studio.library.duplicate')}
         </Button>
       ) : null}
       <Button variant="ghost" size="sm" onClick={() => handleOpenRename(entry)}>
-        <Pencil className="mr-1.5 h-4 w-4" />
+        <Pencil className="mr-1.5 size-4" />
         {t('studio.library.rename')}
       </Button>
       <Button variant="ghost" size="sm" onClick={() => setArchiveTarget(entry)}>
-        <Archive className="mr-1.5 h-4 w-4" />
+        <Archive className="mr-1.5 size-4" />
         {t('studio.library.archive')}
       </Button>
     </div>
@@ -183,11 +183,11 @@ export function LibraryView({
           action={
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="default" size="sm" onClick={() => setImportOpen(true)}>
-                <Upload className="mr-1.5 h-4 w-4" />
+                <Upload className="mr-1.5 size-4" />
                 {t('studio.library.import')}
               </Button>
               <Button variant="outline" size="sm" onClick={onCreateUnit}>
-                <Plus className="mr-1.5 h-4 w-4" />
+                <Plus className="mr-1.5 size-4" />
                 {t('studio.library.newUnit')}
               </Button>
             </div>
@@ -215,11 +215,11 @@ export function LibraryView({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="default" size="sm" onClick={() => setImportOpen(true)}>
-          <Upload className="mr-1.5 h-4 w-4" />
+          <Upload className="mr-1.5 size-4" />
           {t('studio.library.import')}
         </Button>
         <Button variant="outline" size="sm" onClick={onCreateUnit}>
-          <Plus className="mr-1.5 h-4 w-4" />
+          <Plus className="mr-1.5 size-4" />
           {t('studio.library.newUnit')}
         </Button>
       </div>

@@ -118,7 +118,7 @@ export function SchemaForm({
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  className="border-outline-variant text-primary focus:ring-primary h-4 w-4 rounded"
+                  className="border-outline-variant text-primary focus:ring-primary size-4 rounded"
                   checked={value}
                   onChange={(e) => handleFieldChange(key, e.target.checked)}
                   id={`field-${key}`}
@@ -163,7 +163,7 @@ export function SchemaForm({
                       }}
                       aria-label={`Remove item ${idx + 1}`}
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="size-3.5" />
                     </button>
                   </div>
                 ))}
