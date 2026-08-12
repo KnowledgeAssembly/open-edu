@@ -131,6 +131,20 @@ describe('StudioApp', () => {
     expect(screen.getByRole('switch', { name: /studio mode/i })).toBeInTheDocument();
   });
 
+  it('fills the viewport height so full-height views like the preview can stretch', async () => {
+    const { container } = render(
+      wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />),
+    );
+    const main = container.querySelector('main');
+    expect(main).not.toBeNull();
+    expect(main!.className).toContain('flex');
+    expect(main!.className).toContain('flex-col');
+    const view = container.querySelector('.studio-view-enter');
+    expect(view).not.toBeNull();
+    expect(view!.className).toContain('flex-1');
+    expect(view!.className).toContain('min-h-0');
+  });
+
   it('starts on Home with template gallery', async () => {
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
     expect(await screen.findByText('Reading lesson')).toBeInTheDocument();

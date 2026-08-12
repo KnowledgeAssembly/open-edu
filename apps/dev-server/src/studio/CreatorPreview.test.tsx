@@ -5,6 +5,7 @@ import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import type { LoadedPackage } from '@open-edu/core';
+import { getStorageKey } from '../progressStorage.js';
 import { CreatorPreview } from './CreatorPreview';
 
 function wrap(ui: React.ReactElement) {
@@ -75,5 +76,41 @@ describe('CreatorPreview', () => {
     render(wrap(<CreatorPreview pkg={mockPkg} onExit={onExit} />));
     await userEvent.click(await screen.findByRole('button', { name: /exit preview/i }));
     expect(onExit).toHaveBeenCalled();
+  });
+
+  it('renders a course outline sidebar for reference', async () => {
+    render(wrap(<CreatorPreview pkg={mockPkg} />));
+    expect(await screen.findByTestId('step-nodes/lesson.md')).toBeInTheDocument();
+    expect(screen.getByRole('listitem')).toBeInTheDocument();
+  });
+
+  it('reset progress resets the runtime activity state', async () => {
+    localStorage.setItem(
+      getStorageKey('test', '1.0.0'),
+      JSON.stringify({
+        packageId: 'test',
+        packageVersion: '1.0.0',
+        currentNodeId: 'nodes/lesson.md',
+        visitedNodes: ['nodes/lesson.md'],
+        scores: { 'nodes/lesson.md': 100 },
+        answers: {},
+        isCompleted: true,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+
+    render(wrap(<CreatorPreview pkg={mockPkg} />));
+    expect(
+      await screen.findByText('You have completed this learning experience.'),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /reset progress/i }));
+
+    expect(
+      screen.queryByText('You have completed this learning experience.'),
+    ).not.toBeInTheDocument();
+    const saved = JSON.parse(localStorage.getItem(getStorageKey('test', '1.0.0')) ?? '{}');
+    expect(saved.isCompleted).toBe(false);
+    expect(saved.scores).toEqual({});
   });
 });

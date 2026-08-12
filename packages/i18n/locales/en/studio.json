@@ -76,6 +76,7 @@
   "editor.advanced.requiresDeveloper": "Open Developer mode for advanced activity types.",
   "preview.noPackageLoaded": "No package loaded.",
   "preview.noWorkflow": "No workflow defined.",
+  "preview.courseSteps": "Course steps",
   "share.title": "Share this course",
   "share.lede": "We’ll check it’s ready, then give you a file students can open in the learner app.",
   "share.readyHeading": "Ready check",

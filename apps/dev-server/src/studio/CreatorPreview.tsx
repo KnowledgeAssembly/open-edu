@@ -6,6 +6,7 @@ import { createDefaultRegistry } from '@open-edu/widgets';
 import { Button } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { loadProgress, saveProgress, clearProgress } from '../progressStorage.js';
+import { PreviewCourseSidebar } from './PreviewCourseSidebar.js';
 import type { ProgressSnapshot } from '@open-edu/schemas';
 import type { LoadedPackage } from '@open-edu/core';
 
@@ -56,6 +57,7 @@ export function CreatorPreview({
   return (
     <AccessibilityProvider>
       <RuntimeProvider
+        key={progressKey}
         loadedPackage={pkg}
         engine={engine}
         initialProgress={initialProgress}
@@ -71,8 +73,11 @@ export function CreatorPreview({
               {t('studio.preview.resetProgress')}
             </Button>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto">
-            <LayoutShell />
+          <div className="flex min-h-0 flex-1">
+            <PreviewCourseSidebar />
+            <div className="min-h-0 flex-1 overflow-auto">
+              <LayoutShell />
+            </div>
           </div>
         </div>
       </RuntimeProvider>
