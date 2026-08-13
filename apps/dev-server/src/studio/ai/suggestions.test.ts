@@ -70,13 +70,18 @@ describe('resolveSuggestions', () => {
     expect(suggestions.map(s => s.id)).toContain('organize_library');
   });
 
-  it('returns minimal chips for unit-builder and ai-review', () => {
-    const views = ['unit-builder', 'ai-review'] as const;
-    views.forEach(view => {
-      const ctx = { ...baseCtx, view } as StudioContextSnapshot;
-      const suggestions = resolveSuggestions(ctx, mockT);
-      expect(suggestions.map(s => s.id)).toContain('what_can_you_do');
-      expect(suggestions).toHaveLength(1);
-    });
+  it('returns selection-aware chips when activity has a selection', () => {
+    const ctx = {
+      ...baseCtx,
+      view: 'edit-activity',
+      activity: {
+        path: 'nodes/a.md',
+        kind: 'lesson',
+        selection: { start: 0, end: 5, text: 'Hello' },
+      },
+    } as StudioContextSnapshot;
+    const suggestions = resolveSuggestions(ctx, mockT);
+    expect(suggestions.map((s) => s.id)).toEqual(['rewrite_selection', 'simplify_selection']);
+    expect(suggestions[0]!.action.message).toContain('Hello');
   });
 });

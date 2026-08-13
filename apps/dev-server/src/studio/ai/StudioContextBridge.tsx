@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityKindSchema,
   buildOutlineSummary,
   studioContextSnapshotSchema,
   truncateExcerpt,
   type ActivityKind,
+  type StudioContextSnapshot,
 } from './context';
 import { useStudioAssistant } from './StudioAssistantProvider';
+import { useEditorBridge } from './EditorBridgeContext';
 
 interface StudioContextBridgeProps {
   view: string;
@@ -40,6 +42,9 @@ export function StudioContextBridge({
   api,
 }: StudioContextBridgeProps) {
   const { setContext } = useStudioAssistant();
+  const { currentEditor, selection } = useEditorBridge();
+  const baseRef = useRef<StudioContextSnapshot | null>(null);
+  const [baseVersion, setBaseVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +101,8 @@ export function StudioContextBridge({
           kind: ActivityKind;
           title?: string;
           contentExcerpt?: string;
+          isDirty?: boolean;
+          selection?: { start: number; end: number; text: string };
         } = {
           path: selectedPath,
           kind: 'other',
@@ -129,10 +136,11 @@ export function StudioContextBridge({
 
       if (cancelled) return;
       const validated = studioContextSnapshotSchema.parse(snapshot);
+      baseRef.current = validated;
       setContext(validated);
+      setBaseVersion((v) => v + 1);
     }
 
-    // Publish a minimal snapshot immediately so chat never posts null context.
     setContext(
       studioContextSnapshotSchema.parse({
         view,
@@ -146,6 +154,26 @@ export function StudioContextBridge({
       cancelled = true;
     };
   }, [view, selectedPath, loadedPackage, aiAvailable, locale, setContext, api]);
+
+  // Patch live editor fields (selection, dirty, buffer excerpt) without re-fetching.
+  useEffect(() => {
+    const base = baseRef.current;
+    if (!base?.activity || !selectedPath) return;
+    if (!currentEditor || currentEditor.path !== selectedPath) return;
+
+    const next = studioContextSnapshotSchema.parse({
+      ...base,
+      activity: {
+        ...base.activity,
+        contentExcerpt: truncateExcerpt(currentEditor.getCurrentContent()),
+        isDirty: currentEditor.isDirty(),
+        title: currentEditor.title || base.activity.title,
+        kind: currentEditor.kind !== 'other' ? currentEditor.kind : base.activity.kind,
+        selection: selection && selection.text.trim() ? selection : undefined,
+      },
+    });
+    setContext(next);
+  }, [currentEditor, selection, selectedPath, baseVersion, setContext]);
 
   return null;
 }

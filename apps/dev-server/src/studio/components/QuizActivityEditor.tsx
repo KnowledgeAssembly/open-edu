@@ -3,7 +3,7 @@ import { Button, Input, RadioGroup, RadioGroupItem, Textarea } from '@open-edu/d
 import { Check, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { EditorCoachingPanel } from './EditorCoachingPanel.js';
-import { useEditorBridge } from '../ai/EditorBridgeContext';
+import { useEditorBridge, readTextareaSelection } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -60,7 +60,7 @@ export function QuizActivityEditor({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { register, unregister } = useEditorBridge();
+  const { register, unregister, setSelection } = useEditorBridge();
 
   useEffect(() => {
     let cancelled = false;
@@ -132,6 +132,9 @@ export function QuizActivityEditor({
     return () => unregister();
   }, [getCurrentContent, isDirty, path, register, question, unregister]);
 
+  const handleSelectionChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    setSelection(readTextareaSelection(e.currentTarget));
+  };
   const handleAddOption = () => {
     setOptions((prev) => [...prev, freshOption('opt', '')]);
   };
@@ -189,6 +192,9 @@ export function QuizActivityEditor({
               className="mt-2"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              onSelect={handleSelectionChange}
+              onKeyUp={handleSelectionChange}
+              onMouseUp={handleSelectionChange}
               aria-label={t('studio.editor.quiz.questionLabel')}
             />
           </label>

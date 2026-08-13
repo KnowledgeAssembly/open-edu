@@ -4,6 +4,7 @@ import { StudioChatRequestSchema, MAX_MESSAGES, MAX_CONTEXT_CHARS } from './conf
 import { buildSystemPrompt } from './policy';
 import { draftActivity } from './tools';
 import { createChatMetadata } from './metadata';
+import { studioChatMessage } from './messages';
 import type { ItemIntent, ItemIntentParams } from '../types';
 
 function parseIntentFromMessage(content: string): {
@@ -53,14 +54,20 @@ export async function createStudioAssistantHandler(
   try {
     const body = StudioChatRequestSchema.parse(req);
     const packageDir = options.packageDir || '';
+    const locale = body.context.locale || 'en';
+    const msg = (key: string, params?: Record<string, string>) =>
+      studioChatMessage(key, locale, params);
 
     if (body.messages.length > MAX_MESSAGES) {
-      return { status: 400, body: { error: `Too many messages. Maximum is ${MAX_MESSAGES}.` } };
+      return {
+        status: 400,
+        body: { error: msg('assistant.chat.tooManyMessages', { max: String(MAX_MESSAGES) }) },
+      };
     }
 
     const systemPrompt = buildSystemPrompt(body.context);
     if (systemPrompt.length > MAX_CONTEXT_CHARS) {
-      return { status: 400, body: { error: 'Context too large.' } };
+      return { status: 400, body: { error: msg('assistant.chat.contextTooLarge') } };
     }
 
     const lastUserMessage = [...body.messages].reverse().find((m) => m.role === 'user');
@@ -73,8 +80,7 @@ export async function createStudioAssistantHandler(
             status: 200,
             body: {
               role: 'assistant',
-              content:
-                'I need an open course package before I can draft a new activity. Open a course and try again.',
+              content: msg('assistant.chat.needPackageDraft'),
               metadata: createChatMetadata('explain'),
             },
           };
@@ -92,7 +98,7 @@ export async function createStudioAssistantHandler(
             status: 200,
             body: {
               role: 'assistant',
-              content: `Here's a draft ${intent.kind} I created for you. You can preview it below and choose to use it or discard it.`,
+              content: msg('assistant.chat.draftReady', { kind: intent.kind }),
               metadata: createChatMetadata('draft'),
               drafts: result.items,
               applyMode: 'file' as const,
@@ -104,7 +110,7 @@ export async function createStudioAssistantHandler(
           status: 200,
           body: {
             role: 'assistant',
-            content: `I tried to create a draft but ran into an issue: ${result.error}. Could you rephrase your request?`,
+            content: msg('assistant.chat.draftFailed', { error: result.error }),
             metadata: createChatMetadata('explain'),
           },
         };
@@ -116,8 +122,7 @@ export async function createStudioAssistantHandler(
             status: 200,
             body: {
               role: 'assistant',
-              content:
-                'I need an open course package before I can edit this activity. Open a course and try again.',
+              content: msg('assistant.chat.needPackageEdit'),
               metadata: createChatMetadata('explain'),
             },
           };
@@ -144,7 +149,7 @@ export async function createStudioAssistantHandler(
             status: 200,
             body: {
               role: 'assistant',
-              content: `Here's the updated version. Take a look and use it or discard it.`,
+              content: msg('assistant.chat.editReady'),
               metadata: createChatMetadata('draft'),
               drafts: result.items,
               applyMode,
@@ -156,7 +161,7 @@ export async function createStudioAssistantHandler(
           status: 200,
           body: {
             role: 'assistant',
-            content: `I tried to edit this activity but ran into an issue: ${result.error}. Could you try a different approach?`,
+            content: msg('assistant.chat.editFailed', { error: result.error }),
             metadata: createChatMetadata('explain'),
           },
         };
@@ -180,9 +185,9 @@ export async function createStudioAssistantHandler(
     };
   } catch (err) {
     if (err instanceof Error && err.name === 'ZodError') {
-      return { status: 400, body: { error: 'Invalid request body' } };
+      return { status: 400, body: { error: studioChatMessage('assistant.chat.invalidBody') } };
     }
     console.error('[studio-assistant] chat handler error:', err);
-    return { status: 500, body: { error: 'An error occurred' } };
+    return { status: 500, body: { error: studioChatMessage('assistant.chat.serverError') } };
   }
 }

@@ -362,5 +362,15 @@
   "assistant.intent.error": "Could not run this action. Try again.",
   "assistant.suggest.rewrite_selection": "Rewrite selection",
   "assistant.suggest.simplify_selection": "Simplify selection",
-  "assistant.suggest.add_with_ai": "Add with AI"
+  "assistant.suggest.add_with_ai": "Add with AI",
+  "assistant.chat.needPackageDraft": "I need an open course package before I can draft a new activity. Open a course and try again.",
+  "assistant.chat.needPackageEdit": "I need an open course package before I can edit this activity. Open a course and try again.",
+  "assistant.chat.draftReady": "Here's a draft {{kind}} I created for you. You can preview it below and choose to use it or discard it.",
+  "assistant.chat.draftFailed": "I tried to create a draft but ran into an issue: {{error}}. Could you rephrase your request?",
+  "assistant.chat.editReady": "Here's the updated version. Take a look and use it or discard it.",
+  "assistant.chat.editFailed": "I tried to edit this activity but ran into an issue: {{error}}. Could you try a different approach?",
+  "assistant.chat.invalidBody": "Invalid request body",
+  "assistant.chat.serverError": "An error occurred",
+  "assistant.chat.tooManyMessages": "Too many messages. Maximum is {{max}}.",
+  "assistant.chat.contextTooLarge": "Context too large."
 }

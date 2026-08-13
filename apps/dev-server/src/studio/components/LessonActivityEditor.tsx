@@ -12,7 +12,7 @@ import { MarkdownRenderer } from '@open-edu/runtime';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { EditorCoachingPanel } from './EditorCoachingPanel.js';
-import { useEditorBridge } from '../ai/EditorBridgeContext';
+import { useEditorBridge, readTextareaSelection } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -47,7 +47,7 @@ export function LessonActivityEditor({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState('write');
-  const { register, unregister } = useEditorBridge();
+  const { register, unregister, setSelection } = useEditorBridge();
 
   useEffect(() => {
     let cancelled = false;
@@ -87,6 +87,9 @@ export function LessonActivityEditor({
     return () => unregister();
   }, [getCurrentContent, isDirty, path, register, title, unregister]);
 
+  const handleSelectionChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    setSelection(readTextareaSelection(e.currentTarget));
+  };
   const handleTitleChange = (next: string) => {
     setTitle(next);
     setBody(syncHeading(body, next));
@@ -144,6 +147,9 @@ export function LessonActivityEditor({
                   className="min-h-[320px] w-full"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
+                  onSelect={handleSelectionChange}
+                  onKeyUp={handleSelectionChange}
+                  onMouseUp={handleSelectionChange}
                   aria-label={t('studio.editor.lesson.bodyLabel')}
                 />
               </TabsContent>
