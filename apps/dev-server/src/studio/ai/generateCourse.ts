@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -61,11 +61,6 @@ function errorResult(code: AiGenerateErrorCode, error: string): CourseDraftResul
   return { success: false, code, quality: [], outlinePreview: [], error, draftId: '' };
 }
 
-function hasNodes(packageDir: string): boolean {
-  const nodesDir = join(packageDir, 'nodes');
-  return existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
-}
-
 function fallbackOutline(packageDir: string): Array<{ title: string; kind: string }> {
   try {
     const workflowPath = join(packageDir, 'workflow.json');
@@ -119,7 +114,7 @@ function readManifestTitle(packageDir: string): string | undefined {
 export async function generateCourseDraft(
   options: GenerateCourseOptions,
 ): Promise<CourseDraftResult> {
-  const { source, packageDir } = options;
+  const { source } = options;
   const compile = options.compile ?? compileFromCourseCompiler;
 
   if (source.kind === 'spec' && source.spec.trim().length === 0) {
@@ -130,9 +125,7 @@ export async function generateCourseDraft(
     return errorResult('notes-too-short', 'Add more detail');
   }
 
-  if (hasNodes(packageDir)) {
-    return errorResult('has-content', 'Package already has content');
-  }
+  // Draft-only: never writes packageDir. has-content is enforced at commit time.
 
   let raw: string;
   if (source.kind === 'notes') {

@@ -22,15 +22,15 @@ describe('resolveSuggestions', () => {
     expect(suggestions.some(s => s.id === 'summarize_course')).toBe(false);
   });
 
-  it('returns summarize_course when on home view with a course', () => {
+  it('returns create_from_notes first when on home view with a course', () => {
     const ctx = { 
       ...baseCtx, 
       view: 'home', 
       course: { id: '1', title: 'Test', activityCount: 0, outline: [] } 
     } as StudioContextSnapshot;
     const suggestions = resolveSuggestions(ctx, mockT);
+    expect(suggestions[0]?.id).toBe('create_from_notes');
     expect(suggestions.some(s => s.id === 'summarize_course')).toBe(true);
-    expect(suggestions.some(s => s.id === 'create_from_notes')).toBe(false);
   });
 
   it('returns correct chips for outline view', () => {

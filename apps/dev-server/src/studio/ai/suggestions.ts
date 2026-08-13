@@ -37,15 +37,36 @@ export function resolveSuggestions(
   }
 
   const suggestions: Record<string, SuggestionChip[]> = {
-    home: course
-      ? [
-          { id: 'summarize_course', label: t('studio.assistant.suggest.summarize_course'), action: { type: 'send_message', message: 'Summarize this course' } },
-          { id: 'improve_outline', label: t('studio.assistant.suggest.improve_outline'), action: { type: 'send_message', message: 'How can I improve the outline?' } },
-        ]
-      : [
-          { id: 'create_from_notes', label: t('studio.assistant.suggest.create_from_notes'), action: { type: 'send_message', message: 'How do I create a course from notes?' } },
-          { id: 'what_can_you_do', label: t('studio.assistant.suggest.what_can_you_do'), action: { type: 'send_message', message: 'What can you help me with?' } },
-        ],
+    home: [
+      {
+        id: 'create_from_notes',
+        label: t('studio.assistant.suggest.create_from_notes'),
+        action: {
+          type: 'send_message',
+          message: 'Create a course from my notes. I will paste the notes next.',
+        },
+      },
+      ...(course
+        ? [
+            {
+              id: 'summarize_course',
+              label: t('studio.assistant.suggest.summarize_course'),
+              action: { type: 'send_message' as const, message: 'Summarize this course' },
+            },
+            {
+              id: 'improve_outline',
+              label: t('studio.assistant.suggest.improve_outline'),
+              action: { type: 'send_message' as const, message: 'How can I improve the outline?' },
+            },
+          ]
+        : [
+            {
+              id: 'what_can_you_do',
+              label: t('studio.assistant.suggest.what_can_you_do'),
+              action: { type: 'send_message' as const, message: 'What can you help me with?' },
+            },
+          ]),
+    ],
     'outline': [
       { id: 'add_lesson', label: t('studio.assistant.suggest.add_lesson'), action: { type: 'send_message', message: 'How do I add a lesson?' } },
       { id: 'add_quiz', label: t('studio.assistant.suggest.add_quiz'), action: { type: 'send_message', message: 'How do I add a quiz?' } },

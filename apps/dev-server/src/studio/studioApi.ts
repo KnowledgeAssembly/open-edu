@@ -135,6 +135,11 @@ export function createStudioApi() {
         method: 'POST',
         body: JSON.stringify({ draftId, force }),
       }),
+    discardCourseDraft: (draftId: string) =>
+      aiRequest<{ success: boolean }>('/discard-draft', {
+        method: 'POST',
+        body: JSON.stringify({ draftId }),
+      }),
     generateItemAdd: (kind: 'lesson' | 'quiz' | 'practice', description: string) =>
       aiRequest<AiItemAddResult>('/item/add', {
         method: 'POST',

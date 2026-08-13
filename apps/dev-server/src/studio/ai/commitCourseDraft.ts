@@ -1,5 +1,5 @@
 import { existsSync, readdirSync } from 'node:fs';
-import { cp } from 'node:fs/promises';
+import { cp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { getDraftEntry, deleteDraft } from './generateCourse.js';
@@ -22,6 +22,23 @@ function hasNodes(packageDir: string): boolean {
   return existsSync(nodesDir) && readdirSync(nodesDir).length > 0;
 }
 
+async function clearPackageContents(packageDir: string): Promise<void> {
+  const nodesDir = join(packageDir, 'nodes');
+  if (existsSync(nodesDir)) {
+    await rm(nodesDir, { recursive: true, force: true });
+  }
+  const assetsDir = join(packageDir, 'assets');
+  if (existsSync(assetsDir)) {
+    await rm(assetsDir, { recursive: true, force: true });
+  }
+  for (const rel of ['workflow.json', 'package.json', 'rewards.json', 'cards.json']) {
+    const abs = join(packageDir, rel);
+    if (existsSync(abs)) {
+      await rm(abs, { force: true });
+    }
+  }
+}
+
 export async function commitCourseDraft(
   options: CommitCourseDraftOptions,
 ): Promise<CommitCourseDraftResult> {
@@ -36,7 +53,8 @@ export async function commitCourseDraft(
     };
   }
 
-  if (!force && hasNodes(packageDir)) {
+  const packageHasContent = hasNodes(packageDir);
+  if (!force && packageHasContent) {
     return {
       success: false,
       error: 'Package already has content',
@@ -45,6 +63,9 @@ export async function commitCourseDraft(
   }
 
   try {
+    if (force && packageHasContent) {
+      await clearPackageContents(packageDir);
+    }
     await cp(entry.outputDir, packageDir, { recursive: true });
   } catch (error) {
     return {

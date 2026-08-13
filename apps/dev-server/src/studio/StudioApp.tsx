@@ -12,7 +12,6 @@ import { StudioLayout } from './components/StudioLayout.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
-import { clearAiReview, migrateLegacyReview } from './ai/aiSession.js';
 import {
   readStudioView,
   writeStudioView,
@@ -27,6 +26,7 @@ import {
   StudioContextBridge,
   useStudioAssistant,
 } from './ai';
+import { migrateLegacyReview } from './ai/aiSession.js';
 import { EditorBridgeProvider } from './ai/EditorBridgeContext';
 import { isAssistantEnabled } from './ai/assistantFlags';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
@@ -68,18 +68,6 @@ export function StudioApp({
       cancelled = true;
     };
   }, [api]);
-
-  // Migrate legacy sessionStorage ai-review to assistant flow
-  useEffect(() => {
-    if (assistantEnabled) {
-      const legacy = migrateLegacyReview();
-      if (legacy) {
-        // Legacy reviews were already written to disk — no draftId to recover.
-        // Clear the key and let the user navigate to outline.
-        clearAiReview();
-      }
-    }
-  }, [assistantEnabled]);
 
   const handleNavigate = useCallback((next: StudioView) => {
     setView(next);
@@ -277,7 +265,16 @@ function StudioAppInner({
   assistantEnabled?: boolean;
   children: ReactNode;
 }) {
-  const { panelOpen, setPanelOpen } = useStudioAssistant();
+  const { t } = useTranslation();
+  const { panelOpen, setPanelOpen, openWithPreset } = useStudioAssistant();
+
+  useEffect(() => {
+    if (!assistantEnabled) return;
+    const legacy = migrateLegacyReview();
+    if (!legacy) return;
+    // Legacy reviews were already written to disk — no draftId to recover.
+    openWithPreset({ message: t('studio.assistant.courseDraft.legacyExpired') });
+  }, [assistantEnabled, openWithPreset, t]);
 
   return (
     <div className="flex h-screen flex-col">

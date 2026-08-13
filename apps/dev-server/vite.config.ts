@@ -26,7 +26,7 @@ import {
 import { OepWriter } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
-import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
+import { generateCourseDraft, deleteDraft } from './src/studio/ai/generateCourse.js';
 import { commitCourseDraft } from './src/studio/ai/commitCourseDraft.js';
 import {
   generateItemAdd,
@@ -580,6 +580,19 @@ function eduPackageLoader(): Plugin {
                 }
               });
             }
+            return;
+          }
+
+          // POST /api/studio/ai/discard-draft — drop a temp course draft without writing
+          if (pathname === '/api/studio/ai/discard-draft' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { draftId?: string };
+            if (!body.draftId) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'invalid-request', error: 'Missing draftId' }));
+              return;
+            }
+            deleteDraft(body.draftId);
+            res.end(JSON.stringify({ success: true }));
             return;
           }
 

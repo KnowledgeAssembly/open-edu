@@ -99,15 +99,13 @@ export async function generateCourseDraftTool(
       const errorMsg =
         result.code === 'notes-too-short'
           ? 'Your notes are too short. Add more detail about what the course should cover.'
-          : result.code === 'has-content'
-            ? 'This course already has content. Use Accept with force to replace it.'
-            : result.code === 'llm'
-              ? 'AI generation failed. Please try again.'
-              : result.code === 'parse'
-                ? 'Could not understand the generated spec. Try rephrasing your notes.'
-                : result.code === 'compile'
-                  ? `Course compilation had issues: ${result.error || 'Unknown error'}`
-                  : `Could not generate the course: ${result.error || 'Unknown error'}`;
+          : result.code === 'llm'
+            ? 'AI generation failed. Please try again.'
+            : result.code === 'parse'
+              ? 'Could not understand the generated spec. Try rephrasing your notes.'
+              : result.code === 'compile'
+                ? `Course compilation had issues: ${result.error || 'Unknown error'}`
+                : `Could not generate the course: ${result.error || 'Unknown error'}`;
 
       return { ok: false, error: errorMsg };
     }

@@ -133,7 +133,9 @@ export function StudioAssistantChat() {
     if (!api || courseDraftAccepting) return;
     setCourseDraftAccepting(true);
     try {
-      const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
+      const lastAssistantMsg = [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
       const courseDraft = lastAssistantMsg?.metadata?.courseDraft;
       if (!courseDraft || !courseDraft.draftId) {
         appendAssistantNote(t('studio.assistant.courseDraft.failed', { error: 'No draft to accept' }));
@@ -142,17 +144,15 @@ export function StudioAssistantChat() {
       const result = await api.commitCourseDraft(courseDraft.draftId, force);
       if (result.success) {
         appendAssistantNote(t('studio.assistant.courseDraft.accepted'));
+        appendAssistantNote(
+          [
+            t('studio.assistant.courseDraft.next.addActivity'),
+            t('studio.assistant.courseDraft.next.preview'),
+            t('studio.assistant.courseDraft.next.checkShare'),
+          ].join(' · '),
+        );
         onOutlineChanged?.();
       } else {
-        if (result.error?.includes('already has content')) {
-          // Try again with force
-          const retryResult = await api.commitCourseDraft(courseDraft.draftId, true);
-          if (retryResult.success) {
-            appendAssistantNote(t('studio.assistant.courseDraft.accepted'));
-            onOutlineChanged?.();
-            return;
-          }
-        }
         appendAssistantNote(
           t('studio.assistant.courseDraft.failed', { error: result.error || 'Unknown error' }),
         );
@@ -164,8 +164,18 @@ export function StudioAssistantChat() {
     }
   };
 
-  const handleDiscardCourseDraft = () => {
-    // Just remove the draft from pending state - it will expire via TTL
+  const handleDiscardCourseDraft = async () => {
+    const lastAssistantMsg = [...messages]
+      .reverse()
+      .find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
+    const courseDraft = lastAssistantMsg?.metadata?.courseDraft;
+    if (api && courseDraft?.draftId) {
+      try {
+        await api.discardCourseDraft(courseDraft.draftId);
+      } catch {
+        // TTL cleanup still applies if discard endpoint fails
+      }
+    }
     appendAssistantNote(t('studio.assistant.courseDraft.discarded'));
   };
 
@@ -223,10 +233,11 @@ export function StudioAssistantChat() {
                   : undefined
               }
               onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
-              onDiscardCourseDraft={handleDiscardCourseDraft}
+              onDiscardCourseDraft={() => void handleDiscardCourseDraft()}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
               courseDraftAccepting={courseDraftAccepting}
+              packageHasContent={(context?.course?.activityCount ?? 0) > 0}
             />
           ))
         )}

@@ -36,25 +36,49 @@ describe('generateCourseDraft', () => {
     }
   });
 
-  it('refuses to generate a draft for a package that already has nodes', async () => {
+  it('allows drafting even when the package already has nodes (commit enforces overwrite)', async () => {
     const packageDir = await makePackageDir();
     try {
       await mkdir(join(packageDir, 'nodes'), { recursive: true });
       await writeFile(join(packageDir, 'nodes/intro.md'), '# Intro\n\nExisting content', 'utf-8');
 
-      const completeText = vi.fn();
-      const compile = vi.fn();
+      const completeText = vi.fn().mockResolvedValue(
+        JSON.stringify({
+          format: 'openedu-course-spec',
+          version: 1,
+          metadata: { title: 'New', description: 'D', author: 'A' },
+          lessons: [],
+        }),
+      );
+      const compile = vi.fn().mockImplementation(async (_specPath: string, options: { output: string }) => {
+        await mkdir(join(options.output, 'nodes'), { recursive: true });
+        await writeFile(
+          join(options.output, 'package.json'),
+          JSON.stringify({ id: 'new', title: 'New', version: '1.0.0' }),
+          'utf-8',
+        );
+        await writeFile(join(options.output, 'nodes/a.md'), '# A\n', 'utf-8');
+        await writeFile(
+          join(options.output, 'workflow.json'),
+          JSON.stringify({ routing: { 'nodes/a.md': {} } }),
+          'utf-8',
+        );
+        return { success: true, diagnostics: [] };
+      });
+
       const result = await generateCourseDraft({
         source: { kind: 'notes', notes: NOTES, completeText },
         packageDir,
         compile,
       });
 
-      expect(result.success).toBe(false);
-      expect(result.code).toBe('has-content');
-      expect(result.draftId).toBe('');
-      expect(compile).not.toHaveBeenCalled();
-      expect(completeText).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+      expect(result.draftId).toBeTruthy();
+      expect(compile).toHaveBeenCalled();
+      // Existing package content untouched
+      expect((await import('node:fs')).readFileSync(join(packageDir, 'nodes/intro.md'), 'utf-8')).toContain(
+        'Existing content',
+      );
     } finally {
       await rm(packageDir, { recursive: true, force: true });
     }
@@ -150,7 +174,7 @@ describe('generateCourseDraft', () => {
       );
 
       // Assert: packageDir was NOT written to (draft-only)
-      const { existsSync, readdirSync } = await import('node:fs');
+      const { existsSync } = await import('node:fs');
       const nodesDir = join(packageDir, 'nodes');
       expect(existsSync(nodesDir)).toBe(false);
     } finally {

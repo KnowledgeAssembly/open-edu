@@ -116,7 +116,7 @@ describe('commitCourseDraft', () => {
       expect(result.title).toBe('Test');
 
       // Verify files were written to packageDir
-      const { existsSync, readFileSync } = await import('node:fs');
+      const { existsSync } = await import('node:fs');
       expect(existsSync(join(packageDir, 'package.json'))).toBe(true);
       expect(existsSync(join(packageDir, 'nodes/intro.md'))).toBe(true);
       expect(existsSync(join(packageDir, 'workflow.json'))).toBe(true);

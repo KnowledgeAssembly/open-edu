@@ -26,6 +26,7 @@ export function StudioAssistantMessage({
   isDirty,
   applying,
   courseDraftAccepting,
+  packageHasContent,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -39,6 +40,7 @@ export function StudioAssistantMessage({
   isDirty?: boolean;
   applying?: boolean;
   courseDraftAccepting?: boolean;
+  packageHasContent?: boolean;
 }) {
   const { t } = useTranslation();
   const drafts = metadata?.drafts;
@@ -65,6 +67,7 @@ export function StudioAssistantMessage({
             onAccept={(force) => onAcceptCourseDraft?.(force)}
             onDiscard={() => onDiscardCourseDraft?.()}
             accepting={courseDraftAccepting}
+            packageHasContent={packageHasContent}
           />
         </div>
       ) : null}

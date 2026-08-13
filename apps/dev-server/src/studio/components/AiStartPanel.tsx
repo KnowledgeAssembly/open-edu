@@ -18,13 +18,12 @@ export function AiStartPanel() {
             size="sm"
             onClick={() =>
               openWithPreset({
-                message:
-                  'Help me create a course from my notes. Here are my notes on what the course should cover:',
+                message: t('studio.assistant.courseDraft.presetNotes'),
               })
             }
           >
             <Sparkles className="mr-1 size-4" aria-hidden="true" />
-            {t('studio.assistant.suggest.create_from_notes')}
+            {t('studio.assistant.open')}
           </Button>
         </div>
       </CardContent>

@@ -32,27 +32,23 @@ export function AssistantCourseDraftCard({
   onAccept,
   onDiscard,
   accepting,
+  packageHasContent = false,
 }: {
   courseDraft: CourseDraftResult;
   onAccept: (force: boolean) => void;
   onDiscard: () => void;
   accepting?: boolean;
+  packageHasContent?: boolean;
 }) {
   const { t } = useTranslation();
   const [discardConfirm, setDiscardConfirm] = useState(false);
   const [overwriteConfirm, setOverwriteConfirm] = useState(false);
 
   const handleAccept = () => {
-    setOverwriteConfirm(true);
-  };
-
-  const handleOverwriteConfirmed = () => {
-    setOverwriteConfirm(false);
-    onAccept(true);
-  };
-
-  const handleOverwriteCancelled = () => {
-    setOverwriteConfirm(false);
+    if (packageHasContent) {
+      setOverwriteConfirm(true);
+      return;
+    }
     onAccept(false);
   };
 
@@ -64,64 +60,57 @@ export function AssistantCourseDraftCard({
         </h4>
       ) : null}
 
-{courseDraft.success ? (
-          <>
-            <section className="mb-3" aria-labelledby="course-draft-outline-heading">
-              <h5
-                id="course-draft-outline-heading"
-                className="text-on-surface-variant mb-2 text-xs font-medium uppercase tracking-wider"
-              >
-                {t('studio.assistant.courseDraft.outline')}
-              </h5>
-              <ul className="border-outline-variant divide-outline-variant divide-y rounded-md border">
-                {courseDraft.outlinePreview.map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between gap-2 px-3 py-2"
-                  >
-                    <span className="text-on-surface truncate text-xs">{item.title}</span>
-                    <Badge variant="outline" className="text-[10px] leading-tight">
-                      {t(kindLabelKey(item.kind))}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            </section>
+      {courseDraft.success ? (
+        <>
+          <section className="mb-3" aria-labelledby="course-draft-outline-heading">
+            <h5
+              id="course-draft-outline-heading"
+              className="text-on-surface-variant mb-2 text-xs font-medium uppercase tracking-wider"
+            >
+              {t('studio.assistant.courseDraft.outline')}
+            </h5>
+            <ul className="border-outline-variant divide-outline-variant divide-y rounded-md border">
+              {courseDraft.outlinePreview.map((item, index) => (
+                <li key={index} className="flex items-center justify-between gap-2 px-3 py-2">
+                  <span className="text-on-surface truncate text-xs">{item.title}</span>
+                  <Badge variant="outline" className="text-[10px] leading-tight">
+                    {t(kindLabelKey(item.kind))}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-            <section className="mb-3" aria-labelledby="course-draft-quality-heading">
-              <h5
-                id="course-draft-quality-heading"
-                className="text-on-surface-variant mb-2 text-xs font-medium uppercase tracking-wider"
-              >
-                {t('studio.assistant.courseDraft.quality')}
-              </h5>
-              <ul className="space-y-1">
-                {courseDraft.quality.map((item) => (
-                  <li key={item.id} className="flex items-start gap-2">
-                    {item.passed ? (
-                      <Check className="text-success mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-                    ) : (
-                      <X className="text-error mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-                    )}
-                    <span
-                      className={
-                        item.passed
-                          ? 'text-on-surface text-[11px]'
-                          : 'text-error text-[11px]'
-                      }
-                    >
-                      {t(item.labelKey)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </>
-        ) : (
-          <p className="text-error text-xs">{courseDraft.error || 'Draft generation failed'}</p>
-        )}
+          <section className="mb-3" aria-labelledby="course-draft-quality-heading">
+            <h5
+              id="course-draft-quality-heading"
+              className="text-on-surface-variant mb-2 text-xs font-medium uppercase tracking-wider"
+            >
+              {t('studio.assistant.courseDraft.quality')}
+            </h5>
+            <ul className="space-y-1">
+              {courseDraft.quality.map((item) => (
+                <li key={item.id} className="flex items-start gap-2">
+                  {item.passed ? (
+                    <Check className="text-success mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <X className="text-error mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                  )}
+                  <span className={item.passed ? 'text-on-surface text-[11px]' : 'text-error text-[11px]'}>
+                    {t(item.labelKey)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
+      ) : (
+        <p className="text-error text-xs">
+          {courseDraft.error || t('studio.assistant.courseDraft.generationFailed')}
+        </p>
+      )}
 
-      {courseDraft.success && (
+      {courseDraft.success ? (
         <div className="flex items-center gap-2">
           <Button
             variant="default"
@@ -147,15 +136,13 @@ export function AssistantCourseDraftCard({
             <X className="size-3" aria-hidden="true" />
           </Button>
         </div>
-      )}
+      ) : null}
 
       <Dialog open={discardConfirm} onOpenChange={setDiscardConfirm}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>{t('studio.assistant.courseDraft.discardConfirm')}</DialogTitle>
-            <DialogDescription>
-              {t('studio.assistant.courseDraft.discardLede')}
-            </DialogDescription>
+            <DialogDescription>{t('studio.assistant.courseDraft.discardLede')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => setDiscardConfirm(false)}>
@@ -179,9 +166,7 @@ export function AssistantCourseDraftCard({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>{t('studio.assistant.courseDraft.overwriteTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('studio.assistant.courseDraft.overwriteLede')}
-            </DialogDescription>
+            <DialogDescription>{t('studio.assistant.courseDraft.overwriteLede')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => setOverwriteConfirm(false)}>
@@ -190,7 +175,10 @@ export function AssistantCourseDraftCard({
             <Button
               variant="default"
               size="sm"
-              onClick={handleOverwriteConfirmed}
+              onClick={() => {
+                setOverwriteConfirm(false);
+                onAccept(true);
+              }}
             >
               {t('studio.assistant.courseDraft.overwriteConfirm')}
             </Button>
