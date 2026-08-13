@@ -1,14 +1,15 @@
 import { generateText } from 'ai';
 import { createModelFactoryFromEnv } from '@open-edu/llm-config';
+import { completeWithLlm } from '../studioLlm';
 import { StudioChatRequestSchema, MAX_MESSAGES, MAX_CONTEXT_CHARS } from './config';
 import { buildSystemPrompt } from './policy';
-import { draftActivity } from './tools';
+import { draftActivity, generateCourseDraftTool } from './tools';
 import { createChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
 import type { ItemIntent, ItemIntentParams } from '../types';
 
 function parseIntentFromMessage(content: string): {
-  type: 'draft_new' | 'edit_existing' | 'explain';
+  type: 'draft_new' | 'edit_existing' | 'generate_course' | 'explain';
   kind?: 'lesson' | 'quiz' | 'practice';
   description?: string;
   intent?: ItemIntent;
@@ -18,6 +19,30 @@ function parseIntentFromMessage(content: string): {
 
   if (low.includes('add questions') || low.includes('more questions')) {
     return { type: 'edit_existing', intent: 'add-questions' };
+  }
+
+  // Check for course generation before individual activity creation
+  const coursePatterns = [
+    /create\s+(?:a\s+)?(?:full\s+)?course\b/i,
+    /generate\s+(?:a\s+)?course\b/i,
+    /build\s+(?:a\s+)?course\b/i,
+    /make\s+(?:a\s+)?course\b/i,
+    /\b(?:course|curriculum|unit)\s+(?:from|based on|covering)\s+/i,
+    /^.*notes?.*course.*$/i,
+    /^.*course.*notes?.*$/i,
+  ];
+  const isCourseRequest = coursePatterns.some((p) => p.test(low));
+
+  // Only trigger course generation if the message is long enough (has actual notes/content)
+  const hasSubstantialNotes = content.length > 100;
+
+  if (isCourseRequest && hasSubstantialNotes) {
+    return { type: 'generate_course', description: content };
+  }
+
+  // Also trigger course generation for very long messages that look like notes
+  if (content.length > 300 && !low.includes('create') && !low.includes('add') && !low.includes('edit')) {
+    return { type: 'generate_course', description: content };
   }
 
   const createMatch = low.match(/(?:create|add|draft|generate|make new)\s+(?:a\s+)?(lesson|quiz|practice)/);
@@ -74,6 +99,48 @@ export async function createStudioAssistantHandler(
     const intent = lastUserMessage ? parseIntentFromMessage(lastUserMessage.content) : null;
 
     if (intent && intent.type !== 'explain' && body.context.course) {
+      if (intent.type === 'generate_course') {
+        if (!packageDir) {
+          return {
+            status: 200,
+            body: {
+              role: 'assistant',
+              content: msg('assistant.chat.needPackageDraft'),
+              metadata: createChatMetadata('explain'),
+            },
+          };
+        }
+
+        const result = await generateCourseDraftTool({
+          notes: intent.description,
+          packageDir,
+          completeText: completeWithLlm,
+        });
+
+        if (result.ok) {
+          const metadata = createChatMetadata('course_draft');
+          metadata.courseDraft = result.courseDraft;
+          return {
+            status: 200,
+            body: {
+              role: 'assistant',
+              content: msg('assistant.chat.courseDraftReady'),
+              metadata,
+              courseDraft: result.courseDraft,
+            },
+          };
+        }
+
+        return {
+          status: 200,
+          body: {
+            role: 'assistant',
+            content: msg('assistant.chat.courseDraftFailed', { error: result.error }),
+            metadata: createChatMetadata('explain'),
+          },
+        };
+      }
+
       if (intent.type === 'draft_new' && intent.kind) {
         if (!packageDir) {
           return {

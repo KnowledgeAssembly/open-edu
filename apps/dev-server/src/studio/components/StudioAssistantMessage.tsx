@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { cn, Button } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { AssistantDraftCard } from './AssistantDraftCard';
-import type { DraftItem } from '../ai/types';
+import { AssistantCourseDraftCard } from './AssistantCourseDraftCard';
+import type { DraftItem, CourseDraftResult } from '../ai/types';
 import type { DraftApplyMode } from '../ai/StudioAssistantProvider';
 
 interface ChatMessageMetadata {
-  mode?: 'explain' | 'draft';
+  mode?: 'explain' | 'draft' | 'course_draft';
   drafts?: DraftItem[];
+  courseDraft?: CourseDraftResult;
   applyMode?: DraftApplyMode;
 }
 
@@ -19,8 +21,11 @@ export function StudioAssistantMessage({
   onUseAll,
   onDiscardDraft,
   onOpenDraft,
+  onAcceptCourseDraft,
+  onDiscardCourseDraft,
   isDirty,
   applying,
+  courseDraftAccepting,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -29,11 +34,15 @@ export function StudioAssistantMessage({
   onUseAll?: (items: DraftItem[]) => void;
   onDiscardDraft?: (item: DraftItem) => void;
   onOpenDraft?: (item: DraftItem) => void;
+  onAcceptCourseDraft?: (force: boolean) => void;
+  onDiscardCourseDraft?: () => void;
   isDirty?: boolean;
   applying?: boolean;
+  courseDraftAccepting?: boolean;
 }) {
   const { t } = useTranslation();
   const drafts = metadata?.drafts;
+  const courseDraft = metadata?.courseDraft;
   const [expanded, setExpanded] = useState(false);
 
   const visibleDrafts =
@@ -49,6 +58,16 @@ export function StudioAssistantMessage({
       )}
     >
       {content}
+      {courseDraft ? (
+        <div className="mt-3">
+          <AssistantCourseDraftCard
+            courseDraft={courseDraft}
+            onAccept={(force) => onAcceptCourseDraft?.(force)}
+            onDiscard={() => onDiscardCourseDraft?.()}
+            accepting={courseDraftAccepting}
+          />
+        </div>
+      ) : null}
       {drafts && drafts.length > 0 ? (
         <div className="mt-3 space-y-3">
           {drafts.length > 1 ? (

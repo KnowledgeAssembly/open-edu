@@ -3,7 +3,8 @@ import {
   generateItemEdit,
   ItemRequestError,
 } from '../itemGenerate';
-import type { DraftItem, ItemIntent, ItemIntentParams } from '../types';
+import { generateCourseDraft } from '../generateCourse';
+import type { DraftItem, ItemIntent, ItemIntentParams, CourseDraftResult } from '../types';
 
 export interface ToolCallRequest {
   type: 'draft_new' | 'edit_existing';
@@ -15,8 +16,20 @@ export interface ToolCallRequest {
   packageDir: string;
 }
 
+export interface GenerateCourseRequest {
+  notes?: string;
+  spec?: string;
+  specExt?: '.json' | '.md';
+  packageDir: string;
+  completeText: (prompt: string) => Promise<string>;
+}
+
 export type ToolCallResult =
   | { ok: true; items: DraftItem[] }
+  | { ok: false; error: string };
+
+export type GenerateCourseToolResult =
+  | { ok: true; courseDraft: CourseDraftResult }
   | { ok: false; error: string };
 
 /**
@@ -57,6 +70,50 @@ export async function draftActivity(request: ToolCallRequest): Promise<ToolCallR
     if (err instanceof ItemRequestError) {
       return { ok: false, error: err.message };
     }
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
+ * Generate a full course draft from notes or a spec file.
+ * Draft-then-commit: never writes package files.
+ */
+export async function generateCourseDraftTool(
+  request: GenerateCourseRequest,
+): Promise<GenerateCourseToolResult> {
+  try {
+    const source = request.notes
+      ? { kind: 'notes' as const, notes: request.notes, completeText: request.completeText }
+      : {
+          kind: 'spec' as const,
+          spec: request.spec || '',
+          extension: request.specExt || '.json' as '.json' | '.md',
+        };
+
+    const result = await generateCourseDraft({
+      source,
+      packageDir: request.packageDir,
+    });
+
+    if (!result.success) {
+      const errorMsg =
+        result.code === 'notes-too-short'
+          ? 'Your notes are too short. Add more detail about what the course should cover.'
+          : result.code === 'has-content'
+            ? 'This course already has content. Use Accept with force to replace it.'
+            : result.code === 'llm'
+              ? 'AI generation failed. Please try again.'
+              : result.code === 'parse'
+                ? 'Could not understand the generated spec. Try rephrasing your notes.'
+                : result.code === 'compile'
+                  ? `Course compilation had issues: ${result.error || 'Unknown error'}`
+                  : `Could not generate the course: ${result.error || 'Unknown error'}`;
+
+      return { ok: false, error: errorMsg };
+    }
+
+    return { ok: true, courseDraft: result };
+  } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

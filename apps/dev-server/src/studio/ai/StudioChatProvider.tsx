@@ -11,7 +11,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
 import type { DraftApplyMode } from './StudioAssistantProvider';
-import type { DraftItem, ItemIntent, ItemIntentParams } from './types';
+import type { DraftItem, CourseDraftResult, ItemIntent, ItemIntentParams } from './types';
 import type { StudioApi } from '../studioApi';
 
 interface ChatMessage {
@@ -19,8 +19,9 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   metadata?: {
-    mode?: 'explain' | 'draft';
+    mode?: 'explain' | 'draft' | 'course_draft';
     drafts?: DraftItem[];
+    courseDraft?: CourseDraftResult;
     applyMode?: DraftApplyMode;
   };
 }
@@ -159,8 +160,18 @@ export function StudioChatProvider({
           role: 'assistant',
           content: data.content || data.text || '',
           metadata: data.metadata
-            ? { mode: data.metadata.mode, drafts: data.drafts, applyMode }
-            : undefined,
+            ? {
+                mode: data.metadata.mode,
+                drafts: data.drafts,
+                courseDraft: data.courseDraft || data.metadata.courseDraft,
+                applyMode,
+              }
+            : data.courseDraft
+              ? {
+                  mode: 'course_draft',
+                  courseDraft: data.courseDraft,
+                }
+              : undefined,
         };
         const next = [...messagesRef.current, assistantMsg];
         messagesRef.current = next;

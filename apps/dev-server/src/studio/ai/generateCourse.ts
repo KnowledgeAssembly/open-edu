@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -10,9 +10,10 @@ import { loadPackage } from '@open-edu/core';
 import { buildCourseSpecPrompt, extractJsonObject } from './prompts/index.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
 import { detectActivityKind, titleFromMarkdown, titleFromQuizJson } from '../outlineModel.js';
-import type { AiGenerateErrorCode, AiGenerateResult } from './types.js';
+import type { AiGenerateErrorCode, CourseDraftResult } from './types.js';
 
 const MIN_NOTES_LENGTH = 40;
+const DRAFT_TTL_MS = 30 * 60 * 1000;
 
 export type CourseDraftSource =
   | { kind: 'notes'; notes: string; completeText: (prompt: string) => Promise<string> }
@@ -22,11 +23,42 @@ export interface GenerateCourseOptions {
   source: CourseDraftSource;
   packageDir: string;
   compile?: typeof compileFromCourseCompiler;
-  force?: boolean;
 }
 
-function errorResult(code: AiGenerateErrorCode, error: string): AiGenerateResult {
-  return { success: false, code, quality: [], outlinePreview: [], error };
+interface DraftEntry {
+  tempDir: string;
+  outputDir: string;
+  title?: string;
+  createdAt: number;
+}
+
+const activeDrafts = new Map<string, DraftEntry>();
+
+function generateDraftId(): string {
+  return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function getDraftEntry(draftId: string): DraftEntry | undefined {
+  const entry = activeDrafts.get(draftId);
+  if (!entry) return undefined;
+  if (Date.now() - entry.createdAt > DRAFT_TTL_MS) {
+    activeDrafts.delete(draftId);
+    rm(entry.tempDir, { recursive: true, force: true }).catch(() => {});
+    return undefined;
+  }
+  return entry;
+}
+
+export function deleteDraft(draftId: string): void {
+  const entry = activeDrafts.get(draftId);
+  if (entry) {
+    activeDrafts.delete(draftId);
+    rm(entry.tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+function errorResult(code: AiGenerateErrorCode, error: string): CourseDraftResult {
+  return { success: false, code, quality: [], outlinePreview: [], error, draftId: '' };
 }
 
 function hasNodes(packageDir: string): boolean {
@@ -86,8 +118,8 @@ function readManifestTitle(packageDir: string): string | undefined {
 
 export async function generateCourseDraft(
   options: GenerateCourseOptions,
-): Promise<AiGenerateResult> {
-  const { source, packageDir, force = false } = options;
+): Promise<CourseDraftResult> {
+  const { source, packageDir } = options;
   const compile = options.compile ?? compileFromCourseCompiler;
 
   if (source.kind === 'spec' && source.spec.trim().length === 0) {
@@ -98,7 +130,7 @@ export async function generateCourseDraft(
     return errorResult('notes-too-short', 'Add more detail');
   }
 
-  if (!force && hasNodes(packageDir)) {
+  if (hasNodes(packageDir)) {
     return errorResult('has-content', 'Package already has content');
   }
 
@@ -143,7 +175,6 @@ export async function generateCourseDraft(
     );
   }
 
-  // Compile into a scratch dir so packageDir is only touched on success.
   const outputDir = join(tempDir, 'out');
   let result: CompileResult;
   try {
@@ -160,32 +191,30 @@ export async function generateCourseDraft(
   const quality = mapDiagnosticsToQuality(result.diagnostics, outlinePreview);
   const firstError = result.diagnostics.find((diagnostic) => diagnostic.severity === 'error');
 
+  const draftId = generateDraftId();
+  activeDrafts.set(draftId, {
+    tempDir,
+    outputDir,
+    title: readManifestTitle(outputDir),
+    createdAt: Date.now(),
+  });
+
   if (!result.success) {
-    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     return {
       success: false,
       code: 'compile',
       quality,
       outlinePreview,
+      draftId,
       error: firstError?.message ?? 'Could not compile the draft',
     };
   }
-
-  try {
-    await cp(outputDir, packageDir, { recursive: true });
-  } catch (error) {
-    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
-    return errorResult(
-      'write',
-      `Could not save the draft: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-  await rm(tempDir, { recursive: true, force: true }).catch(() => {});
 
   return {
     success: true,
     quality,
     outlinePreview,
-    title: readManifestTitle(packageDir),
+    title: readManifestTitle(outputDir),
+    draftId,
   };
 }

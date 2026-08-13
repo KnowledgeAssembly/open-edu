@@ -71,9 +71,6 @@ export function resolveSuggestions(
     'unit-builder': [
       { id: 'what_can_you_do', label: t('studio.assistant.suggest.what_can_you_do'), action: { type: 'send_message', message: 'What can you help me with?' } },
     ],
-    'ai-review': [
-      { id: 'what_can_you_do', label: t('studio.assistant.suggest.what_can_you_do'), action: { type: 'send_message', message: 'What can you help me with?' } },
-    ],
   };
 
   return suggestions[view] || [];

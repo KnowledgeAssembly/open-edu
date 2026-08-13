@@ -30,6 +30,16 @@ export interface AiGenerateResult {
   code?: AiGenerateErrorCode;
 }
 
+export interface CourseDraftResult {
+  success: boolean;
+  title?: string;
+  outlinePreview: Array<{ title: string; kind: string }>;
+  quality: AiQualityItem[];
+  draftId: string;
+  error?: string;
+  code?: AiGenerateErrorCode;
+}
+
 export interface AiStatus {
   available: boolean;
   reason?: 'missing-key' | 'disabled';
@@ -41,7 +51,9 @@ export type AiEndpointErrorCode =
   | 'missing-spec'
   | 'unknown-ai-endpoint'
   | 'ai-unavailable'
-  | 'invalid-request';
+  | 'invalid-request'
+  | 'draft-not-found'
+  | 'draft-expired';
 
 export type DraftItem =
   | { kind: 'lesson'; title: string; content: string }

@@ -8,7 +8,6 @@ export const StudioViewSchema = z.enum([
   'share',
   'library',
   'unit-builder',
-  'ai-review',
 ]);
 
 export type StudioView = z.infer<typeof StudioViewSchema>;

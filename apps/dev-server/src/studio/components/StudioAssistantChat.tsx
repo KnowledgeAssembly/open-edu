@@ -30,6 +30,7 @@ export function StudioAssistantChat() {
   const [input, setInput] = useState('');
   const [intentRunning, setIntentRunning] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [courseDraftAccepting, setCourseDraftAccepting] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,12 +90,9 @@ export function StudioAssistantChat() {
         appendAssistantNote(t('studio.assistant.draft.appliedOutline'));
         onOutlineChanged?.();
       } else {
-        const { path } = await applyDraft(api, item, { mode: 'file' });
+        await applyDraft(api, item, { mode: 'file' });
         appendAssistantNote(t('studio.assistant.draft.appliedOutline'));
         onOutlineChanged?.();
-        if (path && onOpenPath) {
-          // Keep optional — Open button handles explicit navigation
-        }
       }
 
       setPendingDrafts(null);
@@ -129,6 +127,46 @@ export function StudioAssistantChat() {
     } catch (err) {
       onError?.(err instanceof Error ? err.message : t('studio.errors.generic'));
     }
+  };
+
+  const handleAcceptCourseDraft = async (force: boolean) => {
+    if (!api || courseDraftAccepting) return;
+    setCourseDraftAccepting(true);
+    try {
+      const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
+      const courseDraft = lastAssistantMsg?.metadata?.courseDraft;
+      if (!courseDraft || !courseDraft.draftId) {
+        appendAssistantNote(t('studio.assistant.courseDraft.failed', { error: 'No draft to accept' }));
+        return;
+      }
+      const result = await api.commitCourseDraft(courseDraft.draftId, force);
+      if (result.success) {
+        appendAssistantNote(t('studio.assistant.courseDraft.accepted'));
+        onOutlineChanged?.();
+      } else {
+        if (result.error?.includes('already has content')) {
+          // Try again with force
+          const retryResult = await api.commitCourseDraft(courseDraft.draftId, true);
+          if (retryResult.success) {
+            appendAssistantNote(t('studio.assistant.courseDraft.accepted'));
+            onOutlineChanged?.();
+            return;
+          }
+        }
+        appendAssistantNote(
+          t('studio.assistant.courseDraft.failed', { error: result.error || 'Unknown error' }),
+        );
+      }
+    } catch (err) {
+      onError?.(err instanceof Error ? err.message : t('studio.errors.generic'));
+    } finally {
+      setCourseDraftAccepting(false);
+    }
+  };
+
+  const handleDiscardCourseDraft = () => {
+    // Just remove the draft from pending state - it will expire via TTL
+    appendAssistantNote(t('studio.assistant.courseDraft.discarded'));
   };
 
   const handleIntent = async (intent: ItemIntent, params?: ItemIntentParams) => {
@@ -184,8 +222,11 @@ export function StudioAssistantChat() {
                   ? (item) => void handleOpenDraft(item)
                   : undefined
               }
+              onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
+              onDiscardCourseDraft={handleDiscardCourseDraft}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
+              courseDraftAccepting={courseDraftAccepting}
             />
           ))
         )}

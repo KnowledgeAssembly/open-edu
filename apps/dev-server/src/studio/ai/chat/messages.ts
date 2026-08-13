@@ -1,4 +1,4 @@
-import studioEn from '@open-edu/i18n/locales/en/studio.json';
+import studioEn from '@open-edu/i18n/locales/en/studio.json' with { type: 'json' };
 
 type StudioDict = Record<string, string>;
 
