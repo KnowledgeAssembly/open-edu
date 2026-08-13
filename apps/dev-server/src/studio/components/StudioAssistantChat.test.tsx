@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
@@ -144,5 +144,26 @@ describe('StudioAssistantChat next-step actions', () => {
     await waitFor(() =>
       expect(commitCourseDraft).toHaveBeenCalledWith('draft-1', false),
     );
+  });
+
+  it('prefills the composer without sending when a preset carries prefill: true', async () => {
+    wrap(<StudioAssistantChat />);
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent('studio:assistant:preset', {
+          detail: {
+            message: 'Help me create a course from my notes.',
+            prefill: true,
+          },
+        }),
+      );
+    });
+    const textarea = screen.getByPlaceholderText('Ask anything about your course…');
+    await waitFor(() =>
+      expect((textarea as HTMLTextAreaElement).value).toBe(
+        'Help me create a course from my notes.',
+      ),
+    );
+    expect(sendMessage).not.toHaveBeenCalled();
   });
 });

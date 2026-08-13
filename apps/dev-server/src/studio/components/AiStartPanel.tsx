@@ -37,6 +37,7 @@ export function AiStartPanel({ onError }: { onError?: (message: string) => void 
             onClick={() =>
               openWithPreset({
                 message: t('studio.assistant.courseDraft.presetNotes'),
+                prefill: true,
               })
             }
           >

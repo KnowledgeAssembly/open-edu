@@ -42,6 +42,7 @@ interface StudioAssistantContextType {
   openWithPreset: (preset: {
     kind?: 'lesson' | 'quiz' | 'practice';
     message?: string;
+    prefill?: boolean;
     spec?: SpecAttachPreset;
   }) => void;
   ephemeralSuggestions: SuggestionChip[] | null;
@@ -90,6 +91,7 @@ export function StudioAssistantProvider({
     (preset: {
       kind?: 'lesson' | 'quiz' | 'practice';
       message?: string;
+      prefill?: boolean;
       spec?: SpecAttachPreset;
     }) => {
       setPanelOpen(true);
