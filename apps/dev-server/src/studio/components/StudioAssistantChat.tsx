@@ -44,6 +44,7 @@ export function StudioAssistantChat() {
   const [attachingSpec, setAttachingSpec] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (listRef.current) {
@@ -54,9 +55,13 @@ export function StudioAssistantChat() {
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const preset = e.detail;
-      if (preset.message) {
-        sendMessage(preset.message);
+      if (!preset.message) return;
+      if (preset.prefill) {
+        setInput(preset.message);
+        inputRef.current?.focus();
+        return;
       }
+      sendMessage(preset.message);
     };
     window.addEventListener('studio:assistant:preset', handler as EventListener);
     return () => window.removeEventListener('studio:assistant:preset', handler as EventListener);
@@ -368,6 +373,7 @@ export function StudioAssistantChat() {
       <div className="border-outline-variant bg-surface border-t p-4">
         <div className="relative">
           <textarea
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

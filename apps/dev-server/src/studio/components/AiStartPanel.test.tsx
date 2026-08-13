@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { AiStartPanel } from './AiStartPanel';
@@ -30,5 +31,17 @@ describe('AiStartPanel', () => {
   it('renders an upload course spec control', async () => {
     render(wrap(<AiStartPanel />));
     expect(screen.getByRole('button', { name: /upload spec/i })).toBeInTheDocument();
+  });
+
+  it('opens the assistant with the composer prefilled instead of auto-sending a course draft', async () => {
+    const presetSpy = vi.fn();
+    window.addEventListener('studio:assistant:preset', presetSpy as EventListener);
+    render(wrap(<AiStartPanel />));
+    await userEvent.click(screen.getByRole('button', { name: /open author assistant/i }));
+    await waitFor(() => expect(presetSpy).toHaveBeenCalled());
+    const detail = presetSpy.mock.calls[0]![0].detail;
+    expect(detail.prefill).toBe(true);
+    expect(detail.message).toBeTruthy();
+    window.removeEventListener('studio:assistant:preset', presetSpy as EventListener);
   });
 });
