@@ -26,4 +26,9 @@ describe('AiStartPanel', () => {
     render(wrap(<AiStartPanel />));
     expect(screen.getByRole('button', { name: /open author assistant/i })).toBeInTheDocument();
   });
+
+  it('renders an upload course spec control', async () => {
+    render(wrap(<AiStartPanel />));
+    expect(screen.getByRole('button', { name: /upload spec/i })).toBeInTheDocument();
+  });
 });

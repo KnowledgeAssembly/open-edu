@@ -1,7 +1,7 @@
 import type { StudioContextSnapshot } from '../context';
 
 export function buildSystemPrompt(ctx: StudioContextSnapshot): string {
-  const { view, course, activity } = ctx;
+  const { view, course, activity, lastCourseDraftQuality } = ctx;
 
   let prompt = `You are the OpenEdu Author Assistant, a specialized AI companion for teachers creating educational courses.
 Your goal is to help authors improve their course structure, activity quality, and pedagogical flow.
@@ -30,7 +30,7 @@ COURSE GENERATION:
 Title: ${course.title}
 Activities: ${course.activityCount}
 Outline:
-${course.outline.map(a => `- [${a.kind}] ${a.title} (${a.path})`).join('\n')}
+${course.outline.map((a) => `- [${a.kind}] ${a.title} (${a.path})`).join('\n')}
 `;
   }
 
@@ -43,6 +43,21 @@ Path: ${activity.path}
     if (activity.contentExcerpt) {
       prompt += `\nContent excerpt:\n${activity.contentExcerpt.slice(0, 2000)}`;
     }
+  }
+
+  if (lastCourseDraftQuality && lastCourseDraftQuality.length > 0) {
+    prompt += `\n\nLAST COURSE DRAFT QUALITY CHECKS:
+${lastCourseDraftQuality
+  .map((item) => {
+    const status = item.passed ? 'PASS' : 'FAIL';
+    const detail = !item.passed && item.detail ? ` — ${item.detail}` : '';
+    return `- [${status}] ${item.id} (${item.labelKey})${detail}`;
+  })
+  .join('\n')}
+
+If the user asks why a quality check failed (e.g. "why did assessment fail?"), explain using the FAIL detail above.
+If they ask to fix failing checks, give concrete edit suggestions for each failed id.
+`;
   }
 
   prompt += `\n\nCURRENT VIEW: ${view}

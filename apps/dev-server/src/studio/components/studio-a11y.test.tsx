@@ -16,7 +16,23 @@ import type { LibraryEntry } from '../library/types.js';
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
-const mockAssistantContext = { panelOpen: false, setPanelOpen: vi.fn(), panelWidth: 320, setPanelWidth: vi.fn(), context: null, setContext: vi.fn(), enabled: true, setEnabled: vi.fn(), pendingDrafts: null, setPendingDrafts: vi.fn(), openWithPreset: vi.fn() };
+const mockAssistantContext = {
+  panelOpen: false,
+  setPanelOpen: vi.fn(),
+  panelWidth: 320,
+  setPanelWidth: vi.fn(),
+  context: null,
+  setContext: vi.fn(),
+  enabled: true,
+  setEnabled: vi.fn(),
+  pendingDrafts: null,
+  setPendingDrafts: vi.fn(),
+  openWithPreset: vi.fn(),
+  ephemeralSuggestions: null,
+  setEphemeralSuggestions: vi.fn(),
+  lastCourseQuality: null,
+  setLastCourseQuality: vi.fn(),
+};
 
 vi.mock('../ai', () => ({
   useStudioAssistant: () => mockAssistantContext,

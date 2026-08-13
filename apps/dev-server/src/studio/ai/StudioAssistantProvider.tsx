@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { StudioContextSnapshot } from './context';
-import type { DraftItem } from './types';
+import type { AiQualityItem, DraftItem } from './types';
+import type { SuggestionChip } from './suggestions';
 import {
   getAssistantPanelOpen,
   setAssistantPanelOpen,
@@ -21,6 +22,12 @@ export interface PendingDraft {
   };
 }
 
+export interface SpecAttachPreset {
+  name: string;
+  content: string;
+  ext: '.json' | '.md';
+}
+
 interface StudioAssistantContextType {
   panelOpen: boolean;
   setPanelOpen: (open: boolean) => void;
@@ -32,7 +39,15 @@ interface StudioAssistantContextType {
   setEnabled: (val: boolean) => void;
   pendingDrafts: PendingDraft | null;
   setPendingDrafts: (drafts: PendingDraft | null) => void;
-  openWithPreset: (preset: { kind?: 'lesson' | 'quiz' | 'practice'; message?: string }) => void;
+  openWithPreset: (preset: {
+    kind?: 'lesson' | 'quiz' | 'practice';
+    message?: string;
+    spec?: SpecAttachPreset;
+  }) => void;
+  ephemeralSuggestions: SuggestionChip[] | null;
+  setEphemeralSuggestions: (chips: SuggestionChip[] | null) => void;
+  lastCourseQuality: AiQualityItem[] | null;
+  setLastCourseQuality: (items: AiQualityItem[] | null) => void;
 }
 
 const StudioAssistantContext = createContext<StudioAssistantContextType | null>(null);
@@ -47,6 +62,10 @@ export function StudioAssistantProvider({
   const [context, setContextState] = useState<StudioContextSnapshot | null>(null);
   const [enabled, setEnabledState] = useState(isAssistantEnabled);
   const [pendingDrafts, setPendingDrafts] = useState<PendingDraft | null>(null);
+  const [ephemeralSuggestions, setEphemeralSuggestions] = useState<SuggestionChip[] | null>(
+    null,
+  );
+  const [lastCourseQuality, setLastCourseQuality] = useState<AiQualityItem[] | null>(null);
 
   const setPanelOpen = useCallback((open: boolean) => {
     setPanelOpenState(open);
@@ -68,8 +87,20 @@ export function StudioAssistantProvider({
   }, []);
 
   const openWithPreset = useCallback(
-    (preset: { kind?: 'lesson' | 'quiz' | 'practice'; message?: string }) => {
+    (preset: {
+      kind?: 'lesson' | 'quiz' | 'practice';
+      message?: string;
+      spec?: SpecAttachPreset;
+    }) => {
       setPanelOpen(true);
+      if (preset.spec) {
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent('studio:assistant:spec', { detail: preset.spec }),
+          );
+        }, 100);
+        return;
+      }
       if (preset.message) {
         setTimeout(() => {
           window.dispatchEvent(
@@ -95,6 +126,10 @@ export function StudioAssistantProvider({
         pendingDrafts,
         setPendingDrafts,
         openWithPreset,
+        ephemeralSuggestions,
+        setEphemeralSuggestions,
+        lastCourseQuality,
+        setLastCourseQuality,
       }}
     >
       {children}

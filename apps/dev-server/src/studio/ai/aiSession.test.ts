@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { writeAiReview, readAiReview, clearAiReview } from './aiSession';
+import {
+  writeAiReview,
+  readAiReview,
+  clearAiReview,
+  migrateLegacyReview,
+} from './aiSession';
 import type { AiGenerateResult } from './types.js';
 
 const SAMPLE_RESULT: AiGenerateResult = {
@@ -49,5 +54,28 @@ describe('aiSession', () => {
     };
     writeAiReview(next);
     expect(readAiReview()).toEqual(next);
+  });
+
+  it('migrateLegacyReview converts a successful review and clears storage', () => {
+    writeAiReview(SAMPLE_RESULT);
+    const migrated = migrateLegacyReview();
+    expect(migrated).toMatchObject({
+      success: true,
+      title: 'AI Course',
+      draftId: '',
+      outlinePreview: SAMPLE_RESULT.outlinePreview,
+    });
+    expect(readAiReview()).toBeNull();
+  });
+
+  it('migrateLegacyReview returns null for unsuccessful reviews after clear', () => {
+    writeAiReview({
+      success: false,
+      quality: [],
+      outlinePreview: [],
+      error: 'failed',
+    });
+    expect(migrateLegacyReview()).toBeNull();
+    expect(readAiReview()).toBeNull();
   });
 });

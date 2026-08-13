@@ -77,7 +77,7 @@ export function HomeView({
         <h2 id="studio-ai-heading" className="text-h2 text-on-surface mb-4">
           {t('studio.home.aiHeading')}
         </h2>
-        <AiStartPanel />
+        <AiStartPanel onError={onError} />
       </section>
 
       <section aria-labelledby="studio-recent-heading">

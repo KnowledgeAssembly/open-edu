@@ -2,7 +2,9 @@ export { StudioAssistantProvider, useStudioAssistant } from './StudioAssistantPr
 export { StudioChatProvider, useStudioChat } from './StudioChatProvider';
 export { StudioContextBridge } from './StudioContextBridge';
 export { EditorBridgeProvider, useEditorBridge } from './EditorBridgeContext';
-export { resolveSuggestions } from './suggestions';
+export { resolveSuggestions, resolvePostCommitSuggestions } from './suggestions';
 export { applyDraft, applyDraftBatch } from './applyDraft';
 export type { StudioContextSnapshot } from './context';
-export type { PendingDraft } from './StudioAssistantProvider';
+export type { PendingDraft, SpecAttachPreset } from './StudioAssistantProvider';
+export type { SuggestionChip } from './suggestions';
+export { resolveSpecExtension, SPEC_FILE_ACCEPT } from './specFile';

@@ -96,9 +96,20 @@ export function AssistantCourseDraftCard({
                   ) : (
                     <X className="text-error mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
                   )}
-                  <span className={item.passed ? 'text-on-surface text-[11px]' : 'text-error text-[11px]'}>
-                    {t(item.labelKey)}
-                  </span>
+                  <div className="min-w-0">
+                    <span
+                      className={
+                        item.passed ? 'text-on-surface text-[11px]' : 'text-error text-[11px]'
+                      }
+                    >
+                      {t(item.labelKey)}
+                    </span>
+                    {!item.passed && item.detail ? (
+                      <p className="text-on-surface-variant mt-0.5 text-[10px] leading-snug">
+                        {item.detail}
+                      </p>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ul>

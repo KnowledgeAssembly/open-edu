@@ -92,4 +92,22 @@ describe('AssistantCourseDraftCard', () => {
     fireEvent.click(screen.getByText('studio.assistant.courseDraft.discard'));
     expect(onDiscard).toHaveBeenCalled();
   });
+
+  it('shows quality detail for failed checks', () => {
+    const withDetail: CourseDraftResult = {
+      ...draft,
+      quality: [
+        {
+          id: 'assessment',
+          labelKey: 'studio.ai.quality.assessment',
+          passed: false,
+          detail: 'Add a quiz or practice activity',
+        },
+      ],
+    };
+    render(
+      <AssistantCourseDraftCard courseDraft={withDetail} onAccept={vi.fn()} onDiscard={vi.fn()} />,
+    );
+    expect(screen.getByText('Add a quiz or practice activity')).toBeTruthy();
+  });
 });

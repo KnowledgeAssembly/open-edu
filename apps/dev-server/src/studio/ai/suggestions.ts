@@ -1,4 +1,5 @@
 import type { StudioContextSnapshot } from './context';
+import type { AiQualityItem } from './types';
 
 export interface SuggestionChip {
   id: string;
@@ -67,32 +68,134 @@ export function resolveSuggestions(
             },
           ]),
     ],
-    'outline': [
-      { id: 'add_lesson', label: t('studio.assistant.suggest.add_lesson'), action: { type: 'send_message', message: 'How do I add a lesson?' } },
-      { id: 'add_quiz', label: t('studio.assistant.suggest.add_quiz'), action: { type: 'send_message', message: 'How do I add a quiz?' } },
-      { id: 'check_flow', label: t('studio.assistant.suggest.check_flow'), action: { type: 'send_message', message: 'Check my course flow' } },
+    outline: [
+      {
+        id: 'add_lesson',
+        label: t('studio.assistant.suggest.add_lesson'),
+        action: { type: 'send_message', message: 'How do I add a lesson?' },
+      },
+      {
+        id: 'add_quiz',
+        label: t('studio.assistant.suggest.add_quiz'),
+        action: { type: 'send_message', message: 'How do I add a quiz?' },
+      },
+      {
+        id: 'check_flow',
+        label: t('studio.assistant.suggest.check_flow'),
+        action: { type: 'send_message', message: 'Check my course flow' },
+      },
     ],
     'edit-activity': [
-      { id: 'improve_activity', label: t('studio.assistant.suggest.improve_activity'), action: { type: 'send_message', message: 'How can I improve this activity?' } },
-      { id: 'check_quality', label: t('studio.assistant.suggest.check_quality'), action: { type: 'send_message', message: 'Check quality of this activity' } },
-      { id: 'simplify', label: t('studio.assistant.suggest.simplify'), action: { type: 'send_message', message: 'How can I simplify this?' } },
+      {
+        id: 'improve_activity',
+        label: t('studio.assistant.suggest.improve_activity'),
+        action: { type: 'send_message', message: 'How can I improve this activity?' },
+      },
+      {
+        id: 'check_quality',
+        label: t('studio.assistant.suggest.check_quality'),
+        action: { type: 'send_message', message: 'Check quality of this activity' },
+      },
+      {
+        id: 'simplify',
+        label: t('studio.assistant.suggest.simplify'),
+        action: { type: 'send_message', message: 'How can I simplify this?' },
+      },
     ],
-    'preview': [
-      { id: 'preview_feedback', label: t('studio.assistant.suggest.preview_feedback'), action: { type: 'send_message', message: 'What should I improve after preview?' } },
-      { id: 'add_followup', label: t('studio.assistant.suggest.add_followup'), action: { type: 'send_message', message: 'Suggest a follow-up activity' } },
+    preview: [
+      {
+        id: 'preview_feedback',
+        label: t('studio.assistant.suggest.preview_feedback'),
+        action: { type: 'send_message', message: 'What should I improve after preview?' },
+      },
+      {
+        id: 'add_followup',
+        label: t('studio.assistant.suggest.add_followup'),
+        action: { type: 'send_message', message: 'Suggest a follow-up activity' },
+      },
     ],
-    'share': [
-      { id: 'fix_issues', label: t('studio.assistant.suggest.fix_issues'), action: { type: 'send_message', message: 'Help me fix share readiness issues' } },
-      { id: 'improve_description', label: t('studio.assistant.suggest.improve_description'), action: { type: 'send_message', message: 'Improve the course description' } },
+    share: [
+      {
+        id: 'fix_issues',
+        label: t('studio.assistant.suggest.fix_issues'),
+        action: { type: 'send_message', message: 'Help me fix share readiness issues' },
+      },
+      {
+        id: 'improve_description',
+        label: t('studio.assistant.suggest.improve_description'),
+        action: { type: 'send_message', message: 'Improve the course description' },
+      },
     ],
-    'library': [
-      { id: 'create_course', label: t('studio.assistant.suggest.create_course'), action: { type: 'send_message', message: 'Help me create a new course' } },
-      { id: 'organize_library', label: t('studio.assistant.suggest.organize_library'), action: { type: 'send_message', message: 'How should I organize my library?' } },
+    library: [
+      {
+        id: 'create_course',
+        label: t('studio.assistant.suggest.create_course'),
+        action: { type: 'send_message', message: 'Help me create a new course' },
+      },
+      {
+        id: 'organize_library',
+        label: t('studio.assistant.suggest.organize_library'),
+        action: { type: 'send_message', message: 'How should I organize my library?' },
+      },
     ],
     'unit-builder': [
-      { id: 'what_can_you_do', label: t('studio.assistant.suggest.what_can_you_do'), action: { type: 'send_message', message: 'What can you help me with?' } },
+      {
+        id: 'what_can_you_do',
+        label: t('studio.assistant.suggest.what_can_you_do'),
+        action: { type: 'send_message', message: 'What can you help me with?' },
+      },
     ],
   };
 
   return suggestions[view] || [];
+}
+
+/** Next-step chips shown after accepting a course draft. */
+export function resolvePostCommitSuggestions(
+  t: (key: string, options?: any) => string,
+  quality?: AiQualityItem[],
+): SuggestionChip[] {
+  const chips: SuggestionChip[] = [
+    {
+      id: 'post_add_activity',
+      label: t('studio.assistant.courseDraft.next.addActivity'),
+      action: {
+        type: 'send_message',
+        message: t('studio.assistant.chat.postAddActivity'),
+      },
+    },
+    {
+      id: 'post_preview',
+      label: t('studio.assistant.courseDraft.next.preview'),
+      action: {
+        type: 'send_message',
+        message: t('studio.assistant.chat.postPreview'),
+      },
+    },
+    {
+      id: 'post_share',
+      label: t('studio.assistant.courseDraft.next.checkShare'),
+      action: {
+        type: 'send_message',
+        message: t('studio.assistant.chat.postCheckShare'),
+      },
+    },
+  ];
+
+  const failed = (quality ?? []).filter((item) => !item.passed);
+  if (failed.length > 0) {
+    const list = failed
+      .map((item) => `- ${item.id}${item.detail ? `: ${item.detail}` : ''}`)
+      .join('\n');
+    chips.unshift({
+      id: 'post_fix_checks',
+      label: t('studio.assistant.courseDraft.next.fixChecks'),
+      action: {
+        type: 'send_message',
+        message: t('studio.assistant.chat.fixFailingChecks', { list }),
+      },
+    });
+  }
+
+  return chips;
 }
