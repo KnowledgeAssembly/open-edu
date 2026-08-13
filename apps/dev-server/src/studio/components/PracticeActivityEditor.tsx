@@ -282,7 +282,7 @@ export function PracticeActivityEditor({
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl space-y-6 p-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)]">
           <div className="space-y-4">
             <label className="text-on-surface block text-sm font-medium">
               {t('studio.editor.lesson.titleLabel')}

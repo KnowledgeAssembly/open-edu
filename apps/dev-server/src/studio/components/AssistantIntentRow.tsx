@@ -1,4 +1,4 @@
-import { Button } from '@open-edu/design-system';
+import { Button, Spinner } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { Sparkles } from 'lucide-react';
 import type { ItemIntent, ItemIntentParams } from '../ai/types';
@@ -74,6 +74,12 @@ export function AssistantIntentRow({
       <div className="text-on-surface-variant flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider">
         <Sparkles className="size-3" aria-hidden="true" />
         {t('studio.ai.item.panelHint')}
+        {running ? (
+          <span className="text-primary flex items-center gap-1 normal-case">
+            <Spinner size="sm" className="size-3" />
+            <span aria-live="polite">{t('studio.assistant.intent.running')}</span>
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {intents.map((item) => (

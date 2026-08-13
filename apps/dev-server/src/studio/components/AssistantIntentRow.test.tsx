@@ -12,17 +12,12 @@ vi.mock('@open-edu/design-system', () => ({
       {children}
     </button>
   ),
+  Spinner: () => <div data-testid="spinner" />,
 }));
 
 describe('AssistantIntentRow', () => {
   it('renders lesson intents', () => {
-    render(
-      <AssistantIntentRow
-        kind="lesson"
-        onRunIntent={vi.fn()}
-        running={false}
-      />,
-    );
+    render(<AssistantIntentRow kind="lesson" onRunIntent={vi.fn()} running={false} />);
 
     expect(screen.getByText('studio.assistant.intent.rewrite')).toBeTruthy();
     expect(screen.getByText('studio.assistant.intent.expand')).toBeTruthy();
@@ -30,42 +25,31 @@ describe('AssistantIntentRow', () => {
   });
 
   it('renders quiz intents', () => {
-    render(
-      <AssistantIntentRow
-        kind="quiz"
-        onRunIntent={vi.fn()}
-        running={false}
-      />,
-    );
+    render(<AssistantIntentRow kind="quiz" onRunIntent={vi.fn()} running={false} />);
 
     expect(screen.getByText('studio.assistant.intent.rewrite')).toBeTruthy();
     expect(screen.getByText('studio.assistant.intent.add-questions')).toBeTruthy();
   });
 
   it('renders practice intents', () => {
-    render(
-      <AssistantIntentRow
-        kind="practice"
-        onRunIntent={vi.fn()}
-        running={false}
-      />,
-    );
+    render(<AssistantIntentRow kind="practice" onRunIntent={vi.fn()} running={false} />);
 
     expect(screen.getByText('studio.assistant.intent.improve-prompt')).toBeTruthy();
   });
 
   it('disables buttons when running', () => {
-    render(
-      <AssistantIntentRow
-        kind="lesson"
-        onRunIntent={vi.fn()}
-        running={true}
-      />,
-    );
+    render(<AssistantIntentRow kind="lesson" onRunIntent={vi.fn()} running={true} />);
 
     const buttons = screen.getAllByRole('button');
     buttons.forEach((button) => {
       expect(button).toBeDisabled();
     });
+  });
+
+  it('shows a running indicator while an intent is in progress', () => {
+    render(<AssistantIntentRow kind="lesson" onRunIntent={vi.fn()} running={true} />);
+
+    expect(screen.getByText('studio.assistant.intent.running')).toBeTruthy();
+    expect(screen.getByTestId('spinner')).toBeTruthy();
   });
 });
