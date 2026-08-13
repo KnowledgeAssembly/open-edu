@@ -27,6 +27,9 @@ vi.mock('../ai', async () => {
       regenerate: vi.fn(),
       clearError: vi.fn(),
       clearMessages: vi.fn(),
+      appendAssistantNote: vi.fn(),
+      runIntent: vi.fn(),
+      api: null,
     }),
   };
 });

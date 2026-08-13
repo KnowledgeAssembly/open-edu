@@ -21,6 +21,7 @@ export function AssistantDraftCard({
   onDiscard,
   onOpen,
   isDirty,
+  disabled,
 }: {
   item: DraftItem;
   index: number;
@@ -29,6 +30,7 @@ export function AssistantDraftCard({
   onDiscard: (item: DraftItem) => void;
   onOpen?: (item: DraftItem) => void;
   isDirty?: boolean;
+  disabled?: boolean;
 }) {
   const { t } = useTranslation();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -43,7 +45,7 @@ export function AssistantDraftCard({
 
   return (
     <div className="border-outline-variant bg-surface rounded-lg border p-3">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-on-surface text-xs font-medium uppercase tracking-wider">
           {item.kind}
           {total > 1 ? ` ${index + 1}/${total}` : ''}
@@ -56,15 +58,33 @@ export function AssistantDraftCard({
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <Button variant="default" size="sm" className="flex-1" onClick={handleUse}>
+        <Button
+          variant="default"
+          size="sm"
+          className="flex-1"
+          onClick={handleUse}
+          disabled={disabled}
+        >
           <Check className="mr-1 size-3" aria-hidden="true" />
           {t('studio.assistant.draft.use')}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => onDiscard(item)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onDiscard(item)}
+          disabled={disabled}
+          aria-label={t('studio.assistant.draft.discard')}
+        >
           <X className="size-3" aria-hidden="true" />
         </Button>
         {onOpen ? (
-          <Button variant="ghost" size="sm" onClick={() => onOpen(item)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onOpen(item)}
+            disabled={disabled}
+            aria-label={t('studio.assistant.draft.openInEditor')}
+          >
             <ExternalLink className="size-3" aria-hidden="true" />
           </Button>
         ) : null}

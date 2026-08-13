@@ -70,6 +70,7 @@ export function PracticeActivityEditor({
   const [title, setTitle] = useState('');
   const [widgetId, setWidgetId] = useState<string | null>(null);
   const [config, setConfig] = useState<Record<string, unknown>>({});
+  const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -88,7 +89,10 @@ export function PracticeActivityEditor({
       }),
     [title, widgetId, config],
   );
-  const isDirty = useCallback(() => true, []);
+  const isDirty = useCallback(
+    () => Boolean(baseline) && getCurrentContent() !== baseline,
+    [getCurrentContent, baseline],
+  );
 
   useEffect(() => {
     register({
@@ -131,10 +135,18 @@ export function PracticeActivityEditor({
         const curated = getCuratedWidget(node.widget);
         setTitle(node.title ?? '');
         setWidgetId(node.widget);
-        setConfig(
+        const nextConfig =
           curated && Object.keys(node.config ?? {}).length === 0
             ? seedConfigFor(curated)
-            : node.config,
+            : node.config;
+        setConfig(nextConfig);
+        setBaseline(
+          serializeExerciseNode({
+            type: 'exercise',
+            title: node.title ?? undefined,
+            widget: node.widget,
+            config: nextConfig,
+          }),
         );
         setLoading(false);
       })
@@ -197,6 +209,7 @@ export function PracticeActivityEditor({
         config,
       };
       await api.writeFile(path, serializeExerciseNode(node));
+      setBaseline(serializeExerciseNode(node));
       setSaved(true);
       if (savedTimer.current) clearTimeout(savedTimer.current);
       savedTimer.current = setTimeout(() => setSaved(false), 2000);

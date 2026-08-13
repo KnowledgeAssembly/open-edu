@@ -567,7 +567,7 @@ function eduPackageLoader(): Plugin {
             return;
           }
 
-          // POST /api/studio/ai/chat — Author Assistant explain-only chat
+          // POST /api/studio/ai/chat — Author Assistant chat (explain + item drafts)
           if (pathname === '/api/studio/ai/chat' && method === 'POST') {
             if (!isAiAvailable()) {
               res.statusCode = 503;
@@ -575,7 +575,7 @@ function eduPackageLoader(): Plugin {
               return;
             }
             const body = await parseJsonBody(req);
-            const result = await createStudioAssistantHandler(body);
+            const result = await createStudioAssistantHandler(body, { packageDir });
             if (result.status !== 200) {
               res.statusCode = result.status;
               res.end(JSON.stringify(result.body));

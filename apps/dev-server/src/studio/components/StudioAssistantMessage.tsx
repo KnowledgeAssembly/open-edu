@@ -1,10 +1,14 @@
-import { cn } from '@open-edu/design-system';
+import { useState } from 'react';
+import { cn, Button } from '@open-edu/design-system';
+import { useTranslation } from '@open-edu/i18n';
 import { AssistantDraftCard } from './AssistantDraftCard';
 import type { DraftItem } from '../ai/types';
+import type { DraftApplyMode } from '../ai/StudioAssistantProvider';
 
 interface ChatMessageMetadata {
   mode?: 'explain' | 'draft';
   drafts?: DraftItem[];
+  applyMode?: DraftApplyMode;
 }
 
 export function StudioAssistantMessage({
@@ -12,19 +16,28 @@ export function StudioAssistantMessage({
   content,
   metadata,
   onUseDraft,
+  onUseAll,
   onDiscardDraft,
   onOpenDraft,
   isDirty,
+  applying,
 }: {
   role: 'user' | 'assistant';
   content: string;
   metadata?: ChatMessageMetadata;
-  onUseDraft?: (item: DraftItem) => void;
+  onUseDraft?: (item: DraftItem, siblings: DraftItem[]) => void;
+  onUseAll?: (items: DraftItem[]) => void;
   onDiscardDraft?: (item: DraftItem) => void;
   onOpenDraft?: (item: DraftItem) => void;
   isDirty?: boolean;
+  applying?: boolean;
 }) {
+  const { t } = useTranslation();
   const drafts = metadata?.drafts;
+  const [expanded, setExpanded] = useState(false);
+
+  const visibleDrafts =
+    drafts && drafts.length > 1 && !expanded ? drafts.slice(0, 1) : drafts ?? [];
 
   return (
     <div
@@ -38,16 +51,47 @@ export function StudioAssistantMessage({
       {content}
       {drafts && drafts.length > 0 ? (
         <div className="mt-3 space-y-3">
-          {drafts.map((item, i) => (
+          {drafts.length > 1 ? (
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-on-surface-variant text-xs">
+                {t('studio.assistant.draft.batchCount', { count: String(drafts.length) })}
+              </p>
+              <div className="flex gap-1">
+                {onUseAll ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="text-[11px]"
+                    disabled={applying}
+                    onClick={() => onUseAll(drafts)}
+                  >
+                    {t('studio.assistant.draft.use')}
+                  </Button>
+                ) : null}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[11px]"
+                  onClick={() => setExpanded((v) => !v)}
+                >
+                  {expanded
+                    ? t('studio.assistant.draft.batchCollapse')
+                    : t('studio.assistant.draft.batchExpand')}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+          {visibleDrafts.map((item, i) => (
             <AssistantDraftCard
-              key={`${item.kind}-${i}`}
+              key={`${item.kind}-${i}-${item.title}`}
               item={item}
               index={i}
               total={drafts.length}
-              onUse={(draft) => onUseDraft?.(draft)}
+              onUse={(draft) => onUseDraft?.(draft, drafts)}
               onDiscard={(draft) => onDiscardDraft?.(draft)}
               onOpen={onOpenDraft}
-              isDirty={isDirty}
+              isDirty={isDirty && metadata?.applyMode !== 'file'}
+              disabled={applying}
             />
           ))}
         </div>

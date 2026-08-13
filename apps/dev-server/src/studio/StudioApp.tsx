@@ -54,6 +54,7 @@ export function StudioApp({
   const [aiResult, setAiResult] = useState<AiGenerateResult | null>(() => readAiReview());
   const [aiAvailable, setAiAvailable] = useState(false);
   const [assistantEnabled] = useState(() => _assistantEnabled ?? isAssistantEnabled());
+  const [outlineRevision, setOutlineRevision] = useState(0);
   const api = useMemo(() => createStudioApi(), []);
 
   useEffect(() => {
@@ -153,6 +154,7 @@ export function StudioApp({
     case 'outline':
       content = (
         <OutlineView
+          key={outlineRevision}
           api={api}
           onEdit={handleEdit}
           onError={handleError}
@@ -244,7 +246,16 @@ export function StudioApp({
   return (
     <StudioAssistantProvider>
       <EditorBridgeProvider>
-        <StudioChatProvider courseId={loadedPackage?.manifest.id} api={api}>
+        <StudioChatProvider
+          courseId={loadedPackage?.manifest.id}
+          api={api}
+          onOpenPath={handleEdit}
+          onError={handleError}
+          onOutlineChanged={() => {
+            setOutlineRevision((rev) => rev + 1);
+            handleNavigate('outline');
+          }}
+        >
           <StudioContextBridge
             view={view}
             selectedPath={selectedPath}

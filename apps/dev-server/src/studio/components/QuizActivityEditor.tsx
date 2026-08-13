@@ -56,6 +56,7 @@ export function QuizActivityEditor({
     freshOption('b', ''),
   ]);
   const [correctIndex, setCorrectIndex] = useState<number | null>(0);
+  const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -82,6 +83,7 @@ export function QuizActivityEditor({
             const correct = parsedOptions.findIndex((o) => o.correct === true);
             setCorrectIndex(correct >= 0 ? correct : null);
           }
+          setBaseline(file.content);
         } catch {
           // keep defaults on unparseable content
         }
@@ -99,7 +101,10 @@ export function QuizActivityEditor({
     () => serializeQuiz(question, options, correctIndex),
     [question, options, correctIndex],
   );
-  const isDirty = useCallback(() => true, []);
+  const isDirty = useCallback(
+    () => getCurrentContent() !== baseline,
+    [getCurrentContent, baseline],
+  );
 
   useEffect(() => {
     register({
@@ -144,6 +149,7 @@ export function QuizActivityEditor({
     try {
       const content = serializeQuiz(question, options, correctIndex);
       await api.writeFile(path, content);
+      setBaseline(content);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
       onSaved();

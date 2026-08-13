@@ -43,6 +43,7 @@ export function LessonActivityEditor({
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [baseline, setBaseline] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState('write');
@@ -55,6 +56,7 @@ export function LessonActivityEditor({
       .then((file) => {
         if (cancelled) return;
         setBody(file.content);
+        setBaseline(file.content);
         const match = file.content.match(/^#{1,6}\s+(.+)$/m);
         setTitle(match?.[1]?.trim() ?? '');
       })
@@ -67,7 +69,7 @@ export function LessonActivityEditor({
   }, [api, path, onError]);
 
   const getCurrentContent = useCallback(() => body, [body]);
-  const isDirty = useCallback(() => true, []);
+  const isDirty = useCallback(() => body !== baseline, [body, baseline]);
 
   useEffect(() => {
     register({
@@ -94,6 +96,7 @@ export function LessonActivityEditor({
     setSaving(true);
     try {
       await api.writeFile(path, body);
+      setBaseline(body);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
       onSaved();

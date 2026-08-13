@@ -9,9 +9,12 @@ import {
 } from './assistantStorage';
 import { isAssistantEnabled } from './assistantFlags';
 
+export type DraftApplyMode = 'file' | 'buffer';
+
 export interface PendingDraft {
   items: DraftItem[];
   source: 'intent' | 'chat' | 'outline';
+  applyMode: DraftApplyMode;
   context: {
     kind?: 'lesson' | 'quiz' | 'practice';
     path?: string;

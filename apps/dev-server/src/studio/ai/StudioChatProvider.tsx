@@ -7,9 +7,12 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
+import { useTranslation } from '@open-edu/i18n';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
+import type { DraftApplyMode } from './StudioAssistantProvider';
 import type { DraftItem, ItemIntent, ItemIntentParams } from './types';
+import type { StudioApi } from '../studioApi';
 
 interface ChatMessage {
   id: string;
@@ -18,6 +21,7 @@ interface ChatMessage {
   metadata?: {
     mode?: 'explain' | 'draft';
     drafts?: DraftItem[];
+    applyMode?: DraftApplyMode;
   };
 }
 
@@ -29,12 +33,17 @@ interface StudioChatContextType {
   regenerate: () => void;
   clearError: () => void;
   clearMessages: () => void;
+  appendAssistantNote: (content: string) => void;
   runIntent: (
     kind: 'lesson' | 'quiz' | 'practice',
     intent: ItemIntent,
     currentContent: string,
     params?: ItemIntentParams,
-  ) => void;
+  ) => Promise<void>;
+  api: StudioApi | null;
+  onOpenPath?: (path: string) => void;
+  onError?: (message: string) => void;
+  onOutlineChanged?: () => void;
 }
 
 const StudioChatContext = createContext<StudioChatContextType | null>(null);
@@ -47,18 +56,18 @@ export function StudioChatProvider({
   children,
   courseId,
   api,
+  onOpenPath,
+  onError,
+  onOutlineChanged,
 }: {
   children: ReactNode;
   courseId?: string;
-  api?: {
-    generateItemEdit: (
-      kind: 'lesson' | 'quiz' | 'practice',
-      intent: ItemIntent,
-      currentContent: string,
-      params?: ItemIntentParams,
-    ) => Promise<{ ok: true; items: DraftItem[] } | { ok: false; code: string; error: string }>;
-  };
+  api?: StudioApi;
+  onOpenPath?: (path: string) => void;
+  onError?: (message: string) => void;
+  onOutlineChanged?: () => void;
 }) {
+  const { t } = useTranslation();
   const { context, setPendingDrafts } = useStudioAssistant();
   const contextRef = useRef(context);
   contextRef.current = context;
@@ -89,6 +98,17 @@ export function StudioChatProvider({
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const abortRef = useRef<AbortController | null>(null);
+
+  const appendAssistantNote = useCallback((content: string) => {
+    const note: ChatMessage = {
+      id: `assistant-note-${Date.now()}`,
+      role: 'assistant',
+      content,
+    };
+    const next = [...messagesRef.current, note];
+    messagesRef.current = next;
+    setMessages(next);
+  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -125,22 +145,32 @@ export function StudioChatProvider({
         }
 
         const data = await response.json();
+        const applyMode: DraftApplyMode =
+          data.applyMode === 'buffer' || data.applyMode === 'file'
+            ? data.applyMode
+            : data.drafts && data.drafts.length > 1
+              ? 'file'
+              : snapshot.view === 'edit-activity'
+                ? 'buffer'
+                : 'file';
+
         const assistantMsg: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
           content: data.content || data.text || '',
           metadata: data.metadata
-            ? { mode: data.metadata.mode, drafts: data.drafts }
+            ? { mode: data.metadata.mode, drafts: data.drafts, applyMode }
             : undefined,
         };
         const next = [...messagesRef.current, assistantMsg];
         messagesRef.current = next;
         setMessages(next);
 
-        if (assistantMsg.metadata?.drafts) {
+        if (assistantMsg.metadata?.drafts?.length) {
           setPendingDrafts({
             items: assistantMsg.metadata.drafts,
             source: 'chat',
+            applyMode,
             context: {
               kind: snapshot.activity?.kind as 'lesson' | 'quiz' | 'practice' | undefined,
               path: snapshot.activity?.path,
@@ -183,7 +213,7 @@ export function StudioChatProvider({
       const userMsg: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        content: `${intentLabel} Improve this ${kind}`,
+        content: intentLabel,
       };
       const history = [...messagesRef.current, userMsg];
       messagesRef.current = history;
@@ -194,13 +224,15 @@ export function StudioChatProvider({
         const result = await api.generateItemEdit(kind, intent, currentContent, resolvedParams);
 
         if (result.ok) {
+          const applyMode: DraftApplyMode = result.items.length > 1 ? 'file' : 'buffer';
           const assistantMsg: ChatMessage = {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: `Here's the updated ${kind}. Take a look and use it or discard it.`,
+            content: t('studio.assistant.draft.previewLabel'),
             metadata: {
               mode: 'draft',
               drafts: result.items,
+              applyMode,
             },
           };
           const next = [...messagesRef.current, assistantMsg];
@@ -210,13 +242,14 @@ export function StudioChatProvider({
           setPendingDrafts({
             items: result.items,
             source: 'intent',
+            applyMode,
             context: { kind, path: snapshot.activity?.path },
           });
         } else {
           const errorMsg: ChatMessage = {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: `Could not complete this action: ${result.error}. Try again.`,
+            content: t('studio.assistant.intent.error'),
           };
           const next = [...messagesRef.current, errorMsg];
           messagesRef.current = next;
@@ -224,11 +257,11 @@ export function StudioChatProvider({
         }
 
         setStatus('idle');
-      } catch (err: unknown) {
+      } catch {
         setStatus('error');
       }
     },
-    [api, setPendingDrafts],
+    [api, setPendingDrafts, t],
   );
 
   const stop = useCallback(() => {
@@ -268,7 +301,12 @@ export function StudioChatProvider({
         regenerate,
         clearError,
         clearMessages,
+        appendAssistantNote,
         runIntent,
+        api: api ?? null,
+        onOpenPath,
+        onError,
+        onOutlineChanged,
       }}
     >
       {children}

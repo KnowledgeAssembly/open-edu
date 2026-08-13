@@ -46,9 +46,13 @@ function parseIntentFromMessage(content: string): {
   return null;
 }
 
-export async function createStudioAssistantHandler(req: unknown) {
+export async function createStudioAssistantHandler(
+  req: unknown,
+  options: { packageDir?: string } = {},
+) {
   try {
     const body = StudioChatRequestSchema.parse(req);
+    const packageDir = options.packageDir || '';
 
     if (body.messages.length > MAX_MESSAGES) {
       return { status: 400, body: { error: `Too many messages. Maximum is ${MAX_MESSAGES}.` } };
@@ -64,11 +68,23 @@ export async function createStudioAssistantHandler(req: unknown) {
 
     if (intent && intent.type !== 'explain' && body.context.course) {
       if (intent.type === 'draft_new' && intent.kind) {
+        if (!packageDir) {
+          return {
+            status: 200,
+            body: {
+              role: 'assistant',
+              content:
+                'I need an open course package before I can draft a new activity. Open a course and try again.',
+              metadata: createChatMetadata('explain'),
+            },
+          };
+        }
+
         const result = await draftActivity({
           type: 'draft_new',
           kind: intent.kind,
           description: intent.description || `Create a ${intent.kind}`,
-          packageDir: '',
+          packageDir,
         });
 
         if (result.ok) {
@@ -79,6 +95,7 @@ export async function createStudioAssistantHandler(req: unknown) {
               content: `Here's a draft ${intent.kind} I created for you. You can preview it below and choose to use it or discard it.`,
               metadata: createChatMetadata('draft'),
               drafts: result.items,
+              applyMode: 'file' as const,
             },
           };
         }
@@ -94,8 +111,23 @@ export async function createStudioAssistantHandler(req: unknown) {
       }
 
       if (intent.type === 'edit_existing' && body.context.activity) {
+        if (!packageDir) {
+          return {
+            status: 200,
+            body: {
+              role: 'assistant',
+              content:
+                'I need an open course package before I can edit this activity. Open a course and try again.',
+              metadata: createChatMetadata('explain'),
+            },
+          };
+        }
+
         const contentExcerpt = body.context.activity.contentExcerpt || '';
-        const kind = body.context.activity.kind === 'other' ? 'lesson' : body.context.activity.kind as 'lesson' | 'quiz' | 'practice';
+        const kind =
+          body.context.activity.kind === 'other'
+            ? 'lesson'
+            : (body.context.activity.kind as 'lesson' | 'quiz' | 'practice');
 
         const result = await draftActivity({
           type: 'edit_existing',
@@ -103,10 +135,11 @@ export async function createStudioAssistantHandler(req: unknown) {
           currentContent: contentExcerpt,
           intent: intent.intent || 'rewrite',
           params: intent.params,
-          packageDir: '',
+          packageDir,
         });
 
         if (result.ok) {
+          const applyMode = result.items.length > 1 ? 'file' : 'buffer';
           return {
             status: 200,
             body: {
@@ -114,6 +147,7 @@ export async function createStudioAssistantHandler(req: unknown) {
               content: `Here's the updated version. Take a look and use it or discard it.`,
               metadata: createChatMetadata('draft'),
               drafts: result.items,
+              applyMode,
             },
           };
         }

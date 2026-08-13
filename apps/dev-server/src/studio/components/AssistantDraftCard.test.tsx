@@ -8,8 +8,8 @@ vi.mock('@open-edu/i18n', () => ({
 }));
 
 vi.mock('@open-edu/design-system', () => ({
-  Button: ({ children, onClick, className, disabled }: any) => (
-    <button onClick={onClick} className={className} disabled={disabled}>
+  Button: ({ children, onClick, className, disabled, 'aria-label': ariaLabel }: any) => (
+    <button onClick={onClick} className={className} disabled={disabled} aria-label={ariaLabel}>
       {children}
     </button>
   ),
@@ -65,6 +65,27 @@ describe('AssistantDraftCard', () => {
     );
 
     fireEvent.click(screen.getByText(/studio\.assistant\.draft\.use/));
+    expect(onUse).toHaveBeenCalledWith(lessonDraft);
+  });
+
+  it('confirms before Use when editor is dirty', () => {
+    const onUse = vi.fn();
+
+    render(
+      <AssistantDraftCard
+        item={lessonDraft}
+        index={0}
+        total={1}
+        onUse={onUse}
+        onDiscard={vi.fn()}
+        isDirty
+      />,
+    );
+
+    fireEvent.click(screen.getByText(/studio\.assistant\.draft\.use/));
+    expect(onUse).not.toHaveBeenCalled();
+    expect(screen.getByTestId('dialog')).toBeTruthy();
+    fireEvent.click(screen.getByText(/studio\.assistant\.draft\.confirmApply/));
     expect(onUse).toHaveBeenCalledWith(lessonDraft);
   });
 });

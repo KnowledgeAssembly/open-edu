@@ -64,7 +64,7 @@ export function OutlineView({
   onShare?: () => void;
 }) {
   const { t } = useTranslation();
-  const { openWithPreset } = useStudioAssistant();
+  const { openWithPreset, enabled: assistantEnabled } = useStudioAssistant();
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -288,7 +288,15 @@ export function OutlineView({
             onAddLesson={() => void addActivity('lesson')}
             onAddQuiz={() => void addActivity('quiz')}
             onAddPractice={() => setPickerOpen(true)}
-            onAddAi={() => openWithPreset({ message: 'Help me create a new activity for this course' })}
+            onAddAi={() => {
+              if (assistantEnabled) {
+                openWithPreset({
+                  message: 'Help me create a new activity for this course',
+                });
+              } else {
+                setAiDialogOpen(true);
+              }
+            }}
           />
         </div>
 
@@ -302,7 +310,15 @@ export function OutlineView({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => openWithPreset({ message: 'Help me add the first activity to this course' })}
+                onClick={() => {
+                  if (assistantEnabled) {
+                    openWithPreset({
+                      message: 'Help me add the first activity to this course',
+                    });
+                  } else {
+                    setAiDialogOpen(true);
+                  }
+                }}
               >
                 <Sparkles className="mr-1 size-4" aria-hidden="true" />
                 {t('studio.assistant.suggest.add_with_ai')}
@@ -334,13 +350,15 @@ export function OutlineView({
           onOpenChange={setPickerOpen}
           onSelect={(widget) => void addPractice(widget)}
         />
-        <AiAddDialog
-          api={api}
-          open={aiDialogOpen}
-          onOpenChange={setAiDialogOpen}
-          onAccept={(item) => void addAiDraft(item)}
-          onError={onError}
-        />
+        {!assistantEnabled ? (
+          <AiAddDialog
+            api={api}
+            open={aiDialogOpen}
+            onOpenChange={setAiDialogOpen}
+            onAccept={(item) => void addAiDraft(item)}
+            onError={onError}
+          />
+        ) : null}
 
         <Dialog
           open={deleteTarget !== null}

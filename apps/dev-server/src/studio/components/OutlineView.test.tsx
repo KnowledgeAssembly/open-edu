@@ -51,7 +51,7 @@ vi.mock('./AiAddDialog.js', () => ({
 }));
 
 const { mockAssistantContext } = vi.hoisted(() => ({
-  mockAssistantContext: { panelOpen: false, openWithPreset: vi.fn() },
+  mockAssistantContext: { panelOpen: false, openWithPreset: vi.fn(), enabled: true },
 }));
 
 vi.mock('../ai', () => ({
