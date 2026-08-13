@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@open-edu/design-system';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 
 export function AddActivityMenu({
@@ -20,11 +20,12 @@ export function AddActivityMenu({
   onAddAi: () => void;
 }) {
   const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="default" size="sm" aria-label={t('studio.outline.addMenuLabel')}>
-          <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+          <Plus className="mr-1 size-4" aria-hidden="true" />
           {t('studio.outline.add')}
         </Button>
       </DropdownMenuTrigger>
@@ -34,7 +35,12 @@ export function AddActivityMenu({
         <DropdownMenuItem onSelect={onAddPractice}>
           {t('studio.outline.addPractice')}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onAddAi}>{t('studio.ai.item.addTitle')}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onAddAi}>
+          <span className="flex items-center gap-2">
+            <Sparkles className="text-primary size-3.5" aria-hidden="true" />
+            {t('studio.assistant.suggest.add_with_ai')}
+          </span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

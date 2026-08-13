@@ -153,7 +153,7 @@ export function FileTree({
                 }}
                 title="New Content Node"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="size-3" />
                 New Node
               </button>
             )}
@@ -167,7 +167,7 @@ export function FileTree({
                 }}
                 title="Upload Asset"
               >
-                <Upload className="h-3 w-3" />
+                <Upload className="size-3" />
                 Upload
               </button>
             )}
@@ -261,7 +261,7 @@ export function FileTree({
               }}
               title="New Content Node"
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="size-3" />
               New Node
             </button>
           </div>
@@ -282,7 +282,7 @@ export function FileTree({
               }}
               title="Upload Asset"
             >
-              <Upload className="h-3 w-3" />
+              <Upload className="size-3" />
               Upload
             </button>
           </div>
@@ -314,7 +314,7 @@ export function FileTree({
                 }
               }}
             >
-              <Plus className="text-primary h-3.5 w-3.5" />
+              <Plus className="text-primary size-3.5" />
               <span className="text-primary text-xs font-medium">Create {fileName}</span>
             </div>
           </div>
@@ -381,7 +381,7 @@ function FileIcon({ extension }: { extension: string }) {
     return <MappedIcon className={cn('h-4 w-4 shrink-0', className)} strokeWidth={1.5} />;
   }
   if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.avif'].includes(extension)) {
-    return <FileImage className="text-success h-4 w-4 shrink-0" strokeWidth={1.5} />;
+    return <FileImage className="text-success size-4 shrink-0" strokeWidth={1.5} />;
   }
-  return <File className="text-on-surface-variant h-4 w-4 shrink-0" strokeWidth={1.5} />;
+  return <File className="text-on-surface-variant size-4 shrink-0" strokeWidth={1.5} />;
 }

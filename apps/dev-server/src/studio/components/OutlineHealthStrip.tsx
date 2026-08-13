@@ -16,9 +16,9 @@ export function OutlineHealthStrip({
     <div className="border-outline-variant bg-surface flex items-center justify-between gap-3 rounded-lg border px-4 py-3">
       <div className="flex items-center gap-2">
         {ready ? (
-          <CheckCircle2 className="text-success h-4 w-4 shrink-0" aria-hidden="true" />
+          <CheckCircle2 className="text-success size-4 shrink-0" aria-hidden="true" />
         ) : (
-          <X className="text-error h-4 w-4 shrink-0" aria-hidden="true" />
+          <X className="text-error size-4 shrink-0" aria-hidden="true" />
         )}
         <div>
           <p className="text-on-surface text-sm font-medium">

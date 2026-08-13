@@ -81,7 +81,7 @@ export function ReflectionActivityEditor({
       <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
         {onCancel ? (
           <Button variant="ghost" size="sm" onClick={onCancel} aria-label={t('studio.editor.back')}>
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="size-4" aria-hidden="true" />
           </Button>
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.reflection')}</h1>

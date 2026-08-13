@@ -14,6 +14,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@open-edu/design-system';
+import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { createEmptyExercise, serializeExerciseNode } from '../widgets/exerciseNode.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
@@ -25,6 +26,7 @@ import { AddActivityMenu } from './AddActivityMenu.js';
 import { OutlineActivityRow } from './OutlineActivityRow.js';
 import { OutlineHealthStrip } from './OutlineHealthStrip.js';
 import { buildReadyCheck, isReadyToExport } from '../readyCheck.js';
+import { useStudioAssistant } from '../ai';
 import type { ActivitySummary } from '../types.js';
 import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
@@ -62,6 +64,7 @@ export function OutlineView({
   onShare?: () => void;
 }) {
   const { t } = useTranslation();
+  const { openWithPreset, enabled: assistantEnabled } = useStudioAssistant();
   const [activities, setActivities] = useState<ActivitySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -285,15 +288,43 @@ export function OutlineView({
             onAddLesson={() => void addActivity('lesson')}
             onAddQuiz={() => void addActivity('quiz')}
             onAddPractice={() => setPickerOpen(true)}
-            onAddAi={() => setAiDialogOpen(true)}
+            onAddAi={() => {
+              if (assistantEnabled) {
+                openWithPreset({
+                  message: t('studio.assistant.preset.addActivity'),
+                });
+              } else {
+                setAiDialogOpen(true);
+              }
+            }}
           />
         </div>
 
         {activities.length === 0 ? (
-          <EmptyState
-            heading={t('studio.outline.empty')}
-            description={t('studio.outline.emptyDescription')}
-          />
+          <div className="space-y-4">
+            <EmptyState
+              heading={t('studio.outline.empty')}
+              description={t('studio.outline.emptyDescription')}
+            />
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (assistantEnabled) {
+                    openWithPreset({
+                      message: t('studio.assistant.preset.addFirstActivity'),
+                    });
+                  } else {
+                    setAiDialogOpen(true);
+                  }
+                }}
+              >
+                <Sparkles className="mr-1 size-4" aria-hidden="true" />
+                {t('studio.assistant.suggest.add_with_ai')}
+              </Button>
+            </div>
+          </div>
         ) : (
           <ul className="border-outline-variant bg-surface divide-outline-variant divide-y rounded-lg border">
             {activities.map((activity, index) => (
@@ -319,13 +350,15 @@ export function OutlineView({
           onOpenChange={setPickerOpen}
           onSelect={(widget) => void addPractice(widget)}
         />
-        <AiAddDialog
-          api={api}
-          open={aiDialogOpen}
-          onOpenChange={setAiDialogOpen}
-          onAccept={(item) => void addAiDraft(item)}
-          onError={onError}
-        />
+        {!assistantEnabled ? (
+          <AiAddDialog
+            api={api}
+            open={aiDialogOpen}
+            onOpenChange={setAiDialogOpen}
+            onAccept={(item) => void addAiDraft(item)}
+            onError={onError}
+          />
+        ) : null}
 
         <Dialog
           open={deleteTarget !== null}

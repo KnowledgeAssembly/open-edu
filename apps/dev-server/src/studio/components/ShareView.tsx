@@ -108,7 +108,7 @@ export function ShareView({
           aria-live="polite"
           className="border-success bg-success/10 flex items-start gap-3 rounded-lg border p-4"
         >
-          <Check className="text-success mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <Check className="text-success mt-0.5 size-5 shrink-0" aria-hidden="true" />
           <div>
             <p className="text-on-surface text-sm font-medium">
               {t('studio.share.exportSuccess', { fileName: exportedFileName })}
@@ -132,9 +132,9 @@ export function ShareView({
                 className="text-on-surface flex items-center gap-3 px-4 py-3 text-sm"
               >
                 {item.passed ? (
-                  <Check className="text-success h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Check className="text-success size-4 shrink-0" aria-hidden="true" />
                 ) : (
-                  <X className="text-error h-4 w-4 shrink-0" aria-hidden="true" />
+                  <X className="text-error size-4 shrink-0" aria-hidden="true" />
                 )}
                 <span className="flex-1">{t(item.labelKey)}</span>
                 {item.detail ? (

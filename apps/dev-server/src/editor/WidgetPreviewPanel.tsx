@@ -134,24 +134,24 @@ export function WidgetPreviewPanel({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="size-6 p-0"
               title={t('studio.widget.resetPreview')}
               aria-label={t('studio.widget.resetPreview')}
               onClick={() => setResetToken((t) => t + 1)}
             >
-              <RotateCcw className="h-3.5 w-3.5" />
+              <RotateCcw className="size-3.5" />
             </Button>
           )}
           {onCollapse && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="size-6 p-0"
               onClick={onCollapse}
               title={collapsed ? 'Show preview' : 'Hide preview'}
               aria-label={collapsed ? 'Show preview' : 'Hide preview'}
             >
-              <PanelRightClose className="h-3.5 w-3.5" />
+              <PanelRightClose className="size-3.5" />
             </Button>
           )}
         </div>

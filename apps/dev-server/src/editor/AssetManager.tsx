@@ -96,7 +96,7 @@ export function AssetManager({ assets, onRefresh }: AssetManagerProps) {
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="text-on-surface-variant mb-2 h-8 w-8" />
+          <Upload className="text-on-surface-variant mb-2 size-8" />
           <p className="text-on-surface-variant text-sm">Drop files here or click to upload</p>
           <p className="text-on-surface-variant text-xs">Images, PDFs, videos, and other assets</p>
         </div>

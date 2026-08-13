@@ -26,7 +26,8 @@ import {
 import { OepWriter } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
-import { generateCourseDraft } from './src/studio/ai/generateCourse.js';
+import { generateCourseDraft, deleteDraft } from './src/studio/ai/generateCourse.js';
+import { commitCourseDraft } from './src/studio/ai/commitCourseDraft.js';
 import {
   generateItemAdd,
   generateItemEdit,
@@ -35,6 +36,7 @@ import {
   ItemRequestError,
 } from './src/studio/ai/itemGenerate.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
+import { createStudioAssistantHandler } from './src/studio/ai/chat/handler.js';
 import {
   resolveWorkspace,
   scanWorkspace,
@@ -451,6 +453,7 @@ function eduPackageLoader(): Plugin {
 
           // POST /api/studio/ai/generate — notes → draft package via LLM + course-compiler,
           // or an uploaded course-spec.json / course-spec.md compiled without the LLM.
+          // Draft-only: does NOT copy to packageDir. Use /api/studio/ai/commit to write.
           if (pathname === '/api/studio/ai/generate' && method === 'POST') {
             if (!packageDir) {
               res.statusCode = 400;
@@ -480,11 +483,74 @@ function eduPackageLoader(): Plugin {
               res.end(JSON.stringify({ code: 'missing-spec', error: 'Missing spec or notes' }));
               return;
             }
+            const result = await generateCourseDraft({
+              source,
+              packageDir,
+            });
+
+            // Legacy /generate endpoint — draft-only now. The legacy client
+            // would have navigated to ai-review; the new flow is through the
+            // Author Assistant sidebar with explicit draft-commit.
+            // Inline HMR suppression is removed; drafts no longer write to disk.
+            res.end(JSON.stringify(result));
+            return;
+          }
+
+          // POST /api/studio/ai/generate-draft — draft-only course generation
+          if (pathname === '/api/studio/ai/generate-draft' && method === 'POST') {
+            if (!packageDir) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
+              return;
+            }
+            const body = (await parseJsonBody(req)) as {
+              notes?: string;
+              spec?: string;
+              specExt?: string;
+            };
+            let source: import('./src/studio/ai/generateCourse.js').CourseDraftSource;
+            if (body.notes && typeof body.notes === 'string') {
+              source = { kind: 'notes', notes: body.notes, completeText: completeWithLlm };
+            } else if (body.spec && typeof body.spec === 'string') {
+              if (body.specExt !== '.json' && body.specExt !== '.md') {
+                res.statusCode = 400;
+                res.end(
+                  JSON.stringify({ code: 'spec-invalid', error: 'Unsupported spec extension' }),
+                );
+                return;
+              }
+              source = { kind: 'spec', spec: body.spec, extension: body.specExt };
+            } else {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'missing-spec', error: 'Missing spec or notes' }));
+              return;
+            }
+            const draftResult = await generateCourseDraft({ source, packageDir });
+            res.end(JSON.stringify(draftResult));
+            return;
+          }
+
+          // POST /api/studio/ai/commit — commit a draft to packageDir
+          if (pathname === '/api/studio/ai/commit' && method === 'POST') {
+            if (!packageDir) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
+              return;
+            }
+            const body = (await parseJsonBody(req)) as {
+              draftId?: string;
+              force?: boolean;
+            };
+            if (!body.draftId) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'invalid-request', error: 'Missing draftId' }));
+              return;
+            }
             aiGenerating = true;
-            let result: import('./src/studio/ai/types.js').AiGenerateResult;
+            let commitResult: import('./src/studio/ai/commitCourseDraft.js').CommitCourseDraftResult;
             try {
-              result = await generateCourseDraft({
-                source,
+              commitResult = await commitCourseDraft({
+                draftId: body.draftId,
                 packageDir,
                 force: body.force === true,
               });
@@ -492,7 +558,7 @@ function eduPackageLoader(): Plugin {
               aiGenerating = false;
             }
 
-            if (result.success) {
+            if (commitResult.success) {
               try {
                 packageData = await loadPackage(packageDir);
                 const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
@@ -500,22 +566,33 @@ function eduPackageLoader(): Plugin {
                   srv.moduleGraph.invalidateModule(mod);
                 }
               } catch (err) {
-                console.error('[edu-dev] Failed to reload after AI generate:', err);
+                console.error('[edu-dev] Failed to reload after AI commit:', err);
               }
             }
 
-            res.end(JSON.stringify(result));
-            if (result.success) {
-              // Defer the full-reload so the generate response reaches the client first;
-              // the review is persisted to sessionStorage before any reload is applied.
+            res.end(JSON.stringify(commitResult));
+            if (commitResult.success) {
               setImmediate(() => {
                 try {
                   srv.ws.send({ type: 'full-reload' });
                 } catch (err) {
-                  console.error('[edu-dev] Failed to send AI reload:', err);
+                  console.error('[edu-dev] Failed to send AI commit reload:', err);
                 }
               });
             }
+            return;
+          }
+
+          // POST /api/studio/ai/discard-draft — drop a temp course draft without writing
+          if (pathname === '/api/studio/ai/discard-draft' && method === 'POST') {
+            const body = (await parseJsonBody(req)) as { draftId?: string };
+            if (!body.draftId) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ code: 'invalid-request', error: 'Missing draftId' }));
+              return;
+            }
+            deleteDraft(body.draftId);
+            res.end(JSON.stringify({ success: true }));
             return;
           }
 
@@ -563,6 +640,18 @@ function eduPackageLoader(): Plugin {
               packageDir,
             });
             res.end(JSON.stringify(result));
+            return;
+          }
+
+          // POST /api/studio/ai/chat — Author Assistant chat (explain + item drafts)
+          // Streams an SSE UI message stream (see `createStudioAssistantHandler`).
+          if (pathname === '/api/studio/ai/chat' && method === 'POST') {
+            if (!isAiAvailable()) {
+              res.statusCode = 503;
+              res.end(JSON.stringify({ error: 'ai-unavailable' }));
+              return;
+            }
+            await createStudioAssistantHandler(req, res, { packageDir });
             return;
           }
 
@@ -1504,6 +1593,9 @@ export default defineConfig(({ mode }) => {
         : '""',
       OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
         ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
+        : '""',
+      OPEN_EDU_STUDIO_ASSISTANT: process.env.OPEN_EDU_STUDIO_ASSISTANT
+        ? JSON.stringify(process.env.OPEN_EDU_STUDIO_ASSISTANT)
         : '""',
     },
     server: {

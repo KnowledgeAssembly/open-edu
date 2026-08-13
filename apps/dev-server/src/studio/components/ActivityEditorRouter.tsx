@@ -7,7 +7,6 @@ import { ReflectionActivityEditor } from './ReflectionActivityEditor.js';
 import { RawActivityEditor } from './RawActivityEditor.js';
 import { detectActivityKind } from '../outlineModel.js';
 import type { ActivityKind } from '../types.js';
-import type { DraftItem } from '../ai/types.js';
 import type { StudioApi } from '../studioApi.js';
 
 export function ActivityEditorRouter({
@@ -16,14 +15,12 @@ export function ActivityEditorRouter({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [kind, setKind] = useState<ActivityKind | null>(null);
@@ -59,7 +56,6 @@ export function ActivityEditorRouter({
         onSaved={onSaved}
         onError={onError}
         onCancel={onCancel}
-        onApplyBatch={onApplyBatch}
       />
     );
   }
@@ -72,7 +68,6 @@ export function ActivityEditorRouter({
         onSaved={onSaved}
         onError={onError}
         onCancel={onCancel}
-        onApplyBatch={onApplyBatch}
       />
     );
   }
@@ -85,7 +80,6 @@ export function ActivityEditorRouter({
         onSaved={onSaved}
         onError={onError}
         onCancel={onCancel}
-        onApplyBatch={onApplyBatch}
       />
     );
   }

@@ -73,7 +73,7 @@ export function AccessibilityInspector(): JSX.Element {
           disabled={running}
           className="h-auto py-1.5"
         >
-          <Play className="mr-1 h-3 w-3" />
+          <Play className="mr-1 size-3" />
           {running ? 'Running...' : 'Run Audit'}
         </Button>
         <span className="text-on-surface-variant text-[0.625rem]">

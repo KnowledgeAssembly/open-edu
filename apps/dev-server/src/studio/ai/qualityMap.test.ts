@@ -46,11 +46,25 @@ describe('qualityMap', () => {
   it('passes all items for a clean draft', () => {
     const items = mapDiagnosticsToQuality([], cleanOutline);
     expect(items.every((i) => i.passed)).toBe(true);
+    expect(items.every((i) => i.detail === undefined)).toBe(true);
     expect(items.map((i) => i.labelKey)).toEqual([
       'studio.ai.quality.objectives',
       'studio.ai.quality.assessment',
       'studio.ai.quality.duration',
       'studio.ai.quality.completeness',
     ]);
+  });
+
+  it('includes detail text for failed checks', () => {
+    const items = mapDiagnosticsToQuality(
+      [
+        { severity: 'warning', message: 'Lesson has no objectives', code: 'MISSING_OBJECTIVES' },
+        { severity: 'error', message: 'Invalid question options', code: 'INVALID_QUESTION_OPTIONS' },
+      ],
+      [{ title: 'Intro', kind: 'lesson' }],
+    );
+    expect(items.find((i) => i.id === 'objectives')?.detail).toContain('no objectives');
+    expect(items.find((i) => i.id === 'assessment')?.detail).toMatch(/quiz or practice/i);
+    expect(items.find((i) => i.id === 'completeness')?.detail).toContain('Invalid question');
   });
 });

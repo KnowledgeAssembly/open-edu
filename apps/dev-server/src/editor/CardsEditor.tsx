@@ -140,7 +140,7 @@ function CardEditorCard({ card, onChange, onRemove }: CardEditorCardProps) {
           onClick={onRemove}
           aria-label="Remove card"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-3.5" />
         </button>
       </div>
 

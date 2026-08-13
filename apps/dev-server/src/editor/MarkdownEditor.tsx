@@ -29,7 +29,7 @@ export function MarkdownEditor({ content, onChange, fileName }: MarkdownEditorPr
             className="text-xs"
             onClick={() => setShowPreview(!showPreview)}
           >
-            {showPreview ? <EyeOff className="mr-1 h-3 w-3" /> : <Eye className="mr-1 h-3 w-3" />}
+            {showPreview ? <EyeOff className="mr-1 size-3" /> : <Eye className="mr-1 size-3" />}
             {showPreview ? 'Hide Preview' : 'Show Preview'}
           </Button>
         </div>

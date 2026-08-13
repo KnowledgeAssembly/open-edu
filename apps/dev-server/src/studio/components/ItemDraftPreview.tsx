@@ -84,7 +84,7 @@ function QuizDraftPreview({
                 </span>
                 <span className="text-on-surface flex-1">{option.text}</span>
                 {option.correct ? (
-                  <Check className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Check className="text-primary size-4 shrink-0" aria-hidden="true" />
                 ) : null}
               </div>
             </li>

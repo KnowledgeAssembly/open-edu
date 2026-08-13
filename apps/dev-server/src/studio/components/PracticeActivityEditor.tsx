@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   Button,
   Card,
@@ -22,7 +22,7 @@ import { getCuratedWidget } from '../widgets/curatedCatalog.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
 import { WidgetPicker } from './WidgetPicker.js';
 import { WidgetGuidePanel } from './WidgetGuidePanel.js';
-import { AiEditPanel } from './AiEditPanel.js';
+import { useEditorBridge } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -59,25 +59,58 @@ export function PracticeActivityEditor({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [widgetId, setWidgetId] = useState<string | null>(null);
   const [config, setConfig] = useState<Record<string, unknown>>({});
+  const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [notPractice, setNotPractice] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { register, unregister } = useEditorBridge();
+
+  const getCurrentContent = useCallback(
+    () =>
+      serializeExerciseNode({
+        type: 'exercise',
+        title: title || undefined,
+        widget: widgetId ?? '',
+        config,
+      }),
+    [title, widgetId, config],
+  );
+  const isDirty = useCallback(
+    () => Boolean(baseline) && getCurrentContent() !== baseline,
+    [getCurrentContent, baseline],
+  );
+
+  useEffect(() => {
+    register({
+      getCurrentContent,
+      applyToEditor: (item: DraftItem) => {
+        const node = parseExerciseNode(item.content);
+        if (!node) return;
+        setTitle(node.title ?? '');
+        setWidgetId(node.widget);
+        setConfig(node.config);
+      },
+      isDirty,
+      kind: 'practice',
+      path,
+      title,
+    });
+    return () => unregister();
+  }, [getCurrentContent, isDirty, path, register, title, unregister]);
 
   useEffect(() => {
     return () => {
@@ -102,10 +135,18 @@ export function PracticeActivityEditor({
         const curated = getCuratedWidget(node.widget);
         setTitle(node.title ?? '');
         setWidgetId(node.widget);
-        setConfig(
+        const nextConfig =
           curated && Object.keys(node.config ?? {}).length === 0
             ? seedConfigFor(curated)
-            : node.config,
+            : node.config;
+        setConfig(nextConfig);
+        setBaseline(
+          serializeExerciseNode({
+            type: 'exercise',
+            title: node.title ?? undefined,
+            widget: node.widget,
+            config: nextConfig,
+          }),
         );
         setLoading(false);
       })
@@ -168,6 +209,7 @@ export function PracticeActivityEditor({
         config,
       };
       await api.writeFile(path, serializeExerciseNode(node));
+      setBaseline(serializeExerciseNode(node));
       setSaved(true);
       if (savedTimer.current) clearTimeout(savedTimer.current);
       savedTimer.current = setTimeout(() => setSaved(false), 2000);
@@ -203,7 +245,7 @@ export function PracticeActivityEditor({
               onClick={onCancel}
               aria-label={t('studio.editor.back')}
             >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <ArrowLeft className="size-4" aria-hidden="true" />
             </Button>
           ) : null}
           <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
@@ -234,13 +276,13 @@ export function PracticeActivityEditor({
       <div className="border-outline-variant bg-surface flex items-center gap-2 border-b px-4 py-2">
         {onCancel ? (
           <Button variant="ghost" size="sm" onClick={onCancel} aria-label={t('studio.editor.back')}>
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="size-4" aria-hidden="true" />
           </Button>
         ) : null}
         <h1 className="text-h1 text-on-surface">{t('studio.editor.heading.practice')}</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl space-y-6 p-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_minmax(0,24rem)]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,20rem)]">
           <div className="space-y-4">
             <label className="text-on-surface block text-sm font-medium">
               {t('studio.editor.lesson.titleLabel')}
@@ -315,27 +357,6 @@ export function PracticeActivityEditor({
               </RuntimeThemeProvider>
             </CardContent>
           </Card>
-          <AiEditPanel
-            api={api}
-            kind="practice"
-            getCurrentContent={() =>
-              serializeExerciseNode({
-                type: 'exercise',
-                title: title || undefined,
-                widget: widgetId ?? '',
-                config,
-              })
-            }
-            onApply={(item) => {
-              const node = parseExerciseNode(item.content);
-              if (!node) return;
-              setTitle(node.title ?? '');
-              setWidgetId(node.widget);
-              setConfig(node.config);
-            }}
-            onApplyBatch={(items) => onApplyBatch?.(items)}
-            onError={onError}
-          />
         </div>
         {curated?.guideMarkdown ? <WidgetGuidePanel markdown={curated.guideMarkdown} /> : null}
       </div>

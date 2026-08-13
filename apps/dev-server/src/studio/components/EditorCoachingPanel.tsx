@@ -18,10 +18,10 @@ export function EditorCoachingPanel({ checks, tips }: { checks: CoachingCheck[];
         {checks.map((check) => (
           <li key={check.id} className="text-on-surface-variant flex items-start gap-2 text-sm">
             {check.passed ? (
-              <CheckCircle2 className="text-success mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <CheckCircle2 className="text-success mt-0.5 size-4 shrink-0" aria-hidden="true" />
             ) : (
               <Circle
-                className="text-on-surface-variant mt-0.5 h-4 w-4 shrink-0"
+                className="text-on-surface-variant mt-0.5 size-4 shrink-0"
                 aria-hidden="true"
               />
             )}

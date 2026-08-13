@@ -18,7 +18,7 @@ export function RawJsonEditor({ content, onChange, fileName }: RawJsonEditorProp
       </div>
       <div className="border-outline-variant flex-1 overflow-hidden rounded border">
         <Textarea
-          className="h-full w-full resize-none rounded-none border-0 p-3 font-mono text-xs leading-relaxed focus:outline-none focus-visible:ring-0"
+          className="size-full resize-none rounded-none border-0 p-3 font-mono text-xs leading-relaxed focus:outline-none focus-visible:ring-0"
           value={content}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}

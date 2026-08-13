@@ -1,4 +1,4 @@
-import { Button, cn, OpenEduLogo } from '@open-edu/design-system';
+import { cn, Button, OpenEduLogo } from '@open-edu/design-system';
 import {
   TooltipProvider,
   Tooltip,
@@ -13,6 +13,7 @@ import {
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { ModeToggle } from './ModeToggle.js';
+import { AssistantHeaderButton } from './AssistantHeaderButton.js';
 import type { StudioMode, StudioView } from '../types.js';
 
 interface BreadcrumbItem {
@@ -28,6 +29,8 @@ export function StudioChrome({
   view,
   minimal = false,
   activityLabel,
+  panelOpen: panelOpenProp,
+  setPanelOpen: setPanelOpenProp,
 }: {
   mode: StudioMode;
   onModeChange: (m: StudioMode) => void;
@@ -36,10 +39,14 @@ export function StudioChrome({
   view: StudioView;
   minimal?: boolean;
   activityLabel?: string;
+  panelOpen?: boolean;
+  setPanelOpen?: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
-
+  const panelOpen = panelOpenProp ?? false;
+  const setPanelOpen = setPanelOpenProp ?? (() => {});
   const breadcrumbs: BreadcrumbItem[] = [];
+
   if (view !== 'home') {
     breadcrumbs.push({ label: t('studio.nav.home'), onClick: () => onNavigate('home') });
   }
@@ -125,7 +132,7 @@ export function StudioChrome({
           {t('studio.brand.subtitle')}
         </span>
       </div>
-
+      
       {breadcrumbs.length > 0 ? (
         <nav
           aria-label={t('studio.breadcrumbs.label')}
@@ -134,7 +141,7 @@ export function StudioChrome({
           {breadcrumbs.map((crumb, i) => (
             <span key={i} className="flex items-center gap-1">
               {i > 0 ? (
-                <ChevronRight className="text-on-surface-variant h-3.5 w-3.5" aria-hidden="true" />
+                <ChevronRight className="text-on-surface-variant size-3.5" aria-hidden="true" />
               ) : null}
               {crumb.onClick ? (
                 <Button
@@ -152,9 +159,9 @@ export function StudioChrome({
           ))}
         </nav>
       ) : null}
-
+      
       <div className="flex-1" />
-
+      
       {!minimal ? (
         <>
           <div className="hidden items-center gap-1 md:flex">{navItems.map(renderNavButton)}</div>
@@ -162,7 +169,7 @@ export function StudioChrome({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" aria-label={t('studio.nav.moreMenu')}>
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -176,7 +183,7 @@ export function StudioChrome({
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <div className="px-2 py-2 md:hidden">
+                <div className="p-2 md:hidden">
                   <ModeToggle mode={mode} onChange={onModeChange} />
                 </div>
               </DropdownMenuContent>
@@ -185,9 +192,17 @@ export function StudioChrome({
           {shareAction}
         </>
       ) : null}
-
-      <div className="hidden md:flex">
-        <ModeToggle mode={mode} onChange={onModeChange} />
+      
+      <div className="flex items-center gap-2">
+        {mode === 'creator' && setPanelOpenProp && (
+          <AssistantHeaderButton 
+            active={panelOpen} 
+            onClick={() => setPanelOpen(!panelOpen)} 
+          />
+        )}
+        <div className="hidden md:flex">
+          <ModeToggle mode={mode} onChange={onModeChange} />
+        </div>
       </div>
     </header>
   );

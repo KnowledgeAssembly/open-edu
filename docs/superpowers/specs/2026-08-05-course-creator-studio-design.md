@@ -137,9 +137,11 @@ Each phase must ship something a teacher can **finish** (preview or share). Full
 
 **Ship:**
 
-- “Create from notes / outline / PDF” → draft package (course-compiler / agentic authoring skill)
-- Review UI: accept/reject sections; quality checklist in plain language
-- Actions: “Improve this lesson”, “Add a quiz”
+- Persistent right-sidebar Author Assistant (replaces standalone `ai-review`, `AiEditPanel`, `AiAddDialog`)
+- “Create from notes / outline / PDF” → draft package via sidebar chat
+- Actions: “Improve this lesson”, “Add a quiz”, “Rewrite section” via sidebar intents
+- Streaming responses, conversation history per course, suggested follow-up chips
+- See [`2026-08-12-studio-author-assistant-design.md`](./2026-08-12-studio-author-assistant-design.md) for the full design and phases A–D plans.
 - Offline fallback: templates still work if AI unavailable
 
 **Exit criteria:** Teacher pastes notes → gets draft → refines in Outline/Editor → exports `.oep`.

@@ -185,7 +185,7 @@ export function JSONNodeEditor({
               <label className="text-on-surface-variant flex items-center gap-1 text-xs">
                 <input
                   type="checkbox"
-                  className="border-outline-variant text-success focus:ring-success h-4 w-4 rounded"
+                  className="border-outline-variant text-success focus:ring-success size-4 rounded"
                   checked={opt.correct}
                   onChange={(e) => {
                     const opts = [...(data.options ?? [])];
@@ -205,7 +205,7 @@ export function JSONNodeEditor({
                 }}
                 aria-label={`Remove option ${idx + 1}`}
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="size-3.5" />
               </button>
             </div>
           ))}

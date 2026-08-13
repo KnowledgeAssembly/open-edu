@@ -1,8 +1,8 @@
 import type {
   AiEndpointErrorCode,
-  AiGenerateResult,
   AiItemAddResult,
   AiItemEditResult,
+  CourseDraftResult,
   ItemIntent,
   ItemIntentParams,
 } from './ai/types.js';
@@ -111,14 +111,34 @@ export function createStudioApi() {
       }),
     getAiStatus: () => aiRequest<{ available: boolean; reason?: string }>('/status', {}),
     generateFromNotes: (notes: string, force?: boolean) =>
-      aiRequest<AiGenerateResult>('/generate', {
+      aiRequest<CourseDraftResult>('/generate-draft', {
         method: 'POST',
         body: JSON.stringify({ notes, force }),
       }),
     uploadSpec: (spec: string, specExt: '.json' | '.md', force?: boolean) =>
-      aiRequest<AiGenerateResult>('/generate', {
+      aiRequest<CourseDraftResult>('/generate-draft', {
         method: 'POST',
         body: JSON.stringify({ spec, specExt, force }),
+      }),
+    generateCourseDraft: (notes: string) =>
+      aiRequest<CourseDraftResult>('/generate-draft', {
+        method: 'POST',
+        body: JSON.stringify({ notes }),
+      }),
+    uploadSpecDraft: (spec: string, specExt: '.json' | '.md') =>
+      aiRequest<CourseDraftResult>('/generate-draft', {
+        method: 'POST',
+        body: JSON.stringify({ spec, specExt }),
+      }),
+    commitCourseDraft: (draftId: string, force?: boolean) =>
+      aiRequest<{ success: boolean; title?: string; error?: string }>('/commit', {
+        method: 'POST',
+        body: JSON.stringify({ draftId, force }),
+      }),
+    discardCourseDraft: (draftId: string) =>
+      aiRequest<{ success: boolean }>('/discard-draft', {
+        method: 'POST',
+        body: JSON.stringify({ draftId }),
       }),
     generateItemAdd: (kind: 'lesson' | 'quiz' | 'practice', description: string) =>
       aiRequest<AiItemAddResult>('/item/add', {

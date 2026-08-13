@@ -16,6 +16,33 @@ import type { LibraryEntry } from '../library/types.js';
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
+const mockAssistantContext = {
+  panelOpen: false,
+  setPanelOpen: vi.fn(),
+  panelWidth: 320,
+  setPanelWidth: vi.fn(),
+  context: null,
+  setContext: vi.fn(),
+  enabled: true,
+  setEnabled: vi.fn(),
+  pendingDrafts: null,
+  setPendingDrafts: vi.fn(),
+  openWithPreset: vi.fn(),
+  ephemeralSuggestions: null,
+  setEphemeralSuggestions: vi.fn(),
+  lastCourseQuality: null,
+  setLastCourseQuality: vi.fn(),
+};
+
+vi.mock('../ai', () => ({
+  useStudioAssistant: () => mockAssistantContext,
+}));
+
+vi.mock('../ai/StudioAssistantProvider', () => ({
+  useStudioAssistant: () => mockAssistantContext,
+  StudioAssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const courseEntry: LibraryEntry = {
   id: 'fractions',
   title: 'Fractions',
@@ -185,7 +212,6 @@ describe('axe-core accessibility audits for studio components', () => {
           onError={() => {}}
           courseTitle="Fractions"
           onOpenCurrent={() => {}}
-          onAiGenerated={() => {}}
           onOpenLibrary={() => {}}
         />,
       ),

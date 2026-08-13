@@ -4,13 +4,15 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { HomeView } from './HomeView';
+import { StudioAssistantProvider } from '../ai/StudioAssistantProvider';
 import type { StudioApi } from '../studioApi.js';
-import type { AiGenerateResult } from '../ai/types.js';
 
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
-      {ui}
+      <StudioAssistantProvider>
+        {ui}
+      </StudioAssistantProvider>
     </I18nProvider>
   );
 }
@@ -26,7 +28,6 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     readFile: vi.fn(),
     writeFile: vi.fn(),
     getAiStatus: vi.fn().mockResolvedValue({ available: false }),
-    generateFromNotes: vi.fn(),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -38,7 +39,6 @@ function renderHome(
     onError?: (message: string) => void;
     courseTitle?: string;
     onOpenCurrent?: () => void;
-    onAiGenerated?: (result: AiGenerateResult) => void;
     onOpenLibrary?: () => void;
   } = {},
 ) {
@@ -50,7 +50,6 @@ function renderHome(
         onError={overrides.onError ?? (() => {})}
         courseTitle={overrides.courseTitle}
         onOpenCurrent={overrides.onOpenCurrent ?? (() => {})}
-        onAiGenerated={overrides.onAiGenerated ?? (() => {})}
         onOpenLibrary={overrides.onOpenLibrary ?? (() => {})}
       />,
     ),
@@ -109,21 +108,11 @@ describe('HomeView', () => {
     expect(onError).toHaveBeenCalledWith('boom');
   });
 
-  it('shows the AI unavailable message and a template hint when AI is offline', async () => {
+  it('shows the AI panel with a CTA button', async () => {
     renderHome();
     expect(
-      await screen.findByText(
-        'AI is unavailable offline or no API key is configured. Use a template instead.',
-      ),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /generate draft/i })).not.toBeInTheDocument();
-  });
-
-  it('shows the AI start panel with a Generate draft button when AI is available', async () => {
-    renderHome({
-      api: makeApi({ getAiStatus: vi.fn().mockResolvedValue({ available: true }) }),
-    });
-    expect(await screen.findByRole('button', { name: /generate draft/i })).toBeInTheDocument();
+      (await screen.findAllByText('Or start with AI')).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('shows recent courses from storage', async () => {

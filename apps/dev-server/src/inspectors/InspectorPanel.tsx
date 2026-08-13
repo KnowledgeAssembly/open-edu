@@ -42,7 +42,7 @@ export function InspectorPanel({
         onClick={() => setIsOpen(true)}
         aria-label="Open inspector panel"
       >
-        <PanelRightOpen className="mr-1 h-4 w-4" />
+        <PanelRightOpen className="mr-1 size-4" />
         DevTools
       </Button>
     );
@@ -97,11 +97,11 @@ export function InspectorPanel({
           <Button
             variant="ghost"
             size="icon"
-            className="text-on-surface-variant h-auto w-auto rounded-none px-3"
+            className="text-on-surface-variant size-auto rounded-none px-3"
             onClick={() => setIsOpen(false)}
             aria-label="Close inspector panel"
           >
-            <PanelRightClose className="h-4 w-4" />
+            <PanelRightClose className="size-4" />
           </Button>
         </div>
 

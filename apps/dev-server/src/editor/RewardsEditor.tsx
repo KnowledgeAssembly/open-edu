@@ -141,7 +141,7 @@ function TriggerCard({ trigger, onChange, onRemove, eventExamples }: TriggerCard
           onClick={onRemove}
           aria-label="Remove trigger"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-3.5" />
         </button>
       </div>
 
@@ -245,7 +245,7 @@ function RewardRow({ reward, onChange, onRemove }: RewardRowProps) {
         onClick={onRemove}
         aria-label="Remove reward"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="size-3.5" />
       </button>
     </div>
   );
