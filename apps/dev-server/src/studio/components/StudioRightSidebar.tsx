@@ -78,7 +78,7 @@ export function StudioRightSidebar() {
               }}
               className="text-on-surface-variant hover:text-on-surface flex items-center gap-1 rounded-md p-1 text-[11px] transition-colors"
               aria-label={t('studio.assistant.newConversation')}
-              title={t('studio.assistant.newConversation')}
+              title={t('studio.assistant.historyLabel')}
             >
               <Plus className="size-3.5" />
               <span className="hidden sm:inline">{t('studio.assistant.newConversation')}</span>

@@ -223,6 +223,31 @@ export function StudioAssistantChat() {
     }
   };
 
+  const handleSelectNextStep = (step: string) => {
+    // Action chips map to draft/course card controls; other chips continue the chat.
+    if (step === t('studio.assistant.next.applyDraft')) {
+      const lastDraftMsg = [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant' && m.metadata?.drafts?.length);
+      const drafts = lastDraftMsg?.metadata?.drafts;
+      if (drafts?.length) {
+        void handleUseAll(drafts);
+        return;
+      }
+    }
+    if (step === t('studio.assistant.next.acceptDraft')) {
+      const hasContent = (context?.course?.activityCount ?? 0) > 0;
+      if (hasContent) {
+        // Overwrite confirmation lives on the course draft card — do not force.
+        appendAssistantNote(t('studio.assistant.courseDraft.overwriteLede'));
+        return;
+      }
+      void handleAcceptCourseDraft(false);
+      return;
+    }
+    sendMessage(step);
+  };
+
   const handleDiscardCourseDraft = async () => {
     const lastAssistantMsg = [...messages]
       .reverse()
@@ -300,7 +325,7 @@ export function StudioAssistantChat() {
               }
               onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
               onDiscardCourseDraft={() => void handleDiscardCourseDraft()}
-              onSelectNextStep={(step) => void sendMessage(step)}
+              onSelectNextStep={handleSelectNextStep}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
               courseDraftAccepting={courseDraftAccepting}

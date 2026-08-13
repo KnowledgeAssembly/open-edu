@@ -263,6 +263,7 @@ The learner app is the primary development surface. After `install` completes, t
 - **Dev-server CSS staleness.** After editing Tailwind classes in `packages/runtime/src/`, regenerate dev-server CSS (see Tailwind CSS & Dev-Server section above).
 - **E2E tests.** Run `pnpm test:e2e:install` once per environment for Playwright Chromium, then `pnpm test:e2e tests/e2e/learner-experience.spec.ts` for the canonical learner smoke test.
 - **Optional services.** The Course Creator Studio (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above. The Studio defaults to Creator mode for teachers; Developer mode (file editors + inspectors) is toggled in-app and persisted in `localStorage`. The course library uses `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
+- **Author Assistant.** Enabled by default in Creator. Toggle with `Cmd/Ctrl+Shift+A`. Disable via `OPEN_EDU_STUDIO_ASSISTANT=0` or `localStorage` key `openedu.studio.assistant.enabled=false`. Chat streams through `/api/studio/ai/chat`; conversation history is stored per course in IndexedDB (sessionStorage fallback).
 - **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion. Studio AI drafting is server-side and uses `OPEN_EDU_STUDIO_LLM_*` (or existing llm-config env vars); it degrades to templates when unavailable.
 
 <!-- OPENWIKI:START -->

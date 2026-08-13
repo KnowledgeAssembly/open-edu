@@ -44,6 +44,17 @@ describe('ConversationStore', () => {
     expect(loaded).toEqual([]);
   });
 
+  it('awaited clear before load is the New conversation contract', async () => {
+    await store.saveMessages('test-course', [
+      { id: '1', role: 'user', content: 'Keep me?', createdAt: 100 },
+      { id: '2', role: 'assistant', content: 'Sure', createdAt: 200 },
+    ]);
+    // Provider must await clear before rotating conversationId / hydrating.
+    await store.clearMessages('test-course');
+    const hydrated = await store.loadMessages('test-course');
+    expect(hydrated).toEqual([]);
+  });
+
   it('does not affect other courses', async () => {
     await store.saveMessages('course-a', [{ id: '1', role: 'user', content: 'A', createdAt: 100 }]);
     await store.saveMessages('course-b', [{ id: '2', role: 'user', content: 'B', createdAt: 200 }]);

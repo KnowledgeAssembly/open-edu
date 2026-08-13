@@ -204,10 +204,18 @@ function ChatRuntime({
     id: conversationId,
     transport,
     messages: initialMessages,
-    onError: (err) => {
+    onError: (err: Error) => {
       console.error('[studio-chat] error:', err?.name);
     },
-    onFinish: ({ message, isAbort, isError }) => {
+    onFinish: ({
+      message,
+      isAbort,
+      isError,
+    }: {
+      message: UIMessage;
+      isAbort: boolean;
+      isError: boolean;
+    }) => {
       if (isAbort || isError) return;
       const metadata = message.metadata as ChatMessageMetadata | undefined;
 
@@ -265,12 +273,29 @@ function ChatRuntime({
         ? 'loading'
         : 'idle';
 
+  const clearMessages = useCallback(() => {
+    // Clear in-memory first so the persist effect cannot rewrite the store.
+    chatSetMessages([]);
+    // Await IndexedDB/session clear BEFORE rotating conversationId so the
+    // hydrate effect cannot resurrect the previous thread.
+    void (async () => {
+      await storeRef.current.clearMessages(courseKey);
+      const newId = createConversationId();
+      setConversationId(courseKey, newId);
+      setConversationIdState(newId);
+    })();
+  }, [chatSetMessages, courseKey, setConversationIdState]);
+
   const sendMessage = useCallback(
     (content: string) => {
+      if (!contextRef.current) {
+        onError?.(t('studio.assistant.error.request'));
+        return;
+      }
       setEphemeralSuggestions(null);
       void chatSend({ text: content });
     },
-    [chatSend, setEphemeralSuggestions],
+    [chatSend, onError, setEphemeralSuggestions, t],
   );
 
   const stop = useCallback(() => chatStop(), [chatStop]);
@@ -278,14 +303,6 @@ function ChatRuntime({
   const regenerate = useCallback(() => void chatRegenerate(), [chatRegenerate]);
 
   const clearError = useCallback(() => chatClearError(), [chatClearError]);
-
-  const clearMessages = useCallback(() => {
-    chatSetMessages([]);
-    void storeRef.current.clearMessages(courseKey);
-    const newId = createConversationId();
-    setConversationId(courseKey, newId);
-    setConversationIdState(newId);
-  }, [chatSetMessages, courseKey, setConversationIdState]);
 
   const appendAssistantNote = useCallback(
     (content: string) => {

@@ -23,10 +23,7 @@ export function extractSuggestedNextSteps(input: ExtractNextStepsInput): string[
   if (input.mode === 'draft') {
     steps.push(next('applyDraft'), next('makeEasier'), next('addQuiz'));
   } else if (input.mode === 'course_draft') {
-    steps.push(next('reviewChecklist'), next('acceptDraft'));
-    if (!input.hasCourseDraft) {
-      steps.push(next('addNotes'));
-    }
+    steps.push(next('reviewChecklist'), next('acceptDraft'), next('addNotes'));
   } else {
     switch (input.view) {
       case 'outline':

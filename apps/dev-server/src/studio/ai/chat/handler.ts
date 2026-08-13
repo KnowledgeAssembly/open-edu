@@ -373,7 +373,7 @@ async function pipeStaticMessage(res: ServerResponse, emission: ToolEmission): P
         messageMetadata: emission.metadata,
       } as UIMessageChunk);
     },
-    onError: () => 'An error occurred.',
+    onError: () => studioChatMessage('assistant.chat.serverError'),
   });
 
   await pipeUIMessageStreamToResponse({ response: res, status: 200, stream });
@@ -420,7 +420,7 @@ async function streamExplain(
       }
       return undefined;
     },
-    onError: () => 'An error occurred.',
+    onError: () => studioChatMessage('assistant.chat.serverError', context.locale || 'en'),
   });
 
   await pipeUIMessageStreamToResponse({ response: res, status: 200, stream: uiStream });

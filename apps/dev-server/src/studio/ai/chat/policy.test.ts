@@ -24,9 +24,10 @@ describe('extractSuggestedNextSteps', () => {
     });
     expect(steps).toContain('Review quality checklist');
     expect(steps).toContain('Accept draft');
+    expect(steps).toContain('Add more notes');
   });
 
-  it('includes add-notes when no course draft exists yet', () => {
+  it('includes add-notes for course drafts even when hasCourseDraft is false', () => {
     const steps = extractSuggestedNextSteps({
       mode: 'course_draft',
       view: 'home',

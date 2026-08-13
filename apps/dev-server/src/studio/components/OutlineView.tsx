@@ -291,7 +291,7 @@ export function OutlineView({
             onAddAi={() => {
               if (assistantEnabled) {
                 openWithPreset({
-                  message: 'Help me create a new activity for this course',
+                  message: t('studio.assistant.preset.addActivity'),
                 });
               } else {
                 setAiDialogOpen(true);
@@ -313,7 +313,7 @@ export function OutlineView({
                 onClick={() => {
                   if (assistantEnabled) {
                     openWithPreset({
-                      message: 'Help me add the first activity to this course',
+                      message: t('studio.assistant.preset.addFirstActivity'),
                     });
                   } else {
                     setAiDialogOpen(true);
