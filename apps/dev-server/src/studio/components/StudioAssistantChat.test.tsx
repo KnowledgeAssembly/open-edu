@@ -9,6 +9,7 @@ import type { CourseDraftResult, DraftItem } from '../ai/types';
 const sendMessage = vi.fn();
 const appendAssistantNote = vi.fn();
 const handleUseDraft = vi.fn();
+let chatStatus: 'idle' | 'loading' | 'error' = 'idle';
 
 const draftItem: DraftItem = {
   kind: 'lesson',
@@ -50,7 +51,7 @@ vi.mock('../ai', () => ({
   useStudioChat: () => ({
     messages,
     sendMessage,
-    status: 'idle' as const,
+    status: chatStatus,
     stop: vi.fn(),
     regenerate: vi.fn(),
     clearError: vi.fn(),
@@ -97,6 +98,7 @@ function wrap(ui: React.ReactElement) {
 describe('StudioAssistantChat next-step actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    chatStatus = 'idle';
     messages = [
       {
         id: 'a1',
@@ -141,8 +143,13 @@ describe('StudioAssistantChat next-step actions', () => {
     const chips = screen.getAllByRole('button', { name: 'Accept draft' });
     // Prefer the next-step chip (last), not the card primary button.
     await userEvent.click(chips[chips.length - 1]!);
-    await waitFor(() =>
-      expect(commitCourseDraft).toHaveBeenCalledWith('draft-1', false),
-    );
+    await waitFor(() => expect(commitCourseDraft).toHaveBeenCalledWith('draft-1', false));
+  });
+
+  it('shows a thinking indicator while the assistant is generating a response', () => {
+    chatStatus = 'loading';
+    wrap(<StudioAssistantChat />);
+    expect(screen.getByTestId('thinking-indicator')).toBeTruthy();
+    expect(screen.getByText('Thinking...')).toBeTruthy();
   });
 });

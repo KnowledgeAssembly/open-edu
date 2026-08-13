@@ -357,6 +357,7 @@
   "assistant.draft.confirmCancel": "Cancel",
   "assistant.draft.appliedOutline": "Applied to outline",
   "assistant.draft.appliedEditor": "Applied to editor — Save to keep",
+  "assistant.draft.applying": "Applying…",
   "assistant.intent.rewrite": "Rewrite",
   "assistant.intent.expand": "Expand",
   "assistant.intent.fix-quality": "Fix quality",

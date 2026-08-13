@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Send, Square, RotateCcw, Paperclip } from 'lucide-react';
+import { ThinkingIndicator } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { useStudioAssistant, useStudioChat } from '../ai';
 import { applyDraft, applyDraftBatch } from '../ai/applyDraft';
@@ -299,6 +300,14 @@ export function StudioAssistantChat() {
       : null;
 
   const busy = status === 'loading' || attachingSpec;
+  const working = busy || intentRunning || applying || courseDraftAccepting;
+  const workingLabel = attachingSpec
+    ? t('studio.assistant.attachingSpec')
+    : intentRunning
+      ? t('studio.assistant.intent.running')
+      : applying || courseDraftAccepting
+        ? t('studio.assistant.draft.applying')
+        : t('studio.assistant.thinking');
 
   return (
     <div className="flex h-full flex-col">
@@ -333,11 +342,7 @@ export function StudioAssistantChat() {
             />
           ))
         )}
-        {(status === 'loading' || attachingSpec) && (
-          <div className="text-on-surface-variant mr-auto animate-pulse text-xs">
-            {attachingSpec ? t('studio.assistant.attachingSpec') : t('studio.assistant.thinking')}
-          </div>
-        )}
+        {working && <ThinkingIndicator label={workingLabel} />}
         {status === 'error' && (
           <div className="mx-auto text-center">
             <p className="text-error mb-2 text-xs">{t('studio.assistant.error.request')}</p>
