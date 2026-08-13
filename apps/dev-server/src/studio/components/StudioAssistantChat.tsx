@@ -241,7 +241,11 @@ export function StudioAssistantChat() {
 
   const handleIntent = async (intent: ItemIntent, params?: ItemIntentParams) => {
     if (!currentEditor || intentRunning) return;
-    if (currentEditor.kind !== 'lesson' && currentEditor.kind !== 'quiz' && currentEditor.kind !== 'practice') {
+    if (
+      currentEditor.kind !== 'lesson' &&
+      currentEditor.kind !== 'quiz' &&
+      currentEditor.kind !== 'practice'
+    ) {
       return;
     }
     setIntentRunning(true);
@@ -296,6 +300,7 @@ export function StudioAssistantChat() {
               }
               onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
               onDiscardCourseDraft={() => void handleDiscardCourseDraft()}
+              onSelectNextStep={(step) => void sendMessage(step)}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
               courseDraftAccepting={courseDraftAccepting}
@@ -305,9 +310,7 @@ export function StudioAssistantChat() {
         )}
         {(status === 'loading' || attachingSpec) && (
           <div className="text-on-surface-variant mr-auto animate-pulse text-xs">
-            {attachingSpec
-              ? t('studio.assistant.attachingSpec')
-              : t('studio.assistant.thinking')}
+            {attachingSpec ? t('studio.assistant.attachingSpec') : t('studio.assistant.thinking')}
           </div>
         )}
         {status === 'error' && (

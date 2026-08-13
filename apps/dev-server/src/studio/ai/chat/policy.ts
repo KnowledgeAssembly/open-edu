@@ -1,4 +1,56 @@
-import type { StudioContextSnapshot } from '../context';
+import type { StudioContextSnapshot, StudioView } from '../context';
+import { MAX_SUGGESTED_NEXT_STEPS } from './metadata';
+import { studioChatMessage } from './messages';
+
+export interface ExtractNextStepsInput {
+  mode: 'explain' | 'draft' | 'course_draft';
+  view: StudioView;
+  hasCourseDraft: boolean;
+  locale?: string;
+}
+
+/**
+ * Server-suggested follow-up chips attached to assistant message metadata.
+ * Returns localized plain strings (max 4) so the client renders them without
+ * additional lookups. Derived from the response mode + current view.
+ */
+export function extractSuggestedNextSteps(input: ExtractNextStepsInput): string[] {
+  const locale = input.locale || 'en';
+  const next = (key: string): string => studioChatMessage(`assistant.next.${key}`, locale);
+
+  const steps: string[] = [];
+
+  if (input.mode === 'draft') {
+    steps.push(next('applyDraft'), next('makeEasier'), next('addQuiz'));
+  } else if (input.mode === 'course_draft') {
+    steps.push(next('reviewChecklist'), next('acceptDraft'));
+    if (!input.hasCourseDraft) {
+      steps.push(next('addNotes'));
+    }
+  } else {
+    switch (input.view) {
+      case 'outline':
+        steps.push(next('addLesson'), next('addQuiz'), next('previewCourse'));
+        break;
+      case 'home':
+        steps.push(next('createFromNotes'), next('summarizeCourse'));
+        break;
+      case 'edit-activity':
+        steps.push(next('improveActivity'), next('checkQuality'));
+        break;
+      case 'preview':
+        steps.push(next('previewFeedback'), next('addFollowup'));
+        break;
+      case 'share':
+        steps.push(next('fixIssues'), next('improveDescription'));
+        break;
+      default:
+        steps.push(next('whatCanYouDo'));
+    }
+  }
+
+  return steps.slice(0, MAX_SUGGESTED_NEXT_STEPS);
+}
 
 export function buildSystemPrompt(ctx: StudioContextSnapshot): string {
   const { view, course, activity, lastCourseDraftQuality } = ctx;

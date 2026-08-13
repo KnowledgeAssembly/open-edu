@@ -156,23 +156,28 @@ export function StudioContextBridge({
   }, [view, selectedPath, loadedPackage, aiAvailable, locale, setContext, api]);
 
   // Patch live editor fields (selection, dirty, buffer excerpt) without re-fetching.
+  // Debounced at ~300ms to avoid request spam while typing.
   useEffect(() => {
-    const base = baseRef.current;
-    if (!base?.activity || !selectedPath) return;
-    if (!currentEditor || currentEditor.path !== selectedPath) return;
+    const timer = setTimeout(() => {
+      const base = baseRef.current;
+      if (!base?.activity || !selectedPath) return;
+      if (!currentEditor || currentEditor.path !== selectedPath) return;
 
-    const next = studioContextSnapshotSchema.parse({
-      ...base,
-      activity: {
-        ...base.activity,
-        contentExcerpt: truncateExcerpt(currentEditor.getCurrentContent()),
-        isDirty: currentEditor.isDirty(),
-        title: currentEditor.title || base.activity.title,
-        kind: currentEditor.kind !== 'other' ? currentEditor.kind : base.activity.kind,
-        selection: selection && selection.text.trim() ? selection : undefined,
-      },
-    });
-    setContext(next);
+      const next = studioContextSnapshotSchema.parse({
+        ...base,
+        activity: {
+          ...base.activity,
+          contentExcerpt: truncateExcerpt(currentEditor.getCurrentContent()),
+          isDirty: currentEditor.isDirty(),
+          title: currentEditor.title || base.activity.title,
+          kind: currentEditor.kind !== 'other' ? currentEditor.kind : base.activity.kind,
+          selection: selection && selection.text.trim() ? selection : undefined,
+        },
+      });
+      setContext(next);
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [currentEditor, selection, selectedPath, baseVersion, setContext]);
 
   return null;

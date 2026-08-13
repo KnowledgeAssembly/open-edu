@@ -81,6 +81,19 @@ vi.mock('@dotlottie/react-player', () => ({
   PlayerEvents: {},
 }));
 
+vi.mock('@ai-sdk/react', () => ({
+  useChat: () => ({
+    messages: [],
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
+    status: 'ready' as const,
+    stop: vi.fn(),
+    clearError: vi.fn(),
+    setMessages: vi.fn(),
+    error: undefined,
+  }),
+}));
+
 const { DevApp } = await import('./DevApp');
 
 describe('DevApp', () => {
