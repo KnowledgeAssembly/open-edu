@@ -48,9 +48,24 @@ function openDb(): Promise<IDBDatabase> {
  *
  * Messages are capped at `CONVERSATION_MAX_MESSAGES`; oldest user/assistant
  * pairs are pruned so a turn is never split.
+ *
+ * A per-course write generation invalidates in-flight saves when
+ * `clearMessages` runs (New conversation), so a late `saveMessages` cannot
+ * resurrect a cleared thread.
  */
 export class ConversationStore {
   private dbPromise: Promise<IDBDatabase> | null = null;
+  private writeGeneration = new Map<string, number>();
+
+  private generation(courseId: string): number {
+    return this.writeGeneration.get(courseId) ?? 0;
+  }
+
+  private bumpGeneration(courseId: string): number {
+    const next = this.generation(courseId) + 1;
+    this.writeGeneration.set(courseId, next);
+    return next;
+  }
 
   private getDb(): Promise<IDBDatabase> {
     if (!this.dbPromise) {
@@ -89,7 +104,10 @@ export class ConversationStore {
   }
 
   async saveMessages(courseId: string, messages: StoredChatMessage[]): Promise<void> {
+    const gen = this.generation(courseId);
     const pruned = pruneMessages(messages);
+    if (this.generation(courseId) !== gen) return;
+
     const record: ConversationRecord = {
       courseId,
       messages: pruned,
@@ -98,11 +116,23 @@ export class ConversationStore {
     try {
       await this.transaction('readwrite', (store) => store.put(record));
     } catch {
+      if (this.generation(courseId) !== gen) return;
       this.saveSessionFallback(courseId, pruned);
+      return;
+    }
+
+    // A clear that landed during the put must win.
+    if (this.generation(courseId) !== gen) {
+      await this.deleteRecord(courseId);
     }
   }
 
   async clearMessages(courseId: string): Promise<void> {
+    this.bumpGeneration(courseId);
+    await this.deleteRecord(courseId);
+  }
+
+  private async deleteRecord(courseId: string): Promise<void> {
     try {
       await this.transaction('readwrite', (store) => store.delete(courseId));
     } catch {

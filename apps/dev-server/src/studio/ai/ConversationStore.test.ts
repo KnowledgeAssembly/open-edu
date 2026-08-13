@@ -55,6 +55,18 @@ describe('ConversationStore', () => {
     expect(hydrated).toEqual([]);
   });
 
+  it('does not resurrect a thread when save races with clear', async () => {
+    const stale: StoredChatMessage[] = [
+      { id: '1', role: 'user', content: 'stale', createdAt: 1 },
+      { id: '2', role: 'assistant', content: 'reply', createdAt: 2 },
+    ];
+    const savePromise = store.saveMessages('race-course', stale);
+    await store.clearMessages('race-course');
+    await savePromise;
+    const loaded = await store.loadMessages('race-course');
+    expect(loaded).toEqual([]);
+  });
+
   it('does not affect other courses', async () => {
     await store.saveMessages('course-a', [{ id: '1', role: 'user', content: 'A', createdAt: 100 }]);
     await store.saveMessages('course-b', [{ id: '2', role: 'user', content: 'B', createdAt: 200 }]);

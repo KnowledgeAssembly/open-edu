@@ -108,6 +108,21 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
+/** Abort the LLM stream when the client disconnects / Stop is pressed. */
+function createRequestAbortSignal(req: IncomingMessage): AbortSignal {
+  const controller = new AbortController();
+  const abort = () => {
+    if (!controller.signal.aborted) controller.abort();
+  };
+  if (req.destroyed || ('aborted' in req && Boolean((req as { aborted?: boolean }).aborted))) {
+    abort();
+    return controller.signal;
+  }
+  req.once('close', abort);
+  req.once('aborted', abort);
+  return controller.signal;
+}
+
 function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -207,7 +222,12 @@ export async function createStudioAssistantHandler(
       return;
     }
 
-    await streamExplain(res, { context, systemPrompt, messages: body.messages });
+    await streamExplain(res, {
+      context,
+      systemPrompt,
+      messages: body.messages,
+      abortSignal: createRequestAbortSignal(req),
+    });
   } catch (err) {
     console.error('[studio-assistant] chat handler error:', err);
     writeJson(res, 500, { error: msg('assistant.chat.serverError') });
@@ -386,9 +406,10 @@ async function streamExplain(
     context: StudioContextSnapshot;
     systemPrompt: string;
     messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+    abortSignal?: AbortSignal;
   },
 ): Promise<void> {
-  const { context, systemPrompt, messages } = opts;
+  const { context, systemPrompt, messages, abortSignal } = opts;
   const factory = createModelFactoryFromEnv();
   const model = factory.getModel('fast');
 
@@ -397,6 +418,7 @@ async function streamExplain(
   const result = streamText({
     model,
     messages: modelMessages as never,
+    abortSignal,
     onFinish: () => {
       console.log('[studio-assistant] chat response finished', {
         view: context.view,

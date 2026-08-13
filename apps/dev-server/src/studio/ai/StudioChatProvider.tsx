@@ -86,17 +86,13 @@ interface StudioChatProviderProps {
 
 /**
  * Provides the author-assistant chat surface. Resolves the per-course thread
- * (conversationId + persisted messages) before mounting the AI SDK chat
- * runtime, so `useChat` is constructed with the correct thread and remounts
- * when the course or a "New conversation" changes.
+ * (conversationId + persisted messages) before applying history into the AI SDK
+ * chat runtime. Remounts when the course or a "New conversation" changes.
  */
 export function StudioChatProvider(props: StudioChatProviderProps) {
   const courseKey = props.courseId || 'default';
   const storeRef = useRef(new ConversationStore());
 
-  // Resolve the per-course thread id synchronously so the chat runtime can be
-  // mounted with a stable tree from the first render. Hydrated message history
-  // is applied asynchronously once IndexedDB / sessionStorage resolves.
   const [conversationId, setConversationIdState] = useState<string>(() => {
     const existing = getConversationId(courseKey);
     const id = existing ?? createConversationId();
@@ -126,6 +122,7 @@ export function StudioChatProvider(props: StudioChatProviderProps) {
       conversationId={conversationId}
       initialMessages={hydrated ?? []}
       hydrationPending={hydrated === null}
+      store={storeRef.current}
       setConversationIdState={setConversationIdState}
       api={props.api}
       onOpenPath={props.onOpenPath}
@@ -143,6 +140,7 @@ function ChatRuntime({
   conversationId,
   initialMessages,
   hydrationPending,
+  store,
   setConversationIdState,
   api,
   onOpenPath,
@@ -154,6 +152,7 @@ function ChatRuntime({
   conversationId: string;
   initialMessages: UIMessage[];
   hydrationPending: boolean;
+  store: ConversationStore;
   setConversationIdState: (id: string) => void;
   api?: StudioApi;
   onOpenPath?: (path: string) => void;
@@ -173,6 +172,9 @@ function ChatRuntime({
   contextRef.current = context;
   const lastCourseQualityRef = useRef(lastCourseQuality);
   lastCourseQualityRef.current = lastCourseQuality;
+  const clearingRef = useRef(false);
+  const hydrationPendingRef = useRef(hydrationPending);
+  hydrationPendingRef.current = hydrationPending;
 
   const transport = useRef(
     new DefaultChatTransport({
@@ -203,7 +205,7 @@ function ChatRuntime({
   } = useChat({
     id: conversationId,
     transport,
-    messages: initialMessages,
+    messages: [],
     onError: (err: Error) => {
       console.error('[studio-chat] error:', err?.name);
     },
@@ -216,7 +218,7 @@ function ChatRuntime({
       isAbort: boolean;
       isError: boolean;
     }) => {
-      if (isAbort || isError) return;
+      if (isAbort || isError || clearingRef.current) return;
       const metadata = message.metadata as ChatMessageMetadata | undefined;
 
       if (metadata?.drafts?.length) {
@@ -241,53 +243,51 @@ function ChatRuntime({
   const rawMessagesRef = useRef(rawMessages);
   rawMessagesRef.current = rawMessages;
 
-  // Apply persisted history once hydration resolves. Guarded so a "new
-  // conversation" (key remount) never resurrects the previous thread.
-  const appliedHydrationRef = useRef(initialMessages.length > 0);
+  // Apply persisted history once. Never clobber messages the user already sent
+  // while hydration was still pending.
+  const appliedHydrationRef = useRef(false);
   useEffect(() => {
     if (hydrationPending) return;
     if (appliedHydrationRef.current) return;
-    if (initialMessages.length > 0) {
-      appliedHydrationRef.current = true;
+    appliedHydrationRef.current = true;
+    if (initialMessages.length > 0 && rawMessagesRef.current.length === 0) {
       chatSetMessages(initialMessages);
-    } else {
-      appliedHydrationRef.current = true;
     }
   }, [hydrationPending, initialMessages, chatSetMessages]);
 
-  const messages: ChatMessage[] = rawMessages.map(fromUIMessage);
-
-  const storeRef = useRef(new ConversationStore());
-
-  // Persist the thread (fire-and-forget) once a turn settles.
+  // Persist the thread once a turn settles. ConversationStore write generations
+  // drop/supersede saves that race with New conversation clears.
   useEffect(() => {
+    if (clearingRef.current) return;
+    if (hydrationPending) return;
     if (rawMessages.length === 0) return;
     if (chatStatus === 'submitted' || chatStatus === 'streaming') return;
-    void storeRef.current.saveMessages(courseKey, rawMessages.map(toStoredMessage));
-  }, [rawMessages.length, chatStatus, courseKey]);
+    void store.saveMessages(courseKey, rawMessages.map(toStoredMessage));
+  }, [rawMessages.length, chatStatus, courseKey, store, hydrationPending]);
 
   const status: 'idle' | 'loading' | 'error' =
     chatStatus === 'error'
       ? 'error'
-      : chatStatus === 'submitted' || chatStatus === 'streaming'
+      : chatStatus === 'submitted' || chatStatus === 'streaming' || hydrationPending
         ? 'loading'
         : 'idle';
 
   const clearMessages = useCallback(() => {
-    // Clear in-memory first so the persist effect cannot rewrite the store.
+    if (clearingRef.current) return;
+    clearingRef.current = true;
+    chatStop();
     chatSetMessages([]);
-    // Await IndexedDB/session clear BEFORE rotating conversationId so the
-    // hydrate effect cannot resurrect the previous thread.
     void (async () => {
-      await storeRef.current.clearMessages(courseKey);
+      await store.clearMessages(courseKey);
       const newId = createConversationId();
       setConversationId(courseKey, newId);
       setConversationIdState(newId);
     })();
-  }, [chatSetMessages, courseKey, setConversationIdState]);
+  }, [chatSetMessages, chatStop, courseKey, setConversationIdState, store]);
 
   const sendMessage = useCallback(
     (content: string) => {
+      if (clearingRef.current || hydrationPendingRef.current) return;
       if (!contextRef.current) {
         onError?.(t('studio.assistant.error.request'));
         return;
@@ -300,12 +300,16 @@ function ChatRuntime({
 
   const stop = useCallback(() => chatStop(), [chatStop]);
 
-  const regenerate = useCallback(() => void chatRegenerate(), [chatRegenerate]);
+  const regenerate = useCallback(() => {
+    if (clearingRef.current || hydrationPendingRef.current) return;
+    void chatRegenerate();
+  }, [chatRegenerate]);
 
   const clearError = useCallback(() => chatClearError(), [chatClearError]);
 
   const appendAssistantNote = useCallback(
     (content: string) => {
+      if (clearingRef.current) return;
       const note: StoredChatMessage = {
         id: `assistant-note-${Date.now()}`,
         role: 'assistant',
@@ -320,6 +324,7 @@ function ChatRuntime({
 
   const ingestCourseDraft = useCallback(
     (userContent: string, courseDraft: CourseDraftResult, readyMessage: string) => {
+      if (clearingRef.current) return;
       const userMsg: StoredChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
@@ -353,7 +358,7 @@ function ChatRuntime({
       currentContent: string,
       params?: ItemIntentParams,
     ) => {
-      if (!api) return;
+      if (!api || clearingRef.current) return;
       try {
         const result = await api.generateItemEdit(kind, intent, currentContent, params);
         if (result.ok) {
@@ -380,6 +385,8 @@ function ChatRuntime({
     },
     [api, chatSetMessages, onError, setPendingDrafts, t],
   );
+
+  const messages: ChatMessage[] = rawMessages.map(fromUIMessage);
 
   return (
     <StudioChatContext.Provider
