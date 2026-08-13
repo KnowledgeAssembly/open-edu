@@ -106,6 +106,7 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
 describe('OutlineView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAssistantContext.enabled = true;
   });
 
   it('loads and renders activities with kind badges', async () => {
@@ -212,6 +213,7 @@ describe('OutlineView', () => {
   });
 
   it('accepting an AI draft writes the file, appends the row, and persists order', async () => {
+    mockAssistantContext.enabled = false;
     const api = makeApi();
     render(wrap(<OutlineView api={api} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
@@ -242,6 +244,14 @@ describe('OutlineView', () => {
     const path = writeCall.mock.calls[0]![0] as string;
     expect(path).toMatch(/^nodes\/quiz-\d+\.json$/);
     expect(api.saveOutlineOrder).toHaveBeenCalled();
+    mockAssistantContext.enabled = true;
+  });
+
+  it('does not mount AiAddDialog when the author assistant is enabled', async () => {
+    mockAssistantContext.enabled = true;
+    render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
+    await screen.findByText('Intro');
+    expect(screen.queryByTestId('ai-add-dialog')).toBeNull();
   });
 
   it('renders listitems when activities present', async () => {

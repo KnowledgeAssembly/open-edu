@@ -65,7 +65,7 @@ export function StudioAssistantChat() {
     }
   };
 
-  const resolveApplyMode = (item: DraftItem, siblings: DraftItem[]): DraftApplyMode => {
+  const resolveApplyMode = (_item: DraftItem, siblings: DraftItem[]): DraftApplyMode => {
     if (pendingDrafts?.applyMode) return pendingDrafts.applyMode;
     if (siblings.length > 1) return 'file';
     if (currentEditor && context?.view === 'edit-activity') return 'buffer';
