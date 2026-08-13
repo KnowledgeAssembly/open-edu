@@ -644,20 +644,14 @@ function eduPackageLoader(): Plugin {
           }
 
           // POST /api/studio/ai/chat — Author Assistant chat (explain + item drafts)
+          // Streams an SSE UI message stream (see `createStudioAssistantHandler`).
           if (pathname === '/api/studio/ai/chat' && method === 'POST') {
             if (!isAiAvailable()) {
               res.statusCode = 503;
               res.end(JSON.stringify({ error: 'ai-unavailable' }));
               return;
             }
-            const body = await parseJsonBody(req);
-            const result = await createStudioAssistantHandler(body, { packageDir });
-            if (result.status !== 200) {
-              res.statusCode = result.status;
-              res.end(JSON.stringify(result.body));
-              return;
-            }
-            res.end(JSON.stringify(result.body));
+            await createStudioAssistantHandler(req, res, { packageDir });
             return;
           }
 

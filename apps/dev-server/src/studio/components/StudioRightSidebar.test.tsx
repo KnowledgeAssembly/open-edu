@@ -15,25 +15,42 @@ import type { StudioContextSnapshot } from '../ai/context';
 
 const sendSpy = vi.fn();
 
+const defaultMockChat = {
+  messages: [],
+  sendMessage: sendSpy,
+  status: 'idle' as const,
+  stop: vi.fn(),
+  regenerate: vi.fn(),
+  clearError: vi.fn(),
+  clearMessages: vi.fn(),
+  appendAssistantNote: vi.fn(),
+  ingestCourseDraft: vi.fn(),
+  runIntent: vi.fn(),
+  api: null,
+};
+
+const useStudioChatMock = vi.fn();
+
 vi.mock('../ai', async () => {
   const actual = (await vi.importActual('../ai')) as Record<string, unknown>;
   return {
     ...actual,
-    useStudioChat: () => ({
-      messages: [],
-      sendMessage: sendSpy,
-      status: 'idle' as const,
-      stop: vi.fn(),
-      regenerate: vi.fn(),
-      clearError: vi.fn(),
-      clearMessages: vi.fn(),
-      appendAssistantNote: vi.fn(),
-      ingestCourseDraft: vi.fn(),
-      runIntent: vi.fn(),
-      api: null,
-    }),
+    useStudioChat: (...args: unknown[]) => useStudioChatMock(...args),
   };
 });
+
+vi.mock('@ai-sdk/react', () => ({
+  useChat: () => ({
+    messages: [],
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
+    status: 'ready' as const,
+    stop: vi.fn(),
+    clearError: vi.fn(),
+    setMessages: vi.fn(),
+    error: undefined,
+  }),
+}));
 
 function ContextSeeder({
   snapshot,
@@ -81,6 +98,7 @@ function wrap(ui: React.ReactElement, snapshot: StudioContextSnapshot = defaultS
 describe('StudioRightSidebar', () => {
   beforeEach(() => {
     sendSpy.mockClear();
+    useStudioChatMock.mockReturnValue(defaultMockChat);
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -130,5 +148,25 @@ describe('StudioRightSidebar', () => {
       rules: { 'color-contrast': { enabled: false } },
     });
     expect(results.violations).toEqual([]);
+  });
+
+  it('shows a new conversation button when open', async () => {
+    localStorage.setItem('openedu.studio.assistant.open', 'true');
+    wrap(<StudioRightSidebar />);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /new conversation/i })).toBeInTheDocument();
+    });
+  });
+
+  it('calls clearMessages when new conversation is clicked', async () => {
+    const clearSpy = vi.fn();
+    useStudioChatMock.mockReturnValue({ ...defaultMockChat, clearMessages: clearSpy });
+    localStorage.setItem('openedu.studio.assistant.open', 'true');
+    wrap(<StudioRightSidebar />);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /new conversation/i })).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByRole('button', { name: /new conversation/i }));
+    expect(clearSpy).toHaveBeenCalled();
   });
 });

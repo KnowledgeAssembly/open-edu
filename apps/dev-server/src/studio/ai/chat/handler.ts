@@ -1,11 +1,25 @@
-import { generateText } from 'ai';
+import {
+  createUIMessageStream,
+  pipeUIMessageStreamToResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessageChunk,
+} from 'ai';
 import { createModelFactoryFromEnv } from '@open-edu/llm-config';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { completeWithLlm } from '../studioLlm';
-import { StudioChatRequestSchema, MAX_MESSAGES, MAX_CONTEXT_CHARS } from './config';
-import { buildSystemPrompt } from './policy';
+import {
+  StudioChatRequestSchema,
+  MAX_MESSAGES,
+  MAX_CONTEXT_CHARS,
+  MAX_REQUEST_SIZE_BYTES,
+} from './config';
+import { buildSystemPrompt, extractSuggestedNextSteps } from './policy';
 import { draftActivity, generateCourseDraftTool } from './tools';
-import { createChatMetadata } from './metadata';
+import { createChatMetadata, type StudioChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
+import { checkRateLimit } from './rateLimit';
+import type { StudioContextSnapshot } from '../context';
 import type { ItemIntent, ItemIntentParams } from '../types';
 
 function parseIntentFromMessage(content: string): {
@@ -41,13 +55,24 @@ function parseIntentFromMessage(content: string): {
   }
 
   // Also trigger course generation for very long messages that look like notes
-  if (content.length > 300 && !low.includes('create') && !low.includes('add') && !low.includes('edit')) {
+  if (
+    content.length > 300 &&
+    !low.includes('create') &&
+    !low.includes('add') &&
+    !low.includes('edit')
+  ) {
     return { type: 'generate_course', description: content };
   }
 
-  const createMatch = low.match(/(?:create|add|draft|generate|make new)\s+(?:a\s+)?(lesson|quiz|practice)/);
+  const createMatch = low.match(
+    /(?:create|add|draft|generate|make new)\s+(?:a\s+)?(lesson|quiz|practice)/,
+  );
   if (createMatch) {
-    return { type: 'draft_new', kind: createMatch[1] as 'lesson' | 'quiz' | 'practice', description: content };
+    return {
+      type: 'draft_new',
+      kind: createMatch[1] as 'lesson' | 'quiz' | 'practice',
+      description: content,
+    };
   }
 
   const editPatterns: Array<{ match: RegExp; intent: ItemIntent; params?: ItemIntentParams }> = [
@@ -60,7 +85,12 @@ function parseIntentFromMessage(content: string): {
     { match: /improve.*prompt/i, intent: 'improve-prompt' },
   ];
 
-  if (low.includes('edit') || low.includes('change') || low.includes('improve') || low.includes('rewrite')) {
+  if (
+    low.includes('edit') ||
+    low.includes('change') ||
+    low.includes('improve') ||
+    low.includes('rewrite')
+  ) {
     for (const pattern of editPatterns) {
       if (pattern.match.test(low)) {
         return { type: 'edit_existing', intent: pattern.intent, params: pattern.params };
@@ -72,189 +102,348 @@ function parseIntentFromMessage(content: string): {
   return null;
 }
 
-export async function createStudioAssistantHandler(
-  req: unknown,
-  options: { packageDir?: string } = {},
-) {
-  try {
-    const body = StudioChatRequestSchema.parse(req);
-    const packageDir = options.packageDir || '';
-    const locale = body.context.locale || 'en';
-    const msg = (key: string, params?: Record<string, string>) =>
-      studioChatMessage(key, locale, params);
+function writeJson(res: ServerResponse, status: number, body: unknown): void {
+  if (res.headersSent) return;
+  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(body));
+}
 
-    if (body.messages.length > MAX_MESSAGES) {
+/** Abort the LLM stream when the client disconnects / Stop is pressed. */
+function createRequestAbortSignal(req: IncomingMessage): AbortSignal {
+  const controller = new AbortController();
+  const abort = () => {
+    if (!controller.signal.aborted) controller.abort();
+  };
+  if (req.destroyed || ('aborted' in req && Boolean((req as { aborted?: boolean }).aborted))) {
+    abort();
+    return controller.signal;
+  }
+  req.once('close', abort);
+  req.once('aborted', abort);
+  return controller.signal;
+}
+
+function readJsonBody(req: IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', (chunk: Buffer) => {
+      data += chunk.toString();
+      if (data.length > MAX_REQUEST_SIZE_BYTES) {
+        reject(new Error('Request body too large'));
+      }
+    });
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(data));
+      } catch {
+        reject(new Error('Invalid JSON'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+interface ToolEmission {
+  content: string;
+  metadata: StudioChatMetadata;
+}
+
+/**
+ * Vite-middleware-compatible chat endpoint. Writes an SSE UI message stream
+ * to `res` (mirrors `createPipiliHandler`): the explain path streams tokens
+ * from the LLM; tool paths emit a single static message whose drafts /
+ * courseDraft / next steps are attached as message metadata on finish.
+ */
+export async function createStudioAssistantHandler(
+  req: IncomingMessage,
+  res: ServerResponse,
+  options: { packageDir?: string } = {},
+): Promise<void> {
+  let raw: unknown;
+  try {
+    raw = await readJsonBody(req);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'INVALID_JSON';
+    writeJson(res, message === 'Request body too large' ? 413 : 400, {
+      error: message === 'Request body too large' ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON',
+    });
+    return;
+  }
+
+  let body: {
+    conversationId?: string;
+    messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+    context: StudioContextSnapshot;
+  };
+  try {
+    body = StudioChatRequestSchema.parse(raw);
+  } catch {
+    writeJson(res, 400, { error: studioChatMessage('assistant.chat.invalidBody') });
+    return;
+  }
+
+  const packageDir = options.packageDir || '';
+  const locale = body.context.locale || 'en';
+  const msg = (key: string, params?: Record<string, string>) =>
+    studioChatMessage(key, locale, params);
+
+  if (body.messages.length > MAX_MESSAGES) {
+    writeJson(res, 400, {
+      error: msg('assistant.chat.tooManyMessages', { max: String(MAX_MESSAGES) }),
+    });
+    return;
+  }
+
+  if (checkRateLimit(body.conversationId)) {
+    writeJson(res, 429, { error: msg('assistant.chat.rateLimited') });
+    return;
+  }
+
+  const systemPrompt = buildSystemPrompt(body.context);
+  if (systemPrompt.length > MAX_CONTEXT_CHARS) {
+    writeJson(res, 400, { error: msg('assistant.chat.contextTooLarge') });
+    return;
+  }
+
+  const context = body.context;
+  const lastUserMessage = [...body.messages].reverse().find((m) => m.role === 'user');
+  const intent = lastUserMessage ? parseIntentFromMessage(lastUserMessage.content) : null;
+
+  try {
+    const toolEmission = await runToolIntent(intent, {
+      body,
+      context,
+      packageDir,
+      msg,
+    });
+
+    if (toolEmission) {
+      await pipeStaticMessage(res, toolEmission);
+      return;
+    }
+
+    await streamExplain(res, {
+      context,
+      systemPrompt,
+      messages: body.messages,
+      abortSignal: createRequestAbortSignal(req),
+    });
+  } catch (err) {
+    console.error('[studio-assistant] chat handler error:', err);
+    writeJson(res, 500, { error: msg('assistant.chat.serverError') });
+  }
+}
+
+/** Runs the deterministic tool path (draft / course gen). Null → explain. */
+async function runToolIntent(
+  intent: ReturnType<typeof parseIntentFromMessage>,
+  opts: {
+    body: { context: StudioContextSnapshot };
+    context: StudioContextSnapshot;
+    packageDir: string;
+    msg: (key: string, params?: Record<string, string>) => string;
+  },
+): Promise<ToolEmission | null> {
+  const { context, packageDir, msg } = opts;
+
+  if (!intent || intent.type === 'explain' || !context.course) {
+    return null;
+  }
+
+  const nextSteps = (mode: 'explain' | 'draft' | 'course_draft', hasCourseDraft = false) =>
+    extractSuggestedNextSteps({
+      mode,
+      view: context.view,
+      hasCourseDraft,
+      locale: context.locale || 'en',
+    });
+
+  if (intent.type === 'generate_course') {
+    if (!packageDir) {
       return {
-        status: 400,
-        body: { error: msg('assistant.chat.tooManyMessages', { max: String(MAX_MESSAGES) }) },
+        content: msg('assistant.chat.needPackageDraft'),
+        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
       };
     }
 
-    const systemPrompt = buildSystemPrompt(body.context);
-    if (systemPrompt.length > MAX_CONTEXT_CHARS) {
-      return { status: 400, body: { error: msg('assistant.chat.contextTooLarge') } };
+    const result = await generateCourseDraftTool({
+      notes: intent.description,
+      packageDir,
+      completeText: completeWithLlm,
+    });
+
+    console.log('[studio-assistant] course draft tool', {
+      ok: result.ok,
+      draftId: result.ok ? result.courseDraft.draftId : undefined,
+    });
+
+    if (result.ok) {
+      return {
+        content: msg('assistant.chat.courseDraftReady'),
+        metadata: createChatMetadata('course_draft', {
+          courseDraft: result.courseDraft,
+          suggestedNextSteps: nextSteps('course_draft', true),
+        }),
+      };
     }
-
-    const lastUserMessage = [...body.messages].reverse().find((m) => m.role === 'user');
-    const intent = lastUserMessage ? parseIntentFromMessage(lastUserMessage.content) : null;
-
-    if (intent && intent.type !== 'explain' && body.context.course) {
-      if (intent.type === 'generate_course') {
-        if (!packageDir) {
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.needPackageDraft'),
-              metadata: createChatMetadata('explain'),
-            },
-          };
-        }
-
-        const result = await generateCourseDraftTool({
-          notes: intent.description,
-          packageDir,
-          completeText: completeWithLlm,
-        });
-
-        if (result.ok) {
-          const metadata = createChatMetadata('course_draft');
-          metadata.courseDraft = result.courseDraft;
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.courseDraftReady'),
-              metadata,
-              courseDraft: result.courseDraft,
-            },
-          };
-        }
-
-        return {
-          status: 200,
-          body: {
-            role: 'assistant',
-            content: msg('assistant.chat.courseDraftFailed', { error: result.error }),
-            metadata: createChatMetadata('explain'),
-          },
-        };
-      }
-
-      if (intent.type === 'draft_new' && intent.kind) {
-        if (!packageDir) {
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.needPackageDraft'),
-              metadata: createChatMetadata('explain'),
-            },
-          };
-        }
-
-        const result = await draftActivity({
-          type: 'draft_new',
-          kind: intent.kind,
-          description: intent.description || `Create a ${intent.kind}`,
-          packageDir,
-        });
-
-        if (result.ok) {
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.draftReady', { kind: intent.kind }),
-              metadata: createChatMetadata('draft'),
-              drafts: result.items,
-              applyMode: 'file' as const,
-            },
-          };
-        }
-
-        return {
-          status: 200,
-          body: {
-            role: 'assistant',
-            content: msg('assistant.chat.draftFailed', { error: result.error }),
-            metadata: createChatMetadata('explain'),
-          },
-        };
-      }
-
-      if (intent.type === 'edit_existing' && body.context.activity) {
-        if (!packageDir) {
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.needPackageEdit'),
-              metadata: createChatMetadata('explain'),
-            },
-          };
-        }
-
-        const contentExcerpt = body.context.activity.contentExcerpt || '';
-        const kind =
-          body.context.activity.kind === 'other'
-            ? 'lesson'
-            : (body.context.activity.kind as 'lesson' | 'quiz' | 'practice');
-
-        const result = await draftActivity({
-          type: 'edit_existing',
-          kind,
-          currentContent: contentExcerpt,
-          intent: intent.intent || 'rewrite',
-          params: intent.params,
-          packageDir,
-        });
-
-        if (result.ok) {
-          const applyMode = result.items.length > 1 ? 'file' : 'buffer';
-          return {
-            status: 200,
-            body: {
-              role: 'assistant',
-              content: msg('assistant.chat.editReady'),
-              metadata: createChatMetadata('draft'),
-              drafts: result.items,
-              applyMode,
-            },
-          };
-        }
-
-        return {
-          status: 200,
-          body: {
-            role: 'assistant',
-            content: msg('assistant.chat.editFailed', { error: result.error }),
-            metadata: createChatMetadata('explain'),
-          },
-        };
-      }
-    }
-
-    const factory = createModelFactoryFromEnv();
-    const model = factory.getModel('fast');
-
-    const messages = [{ role: 'system' as const, content: systemPrompt }, ...body.messages];
-
-    const { text } = await generateText({ model, messages: messages as never });
 
     return {
-      status: 200,
-      body: {
-        role: 'assistant',
-        content: text,
-        metadata: createChatMetadata('explain'),
-      },
+      content: msg('assistant.chat.courseDraftFailed', { error: result.error }),
+      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
     };
-  } catch (err) {
-    if (err instanceof Error && err.name === 'ZodError') {
-      return { status: 400, body: { error: studioChatMessage('assistant.chat.invalidBody') } };
-    }
-    console.error('[studio-assistant] chat handler error:', err);
-    return { status: 500, body: { error: studioChatMessage('assistant.chat.serverError') } };
   }
+
+  if (intent.type === 'draft_new' && intent.kind) {
+    if (!packageDir) {
+      return {
+        content: msg('assistant.chat.needPackageDraft'),
+        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
+      };
+    }
+
+    const result = await draftActivity({
+      type: 'draft_new',
+      kind: intent.kind,
+      description: intent.description || `Create a ${intent.kind}`,
+      packageDir,
+    });
+
+    console.log('[studio-assistant] item draft tool', {
+      ok: result.ok,
+      kind: intent.kind,
+    });
+
+    if (result.ok) {
+      return {
+        content: msg('assistant.chat.draftReady', { kind: intent.kind }),
+        metadata: createChatMetadata('draft', {
+          drafts: result.items,
+          suggestedNextSteps: nextSteps('draft'),
+        }),
+      };
+    }
+
+    return {
+      content: msg('assistant.chat.draftFailed', { error: result.error }),
+      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
+    };
+  }
+
+  if (intent.type === 'edit_existing' && context.activity) {
+    if (!packageDir) {
+      return {
+        content: msg('assistant.chat.needPackageEdit'),
+        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
+      };
+    }
+
+    const contentExcerpt = context.activity.contentExcerpt || '';
+    const kind =
+      context.activity.kind === 'other'
+        ? 'lesson'
+        : (context.activity.kind as 'lesson' | 'quiz' | 'practice');
+
+    const result = await draftActivity({
+      type: 'edit_existing',
+      kind,
+      currentContent: contentExcerpt,
+      intent: intent.intent || 'rewrite',
+      params: intent.params,
+      packageDir,
+    });
+
+    console.log('[studio-assistant] item edit tool', {
+      ok: result.ok,
+      kind,
+      intent: intent.intent,
+    });
+
+    if (result.ok) {
+      return {
+        content: msg('assistant.chat.editReady'),
+        metadata: createChatMetadata('draft', {
+          drafts: result.items,
+          suggestedNextSteps: nextSteps('draft'),
+        }),
+      };
+    }
+
+    return {
+      content: msg('assistant.chat.editFailed', { error: result.error }),
+      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
+    };
+  }
+
+  return null;
+}
+
+/** Emit a single static assistant message (tool path) as a UI message stream. */
+async function pipeStaticMessage(res: ServerResponse, emission: ToolEmission): Promise<void> {
+  const textId = `${Date.now()}-text`;
+
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.write({ type: 'start' });
+      writer.write({ type: 'text-start', id: textId });
+      writer.write({ type: 'text-delta', id: textId, delta: emission.content });
+      writer.write({ type: 'text-end', id: textId });
+      writer.write({
+        type: 'finish',
+        finishReason: 'stop',
+        messageMetadata: emission.metadata,
+      } as UIMessageChunk);
+    },
+    onError: () => studioChatMessage('assistant.chat.serverError'),
+  });
+
+  await pipeUIMessageStreamToResponse({ response: res, status: 200, stream });
+}
+
+/** Real token streaming for the explain path. */
+async function streamExplain(
+  res: ServerResponse,
+  opts: {
+    context: StudioContextSnapshot;
+    systemPrompt: string;
+    messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+    abortSignal?: AbortSignal;
+  },
+): Promise<void> {
+  const { context, systemPrompt, messages, abortSignal } = opts;
+  const factory = createModelFactoryFromEnv();
+  const model = factory.getModel('fast');
+
+  const modelMessages = [{ role: 'system' as const, content: systemPrompt }, ...messages];
+
+  const result = streamText({
+    model,
+    messages: modelMessages as never,
+    abortSignal,
+    onFinish: () => {
+      console.log('[studio-assistant] chat response finished', {
+        view: context.view,
+        locale: context.locale,
+      });
+    },
+  });
+
+  const uiStream = toUIMessageStream({
+    stream: result.stream,
+    messageMetadata: ({ part }) => {
+      if (part.type === 'finish') {
+        return createChatMetadata('explain', {
+          suggestedNextSteps: extractSuggestedNextSteps({
+            mode: 'explain',
+            view: context.view,
+            hasCourseDraft: false,
+            locale: context.locale || 'en',
+          }),
+        });
+      }
+      return undefined;
+    },
+    onError: () => studioChatMessage('assistant.chat.serverError', context.locale || 'en'),
+  });
+
+  await pipeUIMessageStreamToResponse({ response: res, status: 200, stream: uiStream });
 }

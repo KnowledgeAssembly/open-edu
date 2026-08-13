@@ -19,6 +19,32 @@ function SuggestionChipItem({ chip, onSend }: SuggestionChipProps) {
   );
 }
 
+function contextLabel(
+  view: string,
+  t: (key: string, options?: Record<string, string>) => string,
+  activityTitle?: string,
+  activityCount?: number,
+): string {
+  switch (view) {
+    case 'home':
+      return t('studio.assistant.context.home');
+    case 'outline':
+      return t('studio.assistant.context.outline', { count: String(activityCount ?? '') });
+    case 'edit-activity':
+      return t('studio.assistant.context.editing', { title: activityTitle ?? '' });
+    case 'preview':
+      return t('studio.assistant.context.preview');
+    case 'share':
+      return t('studio.assistant.context.share');
+    case 'library':
+      return t('studio.assistant.context.library');
+    case 'unit-builder':
+      return t('studio.assistant.context.unitBuilder');
+    default:
+      return t('studio.assistant.context.home');
+  }
+}
+
 export function AssistantContextStrip({ onSend }: { onSend: (msg: string) => void }) {
   const { t } = useTranslation();
   const { context, ephemeralSuggestions, setEphemeralSuggestions } = useStudioAssistant();
@@ -46,17 +72,12 @@ export function AssistantContextStrip({ onSend }: { onSend: (msg: string) => voi
       </div>
 
       <div className="text-on-surface-variant text-[10px] font-medium uppercase tracking-wider">
-        {context.view === 'home'
-          ? t('studio.assistant.context.home')
-          : context.view === 'outline'
-            ? t('studio.assistant.context.outline', {
-                count: String(context.course?.activityCount ?? ''),
-              })
-            : context.view === 'edit-activity'
-              ? t('studio.assistant.context.editing', {
-                  title: context.activity?.title ?? '',
-                })
-              : context.view}
+        {contextLabel(
+          context.view,
+          t,
+          context.activity?.title,
+          context.course?.activityCount,
+        )}
       </div>
     </div>
   );

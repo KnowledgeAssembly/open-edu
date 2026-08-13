@@ -223,6 +223,31 @@ export function StudioAssistantChat() {
     }
   };
 
+  const handleSelectNextStep = (step: string) => {
+    // Action chips map to draft/course card controls; other chips continue the chat.
+    if (step === t('studio.assistant.next.applyDraft')) {
+      const lastDraftMsg = [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant' && m.metadata?.drafts?.length);
+      const drafts = lastDraftMsg?.metadata?.drafts;
+      if (drafts?.length) {
+        void handleUseAll(drafts);
+        return;
+      }
+    }
+    if (step === t('studio.assistant.next.acceptDraft')) {
+      const hasContent = (context?.course?.activityCount ?? 0) > 0;
+      if (hasContent) {
+        // Overwrite confirmation lives on the course draft card — do not force.
+        appendAssistantNote(t('studio.assistant.courseDraft.overwriteLede'));
+        return;
+      }
+      void handleAcceptCourseDraft(false);
+      return;
+    }
+    sendMessage(step);
+  };
+
   const handleDiscardCourseDraft = async () => {
     const lastAssistantMsg = [...messages]
       .reverse()
@@ -241,7 +266,11 @@ export function StudioAssistantChat() {
 
   const handleIntent = async (intent: ItemIntent, params?: ItemIntentParams) => {
     if (!currentEditor || intentRunning) return;
-    if (currentEditor.kind !== 'lesson' && currentEditor.kind !== 'quiz' && currentEditor.kind !== 'practice') {
+    if (
+      currentEditor.kind !== 'lesson' &&
+      currentEditor.kind !== 'quiz' &&
+      currentEditor.kind !== 'practice'
+    ) {
       return;
     }
     setIntentRunning(true);
@@ -296,6 +325,7 @@ export function StudioAssistantChat() {
               }
               onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
               onDiscardCourseDraft={() => void handleDiscardCourseDraft()}
+              onSelectNextStep={handleSelectNextStep}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
               courseDraftAccepting={courseDraftAccepting}
@@ -305,9 +335,7 @@ export function StudioAssistantChat() {
         )}
         {(status === 'loading' || attachingSpec) && (
           <div className="text-on-surface-variant mr-auto animate-pulse text-xs">
-            {attachingSpec
-              ? t('studio.assistant.attachingSpec')
-              : t('studio.assistant.thinking')}
+            {attachingSpec ? t('studio.assistant.attachingSpec') : t('studio.assistant.thinking')}
           </div>
         )}
         {status === 'error' && (

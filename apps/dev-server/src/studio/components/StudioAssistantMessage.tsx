@@ -11,6 +11,7 @@ interface ChatMessageMetadata {
   drafts?: DraftItem[];
   courseDraft?: CourseDraftResult;
   applyMode?: DraftApplyMode;
+  suggestedNextSteps?: string[];
 }
 
 export function StudioAssistantMessage({
@@ -23,6 +24,7 @@ export function StudioAssistantMessage({
   onOpenDraft,
   onAcceptCourseDraft,
   onDiscardCourseDraft,
+  onSelectNextStep,
   isDirty,
   applying,
   courseDraftAccepting,
@@ -37,6 +39,7 @@ export function StudioAssistantMessage({
   onOpenDraft?: (item: DraftItem) => void;
   onAcceptCourseDraft?: (force: boolean) => void;
   onDiscardCourseDraft?: () => void;
+  onSelectNextStep?: (step: string) => void;
   isDirty?: boolean;
   applying?: boolean;
   courseDraftAccepting?: boolean;
@@ -45,10 +48,11 @@ export function StudioAssistantMessage({
   const { t } = useTranslation();
   const drafts = metadata?.drafts;
   const courseDraft = metadata?.courseDraft;
+  const suggestedNextSteps = metadata?.suggestedNextSteps;
   const [expanded, setExpanded] = useState(false);
 
   const visibleDrafts =
-    drafts && drafts.length > 1 && !expanded ? drafts.slice(0, 1) : drafts ?? [];
+    drafts && drafts.length > 1 && !expanded ? drafts.slice(0, 1) : (drafts ?? []);
 
   return (
     <div
@@ -116,6 +120,25 @@ export function StudioAssistantMessage({
               disabled={applying}
             />
           ))}
+        </div>
+      ) : null}
+      {suggestedNextSteps && suggestedNextSteps.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-on-surface-variant mb-1.5 text-[10px] font-medium uppercase tracking-wider">
+            {t('studio.assistant.next.label')}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {suggestedNextSteps.map((step) => (
+              <button
+                key={step}
+                type="button"
+                onClick={() => onSelectNextStep?.(step)}
+                className="border-outline-variant hover:border-primary hover:text-primary text-on-surface-variant whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors"
+              >
+                {step}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

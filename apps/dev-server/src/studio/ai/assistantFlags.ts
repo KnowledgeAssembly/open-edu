@@ -6,12 +6,10 @@ export function isAssistantEnabled(): boolean {
   if (stored === 'true') return true;
   if (stored === 'false') return false;
 
-  if (
-    typeof OPEN_EDU_STUDIO_ASSISTANT === 'string' &&
-    OPEN_EDU_STUDIO_ASSISTANT === '1'
-  ) {
-    return true;
+  if (typeof OPEN_EDU_STUDIO_ASSISTANT === 'string' && OPEN_EDU_STUDIO_ASSISTANT === '0') {
+    return false;
   }
 
-  return false;
+  // Default on in Creator mode; env or localStorage can override to off.
+  return true;
 }

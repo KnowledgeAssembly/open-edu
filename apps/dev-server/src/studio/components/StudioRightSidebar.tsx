@@ -1,17 +1,17 @@
 import { cn } from '@open-edu/design-system';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useStudioAssistant, useStudioChat } from '../ai';
 import { AssistantContextStrip } from './AssistantContextStrip';
 import { StudioAssistantChat } from './StudioAssistantChat';
 import { useTranslation } from '@open-edu/i18n';
 import { useAssistantShortcut } from '../hooks/useAssistantShortcut';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Plus, ChevronRight } from 'lucide-react';
 
 export function StudioRightSidebar() {
   const { t } = useTranslation();
   const { panelOpen, setPanelOpen, panelWidth, setPanelWidth } = useStudioAssistant();
-  const { sendMessage } = useStudioChat();
+  const { sendMessage, clearMessages } = useStudioChat();
   const panelOpenRef = useRef(panelOpen);
   panelOpenRef.current = panelOpen;
 
@@ -28,6 +28,10 @@ export function StudioRightSidebar() {
     ariaLabel: t('studio.assistant.label'),
     onWidthChange: setPanelWidth,
   });
+
+  // prefers-reduced-motion: avoid width transition when the user prefers
+  // reduced motion. The class is applied via a matchMedia listener.
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   if (!panelOpen) {
     return (
@@ -50,8 +54,11 @@ export function StudioRightSidebar() {
       role="complementary"
       aria-label={t('studio.assistant.label')}
       className={cn(
-        'border-outline-variant bg-surface relative flex shrink-0 flex-col overflow-hidden border-l transition-all duration-300',
-        isDragging ? 'transition-none' : '',
+        'border-outline-variant bg-surface relative flex shrink-0 flex-col overflow-hidden border-l',
+        'transition-[width] duration-200 ease-in-out',
+        isDragging && 'transition-none',
+        prefersReducedMotion && 'transition-none',
+        'shadow-sm',
       )}
       style={{ width }}
     >
@@ -61,16 +68,30 @@ export function StudioRightSidebar() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-outline-variant flex items-center justify-between border-b p-4">
+        <div className="border-outline-variant flex h-16 shrink-0 items-center justify-between px-4">
           <h3 className="text-on-surface text-sm font-semibold">{t('studio.assistant.label')}</h3>
-          <button
-            type="button"
-            onClick={() => setPanelOpen(false)}
-            className="text-on-surface-variant hover:text-on-surface text-xs"
-            aria-label={t('studio.assistant.close')}
-          >
-            {t('studio.assistant.close')}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                clearMessages();
+              }}
+              className="text-on-surface-variant hover:text-on-surface flex items-center gap-1 rounded-md p-1 text-[11px] transition-colors"
+              aria-label={t('studio.assistant.newConversation')}
+              title={t('studio.assistant.historyLabel')}
+            >
+              <Plus className="size-3.5" />
+              <span className="hidden sm:inline">{t('studio.assistant.newConversation')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPanelOpen(false)}
+              className="text-on-surface-variant hover:text-on-surface rounded-md p-1 transition-colors"
+              aria-label={t('studio.assistant.close')}
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
         </div>
 
         <AssistantContextStrip onSend={(msg) => sendMessage(msg)} />
@@ -81,4 +102,21 @@ export function StudioRightSidebar() {
       </div>
     </aside>
   );
+}
+
+/** Lightweight `useEffect`-based matchMedia listener. */
+function usePrefersReducedMotion(): boolean {
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  return matches;
 }
