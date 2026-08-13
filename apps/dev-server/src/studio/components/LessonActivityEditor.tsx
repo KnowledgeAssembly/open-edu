@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Button,
   Input,
@@ -11,10 +11,11 @@ import {
 import { MarkdownRenderer } from '@open-edu/runtime';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
-import { AiEditPanel } from './AiEditPanel.js';
 import { EditorCoachingPanel } from './EditorCoachingPanel.js';
+import { useEditorBridge, readTextareaSelection } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
+
 function syncHeading(content: string, title: string): string {
   const lines = content.split('\n');
   const firstHeading = lines.findIndex((line) => /^#{1,6}\s/.test(line));
@@ -32,21 +33,21 @@ export function LessonActivityEditor({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [baseline, setBaseline] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState('write');
+  const { register, unregister, setSelection } = useEditorBridge();
 
   useEffect(() => {
     let cancelled = false;
@@ -55,6 +56,7 @@ export function LessonActivityEditor({
       .then((file) => {
         if (cancelled) return;
         setBody(file.content);
+        setBaseline(file.content);
         const match = file.content.match(/^#{1,6}\s+(.+)$/m);
         setTitle(match?.[1]?.trim() ?? '');
       })
@@ -66,6 +68,28 @@ export function LessonActivityEditor({
     };
   }, [api, path, onError]);
 
+  const getCurrentContent = useCallback(() => body, [body]);
+  const isDirty = useCallback(() => body !== baseline, [body, baseline]);
+
+  useEffect(() => {
+    register({
+      getCurrentContent,
+      applyToEditor: (item: DraftItem) => {
+        setBody(item.content);
+        const match = item.content.match(/^#{1,6}\s+(.+)$/m);
+        setTitle(match?.[1]?.trim() ?? '');
+      },
+      isDirty,
+      kind: 'lesson',
+      path,
+      title,
+    });
+    return () => unregister();
+  }, [getCurrentContent, isDirty, path, register, title, unregister]);
+
+  const handleSelectionChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    setSelection(readTextareaSelection(e.currentTarget));
+  };
   const handleTitleChange = (next: string) => {
     setTitle(next);
     setBody(syncHeading(body, next));
@@ -75,6 +99,7 @@ export function LessonActivityEditor({
     setSaving(true);
     try {
       await api.writeFile(path, body);
+      setBaseline(body);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
       onSaved();
@@ -86,12 +111,6 @@ export function LessonActivityEditor({
   };
 
   const hasHeading = /^#{1,6}\s/m.test(body);
-
-  const applyDraft = (item: DraftItem) => {
-    setBody(item.content);
-    const match = item.content.match(/^#{1,6}\s+(.+)$/m);
-    setTitle(match?.[1]?.trim() ?? '');
-  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -128,6 +147,9 @@ export function LessonActivityEditor({
                   className="min-h-[320px] w-full"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
+                  onSelect={handleSelectionChange}
+                  onKeyUp={handleSelectionChange}
+                  onMouseUp={handleSelectionChange}
                   aria-label={t('studio.editor.lesson.bodyLabel')}
                 />
               </TabsContent>
@@ -170,14 +192,6 @@ export function LessonActivityEditor({
               t('studio.editor.coaching.lesson.addHeading'),
               t('studio.editor.coaching.lesson.oneIdea'),
             ]}
-          />
-          <AiEditPanel
-            api={api}
-            kind="lesson"
-            getCurrentContent={() => body}
-            onApply={applyDraft}
-            onApplyBatch={(items) => onApplyBatch?.(items)}
-            onError={onError}
           />
         </div>
       </div>

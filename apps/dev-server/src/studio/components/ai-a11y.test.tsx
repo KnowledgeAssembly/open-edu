@@ -8,7 +8,7 @@ import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { AiStartPanel } from './AiStartPanel';
 import { AiReviewView } from './AiReviewView';
 import { AiAddDialog } from './AiAddDialog';
-import { AiEditPanel } from './AiEditPanel';
+import { AssistantIntentRow } from './AssistantIntentRow';
 import { ItemDraftPreview } from './ItemDraftPreview';
 import type { StudioApi } from '../studioApi.js';
 import type { AiGenerateResult } from '../ai/types.js';
@@ -162,23 +162,9 @@ describe('AI Studio components — axe-core accessibility audits', () => {
     expect(violations).toHaveLength(0);
   });
 
-  it('AiEditPanel with intent chips is accessible', async () => {
-    const api = makeApi({
-      getAiStatus: vi.fn().mockResolvedValue({ available: true }),
-      generateItemEdit: vi.fn().mockResolvedValue({
-        ok: true,
-        items: [{ kind: 'lesson', title: 'L', content: '# L\n\nBody' }],
-      }),
-    });
+  it('AssistantIntentRow with lesson intents is accessible', async () => {
     const { container } = render(
-      <AiEditPanel
-        api={api}
-        kind="lesson"
-        getCurrentContent={() => '# Current\n\nBody'}
-        onApply={() => {}}
-        onApplyBatch={() => {}}
-        onError={() => {}}
-      />,
+      <AssistantIntentRow kind="lesson" onRunIntent={() => {}} running={false} />,
       { wrapper },
     );
     expect(await screen.findByRole('button', { name: 'Rewrite' })).toBeInTheDocument();

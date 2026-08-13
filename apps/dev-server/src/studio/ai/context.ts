@@ -44,6 +44,13 @@ export const studioContextSnapshotSchema = z.object({
     kind: ActivityKindSchema,
     title: z.string().optional(),
     contentExcerpt: z.string().optional(),
+    selection: z.object({
+      start: z.number(),
+      end: z.number(),
+      text: z.string(),
+    }).optional(),
+    isDirty: z.boolean().optional(),
+    validationIssues: z.array(z.string()).optional(),
   }).optional(),
 });
 

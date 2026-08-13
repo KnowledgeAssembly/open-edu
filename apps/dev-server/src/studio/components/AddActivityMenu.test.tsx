@@ -5,6 +5,12 @@ import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { AddActivityMenu } from './AddActivityMenu';
 
+vi.mock('../ai', () => ({
+  useStudioAssistant: () => ({
+    panelOpen: true,
+  }),
+}));
+
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -113,7 +119,7 @@ describe('AddActivityMenu', () => {
       ),
     );
     await user.click(screen.getByRole('button', { name: /add activity/i }));
-    await user.click(await screen.findByRole('menuitem', { name: /ai draft/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /add with ai/i }));
     expect(onAddAi).toHaveBeenCalledTimes(1);
   });
 

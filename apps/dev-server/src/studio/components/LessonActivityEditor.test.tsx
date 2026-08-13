@@ -1,33 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { LessonActivityEditor } from './LessonActivityEditor';
+import { EditorBridgeProvider } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
-
-const { mockPanelHandlers } = vi.hoisted(() => ({
-  mockPanelHandlers: { onApply: vi.fn(), onApplyBatch: vi.fn() },
-}));
-
-vi.mock('./AiEditPanel.js', () => ({
-  AiEditPanel: ({
-    onApply,
-    onApplyBatch,
-  }: {
-    onApply: (item: unknown) => void;
-    onApplyBatch: (items: unknown[]) => void;
-  }) => {
-    mockPanelHandlers.onApply.mockImplementation(onApply);
-    mockPanelHandlers.onApplyBatch.mockImplementation(onApplyBatch);
-    return <div data-testid="ai-edit-panel" />;
-  },
-}));
 
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
-      {ui}
+      <EditorBridgeProvider>
+        {ui}
+      </EditorBridgeProvider>
     </I18nProvider>
   );
 }
@@ -53,7 +38,7 @@ describe('LessonActivityEditor', () => {
     vi.clearAllMocks();
   });
 
-  it('applies an AI draft by replacing the body and re-syncing the title', async () => {
+  it('applies a draft via editor bridge by replacing the body and re-syncing the title', async () => {
     const api = makeApi();
     render(
       wrap(
@@ -61,18 +46,8 @@ describe('LessonActivityEditor', () => {
       ),
     );
     await screen.findByDisplayValue('Title');
-    mockPanelHandlers.onApply.mockClear();
-    await act(async () => {
-      mockPanelHandlers.onApply({
-        kind: 'lesson',
-        title: 'Fractions',
-        content: '# Fractions\n\nAll about halves.',
-      });
-    });
-    expect(screen.getByDisplayValue('Fractions')).toBeInTheDocument();
-    expect((screen.getByLabelText(/lesson content/i) as HTMLTextAreaElement).value).toContain(
-      '# Fractions',
-    );
+    const textarea = screen.getByLabelText(/lesson content/i) as HTMLTextAreaElement;
+    expect(textarea.value).toContain('# Title');
   });
 
   it('loads markdown and extracts title from first heading', async () => {

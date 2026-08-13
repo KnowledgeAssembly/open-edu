@@ -22,7 +22,6 @@ import {
 } from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
 import type { AiGenerateResult } from './ai/types.js';
-import type { DraftItem } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
 import {
   StudioAssistantProvider,
@@ -30,7 +29,8 @@ import {
   StudioContextBridge,
   useStudioAssistant,
 } from './ai';
-import { isAssistantEnabled } from './ai/assistantFlags.js';
+import { EditorBridgeProvider } from './ai/EditorBridgeContext';
+import { isAssistantEnabled } from './ai/assistantFlags';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
 
 export function StudioApp({
@@ -38,11 +38,13 @@ export function StudioApp({
   onModeChange,
   loadedPackage,
   bundleUnsupported = false,
+  _assistantEnabled,
 }: {
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
   loadedPackage: LoadedPackage | null;
   bundleUnsupported?: boolean;
+  _assistantEnabled?: boolean;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<StudioView>(() => readStudioView());
@@ -51,7 +53,8 @@ export function StudioApp({
   const [error, setError] = useState<string | null>(null);
   const [aiResult, setAiResult] = useState<AiGenerateResult | null>(() => readAiReview());
   const [aiAvailable, setAiAvailable] = useState(false);
-  const [assistantEnabled] = useState(() => isAssistantEnabled());
+  const [assistantEnabled] = useState(() => _assistantEnabled ?? isAssistantEnabled());
+  const [outlineRevision, setOutlineRevision] = useState(0);
   const api = useMemo(() => createStudioApi(), []);
 
   useEffect(() => {
@@ -113,43 +116,6 @@ export function StudioApp({
     window.setTimeout(() => setError(null), 4000);
   }, []);
 
-  const handleSaveDraftItems = useCallback(
-    (items: DraftItem[]) => {
-      void (async () => {
-        const stamp = Date.now();
-        const written: string[] = [];
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i]!;
-          const ext = item.kind === 'lesson' ? '.md' : '.json';
-          const path = `nodes/${item.kind}-${stamp + i}${ext}`;
-          try {
-            await api.writeFile(path, item.content);
-            written.push(path);
-          } catch (err) {
-            handleError(
-              `${err instanceof Error ? err.message : String(err)} (${written.length} of ${
-                items.length
-              } saved)`,
-            );
-            return;
-          }
-        }
-        try {
-          const outline = await api.getOutline();
-          await api.saveOutlineOrder([
-            ...outline.activities.map((activity) => activity.path),
-            ...written,
-          ]);
-        } catch (err) {
-          handleError(err instanceof Error ? err.message : t('studio.errors.generic'));
-          return;
-        }
-        handleNavigate('outline');
-      })();
-    },
-    [api, handleError, handleNavigate, t],
-  );
-
   if (bundleUnsupported) {
     return (
       <div className="flex h-screen flex-col">
@@ -188,6 +154,7 @@ export function StudioApp({
     case 'outline':
       content = (
         <OutlineView
+          key={outlineRevision}
           api={api}
           onEdit={handleEdit}
           onError={handleError}
@@ -204,7 +171,6 @@ export function StudioApp({
           onSaved={() => {}}
           onError={handleError}
           onCancel={() => handleNavigate('outline')}
-          onApplyBatch={handleSaveDraftItems}
         />
       ) : null;
       break;
@@ -277,60 +243,47 @@ export function StudioApp({
       break;
   }
 
-  if (!assistantEnabled) {
-    return (
-      <div className="flex h-screen flex-col">
-        <StudioChrome
-          mode={mode}
-          onModeChange={onModeChange}
-          onNavigate={handleNavigate}
-          courseTitle={courseTitle}
-          view={view}
-          activityLabel={selectedPath?.split('/').pop()}
-        />
-        <StudioLayout className="bg-surface min-h-0 flex-1 overflow-hidden">
-          <div key={view} className="studio-view-enter min-h-0 flex-1">
-            {content}
-            {error ? (
-              <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
-                {error}
-              </div>
-            ) : null}
-          </div>
-        </StudioLayout>
-      </div>
-    );
-  }
-
   return (
     <StudioAssistantProvider>
-      <StudioChatProvider courseId={loadedPackage?.manifest.id}>
-        <StudioContextBridge
-          view={view}
-          selectedPath={selectedPath}
-          loadedPackage={loadedPackage}
-          aiAvailable={aiAvailable}
-          locale="en"
+      <EditorBridgeProvider>
+        <StudioChatProvider
+          courseId={loadedPackage?.manifest.id}
           api={api}
-        />
-        <StudioAppInner
-          mode={mode}
-          onModeChange={onModeChange}
-          handleNavigate={handleNavigate}
-          courseTitle={courseTitle}
-          view={view}
-          selectedPath={selectedPath}
+          onOpenPath={handleEdit}
+          onError={handleError}
+          onOutlineChanged={() => {
+            setOutlineRevision((rev) => rev + 1);
+            handleNavigate('outline');
+          }}
         >
-          <div key={view} className="studio-view-enter min-h-0 flex-1">
-            {content}
-            {error ? (
-              <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
-                {error}
-              </div>
-            ) : null}
-          </div>
-        </StudioAppInner>
-      </StudioChatProvider>
+          <StudioContextBridge
+            view={view}
+            selectedPath={selectedPath}
+            loadedPackage={loadedPackage}
+            aiAvailable={aiAvailable}
+            locale="en"
+            api={api}
+          />
+          <StudioAppInner
+            mode={mode}
+            onModeChange={onModeChange}
+            handleNavigate={handleNavigate}
+            courseTitle={courseTitle}
+            view={view}
+            selectedPath={selectedPath}
+            assistantEnabled={assistantEnabled}
+          >
+            <div key={view} className="studio-view-enter min-h-0 flex-1">
+              {content}
+              {error ? (
+                <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
+                  {error}
+                </div>
+              ) : null}
+            </div>
+          </StudioAppInner>
+        </StudioChatProvider>
+      </EditorBridgeProvider>
     </StudioAssistantProvider>
   );
 }
@@ -342,6 +295,7 @@ function StudioAppInner({
   courseTitle,
   view,
   selectedPath,
+  assistantEnabled,
   children,
 }: {
   mode: StudioMode;
@@ -350,6 +304,7 @@ function StudioAppInner({
   courseTitle?: string;
   view: StudioView;
   selectedPath?: string | null;
+  assistantEnabled?: boolean;
   children: ReactNode;
 }) {
   const { panelOpen, setPanelOpen } = useStudioAssistant();
@@ -364,11 +319,11 @@ function StudioAppInner({
         view={view}
         activityLabel={selectedPath?.split('/').pop()}
         panelOpen={panelOpen}
-        setPanelOpen={setPanelOpen}
+        setPanelOpen={assistantEnabled ? setPanelOpen : undefined}
       />
       <StudioLayout
         className="bg-surface min-h-0 flex-1 overflow-hidden"
-        sidebar={<StudioRightSidebar />}
+        sidebar={assistantEnabled ? <StudioRightSidebar /> : undefined}
       >
         {children}
       </StudioLayout>

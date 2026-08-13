@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button, Input, RadioGroup, RadioGroupItem, Textarea } from '@open-edu/design-system';
 import { Check, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
-import { AiEditPanel } from './AiEditPanel.js';
 import { EditorCoachingPanel } from './EditorCoachingPanel.js';
+import { useEditorBridge, readTextareaSelection } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { DraftItem } from '../ai/types.js';
 
@@ -42,14 +42,12 @@ export function QuizActivityEditor({
   onSaved,
   onError,
   onCancel,
-  onApplyBatch,
 }: {
   api: StudioApi;
   path: string;
   onSaved: () => void;
   onError: (message: string) => void;
   onCancel?: () => void;
-  onApplyBatch?: (items: DraftItem[]) => void;
 }) {
   const { t } = useTranslation();
   const [question, setQuestion] = useState('');
@@ -58,9 +56,11 @@ export function QuizActivityEditor({
     freshOption('b', ''),
   ]);
   const [correctIndex, setCorrectIndex] = useState<number | null>(0);
+  const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { register, unregister, setSelection } = useEditorBridge();
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +83,7 @@ export function QuizActivityEditor({
             const correct = parsedOptions.findIndex((o) => o.correct === true);
             setCorrectIndex(correct >= 0 ? correct : null);
           }
+          setBaseline(file.content);
         } catch {
           // keep defaults on unparseable content
         }
@@ -96,6 +97,44 @@ export function QuizActivityEditor({
     };
   }, [api, path, onError]);
 
+  const getCurrentContent = useCallback(
+    () => serializeQuiz(question, options, correctIndex),
+    [question, options, correctIndex],
+  );
+  const isDirty = useCallback(
+    () => getCurrentContent() !== baseline,
+    [getCurrentContent, baseline],
+  );
+
+  useEffect(() => {
+    register({
+      getCurrentContent,
+      applyToEditor: (item: DraftItem) => {
+        try {
+          const parsed = JSON.parse(item.content) as {
+            question?: string;
+            options?: Array<{ text?: string; correct?: boolean }>;
+          };
+          setQuestion(parsed.question ?? '');
+          const draftOptions = parsed.options ?? [];
+          setOptions(draftOptions.map((option) => freshOption('opt', option.text ?? '')));
+          const correct = draftOptions.findIndex((option) => option.correct === true);
+          setCorrectIndex(correct >= 0 ? correct : null);
+        } catch {
+          // ignore unparseable drafts
+        }
+      },
+      isDirty,
+      kind: 'quiz',
+      path,
+      title: question,
+    });
+    return () => unregister();
+  }, [getCurrentContent, isDirty, path, register, question, unregister]);
+
+  const handleSelectionChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    setSelection(readTextareaSelection(e.currentTarget));
+  };
   const handleAddOption = () => {
     setOptions((prev) => [...prev, freshOption('opt', '')]);
   };
@@ -113,6 +152,7 @@ export function QuizActivityEditor({
     try {
       const content = serializeQuiz(question, options, correctIndex);
       await api.writeFile(path, content);
+      setBaseline(content);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
       onSaved();
@@ -130,22 +170,6 @@ export function QuizActivityEditor({
       </div>
     );
   }
-
-  const applyDraft = (item: DraftItem) => {
-    try {
-      const parsed = JSON.parse(item.content) as {
-        question?: string;
-        options?: Array<{ text?: string; correct?: boolean }>;
-      };
-      setQuestion(parsed.question ?? '');
-      const draftOptions = parsed.options ?? [];
-      setOptions(draftOptions.map((option) => freshOption('opt', option.text ?? '')));
-      const correct = draftOptions.findIndex((option) => option.correct === true);
-      setCorrectIndex(correct >= 0 ? correct : null);
-    } catch {
-      // ignore unparseable drafts
-    }
-  };
 
   const hasCorrect = correctIndex !== null;
   const minOptions = options.length >= 2;
@@ -168,6 +192,9 @@ export function QuizActivityEditor({
               className="mt-2"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              onSelect={handleSelectionChange}
+              onKeyUp={handleSelectionChange}
+              onMouseUp={handleSelectionChange}
               aria-label={t('studio.editor.quiz.questionLabel')}
             />
           </label>
@@ -248,14 +275,6 @@ export function QuizActivityEditor({
               },
             ]}
             tips={[t('studio.editor.coaching.quiz.questionTip')]}
-          />
-          <AiEditPanel
-            api={api}
-            kind="quiz"
-            getCurrentContent={() => serializeQuiz(question, options, correctIndex)}
-            onApply={applyDraft}
-            onApplyBatch={(items) => onApplyBatch?.(items)}
-            onError={onError}
           />
         </div>
       </div>

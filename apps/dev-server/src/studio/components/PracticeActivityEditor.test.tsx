@@ -1,29 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { PracticeActivityEditor } from './PracticeActivityEditor';
+import { EditorBridgeProvider } from '../ai/EditorBridgeContext';
 import type { StudioApi } from '../studioApi.js';
 import type { CuratedWidget } from '../widgets/curatedCatalog.js';
-
-const { mockPanelHandlers } = vi.hoisted(() => ({
-  mockPanelHandlers: { onApply: vi.fn(), onApplyBatch: vi.fn() },
-}));
-
-vi.mock('./AiEditPanel.js', () => ({
-  AiEditPanel: ({
-    onApply,
-    onApplyBatch,
-  }: {
-    onApply: (item: unknown) => void;
-    onApplyBatch: (items: unknown[]) => void;
-  }) => {
-    mockPanelHandlers.onApply.mockImplementation(onApply);
-    mockPanelHandlers.onApplyBatch.mockImplementation(onApplyBatch);
-    return <div data-testid="ai-edit-panel" />;
-  },
-}));
 
 vi.mock('../../editor/WidgetPreviewPanel.js', () => ({
   WidgetPreviewPanel: () => <div data-testid="preview" />,
@@ -77,10 +60,13 @@ vi.mock('../widgets/curatedCatalog.js', () => ({
         ? mockCatalog.matching
         : undefined,
 }));
+
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
-      {ui}
+      <EditorBridgeProvider>
+        {ui}
+      </EditorBridgeProvider>
     </I18nProvider>
   );
 }
@@ -151,30 +137,6 @@ describe('PracticeActivityEditor', () => {
     expect(screen.getByText('Live preview')).toBeInTheDocument();
     expect(screen.getByTestId('preview')).toBeInTheDocument();
     expect(screen.queryByText(/fix the highlighted settings/i)).not.toBeInTheDocument();
-  });
-
-  it('applies an AI draft by restoring the widget and config', async () => {
-    renderEditor(validNodeContent);
-    await screen.findByDisplayValue('Planets quiz');
-    mockPanelHandlers.onApply.mockClear();
-    await act(async () => {
-      mockPanelHandlers.onApply({
-        kind: 'practice',
-        title: 'Updated practice',
-        content: JSON.stringify({
-          type: 'exercise',
-          title: 'Updated practice',
-          widget: 'core.multiple-choice',
-          config: {
-            questions: [{ question: 'New?', options: ['A', 'B'], correctIndex: 0 }],
-            interactive: false,
-          },
-        }),
-      });
-    });
-    expect(screen.getByDisplayValue('Updated practice')).toBeInTheDocument();
-    expect(screen.getByText('Practice settings')).toBeInTheDocument();
-    expect(screen.getByText('Questions')).toBeInTheDocument();
   });
 
   it('saves a serialized exercise node and calls onSaved', async () => {

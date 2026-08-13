@@ -7,6 +7,7 @@ import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import { StudioAssistantProvider, useStudioAssistant } from '../ai/StudioAssistantProvider';
 import { StudioChatProvider } from '../ai/StudioChatProvider';
+import { EditorBridgeProvider } from '../ai/EditorBridgeContext';
 import { StudioRightSidebar } from './StudioRightSidebar';
 import type { StudioContextSnapshot } from '../ai/context';
 
@@ -26,6 +27,9 @@ vi.mock('../ai', async () => {
       regenerate: vi.fn(),
       clearError: vi.fn(),
       clearMessages: vi.fn(),
+      appendAssistantNote: vi.fn(),
+      runIntent: vi.fn(),
+      api: null,
     }),
   };
 });
@@ -63,9 +67,11 @@ function wrap(ui: React.ReactElement, snapshot: StudioContextSnapshot = defaultS
   return render(
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
       <StudioAssistantProvider>
-        <StudioChatProvider courseId="course-1">
-          <ContextSeeder snapshot={snapshot}>{ui}</ContextSeeder>
-        </StudioChatProvider>
+        <EditorBridgeProvider>
+          <StudioChatProvider courseId="course-1">
+            <ContextSeeder snapshot={snapshot}>{ui}</ContextSeeder>
+          </StudioChatProvider>
+        </EditorBridgeProvider>
       </StudioAssistantProvider>
     </I18nProvider>,
   );

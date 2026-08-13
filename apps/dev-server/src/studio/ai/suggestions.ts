@@ -17,9 +17,27 @@ export function resolveSuggestions(
     return [];
   }
 
-  const { view, course } = ctx;
+  const { view, course, activity } = ctx;
+  const chips: SuggestionChip[] = [];
+
+  if (view === 'edit-activity' && activity?.selection) {
+    chips.push(
+      {
+        id: 'rewrite_selection',
+        label: t('studio.assistant.suggest.rewrite_selection'),
+        action: { type: 'send_message', message: `Rewrite this: "${activity.selection.text}"` },
+      },
+      {
+        id: 'simplify_selection',
+        label: t('studio.assistant.suggest.simplify_selection'),
+        action: { type: 'send_message', message: `Simplify this: "${activity.selection.text}"` },
+      },
+    );
+    return chips;
+  }
+
   const suggestions: Record<string, SuggestionChip[]> = {
-    home: course 
+    home: course
       ? [
           { id: 'summarize_course', label: t('studio.assistant.suggest.summarize_course'), action: { type: 'send_message', message: 'Summarize this course' } },
           { id: 'improve_outline', label: t('studio.assistant.suggest.improve_outline'), action: { type: 'send_message', message: 'How can I improve the outline?' } },
