@@ -1,4 +1,4 @@
-import type { AiGenerateResult } from './types.js';
+import type { AiGenerateResult, CourseDraftResult } from './types.js';
 
 const AI_REVIEW_KEY = 'openedu.studio.ai.review';
 
@@ -36,5 +36,30 @@ export function clearAiReview(): void {
     sessionStorage.removeItem(AI_REVIEW_KEY);
   } catch {
     // storage unavailable
+  }
+}
+
+/**
+ * Migrate a legacy sessionStorage review result into a CourseDraftResult
+ * if the assistant is enabled. Returns null if there's nothing to migrate
+ * or the review is too old (past TTL).
+ */
+export function migrateLegacyReview(): CourseDraftResult | null {
+  try {
+    const review = readAiReview();
+    if (!review) return null;
+    clearAiReview();
+    if (!review.success) return null;
+    return {
+      success: review.success,
+      title: review.title,
+      outlinePreview: review.outlinePreview,
+      quality: review.quality,
+      draftId: '',
+      error: review.error,
+      code: review.code,
+    };
+  } catch {
+    return null;
   }
 }

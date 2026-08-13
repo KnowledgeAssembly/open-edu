@@ -1,17 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
-import { Send, Square, RotateCcw } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Send, Square, RotateCcw, Paperclip } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import { useStudioAssistant, useStudioChat } from '../ai';
 import { applyDraft, applyDraftBatch } from '../ai/applyDraft';
+import { resolvePostCommitSuggestions } from '../ai/suggestions';
+import { resolveSpecExtension, SPEC_FILE_ACCEPT } from '../ai/specFile';
 import { StudioAssistantMessage } from './StudioAssistantMessage';
 import { AssistantIntentRow } from './AssistantIntentRow';
 import { useEditorBridge } from '../ai/EditorBridgeContext';
-import type { DraftApplyMode } from '../ai/StudioAssistantProvider';
+import type { DraftApplyMode, SpecAttachPreset } from '../ai/StudioAssistantProvider';
 import type { DraftItem, ItemIntent, ItemIntentParams } from '../ai/types';
 
 export function StudioAssistantChat() {
   const { t } = useTranslation();
-  const { context, pendingDrafts, setPendingDrafts } = useStudioAssistant();
+  const {
+    context,
+    pendingDrafts,
+    setPendingDrafts,
+    setEphemeralSuggestions,
+    setLastCourseQuality,
+  } = useStudioAssistant();
   const {
     messages,
     sendMessage,
@@ -21,6 +29,7 @@ export function StudioAssistantChat() {
     clearError,
     runIntent,
     appendAssistantNote,
+    ingestCourseDraft,
     api,
     onOpenPath,
     onError,
@@ -30,7 +39,10 @@ export function StudioAssistantChat() {
   const [input, setInput] = useState('');
   const [intentRunning, setIntentRunning] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [courseDraftAccepting, setCourseDraftAccepting] = useState(false);
+  const [attachingSpec, setAttachingSpec] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (listRef.current) {
@@ -49,6 +61,40 @@ export function StudioAssistantChat() {
     return () => window.removeEventListener('studio:assistant:preset', handler as EventListener);
   }, [sendMessage]);
 
+  const uploadSpecFile = useCallback(
+    async (spec: SpecAttachPreset) => {
+      if (!api || attachingSpec) return;
+      clearError();
+      setAttachingSpec(true);
+      try {
+        const result = await api.uploadSpecDraft(spec.content, spec.ext);
+        ingestCourseDraft(
+          t('studio.assistant.chat.specAttached', { name: spec.name }),
+          result,
+          t('studio.assistant.chat.courseDraftReadySpec', { name: spec.name }),
+        );
+      } catch (err) {
+        onError?.(err instanceof Error ? err.message : t('studio.ai.uploadError'));
+      } finally {
+        setAttachingSpec(false);
+      }
+    },
+    [api, attachingSpec, clearError, ingestCourseDraft, onError, t],
+  );
+
+  const uploadSpecFileRef = useRef(uploadSpecFile);
+  uploadSpecFileRef.current = uploadSpecFile;
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<SpecAttachPreset>).detail;
+      if (!detail?.content || !detail.ext) return;
+      void uploadSpecFileRef.current(detail);
+    };
+    window.addEventListener('studio:assistant:spec', handler);
+    return () => window.removeEventListener('studio:assistant:spec', handler);
+  }, []);
+
   const aiAvailable = context?.aiAvailable !== false;
 
   const handleSend = () => {
@@ -63,6 +109,19 @@ export function StudioAssistantChat() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleSpecFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const ext = resolveSpecExtension(file.name);
+    if (!ext) {
+      onError?.(t('studio.ai.specInvalid'));
+      return;
+    }
+    const content = await file.text();
+    await uploadSpecFile({ name: file.name, content, ext });
   };
 
   const resolveApplyMode = (_item: DraftItem, siblings: DraftItem[]): DraftApplyMode => {
@@ -89,12 +148,9 @@ export function StudioAssistantChat() {
         appendAssistantNote(t('studio.assistant.draft.appliedOutline'));
         onOutlineChanged?.();
       } else {
-        const { path } = await applyDraft(api, item, { mode: 'file' });
+        await applyDraft(api, item, { mode: 'file' });
         appendAssistantNote(t('studio.assistant.draft.appliedOutline'));
         onOutlineChanged?.();
-        if (path && onOpenPath) {
-          // Keep optional — Open button handles explicit navigation
-        }
       }
 
       setPendingDrafts(null);
@@ -131,6 +187,58 @@ export function StudioAssistantChat() {
     }
   };
 
+  const handleAcceptCourseDraft = async (force: boolean) => {
+    if (!api || courseDraftAccepting) return;
+    setCourseDraftAccepting(true);
+    try {
+      const lastAssistantMsg = [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
+      const courseDraft = lastAssistantMsg?.metadata?.courseDraft;
+      if (!courseDraft || !courseDraft.draftId) {
+        appendAssistantNote(
+          t('studio.assistant.courseDraft.failed', {
+            error: t('studio.assistant.courseDraft.noDraft'),
+          }),
+        );
+        return;
+      }
+      const result = await api.commitCourseDraft(courseDraft.draftId, force);
+      if (result.success) {
+        appendAssistantNote(t('studio.assistant.courseDraft.accepted'));
+        setLastCourseQuality(courseDraft.quality);
+        setEphemeralSuggestions(resolvePostCommitSuggestions(t, courseDraft.quality));
+        onOutlineChanged?.();
+      } else {
+        appendAssistantNote(
+          t('studio.assistant.courseDraft.failed', {
+            error: result.error || t('studio.assistant.courseDraft.unknownError'),
+          }),
+        );
+      }
+    } catch (err) {
+      onError?.(err instanceof Error ? err.message : t('studio.errors.generic'));
+    } finally {
+      setCourseDraftAccepting(false);
+    }
+  };
+
+  const handleDiscardCourseDraft = async () => {
+    const lastAssistantMsg = [...messages]
+      .reverse()
+      .find((m) => m.role === 'assistant' && m.metadata?.courseDraft);
+    const courseDraft = lastAssistantMsg?.metadata?.courseDraft;
+    if (api && courseDraft?.draftId) {
+      try {
+        await api.discardCourseDraft(courseDraft.draftId);
+      } catch {
+        // TTL cleanup still applies if discard endpoint fails
+      }
+    }
+    setEphemeralSuggestions(null);
+    appendAssistantNote(t('studio.assistant.courseDraft.discarded'));
+  };
+
   const handleIntent = async (intent: ItemIntent, params?: ItemIntentParams) => {
     if (!currentEditor || intentRunning) return;
     if (currentEditor.kind !== 'lesson' && currentEditor.kind !== 'quiz' && currentEditor.kind !== 'practice') {
@@ -161,6 +269,8 @@ export function StudioAssistantChat() {
       ? currentEditor!.kind
       : null;
 
+  const busy = status === 'loading' || attachingSpec;
+
   return (
     <div className="flex h-full flex-col">
       <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto p-4">
@@ -184,14 +294,20 @@ export function StudioAssistantChat() {
                   ? (item) => void handleOpenDraft(item)
                   : undefined
               }
+              onAcceptCourseDraft={(force) => void handleAcceptCourseDraft(force)}
+              onDiscardCourseDraft={() => void handleDiscardCourseDraft()}
               isDirty={currentEditor?.isDirty()}
               applying={applying}
+              courseDraftAccepting={courseDraftAccepting}
+              packageHasContent={(context?.course?.activityCount ?? 0) > 0}
             />
           ))
         )}
-        {status === 'loading' && (
+        {(status === 'loading' || attachingSpec) && (
           <div className="text-on-surface-variant mr-auto animate-pulse text-xs">
-            {t('studio.assistant.thinking')}
+            {attachingSpec
+              ? t('studio.assistant.attachingSpec')
+              : t('studio.assistant.thinking')}
           </div>
         )}
         {status === 'error' && (
@@ -212,7 +328,7 @@ export function StudioAssistantChat() {
         <AssistantIntentRow
           kind={editKind}
           onRunIntent={handleIntent}
-          running={intentRunning || status === 'loading' || applying}
+          running={intentRunning || busy || applying}
         />
       ) : null}
 
@@ -223,17 +339,35 @@ export function StudioAssistantChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('studio.assistant.placeholder')}
-            className="border-outline-variant bg-surface-container focus:ring-primary text-on-surface w-full resize-none rounded-md border p-2 pr-10 text-sm focus:outline-none focus:ring-1"
+            className="border-outline-variant bg-surface-container focus:ring-primary text-on-surface w-full resize-none rounded-md border p-2 pr-20 text-sm focus:outline-none focus:ring-1"
             rows={3}
-            disabled={status === 'loading' || !aiAvailable}
+            disabled={busy || !aiAvailable}
           />
           <div className="absolute bottom-2 right-2 flex gap-1">
-            {status === 'loading' ? (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={SPEC_FILE_ACCEPT}
+              className="hidden"
+              aria-label={t('studio.assistant.attachSpec')}
+              onChange={(e) => void handleSpecFileChange(e)}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-on-surface-variant hover:text-on-surface p-1"
+              disabled={busy || !aiAvailable || !api}
+              aria-label={t('studio.assistant.attachSpec')}
+            >
+              <Paperclip className="size-4" />
+            </button>
+            {busy ? (
               <button
                 type="button"
                 onClick={stop}
                 className="text-on-surface-variant hover:text-on-surface p-1"
                 aria-label={t('studio.assistant.chat.stop')}
+                disabled={attachingSpec}
               >
                 <Square className="size-4" />
               </button>
@@ -250,7 +384,7 @@ export function StudioAssistantChat() {
             )}
           </div>
         </div>
-        {messages.length > 0 && status === 'idle' && (
+        {messages.length > 0 && status === 'idle' && !attachingSpec && (
           <div className="mt-2 flex justify-end">
             <button
               type="button"

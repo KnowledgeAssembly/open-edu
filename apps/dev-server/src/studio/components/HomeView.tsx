@@ -15,7 +15,6 @@ import { listRecentCourses } from '../recentCourses.js';
 import { AiStartPanel } from './AiStartPanel.js';
 import { HomeTemplateGallery } from './HomeTemplateGallery.js';
 import type { StudioApi } from '../studioApi.js';
-import type { AiGenerateResult } from '../ai/types.js';
 
 export function HomeView({
   api,
@@ -23,7 +22,6 @@ export function HomeView({
   onError,
   courseTitle,
   onOpenCurrent,
-  onAiGenerated,
   onOpenLibrary,
 }: {
   api: StudioApi;
@@ -31,7 +29,6 @@ export function HomeView({
   onError: (message: string) => void;
   courseTitle?: string;
   onOpenCurrent: () => void;
-  onAiGenerated: (result: AiGenerateResult) => void;
   onOpenLibrary: () => void;
 }) {
   const { t } = useTranslation();
@@ -80,7 +77,7 @@ export function HomeView({
         <h2 id="studio-ai-heading" className="text-h2 text-on-surface mb-4">
           {t('studio.home.aiHeading')}
         </h2>
-        <AiStartPanel api={api} onGenerated={onAiGenerated} onError={onError} />
+        <AiStartPanel onError={onError} />
       </section>
 
       <section aria-labelledby="studio-recent-heading">

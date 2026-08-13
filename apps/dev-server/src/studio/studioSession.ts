@@ -9,7 +9,6 @@ const VALID_VIEWS: StudioView[] = [
   'edit-activity',
   'preview',
   'share',
-  'ai-review',
   'library',
   'unit-builder',
 ];

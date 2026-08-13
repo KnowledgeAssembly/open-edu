@@ -149,17 +149,17 @@ describe('studioApi client', () => {
     });
   });
 
-  it('generateFromNotes posts notes to the AI generate endpoint', async () => {
+  it('generateFromNotes posts notes to the draft endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
         { status: 200 },
       ),
     );
     const api = createStudioApi();
     const result = await api.generateFromNotes('Teach fractions', true);
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(url).toBe('/api/studio/ai/generate');
+    expect(url).toBe('/api/studio/ai/generate-draft');
     expect(init?.method).toBe('POST');
     expect(JSON.parse(init?.body as string)).toEqual({ notes: 'Teach fractions', force: true });
     expect(result.success).toBe(true);
@@ -168,28 +168,28 @@ describe('studioApi client', () => {
   it('generateFromNotes omits force when not supplied', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
         { status: 200 },
       ),
     );
     const api = createStudioApi();
     await api.generateFromNotes('Teach fractions');
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(url).toBe('/api/studio/ai/generate');
+    expect(url).toBe('/api/studio/ai/generate-draft');
     expect(JSON.parse(init?.body as string)).toEqual({ notes: 'Teach fractions' });
   });
 
-  it('uploadSpec posts spec + specExt to the AI generate endpoint', async () => {
+  it('uploadSpec posts spec + specExt to the draft endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
         { status: 200 },
       ),
     );
     const api = createStudioApi();
     const result = await api.uploadSpec('{"format":"openedu-course-spec"}', '.json', true);
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(url).toBe('/api/studio/ai/generate');
+    expect(url).toBe('/api/studio/ai/generate-draft');
     expect(init?.method).toBe('POST');
     expect(JSON.parse(init?.body as string)).toEqual({
       spec: '{"format":"openedu-course-spec"}',
@@ -202,18 +202,34 @@ describe('studioApi client', () => {
   it('uploadSpec omits force when not supplied', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions' }),
+        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
         { status: 200 },
       ),
     );
     const api = createStudioApi();
     await api.uploadSpec('# My Course\n\nContent', '.md');
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(url).toBe('/api/studio/ai/generate');
+    expect(url).toBe('/api/studio/ai/generate-draft');
     expect(JSON.parse(init?.body as string)).toEqual({
       spec: '# My Course\n\nContent',
       specExt: '.md',
     });
+  });
+
+  it('commitCourseDraft posts draftId to the commit endpoint', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ success: true, title: 'Fractions' }),
+        { status: 200 },
+      ),
+    );
+    const api = createStudioApi();
+    const result = await api.commitCourseDraft('draft-abc', true);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/commit');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({ draftId: 'draft-abc', force: true });
+    expect(result.success).toBe(true);
   });
 
   it('getLibrary hits the library root and returns workspace + entries', async () => {

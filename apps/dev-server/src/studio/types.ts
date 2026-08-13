@@ -6,7 +6,6 @@ export type StudioView =
   | 'edit-activity'
   | 'preview'
   | 'share'
-  | 'ai-review'
   | 'library'
   | 'unit-builder';
 

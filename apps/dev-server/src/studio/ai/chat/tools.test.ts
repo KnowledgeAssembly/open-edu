@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { draftActivity } from './tools';
+import { draftActivity, generateCourseDraftTool } from './tools';
 
 vi.mock('../itemGenerate', () => ({
   generateItemAdd: vi.fn(),
@@ -10,6 +10,10 @@ vi.mock('../itemGenerate', () => ({
       super(reason);
     }
   },
+}));
+
+vi.mock('../generateCourse', () => ({
+  generateCourseDraft: vi.fn(),
 }));
 
 describe('draftActivity', () => {
@@ -96,6 +100,87 @@ describe('draftActivity', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toContain('currentContent');
+    }
+  });
+});
+
+describe('generateCourseDraftTool', () => {
+  it('passes notes source through to generateCourseDraft', async () => {
+    const { generateCourseDraft } = await import('../generateCourse');
+    vi.mocked(generateCourseDraft).mockResolvedValueOnce({
+      success: true,
+      draftId: 'draft-1',
+      title: 'Notes Course',
+      outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
+      quality: [],
+    });
+
+    const completeText = vi.fn();
+    const result = await generateCourseDraftTool({
+      notes: 'Build a course about fractions',
+      packageDir: '/test/course',
+      completeText,
+    });
+
+    expect(generateCourseDraft).toHaveBeenCalledWith({
+      source: {
+        kind: 'notes',
+        notes: 'Build a course about fractions',
+        completeText,
+      },
+      packageDir: '/test/course',
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it('passes spec + specExt through to generateCourseDraft', async () => {
+    const { generateCourseDraft } = await import('../generateCourse');
+    vi.mocked(generateCourseDraft).mockResolvedValueOnce({
+      success: true,
+      draftId: 'draft-2',
+      title: 'Spec Course',
+      outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
+      quality: [],
+    });
+
+    const result = await generateCourseDraftTool({
+      spec: '{"format":"openedu-course-spec"}',
+      specExt: '.json',
+      packageDir: '/test/course',
+      completeText: vi.fn(),
+    });
+
+    expect(generateCourseDraft).toHaveBeenCalledWith({
+      source: {
+        kind: 'spec',
+        spec: '{"format":"openedu-course-spec"}',
+        extension: '.json',
+      },
+      packageDir: '/test/course',
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it('maps notes-too-short failures to teacher-readable errors', async () => {
+    const { generateCourseDraft } = await import('../generateCourse');
+    vi.mocked(generateCourseDraft).mockResolvedValueOnce({
+      success: false,
+      draftId: '',
+      outlinePreview: [],
+      quality: [],
+      code: 'notes-too-short',
+      error: 'too short',
+    });
+
+    const result = await generateCourseDraftTool({
+      notes: 'hi',
+      packageDir: '/test/course',
+      completeText: vi.fn(),
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/too short/i);
     }
   });
 });

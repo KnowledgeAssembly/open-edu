@@ -8,7 +8,6 @@ export const StudioViewSchema = z.enum([
   'share',
   'library',
   'unit-builder',
-  'ai-review',
 ]);
 
 export type StudioView = z.infer<typeof StudioViewSchema>;
@@ -52,6 +51,16 @@ export const studioContextSnapshotSchema = z.object({
     isDirty: z.boolean().optional(),
     validationIssues: z.array(z.string()).optional(),
   }).optional(),
+  lastCourseDraftQuality: z
+    .array(
+      z.object({
+        id: z.string(),
+        labelKey: z.string(),
+        passed: z.boolean(),
+        detail: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export type StudioContextSnapshot = z.infer<typeof studioContextSnapshotSchema>;

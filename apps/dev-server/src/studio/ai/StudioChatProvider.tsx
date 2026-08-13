@@ -11,7 +11,7 @@ import { useTranslation } from '@open-edu/i18n';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
 import type { DraftApplyMode } from './StudioAssistantProvider';
-import type { DraftItem, ItemIntent, ItemIntentParams } from './types';
+import type { DraftItem, CourseDraftResult, ItemIntent, ItemIntentParams } from './types';
 import type { StudioApi } from '../studioApi';
 
 interface ChatMessage {
@@ -19,8 +19,9 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   metadata?: {
-    mode?: 'explain' | 'draft';
+    mode?: 'explain' | 'draft' | 'course_draft';
     drafts?: DraftItem[];
+    courseDraft?: CourseDraftResult;
     applyMode?: DraftApplyMode;
   };
 }
@@ -34,6 +35,7 @@ interface StudioChatContextType {
   clearError: () => void;
   clearMessages: () => void;
   appendAssistantNote: (content: string) => void;
+  ingestCourseDraft: (userContent: string, courseDraft: CourseDraftResult, readyMessage: string) => void;
   runIntent: (
     kind: 'lesson' | 'quiz' | 'practice',
     intent: ItemIntent,
@@ -68,9 +70,17 @@ export function StudioChatProvider({
   onOutlineChanged?: () => void;
 }) {
   const { t } = useTranslation();
-  const { context, setPendingDrafts } = useStudioAssistant();
+  const {
+    context,
+    setPendingDrafts,
+    lastCourseQuality,
+    setLastCourseQuality,
+    setEphemeralSuggestions,
+  } = useStudioAssistant();
   const contextRef = useRef(context);
   contextRef.current = context;
+  const lastCourseQualityRef = useRef(lastCourseQuality);
+  lastCourseQualityRef.current = lastCourseQuality;
 
   const courseKey = courseId || 'default';
   const [conversationId, setConversationIdState] = useState(() => {
@@ -110,6 +120,36 @@ export function StudioChatProvider({
     setMessages(next);
   }, []);
 
+  const ingestCourseDraft = useCallback(
+    (userContent: string, courseDraft: CourseDraftResult, readyMessage: string) => {
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: userContent,
+      };
+      const assistantMsg: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: courseDraft.success
+          ? readyMessage
+          : t('studio.assistant.chat.courseDraftFailed', {
+              error: courseDraft.error || t('studio.assistant.courseDraft.unknownError'),
+            }),
+        metadata: courseDraft.success
+          ? { mode: 'course_draft', courseDraft }
+          : undefined,
+      };
+      const next = [...messagesRef.current, userMsg, assistantMsg];
+      messagesRef.current = next;
+      setMessages(next);
+      if (courseDraft.success) {
+        setLastCourseQuality(courseDraft.quality);
+      }
+      setStatus('idle');
+    },
+    [setLastCourseQuality, t],
+  );
+
   const sendMessage = useCallback(
     async (content: string) => {
       const snapshot = contextRef.current;
@@ -117,6 +157,8 @@ export function StudioChatProvider({
         setStatus('error');
         return;
       }
+
+      setEphemeralSuggestions(null);
 
       const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: 'user', content };
       const history = [...messagesRef.current, userMsg];
@@ -127,6 +169,11 @@ export function StudioChatProvider({
       const controller = new AbortController();
       abortRef.current = controller;
 
+      const quality = lastCourseQualityRef.current;
+      const requestContext = quality?.length
+        ? { ...snapshot, lastCourseDraftQuality: quality }
+        : snapshot;
+
       try {
         const response = await fetch('/api/studio/ai/chat', {
           method: 'POST',
@@ -134,7 +181,7 @@ export function StudioChatProvider({
           body: JSON.stringify({
             conversationId,
             messages: history.map((m) => ({ role: m.role, content: m.content })),
-            context: snapshot,
+            context: requestContext,
           }),
           signal: controller.signal,
         });
@@ -154,17 +201,34 @@ export function StudioChatProvider({
                 ? 'buffer'
                 : 'file';
 
+        const courseDraft: CourseDraftResult | undefined =
+          data.courseDraft || data.metadata?.courseDraft;
+
         const assistantMsg: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
           content: data.content || data.text || '',
           metadata: data.metadata
-            ? { mode: data.metadata.mode, drafts: data.drafts, applyMode }
-            : undefined,
+            ? {
+                mode: data.metadata.mode,
+                drafts: data.drafts,
+                courseDraft,
+                applyMode,
+              }
+            : courseDraft
+              ? {
+                  mode: 'course_draft',
+                  courseDraft,
+                }
+              : undefined,
         };
         const next = [...messagesRef.current, assistantMsg];
         messagesRef.current = next;
         setMessages(next);
+
+        if (courseDraft?.success) {
+          setLastCourseQuality(courseDraft.quality);
+        }
 
         if (assistantMsg.metadata?.drafts?.length) {
           setPendingDrafts({
@@ -189,7 +253,7 @@ export function StudioChatProvider({
         abortRef.current = null;
       }
     },
-    [conversationId, setPendingDrafts],
+    [conversationId, setEphemeralSuggestions, setLastCourseQuality, setPendingDrafts],
   );
 
   const runIntent = useCallback(
@@ -302,6 +366,7 @@ export function StudioChatProvider({
         clearError,
         clearMessages,
         appendAssistantNote,
+        ingestCourseDraft,
         runIntent,
         api: api ?? null,
         onOpenPath,

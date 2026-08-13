@@ -6,14 +6,12 @@ import { LibraryView } from './components/LibraryView.js';
 import { OutlineView } from './components/OutlineView.js';
 import { ShareView } from './components/ShareView.js';
 import { UnitBuilderView } from './components/UnitBuilderView.js';
-import { AiReviewView } from './components/AiReviewView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioChrome } from './components/StudioChrome.js';
 import { StudioLayout } from './components/StudioLayout.js';
 import { CreatorPreview } from './CreatorPreview.js';
 import { createStudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
-import { writeAiReview, readAiReview, clearAiReview } from './ai/aiSession.js';
 import {
   readStudioView,
   writeStudioView,
@@ -21,7 +19,6 @@ import {
   writeSelectedPath,
 } from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
-import type { AiGenerateResult } from './ai/types.js';
 import type { StudioMode, StudioView } from './types.js';
 import {
   StudioAssistantProvider,
@@ -29,6 +26,7 @@ import {
   StudioContextBridge,
   useStudioAssistant,
 } from './ai';
+import { migrateLegacyReview } from './ai/aiSession.js';
 import { EditorBridgeProvider } from './ai/EditorBridgeContext';
 import { isAssistantEnabled } from './ai/assistantFlags';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
@@ -51,7 +49,6 @@ export function StudioApp({
   const [selectedPath, setSelectedPath] = useState<string | null>(() => readSelectedPath());
   const [courseTitle, setCourseTitle] = useState<string | undefined>(loadedPackage?.manifest.title);
   const [error, setError] = useState<string | null>(null);
-  const [aiResult, setAiResult] = useState<AiGenerateResult | null>(() => readAiReview());
   const [aiAvailable, setAiAvailable] = useState(false);
   const [assistantEnabled] = useState(() => _assistantEnabled ?? isAssistantEnabled());
   const [outlineRevision, setOutlineRevision] = useState(0);
@@ -80,15 +77,6 @@ export function StudioApp({
       writeSelectedPath(null);
     }
   }, []);
-
-  const handleAiGenerated = useCallback(
-    (result: AiGenerateResult) => {
-      writeAiReview(result);
-      setAiResult(result);
-      handleNavigate('ai-review');
-    },
-    [handleNavigate],
-  );
 
   const handleOpened = useCallback(() => {
     if (loadedPackage) {
@@ -146,7 +134,6 @@ export function StudioApp({
           onError={handleError}
           courseTitle={loadedPackage?.manifest.title}
           onOpenCurrent={() => handleNavigate('outline')}
-          onAiGenerated={handleAiGenerated}
           onOpenLibrary={() => handleNavigate('library')}
         />
       );
@@ -183,35 +170,6 @@ export function StudioApp({
       break;
     case 'share':
       content = <ShareView api={api} onError={handleError} />;
-      break;
-    case 'ai-review':
-      content = aiResult ? (
-        <AiReviewView
-          result={aiResult}
-          onAccept={() => {
-            void (async () => {
-              const packageDir = await Promise.resolve(api.getPackageDir()).catch(() => '');
-              clearAiReview();
-              recordRecentCourse({
-                id: aiResult.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'ai-course',
-                title: aiResult.title || 'AI draft course',
-                packageDir,
-                updatedAt: Date.now(),
-              });
-              handleNavigate('outline');
-            })();
-          }}
-          onReject={() => {
-            clearAiReview();
-            handleNavigate('home');
-          }}
-        />
-      ) : (
-        <EmptyState
-          heading={t('studio.ai.reviewTitle')}
-          description={t('studio.ai.errorGeneric')}
-        />
-      );
       break;
     case 'library':
       content = (
@@ -307,7 +265,16 @@ function StudioAppInner({
   assistantEnabled?: boolean;
   children: ReactNode;
 }) {
-  const { panelOpen, setPanelOpen } = useStudioAssistant();
+  const { t } = useTranslation();
+  const { panelOpen, setPanelOpen, openWithPreset } = useStudioAssistant();
+
+  useEffect(() => {
+    if (!assistantEnabled) return;
+    const legacy = migrateLegacyReview();
+    if (!legacy) return;
+    // Legacy reviews were already written to disk — no draftId to recover.
+    openWithPreset({ message: t('studio.assistant.courseDraft.legacyExpired') });
+  }, [assistantEnabled, openWithPreset, t]);
 
   return (
     <div className="flex h-screen flex-col">

@@ -255,7 +255,7 @@ describe('StudioApp', () => {
     expect(await screen.findByText('Create a unit')).toBeInTheDocument();
   });
 
-  it('generates a draft from notes and navigates to the AI review view', async () => {
+  it('shows the AI CTA button on home view', async () => {
     getAiStatusMock.mockResolvedValue({ available: true });
     generateFromNotesMock.mockResolvedValue({
       success: true,
@@ -264,12 +264,8 @@ describe('StudioApp', () => {
       title: 'AI Course',
     });
     render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
-    const textarea = await screen.findByLabelText(/your notes/i);
-    await userEvent.type(textarea, 'Teach fractions to beginners.');
-    await userEvent.click(screen.getByRole('button', { name: /generate draft/i }));
-    expect(await screen.findByText('Review AI draft')).toBeInTheDocument();
-    expect(screen.getByText('Intro')).toBeInTheDocument();
-    expect(screen.getByText('Learning goals look measurable')).toBeInTheDocument();
+    const elements = await screen.findAllByText('Or start with AI');
+    expect(elements.length).toBeGreaterThanOrEqual(1);
   });
 
   it('writes draft files and navigates to outline via handleSaveDraftItems', async () => {

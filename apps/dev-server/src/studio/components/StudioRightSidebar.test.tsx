@@ -28,6 +28,7 @@ vi.mock('../ai', async () => {
       clearError: vi.fn(),
       clearMessages: vi.fn(),
       appendAssistantNote: vi.fn(),
+      ingestCourseDraft: vi.fn(),
       runIntent: vi.fn(),
       api: null,
     }),

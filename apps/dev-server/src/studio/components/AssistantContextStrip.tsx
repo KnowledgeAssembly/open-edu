@@ -21,17 +21,27 @@ function SuggestionChipItem({ chip, onSend }: SuggestionChipProps) {
 
 export function AssistantContextStrip({ onSend }: { onSend: (msg: string) => void }) {
   const { t } = useTranslation();
-  const { context } = useStudioAssistant();
+  const { context, ephemeralSuggestions, setEphemeralSuggestions } = useStudioAssistant();
 
   if (!context) return null;
 
-  const suggestions = resolveSuggestions(context, t);
+  const suggestions =
+    ephemeralSuggestions && ephemeralSuggestions.length > 0
+      ? ephemeralSuggestions
+      : resolveSuggestions(context, t);
+
+  const handleSend = (message: string) => {
+    if (ephemeralSuggestions?.length) {
+      setEphemeralSuggestions(null);
+    }
+    onSend(message);
+  };
 
   return (
     <div className="flex flex-col gap-3 p-4">
       <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
         {suggestions.map((chip) => (
-          <SuggestionChipItem key={chip.id} chip={chip} onSend={onSend} />
+          <SuggestionChipItem key={chip.id} chip={chip} onSend={handleSend} />
         ))}
       </div>
 
