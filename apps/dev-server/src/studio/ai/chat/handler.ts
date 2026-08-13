@@ -108,18 +108,22 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-/** Abort the LLM stream when the client disconnects / Stop is pressed. */
-function createRequestAbortSignal(req: IncomingMessage): AbortSignal {
+/**
+ * Abort the LLM stream when the client disconnects / Stop is pressed.
+ *
+ * Listens on `res`, not `req`: since Node 16.6.0 an IncomingMessage emits
+ * 'close' as soon as its body has been fully read, so a `req.on('close')`
+ * guard aborts every explain stream before the first token. ServerResponse
+ * 'close' fires only when the response finishes or the connection is
+ * terminated prematurely (client disconnect), which is the signal we want.
+ */
+function createRequestAbortSignal(res: ServerResponse): AbortSignal {
   const controller = new AbortController();
-  const abort = () => {
-    if (!controller.signal.aborted) controller.abort();
-  };
-  if (req.destroyed || ('aborted' in req && Boolean((req as { aborted?: boolean }).aborted))) {
-    abort();
-    return controller.signal;
-  }
-  req.once('close', abort);
-  req.once('aborted', abort);
+  res.once('close', () => {
+    if (!res.writableEnded && !controller.signal.aborted) {
+      controller.abort();
+    }
+  });
   return controller.signal;
 }
 
@@ -226,7 +230,7 @@ export async function createStudioAssistantHandler(
       context,
       systemPrompt,
       messages: body.messages,
-      abortSignal: createRequestAbortSignal(req),
+      abortSignal: createRequestAbortSignal(res),
     });
   } catch (err) {
     console.error('[studio-assistant] chat handler error:', err);
@@ -413,11 +417,10 @@ async function streamExplain(
   const factory = createModelFactoryFromEnv();
   const model = factory.getModel('fast');
 
-  const modelMessages = [{ role: 'system' as const, content: systemPrompt }, ...messages];
-
   const result = streamText({
     model,
-    messages: modelMessages as never,
+    system: systemPrompt,
+    messages: messages as never,
     abortSignal,
     onFinish: () => {
       console.log('[studio-assistant] chat response finished', {

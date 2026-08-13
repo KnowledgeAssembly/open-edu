@@ -62,8 +62,10 @@ function makeReq(body: unknown): IncomingMessage {
 }
 
 function makeRes() {
+  let closeHandler: (() => void) | null = null;
   const res = {
     headersSent: false,
+    writableEnded: false,
     statusCode: 200,
     written: [] as Array<{ status: number; headers: Record<string, string>; body: unknown }>,
     writeHead(status: number, headers: Record<string, string>) {
@@ -72,6 +74,7 @@ function makeRes() {
       this.written.push({ status, headers, body: undefined });
     },
     end(body?: unknown) {
+      this.writableEnded = true;
       if (this.written.length > 0) {
         this.written[this.written.length - 1]!.body = body;
       } else {
@@ -81,11 +84,19 @@ function makeRes() {
     write() {
       return true;
     },
+    once(event: string, handler: () => void) {
+      if (event === 'close') closeHandler = handler;
+    },
+    emitClose() {
+      closeHandler?.();
+    },
   };
   return res as unknown as ServerResponse & {
     headersSent: boolean;
+    writableEnded: boolean;
     statusCode: number;
     written: Array<{ status: number; headers: Record<string, string>; body: unknown }>;
+    emitClose: () => void;
   };
 }
 
@@ -113,6 +124,50 @@ describe('createStudioAssistantHandler', () => {
     const pipeArgs = mockPipe.mock.calls[0]![0] as { status: number; response: ServerResponse };
     expect(pipeArgs.status).toBe(200);
     expect(pipeArgs.response).toBe(res);
+  });
+
+  it('passes the system prompt via the `system` option, never as a system message', async () => {
+    mockStreamText.mockReturnValue({ stream: new ReadableStream() });
+    const res = makeRes();
+    await createStudioAssistantHandler(makeReq(validRequest), res, {});
+
+    const args = mockStreamText.mock.calls[0]![0] as {
+      system?: string;
+      messages: Array<{ role: string }>;
+    };
+    expect(args.system).toBeTypeOf('string');
+    expect(args.messages.some((m) => m.role === 'system')).toBe(false);
+  });
+
+  it('aborts the explain stream only when the response closes before completion', async () => {
+    mockStreamText.mockReturnValue({ stream: new ReadableStream() });
+    const res = makeRes();
+    const done = createStudioAssistantHandler(makeReq(validRequest), res, {});
+    await new Promise((r) => setTimeout(r, 0));
+
+    const args = mockStreamText.mock.calls[0]![0] as { abortSignal?: AbortSignal };
+    expect(args.abortSignal).toBeDefined();
+    expect(args.abortSignal!.aborted).toBe(false);
+
+    // Premature close (client disconnect / Stop) must abort the LLM call.
+    res.emitClose();
+    expect(args.abortSignal!.aborted).toBe(true);
+
+    await done;
+  });
+
+  it('does not abort when the request body is fully read (close fires only on res, not req)', async () => {
+    mockStreamText.mockReturnValue({ stream: new ReadableStream() });
+    const res = makeRes();
+    await createStudioAssistantHandler(makeReq(validRequest), res, {});
+
+    const args = mockStreamText.mock.calls[0]![0] as { abortSignal?: AbortSignal };
+    expect(args.abortSignal!.aborted).toBe(false);
+
+    // Normal completion: response ends before the socket closes — no abort.
+    res.end('done');
+    res.emitClose();
+    expect(args.abortSignal!.aborted).toBe(false);
   });
 
   it('emits a draft message with metadata on finish for a lesson draft request', async () => {
