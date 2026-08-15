@@ -113,7 +113,7 @@ The widget may request completion, score, state persistence, hints, and capabili
 - A widget cannot write progress directly.
 - A widget cannot emit rewards directly.
 - A widget cannot send arbitrary telemetry fields.
-- A widget cannot resolve arbitrary URLs through the host asset loader.
+- A widget cannot resolve arbitrary URLs through a host asset broker or loader.
 
 ### 4.4 Exact versions
 
@@ -248,14 +248,14 @@ type WidgetReference =
       version: string;
       source: 'registry' | 'url';
       registryId?: string; // logical registry configured by the deployment
-      integrity: string; // sha256 digest of manifest bytes
+      integrity?: string; // sha256 digest of manifest bytes; required for new registry references
       fallback?: string;
     };
 ```
 
 The existing remoteWidget field remains readable. Normalization converts it to a WidgetReference with source: url. Production policy may reject that source or permit it only as trusted-remote. A self-hosted instance is represented as source: registry with a deployment-configured logical registryId, not an instance URL embedded in the course. Studio must warn when exporting a course that depends on a registry not present in the target deployment. External course references cannot be compiled or exported without integrity; builtin references are the only exception. For new registry references, integrity covers the manifest bytes. The manifest’s artifact.documentIntegrity then covers the served iframe document bytes.
 
-Legacy remoteWidget references without integrity are not silently upgraded to registry trust. They route through the legacy trusted-remote/url-source policy, emit a validation warning, and remain permitted only when the deployment explicitly enables trusted-remote. This is how existing packages continue to run unchanged while new registry references remain strict.
+Legacy remoteWidget references without integrity are not silently upgraded to registry trust. They route through the legacy trusted-remote/url-source policy, emit a validation warning, and remain permitted only when the deployment explicitly enables trusted-remote. This is how existing packages continue to run unchanged while new registry references remain strict. The type leaves integrity optional only so legacy url-source normalization can be represented without fabrication; new registry references must always supply it.
 
 ## 6. Public SDK
 
@@ -423,7 +423,7 @@ Capability-to-message mapping is explicit in protocol version 1:
 | hints                 | interaction with action hint-request |
 | observe-mode          | init and lifecycle state             |
 
-Only the host sends capability:result. All request/response pairs use requestId; sequence numbers provide ordering but do not correlate concurrent requests. Protocol version 1 has no package-assets capability: online multi-file widgets resolve their own registry-origin subresources, while offline-capable widgets must inline all resources. A future asset broker may be added in a later protocol version.
+Only the host sends capability:result. All request/response pairs use requestId; sequence numbers provide ordering but do not correlate concurrent requests. Protocol version 1 has no package-assets capability: online multi-file widgets resolve their own registry-origin subresources, while offline-capable widgets must inline all resources. capability:request and capability:result are the protocol extension point for future broker-backed capabilities; no protocol version 1 capability uses them.
 
 observe-mode is a read-only presentation/narration mode: the widget may reveal content and report observations, but it must not accept learner answer input or request completion. hints are authoring/config-supplied content; the host records hint-request interactions but does not generate or provide hint text.
 
@@ -452,7 +452,7 @@ Cache artifacts by {widgetId, version, integrity}. A cache hit is valid only whe
 
 ### 9.3 SandboxWidgetAdapter
 
-Creates and destroys the iframe, generates instance IDs/nonces, validates origins and messages, sends lifecycle events, enforces size/rate/payload limits, and bridges state, completion, telemetry, locale, theme, and capabilities. The default ready timeout is 10 seconds. A network failure may be retried once with bounded backoff; protocol, integrity, policy, and schema failures are not retried. Destroy-before-ready resolves as cancelled and cannot later transition the node to ready or complete.
+Creates and destroys the iframe, generates instance IDs/nonces, validates origins and messages, sends lifecycle events, enforces size/rate/payload limits, and bridges state, completion, telemetry, locale, theme, and capabilities. The default ready timeout is 10 seconds. A network failure may be retried once with bounded backoff; protocol, integrity, policy, and schema failures are not retried. Destroy-before-ready resolves as cancelled and cannot later transition the node to ready or complete. Host-bound messages received before ready are dropped and recorded as a safe diagnostic; state:save is never accepted pre-ready.
 
 ### 9.4 NativeWidgetAdapter
 
@@ -572,7 +572,7 @@ Controls:
 - per-instance nonce and sequence numbers;
 - rate, payload, artifact-size, and timeout limits;
 - host-enforced capability allowlist;
-- package-scoped asset resolver;
+- no host asset broker in protocol version 1; subresources resolve only at the verified registry origin;
 - revocation and cache invalidation;
 - no allow-same-origin in protocol version 1;
 - no direct host DOM or storage access.
@@ -592,7 +592,7 @@ object-src 'none';
 base-uri 'none';
 ```
 
-Self-contained offline HTML uses the same restrictions, but replaces script-src 'self' with a build-generated hash, for example script-src 'sha256-<bundle-hash>'. The SDK build computes the hash over the exact inline script bytes and the host verifies the complete document before creating the offline iframe. This permits the required inline bundle without permitting arbitrary inline scripts.
+Self-contained offline HTML uses the same restrictions, but replaces script-src 'self' with a build-generated hash, for example script-src 'sha256-<bundle-hash>'. The SDK build computes the hash over the exact inline script bytes and the host verifies the complete document before creating the offline iframe. This permits the required inline bundle without permitting arbitrary inline scripts. Self-contained artifacts embed the CSP as a meta element so it applies in the offline blob/srcdoc path; the registry mirrors the same policy as a response header for online documents. Protocol conformance fixtures must verify both delivery paths resolve to an equivalent policy.
 
 Additional origins require a manifest capability, deployment allowlist, and a documented privacy review. Configuration and storedState are considered visible to the widget and must not contain sensitive learner data. The learner application CSP must include configured widget origins in frame-src; widget documents retain their own CSP independently.
 
@@ -734,7 +734,3 @@ Implement a **registry-backed, sandboxed widget platform** with a **native adapt
 The key invariant is:
 
 > Community widgets may request learning actions, but only the Open-Edu host may authorize and record them.
-
-```
-
-```
