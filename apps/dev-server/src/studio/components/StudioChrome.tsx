@@ -12,8 +12,10 @@ import {
 } from '@open-edu/design-system';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
+import type { ThemeId } from '@open-edu/runtime';
 import { ModeToggle } from './ModeToggle.js';
 import { AssistantHeaderButton } from './AssistantHeaderButton.js';
+import { ThemeSwitcher } from './ThemeSwitcher.js';
 import type { StudioMode, StudioView } from '../types.js';
 
 interface BreadcrumbItem {
@@ -31,6 +33,8 @@ export function StudioChrome({
   activityLabel,
   panelOpen: panelOpenProp,
   setPanelOpen: setPanelOpenProp,
+  themeId,
+  onThemeChange,
 }: {
   mode: StudioMode;
   onModeChange: (m: StudioMode) => void;
@@ -41,6 +45,8 @@ export function StudioChrome({
   activityLabel?: string;
   panelOpen?: boolean;
   setPanelOpen?: (open: boolean) => void;
+  themeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }) {
   const { t } = useTranslation();
   const panelOpen = panelOpenProp ?? false;
@@ -67,12 +73,15 @@ export function StudioChrome({
   }
 
   const navItems: Array<{ view: StudioView; labelKey: string }> = [
+    { view: 'home', labelKey: 'studio.nav.home' },
     { view: 'library', labelKey: 'studio.nav.library' },
     { view: 'outline', labelKey: 'studio.nav.outline' },
     { view: 'preview', labelKey: 'studio.nav.preview' },
   ];
 
   const needsCourse = !courseTitle;
+
+  const requiresCourse = (view: StudioView) => needsCourse && view !== 'library' && view !== 'home';
 
   const shareBtn = (
     <Button variant="default" size="sm" disabled={needsCourse} onClick={() => onNavigate('share')}>
@@ -98,7 +107,7 @@ export function StudioChrome({
       <Button
         variant="ghost"
         size="sm"
-        disabled={needsCourse && navItem.view !== 'library'}
+        disabled={requiresCourse(navItem.view)}
         aria-current={isActive ? 'page' : undefined}
         className={cn(isActive && 'bg-primary/10 text-primary')}
         onClick={() => onNavigate(navItem.view)}
@@ -106,7 +115,7 @@ export function StudioChrome({
         {t(navItem.labelKey)}
       </Button>
     );
-    if (needsCourse && navItem.view !== 'library') {
+    if (requiresCourse(navItem.view)) {
       return (
         <TooltipProvider key={navItem.view}>
           <Tooltip>
@@ -132,7 +141,7 @@ export function StudioChrome({
           {t('studio.brand.subtitle')}
         </span>
       </div>
-      
+
       {breadcrumbs.length > 0 ? (
         <nav
           aria-label={t('studio.breadcrumbs.label')}
@@ -159,9 +168,9 @@ export function StudioChrome({
           ))}
         </nav>
       ) : null}
-      
+
       <div className="flex-1" />
-      
+
       {!minimal ? (
         <>
           <div className="hidden items-center gap-1 md:flex">{navItems.map(renderNavButton)}</div>
@@ -176,7 +185,7 @@ export function StudioChrome({
                 {navItems.map((navItem) => (
                   <DropdownMenuItem
                     key={navItem.view}
-                    disabled={needsCourse && navItem.view !== 'library'}
+                    disabled={requiresCourse(navItem.view)}
                     onSelect={() => onNavigate(navItem.view)}
                   >
                     {t(navItem.labelKey)}
@@ -192,13 +201,13 @@ export function StudioChrome({
           {shareAction}
         </>
       ) : null}
-      
+
       <div className="flex items-center gap-2">
         {mode === 'creator' && setPanelOpenProp && (
-          <AssistantHeaderButton 
-            active={panelOpen} 
-            onClick={() => setPanelOpen(!panelOpen)} 
-          />
+          <AssistantHeaderButton active={panelOpen} onClick={() => setPanelOpen(!panelOpen)} />
+        )}
+        {themeId && onThemeChange && (
+          <ThemeSwitcher currentThemeId={themeId} onChange={onThemeChange} />
         )}
         <div className="hidden md:flex">
           <ModeToggle mode={mode} onChange={onModeChange} />

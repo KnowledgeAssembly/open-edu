@@ -135,6 +135,24 @@ describe('StudioApp', () => {
     expect(screen.getByRole('switch', { name: /studio mode/i })).toBeInTheDocument();
   });
 
+  it('renders the theme switcher in the top bar and changes the theme', async () => {
+    const onThemeChange = vi.fn();
+    render(
+      wrap(
+        <StudioApp
+          mode="creator"
+          onModeChange={() => {}}
+          loadedPackage={mockPkg}
+          themeId="lumina-scholastica"
+          onThemeChange={onThemeChange}
+        />,
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: /select theme/i }));
+    await userEvent.click(await screen.findByText('OpenEdu Dark'));
+    expect(onThemeChange).toHaveBeenCalledWith('nocturnal');
+  });
+
   it('fills the viewport height so full-height views like the preview can stretch', async () => {
     const { container } = render(
       wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />),

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
+import type { ThemeId } from '@open-edu/runtime';
 import { StudioChrome } from './StudioChrome';
 import type { StudioMode, StudioView } from '../types.js';
 
@@ -24,6 +25,10 @@ function renderChrome(props: {
   courseTitle?: string;
   minimal?: boolean;
   activityLabel?: string;
+  panelOpen?: boolean;
+  setPanelOpen?: (open: boolean) => void;
+  themeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }) {
   const onModeChange = props.onModeChange ?? vi.fn();
   const onNavigate = vi.fn();
@@ -40,6 +45,10 @@ function renderChrome(props: {
           view={props.view ?? 'home'}
           minimal={props.minimal}
           activityLabel={props.activityLabel}
+          panelOpen={props.panelOpen}
+          setPanelOpen={props.setPanelOpen}
+          themeId={props.themeId}
+          onThemeChange={props.onThemeChange}
         />,
       ),
     ),
@@ -62,6 +71,64 @@ describe('StudioChrome', () => {
     renderChrome({ view: 'home', courseTitle: undefined });
     const outlineBtn = screen.getByRole('button', { name: /outline/i });
     expect(outlineBtn).toBeDisabled();
+  });
+
+  it('keeps Home enabled when no courseTitle', () => {
+    renderChrome({ view: 'home', courseTitle: undefined });
+    const homeBtn = screen.getByRole('button', { name: /^home$/i });
+    expect(homeBtn).toBeEnabled();
+  });
+
+  it('shows Home before My courses in the top nav', () => {
+    renderChrome({ view: 'home' });
+    const banner = screen.getByRole('banner');
+    const labels = within(banner)
+      .getAllByRole('button')
+      .map((btn) => (btn.getAttribute('aria-label') ?? btn.textContent ?? '').trim())
+      .filter((label) => ['Home', 'My courses', 'Outline', 'Preview'].includes(label));
+    expect(labels).toEqual(['Home', 'My courses', 'Outline', 'Preview']);
+  });
+
+  it('navigates Home from the top nav', async () => {
+    const { onNavigate } = renderChrome({ view: 'library', courseTitle: 'Test' });
+    await userEvent.click(screen.getAllByRole('button', { name: /^home$/i })[0]!);
+    expect(onNavigate).toHaveBeenCalledWith('home');
+  });
+
+  it('renders the theme switcher and calls onThemeChange on selection', async () => {
+    const user = userEvent.setup();
+    const onThemeChange = vi.fn();
+    renderChrome({
+      view: 'home',
+      themeId: 'lumina-scholastica',
+      onThemeChange,
+    });
+    await user.click(screen.getByRole('button', { name: /select theme/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByText('OpenEdu Dark'));
+    expect(onThemeChange).toHaveBeenCalledWith('nocturnal');
+  });
+
+  it('places the theme switcher after the author companion toggle', () => {
+    renderChrome({
+      view: 'home',
+      panelOpen: false,
+      setPanelOpen: vi.fn(),
+      themeId: 'lumina-scholastica',
+      onThemeChange: vi.fn(),
+    });
+    const buttons = within(screen.getByRole('banner')).getAllByRole('button');
+    const assistantIdx = buttons.findIndex((btn) =>
+      (btn.getAttribute('aria-label') ?? '').includes('Author Assistant'),
+    );
+    const themeIdx = buttons.findIndex((btn) => btn.getAttribute('aria-label') === 'Select theme');
+    expect(assistantIdx).toBeGreaterThanOrEqual(0);
+    expect(themeIdx).toBeGreaterThan(assistantIdx);
+  });
+
+  it('does not render the theme switcher without theme props', () => {
+    renderChrome({ view: 'home' });
+    expect(screen.queryByRole('button', { name: /select theme/i })).not.toBeInTheDocument();
   });
 
   it('disables the Share CTA when no courseTitle', () => {

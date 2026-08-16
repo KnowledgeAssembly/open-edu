@@ -339,6 +339,7 @@
   "assistant.thinking": "Thinking...",
   "assistant.regenerate": "Regenerate",
   "assistant.toggle": "Toggle Author Assistant",
+  "theme.select": "Select theme",
   "assistant.chat.retry": "Retry",
   "assistant.chat.send": "Send",
   "assistant.chat.stop": "Stop",
