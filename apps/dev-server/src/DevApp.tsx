@@ -5,7 +5,9 @@ import {
   RuntimeThemeProvider,
   BundleOverview,
   RewardEventBridge,
+  useThemePreference,
 } from '@open-edu/runtime';
+import type { ThemeId } from '@open-edu/runtime';
 import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
 import { WorkflowEngine } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
@@ -60,10 +62,12 @@ function BundleDevApp({
   bundle,
   mode,
   onModeChange,
+  themeId,
 }: {
   bundle: LoadedBundle;
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
+  themeId: ThemeId;
 }): JSX.Element {
   const { t } = useTranslation();
   const [selectedModuleId, setSelectedModuleId] = useState<string>(
@@ -163,7 +167,7 @@ function BundleDevApp({
 
   if (editorMode === 'edit') {
     return (
-      <RuntimeThemeProvider>
+      <RuntimeThemeProvider themeId={themeId}>
         <EditorShell
           isOpen={editorOpen}
           onToggle={handleEditorToggle}
@@ -179,7 +183,7 @@ function BundleDevApp({
 
   if (showOverview) {
     return (
-      <RuntimeThemeProvider>
+      <RuntimeThemeProvider themeId={themeId}>
         <AccessibilityProvider>
           <BundleOverview
             bundleTitle={bundle.manifest.title}
@@ -216,7 +220,7 @@ function BundleDevApp({
   }
 
   return (
-    <RuntimeThemeProvider>
+    <RuntimeThemeProvider themeId={themeId}>
       <AccessibilityProvider>
         <RuntimeProvider
           key={progressKey}
@@ -270,9 +274,11 @@ function BundleDevApp({
 function SinglePackageDeveloperApp({
   mode,
   onModeChange,
+  themeId,
 }: {
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
+  themeId: ThemeId;
 }): JSX.Element {
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
   const telemetrySessionRef = useRef<TelemetrySession | null>(null);
@@ -380,7 +386,7 @@ function SinglePackageDeveloperApp({
   // Show editor when in edit mode
   if (editorMode === 'edit') {
     return (
-      <RuntimeThemeProvider>
+      <RuntimeThemeProvider themeId={themeId}>
         <EditorShell
           isOpen={editorOpen}
           onToggle={handleEditorToggle}
@@ -413,7 +419,7 @@ function SinglePackageDeveloperApp({
   }
 
   return (
-    <RuntimeThemeProvider>
+    <RuntimeThemeProvider themeId={themeId}>
       <AccessibilityProvider>
         <RuntimeProvider
           key={progressKey}
@@ -458,6 +464,7 @@ function SinglePackageDeveloperApp({
 
 export function DevApp(): JSX.Element {
   const [studioMode, setStudioModeState] = useState<StudioMode>(() => getStudioMode());
+  const [themeId, setThemeId] = useThemePreference();
 
   const setStudioModeAndPersist = useCallback((mode: StudioMode) => {
     setStudioMode(mode);
@@ -466,12 +473,14 @@ export function DevApp(): JSX.Element {
 
   if (studioMode === 'creator') {
     return (
-      <RuntimeThemeProvider>
+      <RuntimeThemeProvider themeId={themeId}>
         <StudioApp
           mode={studioMode}
           onModeChange={setStudioModeAndPersist}
           loadedPackage={loadedPkg}
           bundleUnsupported={Boolean(loadedBundle)}
+          themeId={themeId}
+          onThemeChange={setThemeId}
         />
       </RuntimeThemeProvider>
     );
@@ -483,9 +492,16 @@ export function DevApp(): JSX.Element {
         bundle={loadedBundle}
         mode={studioMode}
         onModeChange={setStudioModeAndPersist}
+        themeId={themeId}
       />
     );
   }
 
-  return <SinglePackageDeveloperApp mode={studioMode} onModeChange={setStudioModeAndPersist} />;
+  return (
+    <SinglePackageDeveloperApp
+      mode={studioMode}
+      onModeChange={setStudioModeAndPersist}
+      themeId={themeId}
+    />
+  );
 }

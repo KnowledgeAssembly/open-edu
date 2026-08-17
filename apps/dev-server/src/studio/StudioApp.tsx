@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { EmptyState } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
+import type { ThemeId } from '@open-edu/runtime';
 import { HomeView } from './components/HomeView.js';
 import { LibraryView } from './components/LibraryView.js';
 import { OutlineView } from './components/OutlineView.js';
@@ -37,12 +38,16 @@ export function StudioApp({
   loadedPackage,
   bundleUnsupported = false,
   _assistantEnabled,
+  themeId,
+  onThemeChange,
 }: {
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
   loadedPackage: LoadedPackage | null;
   bundleUnsupported?: boolean;
   _assistantEnabled?: boolean;
+  themeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<StudioView>(() => readStudioView());
@@ -113,6 +118,8 @@ export function StudioApp({
           onModeChange={onModeChange}
           onNavigate={handleNavigate}
           view={view}
+          themeId={themeId}
+          onThemeChange={onThemeChange}
         />
         <main className="bg-surface flex min-h-0 flex-1 items-center justify-center p-6">
           <EmptyState
@@ -230,6 +237,8 @@ export function StudioApp({
             view={view}
             selectedPath={selectedPath}
             assistantEnabled={assistantEnabled}
+            themeId={themeId}
+            onThemeChange={onThemeChange}
           >
             <div key={view} className="studio-view-enter min-h-0 flex-1">
               {content}
@@ -254,6 +263,8 @@ function StudioAppInner({
   view,
   selectedPath,
   assistantEnabled,
+  themeId,
+  onThemeChange,
   children,
 }: {
   mode: StudioMode;
@@ -263,6 +274,8 @@ function StudioAppInner({
   view: StudioView;
   selectedPath?: string | null;
   assistantEnabled?: boolean;
+  themeId?: ThemeId;
+  onThemeChange?: (id: ThemeId) => void;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
@@ -287,6 +300,8 @@ function StudioAppInner({
         activityLabel={selectedPath?.split('/').pop()}
         panelOpen={panelOpen}
         setPanelOpen={assistantEnabled ? setPanelOpen : undefined}
+        themeId={themeId}
+        onThemeChange={onThemeChange}
       />
       <StudioLayout
         className="bg-surface min-h-0 flex-1 overflow-hidden"
