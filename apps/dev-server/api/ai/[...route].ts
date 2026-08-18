@@ -8,11 +8,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { routeRequest } from './router.js';
 import { isAiAvailable } from '../../src/studio/ai/studioLlm.js';
 import { MAX_REQUEST_BODY_BYTES } from './requestSchema.js';
+import { getAllowedGatewayOrigins } from './gatewayOrigins.js';
 
-const ALLOWED_ORIGINS = (process.env.OPEN_EDU_GATEWAY_ORIGINS ?? '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+const ALLOWED_ORIGINS = getAllowedGatewayOrigins();
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
