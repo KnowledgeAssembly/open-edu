@@ -8,7 +8,7 @@ describe('IndexedDB database setup', () => {
 
   it('exports correct DB_NAME and DB_VERSION', () => {
     expect(DB_NAME).toBe('open-edu');
-    expect(DB_VERSION).toBe(4);
+    expect(DB_VERSION).toBe(7);
   });
 
   it('opens database with all required object stores', async () => {
@@ -23,6 +23,8 @@ describe('IndexedDB database setup', () => {
     expect(storeNames).toContain('notes');
     expect(storeNames).toContain('note-tags');
     expect(storeNames).toContain('bundles');
+    expect(storeNames).toContain('studio-courses');
+    expect(storeNames).toContain('studio-drafts');
     db.close();
   });
 
@@ -55,6 +57,14 @@ describe('IndexedDB database setup', () => {
     const tx = db.transaction('cards', 'readonly');
     const store = tx.objectStore('cards');
     expect(store.keyPath).toBe('cardId');
+    db.close();
+  });
+
+  it('studio-courses store has id keyPath', async () => {
+    const db = await openDatabase();
+    const tx = db.transaction('studio-courses', 'readonly');
+    const store = tx.objectStore('studio-courses');
+    expect(store.keyPath).toBe('id');
     db.close();
   });
 

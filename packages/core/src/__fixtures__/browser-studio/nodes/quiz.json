@@ -1,0 +1,10 @@
+{
+  "type": "quiz",
+  "title": "Sky Quiz",
+  "question": "Which color scatters the most in the atmosphere?",
+  "options": [
+    { "id": "a", "text": "Red", "correct": false },
+    { "id": "b", "text": "Blue", "correct": true },
+    { "id": "c", "text": "Green", "correct": false }
+  ]
+}

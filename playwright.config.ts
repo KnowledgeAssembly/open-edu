@@ -17,10 +17,19 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'pnpm --filter @open-edu/learner dev',
-    url: 'http://localhost:4001',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
-  },
+  webServer: [
+    {
+      command: 'pnpm --filter @open-edu/learner dev',
+      url: 'http://localhost:4001',
+      reuseExistingServer: !process.env.CI,
+      timeout: 30000,
+    },
+    {
+      command:
+        'pnpm --filter @open-edu/dev-server exec vite --mode browser --port 4002 --open false',
+      url: 'http://localhost:4002',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60000,
+    },
+  ],
 });

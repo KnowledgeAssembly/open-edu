@@ -9,6 +9,8 @@ export {
 
 export { loadPackage } from './loader.js';
 export type { LoadOptions } from './loader.js';
+export { loadPackageFromFiles } from './file-loader.js';
+export type { PackageFileSource } from './types.js';
 export type { LoadedPackage, LoadedNode, LoadedBundle } from './types.js';
 export {
   PackageLoadError,
@@ -24,12 +26,17 @@ export {
 export type { ErrorDiagnostics } from './errors.js';
 export { lintPackage } from './content-lint.js';
 export type { LintWarning, LintResult } from './content-lint.js';
-export { loadManifest } from './manifest.js';
-export { loadWorkflow } from './workflow.js';
-export { loadRewards } from './rewards.js';
-export { loadCards } from './cards.js';
-export { loadNodes } from './nodes.js';
-export { resolveAssets, resolveAssetPath } from './assets.js';
+export { loadManifest, parseManifest } from './manifest.js';
+export { loadWorkflow, parseWorkflow } from './workflow.js';
+export { loadRewards, parseRewards } from './rewards.js';
+export { loadCards, parseCards } from './cards.js';
+export { loadNodes, loadNodesFromSource, parseNodeContent } from './nodes.js';
+export {
+  resolveAssets,
+  resolveAssetPath,
+  collectAssetsFromSource,
+  normalizeAssetPath,
+} from './assets.js';
 export { ASSET_MIME_TYPES } from './asset-mime-types.js';
 export { computeFileHash, verifyIntegrity } from './integrity.js';
 export type {

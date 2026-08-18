@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createStudioApi } from './studioApi';
+import { createLocalStudioApi } from './localStudioApi';
 
-describe('studioApi client', () => {
+describe('localStudioApi client', () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('studioApi client', () => {
         status: 200,
       }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.getOutline();
     expect(fetchMock).toHaveBeenCalledWith('/api/package/outline', expect.any(Object));
     expect(result).toEqual({ activities: [], title: 'Fractions' });
@@ -29,7 +29,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ success: true }), { status: 200 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.saveOutlineOrder(['nodes/a.md', 'nodes/b.json']);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/package/outline');
@@ -43,7 +43,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ success: true }), { status: 200 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.applyTemplate('reading-lesson');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/package/create-from-template');
@@ -61,7 +61,7 @@ describe('studioApi client', () => {
         headers: { 'Content-Disposition': 'attachment; filename="fractions-1.0.0.oep"' },
       }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.exportOep();
     expect(result.fileName).toBe('fractions-1.0.0.oep');
     expect(result.blob.size).toBe(13);
@@ -69,7 +69,7 @@ describe('studioApi client', () => {
 
   it('exportOep falls back to course.oep when header is missing', async () => {
     fetchMock.mockResolvedValueOnce(new Response(new Blob(['oep-bytes']), { status: 200 }));
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.exportOep();
     expect(result.fileName).toBe('course.oep');
   });
@@ -78,7 +78,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ error: 'Export failed' }), { status: 400 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await expect(api.exportOep()).rejects.toThrow('Export failed');
   });
 
@@ -86,7 +86,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ available: true }), { status: 200 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.getAiStatus();
     expect(fetchMock).toHaveBeenCalledWith('/api/studio/ai/status', expect.any(Object));
     expect(result).toEqual({ available: true });
@@ -99,7 +99,7 @@ describe('studioApi client', () => {
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.generateItemAdd('lesson', 'Explain fractions');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/item/add');
@@ -121,7 +121,7 @@ describe('studioApi client', () => {
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.generateItemEdit('lesson', 'translate', '# Hi', { targetLocale: 'es' });
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/item/edit');
@@ -138,7 +138,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ ok: true, items: [] }), { status: 200 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.generateItemEdit('lesson', 'rewrite', '# Hi');
     const [, init] = fetchMock.mock.calls[0]!;
     expect(JSON.parse(init?.body as string)).toEqual({
@@ -152,11 +152,17 @@ describe('studioApi client', () => {
   it('generateFromNotes posts notes to the draft endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
+        JSON.stringify({
+          success: true,
+          quality: [],
+          outlinePreview: [],
+          title: 'Fractions',
+          draftId: 'draft-1',
+        }),
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.generateFromNotes('Teach fractions', true);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/generate-draft');
@@ -168,11 +174,17 @@ describe('studioApi client', () => {
   it('generateFromNotes omits force when not supplied', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
+        JSON.stringify({
+          success: true,
+          quality: [],
+          outlinePreview: [],
+          title: 'Fractions',
+          draftId: 'draft-1',
+        }),
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.generateFromNotes('Teach fractions');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/generate-draft');
@@ -182,11 +194,17 @@ describe('studioApi client', () => {
   it('uploadSpec posts spec + specExt to the draft endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
+        JSON.stringify({
+          success: true,
+          quality: [],
+          outlinePreview: [],
+          title: 'Fractions',
+          draftId: 'draft-1',
+        }),
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.uploadSpec('{"format":"openedu-course-spec"}', '.json', true);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/generate-draft');
@@ -202,11 +220,17 @@ describe('studioApi client', () => {
   it('uploadSpec omits force when not supplied', async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ success: true, quality: [], outlinePreview: [], title: 'Fractions', draftId: 'draft-1' }),
+        JSON.stringify({
+          success: true,
+          quality: [],
+          outlinePreview: [],
+          title: 'Fractions',
+          draftId: 'draft-1',
+        }),
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.uploadSpec('# My Course\n\nContent', '.md');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/generate-draft');
@@ -218,12 +242,9 @@ describe('studioApi client', () => {
 
   it('commitCourseDraft posts draftId to the commit endpoint', async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({ success: true, title: 'Fractions' }),
-        { status: 200 },
-      ),
+      new Response(JSON.stringify({ success: true, title: 'Fractions' }), { status: 200 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.commitCourseDraft('draft-abc', true);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/ai/commit');
@@ -239,7 +260,7 @@ describe('studioApi client', () => {
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.getLibrary();
     expect(fetchMock).toHaveBeenCalledWith('/api/studio/library', expect.any(Object));
     expect(result.entries[0]?.id).toBe('fractions');
@@ -251,7 +272,7 @@ describe('studioApi client', () => {
         status: 200,
       }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.openLibraryCourse('fractions');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/open');
@@ -267,7 +288,7 @@ describe('studioApi client', () => {
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.duplicateCourse('fractions', 'fractions-copy', 'Fractions 2');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/duplicate');
@@ -288,7 +309,7 @@ describe('studioApi client', () => {
         },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.renameCourse('fractions', 'Fractions Basics');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/rename');
@@ -305,7 +326,7 @@ describe('studioApi client', () => {
         status: 200,
       }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.archiveCourse('fractions');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/archive');
@@ -323,7 +344,7 @@ describe('studioApi client', () => {
         },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.importCourseFolder('/some/absolute/path');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/import');
@@ -338,7 +359,7 @@ describe('studioApi client', () => {
         { status: 200 },
       ),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await api.createUnit('My Unit', ['fractions', 'living-vs-nonliving']);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/create-unit');
@@ -356,7 +377,7 @@ describe('studioApi client', () => {
         headers: { 'Content-Disposition': 'attachment; filename="my-unit-1.0.0.oep"' },
       }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.exportUnitOep('units/my-unit');
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/studio/library/export-unit-oep');
@@ -368,7 +389,7 @@ describe('studioApi client', () => {
 
   it('exportUnitOep falls back to unit.oep when header is missing', async () => {
     fetchMock.mockResolvedValueOnce(new Response(new Blob(['oep-bytes']), { status: 200 }));
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     const result = await api.exportUnitOep('units/my-unit');
     expect(result.fileName).toBe('unit.oep');
   });
@@ -377,7 +398,7 @@ describe('studioApi client', () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ error: 'bundle.json not found' }), { status: 400 }),
     );
-    const api = createStudioApi();
+    const api = createLocalStudioApi();
     await expect(api.exportUnitOep('units/missing')).rejects.toThrow('bundle.json not found');
   });
 });

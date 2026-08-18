@@ -1,0 +1,7 @@
+{
+  "id": "browser-studio",
+  "title": "Browser Studio Composite",
+  "version": "1.0.0",
+  "author": "Open-Edu",
+  "entry": "nodes/lesson.md"
+}

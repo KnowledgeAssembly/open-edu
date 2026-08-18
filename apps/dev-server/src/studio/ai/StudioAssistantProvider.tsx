@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { StudioContextSnapshot } from './context';
 import type { AiQualityItem, DraftItem } from './types';
 import type { SuggestionChip } from './suggestions';
@@ -9,6 +9,12 @@ import {
   setAssistantPanelWidth,
 } from './assistantStorage';
 import { isAssistantEnabled } from './assistantFlags';
+import {
+  savePendingDraft,
+  listPendingDraftsByCourse,
+  deletePendingDraft,
+  type StoredPendingDraft,
+} from '@open-edu/storage';
 
 export type DraftApplyMode = 'file' | 'buffer';
 
@@ -53,20 +59,76 @@ interface StudioAssistantContextType {
 
 const StudioAssistantContext = createContext<StudioAssistantContextType | null>(null);
 
-export function StudioAssistantProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function StudioAssistantProvider({ children }: { children: React.ReactNode }) {
   const [panelOpen, setPanelOpenState] = useState(getAssistantPanelOpen());
   const [panelWidth, setPanelWidthState] = useState(getAssistantPanelWidth());
   const [context, setContextState] = useState<StudioContextSnapshot | null>(null);
   const [enabled, setEnabledState] = useState(isAssistantEnabled);
-  const [pendingDrafts, setPendingDrafts] = useState<PendingDraft | null>(null);
-  const [ephemeralSuggestions, setEphemeralSuggestions] = useState<SuggestionChip[] | null>(
-    null,
-  );
+  const [pendingDrafts, setPendingDraftsState] = useState<PendingDraft | null>(null);
+  const [ephemeralSuggestions, setEphemeralSuggestions] = useState<SuggestionChip[] | null>(null);
   const [lastCourseQuality, setLastCourseQuality] = useState<AiQualityItem[] | null>(null);
+  const hydrationDoneRef = useRef(false);
+
+  // Hydrate pending drafts from IndexedDB when context (with courseId) becomes available.
+  useEffect(() => {
+    const courseId = context?.course?.id;
+    if (!courseId || hydrationDoneRef.current) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const stored = await listPendingDraftsByCourse(courseId);
+        if (cancelled || !stored.length) return;
+        const latest = stored[0];
+        if (!latest) return;
+        setPendingDraftsState({
+          items: latest.items as DraftItem[],
+          source: latest.source as PendingDraft['source'],
+          applyMode: latest.applyMode as PendingDraft['applyMode'],
+          context: latest.context as PendingDraft['context'],
+        });
+      } catch {
+        // IndexedDB unavailable — keep null drafts.
+      } finally {
+        hydrationDoneRef.current = true;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [context?.course?.id]);
+
+  const contextRef = useRef(context);
+  contextRef.current = context;
+
+  const setPendingDrafts = useCallback((drafts: PendingDraft | null) => {
+    setPendingDraftsState(drafts);
+    // Persist to IndexedDB.
+    void (async () => {
+      try {
+        const courseId = contextRef.current?.course?.id;
+        if (!courseId) return;
+        // Delete existing pending drafts for this course first.
+        const existing = await listPendingDraftsByCourse(courseId);
+        for (const d of existing) {
+          await deletePendingDraft(d.id);
+        }
+        if (!drafts) return;
+        const now = new Date().toISOString();
+        const stored: StoredPendingDraft = {
+          id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          courseId,
+          items: drafts.items,
+          source: drafts.source,
+          applyMode: drafts.applyMode,
+          context: drafts.context,
+          createdAt: now,
+        };
+        await savePendingDraft(stored);
+      } catch {
+        // IndexedDB write failed — UI state is still updated.
+      }
+    })();
+  }, []);
 
   const setPanelOpen = useCallback((open: boolean) => {
     setPanelOpenState(open);
@@ -97,17 +159,13 @@ export function StudioAssistantProvider({
       setPanelOpen(true);
       if (preset.spec) {
         setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent('studio:assistant:spec', { detail: preset.spec }),
-          );
+          window.dispatchEvent(new CustomEvent('studio:assistant:spec', { detail: preset.spec }));
         }, 100);
         return;
       }
       if (preset.message) {
         setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent('studio:assistant:preset', { detail: preset }),
-          );
+          window.dispatchEvent(new CustomEvent('studio:assistant:preset', { detail: preset }));
         }, 100);
       }
     },

@@ -33,6 +33,7 @@ import type { EditorMode } from './editor/types';
 import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
 import type { StudioMode } from './studio/types.js';
 import { StudioApp } from './studio/StudioApp.js';
+import { BrowserStudioProvider, useBrowserStudio } from './studio/browserPreview.js';
 import { DeveloperToolbar } from './components/DeveloperToolbar.js';
 import { useTranslation } from '@open-edu/i18n';
 
@@ -462,14 +463,73 @@ function SinglePackageDeveloperApp({
   );
 }
 
+function BrowserStudioApp({
+  mode,
+  onModeChange,
+  themeId,
+  onThemeChange,
+}: {
+  mode: StudioMode;
+  onModeChange: (mode: StudioMode) => void;
+  themeId: ThemeId;
+  onThemeChange: (id: ThemeId) => void;
+}): JSX.Element {
+  const { t } = useTranslation();
+  const { api, loadedPackage, isLoading, storageStatus } = useBrowserStudio();
+
+  if (isLoading && !loadedPackage) {
+    return (
+      <div className="bg-surface flex h-screen items-center justify-center" role="status">
+        <p className="text-on-surface-variant text-sm">{t('studio.browser.loadingCourses')}</p>
+      </div>
+    );
+  }
+
+  const storageNotice = storageStatus.available
+    ? t('studio.browser.storageNotice')
+    : storageStatus.reason === 'quota-exceeded'
+      ? t('studio.browser.storageQuotaExceeded')
+      : t('studio.browser.storageUnavailable');
+
+  return (
+    <StudioApp
+      mode={mode}
+      onModeChange={onModeChange}
+      loadedPackage={loadedPackage}
+      api={api}
+      storageNotice={storageNotice}
+      browserMode
+      themeId={themeId}
+      onThemeChange={onThemeChange}
+    />
+  );
+}
+
 export function DevApp(): JSX.Element {
   const [studioMode, setStudioModeState] = useState<StudioMode>(() => getStudioMode());
   const [themeId, setThemeId] = useThemePreference();
+
+  const isBrowserMode = import.meta.env.VITE_OPEN_EDU_BROWSER === '1';
 
   const setStudioModeAndPersist = useCallback((mode: StudioMode) => {
     setStudioMode(mode);
     setStudioModeState(mode);
   }, []);
+
+  if (isBrowserMode) {
+    return (
+      <RuntimeThemeProvider themeId={themeId}>
+        <BrowserStudioProvider>
+          <BrowserStudioApp
+            mode={studioMode}
+            onModeChange={setStudioModeAndPersist}
+            themeId={themeId}
+            onThemeChange={setThemeId}
+          />
+        </BrowserStudioProvider>
+      </RuntimeThemeProvider>
+    );
+  }
 
   if (studioMode === 'creator') {
     return (

@@ -1,10 +1,149 @@
 import { describe, it, expect } from 'vitest';
-import { loadNodes } from './nodes';
+import { loadNodes, parseNodeContent, loadNodesFromSource } from './nodes';
 import { NodeLoadError } from './errors';
 import { resolve, join } from 'node:path';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
+import type { PackageFileSource } from './types';
 
 const fixturesDir = resolve(__dirname, '__fixtures__');
+
+function makeSource(files: Record<string, string | Uint8Array>): PackageFileSource {
+  const map = new Map<string, Uint8Array>();
+  for (const [path, data] of Object.entries(files)) {
+    map.set(path, typeof data === 'string' ? new TextEncoder().encode(data) : new Uint8Array(data));
+  }
+  const list = (prefix?: string) => {
+    const names = Array.from(map.keys()).sort();
+    return prefix ? names.filter((p) => p.startsWith(prefix)) : names;
+  };
+  return {
+    get: (path) => map.get(path),
+    list,
+  };
+}
+
+const browserFixtureSource = makeSource({
+  'package.json': JSON.stringify({
+    id: 'browser-studio',
+    title: 'Browser Studio Composite',
+    version: '1.0.0',
+    author: 'Open-Edu',
+    entry: 'nodes/lesson.md',
+  }),
+  'workflow.json': JSON.stringify({
+    routing: { 'nodes/lesson.md': { onComplete: 'nodes/quiz.json' } },
+  }),
+  'nodes/lesson.md': '# Why the Sky Is Blue\n\nSome text.',
+  'nodes/quiz.json': JSON.stringify({
+    type: 'quiz',
+    title: 'Sky Quiz',
+    question: 'Which color scatters the most?',
+    options: [
+      { id: 'a', text: 'Red', correct: false },
+      { id: 'b', text: 'Blue', correct: true },
+    ],
+  }),
+  'assets/diagram.png': new Uint8Array([137, 80, 78, 71]),
+  'assets/notes.txt': 'Unknown text file',
+});
+
+describe('loadNodesFromSource', () => {
+  it('loads markdown and JSON nodes from an in-memory source', () => {
+    const nodes = loadNodesFromSource(browserFixtureSource);
+    expect(nodes).toHaveLength(2);
+    const paths = nodes.map((n) => n.relativePath).sort();
+    expect(paths).toEqual(['nodes/lesson.md', 'nodes/quiz.json']);
+    const lesson = nodes.find((n) => n.relativePath === 'nodes/lesson.md');
+    expect(lesson!.node.title).toBe('Why the Sky Is Blue');
+    const quiz = nodes.find((n) => n.relativePath === 'nodes/quiz.json');
+    if (quiz!.node.type === 'quiz') {
+      expect(quiz!.node.question).toBe('Which color scatters the most?');
+    }
+  });
+
+  it('uses relative paths as both path and relativePath', () => {
+    const [lesson] = loadNodesFromSource(browserFixtureSource);
+    expect(lesson!.path).toBe('nodes/lesson.md');
+    expect(lesson!.relativePath).toBe('nodes/lesson.md');
+  });
+
+  it('rejects subdirectories inside nodes/', () => {
+    const source = makeSource({
+      'nodes/lesson.md': '# Lesson',
+      'nodes/sub/a.md': '# Nested',
+    });
+    expect(() => loadNodesFromSource(source)).toThrow(NodeLoadError);
+    try {
+      loadNodesFromSource(source);
+      expect.fail('should have thrown');
+    } catch (err) {
+      expect((err as Error).message).toContain('Subdirectories inside nodes/');
+    }
+  });
+
+  it('returns an empty array when there are no nodes', () => {
+    const source = makeSource({ 'package.json': '{}' });
+    expect(loadNodesFromSource(source)).toEqual([]);
+  });
+});
+
+describe('parseNodeContent', () => {
+  it('preserves markdown title extraction', () => {
+    expect(parseNodeContent('nodes/lesson.md', '# Getting Started')).toEqual({
+      type: 'lesson',
+      title: 'Getting Started',
+    });
+    expect(parseNodeContent('nodes/plain.md', 'No heading')).toEqual({
+      type: 'lesson',
+      title: undefined,
+    });
+  });
+
+  it('parses a valid JSON node', () => {
+    const node = parseNodeContent(
+      'nodes/quiz.json',
+      JSON.stringify({
+        type: 'quiz',
+        question: 'Q?',
+        options: [
+          { id: 'a', text: 'A', correct: true },
+          { id: 'b', text: 'B', correct: false },
+        ],
+      }),
+    );
+    expect(node.type).toBe('quiz');
+  });
+
+  it('rejects malformed JSON nodes', () => {
+    expect(() => parseNodeContent('nodes/quiz.json', 'not json')).toThrow(NodeLoadError);
+  });
+
+  it('rejects schema-invalid JSON nodes', () => {
+    expect(() => parseNodeContent('nodes/quiz.json', JSON.stringify({ type: 'quiz' }))).toThrow(
+      NodeLoadError,
+    );
+  });
+
+  it('rejects JSON nodes without a type', () => {
+    expect(() => parseNodeContent('nodes/x.json', JSON.stringify({ question: 'Q' }))).toThrow(
+      NodeLoadError,
+    );
+  });
+
+  it('rejects unsupported extensions', () => {
+    expect(() => parseNodeContent('nodes/file.txt', 'hello')).toThrow(NodeLoadError);
+  });
+
+  it('uses logical paths in error messages', () => {
+    try {
+      parseNodeContent('nodes/quiz.json', '{bad');
+      expect.fail('should have thrown');
+    } catch (err) {
+      expect((err as Error).message).toContain('nodes/quiz.json');
+      expect((err as Error).message).not.toMatch(/\/Users\//);
+    }
+  });
+});
 
 async function withTempDir(fn: (dir: string) => Promise<void>): Promise<void> {
   const dir = join(fixturesDir, `tmp-${Math.random().toString(36).slice(2)}`);

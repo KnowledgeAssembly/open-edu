@@ -4,7 +4,15 @@ import { recordRecentCourse, listRecentCourses, type RecentCourse } from './rece
 const make = (id: string, title: string): RecentCourse => ({
   id,
   title,
+  location: 'local',
   packageDir: `/tmp/${id}`,
+  updatedAt: Date.now(),
+});
+
+const makeBrowser = (id: string, title: string): RecentCourse => ({
+  id,
+  title,
+  location: 'browser',
   updatedAt: Date.now(),
 });
 
@@ -24,6 +32,14 @@ describe('recentCourses', () => {
     expect(list).toHaveLength(2);
     expect(list[0]!.id).toBe('b');
     expect(list[1]!.id).toBe('a');
+  });
+
+  it('stores browser courses with a browser id and no fake path', () => {
+    recordRecentCourse(makeBrowser('browser-course', 'Browser Course'));
+    const list = listRecentCourses();
+    expect(list[0]!.location).toBe('browser');
+    expect(list[0]!.packageDir).toBeUndefined();
+    expect(list[0]!.id).toBe('browser-course');
   });
 
   it('deduplicates by id and moves to front', () => {
