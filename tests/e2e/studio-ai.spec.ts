@@ -147,7 +147,10 @@ test.describe('Browser Studio AI (Phase 2)', () => {
 
   test('mocked gateway chat flow confirms gateway is reachable', async ({ page }) => {
     await openStudio(page);
-    mockGateway(page, { available: true });
+    mockGateway(page, {
+      available: true,
+      chatResponse: 'Use a lesson with water chemistry examples.',
+    });
     await createTemplateCourse(page, 'Lesson + quiz');
 
     // Open the assistant panel.
@@ -162,8 +165,10 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await chatInput.fill('Help me create a lesson about water chemistry');
     await chatInput.press('Enter');
 
-    // Verify the input is cleared after sending and the app is still functional.
-    await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 15000 });
+    // Verify the hosted JSON response is adapted into an assistant message.
+    await expect(page.getByText('Use a lesson with water chemistry examples.')).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test('gateway failure during generate-draft shows error and allows retry', async ({ page }) => {
@@ -210,6 +215,18 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     mockGateway(page, { available: true, generateDraft: true });
     await createTemplateCourse(page, 'Lesson + quiz');
 
+    const assistantButton = page
+      .getByRole('button', { name: 'Open Author Assistant', exact: true })
+      .first();
+    await assistantButton.click();
+    const specInput = page.locator('input[type="file"][aria-label="Attach course spec"]');
+    await specInput.setInputFiles({
+      name: 'water-course.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{}'),
+    });
+    await expect(page.getByText('Course draft: AI Water Course')).toBeVisible({ timeout: 15000 });
+
     // Verify IndexedDB has the pending-drafts store after mount.
     const hasStore = await page.evaluate(async () => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -235,5 +252,19 @@ test.describe('Browser Studio AI (Phase 2)', () => {
       return has;
     });
     expect(hasDraftStore).toBe(true);
+
+    // The draft card is backed by persisted chat metadata + studio-drafts,
+    // not only by the in-memory provider state.
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText('Course draft: AI Water Course')).toBeVisible({ timeout: 15000 });
+
+    // Accept the draft locally after reload; the gateway is never called again.
+    await page.getByRole('button', { name: 'Accept draft' }).click();
+    await page.getByRole('button', { name: 'Replace content' }).click();
+    await expect(page.getByRole('heading', { name: 'AI Water Course', level: 2 })).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByRole('button', { name: 'lesson-1', exact: true })).toBeVisible();
   });
 });

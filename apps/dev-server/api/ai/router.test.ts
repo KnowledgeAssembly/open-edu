@@ -131,14 +131,13 @@ describe('gateway router', () => {
       },
       {
         safeguards: { allowedOrigins: [] },
+        chatDeps: { completeText: async () => 'Mocked gateway response.' },
       },
     );
-    expect([200, 502]).toContain(res.status);
+    expect(res.status).toBe(200);
     const body = res.body as { requestId: string; terminal: string };
     expect(body.requestId).toBeTruthy();
-    // Without a provider key the completion fails; the terminal must still be
-    // a deterministic error event and never leak provider internals.
-    expect(body.terminal).toBe('error');
+    expect(body.terminal).toBe('finished');
   });
 
   it('enforces rate limiting', async () => {

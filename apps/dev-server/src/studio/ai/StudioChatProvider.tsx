@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, type UIMessage } from 'ai';
+import { DefaultChatTransport, type ChatTransport, type UIMessage, type UIMessageChunk } from 'ai';
 import { useTranslation } from '@open-edu/i18n';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
@@ -57,6 +57,59 @@ interface StudioChatContextType {
   onOpenPath?: (path: string) => void;
   onError?: (message: string) => void;
   onOutlineChanged?: () => void;
+}
+
+interface HostedChatResponse {
+  terminal: 'finished' | 'error';
+  content?: string;
+  error?: string;
+}
+
+/** Adapt the stateless JSON gateway contract to AI SDK UI message chunks. */
+function createHostedChatTransport(
+  api: string,
+  buildBody: (messages: UIMessage[], chatId: string) => object,
+): ChatTransport<UIMessage> {
+  return {
+    async sendMessages({ messages, chatId, abortSignal }) {
+      const response = await fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(buildBody(messages, chatId)),
+        signal: abortSignal,
+      });
+      const data = (await response.json().catch(() => null)) as HostedChatResponse | null;
+      if (!response.ok) {
+        throw new Error(data?.error ?? 'The AI gateway request failed.');
+      }
+      if (!data || data.terminal !== 'finished') {
+        throw new Error(data?.error ?? 'The AI gateway could not complete the request.');
+      }
+
+      const messageId = `hosted-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const textId = `${messageId}-text`;
+      const content = data.content ?? '';
+      const chunks: UIMessageChunk[] = [
+        { type: 'start', messageId },
+        { type: 'start-step' },
+        { type: 'text-start', id: textId },
+        ...(content ? [{ type: 'text-delta' as const, id: textId, delta: content }] : []),
+        { type: 'text-end', id: textId },
+        { type: 'finish-step' },
+        { type: 'finish', finishReason: 'stop' },
+      ];
+      return new ReadableStream<UIMessageChunk>({
+        start(controller) {
+          for (const chunk of chunks) controller.enqueue(chunk);
+          controller.close();
+        },
+      });
+    },
+    async reconnectToStream() {
+      return null;
+    },
+  };
 }
 
 const StudioChatContext = createContext<StudioChatContextType | null>(null);
@@ -180,11 +233,9 @@ function ChatRuntime({
   const hydrationPendingRef = useRef(hydrationPending);
   hydrationPendingRef.current = hydrationPending;
 
-  const transport = useRef(
-    new DefaultChatTransport({
-      api: chatApiUrl ?? '/api/studio/ai/chat',
-      prepareSendMessagesRequest: ({ id, messages }) => ({
-        body: {
+  const transport = useRef<ChatTransport<UIMessage>>(
+    chatApiUrl
+      ? createHostedChatTransport(chatApiUrl, (messages, id) => ({
           conversationId: id,
           messages: messages.map((m) => ({ role: m.role, content: extractText(m) })),
           context: {
@@ -193,9 +244,22 @@ function ChatRuntime({
               ? { lastCourseDraftQuality: lastCourseQualityRef.current }
               : {}),
           },
-        },
-      }),
-    }),
+        }))
+      : new DefaultChatTransport({
+          api: '/api/studio/ai/chat',
+          prepareSendMessagesRequest: ({ id, messages }) => ({
+            body: {
+              conversationId: id,
+              messages: messages.map((m) => ({ role: m.role, content: extractText(m) })),
+              context: {
+                ...(contextRef.current ?? {}),
+                ...(lastCourseQualityRef.current?.length
+                  ? { lastCourseDraftQuality: lastCourseQualityRef.current }
+                  : {}),
+              },
+            },
+          }),
+        }),
   ).current;
 
   const {

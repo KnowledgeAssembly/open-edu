@@ -5,14 +5,16 @@ import {
   itemEditRequestSchema,
   chatRequestSchema,
 } from './requestSchema.js';
-import { generateDraft } from './generateDraft.js';
-import { generateItem } from './itemGeneration.js';
-import { gatewayChat } from './chat.js';
+import { generateDraft, type GenerateDraftDeps } from './generateDraft.js';
+import { generateItem, type ItemGenerationDeps } from './itemGeneration.js';
+import { gatewayChat, type ChatDeps } from './chat.js';
 import {
   isAllowedOrigin,
   assertBodyLimits,
   checkGatewayRateLimit,
   guardedHandler,
+  isAllowedModel,
+  isAllowedProvider,
   type GatewaySafeguardOptions,
 } from './safeguards.js';
 import { GatewayError, safeErrorBody } from './errors.js';
@@ -22,6 +24,9 @@ export type GatewayRoute = 'status' | 'generate-draft' | 'item' | 'chat';
 export interface GatewayRouterOptions {
   safeguards?: GatewaySafeguardOptions;
   isAvailable?: () => boolean;
+  generateDraftDeps?: GenerateDraftDeps;
+  itemGenerationDeps?: ItemGenerationDeps;
+  chatDeps?: ChatDeps;
 }
 
 export interface RouteRequest {
@@ -83,6 +88,15 @@ export async function routeRequest(
     };
   }
 
+  const provider = process.env.LLM_PROVIDER ?? 'openai';
+  const model = process.env.LLM_MODEL ?? 'gpt-4o-mini';
+  if (!isAllowedProvider(provider) || !isAllowedModel(model)) {
+    return {
+      status: 503,
+      body: safeErrorBody(requestId, 'missing-config', 'AI provider configuration is not allowed.'),
+    };
+  }
+
   const route = parseRoute(req.path);
   if (!route) {
     return { status: 404, body: safeErrorBody(requestId, 'invalid-request', 'Unknown route.') };
@@ -134,6 +148,7 @@ async function dispatch(
       }
       return generateDraft(parsed.data, requestId, {
         isAvailable: options.isAvailable,
+        ...(options.generateDraftDeps ?? {}),
       });
     }
     case 'item': {
@@ -144,14 +159,14 @@ async function dispatch(
       if (!parsed.success) {
         throw new GatewayError('invalid-request', zErrorMessage(parsed), requestId);
       }
-      return generateItem(candidate as never, requestId);
+      return generateItem(candidate as never, requestId, options.itemGenerationDeps);
     }
     case 'chat': {
       const parsed = chatRequestSchema.safeParse(req.body);
       if (!parsed.success) {
         throw new GatewayError('invalid-request', zErrorMessage(parsed), requestId);
       }
-      return gatewayChat(parsed.data, requestId);
+      return gatewayChat(parsed.data, requestId, options.chatDeps);
     }
     default:
       throw new GatewayError('invalid-request', 'Unknown route', requestId);
