@@ -55,7 +55,7 @@ test.describe('Browser Studio (Phase 1)', () => {
     // archive flow can prove that unknown text and binary assets survive.
     await page.evaluate(async () => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('open-edu', 5);
+        const request = indexedDB.open('open-edu');
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });
@@ -114,7 +114,7 @@ test.describe('Browser Studio (Phase 1)', () => {
 
     const importedFiles = await page.evaluate(async () => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('open-edu', 5);
+        const request = indexedDB.open('open-edu');
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });

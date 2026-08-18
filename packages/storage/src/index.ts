@@ -9,7 +9,12 @@ export {
   type BadgeData,
   type CardProgressData,
 } from './db.js';
-export { type StoredStudioCourse, type StoredStudioFile, type StudioCourseSource } from './db.js';
+export {
+  type StoredStudioCourse,
+  type StoredStudioFile,
+  type StoredStudioDraft,
+  type StudioCourseSource,
+} from './db.js';
 export {
   saveStudioCourse,
   getStudioCourse,
@@ -17,6 +22,13 @@ export {
   replaceStudioCourse,
   deleteStudioCourse,
 } from './studio-course-store.js';
+export {
+  saveStudioDraft,
+  getStudioDraft,
+  listStudioDrafts,
+  listStudioDraftsByCourse,
+  deleteStudioDraft,
+} from './studio-draft-store.js';
 export { saveCourse, getCourse, listCourses, deleteCourse, replaceCourse } from './course-store.js';
 export { saveBundle, getBundle, listBundles, replaceBundle, deleteBundle } from './bundle-store.js';
 export { type DistributionMeta, type StoredBundle, type StoredBundleModule } from './db.js';

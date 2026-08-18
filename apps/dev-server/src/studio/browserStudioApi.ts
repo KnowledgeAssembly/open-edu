@@ -23,6 +23,13 @@ import { assertSafeCoursePath, sortCourseFiles, type StudioFile } from './course
 import { getTemplateById } from './templates/catalog.js';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './outlineModel.js';
 import type { LibraryEntry } from './library/types.js';
+import { BrowserAiClient, type BrowserAiClientOptions } from './browserAiClient.js';
+import type {
+  CourseDraftResult,
+  AiItemAddResult,
+  AiItemEditResult,
+  DraftItem,
+} from './ai/types.js';
 
 const TEXT_DECODER = new TextDecoder();
 const TEXT_ENCODER = new TextEncoder();
@@ -46,6 +53,8 @@ export interface BrowserStudioApiOptions {
   store?: BrowserCourseStore;
   session?: BrowserStudioSession;
   onPackageChanged?: () => void;
+  aiClient?: BrowserAiClient;
+  aiClientOptions?: BrowserAiClientOptions;
 }
 
 export function createBrowserStudioSession(): BrowserStudioSession {
@@ -128,6 +137,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   const store = options.store ?? createBrowserCourseStore();
   const session = options.session ?? createBrowserStudioSession();
   const onPackageChanged = options.onPackageChanged ?? (() => {});
+  const aiClient = options.aiClient ?? new BrowserAiClient(options.aiClientOptions ?? {});
 
   async function requireActiveCourse(): Promise<BrowserCourse> {
     if (!session.activeCourseId) {
@@ -532,6 +542,81 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     }
   }
 
+  function toCourseDraftResult(
+    id: string,
+    hasFiles: boolean,
+    title: string,
+    outlinePreview: Array<{ title: string; kind: string }>,
+    quality: Array<{ id: string; labelKey: string; passed: boolean; detail?: string }>,
+  ): CourseDraftResult {
+    return {
+      success: hasFiles,
+      title,
+      outlinePreview,
+      quality,
+      draftId: hasFiles ? id : '',
+      error: hasFiles ? undefined : 'Could not generate a course draft.',
+      code: hasFiles ? undefined : 'compile',
+    };
+  }
+
+  async function generateAndPersistDraft(input: {
+    notes?: string;
+    spec?: string;
+    specExt?: '.json' | '.md';
+  }): Promise<CourseDraftResult> {
+    if (!session.activeCourseId) {
+      throw new BrowserStudioApiError('no-active-course', 'No course is open');
+    }
+    try {
+      const response = await aiClient.generateDraft(input, session.activeCourseId);
+      return toCourseDraftResult(
+        (await aiClient.listDrafts(session.activeCourseId)).at(-1)?.id ?? '',
+        response.files.length > 0,
+        response.title,
+        response.outlinePreview,
+        response.quality,
+      );
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? 'llm';
+      return {
+        success: false,
+        title: undefined,
+        outlinePreview: [],
+        quality: [],
+        draftId: '',
+        error: err instanceof Error ? err.message : 'Could not generate a draft.',
+        code: code === 'provider-error' ? 'llm' : 'compile',
+      };
+    }
+  }
+
+  async function commitLocalDraft(
+    draftId: string,
+    force?: boolean,
+  ): Promise<{ success: boolean; title?: string; error?: string }> {
+    void force;
+    if (!session.activeCourseId) {
+      return { success: false, error: 'No course is open' };
+    }
+    const draft = await aiClient.getDraft(draftId);
+    if (!draft) {
+      return { success: false, error: 'Draft not found' };
+    }
+    const course = await store.get(session.activeCourseId);
+    if (!course) {
+      return { success: false, error: `Course ${session.activeCourseId} not found` };
+    }
+    const files: StudioFile[] = draft.files.map((f) => ({
+      path: f.path,
+      data: new Uint8Array(f.data),
+    }));
+    await store.replace(course.id, { ...course, title: draft.title, files, updatedAt: Date.now() });
+    await aiClient.discardDraft(draftId);
+    onPackageChanged();
+    return { success: true, title: draft.title };
+  }
+
   return {
     getPackageDir: async () => `browser://${session.activeCourseId ?? 'no-course'}`,
     validate,
@@ -550,15 +635,42 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     deleteFile,
     getPreviewPackage,
     getStorageStatus,
-    getAiStatus: async () => ({ available: false, reason: 'disabled' }) as const,
-    generateFromNotes: async () => makeUnsupported('generateFromNotes'),
-    uploadSpec: async () => makeUnsupported('uploadSpec'),
-    generateCourseDraft: async () => makeUnsupported('generateCourseDraft'),
-    uploadSpecDraft: async () => makeUnsupported('uploadSpecDraft'),
-    commitCourseDraft: async () => makeUnsupported('commitCourseDraft'),
-    discardCourseDraft: async () => makeUnsupported('discardCourseDraft'),
-    generateItemAdd: async () => makeUnsupported('generateItemAdd'),
-    generateItemEdit: async () => makeUnsupported('generateItemEdit'),
+    getAiStatus: () => aiClient.getStatus(),
+    generateFromNotes: (notes: string) => generateAndPersistDraft({ notes }),
+    uploadSpec: (spec: string, specExt: '.json' | '.md') =>
+      generateAndPersistDraft({ spec, specExt }),
+    generateCourseDraft: (notes: string) => generateAndPersistDraft({ notes }),
+    uploadSpecDraft: (spec: string, specExt: '.json' | '.md') =>
+      generateAndPersistDraft({ spec, specExt }),
+    commitCourseDraft: (draftId: string, force?: boolean) => commitLocalDraft(draftId, force),
+    discardCourseDraft: async (draftId: string) => {
+      await aiClient.discardDraft(draftId);
+      return { success: true };
+    },
+    generateItemAdd: async (kind, description): Promise<AiItemAddResult> => {
+      const result = await aiClient.generateItem({
+        kind,
+        description,
+      });
+      const item = (result as { item?: unknown }).item;
+      if (item) {
+        return { ok: true, item: item as DraftItem };
+      }
+      return { ok: false, code: 'item-retry-failed', error: 'Item generation failed.' };
+    },
+    generateItemEdit: async (kind, intent, currentContent, params): Promise<AiItemEditResult> => {
+      const result = await aiClient.generateItem({
+        kind,
+        intent,
+        currentContent,
+        ...(params ? { params } : {}),
+      });
+      const items = (result as { items?: unknown }).items;
+      if (Array.isArray(items)) {
+        return { ok: true, items: items as DraftItem[] };
+      }
+      return { ok: false, code: 'item-retry-failed', error: 'Item generation failed.' };
+    },
     importCourseFolder: async () => makeUnsupported('importCourseFolder'),
     createUnit: async () => makeUnsupported('createUnit'),
     exportUnitOep: async () => makeUnsupported('exportUnitOep'),
