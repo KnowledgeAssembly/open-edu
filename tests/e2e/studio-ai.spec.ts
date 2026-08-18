@@ -136,7 +136,9 @@ test.describe('Browser Studio AI (Phase 2)', () => {
 
     // Reload — edits persist in browser storage.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Outline', exact: true })).toBeVisible({
+      timeout: 30000,
+    });
     await expect(
       page.getByRole('button', {
         name: 'What is the boiling point of water? (edited)',
