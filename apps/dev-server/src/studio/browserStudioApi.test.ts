@@ -312,12 +312,12 @@ describe('BrowserStudioApi', () => {
     }
   });
 
-  it('reports AI as unavailable in Phase 1 browser mode', async () => {
+  it('reports AI availability through the gateway client (unavailable without fetch)', async () => {
     const { api } = createBrowserApi();
-    expect(await api.getAiStatus()).toEqual({ available: false, reason: 'disabled' });
-    await expect(api.generateItemAdd('lesson', 'x')).rejects.toMatchObject({
-      code: 'unsupported-in-browser',
-    });
+    // Without a stubbed fetch the client reports AI as unavailable (manual
+    // authoring continues to work) rather than throwing.
+    const status = await api.getAiStatus();
+    expect(status.available).toBe(false);
   });
 
   it('reports storage status', async () => {

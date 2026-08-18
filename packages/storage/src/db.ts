@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 5;
+export const DB_VERSION = 7;
 
 export interface DistributionMeta {
   sourceKind: string;
@@ -110,6 +110,26 @@ export interface StoredStudioCourse {
   source?: StudioCourseSource;
 }
 
+export interface StoredStudioDraft {
+  id: string;
+  courseId: string;
+  version: string;
+  title: string;
+  files: StoredStudioFile[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StoredPendingDraft {
+  id: string;
+  courseId: string;
+  items: Array<{ kind: string; title: string; content: string }>;
+  source: string;
+  applyMode: string;
+  context: { kind?: string; path?: string };
+  createdAt: string;
+}
+
 export interface OpenEduDB {
   courses: StoredCourse;
   progress: LearningProgress;
@@ -121,6 +141,8 @@ export interface OpenEduDB {
   'note-tags': NoteTagRecord;
   bundles: StoredBundle;
   'studio-courses': StoredStudioCourse;
+  'studio-drafts': StoredStudioDraft;
+  'pending-drafts': StoredPendingDraft;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -163,6 +185,12 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('studio-courses')) {
           db.createObjectStore('studio-courses', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('studio-drafts')) {
+          db.createObjectStore('studio-drafts', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('pending-drafts')) {
+          db.createObjectStore('pending-drafts', { keyPath: 'id' });
         }
       },
     }).catch((err) => {

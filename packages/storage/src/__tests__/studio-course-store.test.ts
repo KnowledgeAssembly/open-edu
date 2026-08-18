@@ -32,11 +32,11 @@ describe('studio-course-store', () => {
     resetDatabase();
   });
 
-  it('migrates the database from version 4 to version 5 and adds the studio-courses store', async () => {
+  it('migrates from a legacy database and adds the studio stores', async () => {
     // Start from a deleted database (no open connections after beforeEach
     // closed them), then create a version-4 database with the legacy stores
-    // only. Opening through openDatabase() must run the v4 → v5 upgrade and
-    // add the studio-courses store.
+    // only. Opening through openDatabase() must run the v4 → v6 upgrade and
+    // add the studio-courses and studio-drafts stores.
     await new Promise<void>((resolve, reject) => {
       const req = indexedDB.deleteDatabase('open-edu');
       req.onsuccess = () => resolve();
@@ -63,6 +63,7 @@ describe('studio-course-store', () => {
     resetDatabase();
     const db = await openDatabase();
     expect(Array.from(db.objectStoreNames)).toContain('studio-courses');
+    expect(Array.from(db.objectStoreNames)).toContain('studio-drafts');
     expect(Array.from(db.objectStoreNames)).toContain('courses');
   });
 

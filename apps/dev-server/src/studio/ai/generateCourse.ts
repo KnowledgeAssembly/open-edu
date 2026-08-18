@@ -2,22 +2,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import {
-  compile as compileFromCourseCompiler,
-  type CompileResult,
-} from '@open-edu/course-compiler';
+import { compile as compileFromCourseCompiler } from '@open-edu/course-compiler';
 import { loadPackage } from '@open-edu/core';
-import { buildCourseSpecPrompt, extractJsonObject } from './prompts/index.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
 import { detectActivityKind, titleFromMarkdown, titleFromQuizJson } from '../outlineModel.js';
 import type { AiGenerateErrorCode, CourseDraftResult } from './types.js';
+import { resolveCourseSpec, type CourseSpecSource } from './generateCoursePackage.js';
 
-const MIN_NOTES_LENGTH = 40;
 const DRAFT_TTL_MS = 30 * 60 * 1000;
 
-export type CourseDraftSource =
-  | { kind: 'notes'; notes: string; completeText: (prompt: string) => Promise<string> }
-  | { kind: 'spec'; spec: string; extension: '.json' | '.md' };
+export type CourseDraftSource = CourseSpecSource;
 
 export interface GenerateCourseOptions {
   source: CourseDraftSource;
@@ -100,58 +94,37 @@ async function buildOutlinePreview(
   }
 }
 
-function readManifestTitle(packageDir: string): string | undefined {
-  try {
-    const manifestPath = join(packageDir, 'package.json');
-    if (!existsSync(manifestPath)) return undefined;
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as { title?: string };
-    return manifest.title;
-  } catch {
-    return undefined;
-  }
-}
-
+/**
+ * Local draft generation using the shared `resolveCourseSpec` service.
+ * Adds local-only in-memory draft storage with TTL for the Vite middleware.
+ * Unlike the hosted `generateCoursePackage`, this preserves the temp directory
+ * so `commitCourseDraft` can write to packageDir later.
+ */
 export async function generateCourseDraft(
   options: GenerateCourseOptions,
 ): Promise<CourseDraftResult> {
   const { source } = options;
   const compile = options.compile ?? compileFromCourseCompiler;
 
-  if (source.kind === 'spec' && source.spec.trim().length === 0) {
-    return errorResult('spec-invalid', 'Spec file is empty');
-  }
-
-  if (source.kind === 'notes' && source.notes.trim().length < MIN_NOTES_LENGTH) {
-    return errorResult('notes-too-short', 'Add more detail');
-  }
-
-  // Draft-only: never writes packageDir. has-content is enforced at commit time.
-
-  let raw: string;
-  if (source.kind === 'notes') {
-    try {
-      raw = await source.completeText(buildCourseSpecPrompt(source.notes));
-    } catch (error) {
-      return errorResult(
-        'llm',
-        `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  } else {
-    raw = source.spec;
-  }
-
+  // Validate and resolve spec using the shared service.
   let specText: string;
-  if (source.kind === 'notes') {
-    let spec: Record<string, unknown>;
-    try {
-      spec = extractJsonObject(raw);
-    } catch {
-      return errorResult('parse', 'Could not parse the draft');
-    }
-    specText = JSON.stringify(spec, null, 2);
-  } else {
-    specText = raw;
+  try {
+    specText = await resolveCourseSpec(source);
+  } catch (error) {
+    const code =
+      error instanceof Error && 'code' in error ? (error as { code: string }).code : 'compile';
+    return errorResult(
+      code === 'notes-too-short'
+        ? 'notes-too-short'
+        : code === 'spec-invalid'
+          ? 'spec-invalid'
+          : code === 'llm'
+            ? 'llm'
+            : code === 'parse'
+              ? 'parse'
+              : 'compile',
+      error instanceof Error ? error.message : 'Could not resolve course spec.',
+    );
   }
 
   const tempDir = await mkdtemp(join(tmpdir(), 'openedu-studio-ai-'));
@@ -162,22 +135,16 @@ export async function generateCourseDraft(
     await writeFile(specPath, specText, 'utf-8');
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
-    return errorResult(
-      'write',
-      `Could not write the draft: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    return errorResult('write', 'Could not write the draft.');
   }
 
   const outputDir = join(tempDir, 'out');
-  let result: CompileResult;
+  let result;
   try {
     result = await compile(specPath, { output: outputDir, validate: true });
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
-    return errorResult(
-      'compile',
-      `Could not compile the draft: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    return errorResult('compile', 'Could not compile the draft.');
   }
 
   const outlinePreview = await buildOutlinePreview(outputDir);
@@ -188,7 +155,6 @@ export async function generateCourseDraft(
   activeDrafts.set(draftId, {
     tempDir,
     outputDir,
-    title: readManifestTitle(outputDir),
     createdAt: Date.now(),
   });
 
@@ -199,15 +165,29 @@ export async function generateCourseDraft(
       quality,
       outlinePreview,
       draftId,
-      error: firstError?.message ?? 'Could not compile the draft',
+      error: firstError?.message ?? 'Could not compile the draft.',
     };
   }
+
+  // Read title from compiled output.
+  let title: string | undefined;
+  try {
+    const manifestPath = join(outputDir, 'package.json');
+    if (existsSync(manifestPath)) {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as { title?: string };
+      title = manifest.title;
+    }
+  } catch {
+    // Title is optional.
+  }
+
+  activeDrafts.get(draftId)!.title = title;
 
   return {
     success: true,
     quality,
     outlinePreview,
-    title: readManifestTitle(outputDir),
+    title,
     draftId,
   };
 }

@@ -79,6 +79,7 @@ interface StudioChatProviderProps {
   children: ReactNode;
   courseId?: string;
   api?: StudioApi;
+  chatApiUrl?: string;
   onOpenPath?: (path: string) => void;
   onError?: (message: string) => void;
   onOutlineChanged?: () => void;
@@ -125,6 +126,7 @@ export function StudioChatProvider(props: StudioChatProviderProps) {
       store={storeRef.current}
       setConversationIdState={setConversationIdState}
       api={props.api}
+      chatApiUrl={props.chatApiUrl}
       onOpenPath={props.onOpenPath}
       onError={props.onError}
       onOutlineChanged={props.onOutlineChanged}
@@ -143,6 +145,7 @@ function ChatRuntime({
   store,
   setConversationIdState,
   api,
+  chatApiUrl,
   onOpenPath,
   onError,
   onOutlineChanged,
@@ -155,6 +158,7 @@ function ChatRuntime({
   store: ConversationStore;
   setConversationIdState: (id: string) => void;
   api?: StudioApi;
+  chatApiUrl?: string;
   onOpenPath?: (path: string) => void;
   onError?: (message: string) => void;
   onOutlineChanged?: () => void;
@@ -178,7 +182,7 @@ function ChatRuntime({
 
   const transport = useRef(
     new DefaultChatTransport({
-      api: '/api/studio/ai/chat',
+      api: chatApiUrl ?? '/api/studio/ai/chat',
       prepareSendMessagesRequest: ({ id, messages }) => ({
         body: {
           conversationId: id,
