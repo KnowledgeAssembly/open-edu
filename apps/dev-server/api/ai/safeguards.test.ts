@@ -5,6 +5,8 @@ import {
   assertBodyLimits,
   checkGatewayRateLimit,
   guardedHandler,
+  isAllowedModel,
+  isAllowedProvider,
   resetGatewayRateLimits,
 } from './safeguards.js';
 import { GatewayError } from './errors.js';
@@ -31,6 +33,11 @@ describe('gateway safeguards', () => {
 
   it('allows wildcard origins', () => {
     expect(isAllowedOrigin('https://any.example', { allowedOrigins: ['*'] })).toBe(true);
+  });
+
+  it('allows provider-qualified models from the model allowlist', () => {
+    expect(isAllowedProvider('openrouter')).toBe(true);
+    expect(isAllowedModel('openai/gpt-4o-mini')).toBe(true);
   });
 
   it('rejects oversized bodies with payload-too-large', () => {

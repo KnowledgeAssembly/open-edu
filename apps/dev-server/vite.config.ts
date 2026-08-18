@@ -36,6 +36,7 @@ import {
   ItemRequestError,
 } from './src/studio/ai/itemGenerate.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
+import { createLocalAiMiddleware } from './api/ai/localViteGateway.js';
 import { createStudioAssistantHandler } from './src/studio/ai/chat/handler.js';
 import {
   resolveWorkspace,
@@ -54,6 +55,13 @@ import type { ActivitySummary } from './src/studio/types.js';
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const SERVER_ENV_KEYS = new Set([
+  'OPENAI_API_KEY',
+  'ANTHROPIC_API_KEY',
+  'OPENROUTER_API_KEY',
+  'OPEN_EDU_LOCAL_AI',
+]);
 
 const ASSET_MIME_TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
@@ -1590,22 +1598,34 @@ function virtualPackagePlugin(): Plugin {
   };
 }
 
+function localAiGatewayPlugin(enabled: boolean): Plugin {
+  return {
+    name: 'open-edu-local-ai-gateway',
+    configureServer(server) {
+      server.middlewares.use(createLocalAiMiddleware(enabled));
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const envDir = resolve(__dirname);
   const env = loadEnv(mode, envDir, '');
   for (const [key, value] of Object.entries(env)) {
-    if (key.startsWith('LLM_') && !process.env[key]) {
+    if ((key.startsWith('LLM_') || SERVER_ENV_KEYS.has(key)) && !process.env[key]) {
       process.env[key] = value;
     }
   }
 
   const isBrowserMode = mode === 'browser';
+  const localAiEnabled = isBrowserMode && process.env.OPEN_EDU_LOCAL_AI === '1';
 
   return {
     // In browser mode the Node-only eduPackageLoader is excluded. The virtual
     // package module still needs a resolution so DevApp can always import it;
     // browser mode always uses the local BrowserStudioProvider instead.
-    plugins: isBrowserMode ? [react(), virtualPackagePlugin()] : [react(), eduPackageLoader()],
+    plugins: isBrowserMode
+      ? [react(), virtualPackagePlugin(), localAiGatewayPlugin(localAiEnabled)]
+      : [react(), eduPackageLoader()],
     define: {
       'import.meta.env.VITE_OPEN_EDU_BROWSER': JSON.stringify(isBrowserMode ? '1' : '0'),
       OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR

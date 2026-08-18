@@ -137,7 +137,8 @@ export function isAllowedModel(model: string | undefined): boolean {
   if (!model) return true;
   const envList = process.env.OPEN_EDU_GATEWAY_ALLOWED_MODELS;
   const allowed = envList ? envList.split(',').map((m) => m.trim()) : ALLOWED_MODELS;
-  return allowed.includes(model);
+  const unqualifiedModel = model.includes('/') ? model.slice(model.lastIndexOf('/') + 1) : model;
+  return allowed.includes(model) || allowed.includes(unqualifiedModel);
 }
 
 export function isAllowedProvider(provider: string | undefined): boolean {
