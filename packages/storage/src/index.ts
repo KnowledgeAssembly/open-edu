@@ -13,6 +13,7 @@ export {
   type StoredStudioCourse,
   type StoredStudioFile,
   type StoredStudioDraft,
+  type StoredPendingDraft,
   type StudioCourseSource,
 } from './db.js';
 export {
@@ -29,6 +30,12 @@ export {
   listStudioDraftsByCourse,
   deleteStudioDraft,
 } from './studio-draft-store.js';
+export {
+  savePendingDraft,
+  getPendingDraft,
+  listPendingDraftsByCourse,
+  deletePendingDraft,
+} from './pending-draft-store.js';
 export { saveCourse, getCourse, listCourses, deleteCourse, replaceCourse } from './course-store.js';
 export { saveBundle, getBundle, listBundles, replaceBundle, deleteBundle } from './bundle-store.js';
 export { type DistributionMeta, type StoredBundle, type StoredBundleModule } from './db.js';

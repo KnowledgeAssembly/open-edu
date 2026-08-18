@@ -571,7 +571,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     try {
       const response = await aiClient.generateDraft(input, session.activeCourseId);
       return toCourseDraftResult(
-        (await aiClient.listDrafts(session.activeCourseId)).at(-1)?.id ?? '',
+        response.draftId,
         response.files.length > 0,
         response.title,
         response.outlinePreview,

@@ -1,5 +1,5 @@
 import { GatewayError, safeErrorBody, isGatewayError, classifyGatewayError } from './errors.js';
-import { MAX_REQUEST_BODY_BYTES, MAX_RESPONSE_BYTES } from './requestSchema.js';
+import { MAX_REQUEST_BODY_BYTES, MAX_RESPONSE_BYTES, ALLOWED_MODELS } from './requestSchema.js';
 
 export interface GatewaySafeguardOptions {
   allowedOrigins?: string[];
@@ -69,8 +69,8 @@ export function assertBodyLimits(
 }
 
 /**
- * Wrap a synchronous handler with timeout and safe-error serialization.
- * Returns a structured success or error body, never throwing.
+ * Wrap a synchronous handler with timeout, budget enforcement, and safe-error
+ * serialization. Returns a structured success or error body, never throwing.
  */
 export async function guardedHandler(
   requestId: string,
@@ -82,6 +82,13 @@ export async function guardedHandler(
   const budgetUsd =
     opts.perRequestBudgetUsd ?? Number(process.env.OPEN_EDU_GATEWAY_BUDGET_USD ?? 5);
 
+  if (budgetUsd <= 0) {
+    return {
+      status: 503,
+      body: safeErrorBody(requestId, 'missing-config', 'AI is not configured.'),
+    };
+  }
+
   try {
     const result = await withTimeout(fn(), timeoutMs);
     const serialized = JSON.stringify(result ?? {});
@@ -91,7 +98,6 @@ export async function guardedHandler(
         body: safeErrorBody(requestId, 'generation-error', 'Response is too large.'),
       };
     }
-    void budgetUsd; // per-request cost bound is enforced upstream via model selection
     return { status: 200, body: result };
   } catch (err) {
     if (err instanceof GatewayRateLimitError) {
@@ -115,6 +121,18 @@ export async function guardedHandler(
       body: safeErrorBody(requestId, classified.code, classified.message),
     };
   }
+}
+
+/**
+ * Validate that a model identifier is in the configured allowlist. If
+ * OPEN_EDU_GATEWAY_ALLOWED_MODELS is set, only those models are permitted.
+ * Otherwise, all models in ALLOWED_MODELS are allowed.
+ */
+export function isAllowedModel(model: string | undefined): boolean {
+  if (!model) return true;
+  const envList = process.env.OPEN_EDU_GATEWAY_ALLOWED_MODELS;
+  const allowed = envList ? envList.split(',').map((m) => m.trim()) : ALLOWED_MODELS;
+  return allowed.includes(model);
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {

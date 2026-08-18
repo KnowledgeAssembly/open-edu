@@ -665,7 +665,7 @@ function eduPackageLoader(): Plugin {
           }
           console.error('[edu-dev] AI API error:', err);
           res.statusCode = 500;
-          res.end(JSON.stringify({ error: (err as Error).message }));
+          res.end(JSON.stringify({ code: 'internal-error', error: 'An internal error occurred.' }));
         }
       });
 

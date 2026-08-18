@@ -107,7 +107,7 @@ export class BrowserAiClient {
   async generateDraft(
     input: { notes?: string; spec?: string; specExt?: '.json' | '.md' },
     courseId: string,
-  ): Promise<GatewayDraftResponse> {
+  ): Promise<GatewayDraftResponse & { draftId: string }> {
     const data = await this.request<GatewayDraftResponse>('/api/ai/generate-draft', {
       method: 'POST',
       body: JSON.stringify(input),
@@ -118,9 +118,10 @@ export class BrowserAiClient {
       data: decodeFile(file).buffer.slice(0) as ArrayBuffer,
     }));
 
+    const draftId = `draft-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const now = new Date().toISOString();
     const draft: StoredStudioDraft = {
-      id: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      id: draftId,
       courseId,
       version: data.version ?? '1.0.0',
       title: data.title,
@@ -130,7 +131,7 @@ export class BrowserAiClient {
     };
 
     await saveStudioDraft(draft);
-    return data;
+    return { ...data, draftId };
   }
 
   async listDrafts(courseId: string): Promise<StoredStudioDraft[]> {

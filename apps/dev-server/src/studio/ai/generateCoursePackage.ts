@@ -9,11 +9,48 @@ import { buildCourseSpecPrompt, extractJsonObject } from './prompts/index.js';
 import { mapDiagnosticsToQuality } from './qualityMap.js';
 import type { AiQualityItem } from './types.js';
 
-const MIN_NOTES_LENGTH = 40;
+export const MIN_NOTES_LENGTH = 40;
 
 export type CourseSpecSource =
   | { kind: 'notes'; notes: string; completeText: (prompt: string) => Promise<string> }
   | { kind: 'spec'; spec: string; extension: '.json' | '.md' };
+
+/**
+ * Resolve a course spec source into raw spec text. For notes, calls the LLM
+ * and extracts JSON. For spec sources, returns the raw text. This is the
+ * shared, transport-independent spec resolution used by both the local
+ * middleware and the hosted gateway.
+ */
+export async function resolveCourseSpec(source: CourseSpecSource): Promise<string> {
+  if (source.kind === 'spec') {
+    if (source.spec.trim().length === 0) {
+      throw new GenerateCoursePackageError('spec-invalid', 'Spec file is empty');
+    }
+    return source.spec;
+  }
+
+  if (source.notes.trim().length < MIN_NOTES_LENGTH) {
+    throw new GenerateCoursePackageError('notes-too-short', 'Add more detail');
+  }
+
+  let raw: string;
+  try {
+    raw = await source.completeText(buildCourseSpecPrompt(source.notes));
+  } catch (error) {
+    throw new GenerateCoursePackageError(
+      'llm',
+      `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  let spec: Record<string, unknown>;
+  try {
+    spec = extractJsonObject(raw);
+  } catch {
+    throw new GenerateCoursePackageError('parse', 'Could not parse the draft');
+  }
+  return JSON.stringify(spec, null, 2);
+}
 
 export interface CompiledCourseFiles {
   /** Logical package paths -> UTF-8 text content (all compiled files). */
@@ -47,38 +84,12 @@ export async function generateCoursePackage(
 ): Promise<CompiledCourseFiles> {
   const compile = options.compile ?? compileFromCourseCompiler;
 
-  if (source.kind === 'spec' && source.spec.trim().length === 0) {
-    throw new GenerateCoursePackageError('spec-invalid', 'Spec file is empty');
-  }
-  if (source.kind === 'notes' && source.notes.trim().length < MIN_NOTES_LENGTH) {
-    throw new GenerateCoursePackageError('notes-too-short', 'Add more detail');
-  }
-
-  let raw: string;
-  if (source.kind === 'notes') {
-    try {
-      raw = await source.completeText(buildCourseSpecPrompt(source.notes));
-    } catch (error) {
-      throw new GenerateCoursePackageError(
-        'llm',
-        `AI generation failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  } else {
-    raw = source.spec;
-  }
-
   let specText: string;
-  if (source.kind === 'notes') {
-    let spec: Record<string, unknown>;
-    try {
-      spec = extractJsonObject(raw);
-    } catch {
-      throw new GenerateCoursePackageError('parse', 'Could not parse the draft');
-    }
-    specText = JSON.stringify(spec, null, 2);
-  } else {
-    specText = raw;
+  try {
+    specText = await resolveCourseSpec(source);
+  } catch (err) {
+    if (err instanceof GenerateCoursePackageError) throw err;
+    throw new GenerateCoursePackageError('compile', 'Could not resolve course spec');
   }
 
   const tempDir = await mkdtemp(join(tmpdir(), 'openedu-gw-course-'));

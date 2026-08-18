@@ -4,6 +4,7 @@ import { studioChatMessage } from '../../src/studio/ai/chat/messages.js';
 import type { StudioContextSnapshot } from '../../src/studio/ai/context.js';
 import { GatewayError } from './errors.js';
 import type { ChatRequest } from './requestSchema.js';
+import { MAX_CHAT_CONTEXT_CHARS } from './requestSchema.js';
 
 export interface ChatDeps {
   completeText?: (prompt: string) => Promise<string>;
@@ -43,6 +44,14 @@ export async function gatewayChat(
 
   try {
     const prompt = buildPrompt(request);
+    if (prompt.length > MAX_CHAT_CONTEXT_CHARS) {
+      throw new GatewayError(
+        'payload-too-large',
+        'Context exceeds the size limit. Try a shorter conversation.',
+        requestId,
+        413,
+      );
+    }
     const text = await completeText(prompt);
     if (!lastUser) {
       throw new GatewayError('invalid-request', 'No user message found', requestId);

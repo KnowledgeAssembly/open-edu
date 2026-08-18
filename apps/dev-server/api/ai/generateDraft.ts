@@ -4,6 +4,7 @@ import {
 } from '../../src/studio/ai/generateCoursePackage.js';
 import { completeWithLlm } from '../../src/studio/ai/studioLlm.js';
 import type { GenerateDraftRequest, GenerateDraftResponse } from './requestSchema.js';
+import { MAX_GENERATED_FILES } from './requestSchema.js';
 import { GatewayError } from './errors.js';
 
 export interface GenerateDraftDeps {
@@ -49,6 +50,15 @@ export async function generateDraft(
       encoding: 'utf8' as const,
     }));
 
+    if (files.length > MAX_GENERATED_FILES) {
+      throw new GatewayError(
+        'generation-error',
+        `Generated too many files (${files.length}). Try a simpler course.`,
+        requestId,
+        422,
+      );
+    }
+
     return {
       requestId,
       success: true,
@@ -62,13 +72,21 @@ export async function generateDraft(
     const code = (err as { code?: string }).code;
     const status =
       code === 'llm' || code === 'provider-error' ? 502 : code === 'compile' ? 422 : 400;
+    const safeMessage =
+      code === 'llm' || code === 'provider-error'
+        ? 'The AI provider could not be reached.'
+        : code === 'compile'
+          ? 'Course compilation failed.'
+          : code === 'parse'
+            ? 'Could not parse the generated output.'
+            : 'Invalid request.';
     throw new GatewayError(
       code === 'llm'
         ? 'provider-error'
         : code === 'compile'
           ? 'generation-error'
           : 'invalid-request',
-      (err as Error).message,
+      safeMessage,
       requestId,
       status,
     );

@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 6;
+export const DB_VERSION = 7;
 
 export interface DistributionMeta {
   sourceKind: string;
@@ -120,6 +120,16 @@ export interface StoredStudioDraft {
   updatedAt: string;
 }
 
+export interface StoredPendingDraft {
+  id: string;
+  courseId: string;
+  items: Array<{ kind: string; title: string; content: string }>;
+  source: string;
+  applyMode: string;
+  context: { kind?: string; path?: string };
+  createdAt: string;
+}
+
 export interface OpenEduDB {
   courses: StoredCourse;
   progress: LearningProgress;
@@ -132,6 +142,7 @@ export interface OpenEduDB {
   bundles: StoredBundle;
   'studio-courses': StoredStudioCourse;
   'studio-drafts': StoredStudioDraft;
+  'pending-drafts': StoredPendingDraft;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -177,6 +188,9 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('studio-drafts')) {
           db.createObjectStore('studio-drafts', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('pending-drafts')) {
+          db.createObjectStore('pending-drafts', { keyPath: 'id' });
         }
       },
     }).catch((err) => {

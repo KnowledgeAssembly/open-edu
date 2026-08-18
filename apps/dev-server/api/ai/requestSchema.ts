@@ -6,10 +6,18 @@ export const MAX_SPEC_CHARS = 10_000_000;
 export const MAX_ITEM_DESCRIPTION_CHARS = 20_000;
 export const MAX_ITEM_CONTENT_CHARS = 10_000_000;
 export const MAX_CHAT_MESSAGES = 50;
+export const MAX_CHAT_MESSAGE_CHARS = 10_000;
 export const MAX_CHAT_CONTEXT_CHARS = 15_000;
 export const MAX_REQUEST_BODY_BYTES = 10_000_000;
 export const MAX_RESPONSE_BYTES = 10_000_000;
 export const MAX_GENERATED_FILES = 500;
+export const ALLOWED_MODELS = [
+  'gpt-4o',
+  'gpt-4o-mini',
+  'gpt-3.5-turbo',
+  'claude-3-5-sonnet-20241022',
+  'claude-3-haiku-20240307',
+];
 
 const contentTypeSchema = z.enum(['application/json', 'text/markdown']);
 
@@ -60,7 +68,7 @@ export type ItemEditRequest = z.infer<typeof itemEditRequestSchema>;
 
 const chatMessageSchema = z.object({
   role: z.enum(['user', 'assistant', 'system']),
-  content: z.string(),
+  content: z.string().min(1).max(MAX_CHAT_MESSAGE_CHARS),
 });
 
 export const chatRequestSchema = z.object({
