@@ -54,7 +54,9 @@ async function fixtureOepBytes(): Promise<Uint8Array> {
   await api.store.create(course);
   session.setActiveCourse('browser-studio');
   const { blob } = await api.api.exportOep();
-  return new Uint8Array(await blobToBytes(blob));
+  const bytes = new Uint8Array(await blobToBytes(blob));
+  await api.store.delete('browser-studio');
+  return bytes;
 }
 
 function createBrowserApi() {
@@ -253,6 +255,7 @@ describe('BrowserStudioApi', () => {
     const { blob, fileName } = await api1.api.exportOep();
     expect(fileName).toBe('browser-studio-1.0.0.oep');
     const bytes = new Uint8Array(await blobToBytes(blob));
+    await api1.store.delete('browser-studio');
 
     const api2 = createBrowserApi();
     const summary = await api2.api.importOep(bytes);
@@ -283,6 +286,19 @@ describe('BrowserStudioApi', () => {
     expect(summary.id).toBe('browser-studio');
     expect(await api.store.get('reading-lesson')).not.toBeNull();
     expect(api.session.activeCourseId).toBe('browser-studio');
+  });
+
+  it('assigns a new id when importing an archive whose id already exists', async () => {
+    const bytes = await fixtureOepBytes();
+    const api = createBrowserApi();
+    await api.api.applyTemplate('reading-lesson');
+    await api.api.importOep(bytes);
+
+    const imported = await api.api.importOep(bytes);
+    expect(imported.id).toBe('browser-studio-imported');
+    expect(await api.store.get('browser-studio')).not.toBeNull();
+    expect(await api.store.get('browser-studio-imported')).not.toBeNull();
+    expect(api.session.activeCourseId).toBe('browser-studio-imported');
   });
 
   it('returns unsupported errors for unit/folder operations', async () => {

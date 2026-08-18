@@ -132,13 +132,6 @@ function messageOf(err: unknown): string {
 }
 
 export function createBrowserCourseStore(): BrowserCourseStore {
-  if (typeof indexedDB === 'undefined') {
-    throw new BrowserCourseStoreError(
-      'storage-unavailable',
-      'IndexedDB is not available in this browser',
-    );
-  }
-
   const store: BrowserCourseStore = {
     async list() {
       try {

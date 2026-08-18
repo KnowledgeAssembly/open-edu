@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import {
@@ -43,6 +43,18 @@ describe('BrowserCourseStore', () => {
     const loaded = await store.get('c1');
     expect(loaded!.title).toBe('Course c1');
     expect(loaded!.files.map((f) => f.path)).toEqual(['nodes/lesson.md', 'package.json']);
+  });
+
+  it('can be constructed when IndexedDB is unavailable so callers can report the status', async () => {
+    vi.stubGlobal('indexedDB', undefined);
+    try {
+      const unavailableStore = createBrowserCourseStore();
+      await expect(unavailableStore.list()).rejects.toMatchObject({
+        code: 'storage-unavailable',
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('stores nested, unknown-text, and binary files without loss', async () => {

@@ -51,6 +51,34 @@ test.describe('Browser Studio (Phase 1)', () => {
     await page.getByRole('button', { name: 'Back' }).click();
     await expect(page.getByRole('button', { name: EDITED_QUESTION, exact: true })).toBeVisible();
 
+    // Add files the editor does not expose so the browser persistence and
+    // archive flow can prove that unknown text and binary assets survive.
+    await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('open-edu', 5);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      await new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction('studio-courses', 'readwrite');
+        const store = transaction.objectStore('studio-courses');
+        const getRequest = store.get('lesson-quiz');
+        getRequest.onsuccess = () => {
+          const course = getRequest.result as {
+            files: Array<{ path: string; data: ArrayBuffer }>;
+          };
+          course.files.push(
+            { path: 'assets/notes.txt', data: new TextEncoder().encode('unknown text').buffer },
+            { path: 'assets/diagram.png', data: new Uint8Array([137, 80, 78, 71, 1, 2, 3]).buffer },
+          );
+          store.put(course);
+        };
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
+      db.close();
+    });
+
     // 4. Reload and confirm persistence.
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 30000 });
@@ -72,7 +100,7 @@ test.describe('Browser Studio (Phase 1)', () => {
     const oepPath = await download.path();
     expect(oepPath).toBeTruthy();
 
-    // 6. Import the exported .oep under the same course id.
+    // 6. Import the exported .oep. A colliding ID receives a new browser ID.
     await page.getByRole('button', { name: 'My courses' }).first().click();
     await expect(page.getByRole('heading', { name: 'My courses', level: 1 })).toBeVisible();
     await page.getByRole('button', { name: 'Import' }).click();
@@ -82,6 +110,36 @@ test.describe('Browser Studio (Phase 1)', () => {
     await expect(page.getByRole('heading', { name: 'My courses', level: 1 })).toBeVisible({
       timeout: 15000,
     });
+    await expect(page.getByText('lesson-quiz-imported')).toBeVisible();
+
+    const importedFiles = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('open-edu', 5);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const course = await new Promise<{
+        files: Array<{ path: string; data: ArrayBuffer }>;
+      }>((resolve, reject) => {
+        const request = db
+          .transaction('studio-courses')
+          .objectStore('studio-courses')
+          .get('lesson-quiz-imported');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return course.files.map((file) => ({
+        path: file.path,
+        bytes: Array.from(new Uint8Array(file.data)),
+      }));
+    });
+    expect(importedFiles.find((file) => file.path === 'assets/notes.txt')?.bytes).toEqual(
+      Array.from(new TextEncoder().encode('unknown text')),
+    );
+    expect(importedFiles.find((file) => file.path === 'assets/diagram.png')?.bytes).toEqual([
+      137, 80, 78, 71, 1, 2, 3,
+    ]);
 
     // 7. Confirm the re-imported course keeps both activities (files preserved).
     await page.getByRole('button', { name: 'Open', exact: true }).first().click();

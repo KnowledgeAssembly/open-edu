@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { renderHook, waitFor } from '@testing-library/react';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
@@ -55,6 +55,17 @@ describe('BrowserStudioProvider', () => {
     expect(result.current.api).toBeDefined();
     expect(result.current.store).toBeDefined();
     expect(result.current.session).toBeDefined();
+  });
+
+  it('exposes a storage-unavailable state when IndexedDB is absent', async () => {
+    vi.stubGlobal('indexedDB', undefined);
+    try {
+      const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+      await waitFor(() => expect(result.current.storageStatus.available).toBe(false));
+      expect(result.current.storageStatus.reason).toBe('storage-unavailable');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('boots the most recently updated course into the preview', async () => {

@@ -100,6 +100,30 @@ function summaryToLibraryEntry(summary: BrowserCourseSummary): LibraryEntry {
   };
 }
 
+async function nextAvailableImportId(store: BrowserCourseStore, baseId: string): Promise<string> {
+  let candidate = baseId;
+  let suffix = 0;
+  while (await store.get(candidate)) {
+    suffix += 1;
+    candidate = `${baseId}-imported${suffix === 1 ? '' : `-${suffix}`}`;
+  }
+  return candidate;
+}
+
+function updateManifestId(files: StudioFile[], id: string): StudioFile[] {
+  const manifestIndex = files.findIndex((file) => file.path === 'package.json');
+  if (manifestIndex === -1) return files;
+  const manifest = JSON.parse(TEXT_DECODER.decode(files[manifestIndex]!.data)) as Record<
+    string,
+    unknown
+  >;
+  return files.map((file, index) =>
+    index === manifestIndex
+      ? { ...file, data: TEXT_ENCODER.encode(JSON.stringify({ ...manifest, id }, null, 2)) }
+      : file,
+  );
+}
+
 export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): StudioApi {
   const store = options.store ?? createBrowserCourseStore();
   const session = options.session ?? createBrowserStudioSession();
@@ -417,21 +441,23 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
       throw new BrowserStudioApiError('invalid-archive', 'Archive contains no course files');
     }
 
-    const id = extraction.manifest.id;
+    const originalId = extraction.manifest.id;
+    const id = await nextAvailableImportId(store, originalId);
     const title = extraction.manifest.title;
     const version = extraction.manifest.version;
+    const importedFiles = id === originalId ? files : updateManifestId(files, id);
     const course: BrowserCourse = {
       id,
       version,
       title,
-      files,
+      files: importedFiles,
       updatedAt: Date.now(),
       source: { kind: 'oep-import', label: `${id}-${version}.oep` },
     };
 
     // Validate the complete file set before persisting anything.
     try {
-      await loadPackageFromFiles(makeSourceFromFiles(files), `browser://${id}`);
+      await loadPackageFromFiles(makeSourceFromFiles(importedFiles), `browser://${id}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       throw new BrowserStudioApiError('invalid-package', `Imported course is invalid: ${message}`);
