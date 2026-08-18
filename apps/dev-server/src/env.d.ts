@@ -6,3 +6,11 @@ declare module 'virtual:open-edu-package' {
 
 declare const OPEN_EDU_STUDIO_MODE: string | undefined;
 declare const OPEN_EDU_STUDIO_ASSISTANT: string | undefined;
+
+interface ImportMetaEnv {
+  readonly VITE_OPEN_EDU_BROWSER?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

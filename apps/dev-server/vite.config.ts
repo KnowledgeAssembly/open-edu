@@ -1576,6 +1576,20 @@ function eduPackageLoader(): Plugin {
   };
 }
 
+function virtualPackagePlugin(): Plugin {
+  return {
+    name: 'resolve-virtual-package',
+    resolveId(id) {
+      if (id === VIRTUAL_MODULE_ID) return RESOLVED_VIRTUAL_ID;
+    },
+    load(id) {
+      if (id === RESOLVED_VIRTUAL_ID) {
+        return 'export const packageData = null;\nexport const bundleData = null;';
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const envDir = resolve(__dirname);
   const env = loadEnv(mode, envDir, '');
@@ -1585,9 +1599,15 @@ export default defineConfig(({ mode }) => {
     }
   }
 
+  const isBrowserMode = mode === 'browser';
+
   return {
-    plugins: [react(), eduPackageLoader()],
+    // In browser mode the Node-only eduPackageLoader is excluded. The virtual
+    // package module still needs a resolution so DevApp can always import it;
+    // browser mode always uses the local BrowserStudioProvider instead.
+    plugins: isBrowserMode ? [react(), virtualPackagePlugin()] : [react(), eduPackageLoader()],
     define: {
+      'import.meta.env.VITE_OPEN_EDU_BROWSER': JSON.stringify(isBrowserMode ? '1' : '0'),
       OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
         ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
         : '""',
@@ -1598,9 +1618,23 @@ export default defineConfig(({ mode }) => {
         ? JSON.stringify(process.env.OPEN_EDU_STUDIO_ASSISTANT)
         : '""',
     },
+    build: {
+      outDir: isBrowserMode ? 'dist' : undefined,
+      emptyOutDir: true,
+      rollupOptions: isBrowserMode
+        ? {
+            // These packages are Node-only and never execute on the browser
+            // preview path (RewardBroker/telemetry run only in local Developer
+            // mode). Marking them external keeps their node:* imports out of
+            // the static bundle; the dynamic imports resolve to no-ops at
+            // runtime in the browser.
+            external: ['@open-edu/telemetry', '@open-edu/rewards', '@open-edu/ai-companion'],
+          }
+        : undefined,
+    },
     server: {
       port: 4000,
-      open: true,
+      open: isBrowserMode ? false : true,
     },
   };
 });

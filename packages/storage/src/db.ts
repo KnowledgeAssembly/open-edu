@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 4;
+export const DB_VERSION = 5;
 
 export interface DistributionMeta {
   sourceKind: string;
@@ -91,6 +91,25 @@ export interface NoteTagRecord {
   tag: string;
 }
 
+export type StudioCourseSource =
+  | { kind: 'template'; label?: string }
+  | { kind: 'oep-import'; label?: string }
+  | { kind: 'browser-created'; label?: string };
+
+export interface StoredStudioFile {
+  path: string;
+  data: ArrayBuffer;
+}
+
+export interface StoredStudioCourse {
+  id: string;
+  version: string;
+  title: string;
+  files: StoredStudioFile[];
+  updatedAt: string;
+  source?: StudioCourseSource;
+}
+
 export interface OpenEduDB {
   courses: StoredCourse;
   progress: LearningProgress;
@@ -101,6 +120,7 @@ export interface OpenEduDB {
   notes: NoteRecord;
   'note-tags': NoteTagRecord;
   bundles: StoredBundle;
+  'studio-courses': StoredStudioCourse;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -140,6 +160,9 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('bundles')) {
           db.createObjectStore('bundles', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('studio-courses')) {
+          db.createObjectStore('studio-courses', { keyPath: 'id' });
         }
       },
     }).catch((err) => {

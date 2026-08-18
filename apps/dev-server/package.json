@@ -18,6 +18,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc",
+    "build:browser": "vite build --mode browser",
+    "preview:browser": "vite preview --mode browser",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
@@ -36,6 +38,7 @@
     "@open-edu/rewards": "workspace:*",
     "@open-edu/runtime": "workspace:*",
     "@open-edu/schemas": "workspace:*",
+    "@open-edu/storage": "workspace:*",
     "@open-edu/telemetry": "workspace:*",
     "@open-edu/widgets": "workspace:*",
     "@open-edu/workflow": "workspace:*",

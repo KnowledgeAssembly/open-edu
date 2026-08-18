@@ -113,6 +113,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@open-edu/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../../packages/telemetry

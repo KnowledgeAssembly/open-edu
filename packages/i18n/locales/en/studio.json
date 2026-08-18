@@ -435,5 +435,21 @@
   "assistant.next.whatCanYouDo": "What can you help me with?",
   "assistant.next.label": "Suggested next steps",
   "assistant.newConversation": "New conversation",
-  "assistant.historyLabel": "Conversation history"
+  "assistant.historyLabel": "Conversation history",
+  "browser.storageNotice": "This course is stored in this browser only. Download the .oep file to back it up or share it.",
+  "browser.loadingCourses": "Loading your browser courses…",
+  "browser.noSavedCourses": "No saved courses on this device yet. Create one from a template or import a .oep file.",
+  "browser.storageUnavailable": "Browser storage is unavailable. Course data stays on this device only; choose a supported browser to save courses.",
+  "browser.storageQuotaExceeded": "Browser storage is full. The last saved version is preserved. Export the .oep file to keep your work.",
+  "browser.importSuccess": "Imported {{title}} from .oep.",
+  "browser.importTitle": "Import a .oep course",
+  "browser.importHelp": "Choose a .oep course file to open it in this browser.",
+  "browser.importFailure": "Could not import that .oep file. It may be invalid or unsupported.",
+  "browser.exportSuccess": "Exported {{fileName}}. The file contains every course file, including assets and unknown files.",
+  "browser.exportFailure": "Export failed. Your course is unchanged — try again.",
+  "browser.unsupportedOperation": "This action is not available in the browser version yet.",
+  "browser.unsaved": "Unsaved changes",
+  "browser.saving": "Saving…",
+  "browser.saved": "Saved",
+  "browser.saveFailed": "Could not save to browser storage. The previous version is preserved."
 }

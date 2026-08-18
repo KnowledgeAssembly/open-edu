@@ -52,6 +52,7 @@ function renderDialog(
   overrides: {
     api?: StudioApi;
     open?: boolean;
+    browserMode?: boolean;
     onOpenChange?: (open: boolean) => void;
     onImported?: () => void;
     onError?: (message: string) => void;
@@ -60,6 +61,7 @@ function renderDialog(
   const props = {
     api: overrides.api ?? makeApi(),
     open: overrides.open ?? true,
+    browserMode: overrides.browserMode ?? false,
     onOpenChange: overrides.onOpenChange ?? (() => {}),
     onImported: overrides.onImported ?? (() => {}),
     onError: overrides.onError ?? (() => {}),
@@ -78,6 +80,54 @@ describe('ImportCourseDialog', () => {
     expect(
       screen.getByText('Choose a folder that already contains an OpenEdu package.json.'),
     ).toBeInTheDocument();
+  });
+
+  it('renders a .oep file picker in browser mode', () => {
+    renderDialog({ browserMode: true });
+    expect(screen.getByText('Import a .oep course')).toBeInTheDocument();
+    expect(screen.getByTestId('import-oep-input')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /confirm/i })).not.toBeInTheDocument();
+  });
+
+  it('calls importOep with the selected file bytes in browser mode', async () => {
+    const api = makeApi({
+      importOep: vi.fn().mockResolvedValue({
+        id: 'fractions',
+        title: 'Fractions',
+        version: '1.0.0',
+        updatedAt: 1,
+        fileCount: 3,
+      }),
+    });
+    const onImported = vi.fn();
+    const onError = vi.fn();
+    renderDialog({ api, browserMode: true, onImported, onError });
+    const file = new File([new Uint8Array([80, 75, 3, 4])], 'fractions-1.0.0.oep', {
+      type: 'application/octet-stream',
+    });
+    await userEvent.upload(screen.getByTestId('import-oep-input'), file);
+    await vi.waitFor(() => {
+      expect(api.importOep).toHaveBeenCalledTimes(1);
+    });
+    const bytes = (api.importOep as ReturnType<typeof vi.fn>).mock.calls[0]![0] as Uint8Array;
+    expect(Array.from(bytes)).toEqual([80, 75, 3, 4]);
+    expect(onImported).toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith('Imported Fractions from .oep.');
+  });
+
+  it('reports a browser import failure without calling onImported', async () => {
+    const api = makeApi({
+      importOep: vi.fn().mockRejectedValue(new Error('invalid-archive')),
+    });
+    const onImported = vi.fn();
+    const onError = vi.fn();
+    renderDialog({ api, browserMode: true, onImported, onError });
+    const file = new File([new Uint8Array([1, 2, 3])], 'bad.oep');
+    await userEvent.upload(screen.getByTestId('import-oep-input'), file);
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+    });
+    expect(onImported).not.toHaveBeenCalled();
   });
 
   it('disables Confirm while the path is empty', () => {

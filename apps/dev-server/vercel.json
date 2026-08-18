@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm install && pnpm --filter @open-edu/storage build && pnpm --filter @open-edu/core build && pnpm --filter @open-edu/dev-server build:browser",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install"
+}

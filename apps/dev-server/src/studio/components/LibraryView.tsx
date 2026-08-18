@@ -36,11 +36,13 @@ export function LibraryView({
   onOpen,
   onCreateUnit,
   onError,
+  browserMode = false,
 }: {
   api: StudioApi;
   onOpen: (relativePath: string) => void;
   onCreateUnit: () => void;
   onError: (message: string) => void;
+  browserMode?: boolean;
 }) {
   const { t } = useTranslation();
   const [workspace, setWorkspace] = useState('');
@@ -199,6 +201,7 @@ export function LibraryView({
           onOpenChange={setImportOpen}
           onImported={() => void refresh()}
           onError={onError}
+          browserMode={browserMode}
         />
       </div>
     );
@@ -261,6 +264,7 @@ export function LibraryView({
         onOpenChange={setImportOpen}
         onImported={() => void refresh()}
         onError={onError}
+        browserMode={browserMode}
       />
 
       <Dialog

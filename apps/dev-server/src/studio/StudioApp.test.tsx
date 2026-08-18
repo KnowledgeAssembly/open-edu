@@ -37,18 +37,29 @@ const generateFromNotesMock = vi.fn().mockResolvedValue({
   error: 'Add more detail',
 });
 
-vi.mock('./studioApi.js', () => ({
-  createStudioApi: () => ({
+vi.mock('./localStudioApi.js', () => ({
+  createLocalStudioApi: () => ({
     getPackageDir: vi.fn().mockResolvedValue('/test'),
     validate: vi.fn().mockResolvedValue({ valid: true, errors: [] }),
     getOutline: getOutlineMock,
     saveOutlineOrder: saveOutlineOrderMock,
     applyTemplate: applyTemplateMock,
     exportOep: vi.fn(),
+    importOep: vi.fn(),
     readFile: readFileMock,
     writeFile: writeFileMock,
+    deleteFile: vi.fn(),
+    getPreviewPackage: vi.fn().mockResolvedValue(null),
+    getStorageStatus: vi.fn().mockResolvedValue({ available: true }),
     getAiStatus: getAiStatusMock,
     generateFromNotes: generateFromNotesMock,
+    uploadSpec: vi.fn(),
+    generateCourseDraft: vi.fn(),
+    uploadSpecDraft: vi.fn(),
+    commitCourseDraft: vi.fn(),
+    discardCourseDraft: vi.fn(),
+    generateItemAdd: vi.fn(),
+    generateItemEdit: vi.fn(),
     getLibrary: vi.fn().mockResolvedValue({
       workspace: '/workspace',
       entries: [

@@ -1,0 +1,12 @@
+{
+  "cards": [
+    {
+      "id": "browser-science",
+      "title": "Browser Science",
+      "category": "Science",
+      "type": "knowledge",
+      "summary": "Learn what makes the sky blue.",
+      "unlock": { "type": "chain", "completedNodeIds": ["nodes/quiz.json"] }
+    }
+  ]
+}

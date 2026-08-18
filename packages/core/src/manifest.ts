@@ -1,5 +1,3 @@
-import { readFile, access } from 'node:fs/promises';
-import { join } from 'node:path';
 import { PackageManifestSchema } from '@open-edu/schemas';
 import type { PackageManifest } from '@open-edu/schemas';
 import { ManifestValidationError } from './errors.js';
@@ -17,7 +15,47 @@ function exampleValue(path: (string | number)[]): string {
   return MANIFEST_EXAMPLES[key] ?? '"<value>"';
 }
 
+export function parseManifest(content: string, filePath = 'package.json'): PackageManifest {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(content);
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new ManifestValidationError(
+        `${filePath} is not valid JSON: ${(err as Error).message}`,
+        undefined,
+        { file: filePath, suggestion: `Fix the JSON syntax error in ${filePath}` },
+      );
+    }
+    throw new ManifestValidationError(`Failed to parse ${filePath}: ${(err as Error).message}`);
+  }
+
+  const result = PackageManifestSchema.safeParse(raw);
+
+  if (!result.success) {
+    const issues = result.error.issues
+      .map(
+        (i: { path: (string | number)[]; message: string }) => `${i.path.join('.')}: ${i.message}`,
+      )
+      .join('; ');
+    const firstIssue = result.error.issues[0];
+    const path = firstIssue ? firstIssue.path.join('.') : undefined;
+    const suggestion = firstIssue
+      ? `Fix the "${path}" field in ${filePath}. Example: ${exampleValue(firstIssue.path)}`
+      : `Check the ${filePath} fields match the schema`;
+    throw new ManifestValidationError(`Invalid ${filePath}: ${issues}`, result.error, {
+      file: filePath,
+      path,
+      suggestion,
+    });
+  }
+
+  return result.data;
+}
+
 export async function loadManifest(packageDir: string): Promise<PackageManifest> {
+  const { readFile, access } = await import('node:fs/promises');
+  const { join } = await import('node:path');
   const manifestPath = join(packageDir, 'package.json');
 
   try {
@@ -33,40 +71,12 @@ export async function loadManifest(packageDir: string): Promise<PackageManifest>
     );
   }
 
-  let raw: unknown;
+  let content: string;
   try {
-    const content = await readFile(manifestPath, 'utf-8');
-    raw = JSON.parse(content);
+    content = await readFile(manifestPath, 'utf-8');
   } catch (err) {
-    if (err instanceof SyntaxError) {
-      throw new ManifestValidationError(
-        `package.json is not valid JSON: ${(err as Error).message}`,
-        undefined,
-        { file: 'package.json', suggestion: 'Fix the JSON syntax error in package.json' },
-      );
-    }
     throw new ManifestValidationError(`Failed to read package.json: ${(err as Error).message}`);
   }
 
-  const result = PackageManifestSchema.safeParse(raw);
-
-  if (!result.success) {
-    const issues = result.error.issues
-      .map(
-        (i: { path: (string | number)[]; message: string }) => `${i.path.join('.')}: ${i.message}`,
-      )
-      .join('; ');
-    const firstIssue = result.error.issues[0];
-    const path = firstIssue ? firstIssue.path.join('.') : undefined;
-    const suggestion = firstIssue
-      ? `Fix the "${path}" field in package.json. Example: ${exampleValue(firstIssue.path)}`
-      : 'Check the package.json fields match the schema';
-    throw new ManifestValidationError(`Invalid package.json: ${issues}`, result.error, {
-      file: 'package.json',
-      path,
-      suggestion,
-    });
-  }
-
-  return result.data;
+  return parseManifest(content);
 }

@@ -11,6 +11,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
     "./widget-catalog-data": {
       "types": "./dist/widget-catalog-data.d.ts",
       "import": "./dist/widget-catalog-data.js"

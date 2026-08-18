@@ -14,6 +14,11 @@ export interface LoadedNode {
   node: ContentNode;
 }
 
+export interface PackageFileSource {
+  get(path: string): Uint8Array | undefined;
+  list(prefix?: string): string[];
+}
+
 export interface LoadedPackage {
   rootDir: string;
   manifest: PackageManifest;

@@ -126,12 +126,13 @@ describe('Note Store', () => {
     expect(all).toEqual(['alpha', 'beta', 'zeta']);
   });
 
-  it('DB version is 4 and stores exist', async () => {
-    expect(DB_VERSION).toBe(4);
+  it('DB version is 5 and stores exist', async () => {
+    expect(DB_VERSION).toBe(5);
     const db = await openDatabase();
     const storeNames = Array.from(db.objectStoreNames);
     expect(storeNames).toContain('notes');
     expect(storeNames).toContain('note-tags');
+    expect(storeNames).toContain('studio-courses');
     const tx = db.transaction('note-tags', 'readonly');
     const store = tx.objectStore('note-tags');
     expect(store.indexNames.contains('byNoteId')).toBe(true);

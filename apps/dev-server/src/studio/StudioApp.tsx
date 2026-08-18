@@ -11,7 +11,8 @@ import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
 import { StudioChrome } from './components/StudioChrome.js';
 import { StudioLayout } from './components/StudioLayout.js';
 import { CreatorPreview } from './CreatorPreview.js';
-import { createStudioApi } from './studioApi.js';
+import { createLocalStudioApi } from './localStudioApi.js';
+import type { StudioApi } from './studioApi.js';
 import { recordRecentCourse } from './recentCourses.js';
 import {
   readStudioView,
@@ -40,6 +41,9 @@ export function StudioApp({
   _assistantEnabled,
   themeId,
   onThemeChange,
+  api: apiProp,
+  storageNotice,
+  browserMode = false,
 }: {
   mode: StudioMode;
   onModeChange: (mode: StudioMode) => void;
@@ -48,6 +52,9 @@ export function StudioApp({
   _assistantEnabled?: boolean;
   themeId?: ThemeId;
   onThemeChange?: (id: ThemeId) => void;
+  api?: StudioApi;
+  storageNotice?: string | null;
+  browserMode?: boolean;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<StudioView>(() => readStudioView());
@@ -57,7 +64,7 @@ export function StudioApp({
   const [aiAvailable, setAiAvailable] = useState(false);
   const [assistantEnabled] = useState(() => _assistantEnabled ?? isAssistantEnabled());
   const [outlineRevision, setOutlineRevision] = useState(0);
-  const api = useMemo(() => createStudioApi(), []);
+  const api = useMemo(() => apiProp ?? createLocalStudioApi(), [apiProp]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,10 +92,12 @@ export function StudioApp({
 
   const handleOpened = useCallback(() => {
     if (loadedPackage) {
+      const isBrowser = loadedPackage.rootDir.startsWith('browser://');
       recordRecentCourse({
         id: loadedPackage.manifest.id,
         title: loadedPackage.manifest.title,
-        packageDir: loadedPackage.rootDir,
+        location: isBrowser ? 'browser' : 'local',
+        packageDir: isBrowser ? undefined : loadedPackage.rootDir,
         updatedAt: Date.now(),
       });
     }
@@ -182,6 +191,7 @@ export function StudioApp({
       content = (
         <LibraryView
           api={api}
+          browserMode={browserMode}
           onOpen={(relativePath) =>
             void (async () => {
               try {
@@ -241,6 +251,14 @@ export function StudioApp({
             onThemeChange={onThemeChange}
           >
             <div key={view} className="studio-view-enter min-h-0 flex-1">
+              {storageNotice ? (
+                <div
+                  className="border-outline-variant bg-surface-container-highest text-on-surface-variant mx-auto mt-4 max-w-3xl rounded-lg border px-4 py-2 text-sm"
+                  role="status"
+                >
+                  {storageNotice}
+                </div>
+              ) : null}
               {content}
               {error ? (
                 <div className="text-error mx-auto mt-4 max-w-3xl px-6 text-sm" role="alert">
