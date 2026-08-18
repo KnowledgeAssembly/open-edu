@@ -86,7 +86,9 @@ async function createTemplateCourse(page: Page, templateName: string): Promise<v
   await page.getByRole('button', { name: templateName }).click();
   await page.getByRole('button', { name: 'Use template' }).click();
   await page.getByRole('button', { name: 'Replace and continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: 'Outline', exact: true })).toBeVisible({
+    timeout: 15000,
+  });
 }
 
 test.describe('Browser Studio AI (Phase 2)', () => {
@@ -205,7 +207,9 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     }
 
     // Verify the app is still functional after the error.
-    await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Outline', exact: true })).toBeVisible({
+      timeout: 15000,
+    });
 
     // Manual authoring still works.
     await page.getByRole('button', { name: 'The Water Cycle', exact: true }).click();
@@ -258,7 +262,9 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     // The draft card is backed by persisted chat metadata + studio-drafts,
     // not only by the in-memory provider state.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Outline', exact: true })).toBeVisible({
+      timeout: 30000,
+    });
     await expect(page.getByText('Course draft: AI Water Course')).toBeVisible({ timeout: 15000 });
 
     // Accept the draft locally after reload; the gateway is never called again.
