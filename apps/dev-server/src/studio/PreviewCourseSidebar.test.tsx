@@ -62,10 +62,7 @@ vi.mock('@open-edu/runtime', () => ({
 
 function wrap(ui: React.ReactElement) {
   return (
-    <I18nProvider
-      locale="en"
-      dictionaries={{ en: { studio: studioEn as Record<string, string> } }}
-    >
+    <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
       {ui}
     </I18nProvider>
   );
@@ -101,10 +98,5 @@ describe('PreviewCourseSidebar', () => {
     render(wrap(<PreviewCourseSidebar />));
     await userEvent.click(screen.getByTestId('step-nodes/lesson-b.md'));
     expect(mockNavigate).toHaveBeenCalledWith('nodes/lesson-b.md');
-  });
-
-  it('renders the course title in the sidebar header', () => {
-    render(wrap(<PreviewCourseSidebar />));
-    expect(screen.getByText('Test')).toBeInTheDocument();
   });
 });

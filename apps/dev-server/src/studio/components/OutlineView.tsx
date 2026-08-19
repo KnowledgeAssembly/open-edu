@@ -262,22 +262,6 @@ export function OutlineView({
             onShare={() => onShare?.()}
           />
         ) : null}
-        <div className="border-outline-variant rounded-lg border px-4">
-          <Accordion type="single" collapsible>
-            <AccordionItem value="flow">
-              <AccordionTrigger>{t('studio.flow.title')}</AccordionTrigger>
-              <AccordionContent>
-                <FlowAdvancedPanel api={api} onError={onError} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="rewards">
-              <AccordionTrigger>{t('studio.rewards.title')}</AccordionTrigger>
-              <AccordionContent>
-                <RewardsCardsPanel api={api} onError={onError} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
         <p className="text-on-surface-variant text-sm">{t('studio.outline.dragHint')}</p>
       </aside>
 
@@ -345,6 +329,22 @@ export function OutlineView({
             ))}
           </ul>
         )}
+        <div className="border-outline-variant rounded-lg border px-4">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="flow">
+              <AccordionTrigger>{t('studio.flow.title')}</AccordionTrigger>
+              <AccordionContent>
+                <FlowAdvancedPanel api={api} onError={onError} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="rewards">
+              <AccordionTrigger>{t('studio.rewards.title')}</AccordionTrigger>
+              <AccordionContent>
+                <RewardsCardsPanel api={api} onError={onError} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
         <WidgetPicker
           open={pickerOpen}
           onOpenChange={setPickerOpen}

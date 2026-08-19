@@ -31,6 +31,7 @@ export interface AppSidebarProps {
   currentItemId: string;
   onNavigate: (id: string) => void;
   sections?: AppSidebarSection[];
+  hideHeader?: boolean;
   onBack?: { label: string; onClick: () => void };
   collapsed?: boolean;
   defaultCollapsed?: boolean;
@@ -46,6 +47,7 @@ export function AppSidebar({
   currentItemId,
   onNavigate,
   sections,
+  hideHeader,
   onBack,
   collapsed: controlledCollapsed,
   defaultCollapsed = false,
@@ -90,24 +92,26 @@ export function AppSidebar({
       data-testid="app-sidebar"
       aria-label="Main navigation"
     >
-      <div className="border-outline-variant flex h-16 shrink-0 items-center truncate border-b px-4">
-        {expanded && logo ? (
-          logo
-        ) : !expanded && logoCollapsed ? (
-          logoCollapsed
-        ) : (
-          <>
-            <h1 className="text-on-surface m-0 text-lg font-bold leading-tight">
-              {expanded ? title : 'OE'}
-            </h1>
-            {expanded && subtitle && (
-              <p className="text-on-surface-variant mt-0.5 truncate text-xs leading-tight">
-                {subtitle}
-              </p>
-            )}
-          </>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="border-outline-variant flex h-16 shrink-0 items-center truncate border-b px-4">
+          {expanded && logo ? (
+            logo
+          ) : !expanded && logoCollapsed ? (
+            logoCollapsed
+          ) : (
+            <>
+              <h1 className="text-on-surface m-0 text-lg font-bold leading-tight">
+                {expanded ? title : 'OE'}
+              </h1>
+              {expanded && subtitle && (
+                <p className="text-on-surface-variant mt-0.5 truncate text-xs leading-tight">
+                  {subtitle}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <nav className="flex flex-col gap-0.5 p-2" aria-label="App navigation">
         {items.map((item) => {

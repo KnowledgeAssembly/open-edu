@@ -268,7 +268,7 @@
   "outline.healthCount": "{{count}} activities",
   "outline.healthReady": "Ready to share",
   "outline.healthNotReady": "Review ready check",
-  "outline.dragHint": "Drag to reorder, or use the menu to move rows.",
+  "outline.dragHint": "Use the menu on each row to move it up or down.",
   "preview.exit": "Exit preview",
   "editor.heading.lesson": "Edit lesson",
   "editor.heading.quiz": "Edit quiz",

@@ -1,4 +1,8 @@
-import { AppSidebar, type AppSidebarSection, type AppSidebarStepItem } from '@open-edu/design-system';
+import {
+  AppSidebar,
+  type AppSidebarSection,
+  type AppSidebarStepItem,
+} from '@open-edu/design-system';
 import { useRuntime } from '@open-edu/runtime';
 import { getOrderedNodes } from '@open-edu/workflow';
 import { useTranslation } from '@open-edu/i18n';
@@ -28,12 +32,12 @@ export function PreviewCourseSidebar(): JSX.Element | null {
 
   return (
     <AppSidebar
-      title={loadedPackage.manifest.title}
       items={[]}
       currentItemId=""
       onNavigate={() => {}}
       sections={[section]}
       defaultCollapsed={false}
+      hideHeader
     />
   );
 }

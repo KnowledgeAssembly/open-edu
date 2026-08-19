@@ -39,7 +39,9 @@ const { mockAcceptDraft, capturedOnAccept } = vi.hoisted(() => {
   let _onAccept: ((item: unknown) => void) | null = null;
   return {
     mockAcceptDraft: (item: unknown) => _onAccept?.(item),
-    capturedOnAccept: (fn: (item: unknown) => void) => { _onAccept = fn; },
+    capturedOnAccept: (fn: (item: unknown) => void) => {
+      _onAccept = fn;
+    },
   };
 });
 
@@ -385,18 +387,19 @@ describe('OutlineView', () => {
     expect(screen.queryByText(/activities/)).not.toBeInTheDocument();
   });
 
-  it('renders a left rail with course meta, tip, and advanced accordions', async () => {
+  it('renders a left rail with course meta and tip, and advanced accordions in the main column', async () => {
     const user = userEvent.setup();
     render(wrap(<OutlineView api={makeApi()} onEdit={() => {}} onError={() => {}} />));
     await screen.findByText('Intro');
     const aside = screen.getByRole('complementary');
     expect(within(aside).getByText('Test')).toBeInTheDocument();
     expect(
-      within(aside).getByText('Drag to reorder, or use the menu to move rows.'),
+      within(aside).getByText('Use the menu on each row to move it up or down.'),
     ).toBeInTheDocument();
-    await user.click(within(aside).getByRole('button', { name: /learning path/i }));
+    expect(within(aside).queryByRole('button', { name: /learning path/i })).toBeNull();
+    await user.click(screen.getByRole('button', { name: /learning path/i }));
     expect(
-      await within(aside).findByText('Learners go through activities in outline order.'),
+      await screen.findByText('Learners go through activities in outline order.'),
     ).toBeInTheDocument();
   });
 });
