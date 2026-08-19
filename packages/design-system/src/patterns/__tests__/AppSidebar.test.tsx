@@ -26,6 +26,21 @@ describe('AppSidebar', () => {
     expect(screen.getByText('Interactive learning platform')).toBeInTheDocument();
   });
 
+  it('hides the header entirely when hideHeader is set', () => {
+    render(
+      <AppSidebar
+        items={[]}
+        currentItemId=""
+        onNavigate={() => {}}
+        sections={sections}
+        hideHeader
+      />,
+    );
+    expect(screen.queryByText('OpenEdu')).toBeNull();
+    expect(screen.queryByText('Interactive learning platform')).toBeNull();
+    expect(screen.getByText('Module 1')).toBeInTheDocument();
+  });
+
   it('renders nav items', () => {
     render(<AppSidebar items={navItems} currentItemId="home" onNavigate={() => {}} />);
     expect(screen.getByText('Home')).toBeInTheDocument();
