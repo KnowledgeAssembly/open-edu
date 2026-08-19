@@ -32,16 +32,33 @@ export async function generateItem(
   const edit = deps.generateItemEdit ?? generateItemEditImpl;
 
   if ('description' in request) {
-    const { kind, description } = assertItemAddBody(request);
-    const result = await add({ kind, description, packageDir: '' });
+    const { kind, description, existingTitles } = assertItemAddBody(request);
+    const result = await add({
+      kind,
+      description,
+      packageDir: '',
+      ...(existingTitles ? { existingTitles } : {}),
+    });
     if (!result.ok) {
-      throw new GatewayError('generation-error', safeItemError(unwrapError(result)), requestId, 502);
+      throw new GatewayError(
+        'generation-error',
+        safeItemError(unwrapError(result)),
+        requestId,
+        502,
+      );
     }
     return { requestId, ok: true as const, item: result.item };
   }
 
-  const { kind, intent, currentContent, params } = assertItemEditBody(request);
-  const result = await edit({ kind, intent, currentContent, params, packageDir: '' });
+  const { kind, intent, currentContent, params, existingTitles } = assertItemEditBody(request);
+  const result = await edit({
+    kind,
+    intent,
+    currentContent,
+    params,
+    packageDir: '',
+    ...(existingTitles ? { existingTitles } : {}),
+  });
   if (!result.ok) {
     throw new GatewayError('generation-error', safeItemError(unwrapError(result)), requestId, 502);
   }
@@ -55,6 +72,14 @@ function safeItemError(raw: string): string {
   return 'The AI provider could not draft this item.';
 }
 
+/**
+ * Validates and narrows the raw request body to a typed `ItemAddRequest` or `ItemEditRequest`.
+ *
+ * Note: `existingTitles` is intentionally omitted from the returned object. The Zod
+ * validation handles its shape, but downstream callers (the `dispatch` function) use the
+ * original request body rather than this narrowed result, so `existingTitles` is preserved
+ * in the call path. Do not use this function as the canonical request shape for forwarding.
+ */
 export function assertItemBody(body: unknown): ItemAddRequest | ItemEditRequest {
   const candidate = (body ?? {}) as { intent?: unknown };
   if (candidate.intent !== undefined) {

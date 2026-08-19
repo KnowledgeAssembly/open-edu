@@ -32,6 +32,7 @@ export type GenerateDraftRequest = z.infer<typeof generateDraftRequestSchema>;
 export const itemAddRequestSchema = z.object({
   kind: z.enum(['lesson', 'quiz', 'practice']),
   description: z.string().min(1).max(MAX_ITEM_DESCRIPTION_CHARS),
+  existingTitles: z.array(z.string().min(1)).max(100).optional(),
 });
 
 export type ItemAddRequest = z.infer<typeof itemAddRequestSchema>;
@@ -56,6 +57,7 @@ export const itemEditRequestSchema = z.object({
       direction: z.enum(['easier', 'harder']).optional(),
     })
     .optional(),
+  existingTitles: z.array(z.string().min(1)).max(100).optional(),
 });
 
 export type ItemEditRequest = z.infer<typeof itemEditRequestSchema>;

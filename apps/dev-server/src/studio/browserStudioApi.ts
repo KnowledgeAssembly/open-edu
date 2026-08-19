@@ -617,6 +617,20 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     return { success: true, title: draft.title };
   }
 
+  /** Existing activity titles from the active course, used as LLM context so the
+   *  gateway can draft items that fit the course outline. Returns undefined when
+   *  no course is open or the outline cannot be read. */
+  async function readActiveCourseTitles(): Promise<string[] | undefined> {
+    if (!session.activeCourseId) return undefined;
+    try {
+      const outline = await getOutline();
+      const titles = outline.activities.map((a) => a.title).filter((t) => t.length > 0);
+      return titles.length > 0 ? titles : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   return {
     getPackageDir: async () => `browser://${session.activeCourseId ?? 'no-course'}`,
     validate,
@@ -648,9 +662,11 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
       return { success: true };
     },
     generateItemAdd: async (kind, description): Promise<AiItemAddResult> => {
+      const existingTitles = await readActiveCourseTitles();
       const result = await aiClient.generateItem({
         kind,
         description,
+        ...(existingTitles ? { existingTitles } : {}),
       });
       const item = (result as { item?: unknown }).item;
       if (item) {
@@ -659,11 +675,13 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
       return { ok: false, code: 'item-retry-failed', error: 'Item generation failed.' };
     },
     generateItemEdit: async (kind, intent, currentContent, params): Promise<AiItemEditResult> => {
+      const existingTitles = await readActiveCourseTitles();
       const result = await aiClient.generateItem({
         kind,
         intent,
         currentContent,
         ...(params ? { params } : {}),
+        ...(existingTitles ? { existingTitles } : {}),
       });
       const items = (result as { items?: unknown }).items;
       if (Array.isArray(items)) {

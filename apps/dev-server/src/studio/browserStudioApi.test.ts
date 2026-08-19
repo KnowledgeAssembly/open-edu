@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import { createBrowserStudioApi, createBrowserStudioSession } from './browserStudioApi.js';
+import type { BrowserAiClient } from './browserAiClient.js';
 import {
   createBrowserCourseStore,
   buildFileIndex,
@@ -310,6 +311,44 @@ describe('BrowserStudioApi', () => {
     ]) {
       await expect(operation()).rejects.toMatchObject({ code: 'unsupported-in-browser' });
     }
+  });
+
+  it('includes active course activity titles when drafting an item', async () => {
+    const store = createBrowserCourseStore();
+    const session = createBrowserStudioSession();
+    const generateItem = vi.fn().mockResolvedValue({
+      item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
+    });
+    const aiClient = { generateItem } as unknown as BrowserAiClient;
+    const api = createBrowserStudioApi({ store, session, aiClient });
+    await api.applyTemplate('lesson-quiz');
+    await api.openLibraryCourse('lesson-quiz');
+
+    const result = await api.generateItemAdd('lesson', 'Explain fractions');
+    expect(result.ok).toBe(true);
+    expect(generateItem).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'lesson',
+        description: 'Explain fractions',
+        existingTitles: ['The Water Cycle', 'The Water Cycle Check'],
+      }),
+    );
+  });
+
+  it('omits activity titles when no course is open', async () => {
+    const store = createBrowserCourseStore();
+    const session = createBrowserStudioSession();
+    const generateItem = vi.fn().mockResolvedValue({
+      item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
+    });
+    const aiClient = { generateItem } as unknown as BrowserAiClient;
+    const api = createBrowserStudioApi({ store, session, aiClient });
+    await session.setActiveCourse('nonexistent');
+
+    await api.generateItemAdd('lesson', 'Explain fractions');
+    expect(generateItem).toHaveBeenCalledWith(
+      expect.not.objectContaining({ existingTitles: expect.anything() }),
+    );
   });
 
   it('reports AI availability through the gateway client (unavailable without fetch)', async () => {

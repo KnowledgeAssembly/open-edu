@@ -25,6 +25,72 @@ const MOCK_DRAFT_FILES = [
   },
 ];
 
+const MOCK_QUIZ_ITEM = {
+  kind: 'quiz',
+  title: 'Photosynthesis Check',
+  content: JSON.stringify(
+    {
+      type: 'quiz',
+      question: 'What do plants make during photosynthesis?',
+      options: [
+        { id: 'a', text: 'Oxygen', correct: true },
+        { id: 'b', text: 'Carbon dioxide', correct: false },
+        { id: 'c', text: 'Nitrogen', correct: false },
+        { id: 'd', text: 'Helium', correct: false },
+      ],
+    },
+    null,
+    2,
+  ),
+};
+
+const MOCK_LESSON_ITEM = {
+  kind: 'lesson',
+  title: 'Simpler Version',
+  content: '# Simpler Version\n\nAn easier way to read this lesson.',
+};
+
+/** Mocks the stateless item endpoint for both add (no intent) and edit (intent) calls. */
+async function mockItemGateway(page: Page): Promise<void> {
+  await page.route('**/api/ai/item', (route) => {
+    const body = route.request().postDataJSON() as {
+      intent?: string;
+      kind?: string;
+    };
+    if (body.intent) {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          requestId: 'gw-item-edit',
+          ok: true,
+          items: [{ ...MOCK_LESSON_ITEM, kind: body.kind ?? 'lesson' }],
+        }),
+      });
+    } else {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          requestId: 'gw-item-add',
+          item: MOCK_QUIZ_ITEM,
+        }),
+      });
+    }
+  });
+}
+
+const COURSE_NOTES =
+  'Help me create a course from my notes. A course about water for young students. Explore the states of water and the water cycle with hands-on activities. It should be interactive and engaging for class use.';
+
+async function openAssistant(page: Page): Promise<void> {
+  const assistantButton = page.getByRole('button', { name: 'Open Author Assistant' }).first();
+  await assistantButton.click();
+  const chatInput = page.getByPlaceholder(/ask|type|message/i);
+  await expect(chatInput).toBeVisible({ timeout: 10000 });
+  return chatInput;
+}
+
 function mockGateway(
   page: Page,
   options: { available?: boolean; generateDraft?: boolean; chatResponse?: string } = {},
@@ -166,7 +232,7 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await expect(chatInput).toBeVisible({ timeout: 10000 });
 
     // Type a message and send it — the gateway mock will handle the response.
-    await chatInput.fill('Help me create a lesson about water chemistry');
+    await chatInput.fill('What is the best way to teach the water cycle to young children?');
     await chatInput.press('Enter');
 
     // Verify the hosted JSON response is adapted into an assistant message.
@@ -274,5 +340,63 @@ test.describe('Browser Studio AI (Phase 2)', () => {
       timeout: 15000,
     });
     await expect(page.getByRole('button', { name: 'lesson-1', exact: true })).toBeVisible();
+  });
+
+  test('chat-driven course draft and item draft work in browser mode', async ({ page }) => {
+    await openStudio(page);
+    mockGateway(page, { available: true, generateDraft: true });
+    await createTemplateCourse(page, 'Lesson + quiz');
+    await mockItemGateway(page);
+
+    // Open the assistant and send a course-generation prompt.
+    const chatInput = await openAssistant(page);
+    await chatInput.fill(COURSE_NOTES);
+    await chatInput.press('Enter');
+
+    // The course-draft card renders with the mocked gateway output.
+    await expect(page.getByText('Course draft: AI Water Course')).toBeVisible({ timeout: 15000 });
+
+    // Ask for a new quiz; the item endpoint mock returns a quiz draft.
+    await chatInput.fill('create a quiz about photosynthesis');
+    await chatInput.press('Enter');
+
+    // The item-draft card renders inside the assistant message.
+    await expect(page.getByText('Photosynthesis Check')).toBeVisible({ timeout: 15000 });
+  });
+
+  test('chat-driven edit rewrites the open activity with a draft', async ({ page }) => {
+    await openStudio(page);
+    mockGateway(page, { available: true });
+    await createTemplateCourse(page, 'Lesson + quiz');
+    await mockItemGateway(page);
+
+    // Open the lesson activity so the context has an active activity, and keep
+    // the editor open while chatting so the assistant can read its context.
+    await page.getByRole('button', { name: 'The Water Cycle', exact: true }).click();
+    await expect(page.getByLabel('Lesson content')).toBeVisible({ timeout: 15000 });
+
+    // Open the assistant and ask to simplify the open activity.
+    const chatInput = await openAssistant(page);
+    await chatInput.fill('Make this simpler');
+    await chatInput.press('Enter');
+
+    // The rewrite draft renders as an item-draft card.
+    await expect(page.getByText('Simpler Version').first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test('chat edit without an open activity prompts the user to open one first', async ({
+    page,
+  }) => {
+    await openStudio(page);
+    mockGateway(page, { available: true });
+    await createTemplateCourse(page, 'Lesson + quiz');
+    await mockItemGateway(page);
+
+    // Stay on the outline view (no activity open) and ask for an edit.
+    const chatInput = await openAssistant(page);
+    await chatInput.fill('Rewrite this to be simpler');
+    await chatInput.press('Enter');
+
+    await expect(page.getByText(/open an activity first/i)).toBeVisible({ timeout: 15000 });
   });
 });
