@@ -1,8 +1,8 @@
 import {
   generateCoursePackage,
   type CourseSpecSource,
-} from '../../src/studio/ai/generateCoursePackage.js';
-import { completeWithLlm } from '../../src/studio/ai/studioLlm.js';
+} from '../studio/ai/generateCoursePackage.js';
+import { completeWithLlm } from '../studio/ai/studioLlm.js';
 import type { GenerateDraftRequest, GenerateDraftResponse } from './requestSchema.js';
 import { MAX_GENERATED_FILES } from './requestSchema.js';
 import { GatewayError } from './errors.js';

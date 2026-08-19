@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { studioContextSnapshotSchema } from '../../src/studio/ai/context.js';
+import { studioContextSnapshotSchema } from '../studio/ai/context.js';
 
 export const MAX_NOTES_CHARS = 200_000;
 export const MAX_SPEC_CHARS = 10_000_000;
@@ -12,16 +12,6 @@ export const MAX_REQUEST_BODY_BYTES = 10_000_000;
 export const MAX_RESPONSE_BYTES = 10_000_000;
 export const MAX_GENERATED_FILES = 500;
 export const MAX_COMPLETION_TOKENS = 4_096;
-export const ALLOWED_MODELS = [
-  'gpt-4o',
-  'gpt-4o-mini',
-  'gpt-5.4',
-  'gpt-5.4-mini',
-  'gpt-3.5-turbo',
-  'claude-3-5-sonnet-20241022',
-  'claude-3-haiku-20240307',
-];
-export const ALLOWED_PROVIDERS = ['openai', 'openrouter', 'google'];
 
 const contentTypeSchema = z.enum(['application/json', 'text/markdown']);
 

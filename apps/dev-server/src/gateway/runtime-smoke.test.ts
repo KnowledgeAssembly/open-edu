@@ -28,7 +28,7 @@ describe('Phase 2 gateway runtime smoke', () => {
 
       // Read the complete compiled output into memory.
       const files = new Map<string, Uint8Array>();
-      async function walk(dir: string, prefix = ''): Promise<void> {
+      const walk = async (dir: string, prefix = ''): Promise<void> => {
         for (const entry of await readdir(dir, { withFileTypes: true })) {
           const full = join(dir, entry.name);
           const rel = prefix ? `${prefix}/${entry.name}` : entry.name;

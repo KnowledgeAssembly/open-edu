@@ -6,7 +6,7 @@ describe('GatewayError contract', () => {
   it('builds a structured error without leaking internals', () => {
     const body = safeErrorBody('req-1', 'provider-error', 'The AI provider could not be reached.');
     expect(body.requestId).toBe('req-1');
-    expect(body.error.code).toBe('provider-error');
+    expect((body.error as { code: string }).code).toBe('provider-error');
     expect(JSON.stringify(body)).not.toMatch(/api[_-]?key/i);
     expect(JSON.stringify(body)).not.toMatch(/stack/i);
     expect(JSON.stringify(body)).not.toMatch(/\/Users\//);
@@ -36,7 +36,8 @@ describe('GatewayError contract', () => {
 
   it('never exposes raw provider messages on the error body', () => {
     const body = safeErrorBody('req-1', 'generation-error', 'generation failed');
-    expect(typeof body.error.message).toBe('string');
-    expect(body.error.message).not.toMatch(/secret|token|Bearer/);
+    const err = body.error as { message: string };
+    expect(typeof err.message).toBe('string');
+    expect(err.message).not.toMatch(/secret|token|Bearer/);
   });
 });

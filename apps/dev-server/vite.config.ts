@@ -36,7 +36,8 @@ import {
   ItemRequestError,
 } from './src/studio/ai/itemGenerate.js';
 import { completeWithLlm, isAiAvailable } from './src/studio/ai/studioLlm.js';
-import { createLocalAiMiddleware } from './api/ai/localViteGateway.js';
+import { createLocalAiMiddleware } from './src/gateway/localViteGateway.js';
+import gatewayHandler from './api/ai/[...route].js';
 import { createStudioAssistantHandler } from './src/studio/ai/chat/handler.js';
 import {
   resolveWorkspace,
@@ -1602,7 +1603,7 @@ function localAiGatewayPlugin(enabled: boolean): Plugin {
   return {
     name: 'open-edu-local-ai-gateway',
     configureServer(server) {
-      server.middlewares.use(createLocalAiMiddleware(enabled));
+      server.middlewares.use(createLocalAiMiddleware(enabled, gatewayHandler));
     },
   };
 }
@@ -1626,6 +1627,15 @@ export default defineConfig(({ mode }) => {
     plugins: isBrowserMode
       ? [react(), virtualPackagePlugin(), localAiGatewayPlugin(localAiEnabled)]
       : [react(), eduPackageLoader()],
+    resolve: isBrowserMode
+      ? {
+          alias: {
+            '@open-edu/telemetry': resolve(__dirname, 'src/stubs/telemetry.ts'),
+            '@open-edu/rewards': resolve(__dirname, 'src/stubs/rewards.ts'),
+            '@open-edu/ai-companion': resolve(__dirname, 'src/stubs/ai-companion.ts'),
+          },
+        }
+      : undefined,
     define: {
       'import.meta.env.VITE_OPEN_EDU_BROWSER': JSON.stringify(isBrowserMode ? '1' : '0'),
       OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
@@ -1641,16 +1651,6 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: isBrowserMode ? 'dist' : undefined,
       emptyOutDir: true,
-      rollupOptions: isBrowserMode
-        ? {
-            // These packages are Node-only and never execute on the browser
-            // preview path (RewardBroker/telemetry run only in local Developer
-            // mode). Marking them external keeps their node:* imports out of
-            // the static bundle; the dynamic imports resolve to no-ops at
-            // runtime in the browser.
-            external: ['@open-edu/telemetry', '@open-edu/rewards', '@open-edu/ai-companion'],
-          }
-        : undefined,
     },
     server: {
       port: 4000,
