@@ -1,10 +1,5 @@
 import { GatewayError, safeErrorBody, isGatewayError, classifyGatewayError } from './errors.js';
-import {
-  MAX_REQUEST_BODY_BYTES,
-  MAX_RESPONSE_BYTES,
-  ALLOWED_MODELS,
-  ALLOWED_PROVIDERS,
-} from './requestSchema.js';
+import { MAX_REQUEST_BODY_BYTES, MAX_RESPONSE_BYTES } from './requestSchema.js';
 
 export interface GatewaySafeguardOptions {
   allowedOrigins?: string[];
@@ -126,26 +121,6 @@ export async function guardedHandler(
       body: safeErrorBody(requestId, classified.code, classified.message),
     };
   }
-}
-
-/**
- * Validate that a model identifier is in the configured allowlist. If
- * OPEN_EDU_GATEWAY_ALLOWED_MODELS is set, only those models are permitted.
- * Otherwise, all models in ALLOWED_MODELS are allowed.
- */
-export function isAllowedModel(model: string | undefined): boolean {
-  if (!model) return true;
-  const envList = process.env.OPEN_EDU_GATEWAY_ALLOWED_MODELS;
-  const allowed = envList ? envList.split(',').map((m) => m.trim()) : ALLOWED_MODELS;
-  const unqualifiedModel = model.includes('/') ? model.slice(model.lastIndexOf('/') + 1) : model;
-  return allowed.includes(model) || allowed.includes(unqualifiedModel);
-}
-
-export function isAllowedProvider(provider: string | undefined): boolean {
-  if (!provider) return true;
-  const envList = process.env.OPEN_EDU_GATEWAY_ALLOWED_PROVIDERS;
-  const allowed = envList ? envList.split(',').map((value) => value.trim()) : ALLOWED_PROVIDERS;
-  return allowed.includes(provider);
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {

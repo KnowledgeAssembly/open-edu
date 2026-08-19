@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import {
   generateDraftRequestSchema,
   itemAddRequestSchema,
@@ -13,8 +13,6 @@ import {
   assertBodyLimits,
   checkGatewayRateLimit,
   guardedHandler,
-  isAllowedModel,
-  isAllowedProvider,
   type GatewaySafeguardOptions,
 } from './safeguards.js';
 import { GatewayError, safeErrorBody } from './errors.js';
@@ -88,20 +86,12 @@ export async function routeRequest(
     };
   }
 
-  const provider = process.env.LLM_PROVIDER ?? 'openai';
-  const model = process.env.LLM_MODEL ?? 'gpt-4o-mini';
-  if (!isAllowedProvider(provider) || !isAllowedModel(model)) {
-    return {
-      status: 503,
-      body: safeErrorBody(requestId, 'missing-config', 'AI provider configuration is not allowed.'),
-    };
-  }
-
   const route = parseRoute(req.path);
   if (!route) {
     return { status: 404, body: safeErrorBody(requestId, 'invalid-request', 'Unknown route.') };
   }
 
+  // Status reports AI availability without requiring provider configuration.
   if (route === 'status') {
     if (req.method === 'GET') {
       const available = options.isAvailable ? options.isAvailable() : true;
@@ -144,7 +134,7 @@ async function dispatch(
     case 'generate-draft': {
       const parsed = generateDraftRequestSchema.safeParse(req.body);
       if (!parsed.success) {
-        throw new GatewayError('invalid-request', zErrorMessage(parsed), requestId);
+        throw new GatewayError('invalid-request', zErrorMessage(parsed.error), requestId);
       }
       return generateDraft(parsed.data, requestId, {
         isAvailable: options.isAvailable,
@@ -157,14 +147,14 @@ async function dispatch(
       const schema = isAdd ? itemAddRequestSchema : itemEditRequestSchema;
       const parsed = schema.safeParse(candidate);
       if (!parsed.success) {
-        throw new GatewayError('invalid-request', zErrorMessage(parsed), requestId);
+        throw new GatewayError('invalid-request', zErrorMessage(parsed.error), requestId);
       }
       return generateItem(candidate as never, requestId, options.itemGenerationDeps);
     }
     case 'chat': {
       const parsed = chatRequestSchema.safeParse(req.body);
       if (!parsed.success) {
-        throw new GatewayError('invalid-request', zErrorMessage(parsed), requestId);
+        throw new GatewayError('invalid-request', zErrorMessage(parsed.error), requestId);
       }
       return gatewayChat(parsed.data, requestId, options.chatDeps);
     }
@@ -173,6 +163,6 @@ async function dispatch(
   }
 }
 
-function zErrorMessage(result: { error: z.ZodError }): string {
-  return result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+function zErrorMessage(error: z.ZodError): string {
+  return error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
 }

@@ -1,6 +1,6 @@
-import type { StudioContextSnapshot, StudioView } from '../context';
-import { MAX_SUGGESTED_NEXT_STEPS } from './metadata';
-import { studioChatMessage } from './messages';
+import type { StudioContextSnapshot, StudioView } from '../context.js';
+import { MAX_SUGGESTED_NEXT_STEPS } from './metadata.js';
+import { studioChatMessage } from './messages.js';
 
 export interface ExtractNextStepsInput {
   mode: 'explain' | 'draft' | 'course_draft';

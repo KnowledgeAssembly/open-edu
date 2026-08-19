@@ -1,5 +1,4 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import gatewayHandler from './[...route].js';
 
 type Next = () => void;
 type GatewayHandler = (req: IncomingMessage, res: ServerResponse) => void | Promise<void>;
@@ -11,7 +10,7 @@ type GatewayHandler = (req: IncomingMessage, res: ServerResponse) => void | Prom
  */
 export function createLocalAiMiddleware(
   enabled: boolean,
-  handler: GatewayHandler = gatewayHandler,
+  handler: GatewayHandler,
 ): (req: IncomingMessage, res: ServerResponse, next: Next) => void | Promise<void> {
   return async (req, res, next) => {
     const path = req.url?.split('?')[0];

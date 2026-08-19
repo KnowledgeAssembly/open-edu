@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { routeRequest } from './router.js';
 import { resetGatewayRateLimits } from './safeguards.js';
 import { readFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 const SPEC_PATH = resolve(
   import.meta.dirname,

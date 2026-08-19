@@ -5,10 +5,10 @@
 // The function is stateless: it never keeps a draft registry, never commits,
 // and never stores course or draft bytes server-side.
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { routeRequest } from './router.js';
+import { routeRequest } from '../../src/gateway/router.js';
 import { isAiAvailable } from '../../src/studio/ai/studioLlm.js';
-import { MAX_REQUEST_BODY_BYTES } from './requestSchema.js';
-import { getAllowedGatewayOrigins } from './gatewayOrigins.js';
+import { MAX_REQUEST_BODY_BYTES } from '../../src/gateway/requestSchema.js';
+import { getAllowedGatewayOrigins } from '../../src/gateway/gatewayOrigins.js';
 
 const ALLOWED_ORIGINS = getAllowedGatewayOrigins();
 
@@ -48,6 +48,10 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   const originAllowed =
     !origin || ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGINS.includes('*');
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const ip = Array.isArray(forwardedFor)
+    ? forwardedFor[0]?.trim()
+    : forwardedFor?.split(',')[0]?.trim();
 
   if (req.method === 'OPTIONS') {
     if (!originAllowed) {
@@ -90,7 +94,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       path: pathname,
       body,
       origin,
-      ip: req.headers['x-forwarded-for']?.split(',')[0]?.trim(),
+      ip,
     },
     { safeguards: { allowedOrigins: ALLOWED_ORIGINS }, isAvailable: isAiAvailable },
   );

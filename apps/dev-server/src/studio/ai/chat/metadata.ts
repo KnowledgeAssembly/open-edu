@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { DraftItem, CourseDraftResult } from '../types';
+import type { DraftItem, CourseDraftResult } from '../types.js';
 
 /** Cap follow-up chips shown under an assistant message (server-suggested). */
 export const MAX_SUGGESTED_NEXT_STEPS = 4;

@@ -4,13 +4,18 @@ import {
   assertItemAddBody,
   assertItemEditBody,
   type ItemKind,
-} from '../../src/studio/ai/itemGenerate.js';
+} from '../studio/ai/itemGenerate.js';
 import { GatewayError } from './errors.js';
 import type { ItemAddRequest, ItemEditRequest } from './requestSchema.js';
 
 export interface ItemGenerationDeps {
   generateItemAdd?: typeof generateItemAddImpl;
   generateItemEdit?: typeof generateItemEditImpl;
+}
+
+function unwrapError(result: { ok: false; error: string } | { ok: true }): string {
+  if (result.ok) throw new Error('unwrapError called on success result');
+  return result.error;
 }
 
 /**
@@ -30,7 +35,7 @@ export async function generateItem(
     const { kind, description } = assertItemAddBody(request);
     const result = await add({ kind, description, packageDir: '' });
     if (!result.ok) {
-      throw new GatewayError('generation-error', safeItemError(result.error), requestId, 502);
+      throw new GatewayError('generation-error', safeItemError(unwrapError(result)), requestId, 502);
     }
     return { requestId, ok: true as const, item: result.item };
   }
@@ -38,7 +43,7 @@ export async function generateItem(
   const { kind, intent, currentContent, params } = assertItemEditBody(request);
   const result = await edit({ kind, intent, currentContent, params, packageDir: '' });
   if (!result.ok) {
-    throw new GatewayError('generation-error', safeItemError(result.error), requestId, 502);
+    throw new GatewayError('generation-error', safeItemError(unwrapError(result)), requestId, 502);
   }
   return { requestId, ok: true as const, items: result.items };
 }

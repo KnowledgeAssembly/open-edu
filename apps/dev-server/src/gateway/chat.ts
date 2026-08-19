@@ -1,7 +1,7 @@
-import { completeWithLlm } from '../../src/studio/ai/studioLlm.js';
-import { buildSystemPrompt } from '../../src/studio/ai/chat/policy.js';
-import { studioChatMessage } from '../../src/studio/ai/chat/messages.js';
-import type { StudioContextSnapshot } from '../../src/studio/ai/context.js';
+import { completeWithLlm } from '../studio/ai/studioLlm.js';
+import { buildSystemPrompt } from '../studio/ai/chat/policy.js';
+import { studioChatMessage } from '../studio/ai/chat/messages.js';
+import type { StudioContextSnapshot } from '../studio/ai/context.js';
 import { GatewayError } from './errors.js';
 import type { ChatRequest } from './requestSchema.js';
 import { MAX_CHAT_CONTEXT_CHARS } from './requestSchema.js';
