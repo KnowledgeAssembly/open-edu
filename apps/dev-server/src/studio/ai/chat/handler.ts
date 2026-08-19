@@ -20,87 +20,7 @@ import { createChatMetadata, type StudioChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
 import { checkRateLimit } from './rateLimit';
 import type { StudioContextSnapshot } from '../context';
-import type { ItemIntent, ItemIntentParams } from '../types';
-
-function parseIntentFromMessage(content: string): {
-  type: 'draft_new' | 'edit_existing' | 'generate_course' | 'explain';
-  kind?: 'lesson' | 'quiz' | 'practice';
-  description?: string;
-  intent?: ItemIntent;
-  params?: ItemIntentParams;
-} | null {
-  const low = content.toLowerCase();
-
-  if (low.includes('add questions') || low.includes('more questions')) {
-    return { type: 'edit_existing', intent: 'add-questions' };
-  }
-
-  // Check for course generation before individual activity creation
-  const coursePatterns = [
-    /create\s+(?:a\s+)?(?:full\s+)?course\b/i,
-    /generate\s+(?:a\s+)?course\b/i,
-    /build\s+(?:a\s+)?course\b/i,
-    /make\s+(?:a\s+)?course\b/i,
-    /\b(?:course|curriculum|unit)\s+(?:from|based on|covering)\s+/i,
-    /^.*notes?.*course.*$/i,
-    /^.*course.*notes?.*$/i,
-  ];
-  const isCourseRequest = coursePatterns.some((p) => p.test(low));
-
-  // Only trigger course generation if the message is long enough (has actual notes/content)
-  const hasSubstantialNotes = content.length > 100;
-
-  if (isCourseRequest && hasSubstantialNotes) {
-    return { type: 'generate_course', description: content };
-  }
-
-  // Also trigger course generation for very long messages that look like notes
-  if (
-    content.length > 300 &&
-    !low.includes('create') &&
-    !low.includes('add') &&
-    !low.includes('edit')
-  ) {
-    return { type: 'generate_course', description: content };
-  }
-
-  const createMatch = low.match(
-    /(?:create|add|draft|generate|make new)\s+(?:a\s+)?(lesson|quiz|practice)/,
-  );
-  if (createMatch) {
-    return {
-      type: 'draft_new',
-      kind: createMatch[1] as 'lesson' | 'quiz' | 'practice',
-      description: content,
-    };
-  }
-
-  const editPatterns: Array<{ match: RegExp; intent: ItemIntent; params?: ItemIntentParams }> = [
-    { match: /rewrite|rephrase/i, intent: 'rewrite' },
-    { match: /expand|elaborate/i, intent: 'expand' },
-    { match: /fix.*quality/i, intent: 'fix-quality' },
-    { match: /easier|simplify/i, intent: 'difficulty', params: { direction: 'easier' } },
-    { match: /harder|more.*challenging/i, intent: 'difficulty', params: { direction: 'harder' } },
-    { match: /translate/i, intent: 'translate', params: { targetLocale: 'en' } },
-    { match: /improve.*prompt/i, intent: 'improve-prompt' },
-  ];
-
-  if (
-    low.includes('edit') ||
-    low.includes('change') ||
-    low.includes('improve') ||
-    low.includes('rewrite')
-  ) {
-    for (const pattern of editPatterns) {
-      if (pattern.match.test(low)) {
-        return { type: 'edit_existing', intent: pattern.intent, params: pattern.params };
-      }
-    }
-    return { type: 'edit_existing', intent: 'rewrite' };
-  }
-
-  return null;
-}
+import { parseIntentFromMessage, type ParsedIntent } from './intent.js';
 
 function writeJson(res: ServerResponse, status: number, body: unknown): void {
   if (res.headersSent) return;
@@ -240,7 +160,7 @@ export async function createStudioAssistantHandler(
 
 /** Runs the deterministic tool path (draft / course gen). Null → explain. */
 async function runToolIntent(
-  intent: ReturnType<typeof parseIntentFromMessage>,
+  intent: ParsedIntent | null,
   opts: {
     body: { context: StudioContextSnapshot };
     context: StudioContextSnapshot;

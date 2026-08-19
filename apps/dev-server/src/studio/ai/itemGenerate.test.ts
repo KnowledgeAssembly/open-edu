@@ -180,6 +180,22 @@ describe('generateItemAdd', () => {
     }
   });
 
+  it('injects existing course titles into the add prompt when provided', async () => {
+    vi.mocked(completeWithLlm).mockResolvedValueOnce(
+      JSON.stringify({ title: 'Fractions', markdown: '# Fractions\n\nBody' }),
+    );
+    const result = await generateItemAdd({
+      kind: 'lesson',
+      description: 'Explain fractions',
+      packageDir: '/does/not/matter',
+      existingTitles: ['Water Basics', 'The Water Cycle'],
+    });
+    expect(result.ok).toBe(true);
+    const prompt = vi.mocked(completeWithLlm).mock.calls[0]![0];
+    expect(prompt).toContain('Water Basics');
+    expect(prompt).toContain('The Water Cycle');
+  });
+
   it('retries once when the first draft fails validation', async () => {
     vi.mocked(completeWithLlm)
       .mockResolvedValueOnce(
@@ -349,6 +365,30 @@ describe('request validators', () => {
     });
   });
 
+  it('assertItemAddBody passes through existing course titles', () => {
+    expect(
+      assertItemAddBody({
+        kind: 'quiz',
+        description: 'A quiz',
+        existingTitles: ['Water Basics', 'The Water Cycle'],
+      }),
+    ).toEqual({
+      kind: 'quiz',
+      description: 'A quiz',
+      existingTitles: ['Water Basics', 'The Water Cycle'],
+    });
+  });
+
+  it('assertItemAddBody ignores non-string existing titles', () => {
+    expect(
+      assertItemAddBody({
+        kind: 'quiz',
+        description: 'A quiz',
+        existingTitles: ['ok', 42, null],
+      }),
+    ).toEqual({ kind: 'quiz', description: 'A quiz' });
+  });
+
   it('assertItemAddBody throws on an unknown kind', () => {
     expect(() => assertItemAddBody({ kind: 'video', description: 'x' })).toThrow(
       /kind must be one of/,
@@ -383,6 +423,17 @@ describe('request validators', () => {
         currentContent: '{}',
       }).intent,
     ).toBe('add-questions');
+  });
+
+  it('assertItemEditBody passes through existing course titles', () => {
+    expect(
+      assertItemEditBody({
+        kind: 'lesson',
+        intent: 'rewrite',
+        currentContent: '# Hi',
+        existingTitles: ['Water Basics', 'The Water Cycle'],
+      }).existingTitles,
+    ).toEqual(['Water Basics', 'The Water Cycle']);
   });
 
   it('assertItemEditBody throws on an unknown intent for the kind', () => {

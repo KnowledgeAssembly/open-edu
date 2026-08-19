@@ -148,8 +148,14 @@ export class BrowserAiClient {
 
   async generateItem(
     body:
-      | { kind: string; description: string }
-      | { kind: string; intent: string; currentContent: string; params?: unknown },
+      | { kind: string; description: string; existingTitles?: string[] }
+      | {
+          kind: string;
+          intent: string;
+          currentContent: string;
+          params?: unknown;
+          existingTitles?: string[];
+        },
   ): Promise<unknown> {
     return this.request('/api/ai/item', { method: 'POST', body: JSON.stringify(body) });
   }

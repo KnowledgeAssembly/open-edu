@@ -30,6 +30,22 @@ describe('generateItem', () => {
     ).rejects.toMatchObject({ code: 'generation-error' });
   });
 
+  it('passes existing course titles into the add implementation', async () => {
+    const generateItemAdd = vi.fn().mockResolvedValue({
+      ok: true as const,
+      item: { kind: 'lesson' as const, title: 'Fractions', content: '# Fractions' },
+    });
+    const result = await generateItem(
+      { kind: 'lesson', description: 'Explain fractions', existingTitles: ['Water Basics'] },
+      'req-4',
+      { generateItemAdd },
+    );
+    expect(result.ok).toBe(true);
+    expect(generateItemAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ existingTitles: ['Water Basics'] }),
+    );
+  });
+
   it('maps a successful edit result', async () => {
     const result = await generateItem(
       {

@@ -35,6 +35,8 @@ export interface ItemAddRequest {
   kind: ItemKind;
   description: string;
   packageDir: string;
+  /** Existing activity titles used as prompt context. Overrides packageDir scan. */
+  existingTitles?: string[];
 }
 
 export interface ItemEditRequest {
@@ -43,6 +45,8 @@ export interface ItemEditRequest {
   currentContent: string;
   packageDir: string;
   params?: ItemIntentParams;
+  /** Existing activity titles used as prompt context. Overrides packageDir scan. */
+  existingTitles?: string[];
 }
 
 export class ItemRequestError extends Error {
@@ -249,7 +253,9 @@ export async function generateItemAdd(request: ItemAddRequest): Promise<AiItemAd
   if (!isAiAvailable()) {
     return { ok: false, code: 'item-retry-failed', error: 'AI is unavailable' };
   }
-  const context = renderCourseContext(readCourseContext(request.packageDir));
+  const context = renderCourseContext(
+    request.existingTitles ?? readCourseContext(request.packageDir),
+  );
   const expectedOptionCount = request.kind === 'quiz' ? 4 : 1;
   const buildPrompt = () => {
     switch (request.kind) {
@@ -328,7 +334,9 @@ export async function generateItemEdit(request: ItemEditRequest): Promise<AiItem
   if (!allowlist.includes(request.intent)) {
     throw invalidRequest(`Unsupported intent "${request.intent}" for kind "${request.kind}"`);
   }
-  const context = renderCourseContext(readCourseContext(request.packageDir));
+  const context = renderCourseContext(
+    request.existingTitles ?? readCourseContext(request.packageDir),
+  );
 
   if (request.kind === 'quiz' && request.intent === 'add-questions') {
     return generateQuizBatch(request.currentContent, context, request.params);
@@ -384,15 +392,28 @@ export async function generateItemEdit(request: ItemEditRequest): Promise<AiItem
   return retryFailed(lastError);
 }
 
-export function assertItemAddBody(body: unknown): { kind: ItemKind; description: string } {
-  const candidate = (body ?? {}) as { kind?: unknown; description?: unknown };
+export function assertItemAddBody(body: unknown): {
+  kind: ItemKind;
+  description: string;
+  existingTitles?: string[];
+} {
+  const candidate = (body ?? {}) as {
+    kind?: unknown;
+    description?: unknown;
+    existingTitles?: unknown;
+  };
   if (candidate.kind !== 'lesson' && candidate.kind !== 'quiz' && candidate.kind !== 'practice') {
     throw invalidRequest('kind must be one of lesson, quiz, practice');
   }
   if (typeof candidate.description !== 'string' || candidate.description.trim().length === 0) {
     throw invalidRequest('description must be a non-empty string');
   }
-  return { kind: candidate.kind, description: candidate.description };
+  const existingTitles = normalizeExistingTitles(candidate.existingTitles);
+  return {
+    kind: candidate.kind,
+    description: candidate.description,
+    ...(existingTitles ? { existingTitles } : {}),
+  };
 }
 
 export function assertItemEditBody(body: unknown): {
@@ -400,12 +421,14 @@ export function assertItemEditBody(body: unknown): {
   intent: ItemIntent;
   currentContent: string;
   params?: ItemIntentParams;
+  existingTitles?: string[];
 } {
   const candidate = (body ?? {}) as {
     kind?: unknown;
     intent?: unknown;
     currentContent?: unknown;
     params?: unknown;
+    existingTitles?: unknown;
   };
   if (candidate.kind !== 'lesson' && candidate.kind !== 'quiz' && candidate.kind !== 'practice') {
     throw invalidRequest('kind must be one of lesson, quiz, practice');
@@ -431,7 +454,15 @@ export function assertItemEditBody(body: unknown): {
     ) {
       throw invalidRequest('translate requires a targetLocale param');
     }
-    return { kind: candidate.kind, intent, currentContent: candidate.currentContent, params };
+    return {
+      kind: candidate.kind,
+      intent,
+      currentContent: candidate.currentContent,
+      params,
+      ...(normalizeExistingTitles(candidate.existingTitles)
+        ? { existingTitles: normalizeExistingTitles(candidate.existingTitles) }
+        : {}),
+    };
   }
   if (intent === 'difficulty') {
     if (
@@ -441,10 +472,37 @@ export function assertItemEditBody(body: unknown): {
     ) {
       throw invalidRequest('difficulty requires a direction param of easier|harder');
     }
-    return { kind: candidate.kind, intent, currentContent: candidate.currentContent, params };
+    return {
+      kind: candidate.kind,
+      intent,
+      currentContent: candidate.currentContent,
+      params,
+      ...(normalizeExistingTitles(candidate.existingTitles)
+        ? { existingTitles: normalizeExistingTitles(candidate.existingTitles) }
+        : {}),
+    };
   }
   if (candidate.params !== undefined && candidate.params !== null) {
     throw invalidRequest(`Intent "${intent}" does not accept params`);
   }
-  return { kind: candidate.kind, intent, currentContent: candidate.currentContent };
+  const result: {
+    kind: ItemKind;
+    intent: ItemIntent;
+    currentContent: string;
+    existingTitles?: string[];
+  } = { kind: candidate.kind, intent, currentContent: candidate.currentContent };
+  const existingTitles = normalizeExistingTitles(candidate.existingTitles);
+  if (existingTitles) result.existingTitles = existingTitles;
+  return result;
+}
+
+function normalizeExistingTitles(value: unknown): string[] | undefined {
+  if (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => typeof item === 'string' && item.trim().length > 0)
+  ) {
+    return value.map(String).slice(0, 100);
+  }
+  return undefined;
 }
