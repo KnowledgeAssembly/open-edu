@@ -157,6 +157,14 @@ export function StudioChatProvider(props: StudioChatProviderProps) {
   });
   const [hydrated, setHydrated] = useState<UIMessage[] | null>(null);
 
+  // When the conversation id changes (New conversation), invalidate the
+  // hydrated history synchronously so the remounted chat never hydrates with
+  // the previous conversation's messages before the reload effect runs.
+  const handleNewConversationId = useCallback((newId: string) => {
+    setHydrated(null);
+    setConversationIdState(newId);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     setHydrated(null);
@@ -177,7 +185,7 @@ export function StudioChatProvider(props: StudioChatProviderProps) {
       initialMessages={hydrated ?? []}
       hydrationPending={hydrated === null}
       store={storeRef.current}
-      setConversationIdState={setConversationIdState}
+      setConversationIdState={handleNewConversationId}
       api={props.api}
       chatApiUrl={props.chatApiUrl}
       onOpenPath={props.onOpenPath}
