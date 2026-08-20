@@ -8,6 +8,9 @@ export interface ParsedIntent {
   params?: ItemIntentParams;
 }
 
+/** Shortest explicit course requests ("Create a course about X") are ~30 chars. */
+const MIN_EXPLICIT_COURSE_REQUEST_LENGTH = 30;
+
 /**
  * Deterministic, regex-based intent parser used by both the local Vite chat
  * handler and the browser-mode hosted chat transport. It keeps course
@@ -33,10 +36,11 @@ export function parseIntentFromMessage(content: string): ParsedIntent | null {
   ];
   const isCourseRequest = coursePatterns.some((p) => p.test(low));
 
-  // Only trigger course generation if the message is long enough (has actual notes/content)
+  // Trigger course generation for explicit course requests (even short ones)
+  // or long messages that look like notes.
   const hasSubstantialNotes = content.length > 100;
 
-  if (isCourseRequest && hasSubstantialNotes) {
+  if (isCourseRequest && (hasSubstantialNotes || low.length >= MIN_EXPLICIT_COURSE_REQUEST_LENGTH)) {
     return { type: 'generate_course', description: content };
   }
 
