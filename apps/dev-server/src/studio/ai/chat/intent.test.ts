@@ -16,6 +16,12 @@ describe('parseIntentFromMessage', () => {
     expect(intent).toBeNull();
   });
 
+  it('catches short explicit course requests above the length threshold', () => {
+    const intent = parseIntentFromMessage('Create a course about addition');
+    expect(intent).not.toBeNull();
+    expect(intent?.type).toBe('generate_course');
+  });
+
   it('detects a draft-new request for a lesson', () => {
     const intent = parseIntentFromMessage('Create a lesson about photosynthesis');
     expect(intent?.type).toBe('draft_new');
