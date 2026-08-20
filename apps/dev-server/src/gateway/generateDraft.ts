@@ -8,8 +8,9 @@ import { MAX_GENERATED_FILES } from './requestSchema.js';
 import { GatewayError } from './errors.js';
 
 export interface GenerateDraftDeps {
-  completeText?: (prompt: string) => Promise<string>;
+  completeText?: (prompt: string, signal?: AbortSignal) => Promise<string>;
   isAvailable?: () => boolean;
+  signal?: AbortSignal;
 }
 
 /**
@@ -34,9 +35,10 @@ export async function generateDraft(
   }
 
   const completeText = deps.completeText ?? completeWithLlm;
+  const signal = deps.signal;
   const source: CourseSpecSource =
     request.notes !== undefined
-      ? { kind: 'notes', notes: request.notes, completeText }
+      ? { kind: 'notes', notes: request.notes, completeText, signal }
       : { kind: 'spec', spec: request.spec!, extension: request.specExt! };
 
   try {

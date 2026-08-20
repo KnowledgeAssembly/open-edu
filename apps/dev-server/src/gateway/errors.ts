@@ -55,15 +55,16 @@ export function classifyGatewayError(requestId: string, err: unknown, status = 5
   if (err instanceof GatewayError) return err;
 
   const name = (err as { name?: string }).name ?? '';
+  const msg = String((err as Error).message ?? '');
   const code: GatewayErrorCode =
-    name === 'AbortError' || /timeout|timed out/i.test(String((err as Error).message))
+    name === 'AbortError' || /timeout|timed out/i.test(msg)
       ? 'timeout'
       : 'provider-error';
 
   return new GatewayError(
     code,
     code === 'timeout'
-      ? 'The request timed out. Try again.'
+      ? 'The request timed out. The AI provider may be experiencing high load. Try again with a shorter input.'
       : 'The AI provider could not be reached.',
     requestId,
     status,

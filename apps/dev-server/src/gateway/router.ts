@@ -120,7 +120,7 @@ export async function routeRequest(
     throw err;
   }
 
-  const fn = () => dispatch(route, req, requestId, options);
+  const fn = (signal?: AbortSignal) => dispatch(route, req, requestId, options, signal);
   return guardedHandler(requestId, opts, fn);
 }
 
@@ -129,6 +129,7 @@ async function dispatch(
   req: RouteRequest,
   requestId: string,
   options: GatewayRouterOptions,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   switch (route) {
     case 'generate-draft': {
@@ -138,6 +139,7 @@ async function dispatch(
       }
       return generateDraft(parsed.data, requestId, {
         isAvailable: options.isAvailable,
+        signal,
         ...(options.generateDraftDeps ?? {}),
       });
     }
@@ -156,7 +158,7 @@ async function dispatch(
       if (!parsed.success) {
         throw new GatewayError('invalid-request', zErrorMessage(parsed.error), requestId);
       }
-      return gatewayChat(parsed.data, requestId, options.chatDeps);
+      return gatewayChat(parsed.data, requestId, options.chatDeps, signal);
     }
     default:
       throw new GatewayError('invalid-request', 'Unknown route', requestId);

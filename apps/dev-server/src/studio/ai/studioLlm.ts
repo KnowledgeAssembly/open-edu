@@ -8,7 +8,7 @@ export function isAiAvailable(): boolean {
   return Boolean(config.apiKey) || Boolean(config.baseURL);
 }
 
-export async function completeWithLlm(prompt: string): Promise<string> {
+export async function completeWithLlm(prompt: string, signal?: AbortSignal): Promise<string> {
   try {
     const factory = createModelFactoryFromEnv();
     const model = factory.getModel('fast');
@@ -19,7 +19,7 @@ export async function completeWithLlm(prompt: string): Promise<string> {
         : MAX_COMPLETION_TOKENS,
       MAX_COMPLETION_TOKENS,
     );
-    const result = await generateText({ model, prompt, maxOutputTokens });
+    const result = await generateText({ model, prompt, maxOutputTokens, abortSignal: signal });
     return result.text;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

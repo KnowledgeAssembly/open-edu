@@ -7,7 +7,7 @@ import type { ChatRequest } from './requestSchema.js';
 import { MAX_CHAT_CONTEXT_CHARS } from './requestSchema.js';
 
 export interface ChatDeps {
-  completeText?: (prompt: string) => Promise<string>;
+  completeText?: (prompt: string, signal?: AbortSignal) => Promise<string>;
 }
 
 export interface GatewayChatResult {
@@ -38,6 +38,7 @@ export async function gatewayChat(
   request: ChatRequest,
   requestId: string,
   deps: ChatDeps = {},
+  signal?: AbortSignal,
 ): Promise<GatewayChatResult> {
   const completeText = deps.completeText ?? completeWithLlm;
   const lastUser = [...request.messages].reverse().find((m) => m.role === 'user');
@@ -52,7 +53,7 @@ export async function gatewayChat(
         413,
       );
     }
-    const text = await completeText(prompt);
+    const text = await completeText(prompt, signal);
     if (!lastUser) {
       throw new GatewayError('invalid-request', 'No user message found', requestId);
     }
