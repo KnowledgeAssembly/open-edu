@@ -55,6 +55,17 @@ export interface BrowserAiClientOptions {
   baseUrl?: string;
 }
 
+const MAX_RETRIES = 1;
+const INITIAL_RETRY_DELAY_MS = 2_000;
+
+function isTimeoutError(err: unknown): boolean {
+  return err instanceof BrowserAiClientError && err.code === 'timeout';
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Browser-side AI client for the stateless hosted gateway. It calls only
  * /api/ai/* endpoints, never includes API keys, and owns draft persistence in
@@ -91,6 +102,23 @@ export class BrowserAiClient {
     return data as T;
   }
 
+  private async requestWithRetry<T>(path: string, init?: RequestInit): Promise<T> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        return await this.request<T>(path, init);
+      } catch (err) {
+        lastError = err;
+        if (attempt < MAX_RETRIES && isTimeoutError(err)) {
+          await delay(INITIAL_RETRY_DELAY_MS * 2 ** attempt);
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw lastError;
+  }
+
   async getStatus(): Promise<AiStatus> {
     try {
       const data = await this.request<{ available: boolean; reason?: string }>('/api/ai/status');
@@ -108,7 +136,7 @@ export class BrowserAiClient {
     input: { notes?: string; spec?: string; specExt?: '.json' | '.md' },
     courseId: string,
   ): Promise<GatewayDraftResponse & { draftId: string }> {
-    const data = await this.request<GatewayDraftResponse>('/api/ai/generate-draft', {
+    const data = await this.requestWithRetry<GatewayDraftResponse>('/api/ai/generate-draft', {
       method: 'POST',
       body: JSON.stringify(input),
     });

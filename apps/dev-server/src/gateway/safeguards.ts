@@ -75,10 +75,10 @@ export function assertBodyLimits(
 export async function guardedHandler(
   requestId: string,
   opts: GatewaySafeguardOptions,
-  fn: () => Promise<unknown>,
+  fn: (signal?: AbortSignal) => Promise<unknown>,
 ): Promise<{ status: number; body: unknown }> {
   const timeoutMs =
-    opts.requestTimeoutMs ?? Number(process.env.OPEN_EDU_GATEWAY_TIMEOUT_MS ?? 25_000);
+    opts.requestTimeoutMs ?? Number(process.env.OPEN_EDU_GATEWAY_TIMEOUT_MS ?? 55_000);
   const budgetUsd =
     opts.perRequestBudgetUsd ?? Number(process.env.OPEN_EDU_GATEWAY_BUDGET_USD ?? 5);
 
@@ -89,8 +89,11 @@ export async function guardedHandler(
     };
   }
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const result = await withTimeout(fn(), timeoutMs);
+    const result = await withTimeout(fn(controller.signal), timeoutMs, controller.signal);
+    clearTimeout(timer);
     const serialized = JSON.stringify(result ?? {});
     if (serialized.length > MAX_RESPONSE_BYTES) {
       return {
@@ -100,6 +103,7 @@ export async function guardedHandler(
     }
     return { status: 200, body: result };
   } catch (err) {
+    clearTimeout(timer);
     if (err instanceof GatewayRateLimitError) {
       return {
         status: 429,
@@ -123,13 +127,17 @@ export async function guardedHandler(
   }
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, signal?: AbortSignal): Promise<T> {
   if (!ms || ms <= 0) return promise;
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
       const t = setTimeout(() => reject(new Error('request timed out')), ms);
       t.unref?.();
+      signal?.addEventListener('abort', () => {
+        clearTimeout(t);
+        reject(new DOMException('The operation was aborted.', 'AbortError'));
+      }, { once: true });
     }),
   ]);
 }

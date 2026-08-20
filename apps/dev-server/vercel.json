@@ -7,7 +7,7 @@
   "functions": {
     "api/ai/[...route].ts": {
       "memory": 512,
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }

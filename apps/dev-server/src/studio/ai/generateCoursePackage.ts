@@ -12,7 +12,7 @@ import type { AiQualityItem } from './types.js';
 export const MIN_NOTES_LENGTH = 40;
 
 export type CourseSpecSource =
-  | { kind: 'notes'; notes: string; completeText: (prompt: string) => Promise<string> }
+  | { kind: 'notes'; notes: string; completeText: (prompt: string, signal?: AbortSignal) => Promise<string>; signal?: AbortSignal }
   | { kind: 'spec'; spec: string; extension: '.json' | '.md' };
 
 /**
@@ -35,7 +35,7 @@ export async function resolveCourseSpec(source: CourseSpecSource): Promise<strin
 
   let raw: string;
   try {
-    raw = await source.completeText(buildCourseSpecPrompt(source.notes));
+    raw = await source.completeText(buildCourseSpecPrompt(source.notes), source.signal);
   } catch (error) {
     throw new GenerateCoursePackageError(
       'llm',
