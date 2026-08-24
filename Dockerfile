@@ -1,8 +1,11 @@
 # syntax=docker/dockerfile:1
 
 FROM node:22-bookworm-slim AS base
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-RUN corepack enable
+# Keep pnpm version in sync with "packageManager" in package.json. Activating it
+# explicitly ensures every stage uses the same pnpm (corepack otherwise falls
+# back to its bundled default in stages without a package.json, e.g. pnpm fetch).
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 CI=true
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 FROM base AS deps
 WORKDIR /app
