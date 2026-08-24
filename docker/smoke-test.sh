@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Post-up verification for docker-compose.yml.
 # Builds, starts both services, waits for healthchecks, verifies the shared
-# courses volume is visible from both containers, then tears down (keeping data).
+# courses volume (including that a course written via Studio's container shows
+# up in the learner's catalog), then tears down while keeping course data.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -47,7 +48,18 @@ docker compose exec -T learner test -f /data/courses/.smoke-marker
 docker compose exec -T studio rm /data/courses/.smoke-marker
 echo "    marker written via studio and read via learner"
 
+echo "==> Verifying a course written via studio appears in the learner catalog"
+docker compose exec -T studio cp -R /data/courses/hello-world /data/courses/smoke-test-course
+# Cache-buster forces vite to re-run the virtual module load, which re-scans
+# the catalog directory on each fresh request.
+docker compose exec -T learner node -e 'fetch("http://127.0.0.1:4001/@id/virtual:edu-data?t=" + Date.now()).then((r) => r.text()).then((t) => process.exit(t.includes("smoke-test-course") ? 0 : 1)).catch(() => process.exit(1))'
+docker compose exec -T studio rm -rf /data/courses/smoke-test-course
+echo "    learner catalog picked up the new course"
+
+echo "==> Tearing down (course data is kept; 'down -v' would reset it)"
+docker compose down
+
 echo ""
 echo "Smoke test passed."
+echo "Start the stack any time with: docker compose up -d --build"
 echo "Learner: http://localhost:4001   Studio: http://localhost:4000"
-echo "Run 'docker compose down' when finished ('down -v' resets course data)."

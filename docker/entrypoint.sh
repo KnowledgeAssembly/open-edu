@@ -3,6 +3,7 @@ set -eu
 
 COURSES_DIR="${OPEN_EDU_COURSES_DIR:-/data/courses}"
 SEED_DIR="${OPEN_EDU_SEED_EXAMPLES_DIR:-/opt/examples}"
+SEED_LOCK=".seed-lock"
 
 mkdir -p "$COURSES_DIR"
 if [ ! -w "$COURSES_DIR" ]; then
@@ -11,22 +12,43 @@ if [ ! -w "$COURSES_DIR" ]; then
   exit 1
 fi
 
-is_empty() {
-  [ -z "$(ls -A "$1" 2>/dev/null)" ]
+# Emptiness must ignore the seed lock itself, so a crashed first seed can be
+# retried on the next start instead of being silently skipped forever.
+has_content() {
+  find "$1" -mindepth 1 ! -name "$SEED_LOCK" -print -quit | grep -q .
 }
 
-if is_empty "$COURSES_DIR"; then
-  if mkdir "$COURSES_DIR/.seed-lock" 2>/dev/null; then
-    echo "[entrypoint] Seeding $COURSES_DIR from $SEED_DIR"
-    cp -R "$SEED_DIR/." "$COURSES_DIR/"
-    rm -rf "$COURSES_DIR/.seed-lock"
+cleanup_lock() {
+  rm -rf "$COURSES_DIR/$SEED_LOCK"
+}
+
+seed() {
+  trap cleanup_lock EXIT INT TERM
+  echo "[entrypoint] Seeding $COURSES_DIR from $SEED_DIR"
+  cp -R "$SEED_DIR/." "$COURSES_DIR/"
+  cleanup_lock
+  trap - EXIT INT TERM
+}
+
+if [ -d "$COURSES_DIR/$SEED_LOCK" ]; then
+  echo "[entrypoint] Another container may be seeding the courses volume; waiting..."
+  i=0
+  while [ -d "$COURSES_DIR/$SEED_LOCK" ] && [ "$i" -lt 60 ]; do
+    sleep 1
+    i=$((i + 1))
+  done
+  if [ -d "$COURSES_DIR/$SEED_LOCK" ]; then
+    echo "[entrypoint] WARNING: seed lock still present after 60s." >&2
+    echo "[entrypoint] A previous seed probably crashed; removing the stale lock." >&2
+    cleanup_lock
+  fi
+fi
+
+if ! has_content "$COURSES_DIR"; then
+  if mkdir "$COURSES_DIR/$SEED_LOCK" 2>/dev/null; then
+    seed
   else
-    echo "[entrypoint] Another container is seeding the courses volume; waiting..."
-    i=0
-    while [ -d "$COURSES_DIR/.seed-lock" ] && [ "$i" -lt 60 ]; do
-      sleep 1
-      i=$((i + 1))
-    done
+    echo "[entrypoint] Another container started seeding; skipping."
   fi
 fi
 

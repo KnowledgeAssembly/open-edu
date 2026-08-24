@@ -78,6 +78,12 @@ Courses live in a shared named volume mounted at `/data/courses` that is seeded 
 
 Optional AI keys (Pipili companion, Studio drafting) are read from a `.env` file in the repo root — copy `.env.example` and fill in what you need. Everything works without keys; AI features degrade gracefully.
 
+### Try the Studio → Learner loop
+
+1. Open <http://localhost:4000> and create a course from a template (or edit an existing one).
+2. Open <http://localhost:4001> — your course appears in the catalog alongside the examples.
+3. Restart with `docker compose down && docker compose up -d` — your courses persist. `docker compose down -v` resets to the pristine examples.
+
 To verify the setup end-to-end:
 
 ```bash

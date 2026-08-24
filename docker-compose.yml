@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: open-edu-stack:local
     entrypoint: /app/docker/entrypoint.sh
     command:
       - sh
@@ -39,6 +40,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: open-edu-stack:local
     entrypoint: /app/docker/entrypoint.sh
     command: node packages/cli/dist/cli.js dev /data/courses/hello-world
     ports:
@@ -51,6 +53,8 @@ services:
       LLM_MODEL: ${LLM_MODEL:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
