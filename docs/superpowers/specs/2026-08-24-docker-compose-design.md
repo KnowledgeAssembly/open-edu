@@ -19,14 +19,14 @@
 
 ## Context & constraints (from repo exploration)
 
-| Fact | Consequence |
-|---|---|
-| Both apps are Vite dev servers with server-side middleware (Pipili chat, LLM proxy, OEP proxy, dictionary, Studio AI + library file ops) | Running Vite in containers preserves 100% behavior; no code extraction needed |
-| Learner catalog dir is configurable via `EDU_CATALOG_DIR` (default `examples/`), port fixed at 4001 (`apps/learner/vite.config.ts`) | Point it at a shared volume; compose command supplies `--host --port --strictPort` flags |
-| Studio workspace resolves via `OPEN_EDU_STUDIO_WORKSPACE`, port defaults to 4000 (`apps/dev-server/src/index.ts`) | Point it at the same shared volume |
-| `startDevServer` binds localhost and calls browser-open | Needs one small container-friendly tweak (host option, suppress open) |
-| Single pnpm workspace, one lockfile; packages resolve to built `dist/`; learner aliases some packages to source | Image must contain installed deps, built dist, and sources → one shared image for both services |
-| Root `.env` is gitignored and auto-loaded by docker compose for variable substitution | Allowlist-substitution reuses existing convention; never bake secrets into the image |
+| Fact                                                                                                                                     | Consequence                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Both apps are Vite dev servers with server-side middleware (Pipili chat, LLM proxy, OEP proxy, dictionary, Studio AI + library file ops) | Running Vite in containers preserves 100% behavior; no code extraction needed                   |
+| Learner catalog dir is configurable via `EDU_CATALOG_DIR` (default `examples/`), port fixed at 4001 (`apps/learner/vite.config.ts`)      | Point it at a shared volume; compose command supplies `--host --port --strictPort` flags        |
+| Studio workspace resolves via `OPEN_EDU_STUDIO_WORKSPACE`, port defaults to 4000 (`apps/dev-server/src/index.ts`)                        | Point it at the same shared volume                                                              |
+| `startDevServer` binds localhost and calls browser-open                                                                                  | Needs one small container-friendly tweak (host option, suppress open)                           |
+| Single pnpm workspace, one lockfile; packages resolve to built `dist/`; learner aliases some packages to source                          | Image must contain installed deps, built dist, and sources → one shared image for both services |
+| Root `.env` is gitignored and auto-loaded by docker compose for variable substitution                                                    | Allowlist-substitution reuses existing convention; never bake secrets into the image            |
 
 ## Architecture
 
@@ -74,7 +74,7 @@ services:
     build: { context: ., dockerfile: Dockerfile }
     entrypoint: /app/docker/entrypoint.sh
     command: sh -c "pnpm --filter @open-edu/learner exec vite --host 0.0.0.0 --port 4001 --strictPort"
-    ports: ["4001:4001"]
+    ports: ['4001:4001']
     environment:
       EDU_CATALOG_DIR: /data/courses
       LLM_PROVIDER: ${LLM_PROVIDER:-}
@@ -86,7 +86,13 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     volumes: [courses:/data/courses]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -96,15 +102,21 @@ services:
     build: { context: ., dockerfile: Dockerfile }
     entrypoint: /app/docker/entrypoint.sh
     command: node packages/cli/dist/cli.js dev /data/courses/hello-world
-    ports: ["4000:4000"]
+    ports: ['4000:4000']
     environment:
       OPEN_EDU_STUDIO_WORKSPACE: /data/courses
       OPEN_EDU_STUDIO_HOST: 0.0.0.0
-      OPEN_EDU_CONTAINER: "1"
+      OPEN_EDU_CONTAINER: '1'
       # same LLM allowlist as learner (+ OPEN_EDU_STUDIO_LLM_*)
     volumes: [courses:/data/courses]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -146,14 +158,14 @@ Browser ──► localhost:4000 (Studio)                Browser ──► local
 
 ## Error handling
 
-| Failure | Behavior |
-|---|---|
-| Host port already in use | `--strictPort` + fixed mapping → fast, clear failure instead of drifting ports |
-| Port bound inside container | Service fails healthcheck → visible in `docker compose ps` |
-| Volume not writable | Entrypoint writability check with actionable message before exec |
-| Seeding fails / volume empty | Studio still boots (empty-directory mode supported by CLI) |
-| Studio active-package dir missing | Entrypoint guarantees ≥1 course dir exists |
-| Missing LLM keys | Degraded mode (existing); one-line notice from entrypoint |
+| Failure                           | Behavior                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| Host port already in use          | `--strictPort` + fixed mapping → fast, clear failure instead of drifting ports |
+| Port bound inside container       | Service fails healthcheck → visible in `docker compose ps`                     |
+| Volume not writable               | Entrypoint writability check with actionable message before exec               |
+| Seeding fails / volume empty      | Studio still boots (empty-directory mode supported by CLI)                     |
+| Studio active-package dir missing | Entrypoint guarantees ≥1 course dir exists                                     |
+| Missing LLM keys                  | Degraded mode (existing); one-line notice from entrypoint                      |
 
 Non-root `node` user throughout; no secrets in image layers; `restart: unless-stopped` on both services.
 
@@ -166,16 +178,16 @@ Non-root `node` user throughout; no secrets in image layers; `restart: unless-st
 
 ## Files delivered
 
-| Path | Purpose |
-|---|---|
-| `Dockerfile` | Multi-stage build described above |
-| `.dockerignore` | Build-context hygiene |
-| `docker-compose.yml` | Two services + shared volume |
-| `docker/entrypoint.sh` | Seed-if-empty, checks, exec |
-| `docker/smoke-test.sh` | Post-up verification script |
-| `.env.example` | Optional AI key documentation |
-| `README.md` | "Run with Docker" section |
-| `apps/dev-server/src/index.ts` (+ test) | host/open container tweak |
+| Path                                        | Purpose                             |
+| ------------------------------------------- | ----------------------------------- |
+| `Dockerfile`                                | Multi-stage build described above   |
+| `.dockerignore`                             | Build-context hygiene               |
+| `docker-compose.yml`                        | Two services + shared volume        |
+| `docker/entrypoint.sh`                      | Seed-if-empty, checks, exec         |
+| `docker/smoke-test.sh`                      | Post-up verification script         |
+| `.env.example`                              | Optional AI key documentation       |
+| `README.md`                                 | "Run with Docker" section           |
+| `apps/dev-server/src/index.ts` (+ test)     | host/open container tweak           |
 | `packages/cli/src/commands/dev.ts` (+ test) | `OPEN_EDU_STUDIO_HOST` wire-through |
 
 ## Success criteria
