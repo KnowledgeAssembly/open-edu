@@ -2,7 +2,7 @@ import { completeWithLlm } from '../studio/ai/studioLlm.js';
 import { buildSystemPrompt } from '../studio/ai/chat/policy.js';
 import { studioChatMessage } from '../studio/ai/chat/messages.js';
 import type { StudioContextSnapshot } from '../studio/ai/context.js';
-import { GatewayError } from './errors.js';
+import { GatewayError, classifyGatewayError } from './errors.js';
 import type { ChatRequest } from './requestSchema.js';
 import { MAX_CHAT_CONTEXT_CHARS } from './requestSchema.js';
 
@@ -15,6 +15,7 @@ export interface GatewayChatResult {
   terminal: 'finished' | 'error';
   content?: string;
   error?: string;
+  suggestion?: string;
 }
 
 function buildPrompt(request: ChatRequest): string {
@@ -60,10 +61,12 @@ export async function gatewayChat(
     return { requestId, terminal: 'finished', content: text };
   } catch (err) {
     if (err instanceof GatewayError) throw err;
+    const { message } = classifyGatewayError(requestId, err);
     return {
       requestId,
       terminal: 'error',
       error: studioChatMessage('assistant.chat.serverError', 'en'),
+      suggestion: message,
     };
   }
 }

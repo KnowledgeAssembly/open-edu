@@ -11,6 +11,7 @@ import type { ItemAddRequest, ItemEditRequest } from './requestSchema.js';
 export interface ItemGenerationDeps {
   generateItemAdd?: typeof generateItemAddImpl;
   generateItemEdit?: typeof generateItemEditImpl;
+  signal?: AbortSignal;
 }
 
 function unwrapError(result: { ok: false; error: string } | { ok: true }): string {
@@ -38,6 +39,7 @@ export async function generateItem(
       description,
       packageDir: '',
       ...(existingTitles ? { existingTitles } : {}),
+      ...(deps.signal ? { signal: deps.signal } : {}),
     });
     if (!result.ok) {
       throw new GatewayError(
@@ -58,6 +60,7 @@ export async function generateItem(
     params,
     packageDir: '',
     ...(existingTitles ? { existingTitles } : {}),
+    ...(deps.signal ? { signal: deps.signal } : {}),
   });
   if (!result.ok) {
     throw new GatewayError('generation-error', safeItemError(unwrapError(result)), requestId, 502);

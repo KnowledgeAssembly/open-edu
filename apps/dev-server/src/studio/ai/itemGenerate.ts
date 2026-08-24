@@ -37,6 +37,8 @@ export interface ItemAddRequest {
   packageDir: string;
   /** Existing activity titles used as prompt context. Overrides packageDir scan. */
   existingTitles?: string[];
+  /** AbortSignal to cancel the LLM call on timeout or client disconnect. */
+  signal?: AbortSignal;
 }
 
 export interface ItemEditRequest {
@@ -47,6 +49,8 @@ export interface ItemEditRequest {
   params?: ItemIntentParams;
   /** Existing activity titles used as prompt context. Overrides packageDir scan. */
   existingTitles?: string[];
+  /** AbortSignal to cancel the LLM call on timeout or client disconnect. */
+  signal?: AbortSignal;
 }
 
 export class ItemRequestError extends Error {
@@ -272,7 +276,7 @@ export async function generateItemAdd(request: ItemAddRequest): Promise<AiItemAd
   let lastError = 'AI draft failed validation after retry';
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const raw = await completeWithLlm(prompt);
+      const raw = await completeWithLlm(prompt, request.signal);
       const parsed = parseRaw(raw);
       const item = mapToDraftItem(request.kind, parsed);
       const validationError = validateItemDraft(item, { expectedOptionCount });
@@ -292,6 +296,7 @@ async function generateQuizBatch(
   currentContent: string,
   context: string,
   params: ItemIntentParams | undefined,
+  signal?: AbortSignal,
 ): Promise<AiItemEditResult> {
   const buildPrompt = () =>
     buildQuizEditPrompt('add-questions', currentContent, 4, context, params);
@@ -300,7 +305,7 @@ async function generateQuizBatch(
   let lastError = 'AI draft failed validation after retry';
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const raw = await completeWithLlm(prompt);
+      const raw = await completeWithLlm(prompt, signal);
       const parsed = parseRaw(raw);
       const rawQuestions = Array.isArray(parsed.questions) ? parsed.questions : [];
       if (rawQuestions.length === 0) {
@@ -339,7 +344,7 @@ export async function generateItemEdit(request: ItemEditRequest): Promise<AiItem
   );
 
   if (request.kind === 'quiz' && request.intent === 'add-questions') {
-    return generateQuizBatch(request.currentContent, context, request.params);
+    return generateQuizBatch(request.currentContent, context, request.params, request.signal);
   }
 
   const sourceOptionCount = request.kind === 'quiz' ? countQuizOptions(request.currentContent) : 1;
@@ -376,7 +381,7 @@ export async function generateItemEdit(request: ItemEditRequest): Promise<AiItem
   let lastError = 'AI draft failed validation after retry';
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const raw = await completeWithLlm(prompt);
+      const raw = await completeWithLlm(prompt, request.signal);
       const parsed = parseRaw(raw);
       const item = mapToDraftItem(request.kind, parsed);
       const validationError = validateItemDraft(item, { expectedOptionCount });

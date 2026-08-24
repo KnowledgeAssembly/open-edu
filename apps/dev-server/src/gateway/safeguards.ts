@@ -132,9 +132,16 @@ function withTimeout<T>(promise: Promise<T>, ms: number, signal?: AbortSignal): 
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
-      const t = setTimeout(() => reject(new Error('request timed out')), ms);
+      let settled = false;
+      const t = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(new Error('request timed out'));
+      }, ms);
       t.unref?.();
       signal?.addEventListener('abort', () => {
+        if (settled) return;
+        settled = true;
         clearTimeout(t);
         reject(new DOMException('The operation was aborted.', 'AbortError'));
       }, { once: true });

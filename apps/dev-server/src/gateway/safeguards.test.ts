@@ -85,4 +85,15 @@ describe('gateway safeguards', () => {
     expect(res.status).toBe(500);
     expect((res.body as { error: { code: string } }).error.code).toBe('timeout');
   });
+
+  it('guardedHandler passes abort signal to handler', async () => {
+    let receivedSignal: AbortSignal | undefined;
+    await guardedHandler('req-1', { requestTimeoutMs: 50 }, (signal) => {
+      receivedSignal = signal;
+      return new Promise(() => {}); // never resolves
+    });
+    await new Promise((r) => setTimeout(r, 80));
+    expect(receivedSignal).toBeDefined();
+    expect(receivedSignal?.aborted).toBe(true);
+  });
 });
