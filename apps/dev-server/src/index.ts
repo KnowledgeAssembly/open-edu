@@ -9,6 +9,7 @@ export const DEV_SERVER_VERSION = '0.1.0';
 export interface DevServerOptions {
   port?: number;
   open?: boolean;
+  host?: string;
 }
 
 export async function startDevServer(
@@ -22,11 +23,15 @@ export async function startDevServer(
 
   process.env.OPEN_EDU_PACKAGE_DIR = resolvedPackageDir;
 
+  const containerMode = process.env.OPEN_EDU_CONTAINER === '1';
+  const open = options.open ?? !(options.host || containerMode);
+
   const server = await createServer({
     root: devServerRoot,
     server: {
       port: options.port ?? 4000,
-      open: options.open ?? true,
+      host: options.host,
+      open,
     },
   });
 

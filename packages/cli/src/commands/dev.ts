@@ -41,7 +41,8 @@ export async function devPackage(
       console.log('');
     }
 
-    await startDevServer(packageDir);
+    const host = process.env.OPEN_EDU_STUDIO_HOST;
+    await startDevServer(packageDir, { host });
     logger.info('Dev server started', { packageDir });
 
     if (options?.json) {

@@ -74,4 +74,93 @@ describe('@open-edu/dev-server', () => {
     await startDevServer('/tmp/my-package');
     expect(process.env.OPEN_EDU_PACKAGE_DIR).toBe('/tmp/my-package');
   });
+
+  it('should forward host option to vite server config', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+
+    await startDevServer('/tmp/test-pkg', { host: '0.0.0.0' });
+
+    const opts = mockCreateServer.mock.calls[0][0];
+    expect(opts.server.host).toBe('0.0.0.0');
+  });
+
+  it('should not set host when option is absent', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+
+    await startDevServer('/tmp/test-pkg');
+
+    const opts = mockCreateServer.mock.calls[0][0];
+    expect(opts.server.host).toBeUndefined();
+  });
+
+  it('should default open to false when host option is provided', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+
+    await startDevServer('/tmp/test-pkg', { host: '0.0.0.0' });
+
+    const opts = mockCreateServer.mock.calls[0][0];
+    expect(opts.server.open).toBe(false);
+  });
+
+  it('should default open to false when OPEN_EDU_CONTAINER=1', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+    process.env.OPEN_EDU_CONTAINER = '1';
+
+    try {
+      await startDevServer('/tmp/test-pkg');
+
+      const opts = mockCreateServer.mock.calls[0][0];
+      expect(opts.server.open).toBe(false);
+    } finally {
+      delete process.env.OPEN_EDU_CONTAINER;
+    }
+  });
+
+  it('should keep browser-open enabled by default outside containers', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+    delete process.env.OPEN_EDU_CONTAINER;
+
+    await startDevServer('/tmp/test-pkg');
+
+    const opts = mockCreateServer.mock.calls[0][0];
+    expect(opts.server.open).toBe(true);
+  });
+
+  it('should let explicit open override container suppression', async () => {
+    const server = createMockServer();
+    server.httpServer.once.mockImplementation((_event: string, cb: () => void) => {
+      setTimeout(cb, 5);
+    });
+    mockCreateServer.mockResolvedValue(server);
+    process.env.OPEN_EDU_CONTAINER = '1';
+
+    try {
+      await startDevServer('/tmp/test-pkg', { open: true });
+
+      const opts = mockCreateServer.mock.calls[0][0];
+      expect(opts.server.open).toBe(true);
+    } finally {
+      delete process.env.OPEN_EDU_CONTAINER;
+    }
+  });
 });
