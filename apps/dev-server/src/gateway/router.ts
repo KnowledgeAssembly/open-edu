@@ -151,7 +151,10 @@ async function dispatch(
       if (!parsed.success) {
         throw new GatewayError('invalid-request', zErrorMessage(parsed.error), requestId);
       }
-      return generateItem(candidate as never, requestId, options.itemGenerationDeps);
+      return generateItem(candidate as never, requestId, {
+        ...options.itemGenerationDeps,
+        signal,
+      });
     }
     case 'chat': {
       const parsed = chatRequestSchema.safeParse(req.body);

@@ -72,6 +72,7 @@ interface HostedChatResponse {
   terminal: 'finished' | 'error';
   content?: string;
   error?: string;
+  suggestion?: string;
 }
 
 export type ChatItemKind = 'lesson' | 'quiz' | 'practice';
@@ -290,7 +291,8 @@ export function createHostedChatTransport(
         throw new Error(data?.error ?? 'The AI gateway request failed.');
       }
       if (!data || data.terminal !== 'finished') {
-        throw new Error(data?.error ?? 'The AI gateway could not complete the request.');
+        const msg = data?.error ?? 'The AI gateway could not complete the request.';
+        throw new Error(data?.suggestion ? `${msg}\n\n${data.suggestion}` : msg);
       }
 
       return buildToolResponse(data.content ?? '');
