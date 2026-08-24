@@ -56,7 +56,7 @@ describe('devPackage', () => {
     const result = await devPackage(pkgDir);
     expect(result.success).toBe(true);
     expect(mockLoadPackage).toHaveBeenCalledWith(pkgDir);
-    expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir);
+    expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir, {});
     rmSync(pkgDir, { recursive: true, force: true });
   });
 
@@ -65,8 +65,31 @@ describe('devPackage', () => {
     mockLoadPackage.mockRejectedValue(new PackageLoadError('MANIFEST_VALIDATION_ERROR', 'no pkg'));
     const result = await devPackage(emptyDir);
     expect(result.success).toBe(true);
-    expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir);
+    expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir, {});
     rmSync(emptyDir, { recursive: true, force: true });
+  });
+
+  it('should forward OPEN_EDU_STUDIO_HOST as the host option', async () => {
+    const pkgDir = makeTempDir('edu-dev-host');
+    mockLoadPackage.mockResolvedValue(validPkg);
+    process.env.OPEN_EDU_STUDIO_HOST = '0.0.0.0';
+    try {
+      await devPackage(pkgDir);
+      expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir, { host: '0.0.0.0' });
+    } finally {
+      delete process.env.OPEN_EDU_STUDIO_HOST;
+      rmSync(pkgDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should pass no host when OPEN_EDU_STUDIO_HOST is unset', async () => {
+    const pkgDir = makeTempDir('edu-dev-no-host');
+    mockLoadPackage.mockResolvedValue(validPkg);
+    delete process.env.OPEN_EDU_STUDIO_HOST;
+    await devPackage(pkgDir);
+    const callArgs = mockStartDevServer.mock.calls[0] as unknown[];
+    expect((callArgs[1] as { host?: string }).host).toBeUndefined();
+    rmSync(pkgDir, { recursive: true, force: true });
   });
 
   it('should fail for a directory that does not exist', async () => {
@@ -91,7 +114,7 @@ describe('devPackage', () => {
           serverUrl: 'http://localhost:4000',
         });
       }
-      expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir);
+      expect(mockStartDevServer).toHaveBeenCalledWith(pkgDir, {});
       rmSync(pkgDir, { recursive: true, force: true });
     });
 
@@ -108,7 +131,7 @@ describe('devPackage', () => {
           serverUrl: 'http://localhost:4000',
         });
       }
-      expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir);
+      expect(mockStartDevServer).toHaveBeenCalledWith(emptyDir, {});
       rmSync(emptyDir, { recursive: true, force: true });
     });
 
