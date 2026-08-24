@@ -1,0 +1,76 @@
+services:
+  learner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /app/docker/entrypoint.sh
+    command:
+      - sh
+      - -c
+      - pnpm --filter @open-edu/learner exec vite --host 0.0.0.0 --port 4001 --strictPort
+    ports:
+      - '4001:4001'
+    environment:
+      EDU_CATALOG_DIR: /data/courses
+      LLM_PROVIDER: ${LLM_PROVIDER:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    volumes:
+      - courses:/data/courses
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - '-e'
+        - 'fetch("http://127.0.0.1:4001/").then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /app/docker/entrypoint.sh
+    command: node packages/cli/dist/cli.js dev /data/courses/hello-world
+    ports:
+      - '4000:4000'
+    environment:
+      OPEN_EDU_STUDIO_WORKSPACE: /data/courses
+      OPEN_EDU_STUDIO_HOST: 0.0.0.0
+      OPEN_EDU_CONTAINER: '1'
+      LLM_PROVIDER: ${LLM_PROVIDER:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPEN_EDU_STUDIO_LLM_PROVIDER: ${OPEN_EDU_STUDIO_LLM_PROVIDER:-}
+      OPEN_EDU_STUDIO_LLM_MODEL: ${OPEN_EDU_STUDIO_LLM_MODEL:-}
+      OPEN_EDU_STUDIO_LLM_BASE_URL: ${OPEN_EDU_STUDIO_LLM_BASE_URL:-}
+      OPEN_EDU_STUDIO_LLM_API_KEY: ${OPEN_EDU_STUDIO_LLM_API_KEY:-}
+    volumes:
+      - courses:/data/courses
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - '-e'
+        - 'fetch("http://127.0.0.1:4000/").then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  courses:

@@ -63,6 +63,27 @@ The skill auto-detects whether it's running inside an Open-Edu monorepo:
 
 See the [Agentic Course Authoring Guide](apps/docs/docs/agentic-authoring.md) for the full workflow, quality rubric, and widget catalog integration. Skill code lives at `skills/openedu-course-authoring/`.
 
+## Run with Docker
+
+Run both apps without installing Node or pnpm — only Docker is required:
+
+```bash
+docker compose up --build
+```
+
+- **Learner:** http://localhost:4001
+- **Course Creator Studio:** http://localhost:4000
+
+Courses live in a shared named volume mounted at `/data/courses` that is seeded with the example courses on first start. A course created in the Studio appears in the Learner app, and courses persist across restarts (`docker compose down -v` resets to the pristine examples).
+
+Optional AI keys (Pipili companion, Studio drafting) are read from a `.env` file in the repo root — copy `.env.example` and fill in what you need. Everything works without keys; AI features degrade gracefully.
+
+To verify the setup end-to-end:
+
+```bash
+./docker/smoke-test.sh
+```
+
 ## Course Creator Studio
 
 **OpenEdu Course Creator Studio** is the authoring companion to the learner app. It evolved from the original dev-server (a local Vite preview + inspector + file editor) into a single product with two modes, so teachers can author shareable courses without CLI, file paths, or schema jargon:
