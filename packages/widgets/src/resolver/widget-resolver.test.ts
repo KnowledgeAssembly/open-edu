@@ -492,4 +492,18 @@ describe('WidgetResolver (policy-aware)', () => {
     expect(result).toMatchObject({ ok: false, failure: 'policy', message: 'experimental-denied' });
     expect(calls).not.toContain(DOCUMENT_URL);
   });
+
+  it('demotes an unsigned verified manifest to experimental (policy deny blocks it)', async () => {
+    const man = await manifestBytes({ status: 'verified', signature: undefined });
+    const { impl, calls } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
+    const resolver = makeResolver({
+      policy: policy({ experimentalWidgets: 'deny' }),
+      fetchImpl: impl,
+    });
+
+    const result = await resolver.resolve(registryRef(man.integrity));
+
+    expect(result).toMatchObject({ ok: false, failure: 'policy', message: 'experimental-denied' });
+    expect(calls).not.toContain(DOCUMENT_URL);
+  });
 });

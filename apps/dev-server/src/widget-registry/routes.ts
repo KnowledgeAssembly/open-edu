@@ -21,8 +21,6 @@ function sendJson(res: ServerResponse, statusCode: number, payload: unknown): vo
 
 function applyCors(res: ServerResponse): void {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
 function readJsonBody(req: IncomingMessage): Promise<unknown> {
@@ -54,15 +52,20 @@ function decodeBase64(base64: string): Uint8Array {
 
 export function createWidgetRegistryRouter(store: WidgetRegistryStore) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
-    applyCors(res);
     try {
       const { pathname } = new URL(req.url ?? '/', 'http://localhost');
       const method = req.method ?? 'GET';
 
       if (method === 'OPTIONS') {
+        // No CORS headers on preflight: cross-origin browsers cannot send the
+        // JSON-body install/revoke writes to this dev-only admin API.
         res.statusCode = 204;
         res.end();
         return;
+      }
+
+      if (method === 'GET') {
+        applyCors(res);
       }
 
       if (method === 'POST' && pathname === `${BASE_PATH}/install`) {

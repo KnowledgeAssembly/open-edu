@@ -27,8 +27,10 @@ function sha256Hex(bytes) {
 
 /**
  * Mirrors what WidgetRegistryStore.install persists so the served manifest bytes
- * exactly match what the fixture course's widgetRef.integrity was computed over:
- * the manifest is normalized as JSON.stringify(parsed, null, 2).
+ * exactly match what the fixture course's widgetRef.integrity was computed over.
+ * The seed persists the RAW manifest file bytes (and the registry route serves
+ * them verbatim via readManifestBytes), so this callsite writes the file
+ * content byte-for-byte rather than re-serializing a parsed object.
  */
 export async function seedRegistry() {
   const manifestRaw = await readFile(WIDGET_MANIFEST_FILE, 'utf-8');

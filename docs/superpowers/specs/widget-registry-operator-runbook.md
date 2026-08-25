@@ -52,12 +52,12 @@ Published documents are served from `GET /widget-registry/{publisher}/{widget}/{
 
 Each installed version has an operational status (`store.ts`, `WidgetRegistryStatus`):
 
-| Operation   | Mechanism                                                                                                              | Learner effect                                                                                             |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `enabled`   | default (`manifest.status` unless overridden)                                                                          | Listed in catalog, resolvable                                                                              |
-| `disable`   | writes `.status.json` `{ "status": "disabled" }`                                                                       | **Omitted from `catalog.json`** — new resolution/previews fail; already-serving sessions are unaffected    |
-| `deprecate` | writes `.status.json` `{ "status": "deprecated" }`                                                                     | **Keeps serving**; catalog entry is labeled `deprecated` so authoring tools can warn                       |
-| `revoke`    | `POST /widget-registry/{publisher}/{widget}/{version}/revoke` writes `revoked.json` (or a widget-level `revoked.json`) | Catalog entry omitted; resolver **hard-fails online**; offline cached runs subject to the 7-day grace (§5) |
+| Operation   | Mechanism                                                                                                              | Learner effect                                                                                                                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `enabled`   | default (`manifest.status` unless overridden)                                                                          | Listed in catalog, resolvable                                                                                                                                                                                |
+| `disable`   | writes `.status.json` `{ "status": "disabled" }`                                                                       | **Omitted from `catalog.json`** — new resolution/previews fail; already-serving sessions are unaffected                                                                                                      |
+| `deprecate` | writes `.status.json` `{ "status": "deprecated" }`                                                                     | **Keeps serving**; catalog entry is labeled `deprecated` so authoring tools can warn                                                                                                                         |
+| `revoke`    | `POST /widget-registry/{publisher}/{widget}/{version}/revoke` writes `revoked.json` (or a widget-level `revoked.json`) | Catalog entry retained with `status: revoked` (needed so courses already pinned to it can run the offline grace window); resolver **hard-fails online**; offline cached runs subject to the 7-day grace (§5) |
 
 Details:
 

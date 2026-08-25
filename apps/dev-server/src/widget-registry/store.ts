@@ -51,6 +51,19 @@ function isManagedStatus(value: unknown): value is WidgetRegistryStatus {
   return typeof value === 'string' && (MANAGED_STATUSES as readonly string[]).includes(value);
 }
 
+function assertSafeSegment(part: string, label: string): void {
+  if (
+    part === '' ||
+    part === '.' ||
+    part === '..' ||
+    part.includes('/') ||
+    part.includes('\\') ||
+    part.includes('\0')
+  ) {
+    throw new WidgetValidationError([`${label}-unsafe-path: ${part}`]);
+  }
+}
+
 export class WidgetAlreadyInstalledError extends Error {
   constructor(publisher: string, widget: string, version: string) {
     super(`widget version already installed: ${publisher}/${widget}@${version}`);
@@ -175,7 +188,7 @@ export class WidgetRegistryStore {
       );
       return;
     }
-    const widgetDir = join(this.rootDir, publisher, widget);
+    const widgetDir = this.widgetBaseDir(publisher, widget);
     if ((await this.listDir(widgetDir)).length === 0) {
       throw new WidgetNotFoundError(publisher, widget);
     }
@@ -231,7 +244,7 @@ export class WidgetRegistryStore {
     version: string,
   ): Promise<WidgetRegistryStatus> {
     await this.assertInstalled(publisher, widget, version);
-    const widgetDir = join(this.rootDir, publisher, widget);
+    const widgetDir = this.widgetBaseDir(publisher, widget);
     const versionDir = this.versionDir(publisher, widget, version);
     if (await this.exists(join(widgetDir, 'revoked.json'))) return 'revoked';
     if (await this.exists(join(versionDir, 'revoked.json'))) return 'revoked';
@@ -246,7 +259,7 @@ export class WidgetRegistryStore {
     const installed: InstalledWidget[] = [];
     for (const publisher of await this.listDir(this.rootDir)) {
       for (const widget of await this.listDir(join(this.rootDir, publisher))) {
-        for (const version of await this.listDir(join(this.rootDir, publisher, widget))) {
+        for (const version of await this.listDir(this.widgetBaseDir(publisher, widget))) {
           const versionDir = this.versionDir(publisher, widget, version);
           if (!(await this.exists(join(versionDir, 'manifest.json')))) continue;
           const status = await this.readStatus(publisher, widget, version);
@@ -258,7 +271,14 @@ export class WidgetRegistryStore {
   }
 
   private versionDir(publisher: string, widget: string, version: string): string {
-    return join(this.rootDir, publisher, widget, version);
+    assertSafeSegment(version, 'version');
+    return join(this.widgetBaseDir(publisher, widget), version);
+  }
+
+  private widgetBaseDir(publisher: string, widget: string): string {
+    assertSafeSegment(publisher, 'publisher');
+    assertSafeSegment(widget, 'widget');
+    return join(this.rootDir, publisher, widget);
   }
 
   private async exists(path: string): Promise<boolean> {
