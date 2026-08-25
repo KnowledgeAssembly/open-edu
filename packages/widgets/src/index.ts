@@ -20,8 +20,10 @@ export type {
 } from './types.js';
 export { WidgetRegistrationError } from './types.js';
 export { createWidgetRegistry, registerAllBuiltins, createDefaultRegistry } from './registry.js';
-export { RemoteWidgetLoader } from './remote-loader.js';
+export { RemoteWidgetLoader, TRUSTED_REMOTE_API_VERSION } from './remote-loader.js';
 export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader.js';
+export { assertTrustedRemoteAllowed, originOf, DEFAULT_WIDGET_POLICY } from './policy.js';
+export { IntegrityError, canonicalIntegrity, parseIntegrity, verifyIntegrity } from './integrity.js';
 export { useRemoteWidget } from './use-remote-widget.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';
 export { Button } from '@open-edu/design-system';

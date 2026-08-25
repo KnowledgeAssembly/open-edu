@@ -1,6 +1,11 @@
 import type { WidgetDefinition, WidgetRegistry, RemoteWidgetManifest } from './types';
+import { assertTrustedRemoteAllowed, DEFAULT_WIDGET_POLICY } from './policy';
+import type { WidgetPolicy } from '@open-edu/schemas';
+import { parseIntegrity, verifyIntegrity } from './integrity';
 
 export type { RemoteWidgetManifest } from './types';
+
+export const TRUSTED_REMOTE_API_VERSION = '1.0.0';
 
 export interface RemoteWidgetLoadResult {
   status: 'loading' | 'success' | 'error';
@@ -10,15 +15,6 @@ export interface RemoteWidgetLoadResult {
 type LoadCallback = (result: RemoteWidgetLoadResult) => void;
 
 export type EvaluateModule = (code: string) => Promise<{ default?: unknown }>;
-
-async function digestMessage(message: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 export class RemoteWidgetLoader {
   private static instance: RemoteWidgetLoader;
@@ -37,6 +33,7 @@ export class RemoteWidgetLoader {
     manifest: RemoteWidgetManifest,
     registry: WidgetRegistry,
     evaluate?: EvaluateModule,
+    policy: WidgetPolicy = DEFAULT_WIDGET_POLICY,
   ): Promise<WidgetDefinition> {
     const cacheKey = `${manifest.id}@${manifest.version}`;
 
@@ -46,7 +43,7 @@ export class RemoteWidgetLoader {
     const pending = this.pendingLoads.get(cacheKey);
     if (pending) return pending;
 
-    const loadPromise = this.fetchAndRegister(manifest, registry, cacheKey, evaluate);
+    const loadPromise = this.fetchAndRegister(manifest, registry, cacheKey, evaluate, policy);
     this.pendingLoads.set(cacheKey, loadPromise);
 
     try {
@@ -62,33 +59,62 @@ export class RemoteWidgetLoader {
     registry: WidgetRegistry,
     cacheKey: string,
     evaluate?: EvaluateModule,
+    policy: WidgetPolicy = DEFAULT_WIDGET_POLICY,
   ): Promise<WidgetDefinition> {
     const url = manifest.url;
 
-    if (url.startsWith('file://')) {
-      throw new Error(`Cannot load remote widget from file:// URL: ${url}`);
+    assertTrustedRemoteAllowed(url, policy);
+
+    if (manifest.apiVersion !== TRUSTED_REMOTE_API_VERSION) {
+      const msg = `Unsupported widget apiVersion "${manifest.apiVersion}". Expected "${TRUSTED_REMOTE_API_VERSION}".`;
+      registry.updateRemoteStatus(manifest, 'error', msg);
+      throw new Error(msg);
+    }
+
+    if (policy.requireIntegrityForTrustedRemote && !manifest.integrity) {
+      const msg = `trusted-remote widget "${manifest.id}" requires an integrity hash`;
+      registry.updateRemoteStatus(manifest, 'error', msg);
+      throw new Error(msg);
+    }
+
+    if (manifest.integrity) {
+      try {
+        parseIntegrity(manifest.integrity);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        registry.updateRemoteStatus(manifest, 'error', msg);
+        throw err;
+      }
     }
 
     registry.updateRemoteStatus(manifest, 'loading');
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(policy.readyTimeoutMs) });
     if (!response.ok) {
       const msg = `Failed to fetch remote widget: ${response.status} ${response.statusText}`;
       registry.updateRemoteStatus(manifest, 'error', msg);
       throw new Error(msg);
     }
 
-    const code = await response.text();
+    const bytes = await response.arrayBuffer();
+
+    if (bytes.byteLength > policy.maxArtifactBytes) {
+      const msg = `Remote widget "${manifest.id}" exceeds maxArtifactBytes size limit`;
+      registry.updateRemoteStatus(manifest, 'error', msg);
+      throw new Error(msg);
+    }
 
     if (manifest.integrity) {
-      const expectedHash = manifest.integrity.replace('sha256-', '').replace('sha-256-', '').trim();
-      const actualHash = await digestMessage(code);
-      if (actualHash !== expectedHash) {
-        const msg = `Integrity check failed for widget "${manifest.id}": expected ${expectedHash}, got ${actualHash}`;
+      try {
+        await verifyIntegrity(bytes, manifest.integrity);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
         registry.updateRemoteStatus(manifest, 'error', msg);
-        throw new Error(msg);
+        throw err;
       }
     }
+
+    const code = new TextDecoder().decode(bytes);
 
     let mod: { default?: unknown };
     if (evaluate) {
