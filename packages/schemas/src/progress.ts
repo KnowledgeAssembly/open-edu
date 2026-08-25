@@ -11,12 +11,20 @@ export const ReflectionAnswerSchema = z.object({
   text: z.string(),
 });
 
+// `widgetVersion` (and the provenance fields below) are optional for backward
+// compatibility with answers saved before this phase. Analytics that group or
+// filter by widgetVersion must handle null/undefined for pre-provenance records.
 export const WidgetAnswerSchema = z.object({
   type: z.literal('widget'),
   widgetId: z.string(),
   widgetVersion: z.string().optional(),
   data: z.unknown(),
   score: z.number().optional(),
+  intendedWidgetId: z.string().min(1).max(256).optional(),
+  intendedWidgetVersion: z.string().min(1).max(64).optional(),
+  renderedWidgetId: z.string().min(1).max(256).optional(),
+  renderedWidgetVersion: z.string().min(1).max(64).optional(),
+  renderedViaFallback: z.boolean().optional(),
 });
 
 export const NodeAnswerSchema = z.discriminatedUnion('type', [

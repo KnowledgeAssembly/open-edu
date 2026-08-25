@@ -93,4 +93,29 @@ describe('WidgetAnswerSchema', () => {
   it('rejects wrong discriminator type', () => {
     expect(() => WidgetAnswerSchema.parse({ type: 'quiz', widgetId: 'x', data: {} })).toThrow();
   });
+
+  it('accepts provenance fields', () => {
+    const result = WidgetAnswerSchema.parse({
+      type: 'widget',
+      widgetId: 'core.multiple-choice',
+      widgetVersion: '1.0.0',
+      data: {},
+      intendedWidgetId: 'community.example.quiz',
+      intendedWidgetVersion: '2.0.0',
+      renderedWidgetId: 'core.multiple-choice',
+      renderedWidgetVersion: '1.0.0',
+      renderedViaFallback: true,
+    });
+    expect(result.renderedViaFallback).toBe(true);
+    expect(result.intendedWidgetId).toBe('community.example.quiz');
+  });
+
+  it('still accepts answers without provenance (existing packages)', () => {
+    const result = WidgetAnswerSchema.parse({
+      type: 'widget',
+      widgetId: 'open-edu.matching',
+      data: {},
+    });
+    expect(result.renderedViaFallback).toBeUndefined();
+  });
 });
