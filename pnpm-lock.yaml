@@ -119,6 +119,9 @@ importers:
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../../packages/telemetry
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../../packages/widget-sdk
       '@open-edu/widgets':
         specifier: workspace:*
         version: link:../../packages/widgets
