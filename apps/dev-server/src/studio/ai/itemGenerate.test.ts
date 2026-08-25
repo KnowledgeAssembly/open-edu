@@ -22,6 +22,9 @@ const multipleChoice: CuratedWidget = {
   id: 'core.multiple-choice',
   name: 'Multiple Choice',
   domain: 'core',
+  source: 'builtin',
+  trustTier: 'native',
+  version: '0.1.0',
   guide: { configFields: [] },
 };
 

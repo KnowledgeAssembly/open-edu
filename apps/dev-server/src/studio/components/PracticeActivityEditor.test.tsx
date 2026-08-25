@@ -18,6 +18,9 @@ const { mockCatalog } = vi.hoisted(() => {
     name: 'Multiple Choice',
     description: 'Select the correct answer from a list of options',
     domain: 'core',
+    source: 'builtin',
+    trustTier: 'native',
+    version: '0.1.0',
     guide: {
       configFields: [
         {
@@ -47,6 +50,9 @@ const { mockCatalog } = vi.hoisted(() => {
     name: 'Matching',
     description: 'Match pairs of items',
     domain: 'core',
+    source: 'builtin',
+    trustTier: 'native',
+    version: '0.1.0',
   };
   return { mockCatalog: { multipleChoice, matching } };
 });
