@@ -10,7 +10,7 @@ import {
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
-import type { WidgetRegistry } from '@open-edu/widgets';
+import type { WidgetRegistry, WidgetResolver } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
 import type {
   ProgressSnapshot,
@@ -60,6 +60,7 @@ export interface RuntimeContextValue {
   navigateToNode: (nodeId: string) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
+  widgetResolver?: WidgetResolver;
   progressSnapshot: ProgressSnapshot | null;
   skillScores: Record<string, number>;
   getSkillMastery: (skillId: string) => MasteryLevel;
@@ -73,6 +74,7 @@ export interface RuntimeProviderProps {
   engine: WorkflowEngine;
   children: ReactNode;
   widgetRegistry?: WidgetRegistry;
+  widgetResolver?: WidgetResolver;
   initialProgress?: ProgressSnapshot;
   onProgressChange?: (snapshot: ProgressSnapshot) => void;
   packageId?: string;
@@ -90,6 +92,7 @@ export function RuntimeProvider({
   engine,
   children,
   widgetRegistry,
+  widgetResolver,
   initialProgress,
   onProgressChange,
   packageId,
@@ -285,6 +288,7 @@ export function RuntimeProvider({
       navigateToNode,
       getNode,
       widgetRegistry,
+      widgetResolver,
       skillScores,
       getSkillMastery: getContextSkillMastery,
       skillGraph,
@@ -310,6 +314,7 @@ export function RuntimeProvider({
       navigateToNode,
       getNode,
       widgetRegistry,
+      widgetResolver,
       skillScores,
       getContextSkillMastery,
       skillGraph,

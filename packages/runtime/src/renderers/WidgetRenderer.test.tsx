@@ -5,10 +5,22 @@ import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import { WidgetRenderer } from './WidgetRenderer';
 import { RuntimeProvider, useRuntime } from '../context/RuntimeContext';
-import { createWidgetRegistry } from '@open-edu/widgets';
+import {
+  FALLBACK_ADAPTERS,
+  communityCounterToMultipleChoice,
+  createWidgetRegistry,
+  normalizeWidgetReference,
+} from '@open-edu/widgets';
+import type { WidgetResolver, ResolvedWidget } from '@open-edu/widgets';
 import type { LoadedPackage } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
-import type { NodeAnswer, RemoteWidgetManifest, TelemetryEvent } from '@open-edu/schemas';
+import type {
+  NodeAnswer,
+  RemoteWidgetManifest,
+  TelemetryEvent,
+  WidgetManifest,
+  WidgetReference,
+} from '@open-edu/schemas';
 
 function makePackage(
   nodes: Array<{ relativePath: string; type: string; content: string }>,
@@ -68,10 +80,19 @@ function makeEngine(initialNodeId: string): StubEngine & WorkflowEngine {
 function renderWithProvider(
   pkg: LoadedPackage,
   initialNodeId: string,
-  widgetRendererNode: { type: string; widget?: string; config?: Record<string, unknown> },
+  widgetRendererNode: {
+    type: string;
+    widget?: string;
+    version?: string;
+    config?: Record<string, unknown>;
+    remoteWidget?: RemoteWidgetManifest;
+    widgetRef?: WidgetReference;
+  },
   nodeId: string,
   widgetRegistry?: ReturnType<typeof createWidgetRegistry>,
   onTelemetryEvent?: (event: TelemetryEvent) => void,
+  onDiagnostic?: (code: string) => void,
+  widgetResolver?: WidgetResolver,
 ) {
   const engine = makeEngine(initialNodeId);
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -81,12 +102,16 @@ function renderWithProvider(
         engine={engine}
         widgetRegistry={widgetRegistry}
         onTelemetryEvent={onTelemetryEvent}
+        widgetResolver={widgetResolver}
       >
         {children}
       </RuntimeProvider>
     </I18nProvider>
   );
-  const utils = render(<WidgetRenderer node={widgetRendererNode} nodeId={nodeId} />, { wrapper });
+  const utils = render(
+    <WidgetRenderer node={widgetRendererNode} nodeId={nodeId} onDiagnostic={onDiagnostic} />,
+    { wrapper },
+  );
   return { ...utils, engine };
 }
 
@@ -477,5 +502,205 @@ describe('WidgetRenderer', () => {
         renderedViaFallback: true,
       }),
     );
+  });
+
+  it('reports legacy remoteWidget warnings through onDiagnostic (never telemetry)', () => {
+    const onTelemetryEvent = vi.fn();
+    const onDiagnostic = vi.fn();
+
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      {
+        type: 'custom',
+        remoteWidget: {
+          id: 'community.example.quiz',
+          version: '2.0.0',
+          url: 'https://cdn.example.com/q.js',
+          apiVersion: '1.0.0',
+        },
+      },
+      'nodes/ex-01.md',
+      undefined,
+      onTelemetryEvent,
+      onDiagnostic,
+    );
+
+    expect(screen.getByTestId('remote-widget-loading')).toBeInTheDocument();
+    expect(onDiagnostic).toHaveBeenCalledWith('legacy-url-source');
+    expect(onDiagnostic).toHaveBeenCalledWith('missing-integrity');
+    expect(onTelemetryEvent).not.toHaveBeenCalled();
+  });
+
+  it('renders a native widget through the resolver path', async () => {
+    const definition = {
+      id: 'core.matching',
+      version: '1.0.0',
+      render: () => <div data-testid="resolver-native-content">Resolved Native</div>,
+    };
+    const registry = createWidgetRegistry();
+    registry.register(definition);
+
+    const resolver: WidgetResolver = {
+      normalize: normalizeWidgetReference,
+      resolve: async () => ({
+        ok: true,
+        tier: 'native',
+        widgetId: 'core.matching',
+        version: '1.0.0',
+        definition,
+      }),
+    };
+
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      { type: 'exercise', widget: 'core.matching' },
+      'nodes/ex-01.md',
+      registry,
+      undefined,
+      undefined,
+      resolver,
+    );
+
+    expect(await screen.findByTestId('resolver-native-content')).toBeInTheDocument();
+  });
+
+  it('renders widget-unavailable when the resolver returns a plain failure', async () => {
+    const onDiagnostic = vi.fn();
+    const resolver: WidgetResolver = {
+      normalize: normalizeWidgetReference,
+      resolve: async () => ({ ok: false, failure: 'unavailable', message: 'x' }),
+    };
+    const registry = createWidgetRegistry();
+
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      { type: 'exercise', widget: 'core.nonexistent' },
+      'nodes/ex-01.md',
+      registry,
+      undefined,
+      onDiagnostic,
+      resolver,
+    );
+
+    const status = await screen.findByTestId('widget-unavailable');
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent('This activity is unavailable.');
+    expect(onDiagnostic).toHaveBeenCalledWith('unavailable');
+  });
+
+  it('falls back to a registered builtin via FALLBACK_ADAPTERS when the resolver fails', async () => {
+    expect(FALLBACK_ADAPTERS['community.example.counter']).toBe(communityCounterToMultipleChoice);
+
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'core.multiple-choice',
+      version: '1.0.0',
+      render: (props) => <div data-testid="fallback-mc">{String(props.config.question)}</div>,
+    });
+
+    const resolver: WidgetResolver = {
+      normalize: normalizeWidgetReference,
+      resolve: async () => ({ ok: false, failure: 'unavailable', message: 'x' }),
+    };
+
+    const widgetRef: WidgetReference = {
+      id: 'community.example.counter',
+      version: '1.0.0',
+      source: 'builtin',
+      fallback: 'core.multiple-choice',
+    };
+
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      { type: 'custom', config: { prompt: 'Hi' }, widgetRef },
+      'nodes/ex-01.md',
+      registry,
+      undefined,
+      undefined,
+      resolver,
+    );
+
+    const fallback = await screen.findByTestId('fallback-mc');
+    expect(fallback).toHaveTextContent('Hi');
+  });
+
+  it('idle-unmounts a resolved sandboxed widget when the node is no longer current', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+    );
+
+    try {
+      const manifest: WidgetManifest = {
+        id: 'community.example.counter',
+        version: '1.0.0',
+        status: 'verified',
+        capabilities: [],
+        schemas: {},
+        distribution: { offline: false },
+        artifact: {
+          format: 'single-file',
+          documentUrl: 'https://cdn.example.com/counter.html',
+          documentIntegrity:
+            'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
+      } as unknown as WidgetManifest;
+
+      const widgetRef: WidgetReference = {
+        id: 'community.example.counter',
+        version: '1.0.0',
+        source: 'registry',
+        registryId: 'community',
+        integrity: 'sha256-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        fallback: 'core.multiple-choice',
+      };
+
+      const resolver: WidgetResolver = {
+        normalize: normalizeWidgetReference,
+        resolve: async (): Promise<ResolvedWidget> =>
+          ({
+            ok: true,
+            tier: 'sandboxed',
+            widgetId: 'community.example.counter',
+            version: '1.0.0',
+            manifest,
+            documentBytes: new ArrayBuffer(0),
+            srcDoc: '<html><body>hi</body></html>',
+            grantedCapabilities: [],
+          }) as unknown as ResolvedWidget,
+      };
+
+      const engine = makeEngine('nodes/ex-01.md');
+      const { container } = render(
+        <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+          <RuntimeProvider
+            loadedPackage={pkg}
+            engine={engine}
+            widgetRegistry={createWidgetRegistry()}
+            widgetResolver={resolver}
+          >
+            <WidgetRenderer
+              node={{ type: 'custom', widget: 'community.example.counter', widgetRef }}
+              nodeId="nodes/ex-01.md"
+            />
+          </RuntimeProvider>
+        </I18nProvider>,
+      );
+
+      await screen.findByTestId('sandbox-widget-host');
+      expect(container.querySelectorAll('iframe')).toHaveLength(1);
+
+      act(() => {
+        engine.__listener?.({ type: 'node.entered', nodeId: 'nodes/lesson-02.md', timestamp: 2 });
+      });
+
+      expect(container.querySelectorAll('iframe')).toHaveLength(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

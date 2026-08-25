@@ -14,6 +14,8 @@
   "widget.no_registered": "ID: {{id}} के लिए कोई विजेट पंजीकृत नहीं है",
   "widget.loading_remote": "रिमोट विजेट \"{{id}}\" लोड हो रहा है…",
   "widget.remote_load_error": "रिमोट विजेट \"{{id}}\" को लोड करने में विफल।",
+  "widget.unavailable": "यह गतिविधि उपलब्ध नहीं है।",
+  "widget.iframe_title": "इंटरैक्टिव विजेट: {{id}}",
   "reflection.char_count": "{{count}} / {{max}}",
   "reflection.placeholder": "विचार/प्रतिक्रिया यहाँ लिखें…",
   "reflection.saved": "सहेजा गया — अपने विचार साझा करने के लिए धन्यवाद।",

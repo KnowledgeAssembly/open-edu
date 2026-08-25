@@ -34,6 +34,8 @@ function createInstanceId(): string {
 
 export { isSandboxWidgetsEnabled } from './sandbox-limits';
 
+export let activeFrames = 0;
+
 export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Element | null {
   const {
     documentUrl,
@@ -117,6 +119,13 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
       resizeTimerRef.current = null;
     }
   };
+
+  useEffect(() => {
+    activeFrames += 1;
+    return () => {
+      activeFrames -= 1;
+    };
+  }, []);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
