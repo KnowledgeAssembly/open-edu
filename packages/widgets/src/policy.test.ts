@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_WIDGET_POLICY } from '@open-edu/schemas';
+import { DEFAULT_WIDGET_POLICY, type WidgetPolicy } from '@open-edu/schemas';
 import { assertTrustedRemoteAllowed, originOf } from './policy';
 
 describe('assertTrustedRemoteAllowed', () => {
-  const policy = {
+  const policy: WidgetPolicy = {
     ...DEFAULT_WIDGET_POLICY,
-    enabledTrustTiers: ['native', 'sandboxed', 'trusted-remote'] as const,
+    enabledTrustTiers: ['native', 'sandboxed', 'trusted-remote'],
     allowedOrigins: ['https://cdn.example.com'],
   };
 
