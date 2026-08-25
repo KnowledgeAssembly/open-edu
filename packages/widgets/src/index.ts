@@ -42,6 +42,8 @@ export type {
   CatalogWidgetMeta,
 } from './resolver/widget-resolver.js';
 export { fetchBytes } from './resolver/fetch-manifest.js';
+export { WidgetCatalogFileSchema, loadStaticCatalog } from './resolver/catalog.js';
+export type { WidgetCatalogFile } from './resolver/catalog.js';
 export { createWidgetArtifactCache } from './artifact-cache.js';
 export type { WidgetArtifactCache, CacheEntry } from './artifact-cache.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';
