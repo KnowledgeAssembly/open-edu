@@ -75,6 +75,31 @@ export {
 export type { WidgetManifest, WidgetCapability } from './community-widget-manifest.js';
 
 export {
+  HostToWidgetTypeSchema,
+  WidgetToHostTypeSchema,
+  InteractionActionSchema,
+  WidgetMessageEnvelopeSchema,
+  InitPayloadSchema,
+  CompletePayloadSchema,
+  StateSavePayloadSchema,
+  StateSaveResultSchema,
+  InteractionPayloadSchema,
+  ResizePayloadSchema,
+} from './widget-protocol.js';
+export type {
+  WidgetMessageEnvelope,
+  InitPayload,
+  CompletePayload,
+  StateSavePayload,
+  StateSaveResult,
+  InteractionPayload,
+  ResizePayload,
+  InteractionAction,
+  WidgetToHostType,
+  HostToWidgetType,
+} from './widget-protocol.js';
+
+export {
   SkillGraphSchema,
   SkillDefinitionSchema,
   SkillAssessmentSchema,
