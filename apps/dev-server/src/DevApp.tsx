@@ -81,6 +81,8 @@ function BundleDevApp({
   const [editorMode, setEditorMode] = useState<EditorMode>('preview');
   const [editorOpen, setEditorOpen] = useState(false);
 
+  const moduleSessionRef = useRef<TelemetrySession | null>(null);
+
   const currentPkg = useMemo(() => {
     return selectedModuleId ? (bundle.moduleMap.get(selectedModuleId) ?? null) : null;
   }, [selectedModuleId, bundle]);
@@ -101,6 +103,7 @@ function BundleDevApp({
   useEffect(() => {
     const session = new TelemetrySession();
     session.start();
+    moduleSessionRef.current = session;
 
     const eventSub = session.events$.subscribe({
       next: (event) => {
@@ -140,6 +143,7 @@ function BundleDevApp({
       engineUnsub?.();
       eventSub.unsubscribe();
       session.stop();
+      moduleSessionRef.current = null;
     };
   }, [engine, selectedModuleId, bundle.manifest.id]);
 
@@ -230,6 +234,7 @@ function BundleDevApp({
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
+          onTelemetryEvent={(e) => moduleSessionRef.current?.emit(e)}
         >
           <div className="flex h-screen">
             <div className="min-w-0 flex-1 overflow-auto">
@@ -429,6 +434,7 @@ function SinglePackageDeveloperApp({
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
+          onTelemetryEvent={(e) => telemetrySessionRef.current?.emit(e)}
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           <div className="flex h-screen">

@@ -12,7 +12,13 @@ import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
-import type { ProgressSnapshot, SkillGraph, MasteryLevel, NodeAnswer } from '@open-edu/schemas';
+import type {
+  ProgressSnapshot,
+  SkillGraph,
+  MasteryLevel,
+  NodeAnswer,
+  TelemetryEvent,
+} from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
 import { computeSkillScores, getSkillMastery } from './skills';
 
@@ -59,6 +65,7 @@ export interface RuntimeContextValue {
   getSkillMastery: (skillId: string) => MasteryLevel;
   skillGraph: SkillGraph | undefined;
   resolveAsset: (path: string) => string;
+  emitTelemetry?: (event: Omit<TelemetryEvent, 'timestamp'>) => void;
 }
 
 export interface RuntimeProviderProps {
@@ -71,6 +78,7 @@ export interface RuntimeProviderProps {
   packageId?: string;
   packageVersion?: string;
   skillGraph?: SkillGraph;
+  onTelemetryEvent?: (event: TelemetryEvent) => void;
 }
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
@@ -85,6 +93,7 @@ export function RuntimeProvider({
   packageId,
   packageVersion,
   skillGraph,
+  onTelemetryEvent,
 }: RuntimeProviderProps): JSX.Element {
   const skillsRef = useRef(skillGraph);
   skillsRef.current = skillGraph;
@@ -252,6 +261,13 @@ export function RuntimeProvider({
     [loadedPackage.assetMap, loadedPackage.manifest.id],
   );
 
+  const emitTelemetry = useCallback(
+    (event: Omit<TelemetryEvent, 'timestamp'>) => {
+      onTelemetryEvent?.({ ...event, timestamp: Date.now() } as TelemetryEvent);
+    },
+    [onTelemetryEvent],
+  );
+
   const value = useMemo<RuntimeContextValue>(
     () => ({
       loadedPackage,
@@ -271,6 +287,7 @@ export function RuntimeProvider({
       getSkillMastery: getContextSkillMastery,
       skillGraph,
       resolveAsset,
+      emitTelemetry,
       progressSnapshot: buildProgressSnapshot(
         packageId ?? loadedPackage.manifest.id,
         packageVersion ?? loadedPackage.manifest.version,
@@ -295,6 +312,7 @@ export function RuntimeProvider({
       getContextSkillMastery,
       skillGraph,
       resolveAsset,
+      emitTelemetry,
       packageId,
       packageVersion,
     ],

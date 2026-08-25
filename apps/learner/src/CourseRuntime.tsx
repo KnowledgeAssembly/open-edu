@@ -97,6 +97,7 @@ export function CourseRuntime({
   }, [savedProgress]);
 
   const cardBrokerRef = useRef<CardBroker | null>(null);
+  const telemetrySessionRef = useRef<TelemetrySession | null>(null);
 
   const rewardBridge = useMemo(() => createRewardReceiptBridge(), []);
 
@@ -105,6 +106,7 @@ export function CourseRuntime({
 
     const session = new TelemetrySession();
     session.start();
+    telemetrySessionRef.current = session;
 
     const eventSub = session.events$.subscribe({ next: () => {} });
 
@@ -208,6 +210,7 @@ export function CourseRuntime({
       cardBrokerRef.current = null;
       eventSub.unsubscribe();
       session.stop();
+      telemetrySessionRef.current = null;
     };
   }, [engine, pkg]);
 
@@ -405,6 +408,7 @@ export function CourseRuntime({
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
+          onTelemetryEvent={(e) => telemetrySessionRef.current?.emit(e)}
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           {children && (
