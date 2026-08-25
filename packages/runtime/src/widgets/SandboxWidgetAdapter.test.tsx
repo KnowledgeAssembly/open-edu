@@ -3,7 +3,7 @@ import { render, fireEvent, cleanup, act } from '@testing-library/react';
 import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
 import axe from 'axe-core';
 import type { SandboxWidgetAdapterProps } from './SandboxWidgetAdapter';
-import { SandboxWidgetAdapter } from './SandboxWidgetAdapter';
+import { SandboxWidgetAdapter, activeFrames } from './SandboxWidgetAdapter';
 import { READY_TIMEOUT_MS } from './sandbox-limits';
 
 const MOCK_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -204,5 +204,22 @@ describe('SandboxWidgetAdapter', () => {
 
     expect(props.onError).toHaveBeenCalledWith('timeout');
     expect(container.querySelector('iframe')).toBeNull();
+  });
+
+  it('tracks mounted frames in the module-level activeFrames counter', () => {
+    const before = activeFrames;
+    const propsA = makeProps({ nodeId: 'n1' });
+    const propsB = makeProps({ nodeId: 'n2' });
+    const { container: containerA, unmount: unmountA } = render(
+      <SandboxWidgetAdapter {...propsA} />,
+    );
+    const { container: containerB } = render(<SandboxWidgetAdapter {...propsB} />);
+
+    expect(activeFrames).toBe(before + 2);
+    expect(containerA.querySelectorAll('iframe')).toHaveLength(1);
+    expect(containerB.querySelectorAll('iframe')).toHaveLength(1);
+
+    unmountA();
+    expect(activeFrames).toBe(before + 1);
   });
 });
