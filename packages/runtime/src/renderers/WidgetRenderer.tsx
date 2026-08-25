@@ -433,6 +433,12 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
   );
 }
 
+function themeIdToProtocolTheme(id: string): 'light' | 'dark' | 'zen' {
+  if (id === 'nocturnal') return 'dark';
+  if (id === 'zen') return 'zen';
+  return 'light';
+}
+
 function SandboxWidgetRenderer({
   node,
   nodeId,
@@ -472,7 +478,7 @@ function SandboxWidgetRenderer({
       config: node.config ?? {},
       storedState,
       locale,
-      theme: theme.id,
+      theme: themeIdToProtocolTheme(theme.id),
       themeTokens: {},
       prefersReducedMotion,
       capabilities: ['resize', 'telemetry-interaction', 'state-persistence', 'locale', 'theme'],
