@@ -12,6 +12,8 @@ export function validateWidgetConfig(
   const validate = ajv.compile(schema as AnySchema);
   const valid = validate(config);
   if (valid) return { ok: true };
-  const errors = (validate.errors ?? []).map((err) => `${err.instancePath || '/'} ${err.message}`.trim());
+  const errors = (validate.errors ?? []).map((err) =>
+    `${err.instancePath || '/'} ${err.message}`.trim(),
+  );
   return { ok: false, errors };
 }

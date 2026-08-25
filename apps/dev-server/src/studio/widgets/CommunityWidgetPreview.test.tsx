@@ -29,8 +29,7 @@ const SANDBOX_MANIFEST: WidgetManifest = {
   apiVersion: 'open-edu.widget/1',
   artifact: {
     documentUrl: 'https://registry.example.com/counter.html',
-    documentIntegrity:
-      'sha256-9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+    documentIntegrity: 'sha256-9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
     sizeBytes: 1,
     format: 'self-contained-html',
   },
@@ -46,7 +45,9 @@ const SANDBOX_MANIFEST: WidgetManifest = {
   status: 'verified',
 };
 
-function makeProps(overrides: Partial<CommunityWidgetPreviewProps> = {}): CommunityWidgetPreviewProps {
+function makeProps(
+  overrides: Partial<CommunityWidgetPreviewProps> = {},
+): CommunityWidgetPreviewProps {
   return {
     widget: makeRegistryWidget(),
     config: { prompt: 'Count to five' },
@@ -107,9 +108,7 @@ function dispatchMessage(data: unknown, origin = 'null') {
 describe('CommunityWidgetPreview', () => {
   it('renders a sandboxed iframe with allow-scripts and never allow-same-origin', async () => {
     const resolver = makeResolver(SANDBOX_RESULT);
-    const { container } = render(
-      <CommunityWidgetPreview {...makeProps({ resolver })} />,
-    );
+    const { container } = render(<CommunityWidgetPreview {...makeProps({ resolver })} />);
     await waitFor(() => {
       expect(container.querySelector('iframe')).not.toBeNull();
     });
@@ -121,9 +120,7 @@ describe('CommunityWidgetPreview', () => {
 
   it('resolves through the resolver exactly once before the adapter mounts', async () => {
     const resolver = makeResolver(SANDBOX_RESULT);
-    const { container } = render(
-      <CommunityWidgetPreview {...makeProps({ resolver })} />,
-    );
+    const { container } = render(<CommunityWidgetPreview {...makeProps({ resolver })} />);
 
     const resolveSpy = resolver.resolve as ReturnType<typeof vi.fn>;
 

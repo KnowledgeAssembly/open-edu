@@ -8,10 +8,7 @@ import {
   type ResolverCatalog,
   type ResolvedWidget,
 } from '@open-edu/widgets';
-import {
-  SandboxWidgetAdapter,
-  type SandboxWidgetAdapterProps,
-} from '@open-edu/runtime';
+import { SandboxWidgetAdapter, type SandboxWidgetAdapterProps } from '@open-edu/runtime';
 import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
 import type { CompletePayload, StateSavePayload } from '@open-edu/widget-sdk';
 import type { CuratedWidget } from './curatedCatalog';
@@ -76,15 +73,11 @@ export function CommunityWidgetPreview(props: CommunityWidgetPreviewProps): JSX.
   }
 
   if (!resolved) {
-    return (
-      <div role="region" data-testid="community-preview-resolving" aria-live="polite" />
-    );
+    return <div role="region" data-testid="community-preview-resolving" aria-live="polite" />;
   }
 
   if (resolved.ok && resolved.tier === 'native') {
-    return (
-      <div role="note" data-testid="community-preview-native" />
-    );
+    return <div role="note" data-testid="community-preview-native" />;
   }
 
   if (resolved.ok && resolved.tier === 'sandboxed') {
