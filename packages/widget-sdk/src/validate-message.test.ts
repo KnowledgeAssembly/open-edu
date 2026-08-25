@@ -68,13 +68,17 @@ describe('validateHostBoundMessage', () => {
 
   it('accepts a valid ready message', () => {
     const result = validateHostBoundMessage(makeEnvelope(), 'https://app.example.com', SESSION);
-    expect(result).toEqual({ ok: true, message: expect.objectContaining({ type: 'ready', sequence: 1 }) });
+    expect(result).toEqual({
+      ok: true,
+      message: expect.objectContaining({ type: 'ready', sequence: 1 }),
+    });
   });
 
   it('rejects a malformed non-object payload', () => {
-    expect(
-      validateHostBoundMessage('garbage', 'https://app.example.com', SESSION),
-    ).toEqual({ ok: false, reason: 'malformed' });
+    expect(validateHostBoundMessage('garbage', 'https://app.example.com', SESSION)).toEqual({
+      ok: false,
+      reason: 'malformed',
+    });
     expect(validateHostBoundMessage(null, 'https://app.example.com', SESSION)).toEqual({
       ok: false,
       reason: 'malformed',

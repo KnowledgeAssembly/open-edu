@@ -107,7 +107,9 @@ describe('InteractionActionSchema', () => {
   it('accepts every enum value', () => {
     const actions = InteractionActionSchema.options;
     expect(actions).toContain('select');
-    expect(() => InteractionPayloadSchema.parse({ action: 'custom', data: { label: 'x' } })).not.toThrow();
+    expect(() =>
+      InteractionPayloadSchema.parse({ action: 'custom', data: { label: 'x' } }),
+    ).not.toThrow();
   });
 });
 
