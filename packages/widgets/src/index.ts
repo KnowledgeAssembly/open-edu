@@ -30,6 +30,8 @@ export {
   verifyIntegrity,
 } from './integrity.js';
 export { useRemoteWidget } from './use-remote-widget.js';
+export { normalizeWidgetReference } from './resolver/normalize-reference.js';
+export type { NormalizeWarning } from './resolver/normalize-reference.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';
 export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
