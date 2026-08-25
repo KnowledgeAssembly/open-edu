@@ -199,7 +199,7 @@ describe('createWidgetRegistryRouter', () => {
     expect(catalog.widgets).toHaveLength(1);
   });
 
-  it('revokes a widget via POST and removes it from the catalog', async () => {
+  it('revokes a widget via POST and keeps it in the catalog with status revoked', async () => {
     await router(
       fakeRequest('POST', '/widget-registry/install', installBody()),
       new FakeResponse() as unknown as ServerResponse,
@@ -219,7 +219,11 @@ describe('createWidgetRegistryRouter', () => {
       fakeRequest('GET', '/widget-registry/catalog.json'),
       catalogRes as unknown as ServerResponse,
     );
-    expect(JSON.parse(catalogRes.body).widgets).toHaveLength(0);
+    const catalog = JSON.parse(catalogRes.body) as {
+      widgets: { status: string }[];
+    };
+    expect(catalog.widgets).toHaveLength(1);
+    expect(catalog.widgets[0]!.status).toBe('revoked');
   });
 
   it('returns 404 for an unknown route', async () => {

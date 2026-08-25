@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-+WbCmOI1Ls4f9DR7/ALmlrb49BKOu9LfOqqVC5moVUc='; base-uri 'none';"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-+WbCmOI1Ls4f9DR7/ALmlrb49BKOu9LfOqqVC5moVUc='; connect-src 'none'; frame-src 'none'; base-uri 'none';"
     />
     <title>Community Counter Widget</title>
     <style>
@@ -50,8 +50,14 @@
   </head>
   <body>
     <div class="counter" id="root">
-      <div class="counter__count" id="count" aria-live="polite">0</div>
-      <button class="counter__button" id="increment" type="button" aria-label="Increment count">
+      <div class="counter__count" id="count" data-testid="counter-count" aria-live="polite">0</div>
+      <button
+        class="counter__button"
+        id="increment"
+        type="button"
+        aria-label="Increment count"
+        data-testid="counter-increment"
+      >
         Increment
       </button>
       <div class="counter__status" id="status">Waiting for host init…</div>

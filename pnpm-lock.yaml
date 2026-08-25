@@ -517,6 +517,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
 
+  examples/community-widget-counter-course: {}
+
   examples/fractions:
     devDependencies:
       '@open-edu/core':

@@ -105,7 +105,8 @@ describe('WidgetRegistryStore', () => {
     expect(catalog.widgets[0]).toMatchObject({
       id: 'community.example.counter',
       version: '1.0.0',
-      manifestUrl: 'http://localhost:4002/publisher/community.example.counter/1.0.0/manifest.json',
+      manifestUrl:
+        'http://localhost:4002/widget-registry/publisher/community.example.counter/1.0.0/manifest.json',
       trustTier: 'sandboxed',
       offline: true,
     });
@@ -141,7 +142,18 @@ describe('WidgetRegistryStore', () => {
     ).rejects.toBeInstanceOf(WidgetAlreadyInstalledError);
   });
 
-  it('revoking a version writes revoked.json and removes it from the catalog', async () => {
+  it('uses an explicit registryId when provided', async () => {
+    const custom = new WidgetRegistryStore(rootDir, 'http://localhost:4002', 'localdev');
+    await custom.install({
+      publisher: 'publisher',
+      widgetId: 'community.example.counter',
+      manifestJson: validManifest(),
+      documentBytes: encode(SELF_CONTAINED_HTML),
+    });
+    expect((await custom.catalog()).registryId).toBe('localdev');
+  });
+
+  it('revoking a version writes revoked.json and keeps it in the catalog with status revoked', async () => {
     await store.install({
       publisher: 'publisher',
       widgetId: 'community.example.counter',
@@ -158,7 +170,13 @@ describe('WidgetRegistryStore', () => {
       ),
     );
     expect(typeof revoked.revokedAt).toBe('string');
-    expect((await store.catalog()).widgets).toHaveLength(0);
+    const catalog = await store.catalog();
+    expect(catalog.widgets).toHaveLength(1);
+    expect(catalog.widgets[0]).toMatchObject({
+      id: 'community.example.counter',
+      version: '1.0.0',
+      status: 'revoked',
+    });
   });
 
   it('deprecating a version keeps it in the catalog with status deprecated', async () => {
@@ -266,7 +284,7 @@ describe('WidgetRegistryStore', () => {
     expect(zip).toEqual(archiveBytes);
   });
 
-  it('revoking a whole widget removes all of its versions from the catalog', async () => {
+  it('revoking a whole widget keeps all of its versions listed with status revoked', async () => {
     await store.install({
       publisher: 'publisher',
       widgetId: 'community.example.counter',
@@ -282,7 +300,9 @@ describe('WidgetRegistryStore', () => {
 
     await store.revoke('publisher', 'community.example.counter');
 
-    expect((await store.catalog()).widgets).toHaveLength(0);
+    const catalog = await store.catalog();
+    expect(catalog.widgets).toHaveLength(2);
+    expect(catalog.widgets.every((w) => w.status === 'revoked')).toBe(true);
     expect((await store.listInstalled()).every((w) => w.status === 'revoked')).toBe(true);
   });
 

@@ -64,6 +64,62 @@ describe('loadStaticCatalog', () => {
     ).toThrow();
   });
 
+  it('rejects http non-loopback urls even when allowLoopback is set', () => {
+    expect(() =>
+      loadStaticCatalog(
+        {
+          ...validCatalog,
+          origin: 'http://widgets.example.edu',
+          widgets: validCatalog.widgets.map((w) => ({ ...w })),
+        },
+        { allowLoopback: true },
+      ),
+    ).toThrow();
+  });
+
+  it('accepts loopback http localhost and 127.0.0.1 urls when allowLoopback is set', () => {
+    const catalog = loadStaticCatalog(
+      {
+        registryId: 'localdev',
+        origin: 'http://localhost:4002',
+        widgets: [
+          {
+            id: 'community.example.counter',
+            version: '1.0.0',
+            manifestUrl: 'http://127.0.0.1:4002/x/community.example.counter/1.0.0/manifest.json',
+            status: 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          },
+        ],
+      },
+      { allowLoopback: true },
+    );
+    expect(catalog.registryId).toBe('localdev');
+    expect(catalog.widgets.get('community.example.counter@1.0.0')).toMatchObject({
+      manifestUrl: 'http://127.0.0.1:4002/x/community.example.counter/1.0.0/manifest.json',
+    });
+  });
+
+  it('rejects loopback http urls when allowLoopback is not set', () => {
+    expect(() =>
+      loadStaticCatalog({
+        registryId: 'localdev',
+        origin: 'http://localhost:4002',
+        widgets: [
+          {
+            id: 'community.example.counter',
+            version: '1.0.0',
+            manifestUrl: 'http://localhost:4002/x/manifest.json',
+            status: 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          },
+        ],
+      }),
+    ).toThrow();
+  });
+
   it('returns undefined when the widget id@version is not present', () => {
     const catalog = loadStaticCatalog(validCatalog);
     expect(catalog.widgets.get('community.example.other@1.0.0')).toBeUndefined();

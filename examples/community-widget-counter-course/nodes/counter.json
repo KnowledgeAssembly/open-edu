@@ -1,0 +1,15 @@
+{
+  "type": "custom",
+  "title": "Counter widget",
+  "widget": "exercise",
+  "config": {
+    "target": 5
+  },
+  "widgetRef": {
+    "id": "community.example.counter",
+    "version": "1.0.0",
+    "source": "registry",
+    "registryId": "localdev",
+    "integrity": "sha256-a6505d866f7dca8c30edeaff74b49752391ffc764f21c5a75eb63be91ac18a77"
+  }
+}

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, type ZodType } from 'zod';
 import type { ResolverCatalog, CatalogWidgetMeta } from './widget-resolver.js';
 
 export const WidgetCatalogFileSchema = z.object({
@@ -27,8 +27,45 @@ export const WidgetCatalogFileSchema = z.object({
 });
 export type WidgetCatalogFile = z.infer<typeof WidgetCatalogFileSchema>;
 
-export function loadStaticCatalog(json: unknown): ResolverCatalog {
-  const result = WidgetCatalogFileSchema.safeParse(json);
+function isLoopbackUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'https:') return true;
+    if (url.protocol !== 'http:') return false;
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+function catalogSchemaWithLoopback(allowLoopback: boolean): ZodType<WidgetCatalogFile> {
+  const urlRefine = (v: string) =>
+    allowLoopback ? isLoopbackUrl(v) : new URL(v).protocol === 'https:';
+  const message = allowLoopback
+    ? 'catalog urls must be https or loopback http'
+    : 'catalog urls must be https';
+  return z.object({
+    registryId: z.string(),
+    origin: z.string().url().refine(urlRefine, { message }),
+    widgets: z.array(
+      z.object({
+        id: z.string(),
+        version: z.string(),
+        manifestUrl: z.string().url().refine(urlRefine, { message }),
+        status: z.enum(['experimental', 'verified', 'deprecated', 'revoked']),
+        trustTier: z.enum(['native', 'sandboxed']),
+        offline: z.boolean(),
+      }),
+    ),
+  }) as ZodType<WidgetCatalogFile>;
+}
+
+export function loadStaticCatalog(
+  json: unknown,
+  opts?: { allowLoopback?: boolean },
+): ResolverCatalog {
+  const schema = opts?.allowLoopback ? catalogSchemaWithLoopback(true) : WidgetCatalogFileSchema;
+  const result = schema.safeParse(json);
   if (!result.success) {
     throw new Error(`invalid catalog: ${result.error.message}`);
   }

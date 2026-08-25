@@ -7,13 +7,24 @@ export interface CacheEntry {
   bytes: ArrayBuffer;
   cachedAt: number;
   revokedAt?: number;
+  kind?: string;
 }
 
 export interface WidgetArtifactCache {
-  get(widgetId: string, version: string, integrity: string): Promise<ArrayBuffer | undefined>;
-  getEntry(widgetId: string, version: string, integrity: string): Promise<CacheEntry | undefined>;
+  get(
+    widgetId: string,
+    version: string,
+    integrity: string,
+    kind?: string,
+  ): Promise<ArrayBuffer | undefined>;
+  getEntry(
+    widgetId: string,
+    version: string,
+    integrity: string,
+    kind?: string,
+  ): Promise<CacheEntry | undefined>;
   put(entry: CacheEntry): Promise<void>;
-  invalidate(widgetId: string, version: string): Promise<void>;
+  invalidate(widgetId: string, version: string, kind?: string): Promise<void>;
   clear(): Promise<void>;
 }
 
@@ -22,8 +33,13 @@ const STORE_NAME = 'artifacts';
 const MAX_MEMORY_ENTRIES = 32;
 const MAX_IDB_BYTES = 50 * 1024 * 1024;
 
-function keyOf(widgetId: string, version: string, integrity: string): string {
-  return `${widgetId}@${version}#${integrity}`;
+function keyOf(widgetId: string, version: string, integrity: string, kind?: string): string {
+  return `${kind ? `${kind}:` : ''}${widgetId}@${version}#${integrity}`;
+}
+
+function keywordMatches(key: string, widgetId: string, version: string, kind?: string): boolean {
+  if (kind && !key.startsWith(`${kind}:`)) return false;
+  return key.includes(`${widgetId}@${version}#`);
 }
 
 function idbRequest<T>(req: IDBRequest<T>): Promise<T> {
@@ -89,8 +105,9 @@ class WidgetArtifactCacheImpl implements WidgetArtifactCache {
     widgetId: string,
     version: string,
     integrity: string,
+    kind?: string,
   ): Promise<ArrayBuffer | undefined> {
-    const entry = await this.getEntry(widgetId, version, integrity);
+    const entry = await this.getEntry(widgetId, version, integrity, kind);
     return entry?.bytes;
   }
 
@@ -98,8 +115,9 @@ class WidgetArtifactCacheImpl implements WidgetArtifactCache {
     widgetId: string,
     version: string,
     integrity: string,
+    kind?: string,
   ): Promise<CacheEntry | undefined> {
-    const key = keyOf(widgetId, version, integrity);
+    const key = keyOf(widgetId, version, integrity, kind);
     let entry = this.memory.get(key);
     if (entry) {
       this.touch(key);
@@ -129,7 +147,7 @@ class WidgetArtifactCacheImpl implements WidgetArtifactCache {
   }
 
   async put(entry: CacheEntry): Promise<void> {
-    const key = keyOf(entry.widgetId, entry.version, entry.integrity);
+    const key = keyOf(entry.widgetId, entry.version, entry.integrity, entry.kind);
     this.memory.delete(key);
     this.memory.set(key, entry);
     this.evictMemoryIfOver();
@@ -141,10 +159,9 @@ class WidgetArtifactCacheImpl implements WidgetArtifactCache {
     });
   }
 
-  async invalidate(widgetId: string, version: string): Promise<void> {
-    const prefix = `${widgetId}@${version}#`;
+  async invalidate(widgetId: string, version: string, kind?: string): Promise<void> {
     for (const key of this.memory.keys()) {
-      if (key.startsWith(prefix)) {
+      if (keywordMatches(key, widgetId, version, kind)) {
         this.memory.delete(key);
       }
     }
@@ -157,7 +174,7 @@ class WidgetArtifactCacheImpl implements WidgetArtifactCache {
         req.onsuccess = () => {
           const cursor = req.result;
           if (cursor) {
-            if (String(cursor.key).startsWith(prefix)) {
+            if (keywordMatches(String(cursor.key), widgetId, version, kind)) {
               out.push(String(cursor.key));
             }
             cursor.continue();

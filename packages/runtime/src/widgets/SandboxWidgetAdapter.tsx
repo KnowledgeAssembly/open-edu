@@ -135,6 +135,35 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   }, []);
 
   useEffect(() => {
+    // React StrictMode double-invokes effects: the cleanup below sets the
+    // cancelled flag, so reset it here so this mount can still initialise.
+    cancelledRef.current = false;
+    // React's synthetic onLoad can miss the 'load' event on lazy/srcDoc
+    // sandboxed iframes, so attach a native listener and keep re-posting the
+    // init envelope until the widget acknowledges (bounded by READY_TIMEOUT_MS).
+    const iframe = iframeRef.current;
+    const onLoad = () => handleLoad();
+    iframe?.addEventListener('load', onLoad);
+    const retry = setInterval(() => {
+      if (cancelledRef.current || readyRef.current) {
+        clearInterval(retry);
+        return;
+      }
+      if (iframeRef.current?.contentWindow) {
+        handleLoad();
+      }
+    }, 250);
+    const stop = setTimeout(() => {
+      clearInterval(retry);
+    }, READY_TIMEOUT_MS + 500);
+    return () => {
+      iframe?.removeEventListener('load', onLoad);
+      clearInterval(retry);
+      clearTimeout(stop);
+    };
+  }, []);
+
+  useEffect(() => {
     const stored = callbacksRef.current.initPayload.storedState;
     const expected = callbacksRef.current.initPayload.stateSchemaVersion;
     if (
@@ -150,6 +179,7 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   }, []);
 
   useEffect(() => {
+    cancelledRef.current = false;
     const postToWidget = (type: string, payload: unknown) => {
       const { instanceId, nonce } = sessionRef.current;
       const envelope = {
@@ -314,10 +344,10 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
         referrerPolicy="no-referrer"
         loading="lazy"
         title={title}
+        data-testid="sandbox-widget-frame"
         frameBorder={0}
         src={documentUrl}
         srcDoc={srcDoc}
-        onLoad={handleLoad}
       />
     </div>
   );

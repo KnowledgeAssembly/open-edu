@@ -75,13 +75,16 @@ export class WidgetNotFoundError extends Error {
 export class WidgetRegistryStore {
   readonly rootDir: string;
   readonly origin: string;
+  readonly registryId: string;
 
-  constructor(rootDir?: string, origin?: string) {
+  constructor(rootDir?: string, origin?: string, registryId?: string) {
     this.rootDir =
       rootDir ??
       process.env.OPEN_EDU_WIDGET_REGISTRY ??
       join(process.cwd(), '.openedu-widget-registry');
     this.origin = origin ?? 'http://localhost:4002';
+    this.registryId =
+      registryId ?? process.env.OPEN_EDU_WIDGET_REGISTRY_ID ?? deriveRegistryId(this.origin);
   }
 
   async install(
@@ -133,26 +136,31 @@ export class WidgetRegistryStore {
       const widgetDirs = await this.listDir(pubDir);
       for (const widget of widgetDirs) {
         const widgetDir = join(pubDir, widget);
-        if (await this.exists(join(widgetDir, 'revoked.json'))) continue;
+        const widgetRevoked = await this.exists(join(widgetDir, 'revoked.json'));
         const versions = await this.listDir(widgetDir);
         for (const version of versions) {
           const versionDir = join(widgetDir, version);
+          if (!(await this.exists(join(versionDir, 'manifest.json')))) continue;
           const status = await this.catalogStatus(versionDir);
           if (status === 'skip') continue;
           const manifest = await this.tryReadManifest(versionDir);
           if (!manifest) continue;
+          let entryStatus: WidgetInstanceCatalogEntry['status'];
+          if (widgetRevoked || status === 'revoked') entryStatus = 'revoked';
+          else if (status === 'deprecated') entryStatus = 'deprecated';
+          else entryStatus = manifest.status;
           widgets.push({
             id: manifest.id,
             version: manifest.version,
-            manifestUrl: `${this.origin}/${publisher}/${widget}/${version}/manifest.json`,
-            status: status === 'deprecated' ? 'deprecated' : manifest.status,
+            manifestUrl: `${this.origin}/widget-registry/${publisher}/${widget}/${version}/manifest.json`,
+            status: entryStatus,
             trustTier: 'sandboxed',
             offline: manifest.distribution.offline,
           });
         }
       }
     }
-    return { registryId: deriveRegistryId(this.origin), origin: this.origin, widgets };
+    return { registryId: this.registryId, origin: this.origin, widgets };
   }
 
   async revoke(publisher: string, widget: string, version?: string): Promise<void> {
@@ -197,6 +205,15 @@ export class WidgetRegistryStore {
     const parsed = await this.tryReadManifest(this.versionDir(publisher, widget, version));
     if (!parsed) throw new WidgetNotFoundError(publisher, widget, version);
     return parsed;
+  }
+
+  async readManifestBytes(publisher: string, widget: string, version: string): Promise<Uint8Array> {
+    const file = join(this.versionDir(publisher, widget, version), 'manifest.json');
+    try {
+      return new Uint8Array(await readFile(file));
+    } catch {
+      throw new WidgetNotFoundError(publisher, widget, version);
+    }
   }
 
   async readDocument(publisher: string, widget: string, version: string): Promise<Uint8Array> {
@@ -290,15 +307,14 @@ export class WidgetRegistryStore {
   }
 
   private async catalogStatus(dir: string): Promise<WidgetRegistryStatus | 'skip'> {
-    if (await this.exists(join(dir, 'revoked.json'))) return 'skip';
     const override = await this.readStatusFile(dir);
-    if (override) {
-      if (override === 'disabled' || override === 'revoked') return 'skip';
-      return override;
-    }
+    if (override === 'disabled') return 'skip';
+    if (override === 'revoked' || override === 'deprecated') return override;
+    if (override === 'enabled') return 'enabled';
+    if (await this.exists(join(dir, 'revoked.json'))) return 'revoked';
     const manifest = await this.tryReadManifest(dir);
     if (!manifest) return 'skip';
-    if (manifest.status === 'revoked') return 'skip';
+    if (manifest.status === 'revoked') return 'revoked';
     return manifest.status === 'deprecated' ? 'deprecated' : 'enabled';
   }
 

@@ -335,6 +335,15 @@ function multipartParse(body: Buffer, boundary: string): MultipartPart[] {
   return parts;
 }
 
+function widgetRegistryPlugin(): Plugin {
+  return {
+    name: 'open-edu-widget-registry',
+    configureServer(server) {
+      server.middlewares.use(createWidgetRegistryMiddleware(widgetRegistryStore));
+    },
+  };
+}
+
 function eduPackageLoader(): Plugin {
   let packageData: LoadedPackage | null = null;
   let bundleData: LoadedBundle | null = null;
@@ -389,12 +398,6 @@ function eduPackageLoader(): Plugin {
 
     configureServer(srv) {
       server = srv;
-
-      // Instance widget registry (admin-installed immutable widget versions).
-      // Registered before the package API catch-all so /widget-registry/*
-      // requests are never swallowed by it.
-      srv.middlewares.use(createWidgetRegistryMiddleware(widgetRegistryStore));
-
       const getCurrentDir = () => packageDir || bundleDir;
       const watchDir = bundleDir || packageDir;
       if (!watchDir) return;
@@ -1636,8 +1639,13 @@ export default defineConfig(({ mode }) => {
     // package module still needs a resolution so DevApp can always import it;
     // browser mode always uses the local BrowserStudioProvider instead.
     plugins: isBrowserMode
-      ? [react(), virtualPackagePlugin(), localAiGatewayPlugin(localAiEnabled)]
-      : [react(), eduPackageLoader()],
+      ? [
+          react(),
+          widgetRegistryPlugin(),
+          virtualPackagePlugin(),
+          localAiGatewayPlugin(localAiEnabled),
+        ]
+      : [react(), widgetRegistryPlugin(), eduPackageLoader()],
     resolve: isBrowserMode
       ? {
           alias: {

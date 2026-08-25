@@ -19,6 +19,12 @@ function sendJson(res: ServerResponse, statusCode: number, payload: unknown): vo
   res.end(JSON.stringify(payload));
 }
 
+function applyCors(res: ServerResponse): void {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
 function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -48,9 +54,16 @@ function decodeBase64(base64: string): Uint8Array {
 
 export function createWidgetRegistryRouter(store: WidgetRegistryStore) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+    applyCors(res);
     try {
       const { pathname } = new URL(req.url ?? '/', 'http://localhost');
       const method = req.method ?? 'GET';
+
+      if (method === 'OPTIONS') {
+        res.statusCode = 204;
+        res.end();
+        return;
+      }
 
       if (method === 'POST' && pathname === `${BASE_PATH}/install`) {
         await handleInstall(req, res, store);
@@ -202,11 +215,11 @@ async function handleManifest(
   version: string,
 ): Promise<void> {
   try {
-    const manifest = await store.readManifest(publisher, widget, version);
+    const bytes = await store.readManifestBytes(publisher, widget, version);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'max-age=3600, must-revalidate');
-    res.end(JSON.stringify(manifest));
+    res.end(Buffer.from(bytes));
   } catch (err) {
     if (err instanceof WidgetNotFoundError) {
       sendJson(res, 404, { error: 'manifest not found' });
