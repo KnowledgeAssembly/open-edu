@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import type { WidgetCatalogEntry } from '@open-edu/core';
 import widgetCatalogData from '@open-edu/core/widget-catalog-data';
 import { loadStaticCatalog } from '@open-edu/widgets/catalog';
@@ -132,18 +131,19 @@ export function loadCatalogWidgets(
 function getConfiguredCatalogFiles(): unknown[] {
   const globalCatalogs = (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__;
   if (Array.isArray(globalCatalogs)) return globalCatalogs;
+  if (!import.meta.env.SSR) return [];
   const envPaths = process.env.OPEN_EDU_STUDIO_CATALOGS;
   if (!envPaths) return [];
   return envPaths
     .split(',')
-    .map((path) => path.trim())
+    .map((p) => p.trim())
     .filter(Boolean)
-    .map((path) => {
+    .map((filePath) => {
       try {
-        return JSON.parse(readFileSync(path, 'utf-8'));
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn(`skipping unparseable catalog file: ${path}`, err);
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { readFileSync } = require('node:fs') as typeof import('node:fs');
+        return JSON.parse(readFileSync(filePath, 'utf-8'));
+      } catch {
         return null;
       }
     })
