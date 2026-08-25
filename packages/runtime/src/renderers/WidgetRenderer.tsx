@@ -376,6 +376,7 @@ function SandboxWidgetRenderer({
     themeTokens: {},
     prefersReducedMotion,
     capabilities: resolved.grantedCapabilities,
+    stateSchemaVersion: resolved.manifest.stateSchemaVersion as string | undefined,
   };
 
   const expectedOrigin: string | 'opaque' = resolved.srcDoc

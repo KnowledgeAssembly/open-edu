@@ -8,7 +8,12 @@ import {
   type InteractionPayload,
   type HostSession,
 } from '@open-edu/widget-sdk';
-import { READY_TIMEOUT_MS, clampResizeHeight, createRateLimiter } from './sandbox-limits';
+import {
+  READY_TIMEOUT_MS,
+  MAX_STATE_BYTES,
+  clampResizeHeight,
+  createRateLimiter,
+} from './sandbox-limits';
 
 export interface SandboxWidgetAdapterProps {
   nodeId: string;
@@ -57,6 +62,8 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   const hostSequenceRef = useRef(1);
   const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stateIncompatibleRef = useRef(false);
 
   const sessionRef = useRef<HostSession>({
     instanceId: createInstanceId(),
@@ -128,6 +135,39 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   }, []);
 
   useEffect(() => {
+    const stored = callbacksRef.current.initPayload.storedState;
+    const expected = callbacksRef.current.initPayload.stateSchemaVersion;
+    if (
+      expected &&
+      typeof stored === 'object' &&
+      stored !== null &&
+      'schemaVersion' in stored &&
+      (stored as { schemaVersion?: unknown }).schemaVersion !== expected
+    ) {
+      stateIncompatibleRef.current = true;
+      callbacksRef.current.onDiagnostic?.('state-incompatible');
+    }
+  }, []);
+
+  useEffect(() => {
+    const postToWidget = (type: string, payload: unknown) => {
+      const { instanceId, nonce } = sessionRef.current;
+      const envelope = {
+        apiVersion: PROTOCOL_API_VERSION,
+        type,
+        instanceId,
+        nonce,
+        sequence: hostSequenceRef.current,
+        payload,
+      };
+      hostSequenceRef.current += 1;
+      const targetOrigin =
+        callbacksRef.current.expectedOrigin === 'opaque'
+          ? '*'
+          : callbacksRef.current.expectedOrigin;
+      iframeRef.current?.contentWindow?.postMessage(envelope, targetOrigin);
+    };
+
     const handleMessage = (event: MessageEvent) => {
       if (cancelledRef.current) return;
 
@@ -169,6 +209,10 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
         case 'ready':
           break;
         case 'complete': {
+          if (stateIncompatibleRef.current) {
+            callbacksRef.current.onDiagnostic?.('state-incompatible');
+            break;
+          }
           const capabilities = callbacksRef.current.initPayload.capabilities;
           const observeGate =
             capabilities.includes('observe-mode') &&
@@ -183,9 +227,43 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
         case 'interaction':
           cbInteract(msg.payload as InteractionPayload);
           break;
-        case 'state:save':
+        case 'state:save': {
+          const raw = msg.payload as {
+            requestId?: string;
+            schemaVersion?: string;
+            state?: unknown;
+          };
+          const stateSize = JSON.stringify(raw.state ?? null).length;
+          const oversized = stateSize > MAX_STATE_BYTES;
+          const expected = callbacksRef.current.initPayload.stateSchemaVersion;
+          const versionMatches = !expected || raw.schemaVersion === expected;
+          if (oversized) {
+            postToWidget('state:update', {
+              requestId: raw.requestId,
+              accepted: false,
+              rejectionReason: 'too-large',
+            });
+            callbacksRef.current.onDiagnostic?.('state-save-rejected');
+            break;
+          }
+          if (!versionMatches) {
+            postToWidget('state:update', {
+              requestId: raw.requestId,
+              accepted: false,
+              rejectionReason: 'schema-invalid',
+            });
+            callbacksRef.current.onDiagnostic?.('state-save-rejected');
+            break;
+          }
+          stateIncompatibleRef.current = false;
+          postToWidget('state:update', {
+            requestId: raw.requestId,
+            accepted: true,
+            normalizedState: raw.state,
+          });
           cbState(msg.payload as StateSavePayload);
           break;
+        }
         case 'resize': {
           const height = (msg.payload as { height: number }).height;
           if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
