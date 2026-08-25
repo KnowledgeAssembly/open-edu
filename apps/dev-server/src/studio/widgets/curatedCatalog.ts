@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import type { WidgetCatalogEntry } from '@open-edu/core';
 import widgetCatalogData from '@open-edu/core/widget-catalog-data';
-import { loadStaticCatalog } from '@open-edu/widgets';
+import { loadStaticCatalog } from '@open-edu/widgets/catalog';
 
 const CATALOG_ENTRIES: WidgetCatalogEntry[] = widgetCatalogData;
 

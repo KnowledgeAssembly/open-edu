@@ -121,6 +121,47 @@ open-edu/
 6. **Commits should be scoped.** Use conventional commits: `feat(schemas): add workflow schema`
 7. **One story per PR.** Each story gets its own branch and PR.
 
+## Known Issues & Fix Patterns
+
+### ESM Extensionless Imports in Vite Config Loading
+
+**Problem:** Packages using `"type": "module"` with `moduleResolution: "bundler"` (the base tsconfig default) produce `.js` dist files with extensionless relative imports (e.g., `from '../../metadata/learning-intents'` instead of `from '../../metadata/learning-intents.js'`). This works fine in bundlers (Vite, webpack) but fails when Node.js ESM resolution encounters them at runtime.
+
+This causes Vercel deployment failures when `vite.config.ts` transitively imports a workspace package whose dist files have extensionless imports. The error looks like:
+
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '.../dist/types' imported from '.../dist/registry.js'
+```
+
+**The import chain that triggers it:**
+`vite.config.ts` → a local source file → a file that imports `@open-edu/some-package` → the package's `dist/index.js` → internal dist files with extensionless imports → Node.js ESM fails.
+
+**Correct fix — use subpath exports to bypass the full package:**
+
+1. Add a subpath export in the package's `package.json` pointing directly to the specific module needed (which should have only external imports, not internal extensionless ones):
+   ```json
+   "exports": {
+     ".": { ... },
+     "./catalog": {
+       "types": "./dist/resolver/catalog.d.ts",
+       "import": "./dist/resolver/catalog.js"
+     }
+   }
+   ```
+2. Update the consuming import to use the subpath: `import { ... } from '@open-edu/widgets/catalog'`
+
+**Do NOT do this:**
+
+- Do not add `.js` extensions to every source file import across the monorepo. The `moduleResolution: "bundler"` setting is correct for development and testing; adding `.js` everywhere is a sledgehammer fix that creates churn and doesn't address the real issue.
+- Do not change `moduleResolution` to `"node16"`/`"nodenext"` in the base tsconfig — this would force `.js` extensions in all source files project-wide.
+
+**Already-applied examples:**
+
+- `@open-edu/core/widget-catalog-data` — subpath export for JSON catalog data
+- `@open-edu/widgets/catalog` — subpath export for `loadStaticCatalog` (breaks the import chain from `vite.config.ts` → `itemGenerate.ts` → `curatedCatalog.ts` → full `@open-edu/widgets` tree)
+
+**How to diagnose:** If you see `ERR_MODULE_NOT_FOUND` for a `.js` file importing another `.js` file without extension, trace the import chain from `vite.config.ts` to find which workspace package is being pulled in. Then create a subpath export for just the function(s) needed.
+
 ## UI Coding Standards
 
 1. **Styling:** Use Tailwind utility classes + `cn()` from `@open-edu/design-system`. Never use inline `style={{}}` except for dynamic sizing props.
