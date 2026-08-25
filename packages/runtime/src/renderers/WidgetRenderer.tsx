@@ -1,6 +1,6 @@
 import { Component, useContext, useRef, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
-import { useRuntime } from '../context/RuntimeContext';
+import { useRuntime, type DistributiveOmit } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
 import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
@@ -9,7 +9,9 @@ import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
 import type { OasAnimationController } from '../components/useOasAnimation';
 import { useStepSyncMachine } from '../components/useStepSyncMachine';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
-import type { WidgetAnswer } from '@open-edu/schemas';
+import type { TelemetryEvent, WidgetAnswer } from '@open-edu/schemas';
+import { buildWidgetAnswer } from '../widgets/answer-provenance';
+import { normalizeWidgetInteraction } from '../widgets/normalize-interaction';
 
 interface WidgetErrorBoundaryState {
   hasError: boolean;
@@ -92,6 +94,7 @@ function StepSyncedWidget({
   completeNode,
   saveAnswer,
   locale,
+  emitTelemetry,
 }: {
   widgetId: string;
   nodeId: string;
@@ -104,6 +107,7 @@ function StepSyncedWidget({
   completeNode: (score?: number) => void;
   saveAnswer: (nodeId: string, answer: WidgetAnswer) => void;
   locale?: string;
+  emitTelemetry?: (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => void;
 }) {
   const parsedAnim = AnimationConfigSchema.safeParse(animationConfig);
   const effectCount = parsedAnim.success ? (parsedAnim.data.effects?.length ?? 0) : 0;
@@ -123,7 +127,8 @@ function StepSyncedWidget({
   const animationControllerRef = useRef<OasAnimationController | null>(null);
 
   const emitInteraction = (data: Record<string, unknown>) => {
-    console.debug('[widget:interaction]', widgetId, data);
+    const normalized = normalizeWidgetInteraction(widgetId, data);
+    if (normalized) emitTelemetry?.(normalized);
     if (data.action === 'reveal' && typeof data.step === 'number') {
       machine.goTo(data.step);
     } else if (data.action === 'reveal') {
@@ -140,14 +145,18 @@ function StepSyncedWidget({
     syncedRevealedCount: machine.state.revealedCount,
     complete: (score?: number, state?: unknown) => {
       if (state !== undefined) {
-        const answer: WidgetAnswer = {
-          type: 'widget',
-          widgetId,
-          widgetVersion: definitionVersion,
+        const answer = buildWidgetAnswer({
+          intendedWidgetId: widgetId,
+          intendedWidgetVersion: definitionVersion,
+          renderedWidgetId: widgetId,
+          renderedWidgetVersion: definitionVersion,
           data: state,
           score,
-        };
+        });
         saveAnswer(nodeId, answer);
+        if (answer.renderedViaFallback) {
+          emitTelemetry?.({ event: 'node_complete', nodeId, score, renderedViaFallback: true });
+        }
       }
       if (
         state &&
@@ -182,7 +191,8 @@ function StepSyncedWidget({
 }
 
 export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
-  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset, emitTelemetry } =
+    useRuntime();
   const { t } = useTranslation();
   const animationControllerRef = useRef<OasAnimationController | null>(null);
 
@@ -208,7 +218,8 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
   const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
 
   const emitInteraction = (data: Record<string, unknown>) => {
-    console.debug('[widget:interaction]', widgetId, data);
+    const normalized = normalizeWidgetInteraction(widgetId, data);
+    if (normalized) emitTelemetry?.(normalized);
     // Legacy one-way bridge for non-step-synced animations
     if (data.action === 'reveal') {
       if (typeof data.step === 'number') {
@@ -228,14 +239,18 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
     resolveAsset,
     complete: (score?: number, state?: unknown) => {
       if (state !== undefined) {
-        const answer: WidgetAnswer = {
-          type: 'widget',
-          widgetId,
-          widgetVersion: definition.version,
+        const answer = buildWidgetAnswer({
+          intendedWidgetId: widgetId,
+          intendedWidgetVersion: definition.version,
+          renderedWidgetId: widgetId,
+          renderedWidgetVersion: definition.version,
           data: state,
           score,
-        };
+        });
         saveAnswer(nodeId, answer);
+        if (answer.renderedViaFallback) {
+          emitTelemetry?.({ event: 'node_complete', nodeId, score, renderedViaFallback: true });
+        }
       }
       completeNode(score);
     },
@@ -262,6 +277,7 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
             completeNode={completeNode}
             saveAnswer={saveAnswer}
             locale={locale}
+            emitTelemetry={emitTelemetry}
           />
         ) : animationConfig ? (
           <OasAnimationWrapper
@@ -280,7 +296,8 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 }
 
 function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: string }): JSX.Element {
-  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset } = useRuntime();
+  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset, emitTelemetry } =
+    useRuntime();
   const { t } = useTranslation();
 
   const i18nContext = useContext(I18nContext);
@@ -301,6 +318,7 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     if (manifest.fallback) {
       const fallbackDef = widgetRegistry?.get(manifest.fallback);
       if (fallbackDef) {
+        const fallbackId = manifest.fallback;
         const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
         const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
         const WidgetComponent = fallbackDef.render;
@@ -310,16 +328,28 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
           locale,
           resolveAsset,
           emitInteraction: (data: Record<string, unknown>) => {
-            console.debug('[widget:interaction]', manifest.fallback, data);
+            const normalized = normalizeWidgetInteraction(fallbackId, data);
+            if (normalized) emitTelemetry?.(normalized);
           },
           complete: (score?: number, state?: unknown) => {
             if (state !== undefined) {
-              saveAnswer(nodeId, {
-                type: 'widget',
-                widgetId: manifest.fallback ?? 'unknown',
+              const answer = buildWidgetAnswer({
+                intendedWidgetId: manifest.id,
+                intendedWidgetVersion: manifest.version,
+                renderedWidgetId: fallbackId,
+                renderedWidgetVersion: fallbackDef.version,
                 data: state,
                 score,
               });
+              saveAnswer(nodeId, answer);
+              if (answer.renderedViaFallback) {
+                emitTelemetry?.({
+                  event: 'node_complete',
+                  nodeId,
+                  score,
+                  renderedViaFallback: true,
+                });
+              }
             }
             completeNode(score);
           },
@@ -357,16 +387,28 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
     locale,
     resolveAsset,
     emitInteraction: (data: Record<string, unknown>) => {
-      console.debug('[widget:interaction]', manifest.id, data);
+      const normalized = normalizeWidgetInteraction(manifest.id, data);
+      if (normalized) emitTelemetry?.(normalized);
     },
     complete: (score?: number, state?: unknown) => {
       if (state !== undefined) {
-        saveAnswer(nodeId, {
-          type: 'widget',
-          widgetId: manifest.id,
+        const answer = buildWidgetAnswer({
+          intendedWidgetId: manifest.id,
+          intendedWidgetVersion: manifest.version,
+          renderedWidgetId: manifest.id,
+          renderedWidgetVersion: manifest.version,
           data: state,
           score,
         });
+        saveAnswer(nodeId, answer);
+        if (answer.renderedViaFallback) {
+          emitTelemetry?.({
+            event: 'node_complete',
+            nodeId,
+            score,
+            renderedViaFallback: true,
+          });
+        }
       }
       completeNode(score);
     },

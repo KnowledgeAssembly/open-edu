@@ -81,7 +81,7 @@ export interface RuntimeProviderProps {
   onTelemetryEvent?: (event: TelemetryEvent) => void;
 }
 
-type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
+export type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
 

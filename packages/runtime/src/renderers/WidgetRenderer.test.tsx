@@ -8,7 +8,7 @@ import { RuntimeProvider, useRuntime } from '../context/RuntimeContext';
 import { createWidgetRegistry } from '@open-edu/widgets';
 import type { LoadedPackage } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
-import type { NodeAnswer } from '@open-edu/schemas';
+import type { NodeAnswer, RemoteWidgetManifest, TelemetryEvent } from '@open-edu/schemas';
 
 function makePackage(
   nodes: Array<{ relativePath: string; type: string; content: string }>,
@@ -71,11 +71,17 @@ function renderWithProvider(
   widgetRendererNode: { type: string; widget?: string; config?: Record<string, unknown> },
   nodeId: string,
   widgetRegistry?: ReturnType<typeof createWidgetRegistry>,
+  onTelemetryEvent?: (event: TelemetryEvent) => void,
 ) {
   const engine = makeEngine(initialNodeId);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
-      <RuntimeProvider loadedPackage={pkg} engine={engine} widgetRegistry={widgetRegistry}>
+      <RuntimeProvider
+        loadedPackage={pkg}
+        engine={engine}
+        widgetRegistry={widgetRegistry}
+        onTelemetryEvent={onTelemetryEvent}
+      >
         {children}
       </RuntimeProvider>
     </I18nProvider>
@@ -371,5 +377,105 @@ describe('WidgetRenderer', () => {
     expect(screen.getByTestId('synced-count')).toHaveTextContent('1');
     fireEvent.click(screen.getByRole('button', { name: 'Reveal' }));
     expect(screen.getByTestId('synced-count')).toHaveTextContent('2');
+  });
+
+  it('emits widget_interaction telemetry for builtin widget interactions', () => {
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'interaction-widget',
+      version: '1.0.0',
+      render: (props) => (
+        <button type="button" onClick={() => props.emitInteraction({ action: 'reveal', step: 1 })}>
+          Reveal
+        </button>
+      ),
+    });
+
+    const onTelemetryEvent = vi.fn();
+    renderWithProvider(
+      pkg,
+      'nodes/ex-01.md',
+      { type: 'exercise', widget: 'interaction-widget' },
+      'nodes/ex-01.md',
+      registry,
+      onTelemetryEvent,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal' }));
+    expect(onTelemetryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'widget_interaction',
+        widgetId: 'interaction-widget',
+        action: 'reveal',
+        data: { step: 1 },
+      }),
+    );
+  });
+
+  it('records fallback provenance and emits node_complete telemetry when remote widget falls back', async () => {
+    let capturedAnswers: Record<string, NodeAnswer> = {};
+    function AnswersCapturer() {
+      const { answers } = useRuntime();
+      capturedAnswers = answers;
+      return <div data-testid="captured">{JSON.stringify(answers)}</div>;
+    }
+
+    const registry = createWidgetRegistry();
+    registry.register({
+      id: 'core.fallback-widget',
+      version: '1.0.0',
+      render: (props) => (
+        <button type="button" onClick={() => props.complete(75, { finished: true })}>
+          Fallback Complete
+        </button>
+      ),
+    });
+
+    const remoteWidget: RemoteWidgetManifest = {
+      id: 'community.example.quiz',
+      version: '2.0.0',
+      url: 'https://cdn.example.com/q.js',
+      apiVersion: '1.0.0',
+      fallback: 'core.fallback-widget',
+    };
+
+    const engine = makeEngine('nodes/ex-01.md');
+    const onTelemetryEvent = vi.fn();
+    render(
+      <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+        <RuntimeProvider
+          loadedPackage={pkg}
+          engine={engine}
+          widgetRegistry={registry}
+          onTelemetryEvent={onTelemetryEvent}
+        >
+          <AnswersCapturer />
+          <WidgetRenderer node={{ type: 'custom', remoteWidget }} nodeId="nodes/ex-01.md" />
+        </RuntimeProvider>
+      </I18nProvider>,
+    );
+
+    const fallbackButton = await screen.findByRole('button', { name: 'Fallback Complete' });
+    fireEvent.click(fallbackButton);
+
+    const saved = capturedAnswers['nodes/ex-01.md'];
+    expect(saved).toBeDefined();
+    expect((saved as { renderedViaFallback?: boolean }).renderedViaFallback).toBe(true);
+    expect((saved as { intendedWidgetId?: string }).intendedWidgetId).toBe(
+      'community.example.quiz',
+    );
+    expect((saved as { intendedWidgetVersion?: string }).intendedWidgetVersion).toBe('2.0.0');
+    expect((saved as { renderedWidgetId?: string }).renderedWidgetId).toBe('core.fallback-widget');
+    expect((saved as { renderedWidgetVersion?: string }).renderedWidgetVersion).toBe('1.0.0');
+    expect((saved as { score?: number }).score).toBe(75);
+
+    expect(onTelemetryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'node_complete',
+        nodeId: 'nodes/ex-01.md',
+        score: 75,
+        renderedViaFallback: true,
+      }),
+    );
   });
 });
