@@ -103,6 +103,14 @@ export { RegistryMetadataSchema } from './registry.js';
 export type { RegistryMetadata } from './registry.js';
 
 export {
+  WidgetPolicySchema,
+  DEFAULT_WIDGET_POLICY,
+  TrustTierSchema,
+  isTrustTierEnabled,
+} from './widget-policy.js';
+export type { WidgetPolicy, TrustTier } from './widget-policy.js';
+
+export {
   TelemetryEventSchema,
   NodeOpenEventSchema,
   NodeCompleteEventSchema,
