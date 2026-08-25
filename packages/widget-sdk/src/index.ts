@@ -3,6 +3,7 @@ export { createWidgetHostClient } from './host-client.js';
 export type { WidgetHostClient, WidgetHostClientOptions } from './host-client.js';
 export { applyThemeTokens } from './theme.js';
 export { validateHostBoundMessage, validateWidgetBoundMessage } from './validate-message.js';
+export { normalizeInteractionData } from './normalize-interaction-data.js';
 export type { MessageRejection, HostSession } from './validate-message.js';
 export {
   WidgetMessageEnvelopeSchema,
