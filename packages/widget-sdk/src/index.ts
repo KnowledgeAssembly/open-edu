@@ -1,4 +1,7 @@
 export { PROTOCOL_API_VERSION } from './constants.js';
+export { createWidgetHostClient } from './host-client.js';
+export type { WidgetHostClient, WidgetHostClientOptions } from './host-client.js';
+export { applyThemeTokens } from './theme.js';
 export { validateHostBoundMessage, validateWidgetBoundMessage } from './validate-message.js';
 export type { MessageRejection, HostSession } from './validate-message.js';
 export {
