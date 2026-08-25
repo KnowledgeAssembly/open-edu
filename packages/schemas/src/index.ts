@@ -64,6 +64,9 @@ export type {
 export { RemoteWidgetManifestSchema } from './widget-manifest.js';
 export type { RemoteWidgetManifest } from './widget-manifest.js';
 
+export { WidgetReferenceSchema } from './widget-reference.js';
+export type { WidgetReference } from './widget-reference.js';
+
 export {
   WidgetManifestSchema,
   WidgetCapabilitySchema,

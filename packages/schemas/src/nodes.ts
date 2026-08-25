@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SkillsSchema } from './manifest.js';
+import { WidgetReferenceSchema } from './widget-reference.js';
 import { RemoteWidgetManifestSchema } from './widget-manifest.js';
 
 const OptionSchema = z.object({
@@ -61,6 +62,7 @@ export const WidgetNodeSchema = z.object({
   ...NodeFields,
   ...WidgetConfigSchema.shape,
   remoteWidget: RemoteWidgetManifestSchema.optional(),
+  widgetRef: WidgetReferenceSchema.optional(),
 });
 
 export const ContentNodeSchema = z.discriminatedUnion('type', [
