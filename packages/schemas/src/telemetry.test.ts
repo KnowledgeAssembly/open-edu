@@ -61,6 +61,18 @@ describe('TelemetryEventSchema', () => {
     ).toThrow();
   });
 
+  it('should accept node_complete with renderedViaFallback', () => {
+    expect(
+      TelemetryEventSchema.parse({
+        timestamp: ts,
+        event: 'node_complete',
+        nodeId: 'n1',
+        score: 80,
+        renderedViaFallback: true,
+      }),
+    ).toMatchObject({ renderedViaFallback: true });
+  });
+
   it('should accept a quiz_answered event', () => {
     expect(
       TelemetryEventSchema.parse({
