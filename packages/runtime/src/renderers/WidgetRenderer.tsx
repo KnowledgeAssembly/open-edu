@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRuntime } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
@@ -44,12 +44,16 @@ export function WidgetRenderer({ node, nodeId, onDiagnostic }: WidgetRendererPro
   const { widgetRegistry, widgetResolver } = useRuntime();
   const { t } = useTranslation();
 
-  const { ref, warnings } = normalizeWidgetReference({
-    widget: node.widget,
-    version: node.version,
-    remoteWidget: node.remoteWidget,
-    widgetRef: node.widgetRef,
-  });
+  const { ref, warnings } = useMemo(
+    () =>
+      normalizeWidgetReference({
+        widget: node.widget,
+        version: node.version,
+        remoteWidget: node.remoteWidget,
+        widgetRef: node.widgetRef,
+      }),
+    [node.widget, node.version, node.remoteWidget, node.widgetRef],
+  );
 
   if (warnings.length > 0) {
     if (process.env.NODE_ENV !== 'production') {
@@ -113,9 +117,15 @@ function ResolvedWidgetRenderer({
   useEffect(() => {
     let cancelled = false;
     setResolved(undefined);
-    void resolver.resolve(widgetRef, node.config).then((r) => {
-      if (!cancelled) setResolved(r);
-    });
+    void resolver
+      .resolve(widgetRef, node.config)
+      .then((r) => {
+        if (!cancelled) setResolved(r);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setResolved({ ok: false, failure: 'unavailable', message: 'resolve-error' });
+      });
     return () => {
       cancelled = true;
     };
