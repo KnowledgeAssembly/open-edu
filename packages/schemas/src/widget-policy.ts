@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { WidgetCapabilitySchema } from './community-widget-manifest.js';
 
 export const TrustTierSchema = z.enum(['native', 'trusted-remote', 'sandboxed']);
 export type TrustTier = z.infer<typeof TrustTierSchema>;
@@ -36,6 +37,17 @@ export const WidgetPolicySchema = z.object({
   experimentalWidgets: z.enum(['allow', 'deny']).default('deny'),
   maxHostBoundMessagesPerMinute: z.number().int().positive().default(120),
   registryCatalogOrigins: z.array(httpsPublicOrigin).default([]),
+  grantedCapabilities: z
+    .array(WidgetCapabilitySchema)
+    .default([
+      'resize',
+      'telemetry-interaction',
+      'state-persistence',
+      'locale',
+      'theme',
+      'hints',
+      'observe-mode',
+    ]),
 });
 
 export type WidgetPolicy = z.infer<typeof WidgetPolicySchema>;
@@ -49,6 +61,15 @@ export const DEFAULT_WIDGET_POLICY: WidgetPolicy = WidgetPolicySchema.parse({
   experimentalWidgets: 'deny',
   maxHostBoundMessagesPerMinute: 120,
   registryCatalogOrigins: [],
+  grantedCapabilities: [
+    'resize',
+    'telemetry-interaction',
+    'state-persistence',
+    'locale',
+    'theme',
+    'hints',
+    'observe-mode',
+  ],
 });
 
 export function isTrustTierEnabled(policy: WidgetPolicy, tier: TrustTier): boolean {

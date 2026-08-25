@@ -32,6 +32,16 @@ export {
 export { useRemoteWidget } from './use-remote-widget.js';
 export { normalizeWidgetReference } from './resolver/normalize-reference.js';
 export type { NormalizeWarning } from './resolver/normalize-reference.js';
+export { createWidgetResolver } from './resolver/widget-resolver.js';
+export type {
+  WidgetResolver,
+  ResolvedWidget,
+  ResolveFailure,
+  WidgetResolverOptions,
+  ResolverCatalog,
+  CatalogWidgetMeta,
+} from './resolver/widget-resolver.js';
+export { fetchBytes } from './resolver/fetch-manifest.js';
 export { createWidgetArtifactCache } from './artifact-cache.js';
 export type { WidgetArtifactCache, CacheEntry } from './artifact-cache.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';

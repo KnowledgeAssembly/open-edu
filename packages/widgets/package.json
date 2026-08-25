@@ -37,6 +37,7 @@
     "@open-edu/i18n": "workspace:*",
     "@open-edu/schemas": "workspace:^",
     "@open-edu/widget-sdk": "workspace:*",
+    "ajv": "^8.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

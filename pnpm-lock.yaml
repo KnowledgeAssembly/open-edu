@@ -1144,6 +1144,9 @@ importers:
       '@open-edu/widget-sdk':
         specifier: workspace:*
         version: link:../widget-sdk
+      ajv:
+        specifier: ^8.0.0
+        version: 8.20.0
       react:
         specifier: ^18.0.0
         version: 18.3.1
