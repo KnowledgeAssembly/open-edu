@@ -5,8 +5,7 @@ import { createWidgetRegistry } from './registry';
 import type { RemoteWidgetManifest } from './types';
 import { canonicalIntegrity } from './integrity';
 
-const SHA_256_64_ZEROS =
-  'sha256-0000000000000000000000000000000000000000000000000000000000000000';
+const SHA_256_64_ZEROS = 'sha256-0000000000000000000000000000000000000000000000000000000000000000';
 
 const policy: WidgetPolicy = {
   ...DEFAULT_WIDGET_POLICY,
@@ -57,7 +56,9 @@ describe('RemoteWidgetLoader', () => {
       }),
     );
 
-    const manifest = makeManifest({ integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     const def = await loader.load(
       manifest,
       registry,
@@ -82,7 +83,9 @@ describe('RemoteWidgetLoader', () => {
       });
     });
 
-    const manifest = makeManifest({ integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     const evaluate = makeEvaluate({ id: 'test-remote', version: '1.0.0', render: () => null });
     await loader.load(manifest, registry, evaluate, policy);
     await loader.load(manifest, registry, evaluate, policy);
@@ -138,7 +141,9 @@ describe('RemoteWidgetLoader', () => {
       }),
     );
 
-    const manifest = makeManifest({ integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     await expect(loader.load(manifest, registry, async () => ({}), policy)).rejects.toThrow(
       'has no default export',
     );
@@ -153,7 +158,9 @@ describe('RemoteWidgetLoader', () => {
       }),
     );
 
-    const manifest = makeManifest({ integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     await expect(
       loader.load(manifest, registry, async () => ({ default: { notAWidget: true } }), policy),
     ).rejects.toThrow('not a valid WidgetDefinition');
@@ -168,7 +175,10 @@ describe('RemoteWidgetLoader', () => {
       }),
     );
 
-    const manifest = makeManifest({ id: 'status-test', integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      id: 'status-test',
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     registry.registerRemote(manifest);
 
     const reg1 = registry.getRemoteRegistration(manifest);
@@ -194,7 +204,10 @@ describe('RemoteWidgetLoader', () => {
       }),
     );
 
-    const manifest = makeManifest({ id: 'cached-test', integrity: await canonicalIntegrity(new TextEncoder().encode(code)) });
+    const manifest = makeManifest({
+      id: 'cached-test',
+      integrity: await canonicalIntegrity(new TextEncoder().encode(code)),
+    });
     await loader.load(
       manifest,
       registry,
@@ -217,9 +230,9 @@ describe('RemoteWidgetLoader', () => {
   it('rejects missing integrity even when trusted-remote is enabled', async () => {
     const { integrity: _i, ...rest } = makeManifest();
 
-    await expect(loader.load(rest as RemoteWidgetManifest, registry, undefined, policy)).rejects.toThrow(
-      'integrity',
-    );
+    await expect(
+      loader.load(rest as RemoteWidgetManifest, registry, undefined, policy),
+    ).rejects.toThrow('integrity');
   });
 
   it('rejects apiVersion other than 1.0.0', async () => {
