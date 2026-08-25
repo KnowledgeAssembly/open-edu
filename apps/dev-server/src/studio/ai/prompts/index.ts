@@ -1,4 +1,10 @@
-export { renderWidgetCatalogSection, renderCourseContext } from './buildPrompt.js';
+export {
+  renderWidgetCatalogSection,
+  renderCourseContext,
+  isCatalogWidgetId,
+  assertCatalogWidgetId,
+  assertNoLegacyRemoteUrlPrompt,
+} from './buildPrompt.js';
 export { COURSE_SPEC_CONTRACT, buildCourseSpecPrompt } from './coursePrompt.js';
 export { extractJsonObject } from './extract.js';
 export {
