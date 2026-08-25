@@ -39,6 +39,12 @@ export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
 export { useObserveMode } from './use-observe-mode.js';
 export type { ObserveModeOptions } from './use-observe-mode.js';
+export {
+  applyFallbackConfig,
+  communityCounterToMultipleChoice,
+  FALLBACK_ADAPTERS,
+} from './fallback-transform.js';
+export type { FallbackAdapter } from './fallback-transform.js';
 export * as svgExplorer from './svg-explorer/index.js';
 
 export {
