@@ -151,6 +151,18 @@ describe('WidgetManifestSchema', () => {
   });
 });
 
+describe('WidgetManifestSchema stateSchemaVersion', () => {
+  it('parses a manifest with stateSchemaVersion', () => {
+    expect(() => buildManifest({ stateSchemaVersion: '2' })).not.toThrow();
+    const result = WidgetManifestSchema.parse(buildManifest({ stateSchemaVersion: '2' }));
+    expect(result.stateSchemaVersion).toBe('2');
+  });
+
+  it('still parses the base fixture without stateSchemaVersion', () => {
+    expect(WidgetManifestSchema.safeParse(VALID).success).toBe(true);
+  });
+});
+
 describe('WidgetCapabilitySchema', () => {
   it('rejects unknown capabilities', () => {
     expect(() =>

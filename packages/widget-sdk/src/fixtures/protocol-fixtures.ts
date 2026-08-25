@@ -50,3 +50,26 @@ export const CAPABILITY_REQUEST_V1_REJECTION_FIXTURE = {
   sequence: 1,
   payload: { capability: 'resize' },
 } as const;
+
+export const STATED_MIGRATION_INIT_MESSAGE = {
+  apiVersion: 'open-edu.widget/1' as const,
+  type: 'init' as const,
+  instanceId: 'test-instance',
+  nonce: 'test-nonce',
+  sequence: 1,
+  payload: {
+    apiVersion: 'open-edu.widget/1',
+    widgetId: 'community.example.counter',
+    widgetVersion: '1.0.0',
+    instanceId: 'test-instance',
+    nodeId: 'node-1',
+    config: { prompt: 'Count five' },
+    storedState: { schemaVersion: '1', v: 1, data: 'old' },
+    locale: 'en',
+    theme: 'light' as const,
+    themeTokens: {},
+    prefersReducedMotion: false,
+    capabilities: ['resize', 'telemetry-interaction', 'state-persistence'],
+    stateSchemaVersion: '2',
+  },
+};

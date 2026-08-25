@@ -107,6 +107,8 @@ export {
   getWidgetsByLearningIntent,
 } from './metadata/learning-intents.js';
 
+export { assertPersistableState } from './state-migration.js';
+
 export type {
   WidgetCapabilities,
   AccessibilityMetadata,

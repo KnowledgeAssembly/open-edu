@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { WidgetMessageEnvelopeSchema } from '@open-edu/schemas';
+import { WidgetMessageEnvelopeSchema, InitPayloadSchema } from '@open-edu/schemas';
 import { validateHostBoundMessage, type HostSession } from '../validate-message';
 import {
   VALID_INIT_MESSAGE,
@@ -8,6 +8,7 @@ import {
   MULTI_FILE_CSP,
   SELF_CONTAINED_CSP_PREFIX,
   CAPABILITY_REQUEST_V1_REJECTION_FIXTURE,
+  STATED_MIGRATION_INIT_MESSAGE,
 } from './protocol-fixtures';
 
 const SESSION: HostSession = {
@@ -38,6 +39,16 @@ describe('protocol fixtures', () => {
   it('SELF_CONTAINED_CSP_PREFIX is the documented self-contained pattern', () => {
     expect(SELF_CONTAINED_CSP_PREFIX).toBe("default-src 'none'; script-src 'sha256-");
     expect(MULTI_FILE_CSP.startsWith(SELF_CONTAINED_CSP_PREFIX)).toBe(false);
+  });
+
+  it('STATED_MIGRATION_INIT_MESSAGE is an envelope with a version-mismatched init payload', () => {
+    const parsed = InitPayloadSchema.safeParse(STATED_MIGRATION_INIT_MESSAGE.payload);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.stateSchemaVersion).toBe('2');
+      expect((parsed.data.storedState as { schemaVersion?: string }).schemaVersion).toBe('1');
+    }
+    expect(WidgetMessageEnvelopeSchema.safeParse(STATED_MIGRATION_INIT_MESSAGE).success).toBe(true);
   });
 });
 
