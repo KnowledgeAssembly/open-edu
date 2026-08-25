@@ -5,7 +5,9 @@ import { canonicalIntegrity } from './integrity';
 const K = 'core.multiple-choice';
 const V = '1.0.0';
 
-async function sampleBytes(text = 'hello artifact'): Promise<{ bytes: ArrayBuffer; integrity: string }> {
+async function sampleBytes(
+  text = 'hello artifact',
+): Promise<{ bytes: ArrayBuffer; integrity: string }> {
   const bytes = new TextEncoder().encode(text).buffer;
   const integrity = await canonicalIntegrity(bytes);
   return { bytes, integrity };
@@ -14,8 +16,12 @@ async function sampleBytes(text = 'hello artifact'): Promise<{ bytes: ArrayBuffe
 describe('WidgetArtifactCache (memory)', () => {
   // default: no global indexedDB in jsdom → memory store
   let cache: ReturnType<typeof createWidgetArtifactCache>;
-  beforeEach(() => { cache = createWidgetArtifactCache(); });
-  afterEach(async () => { await cache.clear(); });
+  beforeEach(() => {
+    cache = createWidgetArtifactCache();
+  });
+  afterEach(async () => {
+    await cache.clear();
+  });
 
   it('hit returns bytes after put with matching integrity', async () => {
     const { bytes, integrity } = await sampleBytes();

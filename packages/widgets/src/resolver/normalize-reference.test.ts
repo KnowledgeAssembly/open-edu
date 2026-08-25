@@ -25,10 +25,7 @@ describe('normalizeWidgetReference', () => {
       source: 'url',
     });
     expect(ref.source).toBe('url');
-    expect(warnings.map((w) => w.code).sort()).toEqual([
-      'legacy-url-source',
-      'missing-integrity',
-    ]);
+    expect(warnings.map((w) => w.code).sort()).toEqual(['legacy-url-source', 'missing-integrity']);
   });
 
   it('emits only legacy-url-source when remoteWidget has integrity', () => {
