@@ -1,4 +1,6 @@
 export { PROTOCOL_API_VERSION } from './constants.js';
+export { validateHostBoundMessage, validateWidgetBoundMessage } from './validate-message.js';
+export type { MessageRejection, HostSession } from './validate-message.js';
 export {
   WidgetMessageEnvelopeSchema,
   HostToWidgetTypeSchema,
