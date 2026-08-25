@@ -3,6 +3,7 @@ import { render, waitFor, act } from '@testing-library/react';
 import { CourseRuntime, type BundleCourseContext } from './CourseRuntime';
 import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
 import { I18nProvider } from '@open-edu/i18n';
+import type * as Widgets from '@open-edu/widgets';
 import learnerDict from '@open-edu/i18n/locales/en/learner.json';
 
 const { mockAddRewardMessage, mockSaveCardProgress } = vi.hoisted(() => ({
@@ -76,9 +77,13 @@ vi.mock('@open-edu/telemetry', () => ({
   }),
 }));
 
-vi.mock('@open-edu/widgets', () => ({
-  createDefaultRegistry: vi.fn(() => ({})),
-}));
+vi.mock('@open-edu/widgets', async (importOriginal) => {
+  const actual = await importOriginal<typeof Widgets>();
+  return {
+    ...actual,
+    createDefaultRegistry: vi.fn(() => ({})),
+  };
+});
 
 vi.mock('@open-edu/accessibility', () => ({
   AccessibilityProvider: ({ children }: { children: React.ReactNode }) => children,

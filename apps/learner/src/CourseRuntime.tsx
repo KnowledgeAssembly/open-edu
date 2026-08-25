@@ -11,7 +11,12 @@ import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
 import { AccessibilityProvider } from '@open-edu/accessibility';
-import { createDefaultRegistry } from '@open-edu/widgets';
+import {
+  createDefaultRegistry,
+  createWidgetArtifactCache,
+  createWidgetResolver,
+  DEFAULT_WIDGET_POLICY,
+} from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import { useTranslation } from '@open-edu/i18n';
 import type { RewardReceipt } from '@open-edu/rewards';
@@ -25,6 +30,17 @@ import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
 import { useCompanion } from './ai';
+
+(globalThis as { __OPEN_EDU_SANDBOX_WIDGETS__?: boolean }).__OPEN_EDU_SANDBOX_WIDGETS__ = true;
+
+const widgetOriginsEnv =
+  (import.meta.env.VITE_OPEN_EDU_WIDGET_ORIGINS as string | undefined) ??
+  (import.meta.env as Record<string, string | undefined>).OPEN_EDU_WIDGET_ORIGINS ??
+  '';
+const widgetOrigins = widgetOriginsEnv
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -91,6 +107,25 @@ export function CourseRuntime({
   }, [pkg]);
 
   const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
+
+  const widgetPolicy = useMemo(
+    () => ({
+      ...DEFAULT_WIDGET_POLICY,
+      allowedOrigins: widgetOrigins,
+      registryCatalogOrigins: widgetOrigins,
+    }),
+    [],
+  );
+  const widgetResolver = useMemo(
+    () =>
+      createWidgetResolver({
+        policy: widgetPolicy,
+        cache: createWidgetArtifactCache(),
+        catalogs: {},
+        registry: widgetRegistry,
+      }),
+    [widgetPolicy, widgetRegistry],
+  );
 
   const initialProgress = useMemo(() => {
     return savedProgress ?? undefined;
@@ -408,6 +443,7 @@ export function CourseRuntime({
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
+          widgetResolver={widgetResolver}
           onTelemetryEvent={(e) => telemetrySessionRef.current?.emit(e)}
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
