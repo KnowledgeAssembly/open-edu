@@ -1,5 +1,8 @@
 import type { RemoteWidgetManifest, WidgetReference } from '@open-edu/schemas';
 
+const DEFAULT_WIDGET_ID = 'exercise';
+const DEFAULT_VERSION = '0.0.0';
+
 export interface NormalizeWarning {
   code: 'legacy-url-source' | 'missing-integrity';
   message: string;
@@ -40,8 +43,8 @@ export function normalizeWidgetReference(input: {
   }
   return {
     ref: {
-      id: input.widget ?? 'exercise',
-      version: input.version ?? '0.0.0',
+      id: input.widget ?? DEFAULT_WIDGET_ID,
+      version: input.version ?? DEFAULT_VERSION,
       source: 'builtin',
     },
     warnings: [],

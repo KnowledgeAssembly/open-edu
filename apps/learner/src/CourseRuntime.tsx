@@ -428,7 +428,7 @@ export function CourseRuntime({
         <p className="text-on-surface-variant mb-lg">{t('learner.course.no_workflow')}</p>
         <Button onClick={onBackToCatalog}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to catalog
+          {t('back_to_catalog')}
         </Button>
       </div>
     );

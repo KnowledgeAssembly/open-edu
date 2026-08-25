@@ -80,6 +80,7 @@ export interface WidgetResolver {
 }
 
 const DAY = 24 * 60 * 60 * 1000;
+const MAX_SRCDOC_BYTES = 2 * 1024 * 1024;
 
 export function createWidgetResolver(options: WidgetResolverOptions): WidgetResolver {
   const { policy, cache, catalogs, registry } = options;
@@ -125,7 +126,12 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
       if (!entry) {
         return { ok: false, failure: 'unavailable', message: 'widget-not-in-catalog' };
       }
-      const manifestOrigin = new URL(entry.manifestUrl).origin;
+      let manifestOrigin: string;
+      try {
+        manifestOrigin = new URL(entry.manifestUrl).origin;
+      } catch {
+        return { ok: false, failure: 'schema', message: 'manifest-url-invalid' };
+      }
       if (!policy.registryCatalogOrigins.includes(manifestOrigin)) {
         return { ok: false, failure: 'policy', message: 'registry-origin-not-allowed' };
       }
@@ -258,7 +264,12 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
       }
 
       if (manifest.artifact.format === 'multi-file') {
-        const documentOrigin = new URL(manifest.artifact.documentUrl).origin;
+        let documentOrigin: string;
+        try {
+          documentOrigin = new URL(manifest.artifact.documentUrl).origin;
+        } catch {
+          return { ok: false, failure: 'schema', message: 'document-url-invalid' };
+        }
         if (documentOrigin !== manifestOrigin) {
           return { ok: false, failure: 'policy', message: 'document-origin-not-allowed' };
         }
@@ -272,6 +283,9 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
           documentUrl: manifest.artifact.documentUrl,
           grantedCapabilities,
         };
+      }
+      if (bytes.byteLength > MAX_SRCDOC_BYTES) {
+        return { ok: false, failure: 'schema', message: 'document-too-large' };
       }
       return {
         ok: true,

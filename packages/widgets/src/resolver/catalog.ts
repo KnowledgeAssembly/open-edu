@@ -28,7 +28,11 @@ export const WidgetCatalogFileSchema = z.object({
 export type WidgetCatalogFile = z.infer<typeof WidgetCatalogFileSchema>;
 
 export function loadStaticCatalog(json: unknown): ResolverCatalog {
-  const parsed = WidgetCatalogFileSchema.parse(json);
+  const result = WidgetCatalogFileSchema.safeParse(json);
+  if (!result.success) {
+    throw new Error(`invalid catalog: ${result.error.message}`);
+  }
+  const parsed = result.data;
   const widgets = new Map<string, CatalogWidgetMeta>();
   for (const w of parsed.widgets) {
     widgets.set(`${w.id}@${w.version}`, {
