@@ -144,9 +144,16 @@ Warn when `registryId` is not in the deployment’s configured catalogs (`studio
 - Create: `apps/dev-server/src/studio/widgets/CommunityWidgetPreview.tsx`
 - Create: `apps/dev-server/src/studio/widgets/CommunityWidgetPreview.test.tsx`
 
-Mount `SandboxWidgetAdapter` with the selected catalog widget’s document (dev registry origin allowed). Observe-mode: pass `capabilities` including `observe-mode` and omit complete handler side effects on the course.
+Mount `SandboxWidgetAdapter` via the **Phase 2 `WidgetResolver`** — not by constructing the document URL directly from the manifest. The Studio preview must go through the same integrity-verification path as the learner runtime:
 
-Test: iframe sandbox attribute present; complete from preview does not call course `saveAnswer` (pass a spy, expect 0).
+1. Resolve the widget via `WidgetResolver` with the deployment's `WidgetPolicy`.
+2. For local dev-registry widgets, the `policy.registryCatalogOrigins` may include `http://localhost:4177` in developer mode only — this is the same relaxed origin already permitted by `DevRegistry`. Never allow unverified document bytes.
+3. Mount `SandboxWidgetAdapter` with the resolved `documentBytes` or `documentUrl` returned by the resolver.
+4. Pass `capabilities: ['observe-mode']` so the preview cannot trigger completion side effects on the course.
+
+Studio must never load a community widget document without first passing it through resolver integrity checks. If the resolver returns `{ ok: false }`, show the resolver failure reason in the preview pane instead of falling back to loading the URL directly.
+
+Tests: iframe sandbox attribute present; resolver is called before mounting adapter (spy on `WidgetResolver.resolve`); complete from preview does not call course `saveAnswer` (pass a spy, expect 0); if resolver returns `{ ok: false, failure: 'integrity' }`, preview shows error state not iframe.
 
 - [ ] Commit `feat(studio): preview community widgets through the sandbox adapter`
 

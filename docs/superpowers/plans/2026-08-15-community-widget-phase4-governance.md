@@ -95,12 +95,18 @@ catalog.json
 API (StudioAPI or Vite middleware — follow existing `apps/dev-server/src` server patterns; search `app.post` / `StudioAPI`):
 
 - `POST /widget-registry/install` (admin) — validate, write immutable dir, refuse overwrite of same version
-- `GET /widget-registry/catalog.json`
+- `GET /widget-registry/catalog.json` — respond with `Cache-Control: max-age=3600, must-revalidate` so online learners see revocations within one hour
 - `GET /widget-registry/:publisher/:widget/:version/manifest.json`
 - `GET /widget-registry/:publisher/:widget/:version/index.html` with CSP header = `MULTI_FILE_CSP` or self-contained variant
+- `GET /widget-registry/:publisher/:widget/:version/artifact.zip` — return **403 Forbidden** for all non-admin origins; if admin auth is not yet implemented, return 404 with body `{"error":"archive download not available"}`
 - `POST /widget-registry/:id/:version/revoke`
 
 Operations: enable, disable, deprecate, revoke. Disable = omit from catalog resolution for new courses; revoke = status revoked + cache invalidation signal file `revoked.json`.
+
+Tests:
+
+- `GET /widget-registry/catalog.json` response includes `Cache-Control: max-age=3600`
+- `GET /widget-registry/:publisher/:widget/:version/artifact.zip` from a non-admin request returns 403 or 404 (not the zip bytes)
 
 Serve documents from a **path prefix**, not the learner app cookie origin if the dev-server already has a host split; if not, document that production must use a dedicated widget origin. Tests use the filesystem store without HTTP if routing is hard to boot in unit tests; add one HTTP test if the existing dev-server test harness already starts the server.
 
@@ -168,6 +174,7 @@ Cases (map to spec §17):
 8. Revoke + online → widget unavailable
 9. CSP: document must not load `https://evil.example/x.js` — intercept requests, expect zero
 10. Idle unmount: navigate away and back; state restored from host
+11. Day-7 grace: revoke the widget while offline; reload immediately — self-contained widget still loads from cache. Day-8 hard-block: call `await page.clock.setFixedTime(revokedAt + 8 * 24 * 3600 * 1000)` (Playwright built-in clock API) then reload — expect widget unavailable error state. The `WidgetArtifactCache` and `WidgetResolver` accept an injectable `now?: () => number` parameter (already present from Phase 2 Task 4); the E2E test must override this via the learner app's `window.__OPEN_EDU_NOW__` hook or equivalent test seam. Do not use `setTimeout` or `sleep` to simulate time.
 
 Add `data-testid="sandbox-widget-frame"` on the iframe in `SandboxWidgetAdapter` if missing.
 

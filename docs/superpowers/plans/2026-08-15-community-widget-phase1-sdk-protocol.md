@@ -565,6 +565,61 @@ Tests use a mock `parent.postMessage`.
 
 ---
 
+### Task 6b: Shared interaction data normalizer
+
+**Files:**
+
+- Create: `packages/widget-sdk/src/normalize-interaction-data.ts`
+- Create: `packages/widget-sdk/src/normalize-interaction-data.test.ts`
+
+Define a per-action allow schema and a canonical normalizer used by **both** native and sandboxed paths:
+
+```ts
+import { InteractionActionSchema } from '@open-edu/schemas';
+
+const ACTION_DATA_SCHEMAS: Record<string, readonly string[]> = {
+  select: ['optionId', 'index'],
+  submit: ['optionId', 'index', 'step'],
+  retry: ['step'],
+  'hint-request': ['step'],
+  reveal: ['step'],
+  drag: ['from', 'to', 'index'],
+  drop: ['from', 'to', 'index'],
+  navigate: ['step', 'index'],
+  custom: ['step', 'optionId', 'from', 'to', 'index', 'key'],
+};
+
+export function normalizeInteractionData(
+  action: string,
+  data: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  if (!data) return undefined;
+  const allowed = ACTION_DATA_SCHEMAS[action];
+  if (!allowed) return undefined;
+  const filtered: Record<string, unknown> = {};
+  for (const key of allowed) {
+    if (key in data && typeof data[key] !== 'object') {
+      filtered[key] = data[key];
+    }
+  }
+  return Object.keys(filtered).length > 0 ? filtered : undefined;
+}
+```
+
+`@open-edu/runtime` and `@open-edu/widgets` must import `normalizeInteractionData` from `@open-edu/widget-sdk`. The Phase 0 `normalize-interaction.ts` in `packages/runtime/src/widgets/` must be updated in Phase 2 to delegate to this shared utility.
+
+Tests:
+
+- `drag` action: `{ from: 'A', to: 'B', secret: 'nope' }` → `{ from: 'A', to: 'B' }`
+- `navigate` action: `{ step: 2, widgetId: 'x' }` → `{ step: 2 }`
+- `custom` action: passes `key` field; strips nested objects
+- unknown action returns `undefined`
+
+- [ ] Run: `pnpm --filter @open-edu/widget-sdk test src/normalize-interaction-data.test.ts`
+- [ ] Commit `feat(widget-sdk): add canonical per-action interaction data normalizer`
+
+---
+
 ### Task 7: Conformance fixtures + iframe harness
 
 **Files:**
@@ -585,9 +640,20 @@ export const MULTI_FILE_CSP =
   "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; font-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none';";
 
 export const SELF_CONTAINED_CSP_PREFIX = "default-src 'none'; script-src 'sha256-";
+
+export const CAPABILITY_REQUEST_V1_REJECTION_FIXTURE = {
+  apiVersion: 'open-edu.widget/1' as const,
+  type: 'capability:request',
+  instanceId: 'test-instance',
+  nonce: 'test-nonce',
+  sequence: 1,
+  payload: { capability: 'resize' },
+} as const;
 ```
 
 A test asserts `MULTI_FILE_CSP` contains `connect-src 'none'` and `frame-src 'none'`.
+
+> A test must assert that `validateHostBoundMessage` with `type: 'capability:request'` returns `{ ok: false, reason: 'type' }` — because `capability:request` is a widget→host message type but the host drops it in v1 since no v1 capability uses the request/response channel. This makes the extension-point behavior deterministic and prevents widgets from depending on an unimplemented path.
 
 - [ ] Commit `feat(widget-sdk): add protocol fixtures and host harness`
 
@@ -659,6 +725,8 @@ Implementation requirements:
 - Rate-limit host-bound messages; overflow → drop + diagnostic `rate-limit`
 - Debounce resize 100ms then clamp
 - Network retry: **not in this component**; resolver (Phase 2) retries fetch once. Adapter treats documentUrl as already verified.
+- `observe-mode` enforcement: if `initPayload.capabilities` contains `'observe-mode'` and does **not** contain `'telemetry-interaction'`, the adapter must reject any inbound `complete` message — call `onDiagnostic?.('observe-mode-complete-rejected')` and do not call `onComplete`.
+- Diagnostics channel: all system-level diagnostic signals (wrong nonce, rate-limit, pre-ready messages, observe-mode complete rejection) must be emitted through `onDiagnostic(reason: string)` and must **never** be routed through `onInteraction` or any `emitTelemetry`/`widget_interaction` path.
 
 Tests (RTL + fake postMessage):
 
@@ -668,6 +736,7 @@ Tests (RTL + fake postMessage):
 4. Unmount before ready does not complete
 5. Iframe has `sandbox="allow-scripts"` and no `allow-same-origin`
 6. Host shell (loading/error region wrapping the iframe) passes axe-core with a localized `title`
+7. `observe-mode` with `complete` message does not call `onComplete`; calls `onDiagnostic('observe-mode-complete-rejected')`
 
 Feature flag: export `isSandboxWidgetsEnabled()` reading `globalThis.__OPEN_EDU_SANDBOX_WIDGETS__ === true` or prop `enabled` default false. WidgetRenderer only mounts adapter when enabled **and** `node.widgetRef?.source === 'registry'`. Until Phase 2, tests mount `SandboxWidgetAdapter` directly.
 
@@ -688,6 +757,36 @@ Feature flag: export `isSandboxWidgetsEnabled()` reading `globalThis.__OPEN_EDU_
 
 Counter widget: vanilla JS, listens for `init`, renders a button, `postMessage` `ready` then `interaction` `select` and `complete` `{ score: 100, reason: 'submitted' }`. No React.
 
+The build step for `dist/index.html` must use `computeSelfContainedCspHash` from `@open-edu/widget-sdk/build-helpers` to produce the correct `script-src 'sha256-...'` value for the inline script. Add this as a new file:
+
+- Create: `packages/widget-sdk/src/build-helpers.ts` (Node.js only — uses `crypto` from Node, not Web Crypto)
+
+```ts
+import { createHash } from 'node:crypto';
+
+/**
+ * Compute the sha256 CSP hash for an inline script element.
+ * Pass the exact string content of the inline <script> tag
+ * (not the outer HTML — only the text between <script> and </script>).
+ * Returns the canonical `sha256-<base64>` format required by CSP.
+ */
+export function computeSelfContainedCspHash(inlineScriptContent: string): string {
+  const hash = createHash('sha256').update(inlineScriptContent, 'utf8').digest('base64');
+  return `sha256-${hash}`;
+}
+```
+
+Expose as `"./build-helpers"` in the `exports` map (no `development` condition — it is a build-time utility for any environment). Add a test:
+
+```ts
+import { computeSelfContainedCspHash } from './build-helpers';
+it('produces sha256-<base64> for known input', () => {
+  expect(computeSelfContainedCspHash('console.log(1)')).toMatch(/^sha256-[A-Za-z0-9+/=]{44}$/);
+});
+```
+
+The counter widget's self-contained HTML must embed the computed hash in its CSP meta element and the `widget.manifest.json` must set `artifact.documentIntegrity` to the sha256 of the complete served document bytes (using `canonicalIntegrity` from `@open-edu/widgets`).
+
 `dev-registry.ts`:
 
 ```ts
@@ -703,7 +802,15 @@ export function createDevRegistry(options?: DevRegistryOptions) {
 }
 ```
 
-Test: default relaxed origin is localhost HTTP (dev only). Production `WidgetPolicy.allowedOrigins` still rejects this — that is intentional. Document in a 10-line comment at top of `dev-registry.ts`: never import this module from `apps/learner` production entry.
+Test: default relaxed origin is localhost HTTP (dev only). Production `WidgetPolicy.allowedOrigins` still rejects this — that is intentional. Structure `dev-registry.ts` as a dedicated subpath export. In `packages/widget-sdk/package.json`, add under `exports`:
+
+```json
+"./dev": {
+  "development": { "types": "./dist/dev/index.d.ts", "import": "./dist/dev/index.js" }
+}
+```
+
+This makes `import ... from '@open-edu/widget-sdk/dev'` fail in production builds (bundlers that do not set `NODE_ENV=development`). Add an ESLint `no-restricted-imports` rule to `apps/learner` and `packages/runtime` that rejects `@open-edu/widget-sdk/dev` with the message `"dev-registry must not be imported in production packages"`.
 
 Migrate `examples/remote-widget-demo/remote-widget.js`: add a file header comment that `window.React` is deprecated; add `examples/remote-widget-demo/MIGRATION.md` **only if** the user asked for docs — skip extra markdown. Instead add a 15-line comment in `remote-widget.js` pointing to `@open-edu/widget-sdk` `createWidgetHostClient`. Leave the React demo functioning for trusted-remote opt-in tests.
 

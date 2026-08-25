@@ -390,6 +390,16 @@ interface StateSaveResult {
 
 state:update is sent only after an accepted save and contains the normalized host state. A widget version change never silently discards incompatible stored state: the host attempts the declared migration, otherwise marks the state incompatible and reports a recoverable error. Starting from a clean state requires an explicit widget request or author-approved policy.
 
+The expected widget-side migration lifecycle is:
+
+1. The host sends `init` with the previously persisted `storedState` (any schemaVersion).
+2. The widget detects that `storedState.schemaVersion` differs from its current schema and performs the migration internally.
+3. The widget posts a `state:save` message with the migrated state and the new `schemaVersion`.
+4. The host validates size and schema, then responds with `state:update` containing the `normalizedState`.
+5. Only after an accepted `state:save` does the host clear the `state-incompatible` resolver error and allow subsequent completion.
+
+If the widget never posts a migrated save, the host retains the incompatible-state error for the lifetime of the render. The SDK `host-client` should expose a `migrateState(newState, schemaVersion)` helper that posts the `state:save` and awaits the `state:update` acknowledgement.
+
 State schemas declare schemaVersion. Migration functions are versioned by the widget and run inside the widget; the host validates the migrated result before persistence.
 
 ## 8. Capability model
@@ -427,6 +437,8 @@ Only the host sends capability:result. All request/response pairs use requestId;
 
 observe-mode is a read-only presentation/narration mode: the widget may reveal content and report observations, but it must not accept learner answer input or request completion. hints are authoring/config-supplied content; the host records hint-request interactions but does not generate or provide hint text.
 
+In protocol version 1, the host must explicitly reject (drop and record as a safe diagnostic) any inbound `capability:request` message from the widget, since no v1 capability uses the request/response channel. Conformance fixtures must include a test asserting this rejection. This prevents widgets from accidentally depending on an unimplemented path and makes the "extension point" behavior deterministic.
+
 ## 9. Runtime components
 
 ### 9.1 WidgetResolver
@@ -460,7 +472,7 @@ Wraps the current WidgetDefinition renderer and maps WidgetRenderProps to the co
 
 ### 9.5 WidgetPolicy
 
-Deployment configuration controls allowed registries/origins, enabled trust tiers, artifact and state limits, experimental-widget policy, capability grants, offline grace behavior for unavailable or revoked artifacts, and the learner CSP frame-src allowlist.
+Deployment configuration controls allowed registries/origins, trusted origins for manifest fetches (`registryCatalogOrigins`), enabled trust tiers, artifact and state limits, experimental-widget policy, capability grants, offline grace behavior for unavailable or revoked artifacts, and the learner CSP frame-src allowlist. The policy must also include `registryCatalogOrigins: string[]` — the exhaustive list of HTTPS non-loopback origins from which the resolver may fetch `manifest.json`. The resolver must refuse to fetch a manifest from any origin not in this list before attempting the network request. This provides defence-in-depth even when manifest integrity verification would ultimately reject a tampered response.
 
 The default offline revocation policy allows a previously verified cached artifact to run for seven days after revocation when the device is offline. On the first successful network check after revocation, or after the grace window expires, the widget is hard-blocked. Revocation is checked against both the fetched manifest and the cached manifest.
 
@@ -594,6 +606,8 @@ base-uri 'none';
 
 Self-contained offline HTML uses the same restrictions, but replaces script-src 'self' with a build-generated hash, for example script-src 'sha256-<bundle-hash>'. The SDK build computes the hash over the exact inline script bytes and the host verifies the complete document before creating the offline iframe. This permits the required inline bundle without permitting arbitrary inline scripts. Self-contained artifacts embed the CSP as a meta element so it applies in the offline blob/srcdoc path; the registry mirrors the same policy as a response header for online documents. Protocol conformance fixtures must verify both delivery paths resolve to an equivalent policy.
 
+The SDK must ship a `build-helpers` export containing a `computeSelfContainedCspHash(htmlString: string): string` utility. This function parses the inline script element from the serialized HTML and returns the canonical `sha256-<hex>` digest over the exact UTF-8 bytes of the inline script content. Widget authors must use this utility in their self-contained build pipeline to produce the correct hash; producing the hash by any other means risks a CSP/integrity mismatch where the host's document integrity check passes while the browser-enforced CSP blocks the script. The Phase 1 counter example widget must demonstrate use of this utility.
+
 Additional origins require a manifest capability, deployment allowlist, and a documented privacy review. Configuration and storedState are considered visible to the widget and must not contain sensitive learner data. The learner application CSP must include configured widget origins in frame-src; widget documents retain their own CSP independently.
 
 The current same-realm loader may remain for controlled deployments under trusted-remote, but must require integrity, origin policy, API validation, timeout/size limits, and explicit configuration. It is disabled by default in public learner builds.
@@ -703,6 +717,8 @@ Every phase adds Vitest coverage; browser isolation and end-to-end behavior use 
 Safe diagnostics record widget ID/version, integrity, protocol version, source/trust tier, load duration, cache result, failure category, fallback usage, and message rejection category.
 
 Diagnostics must not record widget configuration, learner answers, or arbitrary widget payloads unless they pass the existing privacy/telemetry policy. A developer-only diagnostics panel may expose manifest, source, version, cache state, and last safe error.
+
+Safe diagnostics must never be emitted through the `widget_interaction` telemetry event. `widget_interaction` is a learner-action event; routing system-level warnings (such as legacy normalization warnings or missing-integrity warnings) through it corrupts behavioral analytics. All diagnostic signals must flow through a dedicated channel — either a `DiagnosticBus` observable on `RuntimeContext` or the `onDiagnostic` callback already defined on `SandboxWidgetAdapter`. The `WidgetRenderer` must use `onDiagnostic` (or the equivalent context channel) for all resolver and normalization warnings, and must never call `emitTelemetry` with diagnostic payloads.
 
 ## 19. Acceptance criteria
 

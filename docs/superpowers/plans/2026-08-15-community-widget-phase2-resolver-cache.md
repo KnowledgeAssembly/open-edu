@@ -199,6 +199,7 @@ Algorithm (must match spec §10.1):
 3. If `source === 'url'` → require `trusted-remote` enabled; else `{ failure: 'policy' }` with warning already recorded
 4. If `source === 'registry'`:
    - require `ref.integrity`
+   - verify that the manifest fetch origin (derived from the deployment catalog config for `ref.registryId`) is listed in `policy.registryCatalogOrigins`; if not, return `{ failure: 'policy', message: 'registry-origin-not-allowed' }` without fetching
    - load manifest bytes from `catalogs[ref.registryId]` or fetch `manifestUrl` constructed as `{base}/{publisher}/{widget}/{version}/manifest.json` where `base` comes from **deployment catalog config**, never from the course
    - `verifyIntegrity(manifestBytes, ref.integrity)` **before** parsing JSON
    - `WidgetManifestSchema.parse`
@@ -220,6 +221,7 @@ Tests with mocked fetch:
 - revoked offline within 7d returns cached
 - revoked offline after 7d fails
 - legacy url without trusted-remote fails policy
+- registry manifest fetch origin not in `registryCatalogOrigins` → `{ failure: 'policy', message: 'registry-origin-not-allowed' }` (no network request made)
 - config schema reject
 
 Network retry: fetchImpl wrapper retries **once** on `TypeError` (network) with 200ms delay; no retry on 4xx, integrity, or parse errors.
@@ -273,17 +275,19 @@ export const WidgetCatalogFileSchema = z.object({
 
 ```ts
 const { ref, warnings } = normalizeWidgetReference(node);
-warnings.forEach((w) =>
-  emitTelemetry?.({
-    event: 'widget_interaction',
-    widgetId: ref.id,
-    action: 'custom',
-    data: { diagnostic: w.code },
-  }),
-);
+if (warnings.length > 0) {
+  if (process.env.NODE_ENV !== 'production') {
+    warnings.forEach((w) => console.warn('[open-edu:widget-resolver]', w.code, w.message));
+  }
+  // Diagnostics MUST NOT go through emitTelemetry / widget_interaction.
+  // widget_interaction is a learner-action event; routing system warnings
+  // through it corrupts behavioral analytics. Use the runtime DiagnosticBus
+  // or the onDiagnostic callback pattern from SandboxWidgetAdapter.
+  warnings.forEach((w) => onDiagnostic?.(w.code));
+}
 ```
 
-Do **not** send diagnostics as `widget_interaction` if that pollutes analytics. Prefer `onDiagnostic` no-op in production and `console.warn` in development. Spec §18: diagnostics must not record config or answers.
+Add `onDiagnostic?: (code: string) => void` as a prop on `NativeWidgetAdapter` and `WidgetRenderer`, so the diagnostic callback is threaded through the renderer tree. Add a test case: a node with a legacy `remoteWidget` (no integrity) emits `'legacy-url-source'` and `'missing-integrity'` on `onDiagnostic`, not through any telemetry event.
 
 On resolve failure: if `ref.fallback` and `applyFallbackConfig` succeeds, render native fallback with provenance; else show `t('runtime.widget.unavailable', { id: ref.id })`.
 
@@ -342,7 +346,22 @@ export function assertPersistableState(state: unknown, maxBytes = 64 * 1024): vo
 }
 ```
 
+**State migration lifecycle (host responsibilities):**
+
+When the resolver detects `storedState.schemaVersion !== manifest.stateSchemaVersion`:
+
+1. The host sends `init` with the incompatible `storedState` and sets an internal `stateIncompatible` flag.
+2. The widget migrates internally and posts `state:save` with the new `schemaVersion`.
+3. The host validates the migrated save (size + schema). On accept: clear `stateIncompatible`, send `state:update`. On reject: send `state:update` with `accepted: false` and `rejectionReason: 'schema-invalid'`.
+4. If the widget never posts a migration save, `stateIncompatible` persists for the render lifetime.
+
+The sandbox adapter must not accept `complete` while `stateIncompatible` is set unless the widget first resolves the migration.
+
+Conformance fixtures in `@open-edu/widget-sdk` must include a "migrate v1 → v2 state" round-trip: send `init` with `storedState: { v: 1, data: 'old' }`, expect widget to post `state:save` with `schemaVersion: '2'`, host accepts, confirms `stateIncompatible` cleared.
+
 If stored state's `schemaVersion` !== manifest state schema version, resolver returns `{ failure: 'schema', message: 'state-incompatible' }` unless the widget has already posted a migrated `state:save` that the host accepted. Test: oversized state rejected; incompatible version surfaces recoverable error string `state-incompatible`.
+
+- `stateIncompatible` flag prevents `complete` from being accepted; cleared only after accepted `state:save` with matching `schemaVersion`
 
 Sandbox adapter: on accepted save, post `state:update` with `normalizedState`. On reject, include `rejectionReason`.
 
