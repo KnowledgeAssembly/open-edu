@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from '@open-edu/i18n';
 import { SchemaForm } from './SchemaForm';
 import { X } from 'lucide-react';
 import { Input } from '../components/ui/input';
@@ -11,6 +12,7 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import type { ValidationError } from './WidgetValidator';
+import { listConfiguredRegistryIds } from '../studio/widgets/curatedCatalog';
 
 type NodeType = 'lesson' | 'quiz' | 'reflection' | 'exercise' | 'custom';
 
@@ -31,6 +33,7 @@ interface ContentNodeData {
   version?: string;
   config?: Record<string, unknown>;
   remoteWidget?: Record<string, unknown>;
+  widgetRef?: Record<string, unknown>;
 }
 
 interface JSONNodeEditorProps {
@@ -64,6 +67,17 @@ export function JSONNodeEditor({
   fileName,
   fieldErrors = {},
 }: JSONNodeEditorProps) {
+  const { t } = useTranslation();
+
+  const registryWarning = useMemo(() => {
+    if (data.type !== 'custom') return null;
+    if (data.widgetRef?.source !== 'registry') return null;
+    const registryId = data.widgetRef?.registryId;
+    if (typeof registryId !== 'string' || !registryId) return null;
+    if (listConfiguredRegistryIds().includes(registryId)) return null;
+    return registryId;
+  }, [data]);
+
   const formContent = useMemo(() => {
     const base: Record<string, unknown> = {
       type: data.type,
@@ -101,6 +115,7 @@ export function JSONNodeEditor({
         version: data.version ?? '',
         config: data.config ?? {},
         remoteWidget: data.remoteWidget ?? {},
+        widgetRef: data.widgetRef ?? {},
       };
     }
 
@@ -121,7 +136,7 @@ export function JSONNodeEditor({
       case 'exercise':
         return [...base, 'widget', 'config'];
       case 'custom':
-        return [...base, 'widget', 'version', 'config', 'remoteWidget'];
+        return [...base, 'widget', 'version', 'config', 'remoteWidget', 'widgetRef'];
       default:
         return base;
     }
@@ -165,6 +180,16 @@ export function JSONNodeEditor({
         placeholders={commonPlaceholders}
         fieldErrors={fieldErrors}
       />
+
+      {registryWarning && (
+        <div
+          role="note"
+          data-testid="registry-warning"
+          className="border-warning/30 bg-warning/10 text-warning rounded-lg border px-3 py-2 text-xs"
+        >
+          {t('studio.widget.missing_registry_warning', { id: registryWarning })}
+        </div>
+      )}
 
       {data.type === 'quiz' && (
         <div className="space-y-2">

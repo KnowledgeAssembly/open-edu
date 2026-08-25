@@ -3,6 +3,7 @@ import {
   listCuratedWidgets,
   getCuratedWidget,
   loadCatalogWidgets,
+  listConfiguredRegistryIds,
   __resetCatalogCache,
 } from './curatedCatalog';
 
@@ -103,5 +104,41 @@ describe('curatedCatalog', () => {
     expect(widget?.source).toBe('builtin');
     expect(widget?.trustTier).toBe('native');
     expect(widget?.version).toBe('0.1.0');
+  });
+
+  it('lists configured registry ids, excluding builtins and deduplicating', () => {
+    const original = (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__;
+    (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = [
+      {
+        registryId: 'community-registry',
+        origin: 'https://widgets.example.edu',
+        widgets: [
+          {
+            id: 'community.example.counter',
+            version: '1.0.0',
+            manifestUrl:
+              'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
+            status: 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          },
+          {
+            id: 'community.example.clock',
+            version: '1.0.0',
+            manifestUrl: 'https://widgets.example.edu/community.example.clock/1.0.0/manifest.json',
+            status: 'verified',
+            trustTier: 'sandboxed',
+            offline: false,
+          },
+        ],
+      },
+    ];
+    __resetCatalogCache();
+    loadCatalogWidgets();
+    const ids = listConfiguredRegistryIds();
+    expect(ids).toContain('community-registry');
+    expect(ids.filter((id) => id === 'community-registry')).toHaveLength(1);
+    expect(ids).not.toContain('core.matching');
+    (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = original;
   });
 });

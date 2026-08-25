@@ -172,3 +172,13 @@ export function getCuratedWidget(id: string): CuratedWidget | undefined {
   if (!widget || widget.status === 'deprecated' || widget.deprecated === true) return undefined;
   return widget;
 }
+
+export function listConfiguredRegistryIds(): string[] {
+  return [
+    ...new Set(
+      [...getCatalogMap().values()]
+        .filter((w) => w.source === 'registry' && w.registryId)
+        .map((w) => w.registryId as string),
+    ),
+  ];
+}
