@@ -37,8 +37,7 @@ describe('loadStaticCatalog', () => {
     expect(v1).toEqual({
       id: 'community.example.counter',
       version: '1.0.0',
-      manifestUrl:
-        'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
+      manifestUrl: 'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
       status: 'experimental',
       trustTier: 'sandboxed',
       offline: true,
@@ -48,8 +47,7 @@ describe('loadStaticCatalog', () => {
     expect(v2).toEqual({
       id: 'community.example.counter',
       version: '1.1.0',
-      manifestUrl:
-        'https://widgets.example.edu/community.example.counter/1.1.0/manifest.json',
+      manifestUrl: 'https://widgets.example.edu/community.example.counter/1.1.0/manifest.json',
       status: 'verified',
       trustTier: 'sandboxed',
       offline: false,
