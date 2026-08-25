@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+import type * as NodeFs from 'node:fs';
 import type { WidgetCatalogEntry } from '@open-edu/core';
 import widgetCatalogData from '@open-edu/core/widget-catalog-data';
 import { loadStaticCatalog } from '@open-edu/widgets/catalog';
@@ -140,8 +142,7 @@ function getConfiguredCatalogFiles(): unknown[] {
     .filter(Boolean)
     .map((filePath) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { readFileSync } = require('node:fs') as typeof import('node:fs');
+        const { readFileSync } = createRequire(import.meta.url)('node:fs') as typeof NodeFs;
         return JSON.parse(readFileSync(filePath, 'utf-8'));
       } catch {
         return null;
