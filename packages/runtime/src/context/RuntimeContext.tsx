@@ -65,7 +65,7 @@ export interface RuntimeContextValue {
   getSkillMastery: (skillId: string) => MasteryLevel;
   skillGraph: SkillGraph | undefined;
   resolveAsset: (path: string) => string;
-  emitTelemetry?: (event: Omit<TelemetryEvent, 'timestamp'>) => void;
+  emitTelemetry?: (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => void;
 }
 
 export interface RuntimeProviderProps {
@@ -80,6 +80,8 @@ export interface RuntimeProviderProps {
   skillGraph?: SkillGraph;
   onTelemetryEvent?: (event: TelemetryEvent) => void;
 }
+
+type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
 
@@ -262,7 +264,7 @@ export function RuntimeProvider({
   );
 
   const emitTelemetry = useCallback(
-    (event: Omit<TelemetryEvent, 'timestamp'>) => {
+    (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => {
       onTelemetryEvent?.({ ...event, timestamp: Date.now() } as TelemetryEvent);
     },
     [onTelemetryEvent],

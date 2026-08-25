@@ -463,7 +463,7 @@ describe('RuntimeProvider', () => {
       event: 'widget_interaction',
       widgetId: 'core.matching',
       action: 'reveal',
-    } as never);
+    });
     expect(onTelemetryEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'widget_interaction',
