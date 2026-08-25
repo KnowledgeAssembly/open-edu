@@ -21,6 +21,16 @@ const { mockWidgets } = vi.hoisted(() => ({
       description: 'Visualize fractions as shapes',
       domain: 'math',
     },
+    {
+      id: 'community.example.counter',
+      name: 'Counter',
+      domain: 'core',
+      source: 'registry',
+      trustTier: 'sandboxed',
+      version: '1.0.0',
+      experimental: true,
+      offline: true,
+    },
   ] as CuratedWidget[],
 }));
 
@@ -56,8 +66,15 @@ describe('WidgetPicker', () => {
 
   it('shows a domain badge for each widget', () => {
     renderPicker();
-    expect(screen.getAllByText('core').length).toBe(2);
+    expect(screen.getAllByText('core').length).toBe(3);
     expect(screen.getByText('math')).toBeInTheDocument();
+  });
+
+  it('labels registry widgets sandboxed and experimental with offline warning', () => {
+    renderPicker();
+    expect(screen.getByText('Sandboxed')).toBeInTheDocument();
+    expect(screen.getByText('Experimental')).toBeInTheDocument();
+    expect(screen.getByText('This widget requires a network connection.')).toBeInTheDocument();
   });
 
   it('filters widgets by search query', async () => {
