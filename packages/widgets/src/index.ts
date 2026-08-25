@@ -32,6 +32,8 @@ export {
 export { useRemoteWidget } from './use-remote-widget.js';
 export { normalizeWidgetReference } from './resolver/normalize-reference.js';
 export type { NormalizeWarning } from './resolver/normalize-reference.js';
+export { createWidgetArtifactCache } from './artifact-cache.js';
+export type { WidgetArtifactCache, CacheEntry } from './artifact-cache.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';
 export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
