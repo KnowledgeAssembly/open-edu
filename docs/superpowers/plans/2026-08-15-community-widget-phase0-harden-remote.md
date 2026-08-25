@@ -280,7 +280,7 @@ export function isTrustTierEnabled(policy: WidgetPolicy, tier: TrustTier): boole
 }
 ```
 
-Export `WidgetPolicySchema`, `DEFAULT_WIDGET_POLICY`, `TrustTierSchema`, `isTrustTierEnabled`, `registryCatalogOrigins`, and types from `packages/schemas/src/index.ts`.
+Export `WidgetPolicySchema`, `DEFAULT_WIDGET_POLICY`, `TrustTierSchema`, `isTrustTierEnabled`, and types (`WidgetPolicy`, `TrustTier`) from `packages/schemas/src/index.ts`. The `registryCatalogOrigins` field is accessible via the `WidgetPolicy` type — it is not a standalone export.
 
 - [ ] **Step 4: Run tests**
 

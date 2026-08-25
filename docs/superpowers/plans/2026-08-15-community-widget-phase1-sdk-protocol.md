@@ -572,7 +572,7 @@ Tests use a mock `parent.postMessage`.
 - Create: `packages/widget-sdk/src/normalize-interaction-data.ts`
 - Create: `packages/widget-sdk/src/normalize-interaction-data.test.ts`
 
-Define a per-action allow schema and a canonical normalizer used by **both** native and sandboxed paths:
+Define a per-action allow schema and a canonical normalizer used by **both** native and sandboxed paths. Depends on Task 3 (`InteractionActionSchema` in `@open-edu/schemas`):
 
 ```ts
 import { InteractionActionSchema } from '@open-edu/schemas';
