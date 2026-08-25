@@ -52,10 +52,16 @@ import {
 } from './src/studio/library/courseOps.js';
 import { createUnit, buildUnitOep } from './src/studio/library/unitBuilder.js';
 import type { ActivitySummary } from './src/studio/types.js';
+import {
+  createWidgetRegistryMiddleware,
+  WidgetRegistryStore,
+} from './src/widget-registry/routes.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const widgetRegistryStore = new WidgetRegistryStore(process.env.OPEN_EDU_WIDGET_REGISTRY);
 
 const SERVER_ENV_KEYS = new Set([
   'OPENAI_API_KEY',
@@ -383,6 +389,11 @@ function eduPackageLoader(): Plugin {
 
     configureServer(srv) {
       server = srv;
+
+      // Instance widget registry (admin-installed immutable widget versions).
+      // Registered before the package API catch-all so /widget-registry/*
+      // requests are never swallowed by it.
+      srv.middlewares.use(createWidgetRegistryMiddleware(widgetRegistryStore));
 
       const getCurrentDir = () => packageDir || bundleDir;
       const watchDir = bundleDir || packageDir;

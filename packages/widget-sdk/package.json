@@ -15,6 +15,10 @@
       "types": "./dist/build-helpers.d.ts",
       "import": "./dist/build-helpers.js"
     },
+    "./fixtures": {
+      "types": "./dist/fixtures/protocol-fixtures.d.ts",
+      "import": "./dist/fixtures/protocol-fixtures.js"
+    },
     "./dev": {
       "development": {
         "types": "./dist/dev/index.d.ts",

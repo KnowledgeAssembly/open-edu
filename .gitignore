@@ -24,3 +24,4 @@ apps/learner/public/dictionary
 
 # Pipeline generated output
 output/
+.openedu-widget-registry/
