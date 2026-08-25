@@ -65,6 +65,13 @@ export { RemoteWidgetManifestSchema } from './widget-manifest.js';
 export type { RemoteWidgetManifest } from './widget-manifest.js';
 
 export {
+  WidgetManifestSchema,
+  WidgetCapabilitySchema,
+  PROTOCOL_API_VERSION,
+} from './community-widget-manifest.js';
+export type { WidgetManifest, WidgetCapability } from './community-widget-manifest.js';
+
+export {
   SkillGraphSchema,
   SkillDefinitionSchema,
   SkillAssessmentSchema,
