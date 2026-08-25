@@ -2,7 +2,6 @@ export const READY_TIMEOUT_MS = 10_000;
 export const MAX_MESSAGES_PER_MINUTE = 120;
 export const MIN_IFRAME_HEIGHT = 120;
 export const MAX_IFRAME_HEIGHT = 1200;
-export const MAX_STATE_BYTES = 64 * 1024;
 
 export function clampResizeHeight(height: number): number {
   return Math.min(MAX_IFRAME_HEIGHT, Math.max(MIN_IFRAME_HEIGHT, Math.round(height)));

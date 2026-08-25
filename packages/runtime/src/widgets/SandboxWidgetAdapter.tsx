@@ -212,7 +212,11 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   }, []);
 
   if (errored) {
-    return <div role="status" data-testid="sandbox-widget-error" aria-live="polite" />;
+    return (
+      <div role="status" data-testid="sandbox-widget-error" aria-live="polite">
+        {props.title}
+      </div>
+    );
   }
 
   return (

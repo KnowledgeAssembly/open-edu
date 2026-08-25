@@ -1,4 +1,4 @@
-import { PROTOCOL_API_VERSION } from '@open-edu/schemas';
+import { PROTOCOL_API_VERSION, InitPayloadSchema } from '@open-edu/schemas';
 import type {
   CompletePayload,
   StateSavePayload,
@@ -68,7 +68,10 @@ export function createWidgetHostClient({
     if (!result.ok) return;
     lastHostSequence = result.message.sequence;
     if (result.message.type === 'init' && initHandler) {
-      initHandler(result.message.payload as InitPayload);
+      const parsed = InitPayloadSchema.safeParse(result.message.payload);
+      if (parsed.success) {
+        initHandler(parsed.data);
+      }
     }
   });
 

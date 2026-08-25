@@ -1,4 +1,4 @@
-import { Component, useContext, useRef, type ReactNode } from 'react';
+import { Component, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import { useRuntime, type DistributiveOmit } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
@@ -14,6 +14,7 @@ import type { TelemetryEvent, WidgetAnswer, WidgetReference } from '@open-edu/sc
 import { buildWidgetAnswer } from '../widgets/answer-provenance';
 import { normalizeWidgetInteraction } from '../widgets/normalize-interaction';
 import { SandboxWidgetAdapter, isSandboxWidgetsEnabled } from '../widgets/SandboxWidgetAdapter';
+import { useTheme } from '../theme';
 import type { InitPayload } from '@open-edu/widget-sdk';
 
 interface WidgetErrorBoundaryState {
@@ -447,6 +448,19 @@ function SandboxWidgetRenderer({
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale ?? 'en';
+  const theme = useTheme();
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const buildAdapter = () => {
     const initPayload: InitPayload = {
@@ -458,9 +472,9 @@ function SandboxWidgetRenderer({
       config: node.config ?? {},
       storedState,
       locale,
-      theme: 'light',
+      theme: theme.id,
       themeTokens: {},
-      prefersReducedMotion: false,
+      prefersReducedMotion,
       capabilities: ['resize', 'telemetry-interaction', 'state-persistence', 'locale', 'theme'],
     };
 

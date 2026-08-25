@@ -1,7 +1,10 @@
 import { z } from 'zod';
-import { WidgetCapabilitySchema } from './community-widget-manifest.js';
+import {
+  WidgetCapabilitySchema,
+  PROTOCOL_API_VERSION,
+} from './community-widget-manifest.js';
 
-export const PROTOCOL_API_VERSION = 'open-edu.widget/1' as const;
+export { PROTOCOL_API_VERSION } from './community-widget-manifest.js';
 
 export const HostToWidgetTypeSchema = z.enum([
   'init',
