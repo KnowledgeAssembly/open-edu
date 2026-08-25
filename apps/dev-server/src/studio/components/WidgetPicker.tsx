@@ -87,7 +87,7 @@ export function WidgetPicker({
                           {t('studio.widget.experimental_badge')}
                         </Badge>
                       ) : null}
-                      {widget.offline ? (
+                      {widget.offline === false ? (
                         <Badge variant="outline" className="text-[10px]">
                           {t('studio.widget.online_only_warning')}
                         </Badge>

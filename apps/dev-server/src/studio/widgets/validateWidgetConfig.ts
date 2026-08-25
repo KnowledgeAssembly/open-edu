@@ -9,7 +9,12 @@ export function validateWidgetConfig(
   config: unknown,
 ): WidgetConfigValidation {
   if (!schema) return { ok: true };
-  const validate = ajv.compile(schema as AnySchema);
+  let validate;
+  try {
+    validate = ajv.compile(schema as AnySchema);
+  } catch {
+    return { ok: false, errors: ['Invalid JSON Schema'] };
+  }
   const valid = validate(config);
   if (valid) return { ok: true };
   const errors = (validate.errors ?? []).map((err) =>

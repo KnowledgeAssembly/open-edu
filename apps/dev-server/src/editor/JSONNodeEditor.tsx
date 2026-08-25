@@ -136,7 +136,7 @@ export function JSONNodeEditor({
       case 'exercise':
         return [...base, 'widget', 'config'];
       case 'custom':
-        return [...base, 'widget', 'version', 'config', 'remoteWidget', 'widgetRef'];
+        return [...base, 'widget', 'version', 'config', 'widgetRef', 'remoteWidget'];
       default:
         return base;
     }

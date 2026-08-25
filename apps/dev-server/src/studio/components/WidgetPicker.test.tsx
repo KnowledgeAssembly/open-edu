@@ -31,6 +31,16 @@ const { mockWidgets } = vi.hoisted(() => ({
       experimental: true,
       offline: true,
     },
+    {
+      id: 'community.example.remote',
+      name: 'Remote Widget',
+      domain: 'core',
+      source: 'registry',
+      trustTier: 'sandboxed',
+      version: '2.0.0',
+      experimental: false,
+      offline: false,
+    },
   ] as CuratedWidget[],
 }));
 
@@ -66,15 +76,16 @@ describe('WidgetPicker', () => {
 
   it('shows a domain badge for each widget', () => {
     renderPicker();
-    expect(screen.getAllByText('core').length).toBe(3);
+    expect(screen.getAllByText('core').length).toBe(4);
     expect(screen.getByText('math')).toBeInTheDocument();
   });
 
-  it('labels registry widgets sandboxed and experimental with offline warning', () => {
+  it('labels registry widgets sandboxed and experimental; online-only for offline=false', () => {
     renderPicker();
-    expect(screen.getByText('Sandboxed')).toBeInTheDocument();
+    expect(screen.getAllByText('Sandboxed').length).toBe(2);
     expect(screen.getByText('Experimental')).toBeInTheDocument();
-    expect(screen.getByText('This widget requires a network connection.')).toBeInTheDocument();
+    expect(screen.getByText('Remote Widget')).toBeInTheDocument();
+    expect(screen.getAllByText('This widget requires a network connection.').length).toBe(1);
   });
 
   it('filters widgets by search query', async () => {
