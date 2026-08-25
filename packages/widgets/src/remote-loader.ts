@@ -96,7 +96,8 @@ export class RemoteWidgetLoader {
       throw new Error(msg);
     }
 
-    const bytes = await response.arrayBuffer();
+    const arrayBuffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
 
     if (bytes.byteLength > policy.maxArtifactBytes) {
       const msg = `Remote widget "${manifest.id}" exceeds maxArtifactBytes size limit`;
