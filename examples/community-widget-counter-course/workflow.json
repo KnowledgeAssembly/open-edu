@@ -1,0 +1,5 @@
+{
+  "routing": {
+    "nodes/counter.json": { "onComplete": "COMPLETED" }
+  }
+}

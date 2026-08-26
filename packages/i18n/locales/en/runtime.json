@@ -53,5 +53,7 @@
   "canvas.step_of": "Step {{step}} of {{total}}",
   "reward.badge_unlocked": "Badge unlocked: {{name}}",
   "reward.xp_gained": "Gained {{amount}} XP",
-  "reward.generic": "{{type}} reward"
+  "reward.generic": "{{type}} reward",
+  "workflow.now_viewing": "Now viewing: {{title}}",
+  "workflow.completed": "Lesson completed"
 }

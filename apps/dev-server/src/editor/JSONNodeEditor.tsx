@@ -43,24 +43,6 @@ interface JSONNodeEditorProps {
   fieldErrors?: Record<string, ValidationError[]>;
 }
 
-const commonFieldLabels: Record<string, string> = {
-  type: 'Node Type',
-  title: 'Title',
-  skills: 'Skills',
-};
-
-const commonPlaceholders: Record<string, string> = {
-  title: 'Node title (optional)',
-};
-
-const typeDescriptions: Record<NodeType, string> = {
-  lesson: 'A markdown lesson node with optional title and skills',
-  quiz: 'A quiz node with question and multiple-choice options',
-  reflection: 'A reflection prompt node',
-  exercise: 'An interactive exercise node',
-  custom: 'A custom widget node',
-};
-
 export function JSONNodeEditor({
   data,
   onChange,
@@ -68,6 +50,33 @@ export function JSONNodeEditor({
   fieldErrors = {},
 }: JSONNodeEditorProps) {
   const { t } = useTranslation();
+
+  const commonFieldLabels = useMemo<Record<string, string>>(
+    () => ({
+      type: t('studio.editor.node.nodeType'),
+      title: t('studio.editor.node.title'),
+      skills: t('studio.editor.node.skills'),
+    }),
+    [t],
+  );
+
+  const commonPlaceholders = useMemo<Record<string, string>>(
+    () => ({
+      title: t('studio.editor.node.titlePlaceholder'),
+    }),
+    [t],
+  );
+
+  const typeDescriptions = useMemo<Record<NodeType, string>>(
+    () => ({
+      lesson: t('studio.editor.node.typeDescription.lesson'),
+      quiz: t('studio.editor.node.typeDescription.quiz'),
+      reflection: t('studio.editor.node.typeDescription.reflection'),
+      exercise: t('studio.editor.node.typeDescription.exercise'),
+      custom: t('studio.editor.node.typeDescription.custom'),
+    }),
+    [t],
+  );
 
   const registryWarning = useMemo(() => {
     if (data.type !== 'custom') return null;
@@ -146,14 +155,14 @@ export function JSONNodeEditor({
     <div className="space-y-4">
       <div className="border-tertiary-container bg-tertiary-container text-tertiary rounded-lg border px-3 py-2 text-xs">
         <span className="font-medium">
-          {data.type.charAt(0).toUpperCase() + data.type.slice(1)} node
+          {typeDescriptions[data.type]}
         </span>
         {' — '}
-        {typeDescriptions[data.type] ?? 'Edit node configuration'}
+        {typeDescriptions[data.type] ?? t('studio.editor.node.editFallback')}
       </div>
 
       <div className="flex items-center gap-2">
-        <label className="text-on-surface-variant text-xs font-medium">Type</label>
+        <label className="text-on-surface-variant text-xs font-medium">{t('studio.editor.node.typeLabel')}</label>
         <Select
           value={data.type}
           onValueChange={(value) => onChange({ ...data, type: value as NodeType })}
@@ -193,12 +202,12 @@ export function JSONNodeEditor({
 
       {data.type === 'quiz' && (
         <div className="space-y-2">
-          <label className="text-on-surface-variant text-xs font-medium">Answer Options</label>
+          <label className="text-on-surface-variant text-xs font-medium">{t('studio.editor.node.answerOptions')}</label>
           {(data.options ?? []).map((opt, idx) => (
             <div key={idx} className="flex items-center gap-2">
               <Input
                 className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
-                placeholder={`Option ${String.fromCharCode(97 + idx)}...`}
+                placeholder={t('studio.editor.node.optionPlaceholder', { letter: String.fromCharCode(97 + idx) })}
                 value={opt.text}
                 onChange={(e) => {
                   const opts = [...(data.options ?? [])];
@@ -219,7 +228,7 @@ export function JSONNodeEditor({
                     onChange({ ...data, options: opts });
                   }}
                 />
-                Correct
+                {t('studio.editor.quiz.correct')}
               </label>
               <button
                 type="button"
@@ -245,18 +254,18 @@ export function JSONNodeEditor({
               });
             }}
           >
-            + Add option
+            + {t('studio.editor.quiz.addOption')}
           </button>
         </div>
       )}
 
       {data.type === 'reflection' && (
         <div>
-          <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">Prompt</label>
+          <label className="text-on-surface-variant mb-0.5 block text-xs font-medium">{t('studio.editor.reflection.promptLabel')}</label>
           <Textarea
             className="border-outline-variant focus:border-primary focus:ring-primary w-full rounded border px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1"
             rows={4}
-            placeholder="Enter reflection prompt..."
+            placeholder={t('studio.editor.reflection.promptPlaceholder')}
             value={data.prompt ?? ''}
             onChange={(e) => onChange({ ...data, prompt: e.target.value })}
           />

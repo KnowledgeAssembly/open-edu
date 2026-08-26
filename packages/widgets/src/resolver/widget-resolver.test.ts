@@ -7,7 +7,12 @@ import {
   type WidgetReference,
 } from '@open-edu/schemas';
 import { createWidgetResolver } from './widget-resolver.js';
-import type { ResolverCatalog, WidgetResolver, WidgetResolverOptions } from './widget-resolver.js';
+import type {
+  ResolverCatalog,
+  CatalogWidgetMeta,
+  WidgetResolver,
+  WidgetResolverOptions,
+} from './widget-resolver.js';
 import { createWidgetRegistry } from '../registry.js';
 import type { WidgetRegistry } from '../types.js';
 import { createWidgetArtifactCache } from '../artifact-cache.js';
@@ -54,7 +59,10 @@ const BUILTIN_COUNTER = {
   render: () => null,
 };
 
-function catalogFor(registryId: string): ResolverCatalog {
+function catalogFor(
+  registryId: string,
+  status: CatalogWidgetMeta['status'] = 'experimental',
+): ResolverCatalog {
   return {
     registryId,
     origin: ORIGIN,
@@ -65,7 +73,7 @@ function catalogFor(registryId: string): ResolverCatalog {
           id: WIDGET_ID,
           version: VERSION,
           manifestUrl: MANIFEST_URL,
-          status: 'experimental',
+          status,
           trustTier: 'sandboxed',
           offline: false,
         },
@@ -238,6 +246,58 @@ describe('WidgetResolver (policy-aware)', () => {
     expect(result).toMatchObject({ ok: false, failure: 'revoked' });
   });
 
+  it('refuses online when the catalog marks the widget revoked even if the served manifest is not', async () => {
+    const man = await manifestBytes();
+    const { impl, calls } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
+    const cache = createWidgetArtifactCache();
+    const resolver = createWidgetResolver({
+      policy: policy(),
+      cache,
+      catalogs: { widgets: catalogFor('widgets', 'revoked') },
+      registry: registryWith(BUILTIN_COUNTER),
+      fetchImpl: impl,
+      isOnline: () => true,
+      now: () => Date.now(),
+    });
+
+    const result = await resolver.resolve(registryRef(man.integrity));
+
+    expect(result).toMatchObject({ ok: false, failure: 'revoked' });
+    expect(calls).toContain(MANIFEST_URL);
+  });
+
+  it('marks revokedAt on both the document and manifest cache entries when revoked', async () => {
+    const doc = await documentBytes(DOC_TEXT);
+    const man = await manifestBytes({
+      status: 'revoked',
+      artifact: { ...baseArtifact(doc.integrity), sizeBytes: doc.bytes.byteLength },
+    });
+    const cache = createWidgetArtifactCache();
+    const now = Date.now();
+    await cache.put({
+      widgetId: WIDGET_ID,
+      version: VERSION,
+      integrity: doc.integrity,
+      bytes: doc.bytes,
+      cachedAt: now - 1000,
+    });
+    const { impl } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
+    const resolver = makeResolver({
+      cache,
+      fetchImpl: impl,
+      isOnline: () => false,
+      now: () => now,
+      catalogs: { widgets: catalogFor('widgets', 'revoked') },
+    });
+
+    await resolver.resolve(registryRef(man.integrity));
+
+    const docEntry = await cache.getEntry(WIDGET_ID, VERSION, doc.integrity);
+    expect(docEntry?.revokedAt).toBe(now);
+    const manifestEntry = await cache.getEntry(WIDGET_ID, VERSION, man.integrity, 'manifest');
+    expect(manifestEntry?.revokedAt).toBe(now);
+  });
+
   it('serves a revoked widget from cache offline within the 7d grace', async () => {
     const doc = await documentBytes(DOC_TEXT);
     const man = await manifestBytes({
@@ -297,6 +357,48 @@ describe('WidgetResolver (policy-aware)', () => {
     const result = await resolver.resolve(registryRef(man.integrity));
 
     expect(result).toMatchObject({ ok: false, failure: 'revoked' });
+  });
+
+  it('falls back to a cached manifest offline when the registry is unreachable', async () => {
+    const doc = await documentBytes(DOC_TEXT);
+    const man = await manifestBytes({
+      artifact: { ...baseArtifact(doc.integrity), sizeBytes: doc.bytes.byteLength },
+      distribution: { offline: true, cachePolicy: 'immutable' },
+    });
+    const cache = createWidgetArtifactCache();
+    const now = Date.now();
+    await cache.put({
+      widgetId: WIDGET_ID,
+      version: VERSION,
+      integrity: man.integrity,
+      bytes: man.bytes,
+      cachedAt: now - 1000,
+      kind: 'manifest',
+    });
+    await cache.put({
+      widgetId: WIDGET_ID,
+      version: VERSION,
+      integrity: doc.integrity,
+      bytes: doc.bytes,
+      cachedAt: now - 1000,
+    });
+    const impl: typeof fetch = async () => {
+      throw new TypeError('network unreachable');
+    };
+    const resolver = makeResolver({
+      cache,
+      fetchImpl: impl,
+      isOnline: () => false,
+      now: () => now,
+    });
+
+    const result = await resolver.resolve(registryRef(man.integrity));
+
+    expect(result.ok).toBe(true);
+    if (result.ok && result.tier === 'sandboxed') {
+      expect(result.srcDoc).toBe(DOC_TEXT);
+      expect(result.documentBytes).toEqual(doc.bytes);
+    }
   });
 
   it('rejects a legacy url ref when trusted-remote is disabled', async () => {
@@ -379,6 +481,20 @@ describe('WidgetResolver (policy-aware)', () => {
 
   it('denies experimental widgets when the policy says deny', async () => {
     const man = await manifestBytes({ status: 'experimental' });
+    const { impl, calls } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
+    const resolver = makeResolver({
+      policy: policy({ experimentalWidgets: 'deny' }),
+      fetchImpl: impl,
+    });
+
+    const result = await resolver.resolve(registryRef(man.integrity));
+
+    expect(result).toMatchObject({ ok: false, failure: 'policy', message: 'experimental-denied' });
+    expect(calls).not.toContain(DOCUMENT_URL);
+  });
+
+  it('demotes an unsigned verified manifest to experimental (policy deny blocks it)', async () => {
+    const man = await manifestBytes({ status: 'verified', signature: undefined });
     const { impl, calls } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
     const resolver = makeResolver({
       policy: policy({ experimentalWidgets: 'deny' }),

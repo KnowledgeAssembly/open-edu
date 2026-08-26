@@ -1,7 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolve } from 'node:path';
+
+const widgetRegistryDir = resolve(__dirname, '.openedu-widget-registry');
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup.mjs',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -30,6 +34,11 @@ export default defineConfig({
       url: 'http://localhost:4002',
       reuseExistingServer: !process.env.CI,
       timeout: 60000,
+      env: {
+        ...process.env,
+        OPEN_EDU_WIDGET_REGISTRY: widgetRegistryDir,
+        OPEN_EDU_WIDGET_REGISTRY_ID: 'localdev',
+      },
     },
   ],
 });

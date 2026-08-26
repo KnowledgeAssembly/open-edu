@@ -52,10 +52,16 @@ import {
 } from './src/studio/library/courseOps.js';
 import { createUnit, buildUnitOep } from './src/studio/library/unitBuilder.js';
 import type { ActivitySummary } from './src/studio/types.js';
+import {
+  createWidgetRegistryMiddleware,
+  WidgetRegistryStore,
+} from './src/widget-registry/routes.js';
 
 const VIRTUAL_MODULE_ID = 'virtual:open-edu-package';
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_MODULE_ID}`;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const widgetRegistryStore = new WidgetRegistryStore(process.env.OPEN_EDU_WIDGET_REGISTRY);
 
 const SERVER_ENV_KEYS = new Set([
   'OPENAI_API_KEY',
@@ -329,6 +335,15 @@ function multipartParse(body: Buffer, boundary: string): MultipartPart[] {
   return parts;
 }
 
+function widgetRegistryPlugin(): Plugin {
+  return {
+    name: 'open-edu-widget-registry',
+    configureServer(server) {
+      server.middlewares.use(createWidgetRegistryMiddleware(widgetRegistryStore));
+    },
+  };
+}
+
 function eduPackageLoader(): Plugin {
   let packageData: LoadedPackage | null = null;
   let bundleData: LoadedBundle | null = null;
@@ -383,7 +398,6 @@ function eduPackageLoader(): Plugin {
 
     configureServer(srv) {
       server = srv;
-
       const getCurrentDir = () => packageDir || bundleDir;
       const watchDir = bundleDir || packageDir;
       if (!watchDir) return;
@@ -1625,8 +1639,13 @@ export default defineConfig(({ mode }) => {
     // package module still needs a resolution so DevApp can always import it;
     // browser mode always uses the local BrowserStudioProvider instead.
     plugins: isBrowserMode
-      ? [react(), virtualPackagePlugin(), localAiGatewayPlugin(localAiEnabled)]
-      : [react(), eduPackageLoader()],
+      ? [
+          react(),
+          widgetRegistryPlugin(),
+          virtualPackagePlugin(),
+          localAiGatewayPlugin(localAiEnabled),
+        ]
+      : [react(), widgetRegistryPlugin(), eduPackageLoader()],
     resolve: isBrowserMode
       ? {
           alias: {

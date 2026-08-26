@@ -4,16 +4,13 @@
   "apiVersion": "open-edu.widget/1",
   "artifact": {
     "documentUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/index.html",
-    "documentIntegrity": "sha256-3be8a02e4c840c28c62e852063241d592744f55fc117e5d8e7a08c890338e2af",
-    "sizeBytes": 4237,
+    "documentIntegrity": "sha256-bc8ab995ce148f58201b6610db3637184904a38895cf95cb223be7389fc09c27",
+    "sizeBytes": 4382,
     "format": "self-contained-html"
   },
   "publisher": { "id": "community-publisher-1", "name": "Community Demo Publisher" },
   "metadata": { "description": "Vanilla self-contained counter widget" },
-  "schemas": {
-    "configUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/schema/config.schema.json",
-    "stateUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/schema/state.schema.json"
-  },
+  "schemas": {},
   "capabilities": ["resize", "telemetry-interaction", "state-persistence", "locale", "theme"],
   "accessibility": {},
   "supportedThemes": ["light", "dark", "zen"],

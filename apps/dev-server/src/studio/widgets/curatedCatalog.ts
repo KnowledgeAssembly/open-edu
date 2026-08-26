@@ -1,6 +1,7 @@
 import type { WidgetCatalogEntry } from '@open-edu/core';
 import widgetCatalogData from '@open-edu/core/widget-catalog-data';
 import { loadStaticCatalog } from '@open-edu/widgets/catalog';
+import * as nodeFs from 'node:fs';
 
 const CATALOG_ENTRIES: WidgetCatalogEntry[] = widgetCatalogData;
 
@@ -140,9 +141,7 @@ function getConfiguredCatalogFiles(): unknown[] {
     .filter(Boolean)
     .map((filePath) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { readFileSync } = require('node:fs') as typeof import('node:fs');
-        return JSON.parse(readFileSync(filePath, 'utf-8'));
+        return JSON.parse(nodeFs.readFileSync(filePath, 'utf-8'));
       } catch {
         return null;
       }

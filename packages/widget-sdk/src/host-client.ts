@@ -50,7 +50,7 @@ export function createWidgetHostClient({
         requestId,
         payload,
       },
-      target.parentOrigin || '*',
+      target.parentOrigin ?? '*',
     );
   };
 

@@ -12,6 +12,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./install": {
+      "types": "./dist/install/index.d.ts",
+      "import": "./dist/install/index.js"
+    },
     "./catalog": {
       "types": "./dist/resolver/catalog.d.ts",
       "import": "./dist/resolver/catalog.js"

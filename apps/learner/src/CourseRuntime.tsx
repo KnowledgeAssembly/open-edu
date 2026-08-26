@@ -15,7 +15,9 @@ import {
   createDefaultRegistry,
   createWidgetArtifactCache,
   createWidgetResolver,
+  loadStaticCatalog,
   DEFAULT_WIDGET_POLICY,
+  type ResolverCatalog,
 } from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import { useTranslation } from '@open-edu/i18n';
@@ -41,6 +43,40 @@ const widgetOrigins = widgetOriginsEnv
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+
+const widgetGlobalOrigins = (globalThis as { __OPEN_EDU_WIDGET_ORIGINS__?: string })
+  .__OPEN_EDU_WIDGET_ORIGINS__;
+if (widgetGlobalOrigins) {
+  for (const origin of widgetGlobalOrigins
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
+    if (!widgetOrigins.includes(origin)) widgetOrigins.push(origin);
+  }
+}
+
+const widgetE2EClock = (): number => {
+  const fake = (globalThis as { __OPEN_EDU_NOW__?: unknown }).__OPEN_EDU_NOW__;
+  return typeof fake === 'number' ? fake : Date.now();
+};
+
+const widgetE2EOnline = (): boolean => {
+  const flag = (globalThis as { __OPEN_EDU_ONLINE__?: unknown }).__OPEN_EDU_ONLINE__;
+  if (flag === undefined || flag === null) return navigator.onLine;
+  return String(flag) !== 'false';
+};
+
+const allowExperimentalCommunityWidgets =
+  (globalThis as { __OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__?: boolean })
+    .__OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__ === true;
+
+const WIDGET_CATALOG_STORAGE_KEY = 'open-edu-widget-registry-catalog';
+
+function buildRemoteCatalogs(catalogUrl: string, json: unknown): Record<string, ResolverCatalog> {
+  const allowLoopback = new URL(catalogUrl).protocol === 'http:';
+  const catalog = loadStaticCatalog(json, { allowLoopback });
+  return { [catalog.registryId]: catalog };
+}
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -113,18 +149,65 @@ export function CourseRuntime({
       ...DEFAULT_WIDGET_POLICY,
       allowedOrigins: widgetOrigins,
       registryCatalogOrigins: widgetOrigins,
+      experimentalWidgets: allowExperimentalCommunityWidgets
+        ? 'allow'
+        : DEFAULT_WIDGET_POLICY.experimentalWidgets,
     }),
     [],
   );
+
+  const widgetCatalogUrl = (globalThis as { __OPEN_EDU_WIDGET_CATALOG_URL__?: string })
+    .__OPEN_EDU_WIDGET_CATALOG_URL__;
+  const [remoteCatalogs, setRemoteCatalogs] = useState<Record<string, ResolverCatalog>>({});
+
+  useEffect(() => {
+    if (!widgetCatalogUrl) return;
+    let cancelled = false;
+    void (async () => {
+      const apply = (json: unknown) => {
+        try {
+          setRemoteCatalogs(buildRemoteCatalogs(widgetCatalogUrl, json));
+        } catch {
+          // invalid catalog payload: keep the previous (possibly empty) catalogs
+        }
+      };
+      try {
+        const res = await fetch(widgetCatalogUrl);
+        const json: unknown = await res.json();
+        try {
+          localStorage.setItem(WIDGET_CATALOG_STORAGE_KEY, JSON.stringify(json));
+        } catch {
+          // storage unavailable: still use the freshly fetched catalog
+        }
+        if (!cancelled) apply(json);
+      } catch {
+        const cached = localStorage.getItem(WIDGET_CATALOG_STORAGE_KEY);
+        if (cached) {
+          try {
+            const json: unknown = JSON.parse(cached);
+            if (!cancelled) apply(json);
+          } catch {
+            // corrupted cached catalog: keep empty
+          }
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [widgetCatalogUrl]);
+
   const widgetResolver = useMemo(
     () =>
       createWidgetResolver({
         policy: widgetPolicy,
         cache: createWidgetArtifactCache(),
-        catalogs: {},
+        catalogs: remoteCatalogs,
         registry: widgetRegistry,
+        now: widgetE2EClock,
+        isOnline: widgetE2EOnline,
       }),
-    [widgetPolicy, widgetRegistry],
+    [widgetPolicy, widgetRegistry, remoteCatalogs],
   );
 
   const initialProgress = useMemo(() => {

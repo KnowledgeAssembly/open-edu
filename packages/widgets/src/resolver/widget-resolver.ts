@@ -136,7 +136,7 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
         return { ok: false, failure: 'policy', message: 'registry-origin-not-allowed' };
       }
 
-      let manifestBytes: ArrayBuffer;
+      let manifestBytes: ArrayBuffer | undefined;
       try {
         manifestBytes = await fetchBytes(
           entry.manifestUrl,
@@ -144,10 +144,25 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
           fetchImpl,
         );
       } catch (err) {
-        if (isFetchTimeout(err)) {
-          return { ok: false, failure: 'timeout', message: 'manifest-fetch-timeout' };
+        const timedOut = isFetchTimeout(err);
+        if (ref.integrity) {
+          const offlineManifest = await cache.getEntry(
+            ref.id,
+            ref.version,
+            ref.integrity,
+            'manifest',
+          );
+          if (offlineManifest) {
+            manifestBytes = offlineManifest.bytes;
+          }
         }
-        return { ok: false, failure: 'unavailable', message: 'manifest-fetch-failed' };
+        if (!manifestBytes) {
+          return {
+            ok: false,
+            failure: timedOut ? 'timeout' : 'unavailable',
+            message: timedOut ? 'manifest-fetch-timeout' : 'manifest-fetch-failed',
+          };
+        }
       }
 
       try {
@@ -168,9 +183,17 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
       }
 
       const NOW = now();
+      await cache.put({
+        widgetId: ref.id,
+        version: ref.version,
+        integrity: ref.integrity,
+        bytes: manifestBytes,
+        cachedAt: NOW,
+        kind: 'manifest',
+      });
       let cachedDocumentBytes: ArrayBuffer | undefined;
 
-      if (manifest.status === 'revoked') {
+      if (manifest.status === 'revoked' || entry.status === 'revoked') {
         const cached = await cache.getEntry(
           ref.id,
           ref.version,
@@ -178,6 +201,10 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
         );
         if (cached && !cached.revokedAt) {
           await cache.put({ ...cached, revokedAt: NOW });
+        }
+        const cachedManifest = await cache.getEntry(ref.id, ref.version, ref.integrity, 'manifest');
+        if (cachedManifest && !cachedManifest.revokedAt) {
+          await cache.put({ ...cachedManifest, revokedAt: NOW });
         }
         if (isOnline()) {
           return { ok: false, failure: 'revoked', message: 'revoked' };

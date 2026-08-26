@@ -4,7 +4,7 @@ import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
 import type { InitPayload } from '@open-edu/widget-sdk';
 import axe from 'axe-core';
 import type { SandboxWidgetAdapterProps } from './SandboxWidgetAdapter';
-import { SandboxWidgetAdapter, activeFrames } from './SandboxWidgetAdapter';
+import { SandboxWidgetAdapter, getActiveFrameCount } from './SandboxWidgetAdapter';
 import { READY_TIMEOUT_MS } from './sandbox-limits';
 
 const MOCK_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -216,6 +216,29 @@ describe('SandboxWidgetAdapter', () => {
     expect(props.onDiagnostic).toHaveBeenCalledWith('observe-mode-complete-rejected');
   });
 
+  it('rejects state:save under observe-mode without telemetry-interaction', () => {
+    const props = makeProps({
+      initPayload: {
+        ...makeProps().initPayload,
+        capabilities: ['observe-mode'],
+      },
+    });
+    render(<SandboxWidgetAdapter {...props} />);
+    act(() => {
+      dispatchMessage(makeReadyEnvelope(1));
+    });
+    expect(props.onReady).toHaveBeenCalledTimes(1);
+    act(() => {
+      dispatchMessage(
+        makeSaveEnvelope(2, {
+          payload: { requestId: 'r1', schemaVersion: '1', state: { v: 1 } },
+        }),
+      );
+    });
+    expect(props.onStateSave).not.toHaveBeenCalled();
+    expect(props.onDiagnostic).toHaveBeenCalledWith('observe-mode-state-save-rejected');
+  });
+
   it('times out and removes the iframe when ready never arrives', () => {
     vi.useFakeTimers();
     const props = makeProps();
@@ -231,7 +254,7 @@ describe('SandboxWidgetAdapter', () => {
   });
 
   it('tracks mounted frames in the module-level activeFrames counter', () => {
-    const before = activeFrames;
+    const before = getActiveFrameCount();
     const propsA = makeProps({ nodeId: 'n1' });
     const propsB = makeProps({ nodeId: 'n2' });
     const { container: containerA, unmount: unmountA } = render(
@@ -239,12 +262,12 @@ describe('SandboxWidgetAdapter', () => {
     );
     const { container: containerB } = render(<SandboxWidgetAdapter {...propsB} />);
 
-    expect(activeFrames).toBe(before + 2);
+    expect(getActiveFrameCount()).toBe(before + 2);
     expect(containerA.querySelectorAll('iframe')).toHaveLength(1);
     expect(containerB.querySelectorAll('iframe')).toHaveLength(1);
 
     unmountA();
-    expect(activeFrames).toBe(before + 1);
+    expect(getActiveFrameCount()).toBe(before + 1);
   });
 
   it('gates complete while state-incompatible and unblocks after an accepted migration save', () => {

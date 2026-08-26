@@ -1,3 +1,4 @@
+export { MULTI_FILE_CSP, SELF_CONTAINED_CSP_PREFIX } from './fixtures/protocol-fixtures.js';
 export { PROTOCOL_API_VERSION } from './constants.js';
 export { createWidgetHostClient } from './host-client.js';
 export type { WidgetHostClient, WidgetHostClientOptions } from './host-client.js';

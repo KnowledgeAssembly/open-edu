@@ -47,6 +47,54 @@ describe('WidgetArtifactCache (memory)', () => {
     await expect(cache.get(K, V, integrity)).resolves.toBeUndefined();
   });
 
+  it('separates manifest-kind entries from document entries by key', async () => {
+    const doc = await sampleBytes('doc bytes');
+    const man = await sampleBytes('manifest bytes');
+    await cache.put({
+      widgetId: K,
+      version: V,
+      integrity: doc.integrity,
+      bytes: doc.bytes,
+      cachedAt: Date.now(),
+    });
+    await cache.put({
+      widgetId: K,
+      version: V,
+      integrity: man.integrity,
+      bytes: man.bytes,
+      cachedAt: Date.now(),
+      kind: 'manifest',
+    });
+    await expect(cache.get(K, V, doc.integrity)).resolves.toEqual(doc.bytes);
+    await expect(cache.get(K, V, doc.integrity, 'manifest')).resolves.toBeUndefined();
+    await expect(cache.get(K, V, man.integrity, 'manifest')).resolves.toEqual(man.bytes);
+    const entry = await cache.getEntry(K, V, man.integrity, 'manifest');
+    expect(entry?.kind).toBe('manifest');
+  });
+
+  it('invalidate with a kind only removes entries of that kind', async () => {
+    const doc = await sampleBytes('doc bytes');
+    const man = await sampleBytes('manifest bytes');
+    await cache.put({
+      widgetId: K,
+      version: V,
+      integrity: doc.integrity,
+      bytes: doc.bytes,
+      cachedAt: Date.now(),
+    });
+    await cache.put({
+      widgetId: K,
+      version: V,
+      integrity: man.integrity,
+      bytes: man.bytes,
+      cachedAt: Date.now(),
+      kind: 'manifest',
+    });
+    await cache.invalidate(K, V, 'manifest');
+    await expect(cache.get(K, V, man.integrity, 'manifest')).resolves.toBeUndefined();
+    await expect(cache.get(K, V, doc.integrity)).resolves.toEqual(doc.bytes);
+  });
+
   it('memory store is LRU-bounded to 32 entries', async () => {
     const { bytes, integrity } = await sampleBytes('tiny');
     for (let i = 0; i < 33; i++) {

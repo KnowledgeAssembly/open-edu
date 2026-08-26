@@ -223,6 +223,7 @@ describe('ContentNodeSchema (discriminated union)', () => {
         id: 'community.example.counter',
         version: '1.0.0',
         source: 'registry',
+        registryId: 'reg.example',
         integrity: 'sha256-' + 'a'.repeat(64),
       },
     });
