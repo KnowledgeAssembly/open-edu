@@ -81,6 +81,7 @@ export interface NativeWidgetAdapterProps {
   intendedWidgetVersion?: string;
   /** Config adaptation for fallback rendering; defaults to node.config. */
   configOverride?: Record<string, unknown>;
+  /** Reserved for lifecycle diagnostics; native widgets currently have no host-level diagnostics. */
   onDiagnostic?: (code: string) => void;
 }
 

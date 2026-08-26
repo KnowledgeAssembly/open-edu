@@ -19,6 +19,7 @@ export const WidgetCatalogFileSchema = z.object({
         .refine((v) => new URL(v).protocol === 'https:', {
           message: 'manifestUrl must be https',
         }),
+      integrity: z.string().regex(/^sha256-[a-f0-9]{64}$/).optional(),
       status: z.enum(['experimental', 'verified', 'deprecated', 'revoked']),
       trustTier: z.enum(['native', 'sandboxed']),
       offline: z.boolean(),
@@ -52,6 +53,7 @@ function catalogSchemaWithLoopback(allowLoopback: boolean): ZodType<WidgetCatalo
         id: z.string(),
         version: z.string(),
         manifestUrl: z.string().url().refine(urlRefine, { message }),
+        integrity: z.string().regex(/^sha256-[a-f0-9]{64}$/).optional(),
         status: z.enum(['experimental', 'verified', 'deprecated', 'revoked']),
         trustTier: z.enum(['native', 'sandboxed']),
         offline: z.boolean(),
@@ -76,6 +78,7 @@ export function loadStaticCatalog(
       id: w.id,
       version: w.version,
       manifestUrl: w.manifestUrl,
+      integrity: w.integrity,
       status: w.status,
       trustTier: w.trustTier,
       offline: w.offline,

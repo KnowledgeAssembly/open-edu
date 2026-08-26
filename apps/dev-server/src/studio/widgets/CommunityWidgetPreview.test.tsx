@@ -193,6 +193,7 @@ describe('CommunityWidgetPreview', () => {
           widgetId: 'builtin.chart',
           version: '0.1.0',
           definition,
+          grantedCapabilities: [],
         } as ResolvedWidget;
       })(),
     );

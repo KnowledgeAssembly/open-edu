@@ -123,8 +123,8 @@
           if (typeof config.target === 'number' && config.target >= 1) {
             target = config.target;
           }
-          if (msg.payload && msg.payload.state && typeof msg.payload.state.count === 'number') {
-            count = msg.payload.state.count;
+          if (msg.payload && msg.payload.storedState && typeof msg.payload.storedState.count === 'number') {
+            count = msg.payload.storedState.count;
           }
           post('ready', {});
           render();

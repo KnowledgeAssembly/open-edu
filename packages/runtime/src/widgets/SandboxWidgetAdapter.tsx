@@ -107,7 +107,7 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
       instanceId,
       nonce,
       sequence: hostSequenceRef.current,
-      payload: { ...initPayload, instanceId, nonce },
+      payload: initPayload,
     };
     hostSequenceRef.current += 1;
     const targetOrigin = expectedOrigin === 'opaque' ? '*' : expectedOrigin;
