@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Counter Widget Config",
+  "type": "object",
+  "properties": {
+    "target": {
+      "type": "number",
+      "minimum": 1,
+      "default": 5
+    }
+  },
+  "additionalProperties": false
+}

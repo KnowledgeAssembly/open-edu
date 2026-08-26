@@ -64,6 +64,41 @@ export type {
 export { RemoteWidgetManifestSchema } from './widget-manifest.js';
 export type { RemoteWidgetManifest } from './widget-manifest.js';
 
+export { WidgetReferenceSchema } from './widget-reference.js';
+export type { WidgetReference } from './widget-reference.js';
+
+export {
+  WidgetManifestSchema,
+  WidgetCapabilitySchema,
+  PROTOCOL_API_VERSION,
+} from './community-widget-manifest.js';
+export type { WidgetManifest, WidgetCapability } from './community-widget-manifest.js';
+
+export {
+  HostToWidgetTypeSchema,
+  WidgetToHostTypeSchema,
+  InteractionActionSchema,
+  WidgetMessageEnvelopeSchema,
+  InitPayloadSchema,
+  CompletePayloadSchema,
+  StateSavePayloadSchema,
+  StateSaveResultSchema,
+  InteractionPayloadSchema,
+  ResizePayloadSchema,
+} from './widget-protocol.js';
+export type {
+  WidgetMessageEnvelope,
+  InitPayload,
+  CompletePayload,
+  StateSavePayload,
+  StateSaveResult,
+  InteractionPayload,
+  ResizePayload,
+  InteractionAction,
+  WidgetToHostType,
+  HostToWidgetType,
+} from './widget-protocol.js';
+
 export {
   SkillGraphSchema,
   SkillDefinitionSchema,

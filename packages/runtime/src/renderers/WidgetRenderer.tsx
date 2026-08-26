@@ -1,4 +1,4 @@
-import { Component, useContext, useRef, type ReactNode } from 'react';
+import { Component, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimationConfigSchema } from '@open-edu/schemas';
 import { useRuntime, type DistributiveOmit } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
@@ -9,9 +9,13 @@ import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
 import type { OasAnimationController } from '../components/useOasAnimation';
 import { useStepSyncMachine } from '../components/useStepSyncMachine';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
-import type { TelemetryEvent, WidgetAnswer } from '@open-edu/schemas';
+import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
+import type { TelemetryEvent, WidgetAnswer, WidgetReference } from '@open-edu/schemas';
 import { buildWidgetAnswer } from '../widgets/answer-provenance';
 import { normalizeWidgetInteraction } from '../widgets/normalize-interaction';
+import { SandboxWidgetAdapter, isSandboxWidgetsEnabled } from '../widgets/SandboxWidgetAdapter';
+import { useTheme } from '../theme';
+import type { InitPayload } from '@open-edu/widget-sdk';
 
 interface WidgetErrorBoundaryState {
   hasError: boolean;
@@ -63,6 +67,7 @@ interface RemoteNode {
   widget?: string;
   config?: Record<string, unknown>;
   remoteWidget?: RemoteWidgetManifest;
+  widgetRef?: WidgetReference;
 }
 
 export interface WidgetRendererProps {
@@ -198,6 +203,10 @@ export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Eleme
 
   const i18nContext = useContext(I18nContext);
   const locale = i18nContext?.locale;
+
+  if (isSandboxWidgetsEnabled() && node.widgetRef?.source === 'registry') {
+    return <SandboxWidgetRenderer node={node} nodeId={nodeId} />;
+  }
 
   if (node.remoteWidget) {
     return <RemoteWidgetRenderer node={node} nodeId={nodeId} />;
@@ -422,4 +431,110 @@ function RemoteWidgetRenderer({ node, nodeId }: { node: RemoteNode; nodeId: stri
       </WidgetCanvas>
     </WidgetErrorBoundary>
   );
+}
+
+function themeIdToProtocolTheme(id: string): 'light' | 'dark' | 'zen' {
+  if (id === 'nocturnal') return 'dark';
+  if (id === 'zen') return 'zen';
+  return 'light';
+}
+
+function SandboxWidgetRenderer({
+  node,
+  nodeId,
+}: {
+  node: RemoteNode;
+  nodeId: string;
+}): JSX.Element {
+  const { completeNode, answers, saveAnswer, emitTelemetry } = useRuntime();
+  const widgetRef = node.widgetRef!;
+
+  const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
+  const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
+
+  const i18nContext = useContext(I18nContext);
+  const locale = i18nContext?.locale ?? 'en';
+  const theme = useTheme();
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const buildAdapter = () => {
+    const initPayload: InitPayload = {
+      apiVersion: PROTOCOL_API_VERSION,
+      widgetId: widgetRef.id,
+      widgetVersion: widgetRef.version,
+      instanceId: '',
+      nodeId,
+      config: node.config ?? {},
+      storedState,
+      locale,
+      theme: themeIdToProtocolTheme(theme.id),
+      themeTokens: {},
+      prefersReducedMotion,
+      capabilities: ['resize', 'telemetry-interaction', 'state-persistence', 'locale', 'theme'],
+    };
+
+    return (
+      <SandboxWidgetAdapter
+        nodeId={nodeId}
+        expectedOrigin="opaque"
+        title={widgetRef.id}
+        initPayload={initPayload}
+        onReady={() => {}}
+        onComplete={(payload) => {
+          const answer = buildWidgetAnswer({
+            intendedWidgetId: widgetRef.id,
+            intendedWidgetVersion: widgetRef.version,
+            renderedWidgetId: widgetRef.id,
+            renderedWidgetVersion: widgetRef.version,
+            data: payload.state,
+            score: payload.score,
+          });
+          saveAnswer(nodeId, answer);
+          completeNode(payload.score);
+        }}
+        onInteraction={(payload) =>
+          emitTelemetry?.({
+            event: 'widget_interaction',
+            widgetId: widgetRef.id,
+            action: payload.action,
+            data: payload.data,
+          })
+        }
+        onStateSave={(payload) =>
+          saveAnswer(
+            nodeId,
+            buildWidgetAnswer({
+              intendedWidgetId: widgetRef.id,
+              intendedWidgetVersion: widgetRef.version,
+              renderedWidgetId: widgetRef.id,
+              renderedWidgetVersion: widgetRef.version,
+              data: payload.state,
+            }),
+          )
+        }
+        onError={(message) => console.warn('[sandbox-widget]', message)}
+        onDiagnostic={(reason) => console.warn('[sandbox-widget]', reason)}
+      />
+    );
+  };
+
+  // Phase 1 ships no resolver, so widgetRef carries no document source yet. When a
+  // documentUrl/srcDoc becomes available (Phase 2 resolver), render the adapter.
+  const sourceUrl: string | undefined = undefined;
+  if (sourceUrl) {
+    return buildAdapter();
+  }
+
+  return <div role="status" data-testid="sandbox-widget-unresolved" aria-live="polite" />;
 }

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-+WbCmOI1Ls4f9DR7/ALmlrb49BKOu9LfOqqVC5moVUc='; base-uri 'none';"
+    />
+    <title>Community Counter Widget</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: transparent;
+      }
+      .counter {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(127, 127, 127, 0.3);
+        background: rgba(127, 127, 127, 0.08);
+      }
+      .counter__count {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .counter__button {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        background: #2563eb;
+        color: #fff;
+      }
+      .counter__status {
+        font-size: 0.875rem;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="counter" id="root">
+      <div class="counter__count" id="count" aria-live="polite">0</div>
+      <button class="counter__button" id="increment" type="button" aria-label="Increment count">
+        Increment
+      </button>
+      <div class="counter__status" id="status">Waiting for host init…</div>
+    </div>
+    <script>
+      /* Community counter widget.
+         This is a vanilla, framework-agnostic widget that talks to the host
+         through the sandboxed open-edu.widget/1 postMessage protocol.
+         It mirrors the SDK's createWidgetHostClient (from @open-edu/widget-sdk):
+         the same envelope { apiVersion, type, instanceId, nonce, sequence, payload }
+         and message flow are reimplemented here without any dependencies. */
+      (function () {
+        var instanceId = null;
+        var nonce = null;
+        var sequence = 0;
+        var count = 0;
+        var target = 5;
+        var state = { count: 0 };
+
+        var countEl = document.getElementById('count');
+        var buttonEl = document.getElementById('increment');
+        var statusEl = document.getElementById('status');
+
+        function post(type, payload) {
+          sequence += 1;
+          window.parent.postMessage(
+            {
+              apiVersion: 'open-edu.widget/1',
+              type: type,
+              instanceId: instanceId,
+              nonce: nonce,
+              sequence: sequence,
+              payload: payload
+            },
+            '*'
+          );
+        }
+
+        function render() {
+          countEl.textContent = String(count);
+          state.count = count;
+          if (count >= target) {
+            statusEl.textContent = 'Target reached!';
+            post('complete', { score: 100, reason: 'submitted', state: state });
+          } else {
+            statusEl.textContent = 'Click to reach ' + target;
+          }
+        }
+
+        buttonEl.addEventListener('click', function () {
+          count += 1;
+          render();
+          post('interaction', { action: 'select', data: { index: count } });
+        });
+
+        window.addEventListener('message', function (event) {
+          var msg = event.data;
+          if (!msg || msg.apiVersion !== 'open-edu.widget/1') return;
+          if (msg.type !== 'init') return;
+          instanceId = msg.instanceId;
+          nonce = msg.nonce;
+          var config = (msg.payload && msg.payload.config) || {};
+          if (typeof config.target === 'number' && config.target >= 1) {
+            target = config.target;
+          }
+          if (msg.payload && msg.payload.state && typeof msg.payload.state.count === 'number') {
+            count = msg.payload.state.count;
+          }
+          post('ready', {});
+          render();
+        });
+
+        statusEl.textContent = 'Waiting for host init…';
+      })();
+    </script>
+  </body>
+</html>

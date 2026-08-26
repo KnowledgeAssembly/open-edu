@@ -1,0 +1,24 @@
+{
+  "id": "community.example.counter",
+  "version": "1.0.0",
+  "apiVersion": "open-edu.widget/1",
+  "artifact": {
+    "documentUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/index.html",
+    "documentIntegrity": "sha256-3be8a02e4c840c28c62e852063241d592744f55fc117e5d8e7a08c890338e2af",
+    "sizeBytes": 4237,
+    "format": "self-contained-html"
+  },
+  "publisher": { "id": "community-publisher-1", "name": "Community Demo Publisher" },
+  "metadata": { "description": "Vanilla self-contained counter widget" },
+  "schemas": {
+    "configUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/schema/config.schema.json",
+    "stateUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/schema/state.schema.json"
+  },
+  "capabilities": ["resize", "telemetry-interaction", "state-persistence", "locale", "theme"],
+  "accessibility": {},
+  "supportedThemes": ["light", "dark", "zen"],
+  "reducedMotion": "supported",
+  "compatibility": { "runtime": "open-edu >= 0.1.0" },
+  "distribution": { "offline": true, "cachePolicy": "immutable" },
+  "status": "experimental"
+}

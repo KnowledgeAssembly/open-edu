@@ -1013,6 +1013,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../widget-sdk
       '@open-edu/widgets':
         specifier: workspace:*
         version: link:../widgets
@@ -1109,6 +1112,15 @@ importers:
         specifier: ^3.0.0
         version: 3.25.76
 
+  packages/widget-sdk:
+    dependencies:
+      '@open-edu/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+
   packages/widgets:
     dependencies:
       '@dnd-kit/core':
@@ -1129,6 +1141,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:^
         version: link:../schemas
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../widget-sdk
       react:
         specifier: ^18.0.0
         version: 18.3.1
