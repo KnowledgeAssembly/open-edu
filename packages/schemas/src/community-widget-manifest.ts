@@ -75,6 +75,7 @@ export const WidgetManifestSchema = z
       cachePolicy: z.literal('immutable'),
     }),
     status: z.enum(['experimental', 'verified', 'deprecated', 'revoked']),
+    stateSchemaVersion: z.string().min(1).max(64).optional(),
     fallback: z.string().min(1).max(256).optional(),
     signature: z.unknown().optional(),
   })

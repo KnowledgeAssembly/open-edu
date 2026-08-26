@@ -1,12 +1,36 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, cleanup, act } from '@testing-library/react';
 import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
+import type { InitPayload } from '@open-edu/widget-sdk';
 import axe from 'axe-core';
 import type { SandboxWidgetAdapterProps } from './SandboxWidgetAdapter';
-import { SandboxWidgetAdapter } from './SandboxWidgetAdapter';
+import { SandboxWidgetAdapter, activeFrames } from './SandboxWidgetAdapter';
 import { READY_TIMEOUT_MS } from './sandbox-limits';
 
 const MOCK_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+const MIGRATION_INIT: InitPayload = {
+  apiVersion: PROTOCOL_API_VERSION,
+  widgetId: 'community.example.counter',
+  widgetVersion: '1.0.0',
+  instanceId: '',
+  nodeId: 'node-migrate',
+  config: { prompt: 'Count five' },
+  storedState: { schemaVersion: '1', v: 1, data: 'old' },
+  locale: 'en',
+  theme: 'light',
+  themeTokens: {},
+  prefersReducedMotion: false,
+  capabilities: ['resize', 'telemetry-interaction', 'state-persistence'],
+  stateSchemaVersion: '2',
+};
+
+function makeSaveEnvelope(
+  sequence: number,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return makeEnvelope('state:save', sequence, overrides);
+}
 
 function makeEnvelope(
   type: string,
@@ -204,5 +228,168 @@ describe('SandboxWidgetAdapter', () => {
 
     expect(props.onError).toHaveBeenCalledWith('timeout');
     expect(container.querySelector('iframe')).toBeNull();
+  });
+
+  it('tracks mounted frames in the module-level activeFrames counter', () => {
+    const before = activeFrames;
+    const propsA = makeProps({ nodeId: 'n1' });
+    const propsB = makeProps({ nodeId: 'n2' });
+    const { container: containerA, unmount: unmountA } = render(
+      <SandboxWidgetAdapter {...propsA} />,
+    );
+    const { container: containerB } = render(<SandboxWidgetAdapter {...propsB} />);
+
+    expect(activeFrames).toBe(before + 2);
+    expect(containerA.querySelectorAll('iframe')).toHaveLength(1);
+    expect(containerB.querySelectorAll('iframe')).toHaveLength(1);
+
+    unmountA();
+    expect(activeFrames).toBe(before + 1);
+  });
+
+  it('gates complete while state-incompatible and unblocks after an accepted migration save', () => {
+    const props = makeProps({ initPayload: MIGRATION_INIT });
+    const { container } = render(<SandboxWidgetAdapter {...props} />);
+    const iframe = container.querySelector('iframe')!;
+
+    const postedMessages: unknown[] = [];
+    iframe.contentWindow!.postMessage = vi.fn((msg: unknown) => {
+      postedMessages.push(msg);
+    });
+
+    act(() => {
+      dispatchMessage(makeReadyEnvelope(1));
+    });
+    expect(props.onReady).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      dispatchMessage(makeCompleteEnvelope(2));
+    });
+    expect(props.onComplete).not.toHaveBeenCalled();
+    expect(props.onDiagnostic).toHaveBeenCalledWith('state-incompatible');
+
+    const savePayload = {
+      requestId: 'r1',
+      schemaVersion: '2',
+      state: { schemaVersion: '2', v: 2, data: 'new' },
+    };
+    act(() => {
+      dispatchMessage(makeSaveEnvelope(3, { payload: savePayload }));
+    });
+    expect(props.onStateSave).toHaveBeenCalledWith(savePayload);
+
+    const update = postedMessages.find((m) => (m as { type: string }).type === 'state:update') as
+      | {
+          instanceId: string;
+          nonce: string;
+          sequence: number;
+          payload: { accepted: boolean; normalizedState: unknown };
+        }
+      | undefined;
+    expect(update?.instanceId).toBe(MOCK_ID);
+    expect(update?.nonce).toBe(MOCK_ID);
+    expect(update?.payload).toEqual({
+      requestId: 'r1',
+      accepted: true,
+      normalizedState: savePayload.state,
+    });
+
+    act(() => {
+      dispatchMessage(makeCompleteEnvelope(4));
+    });
+    expect(props.onComplete).toHaveBeenCalledTimes(1);
+    expect(props.onComplete).toHaveBeenCalledWith({ score: 100, state: { done: true } });
+  });
+
+  it('rejects an oversized state save with too-large and does not persist', () => {
+    const props = makeProps({ initPayload: MIGRATION_INIT });
+    const { container } = render(<SandboxWidgetAdapter {...props} />);
+    const iframe = container.querySelector('iframe')!;
+
+    const postedMessages: unknown[] = [];
+    iframe.contentWindow!.postMessage = vi.fn((msg: unknown) => {
+      postedMessages.push(msg);
+    });
+
+    act(() => {
+      dispatchMessage(makeReadyEnvelope(1));
+    });
+    expect(props.onReady).toHaveBeenCalledTimes(1);
+
+    const savePayload = {
+      requestId: 'r2',
+      schemaVersion: '2',
+      state: { blob: 'x'.repeat(80 * 1024) },
+    };
+    act(() => {
+      dispatchMessage(makeSaveEnvelope(2, { payload: savePayload }));
+    });
+    expect(props.onStateSave).not.toHaveBeenCalled();
+    expect(props.onDiagnostic).toHaveBeenCalledWith('state-save-rejected');
+
+    const update = postedMessages.find((m) => (m as { type: string }).type === 'state:update') as
+      | { payload: { accepted: boolean; rejectionReason: string } }
+      | undefined;
+    expect(update?.payload).toEqual({
+      requestId: 'r2',
+      accepted: false,
+      rejectionReason: 'too-large',
+    });
+  });
+
+  it('rejects a schema-mismatched state save and keeps the complete gate closed', () => {
+    const props = makeProps({ initPayload: MIGRATION_INIT });
+    const { container } = render(<SandboxWidgetAdapter {...props} />);
+    const iframe = container.querySelector('iframe')!;
+
+    const postedMessages: unknown[] = [];
+    iframe.contentWindow!.postMessage = vi.fn((msg: unknown) => {
+      postedMessages.push(msg);
+    });
+
+    act(() => {
+      dispatchMessage(makeReadyEnvelope(1));
+    });
+    expect(props.onReady).toHaveBeenCalledTimes(1);
+
+    const savePayload = { requestId: 'r3', schemaVersion: '1', state: { v: 3 } };
+    act(() => {
+      dispatchMessage(makeSaveEnvelope(2, { payload: savePayload }));
+    });
+    expect(props.onStateSave).not.toHaveBeenCalled();
+    expect(props.onDiagnostic).toHaveBeenCalledWith('state-save-rejected');
+
+    const update = postedMessages.find((m) => (m as { type: string }).type === 'state:update') as
+      | { payload: { accepted: boolean; rejectionReason: string } }
+      | undefined;
+    expect(update?.payload).toEqual({
+      requestId: 'r3',
+      accepted: false,
+      rejectionReason: 'schema-invalid',
+    });
+
+    act(() => {
+      dispatchMessage(makeCompleteEnvelope(3));
+    });
+    expect(props.onComplete).not.toHaveBeenCalled();
+    expect(props.onDiagnostic).toHaveBeenCalledWith('state-incompatible');
+  });
+
+  it('allows normal complete flow when there is no version mismatch', () => {
+    const props = makeProps({
+      initPayload: {
+        ...makeProps().initPayload,
+        storedState: { schemaVersion: '1' },
+        stateSchemaVersion: undefined,
+      },
+    });
+    render(<SandboxWidgetAdapter {...props} />);
+    act(() => {
+      dispatchMessage(makeReadyEnvelope(1));
+    });
+    act(() => {
+      dispatchMessage(makeCompleteEnvelope(2));
+    });
+    expect(props.onComplete).toHaveBeenCalledTimes(1);
   });
 });

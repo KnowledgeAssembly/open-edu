@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  WidgetCapabilitySchema,
-  PROTOCOL_API_VERSION,
-} from './community-widget-manifest.js';
+import { WidgetCapabilitySchema, PROTOCOL_API_VERSION } from './community-widget-manifest.js';
 
 export { PROTOCOL_API_VERSION } from './community-widget-manifest.js';
 
@@ -61,6 +58,8 @@ export const InitPayloadSchema = z.object({
   themeTokens: z.record(z.string()),
   prefersReducedMotion: z.boolean(),
   capabilities: z.array(WidgetCapabilitySchema),
+  nonce: z.string().min(1).max(128).optional(),
+  stateSchemaVersion: z.string().min(1).max(64).optional(),
 });
 
 export const CompletePayloadSchema = z.object({

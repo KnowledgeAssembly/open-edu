@@ -38,4 +38,25 @@ describe('WidgetPolicySchema', () => {
       }),
     ).toThrow();
   });
+
+  it('grants all seven v1 capabilities by default', () => {
+    const policy = WidgetPolicySchema.parse(DEFAULT_WIDGET_POLICY);
+    expect(policy.grantedCapabilities).toEqual([
+      'resize',
+      'telemetry-interaction',
+      'state-persistence',
+      'locale',
+      'theme',
+      'hints',
+      'observe-mode',
+    ]);
+  });
+
+  it('parses a restricted grantedCapabilities override', () => {
+    const policy = WidgetPolicySchema.parse({
+      ...DEFAULT_WIDGET_POLICY,
+      grantedCapabilities: ['resize'],
+    });
+    expect(policy.grantedCapabilities).toEqual(['resize']);
+  });
 });

@@ -14,6 +14,8 @@
   "widget.no_registered": "ID: {{id}} ପାଇଁ କୌଣସି ୱିଜେଟ୍ ପଞ୍ଜୀକୃତ ନାହିଁ",
   "widget.loading_remote": "ରିମୋଟ୍ ୱିଜେଟ୍ \"{{id}}\" ଲୋଡ୍ ହେଉଛି…",
   "widget.remote_load_error": "ରିମୋଟ୍ ୱିଜେଟ୍ \"{{id}}\" ଲୋଡ୍ କରିବାରେ ବିଫଳ।",
+  "widget.unavailable": "ଏହି କାର୍ଯ୍ୟକଳାପ ଉପଲବ୍ଧ ନାହିଁ।",
+  "widget.iframe_title": "ଇଣ୍ଟରାକ୍ଟିଭ୍ ୱିଜେଟ୍: {{id}}",
   "reflection.char_count": "{{count}} / {{max}}",
   "reflection.placeholder": "ଆପଣଙ୍କର ମତାମତ/ମନର କଥା ଏଠାରେ ଲେଖନ୍ତୁ…",
   "reflection.saved": "ସୁରକ୍ଷିତ ହେଲା — ଆପଣଙ୍କ ମତାମତ ପାଇଁ ଧନ୍ୟବାଦ।",

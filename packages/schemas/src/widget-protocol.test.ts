@@ -81,6 +81,46 @@ describe('InitPayloadSchema', () => {
     expect(result.storedState).toEqual({ count: 3 });
   });
 
+  it('parses an init payload with nonce and stateSchemaVersion, keeping both', () => {
+    const payload = {
+      apiVersion: 'open-edu.widget/1',
+      widgetId: 'community.example.counter',
+      widgetVersion: '1.0.0',
+      instanceId: 'inst-1',
+      nodeId: 'node-1',
+      config: {},
+      locale: 'en',
+      theme: 'dark',
+      themeTokens: {},
+      prefersReducedMotion: false,
+      capabilities: [],
+      nonce: 'req-nonce-1',
+      stateSchemaVersion: '2',
+    };
+    const result = InitPayloadSchema.parse(payload);
+    expect(result.nonce).toBe('req-nonce-1');
+    expect(result.stateSchemaVersion).toBe('2');
+  });
+
+  it('leaves nonce and stateSchemaVersion undefined when absent', () => {
+    const payload = {
+      apiVersion: 'open-edu.widget/1',
+      widgetId: 'community.example.counter',
+      widgetVersion: '1.0.0',
+      instanceId: 'inst-1',
+      nodeId: 'node-1',
+      config: {},
+      locale: 'en',
+      theme: 'light',
+      themeTokens: {},
+      prefersReducedMotion: false,
+      capabilities: [],
+    };
+    const result = InitPayloadSchema.parse(payload);
+    expect(result.nonce).toBeUndefined();
+    expect(result.stateSchemaVersion).toBeUndefined();
+  });
+
   it('rejects an unknown theme', () => {
     const payload = {
       apiVersion: 'open-edu.widget/1',

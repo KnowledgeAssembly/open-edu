@@ -1,70 +1,34 @@
-import { Component, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AnimationConfigSchema } from '@open-edu/schemas';
-import { useRuntime, type DistributiveOmit } from '../context/RuntimeContext';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { useRuntime } from '../context/RuntimeContext';
 import { I18nContext, useTranslation } from '@open-edu/i18n';
 import type { WidgetRenderProps, RemoteWidgetManifest } from '@open-edu/widgets';
-import { useRemoteWidget, resolveWidgetId as resolveAlias } from '@open-edu/widgets';
+import {
+  useRemoteWidget,
+  normalizeWidgetReference,
+  applyFallbackConfig,
+  FALLBACK_ADAPTERS,
+} from '@open-edu/widgets';
+import type { ResolvedWidget } from '@open-edu/widgets';
+import type { WidgetReference } from '@open-edu/schemas';
 import { WidgetCanvas } from '../components/WidgetCanvas';
-import { OasAnimationWrapper } from '../components/OasAnimationWrapper';
-import type { OasAnimationController } from '../components/useOasAnimation';
-import { useStepSyncMachine } from '../components/useStepSyncMachine';
 import { WidgetErrorFallback } from '../components/WidgetErrorFallback';
 import { PROTOCOL_API_VERSION } from '@open-edu/widget-sdk';
-import type { TelemetryEvent, WidgetAnswer, WidgetReference } from '@open-edu/schemas';
+import type { InitPayload } from '@open-edu/widget-sdk';
+import type { WidgetAnswer } from '@open-edu/schemas';
 import { buildWidgetAnswer } from '../widgets/answer-provenance';
 import { normalizeWidgetInteraction } from '../widgets/normalize-interaction';
 import { SandboxWidgetAdapter, isSandboxWidgetsEnabled } from '../widgets/SandboxWidgetAdapter';
+import {
+  NativeWidgetAdapter,
+  WidgetErrorBoundary,
+  resolveWidgetId,
+} from '../widgets/NativeWidgetAdapter';
 import { useTheme } from '../theme';
-import type { InitPayload } from '@open-edu/widget-sdk';
-
-interface WidgetErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-}
-
-class WidgetErrorBoundary extends Component<
-  { widgetId: string; message: string; children: ReactNode },
-  WidgetErrorBoundaryState
-> {
-  state: WidgetErrorBoundaryState = { hasError: false };
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error(`[WidgetErrorBoundary] Error in widget ${this.props.widgetId}:`, error, info);
-  }
-
-  handleRetry = () => {
-    this.setState({ hasError: false, error: undefined });
-  };
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <WidgetErrorFallback
-          widgetId={this.props.widgetId}
-          message={this.props.message}
-          onRetry={this.handleRetry}
-          isDevMode={process.env.NODE_ENV === 'development'}
-          devDetails={this.state.error?.message}
-        />
-      );
-    }
-    return this.props.children;
-  }
-}
-
-function resolveWidgetId(node: { type: string; widget?: string }): string {
-  if (node.type === 'custom' && node.widget) return resolveAlias(node.widget);
-  if (node.type === 'exercise') return resolveAlias(node.widget ?? 'exercise');
-  return resolveAlias('exercise');
-}
 
 interface RemoteNode {
   type: string;
   widget?: string;
+  version?: string;
   config?: Record<string, unknown>;
   remoteWidget?: RemoteWidgetManifest;
   widgetRef?: WidgetReference;
@@ -73,234 +37,161 @@ interface RemoteNode {
 export interface WidgetRendererProps {
   node: RemoteNode;
   nodeId: string;
+  onDiagnostic?: (code: string) => void;
 }
 
-function countWidgetSteps(config: Record<string, unknown> | undefined): number {
-  const steps = config?.steps;
-  if (Array.isArray(steps)) return steps.length;
-  const nodes = config?.nodes;
-  if (Array.isArray(nodes)) return nodes.length;
-  return 0;
-}
+export function WidgetRenderer({ node, nodeId, onDiagnostic }: WidgetRendererProps): JSX.Element {
+  const { widgetRegistry, widgetResolver } = useRuntime();
+  const { t } = useTranslation();
 
-/**
- * Hosts the shared step-sync state machine so SVG/Lottie animation and widget
- * step reveal share one source of truth when `animation.trigger === 'step'`.
- */
-function StepSyncedWidget({
-  widgetId,
-  nodeId,
-  nodeConfig,
-  animationConfig,
-  definitionVersion,
-  WidgetComponent,
-  storedState,
-  resolveAsset,
-  completeNode,
-  saveAnswer,
-  locale,
-  emitTelemetry,
-}: {
-  widgetId: string;
-  nodeId: string;
-  nodeConfig: Record<string, unknown>;
-  animationConfig: unknown;
-  definitionVersion?: string;
-  WidgetComponent: (props: WidgetRenderProps) => ReactNode;
-  storedState: unknown;
-  resolveAsset: (path: string) => string;
-  completeNode: (score?: number) => void;
-  saveAnswer: (nodeId: string, answer: WidgetAnswer) => void;
-  locale?: string;
-  emitTelemetry?: (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => void;
-}) {
-  const parsedAnim = AnimationConfigSchema.safeParse(animationConfig);
-  const effectCount = parsedAnim.success ? (parsedAnim.data.effects?.length ?? 0) : 0;
-  const widgetStepCount = countWidgetSteps(nodeConfig);
-  const totalSteps = Math.max(1, effectCount || widgetStepCount || 1);
+  const { ref, warnings } = useMemo(
+    () =>
+      normalizeWidgetReference({
+        widget: node.widget,
+        version: node.version,
+        remoteWidget: node.remoteWidget,
+        widgetRef: node.widgetRef,
+      }),
+    [node.widget, node.version, node.remoteWidget, node.widgetRef],
+  );
 
-  const initialRevealed =
-    storedState &&
-    typeof storedState === 'object' &&
-    storedState !== null &&
-    'revealedCount' in storedState &&
-    typeof (storedState as { revealedCount: unknown }).revealedCount === 'number'
-      ? (storedState as { revealedCount: number }).revealedCount
-      : 0;
-
-  const machine = useStepSyncMachine(totalSteps, initialRevealed);
-  const animationControllerRef = useRef<OasAnimationController | null>(null);
-
-  const emitInteraction = (data: Record<string, unknown>) => {
-    const normalized = normalizeWidgetInteraction(widgetId, data);
-    if (normalized) emitTelemetry?.(normalized);
-    if (data.action === 'reveal' && typeof data.step === 'number') {
-      machine.goTo(data.step);
-    } else if (data.action === 'reveal') {
-      machine.revealNext();
+  if (warnings.length > 0) {
+    if (process.env.NODE_ENV !== 'production') {
+      warnings.forEach((w) => console.warn('[open-edu:widget-resolver]', w.code, w.message));
     }
-  };
+    if (onDiagnostic) warnings.forEach((w) => onDiagnostic(w.code));
+    else warnings.forEach((w) => console.warn('[open-edu:widget-diagnostic]', w.code));
+  }
 
-  const widgetProps: WidgetRenderProps = {
-    nodeId,
-    config: nodeConfig,
-    locale,
-    emitInteraction,
-    resolveAsset,
-    syncedRevealedCount: machine.state.revealedCount,
-    complete: (score?: number, state?: unknown) => {
-      if (state !== undefined) {
-        const answer = buildWidgetAnswer({
-          intendedWidgetId: widgetId,
-          intendedWidgetVersion: definitionVersion,
-          renderedWidgetId: widgetId,
-          renderedWidgetVersion: definitionVersion,
-          data: state,
-          score,
-        });
-        saveAnswer(nodeId, answer);
-        if (answer.renderedViaFallback) {
-          emitTelemetry?.({ event: 'node_complete', nodeId, score, renderedViaFallback: true });
-        }
-      }
-      if (
-        state &&
-        typeof state === 'object' &&
-        state !== null &&
-        'finished' in state &&
-        (state as { finished?: boolean }).finished
-      ) {
-        machine.finish();
-      }
-      completeNode(score);
-    },
-    storedState,
-  };
+  if (ref.source === 'url') return <RemoteWidgetRenderer node={node} nodeId={nodeId} />;
 
-  const handleAnimStepChange = (stepIndex: number) => {
-    // Animation controls → machine (revealedCount = stepIndex + 1, or 0 when idle)
-    machine.goTo(stepIndex < 0 ? 0 : stepIndex + 1);
-  };
+  if (!widgetResolver) {
+    if (isSandboxWidgetsEnabled() && node.widgetRef?.source === 'registry') {
+      return <SandboxWidgetRenderer node={node} nodeId={nodeId} />;
+    }
+    const widgetId = resolveWidgetId(node);
+    const definition = widgetRegistry?.get(widgetId);
+    if (!definition) {
+      return (
+        <div role="status" data-testid="widget-renderer-placeholder">
+          {t('runtime.widget.no_registered', { id: widgetId })}
+        </div>
+      );
+    }
+    return (
+      <NativeWidgetAdapter
+        definition={definition}
+        node={node}
+        nodeId={nodeId}
+        onDiagnostic={onDiagnostic}
+      />
+    );
+  }
 
   return (
-    <OasAnimationWrapper
-      config={animationConfig}
-      resolveSrc={resolveAsset}
-      preserveChildren
-      controllerRef={animationControllerRef}
-      controlledStep={machine.animationStepIndex}
-      onStepChange={handleAnimStepChange}
-      staticChildren={<WidgetComponent {...widgetProps} />}
+    <ResolvedWidgetRenderer
+      widgetRef={ref}
+      node={node}
+      nodeId={nodeId}
+      onDiagnostic={onDiagnostic}
     />
   );
 }
 
-export function WidgetRenderer({ node, nodeId }: WidgetRendererProps): JSX.Element {
-  const { widgetRegistry, completeNode, answers, saveAnswer, resolveAsset, emitTelemetry } =
-    useRuntime();
+function ResolvedWidgetRenderer({
+  widgetRef,
+  node,
+  nodeId,
+  onDiagnostic,
+}: {
+  widgetRef: WidgetReference;
+  node: RemoteNode;
+  nodeId: string;
+  onDiagnostic?: (code: string) => void;
+}): JSX.Element {
+  const { widgetResolver, widgetRegistry } = useRuntime();
+  const resolver = widgetResolver!;
   const { t } = useTranslation();
-  const animationControllerRef = useRef<OasAnimationController | null>(null);
+  const [resolved, setResolved] = useState<ResolvedWidget | undefined>(undefined);
 
-  const i18nContext = useContext(I18nContext);
-  const locale = i18nContext?.locale;
+  useEffect(() => {
+    let cancelled = false;
+    setResolved(undefined);
+    void resolver
+      .resolve(widgetRef, node.config)
+      .then((r) => {
+        if (!cancelled) setResolved(r);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setResolved({ ok: false, failure: 'unavailable', message: 'resolve-error' });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resolver, widgetRef, node.config]);
 
-  if (isSandboxWidgetsEnabled() && node.widgetRef?.source === 'registry') {
-    return <SandboxWidgetRenderer node={node} nodeId={nodeId} />;
+  if (!resolved) {
+    return <div role="status" data-testid="widget-resolving" aria-live="polite" />;
   }
 
-  if (node.remoteWidget) {
-    return <RemoteWidgetRenderer node={node} nodeId={nodeId} />;
-  }
-
-  const widgetId = resolveWidgetId(node);
-  const definition = widgetRegistry?.get(widgetId);
-
-  if (!definition) {
+  if (resolved.ok && resolved.tier === 'native') {
     return (
-      <div role="status" data-testid="widget-renderer-placeholder">
-        {t('runtime.widget.no_registered', { id: widgetId })}
-      </div>
+      <NativeWidgetAdapter
+        definition={resolved.definition}
+        node={node}
+        nodeId={nodeId}
+        onDiagnostic={onDiagnostic}
+      />
     );
   }
 
-  const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
-  const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
+  if (resolved.ok && resolved.tier === 'sandboxed') {
+    return (
+      <SandboxWidgetRenderer
+        node={node}
+        nodeId={nodeId}
+        resolved={resolved}
+        onDiagnostic={onDiagnostic}
+      />
+    );
+  }
 
-  const emitInteraction = (data: Record<string, unknown>) => {
-    const normalized = normalizeWidgetInteraction(widgetId, data);
-    if (normalized) emitTelemetry?.(normalized);
-    // Legacy one-way bridge for non-step-synced animations
-    if (data.action === 'reveal') {
-      if (typeof data.step === 'number') {
-        animationControllerRef.current?.goToStep(data.step - 1);
-      } else {
-        animationControllerRef.current?.nextStep();
-      }
-    }
+  const renderUnavailable = () => (
+    <div role="status" data-testid="widget-unavailable" aria-live="polite">
+      {t('runtime.widget.unavailable', { id: widgetRef.id })}
+    </div>
+  );
+
+  const reportFailure = () => {
+    if (onDiagnostic) onDiagnostic(resolved.failure);
+    return renderUnavailable();
   };
 
-  const WidgetComponent = definition.render;
-  const widgetProps: WidgetRenderProps = {
-    nodeId,
-    config: node.config ?? {},
-    locale,
-    emitInteraction,
-    resolveAsset,
-    complete: (score?: number, state?: unknown) => {
-      if (state !== undefined) {
-        const answer = buildWidgetAnswer({
-          intendedWidgetId: widgetId,
-          intendedWidgetVersion: definition.version,
-          renderedWidgetId: widgetId,
-          renderedWidgetVersion: definition.version,
-          data: state,
-          score,
-        });
-        saveAnswer(nodeId, answer);
-        if (answer.renderedViaFallback) {
-          emitTelemetry?.({ event: 'node_complete', nodeId, score, renderedViaFallback: true });
-        }
-      }
-      completeNode(score);
-    },
-    storedState,
-  };
+  const fallbackId = 'fallback' in widgetRef ? widgetRef.fallback : undefined;
+  const adapter = FALLBACK_ADAPTERS[widgetRef.id];
+  if (!fallbackId || !adapter) return reportFailure();
 
-  const animationConfig = node.config?.animation;
-  const parsedAnim = AnimationConfigSchema.safeParse(animationConfig);
-  const isStepTriggered = parsedAnim.success && parsedAnim.data.trigger === 'step';
+  let adapted: unknown;
+  try {
+    adapted = applyFallbackConfig(adapter, node.config ?? {});
+  } catch {
+    return reportFailure();
+  }
+
+  const definition = widgetRegistry?.get(fallbackId);
+  if (!definition) return reportFailure();
 
   return (
-    <WidgetErrorBoundary widgetId={widgetId} message={t('runtime.widget.load_error')}>
-      <WidgetCanvas widgetId={widgetId} minHeight={200}>
-        {animationConfig && isStepTriggered ? (
-          <StepSyncedWidget
-            widgetId={widgetId}
-            nodeId={nodeId}
-            nodeConfig={node.config ?? {}}
-            animationConfig={animationConfig}
-            definitionVersion={definition.version}
-            WidgetComponent={WidgetComponent}
-            storedState={storedState}
-            resolveAsset={resolveAsset}
-            completeNode={completeNode}
-            saveAnswer={saveAnswer}
-            locale={locale}
-            emitTelemetry={emitTelemetry}
-          />
-        ) : animationConfig ? (
-          <OasAnimationWrapper
-            config={animationConfig}
-            resolveSrc={resolveAsset}
-            preserveChildren
-            controllerRef={animationControllerRef}
-            staticChildren={<WidgetComponent {...widgetProps} />}
-          />
-        ) : (
-          <WidgetComponent {...widgetProps} />
-        )}
-      </WidgetCanvas>
-    </WidgetErrorBoundary>
+    <NativeWidgetAdapter
+      definition={definition}
+      node={node}
+      nodeId={nodeId}
+      intendedWidgetId={widgetRef.id}
+      intendedWidgetVersion={widgetRef.version}
+      configOverride={adapted as Record<string, unknown>}
+      onDiagnostic={onDiagnostic}
+    />
   );
 }
 
@@ -439,15 +330,21 @@ function themeIdToProtocolTheme(id: string): 'light' | 'dark' | 'zen' {
   return 'light';
 }
 
+type SandboxedResolved = Extract<ResolvedWidget, { ok: true; tier: 'sandboxed' }>;
+
 function SandboxWidgetRenderer({
   node,
   nodeId,
+  resolved,
+  onDiagnostic,
 }: {
   node: RemoteNode;
   nodeId: string;
+  resolved?: SandboxedResolved;
+  onDiagnostic?: (code: string) => void;
 }): JSX.Element {
-  const { completeNode, answers, saveAnswer, emitTelemetry } = useRuntime();
-  const widgetRef = node.widgetRef!;
+  const { completeNode, answers, saveAnswer, emitTelemetry, currentNodeId } = useRuntime();
+  const { t } = useTranslation();
 
   const storedAnswer = answers[nodeId] as WidgetAnswer | undefined;
   const storedState = storedAnswer?.type === 'widget' ? storedAnswer.data : undefined;
@@ -468,73 +365,85 @@ function SandboxWidgetRenderer({
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const buildAdapter = () => {
-    const initPayload: InitPayload = {
-      apiVersion: PROTOCOL_API_VERSION,
-      widgetId: widgetRef.id,
-      widgetVersion: widgetRef.version,
-      instanceId: '',
-      nodeId,
-      config: node.config ?? {},
-      storedState,
-      locale,
-      theme: themeIdToProtocolTheme(theme.id),
-      themeTokens: {},
-      prefersReducedMotion,
-      capabilities: ['resize', 'telemetry-interaction', 'state-persistence', 'locale', 'theme'],
-    };
-
-    return (
-      <SandboxWidgetAdapter
-        nodeId={nodeId}
-        expectedOrigin="opaque"
-        title={widgetRef.id}
-        initPayload={initPayload}
-        onReady={() => {}}
-        onComplete={(payload) => {
-          const answer = buildWidgetAnswer({
-            intendedWidgetId: widgetRef.id,
-            intendedWidgetVersion: widgetRef.version,
-            renderedWidgetId: widgetRef.id,
-            renderedWidgetVersion: widgetRef.version,
-            data: payload.state,
-            score: payload.score,
-          });
-          saveAnswer(nodeId, answer);
-          completeNode(payload.score);
-        }}
-        onInteraction={(payload) =>
-          emitTelemetry?.({
-            event: 'widget_interaction',
-            widgetId: widgetRef.id,
-            action: payload.action,
-            data: payload.data,
-          })
-        }
-        onStateSave={(payload) =>
-          saveAnswer(
-            nodeId,
-            buildWidgetAnswer({
-              intendedWidgetId: widgetRef.id,
-              intendedWidgetVersion: widgetRef.version,
-              renderedWidgetId: widgetRef.id,
-              renderedWidgetVersion: widgetRef.version,
-              data: payload.state,
-            }),
-          )
-        }
-        onError={(message) => console.warn('[sandbox-widget]', message)}
-        onDiagnostic={(reason) => console.warn('[sandbox-widget]', reason)}
-      />
-    );
-  };
-
-  // Phase 1 ships no resolver, so widgetRef carries no document source yet. When a
-  // documentUrl/srcDoc becomes available (Phase 2 resolver), render the adapter.
-  const sourceUrl: string | undefined = undefined;
-  if (sourceUrl) {
-    return buildAdapter();
+  if (currentNodeId !== nodeId) {
+    return <div />;
   }
 
-  return <div role="status" data-testid="sandbox-widget-unresolved" aria-live="polite" />;
+  if (!resolved) {
+    return <div role="status" data-testid="sandbox-widget-unresolved" aria-live="polite" />;
+  }
+
+  const initPayload: InitPayload = {
+    apiVersion: PROTOCOL_API_VERSION,
+    widgetId: resolved.widgetId,
+    widgetVersion: resolved.version,
+    instanceId: '',
+    nodeId,
+    config: node.config ?? {},
+    storedState,
+    locale,
+    theme: themeIdToProtocolTheme(theme.id),
+    themeTokens: {},
+    prefersReducedMotion,
+    capabilities: resolved.grantedCapabilities,
+    stateSchemaVersion: resolved.manifest.stateSchemaVersion as string | undefined,
+  };
+
+  const expectedOrigin: string | 'opaque' = resolved.srcDoc
+    ? 'opaque'
+    : resolved.documentUrl
+      ? new URL(resolved.documentUrl).origin
+      : 'opaque';
+
+  return (
+    <SandboxWidgetAdapter
+      nodeId={nodeId}
+      documentUrl={resolved.documentUrl}
+      srcDoc={resolved.srcDoc}
+      expectedOrigin={expectedOrigin}
+      title={t('runtime.widget.iframe_title', { id: resolved.widgetId })}
+      initPayload={initPayload}
+      onReady={() => {}}
+      onComplete={(payload) => {
+        const answer = buildWidgetAnswer({
+          intendedWidgetId: resolved.widgetId,
+          intendedWidgetVersion: resolved.version,
+          renderedWidgetId: resolved.widgetId,
+          renderedWidgetVersion: resolved.version,
+          data: payload.state,
+          score: payload.score,
+        });
+        saveAnswer(nodeId, answer);
+        completeNode(payload.score);
+      }}
+      onInteraction={(payload) =>
+        emitTelemetry?.({
+          event: 'widget_interaction',
+          widgetId: resolved.widgetId,
+          action: payload.action,
+          data: payload.data,
+        })
+      }
+      onStateSave={(payload) =>
+        saveAnswer(
+          nodeId,
+          buildWidgetAnswer({
+            intendedWidgetId: resolved.widgetId,
+            intendedWidgetVersion: resolved.version,
+            renderedWidgetId: resolved.widgetId,
+            renderedWidgetVersion: resolved.version,
+            data: payload.state,
+          }),
+        )
+      }
+      onError={(message) => console.warn('[sandbox-widget]', message)}
+      onDiagnostic={(reason) => {
+        if (onDiagnostic) {
+          onDiagnostic(reason);
+        } else {
+          console.warn('[sandbox-widget]', reason);
+        }
+      }}
+    />
+  );
 }
