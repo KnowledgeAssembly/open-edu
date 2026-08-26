@@ -119,7 +119,7 @@ export function loadCatalogWidgets(
         registryId: staticCatalog.registryId,
         trustTier: entry.trustTier,
         version: entry.version,
-        integrity: undefined,
+        integrity: entry.integrity,
         offline: entry.offline,
         experimental: entry.status === 'experimental',
         status: entry.status,

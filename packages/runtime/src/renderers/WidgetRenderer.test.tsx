@@ -549,6 +549,7 @@ describe('WidgetRenderer', () => {
         widgetId: 'core.matching',
         version: '1.0.0',
         definition,
+        grantedCapabilities: [],
       }),
     };
 

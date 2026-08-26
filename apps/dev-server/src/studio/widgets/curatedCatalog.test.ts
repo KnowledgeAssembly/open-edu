@@ -84,6 +84,28 @@ describe('curatedCatalog', () => {
     expect(map.get('community.example.revoked')).toBeUndefined();
   });
 
+  it('passes through manifest integrity from the catalog', () => {
+    const integrity = 'sha256-' + 'ab'.repeat(32);
+    const catalog = {
+      registryId: 'community-registry',
+      origin: 'https://widgets.example.edu',
+      widgets: [
+        {
+          id: 'community.example.counter',
+          version: '1.0.0',
+          manifestUrl: 'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
+          integrity,
+          status: 'verified',
+          trustTier: 'sandboxed',
+          offline: true,
+        },
+      ],
+    };
+    const map = loadCatalogWidgets([catalog]);
+    const widget = map.get('community.example.counter');
+    expect(widget?.integrity).toBe(integrity);
+  });
+
   it('lets a built-in win when a registry entry collides with the same id', () => {
     const catalog = {
       registryId: 'collision-registry',

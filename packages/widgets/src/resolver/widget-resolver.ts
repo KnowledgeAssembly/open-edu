@@ -30,6 +30,7 @@ export type ResolvedWidget =
       widgetId: string;
       version: string;
       definition: WidgetDefinition;
+      grantedCapabilities: WidgetCapability[];
     }
   | {
       ok: true;
@@ -54,6 +55,7 @@ export interface CatalogWidgetMeta {
   id: string;
   version: string;
   manifestUrl: string;
+  integrity?: string;
   status: 'experimental' | 'verified' | 'deprecated' | 'revoked';
   trustTier: 'native' | 'sandboxed';
   offline: boolean;
@@ -102,6 +104,7 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
           widgetId: ref.id,
           version: ref.version,
           definition,
+          grantedCapabilities: [],
         };
       }
 
@@ -209,7 +212,8 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
         if (isOnline()) {
           return { ok: false, failure: 'revoked', message: 'revoked' };
         }
-        if (cached && NOW - cached.cachedAt <= 7 * DAY) {
+        const graceAnchor = cached?.revokedAt ?? cached?.cachedAt ?? 0;
+        if (cached && NOW - graceAnchor <= 7 * DAY) {
           cachedDocumentBytes = cached.bytes;
         } else {
           return { ok: false, failure: 'revoked', message: 'revoked-offline-grace-expired' };

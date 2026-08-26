@@ -311,7 +311,8 @@ describe('WidgetResolver (policy-aware)', () => {
       version: VERSION,
       integrity: doc.integrity,
       bytes: doc.bytes,
-      cachedAt: now - 1000,
+      cachedAt: now - 30 * DAY,
+      revokedAt: now - 1000,
     });
     const { impl, calls } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
     const resolver = makeResolver({
@@ -344,7 +345,8 @@ describe('WidgetResolver (policy-aware)', () => {
       version: VERSION,
       integrity: doc.integrity,
       bytes: doc.bytes,
-      cachedAt: now - 8 * DAY,
+      cachedAt: now - 30 * DAY,
+      revokedAt: now - 8 * DAY,
     });
     const { impl } = makeFetchMock({ [MANIFEST_URL]: man.bytes });
     const resolver = makeResolver({
