@@ -14,6 +14,9 @@ const { mockCatalog } = vi.hoisted(() => {
     name: 'Multiple Choice',
     description: 'Select the correct answer from a list of options',
     domain: 'core',
+    source: 'builtin',
+    trustTier: 'native',
+    version: '0.1.0',
     guide: { configFields: [] },
   };
   return {
@@ -23,6 +26,9 @@ const { mockCatalog } = vi.hoisted(() => {
         id: 'core.matching',
         name: 'Matching',
         domain: 'core',
+        source: 'builtin',
+        trustTier: 'native',
+        version: '0.1.0',
         guide: { configFields: [] },
       } as CuratedWidget,
     },

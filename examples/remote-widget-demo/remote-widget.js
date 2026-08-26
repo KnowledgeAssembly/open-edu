@@ -1,6 +1,22 @@
-// Self-contained remote widget bundle for demonstration.
-// In production, this file would be hosted on a CDN.
-// Relies on React being available in the host page global scope.
+// LEGACY trusted-remote (same-realm) demo.
+// ---------------------------------------------------------------
+// This file demonstrates the OLD trusted-remote pattern where the
+// widget bundle is loaded in the same JavaScript realm as the host
+// and receives host-scope globals directly.
+//
+// NOTE: window.React in the host scope is DEPRECATED for community
+// widgets. Community widgets must be framework-agnostic and must NOT
+// assume React (or any framework) is bundled/available in the host.
+//
+// Instead, community widgets should talk to the host through the
+// sandboxed open-edu.widget/1 postMessage protocol. Use the SDK's
+// createWidgetHostClient (from @open-edu/widget-sdk) to send and
+// receive protocol envelopes inside a sandboxed iframe.
+//
+// This file is kept byte-identical (apart from this comment) so it
+// continues to function for legacy trusted-remote opt-in tests. New
+// widgets should target the sandboxed protocol instead.
+// ---------------------------------------------------------------
 export default {
   id: 'open-edu.remote-practice',
   version: '1.0.0',

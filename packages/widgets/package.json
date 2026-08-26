@@ -11,6 +11,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./install": {
+      "types": "./dist/install/index.d.ts",
+      "import": "./dist/install/index.js"
+    },
+    "./catalog": {
+      "types": "./dist/resolver/catalog.d.ts",
+      "import": "./dist/resolver/catalog.js"
     }
   },
   "files": [
@@ -36,6 +44,8 @@
     "@open-edu/design-system": "workspace:*",
     "@open-edu/i18n": "workspace:*",
     "@open-edu/schemas": "workspace:^",
+    "@open-edu/widget-sdk": "workspace:*",
+    "ajv": "^8.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
@@ -44,6 +54,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "axe-core": "^4.12.1",
+    "fake-indexeddb": "^6.2.5",
     "tailwindcss": "^3.4.19"
   }
 }

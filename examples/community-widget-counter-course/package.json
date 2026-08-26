@@ -1,0 +1,14 @@
+{
+  "name": "@open-edu/example-community-widget-counter-course",
+  "id": "community-widget-counter-course",
+  "title": "Community Widget Counter Course",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Open-Edu Team",
+  "entry": "nodes/counter.json",
+  "scripts": {
+    "test": "echo ok",
+    "lint": "echo ok",
+    "typecheck": "echo ok"
+  }
+}

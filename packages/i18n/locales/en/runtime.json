@@ -15,6 +15,8 @@
   "widget.no_registered": "No widget registered for ID: {{id}}",
   "widget.loading_remote": "Loading remote widget \"{{id}}\"…",
   "widget.remote_load_error": "Failed to load remote widget \"{{id}}\".",
+  "widget.unavailable": "This activity is unavailable.",
+  "widget.iframe_title": "Interactive widget: {{id}}",
   "reflection.char_count": "{{count}} / {{max}}",
   "reflection.placeholder": "Type your reflection here…",
   "reflection.saved": "Saved — thank you for your reflection.",
@@ -51,5 +53,7 @@
   "canvas.step_of": "Step {{step}} of {{total}}",
   "reward.badge_unlocked": "Badge unlocked: {{name}}",
   "reward.xp_gained": "Gained {{amount}} XP",
-  "reward.generic": "{{type}} reward"
+  "reward.generic": "{{type}} reward",
+  "workflow.now_viewing": "Now viewing: {{title}}",
+  "workflow.completed": "Lesson completed"
 }

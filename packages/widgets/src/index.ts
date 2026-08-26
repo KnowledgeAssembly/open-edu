@@ -20,14 +20,43 @@ export type {
 } from './types.js';
 export { WidgetRegistrationError } from './types.js';
 export { createWidgetRegistry, registerAllBuiltins, createDefaultRegistry } from './registry.js';
-export { RemoteWidgetLoader } from './remote-loader.js';
+export { RemoteWidgetLoader, TRUSTED_REMOTE_API_VERSION } from './remote-loader.js';
 export type { RemoteWidgetLoadResult, EvaluateModule } from './remote-loader.js';
+export { assertTrustedRemoteAllowed, originOf, DEFAULT_WIDGET_POLICY } from './policy.js';
+export {
+  IntegrityError,
+  canonicalIntegrity,
+  parseIntegrity,
+  verifyIntegrity,
+} from './integrity.js';
 export { useRemoteWidget } from './use-remote-widget.js';
+export { normalizeWidgetReference } from './resolver/normalize-reference.js';
+export type { NormalizeWarning } from './resolver/normalize-reference.js';
+export { createWidgetResolver } from './resolver/widget-resolver.js';
+export type {
+  WidgetResolver,
+  ResolvedWidget,
+  ResolveFailure,
+  WidgetResolverOptions,
+  ResolverCatalog,
+  CatalogWidgetMeta,
+} from './resolver/widget-resolver.js';
+export { fetchBytes } from './resolver/fetch-manifest.js';
+export { WidgetCatalogFileSchema, loadStaticCatalog } from './resolver/catalog.js';
+export type { WidgetCatalogFile } from './resolver/catalog.js';
+export { createWidgetArtifactCache } from './artifact-cache.js';
+export type { WidgetArtifactCache, CacheEntry } from './artifact-cache.js';
 export type { UseRemoteWidgetResult } from './use-remote-widget.js';
 export { Button } from '@open-edu/design-system';
 export type { ButtonProps } from '@open-edu/design-system';
 export { useObserveMode } from './use-observe-mode.js';
 export type { ObserveModeOptions } from './use-observe-mode.js';
+export {
+  applyFallbackConfig,
+  communityCounterToMultipleChoice,
+  FALLBACK_ADAPTERS,
+} from './fallback-transform.js';
+export type { FallbackAdapter } from './fallback-transform.js';
 export * as svgExplorer from './svg-explorer/index.js';
 
 export {
@@ -77,6 +106,8 @@ export {
   getLearningIntentsForWidget,
   getWidgetsByLearningIntent,
 } from './metadata/learning-intents.js';
+
+export { assertPersistableState } from './state-migration.js';
 
 export type {
   WidgetCapabilities,

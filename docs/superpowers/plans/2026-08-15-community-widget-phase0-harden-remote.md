@@ -196,6 +196,20 @@ describe('WidgetPolicySchema', () => {
       }),
     ).toThrow();
   });
+
+  it('defaults registryCatalogOrigins to empty array', () => {
+    const policy = WidgetPolicySchema.parse(DEFAULT_WIDGET_POLICY);
+    expect(policy.registryCatalogOrigins).toEqual([]);
+  });
+
+  it('rejects loopback origins in registryCatalogOrigins', () => {
+    expect(() =>
+      WidgetPolicySchema.parse({
+        ...DEFAULT_WIDGET_POLICY,
+        registryCatalogOrigins: ['https://127.0.0.1'],
+      }),
+    ).toThrow();
+  });
 });
 ```
 
@@ -245,6 +259,7 @@ export const WidgetPolicySchema = z.object({
   readyTimeoutMs: z.number().int().positive().max(60_000),
   experimentalWidgets: z.enum(['allow', 'deny']).default('deny'),
   maxHostBoundMessagesPerMinute: z.number().int().positive().default(120),
+  registryCatalogOrigins: z.array(httpsPublicOrigin).default([]),
 });
 
 export type WidgetPolicy = z.infer<typeof WidgetPolicySchema>;
@@ -257,6 +272,7 @@ export const DEFAULT_WIDGET_POLICY: WidgetPolicy = WidgetPolicySchema.parse({
   readyTimeoutMs: 10_000,
   experimentalWidgets: 'deny',
   maxHostBoundMessagesPerMinute: 120,
+  registryCatalogOrigins: [],
 });
 
 export function isTrustTierEnabled(policy: WidgetPolicy, tier: TrustTier): boolean {
@@ -264,7 +280,7 @@ export function isTrustTierEnabled(policy: WidgetPolicy, tier: TrustTier): boole
 }
 ```
 
-Export `WidgetPolicySchema`, `DEFAULT_WIDGET_POLICY`, `TrustTierSchema`, `isTrustTierEnabled`, and types from `packages/schemas/src/index.ts`.
+Export `WidgetPolicySchema`, `DEFAULT_WIDGET_POLICY`, `TrustTierSchema`, `isTrustTierEnabled`, and types (`WidgetPolicy`, `TrustTier`) from `packages/schemas/src/index.ts`. The `registryCatalogOrigins` field is accessible via the `WidgetPolicy` type — it is not a standalone export.
 
 - [ ] **Step 4: Run tests**
 
@@ -603,6 +619,8 @@ feat(schemas): add widget answer fallback provenance
 EOF
 )"
 ```
+
+> **Analytics note:** `widgetVersion` is optional on `WidgetAnswerSchema` for backward compatibility with answers saved before this phase. Analytics queries that group or filter by `widgetVersion` must handle `null`/`undefined` for pre-provenance records. Add a comment in the schema file noting this so future consumers are aware.
 
 ---
 

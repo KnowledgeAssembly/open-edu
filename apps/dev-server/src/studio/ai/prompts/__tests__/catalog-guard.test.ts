@@ -6,7 +6,13 @@ import { join, extname } from 'node:path';
 import { compile } from '@open-edu/course-compiler';
 import { CourseModelSchema } from '@open-edu/course-compiler';
 import { parseCourseSpecJSON } from '@open-edu/course-compiler';
-import { renderWidgetCatalogSection, buildCourseSpecPrompt } from '../index.js';
+import {
+  renderWidgetCatalogSection,
+  buildCourseSpecPrompt,
+  isCatalogWidgetId,
+  assertCatalogWidgetId,
+  assertNoLegacyRemoteUrlPrompt,
+} from '../index.js';
 
 vi.mock('../../../widgets/curatedCatalog.js', () => ({
   listCuratedWidgets: () => [
@@ -14,13 +20,32 @@ vi.mock('../../../widgets/curatedCatalog.js', () => ({
       id: 'core.multiple-choice',
       name: 'Multiple Choice',
       domain: 'core',
+      source: 'builtin',
+      trustTier: 'native',
+      version: '1.2.0',
+      offline: false,
+      status: 'stable',
       guide: { configFields: [] },
     },
     {
       id: 'math.fraction-visual',
       name: 'Fraction Visual',
       domain: 'math',
+      source: 'builtin',
+      trustTier: 'native',
+      version: '0.1.0',
+      offline: false,
+      status: 'experimental',
       guide: { configFields: [] },
+    },
+    {
+      id: 'community.example.counter',
+      name: 'Counter',
+      source: 'registry',
+      trustTier: 'sandboxed',
+      version: '1.0.0',
+      offline: true,
+      status: 'experimental',
     },
   ],
 }));
@@ -41,6 +66,41 @@ describe('catalog guard', () => {
     expect(section).toContain('AVAILABLE WIDGETS');
     expect(section).toContain('core.multiple-choice');
     expect(section).toContain('math.fraction-visual');
+  });
+
+  it('renderWidgetCatalogSection uses the enriched source/trust/version/offline/status columns', () => {
+    const section = renderWidgetCatalogSection();
+    expect(section).toContain(
+      'AVAILABLE WIDGETS (id | name | source | trust | version | offline | status)',
+    );
+    expect(section).toContain(
+      'community.example.counter | Counter | registry | sandboxed | 1.0.0 | offline | experimental',
+    );
+  });
+
+  it('renderWidgetCatalogSection output never emits a legacy remoteWidget.url', () => {
+    const section = renderWidgetCatalogSection();
+    expect(section).not.toContain('remoteWidget.url');
+    expect(() => assertNoLegacyRemoteUrlPrompt(section)).not.toThrow();
+  });
+
+  it('assertNoLegacyRemoteUrlPrompt throws when the text mentions remoteWidget.url', () => {
+    expect(() => assertNoLegacyRemoteUrlPrompt('use remoteWidget.url for anything')).toThrow(
+      /remoteWidget\.url/,
+    );
+  });
+
+  it('isCatalogWidgetId matches only merged catalog ids', () => {
+    expect(isCatalogWidgetId('core.multiple-choice')).toBe(true);
+    expect(isCatalogWidgetId('community.example.counter')).toBe(true);
+    expect(isCatalogWidgetId('not-a-widget')).toBe(false);
+  });
+
+  it('assertCatalogWidgetId accepts a curated id and rejects unknown ids', () => {
+    expect(() => assertCatalogWidgetId('community.example.counter')).not.toThrow();
+    expect(() => assertCatalogWidgetId('not-a-widget')).toThrow(
+      /Unknown or revoked widget id "not-a-widget"/,
+    );
   });
 
   it('the full-course prompt injects catalog ids', () => {

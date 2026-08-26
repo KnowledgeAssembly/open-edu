@@ -1,0 +1,43 @@
+{
+  "name": "@open-edu/widget-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic community widget protocol SDK for Open-Edu",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./build-helpers": {
+      "types": "./dist/build-helpers.d.ts",
+      "import": "./dist/build-helpers.js"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures/protocol-fixtures.d.ts",
+      "import": "./dist/fixtures/protocol-fixtures.js"
+    },
+    "./dev": {
+      "development": {
+        "types": "./dist/dev/index.d.ts",
+        "import": "./dist/dev/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@open-edu/schemas": "workspace:*",
+    "zod": "^3.22.0"
+  }
+}

@@ -19,6 +19,7 @@ export const NodeCompleteEventSchema = BaseTelemetrySchema.extend({
   event: z.literal('node_complete'),
   nodeId: z.string().min(1).max(256),
   score: z.number().min(0).max(100).optional(),
+  renderedViaFallback: z.boolean().optional(),
 });
 
 export const QuizAnsweredEventSchema = BaseTelemetrySchema.extend({

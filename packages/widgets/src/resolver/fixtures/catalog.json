@@ -1,0 +1,22 @@
+{
+  "registryId": "example-registry",
+  "origin": "https://widgets.example.edu",
+  "widgets": [
+    {
+      "id": "community.example.counter",
+      "version": "1.0.0",
+      "manifestUrl": "https://widgets.example.edu/community.example.counter/1.0.0/manifest.json",
+      "status": "experimental",
+      "trustTier": "sandboxed",
+      "offline": true
+    },
+    {
+      "id": "community.example.counter",
+      "version": "1.1.0",
+      "manifestUrl": "https://widgets.example.edu/community.example.counter/1.1.0/manifest.json",
+      "status": "verified",
+      "trustTier": "sandboxed",
+      "offline": false
+    }
+  ]
+}

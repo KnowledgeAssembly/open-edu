@@ -10,9 +10,16 @@ import {
 } from 'react';
 import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
-import type { WidgetRegistry } from '@open-edu/widgets';
+import type { WidgetRegistry, WidgetResolver } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
-import type { ProgressSnapshot, SkillGraph, MasteryLevel, NodeAnswer } from '@open-edu/schemas';
+import { useTranslation } from '@open-edu/i18n';
+import type {
+  ProgressSnapshot,
+  SkillGraph,
+  MasteryLevel,
+  NodeAnswer,
+  TelemetryEvent,
+} from '@open-edu/schemas';
 import { buildProgressSnapshot } from './progress';
 import { computeSkillScores, getSkillMastery } from './skills';
 
@@ -54,11 +61,13 @@ export interface RuntimeContextValue {
   navigateToNode: (nodeId: string) => void;
   getNode: (nodeId: string) => LoadedNode | undefined;
   widgetRegistry: WidgetRegistry | undefined;
+  widgetResolver?: WidgetResolver;
   progressSnapshot: ProgressSnapshot | null;
   skillScores: Record<string, number>;
   getSkillMastery: (skillId: string) => MasteryLevel;
   skillGraph: SkillGraph | undefined;
   resolveAsset: (path: string) => string;
+  emitTelemetry?: (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => void;
 }
 
 export interface RuntimeProviderProps {
@@ -66,12 +75,16 @@ export interface RuntimeProviderProps {
   engine: WorkflowEngine;
   children: ReactNode;
   widgetRegistry?: WidgetRegistry;
+  widgetResolver?: WidgetResolver;
   initialProgress?: ProgressSnapshot;
   onProgressChange?: (snapshot: ProgressSnapshot) => void;
   packageId?: string;
   packageVersion?: string;
   skillGraph?: SkillGraph;
+  onTelemetryEvent?: (event: TelemetryEvent) => void;
 }
+
+export type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 const RuntimeContext = createContext<RuntimeContextValue | null>(null);
 
@@ -80,11 +93,13 @@ export function RuntimeProvider({
   engine,
   children,
   widgetRegistry,
+  widgetResolver,
   initialProgress,
   onProgressChange,
   packageId,
   packageVersion,
   skillGraph,
+  onTelemetryEvent,
 }: RuntimeProviderProps): JSX.Element {
   const skillsRef = useRef(skillGraph);
   skillsRef.current = skillGraph;
@@ -252,6 +267,13 @@ export function RuntimeProvider({
     [loadedPackage.assetMap, loadedPackage.manifest.id],
   );
 
+  const emitTelemetry = useCallback(
+    (event: DistributiveOmit<TelemetryEvent, 'timestamp'>) => {
+      onTelemetryEvent?.({ ...event, timestamp: Date.now() } as TelemetryEvent);
+    },
+    [onTelemetryEvent],
+  );
+
   const value = useMemo<RuntimeContextValue>(
     () => ({
       loadedPackage,
@@ -267,10 +289,12 @@ export function RuntimeProvider({
       navigateToNode,
       getNode,
       widgetRegistry,
+      widgetResolver,
       skillScores,
       getSkillMastery: getContextSkillMastery,
       skillGraph,
       resolveAsset,
+      emitTelemetry,
       progressSnapshot: buildProgressSnapshot(
         packageId ?? loadedPackage.manifest.id,
         packageVersion ?? loadedPackage.manifest.version,
@@ -291,10 +315,12 @@ export function RuntimeProvider({
       navigateToNode,
       getNode,
       widgetRegistry,
+      widgetResolver,
       skillScores,
       getContextSkillMastery,
       skillGraph,
       resolveAsset,
+      emitTelemetry,
       packageId,
       packageVersion,
     ],
@@ -312,6 +338,7 @@ export function RuntimeProvider({
 
 function WorkflowAnnouncer(): null {
   const { announce } = useLiveRegion();
+  const { t } = useTranslation();
   const { currentNodeId, currentNode, isCompleted } = useRuntime();
   const announcedRef = useRef<Set<string>>(new Set());
 
@@ -321,13 +348,13 @@ function WorkflowAnnouncer(): null {
       const title =
         currentNode.node.title ??
         currentNode.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-      announce(`Now viewing: ${title}`);
+      announce(t('runtime.workflow.now_viewing', { title }));
     }
   }, [currentNodeId, currentNode, announce]);
 
   useEffect(() => {
     if (isCompleted) {
-      announce('Lesson completed', 'assertive');
+      announce(t('runtime.workflow.completed'), 'assertive');
     }
   }, [isCompleted, announce]);
 

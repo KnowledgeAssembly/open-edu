@@ -13,9 +13,10 @@ import type { NodeAnswer, QuizAnswer, ReflectionAnswer } from '@open-edu/schemas
 export interface NodeRendererProps {
   node: LoadedNode | null;
   onComplete?: (score?: number) => void;
+  onDiagnostic?: (code: string) => void;
 }
 
-export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Element {
+export function NodeRenderer({ node, onComplete, onDiagnostic }: NodeRendererProps): JSX.Element {
   const { t } = useTranslation();
   const runtime = useRuntimeOptional();
   const handleComplete: (score?: number) => void =
@@ -74,14 +75,14 @@ export function NodeRenderer({ node, onComplete }: NodeRendererProps): JSX.Eleme
     case 'exercise':
       return (
         <FocusTrap key={node.relativePath}>
-          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} onDiagnostic={onDiagnostic} />
         </FocusTrap>
       );
 
     case 'custom':
       return (
         <FocusTrap key={node.relativePath}>
-          <WidgetRenderer node={node.node} nodeId={node.relativePath} />
+          <WidgetRenderer node={node.node} nodeId={node.relativePath} onDiagnostic={onDiagnostic} />
         </FocusTrap>
       );
 

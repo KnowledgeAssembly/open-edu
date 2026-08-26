@@ -51,15 +51,9 @@ export interface WidgetDefinitionV2 extends WidgetDefinition {
   replacement?: string;
 }
 
-export interface RemoteWidgetManifest {
-  id: string;
-  version: string;
-  url: string;
-  integrity?: string;
-  apiVersion: string;
-  fallback?: string;
-  permissions?: string[];
-}
+import type { RemoteWidgetManifest } from '@open-edu/schemas';
+
+export type { RemoteWidgetManifest };
 
 export interface RemoteWidgetRegistration {
   manifest: RemoteWidgetManifest;

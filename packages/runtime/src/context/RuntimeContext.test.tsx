@@ -450,6 +450,30 @@ describe('RuntimeProvider', () => {
     });
   });
 
+  it('emitTelemetry forwards to onTelemetryEvent with a timestamp', () => {
+    const onTelemetryEvent = vi.fn();
+    const { result } = renderHook(() => useRuntime(), {
+      wrapper: ({ children }) => (
+        <RuntimeProvider loadedPackage={pkg} engine={engine} onTelemetryEvent={onTelemetryEvent}>
+          {children}
+        </RuntimeProvider>
+      ),
+    });
+    result.current.emitTelemetry?.({
+      event: 'widget_interaction',
+      widgetId: 'core.matching',
+      action: 'reveal',
+    });
+    expect(onTelemetryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'widget_interaction',
+        widgetId: 'core.matching',
+        action: 'reveal',
+        timestamp: expect.any(Number),
+      }),
+    );
+  });
+
   describe('resolveAsset', () => {
     const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     const jpgBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);

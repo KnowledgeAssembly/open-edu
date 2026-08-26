@@ -119,6 +119,9 @@ importers:
       '@open-edu/telemetry':
         specifier: workspace:*
         version: link:../../packages/telemetry
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../../packages/widget-sdk
       '@open-edu/widgets':
         specifier: workspace:*
         version: link:../../packages/widgets
@@ -131,6 +134,9 @@ importers:
       ai:
         specifier: ^7.0.0
         version: 7.0.37(zod@3.25.76)
+      ajv:
+        specifier: ^8.0.0
+        version: 8.20.0
       axe-core:
         specifier: ^4.7.0
         version: 4.12.1
@@ -510,6 +516,8 @@ importers:
       '@open-edu/core':
         specifier: workspace:*
         version: link:../../packages/core
+
+  examples/community-widget-counter-course: {}
 
   examples/fractions:
     devDependencies:
@@ -1013,6 +1021,9 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../widget-sdk
       '@open-edu/widgets':
         specifier: workspace:*
         version: link:../widgets
@@ -1109,6 +1120,15 @@ importers:
         specifier: ^3.0.0
         version: 3.25.76
 
+  packages/widget-sdk:
+    dependencies:
+      '@open-edu/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+
   packages/widgets:
     dependencies:
       '@dnd-kit/core':
@@ -1129,6 +1149,12 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:^
         version: link:../schemas
+      '@open-edu/widget-sdk':
+        specifier: workspace:*
+        version: link:../widget-sdk
+      ajv:
+        specifier: ^8.0.0
+        version: 8.20.0
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -1154,6 +1180,9 @@ importers:
       axe-core:
         specifier: ^4.12.1
         version: 4.12.1
+      fake-indexeddb:
+        specifier: ^6.2.5
+        version: 6.2.5
       tailwindcss:
         specifier: ^3.4.19
         version: 3.4.19(tsx@4.22.5)(yaml@2.9.0)

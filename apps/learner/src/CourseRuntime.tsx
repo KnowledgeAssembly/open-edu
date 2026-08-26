@@ -11,7 +11,14 @@ import { WorkflowEngine, getOrderedNodes } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { TelemetrySession } from '@open-edu/telemetry';
 import { AccessibilityProvider } from '@open-edu/accessibility';
-import { createDefaultRegistry } from '@open-edu/widgets';
+import {
+  createDefaultRegistry,
+  createWidgetArtifactCache,
+  createWidgetResolver,
+  loadStaticCatalog,
+  DEFAULT_WIDGET_POLICY,
+  type ResolverCatalog,
+} from '@open-edu/widgets';
 import { RewardBroker, CardBroker } from '@open-edu/rewards';
 import { useTranslation } from '@open-edu/i18n';
 import type { RewardReceipt } from '@open-edu/rewards';
@@ -25,6 +32,51 @@ import { saveCardProgress, getAllCardProgress } from './cardsStorage';
 import { Button } from '@open-edu/design-system';
 import { ArrowLeft } from 'lucide-react';
 import { useCompanion } from './ai';
+
+(globalThis as { __OPEN_EDU_SANDBOX_WIDGETS__?: boolean }).__OPEN_EDU_SANDBOX_WIDGETS__ = true;
+
+const widgetOriginsEnv =
+  (import.meta.env.VITE_OPEN_EDU_WIDGET_ORIGINS as string | undefined) ??
+  (import.meta.env as Record<string, string | undefined>).OPEN_EDU_WIDGET_ORIGINS ??
+  '';
+const widgetOrigins = widgetOriginsEnv
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const widgetGlobalOrigins = (globalThis as { __OPEN_EDU_WIDGET_ORIGINS__?: string })
+  .__OPEN_EDU_WIDGET_ORIGINS__;
+if (widgetGlobalOrigins) {
+  for (const origin of widgetGlobalOrigins
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
+    if (!widgetOrigins.includes(origin)) widgetOrigins.push(origin);
+  }
+}
+
+const widgetE2EClock = (): number => {
+  const fake = (globalThis as { __OPEN_EDU_NOW__?: unknown }).__OPEN_EDU_NOW__;
+  return typeof fake === 'number' ? fake : Date.now();
+};
+
+const widgetE2EOnline = (): boolean => {
+  const flag = (globalThis as { __OPEN_EDU_ONLINE__?: unknown }).__OPEN_EDU_ONLINE__;
+  if (flag === undefined || flag === null) return navigator.onLine;
+  return String(flag) !== 'false';
+};
+
+const allowExperimentalCommunityWidgets =
+  (globalThis as { __OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__?: boolean })
+    .__OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__ === true;
+
+const WIDGET_CATALOG_STORAGE_KEY = 'open-edu-widget-registry-catalog';
+
+function buildRemoteCatalogs(catalogUrl: string, json: unknown): Record<string, ResolverCatalog> {
+  const allowLoopback = new URL(catalogUrl).protocol === 'http:';
+  const catalog = loadStaticCatalog(json, { allowLoopback });
+  return { [catalog.registryId]: catalog };
+}
 
 export interface BundleCourseContext {
   bundleId: string;
@@ -92,11 +144,78 @@ export function CourseRuntime({
 
   const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
 
+  const widgetPolicy = useMemo(
+    () => ({
+      ...DEFAULT_WIDGET_POLICY,
+      allowedOrigins: widgetOrigins,
+      registryCatalogOrigins: widgetOrigins,
+      experimentalWidgets: allowExperimentalCommunityWidgets
+        ? 'allow'
+        : DEFAULT_WIDGET_POLICY.experimentalWidgets,
+    }),
+    [],
+  );
+
+  const widgetCatalogUrl = (globalThis as { __OPEN_EDU_WIDGET_CATALOG_URL__?: string })
+    .__OPEN_EDU_WIDGET_CATALOG_URL__;
+  const [remoteCatalogs, setRemoteCatalogs] = useState<Record<string, ResolverCatalog>>({});
+
+  useEffect(() => {
+    if (!widgetCatalogUrl) return;
+    let cancelled = false;
+    void (async () => {
+      const apply = (json: unknown) => {
+        try {
+          setRemoteCatalogs(buildRemoteCatalogs(widgetCatalogUrl, json));
+        } catch {
+          // invalid catalog payload: keep the previous (possibly empty) catalogs
+        }
+      };
+      try {
+        const res = await fetch(widgetCatalogUrl);
+        const json: unknown = await res.json();
+        try {
+          localStorage.setItem(WIDGET_CATALOG_STORAGE_KEY, JSON.stringify(json));
+        } catch {
+          // storage unavailable: still use the freshly fetched catalog
+        }
+        if (!cancelled) apply(json);
+      } catch {
+        const cached = localStorage.getItem(WIDGET_CATALOG_STORAGE_KEY);
+        if (cached) {
+          try {
+            const json: unknown = JSON.parse(cached);
+            if (!cancelled) apply(json);
+          } catch {
+            // corrupted cached catalog: keep empty
+          }
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [widgetCatalogUrl]);
+
+  const widgetResolver = useMemo(
+    () =>
+      createWidgetResolver({
+        policy: widgetPolicy,
+        cache: createWidgetArtifactCache(),
+        catalogs: remoteCatalogs,
+        registry: widgetRegistry,
+        now: widgetE2EClock,
+        isOnline: widgetE2EOnline,
+      }),
+    [widgetPolicy, widgetRegistry, remoteCatalogs],
+  );
+
   const initialProgress = useMemo(() => {
     return savedProgress ?? undefined;
   }, [savedProgress]);
 
   const cardBrokerRef = useRef<CardBroker | null>(null);
+  const telemetrySessionRef = useRef<TelemetrySession | null>(null);
 
   const rewardBridge = useMemo(() => createRewardReceiptBridge(), []);
 
@@ -105,6 +224,7 @@ export function CourseRuntime({
 
     const session = new TelemetrySession();
     session.start();
+    telemetrySessionRef.current = session;
 
     const eventSub = session.events$.subscribe({ next: () => {} });
 
@@ -208,6 +328,7 @@ export function CourseRuntime({
       cardBrokerRef.current = null;
       eventSub.unsubscribe();
       session.stop();
+      telemetrySessionRef.current = null;
     };
   }, [engine, pkg]);
 
@@ -390,7 +511,7 @@ export function CourseRuntime({
         <p className="text-on-surface-variant mb-lg">{t('learner.course.no_workflow')}</p>
         <Button onClick={onBackToCatalog}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to catalog
+          {t('learner.back_to_catalog')}
         </Button>
       </div>
     );
@@ -405,6 +526,8 @@ export function CourseRuntime({
           initialProgress={initialProgress}
           onProgressChange={handleProgressChange}
           widgetRegistry={widgetRegistry}
+          widgetResolver={widgetResolver}
+          onTelemetryEvent={(e) => telemetrySessionRef.current?.emit(e)}
         >
           <RewardEventBridge receipts$={rewardBridge.receipts$} />
           {children && (

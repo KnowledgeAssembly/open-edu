@@ -134,3 +134,9 @@ export { RewardEventBridge } from './components/RewardEventBridge.js';
 export type { RewardEventBridgeProps } from './components/RewardEventBridge.js';
 export { CanvasAnimationRenderer } from './components/CanvasAnimationRenderer.js';
 export type { CanvasAnimationRendererProps } from './components/CanvasAnimationRenderer.js';
+export {
+  SandboxWidgetAdapter,
+  isSandboxWidgetsEnabled,
+  getActiveFrameCount,
+} from './widgets/SandboxWidgetAdapter.js';
+export type { SandboxWidgetAdapterProps } from './widgets/SandboxWidgetAdapter.js';

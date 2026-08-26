@@ -209,6 +209,31 @@ describe('ContentNodeSchema (discriminated union)', () => {
     });
   });
 
+  it('allows a custom node with both remoteWidget and widgetRef (additive)', () => {
+    const result = ContentNodeSchema.parse({
+      type: 'custom',
+      widget: 'some-widget',
+      remoteWidget: {
+        id: 'legacy-remote',
+        version: '1.0.0',
+        url: 'https://cdn.example.com/w.js',
+        apiVersion: '1.0.0',
+      },
+      widgetRef: {
+        id: 'community.example.counter',
+        version: '1.0.0',
+        source: 'registry',
+        registryId: 'reg.example',
+        integrity: 'sha256-' + 'a'.repeat(64),
+      },
+    });
+    if (result.type !== 'custom') {
+      throw new Error('expected custom node');
+    }
+    expect(result.widgetRef).toBeDefined();
+    expect(result.remoteWidget).toBeDefined();
+  });
+
   it('should reject unknown node type', () => {
     expect(() => ContentNodeSchema.parse({ type: 'unknown' })).toThrow();
   });
