@@ -77,6 +77,21 @@ export function WidgetPicker({
                           {widget.domain}
                         </Badge>
                       ) : null}
+                      {widget.source === 'registry' ? (
+                        <Badge variant="outline" className="text-[10px]">
+                          {t('studio.widget.sandboxed_badge')}
+                        </Badge>
+                      ) : null}
+                      {widget.experimental ? (
+                        <Badge variant="outline" className="text-[10px]">
+                          {t('studio.widget.experimental_badge')}
+                        </Badge>
+                      ) : null}
+                      {widget.offline === false ? (
+                        <Badge variant="outline" className="text-[10px]">
+                          {t('studio.widget.online_only_warning')}
+                        </Badge>
+                      ) : null}
                     </div>
                     {widget.description ? (
                       <p className="text-on-surface-variant mt-0.5 line-clamp-2 text-xs">

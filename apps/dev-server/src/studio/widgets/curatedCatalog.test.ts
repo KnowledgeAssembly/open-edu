@@ -1,13 +1,23 @@
-import { describe, it, expect } from 'vitest';
-import { listCuratedWidgets, getCuratedWidget } from './curatedCatalog';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  listCuratedWidgets,
+  getCuratedWidget,
+  loadCatalogWidgets,
+  listConfiguredRegistryIds,
+  __resetCatalogCache,
+} from './curatedCatalog';
 
 describe('curatedCatalog', () => {
-  it('returns only non-deprecated stable widgets with a guide', () => {
+  beforeEach(() => {
+    __resetCatalogCache();
+  });
+
+  it('returns only non-deprecated widgets', () => {
     const list = listCuratedWidgets();
     expect(list.length).toBeGreaterThanOrEqual(20);
-    expect(
-      list.every((w) => w.id && w.name && !w.deprecated && w.status !== 'deprecated' && w.guide),
-    ).toBe(true);
+    expect(list.every((w) => w.id && w.name && !w.deprecated && w.status !== 'deprecated')).toBe(
+      true,
+    );
     expect(getCuratedWidget('core.multiple-choice')?.id).toBe('core.multiple-choice');
   });
 
@@ -31,5 +41,104 @@ describe('curatedCatalog', () => {
     const markdown = getCuratedWidget('core.multiple-choice')?.guideMarkdown ?? '';
     expect(markdown.length).toBeGreaterThan(0);
     expect(markdown).toContain('Multiple Choice');
+  });
+
+  it('marks built-in widgets as source builtin, native trustTier, version 0.1.0', () => {
+    const matching = getCuratedWidget('core.matching');
+    expect(matching?.source).toBe('builtin');
+    expect(matching?.trustTier).toBe('native');
+    expect(matching?.version).toBe('0.1.0');
+  });
+
+  it('merges registry widgets, skipping revoked and flagging experimental/sandboxed', () => {
+    const catalog = {
+      registryId: 'community-registry',
+      origin: 'https://widgets.example.edu',
+      widgets: [
+        {
+          id: 'community.example.counter',
+          version: '1.0.0',
+          manifestUrl: 'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
+          status: 'experimental',
+          trustTier: 'sandboxed',
+          offline: true,
+        },
+        {
+          id: 'community.example.revoked',
+          version: '1.0.0',
+          manifestUrl: 'https://widgets.example.edu/community.example.revoked/1.0.0/manifest.json',
+          status: 'revoked',
+          trustTier: 'sandboxed',
+          offline: false,
+        },
+      ],
+    };
+    const map = loadCatalogWidgets([catalog]);
+    const experiment = map.get('community.example.counter');
+    expect(experiment?.source).toBe('registry');
+    expect(experiment?.trustTier).toBe('sandboxed');
+    expect(experiment?.experimental).toBe(true);
+    expect(experiment?.version).toBe('1.0.0');
+    expect(experiment?.offline).toBe(true);
+    expect(experiment?.registryId).toBe('community-registry');
+    expect(map.get('community.example.revoked')).toBeUndefined();
+  });
+
+  it('lets a built-in win when a registry entry collides with the same id', () => {
+    const catalog = {
+      registryId: 'collision-registry',
+      origin: 'https://widgets.example.edu',
+      widgets: [
+        {
+          id: 'core.matching',
+          version: '9.9.9',
+          manifestUrl: 'https://widgets.example.edu/core.matching/9.9.9/manifest.json',
+          status: 'verified',
+          trustTier: 'sandboxed',
+          offline: false,
+        },
+      ],
+    };
+    const map = loadCatalogWidgets([catalog]);
+    const widget = map.get('core.matching');
+    expect(widget?.source).toBe('builtin');
+    expect(widget?.trustTier).toBe('native');
+    expect(widget?.version).toBe('0.1.0');
+  });
+
+  it('lists configured registry ids, excluding builtins and deduplicating', () => {
+    const original = (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__;
+    (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = [
+      {
+        registryId: 'community-registry',
+        origin: 'https://widgets.example.edu',
+        widgets: [
+          {
+            id: 'community.example.counter',
+            version: '1.0.0',
+            manifestUrl:
+              'https://widgets.example.edu/community.example.counter/1.0.0/manifest.json',
+            status: 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          },
+          {
+            id: 'community.example.clock',
+            version: '1.0.0',
+            manifestUrl: 'https://widgets.example.edu/community.example.clock/1.0.0/manifest.json',
+            status: 'verified',
+            trustTier: 'sandboxed',
+            offline: false,
+          },
+        ],
+      },
+    ];
+    __resetCatalogCache();
+    loadCatalogWidgets();
+    const ids = listConfiguredRegistryIds();
+    expect(ids).toContain('community-registry');
+    expect(ids.filter((id) => id === 'community-registry')).toHaveLength(1);
+    expect(ids).not.toContain('core.matching');
+    (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = original;
   });
 });

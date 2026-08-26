@@ -14,6 +14,11 @@ vi.mock('../../../widgets/curatedCatalog.js', () => ({
       id: 'core.multiple-choice',
       name: 'Multiple Choice',
       domain: 'core',
+      source: 'builtin',
+      trustTier: 'native',
+      version: '1.2.0',
+      offline: false,
+      status: 'stable',
       guide: {
         configFields: [{ name: 'questions', type: 'array', required: true, description: '' }],
       },
@@ -41,8 +46,10 @@ describe('item add prompts', () => {
     const prompt = buildPracticeAddPrompt('Practice identifying fractions', '');
     expect(prompt).toContain('Practice identifying fractions');
     expect(prompt).toContain('AVAILABLE WIDGETS');
+    expect(prompt).toContain(
+      'AVAILABLE WIDGETS (id | name | source | trust | version | offline | status)',
+    );
     expect(prompt).toContain('core.multiple-choice');
-    expect(prompt).toContain('questions:array');
   });
 
   it('prompts inject the course context when present', () => {
