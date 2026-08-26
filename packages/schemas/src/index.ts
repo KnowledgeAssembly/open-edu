@@ -70,6 +70,7 @@ export type { WidgetReference } from './widget-reference.js';
 export {
   WidgetManifestSchema,
   WidgetCapabilitySchema,
+  IntegrityHashSchema,
   PROTOCOL_API_VERSION,
 } from './community-widget-manifest.js';
 export type { WidgetManifest, WidgetCapability } from './community-widget-manifest.js';

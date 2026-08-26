@@ -314,4 +314,97 @@ describe('WidgetRegistryStore', () => {
       store.readDocument('publisher', 'community.example.counter', '9.9.9'),
     ).rejects.toThrow('widget not found');
   });
+
+  describe('assertSafeSegment (path traversal prevention)', () => {
+    it('rejects path traversal via publisher segment (../)', async () => {
+      await expect(
+        store.install({
+          publisher: '../etc',
+          widgetId: 'community.example.counter',
+          manifestJson: validManifest({ publisher: { id: '../etc', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects null byte in widget name', async () => {
+      await expect(
+        store.install({
+          publisher: 'publisher',
+          widgetId: 'test\0evil',
+          manifestJson: validManifest({ id: 'test\0evil', publisher: { id: 'publisher', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects .. as version', async () => {
+      await expect(
+        store.install({
+          publisher: 'publisher',
+          widgetId: 'community.example.counter',
+          manifestJson: validManifest({ version: '..', publisher: { id: 'publisher', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects . as version', async () => {
+      await expect(
+        store.install({
+          publisher: 'publisher',
+          widgetId: 'community.example.counter',
+          manifestJson: validManifest({ version: '.', publisher: { id: 'publisher', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects empty string as publisher', async () => {
+      await expect(
+        store.install({
+          publisher: '',
+          widgetId: 'community.example.counter',
+          manifestJson: validManifest({ publisher: { id: '', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects Windows-style path (C:\\) in publisher', async () => {
+      await expect(
+        store.install({
+          publisher: 'C:\\Users',
+          widgetId: 'community.example.counter',
+          manifestJson: validManifest({ publisher: { id: 'C:\\Users', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('rejects backslash in widget name', async () => {
+      await expect(
+        store.install({
+          publisher: 'publisher',
+          widgetId: 'foo\\bar',
+          manifestJson: validManifest({ id: 'foo\\bar', publisher: { id: 'publisher', name: 'Test' } }),
+          documentBytes: encode(SELF_CONTAINED_HTML),
+        }),
+      ).rejects.toBeInstanceOf(WidgetValidationError);
+    });
+
+    it('accepts normal publisher, widget, and version values', async () => {
+      const installed = await store.install({
+        publisher: 'publisher',
+        widgetId: 'community.example.counter',
+        manifestJson: validManifest(),
+        documentBytes: encode(SELF_CONTAINED_HTML),
+      });
+      expect(installed).toEqual({
+        publisher: 'publisher',
+        widget: 'community.example.counter',
+        version: '1.0.0',
+      });
+    });
+  });
 });

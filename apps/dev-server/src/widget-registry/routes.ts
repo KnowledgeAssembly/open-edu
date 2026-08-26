@@ -64,16 +64,13 @@ export function createWidgetRegistryRouter(store: WidgetRegistryStore) {
         return;
       }
 
-      if (method === 'GET') {
-        applyCors(res);
-      }
-
       if (method === 'POST' && pathname === `${BASE_PATH}/install`) {
         await handleInstall(req, res, store);
         return;
       }
 
       if (method === 'GET' && pathname === `${BASE_PATH}/catalog.json`) {
+        applyCors(res);
         const catalog = await store.catalog();
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'max-age=3600, must-revalidate');
@@ -219,6 +216,7 @@ async function handleManifest(
 ): Promise<void> {
   try {
     const bytes = await store.readManifestBytes(publisher, widget, version);
+    applyCors(res);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'max-age=3600, must-revalidate');
@@ -242,6 +240,7 @@ async function handleDocument(
   try {
     const bytes = await store.readDocument(publisher, widget, version);
     const manifest = await store.readManifest(publisher, widget, version);
+    applyCors(res);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (manifest.artifact.format === 'multi-file') {

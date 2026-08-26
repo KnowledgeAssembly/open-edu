@@ -12,6 +12,7 @@ import type { LoadedPackage, LoadedNode } from '@open-edu/core';
 import type { WorkflowEngine, WorkflowEvent } from '@open-edu/workflow';
 import type { WidgetRegistry, WidgetResolver } from '@open-edu/widgets';
 import { LiveRegionProvider, useLiveRegion } from '@open-edu/accessibility';
+import { useTranslation } from '@open-edu/i18n';
 import type {
   ProgressSnapshot,
   SkillGraph,
@@ -337,6 +338,7 @@ export function RuntimeProvider({
 
 function WorkflowAnnouncer(): null {
   const { announce } = useLiveRegion();
+  const { t } = useTranslation();
   const { currentNodeId, currentNode, isCompleted } = useRuntime();
   const announcedRef = useRef<Set<string>>(new Set());
 
@@ -346,13 +348,13 @@ function WorkflowAnnouncer(): null {
       const title =
         currentNode.node.title ??
         currentNode.relativePath.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-      announce(`Now viewing: ${title}`);
+      announce(t('runtime.workflow.now_viewing', { title }));
     }
   }, [currentNodeId, currentNode, announce]);
 
   useEffect(() => {
     if (isCompleted) {
-      announce('Lesson completed', 'assertive');
+      announce(t('runtime.workflow.completed'), 'assertive');
     }
   }, [isCompleted, announce]);
 

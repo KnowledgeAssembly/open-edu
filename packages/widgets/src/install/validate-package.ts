@@ -1,6 +1,6 @@
 import { WidgetManifestSchema, type WidgetManifest, type WidgetPolicy } from '@open-edu/schemas';
 import { canonicalIntegrity } from '../integrity.js';
-import { extractCspMeta, isSelfContainedHtml, verifyDocumentCsp } from './verify-suite.js';
+import { extractCspMeta, hasCspDirective, isSelfContainedHtml, verifyDocumentCsp } from './verify-suite.js';
 
 export interface WidgetPackageInput {
   manifestJson: unknown;
@@ -23,8 +23,8 @@ function cspErrors(html: string, header?: string): string[] {
     return ['csp-missing-connect-none', 'csp-missing-frame-none'];
   }
   const errors: string[] = [];
-  if (!cspText.includes("connect-src 'none'")) errors.push('csp-missing-connect-none');
-  if (!cspText.includes("frame-src 'none'")) errors.push('csp-missing-frame-none');
+  if (!hasCspDirective(cspText, 'connect-src')) errors.push('csp-missing-connect-none');
+  if (!hasCspDirective(cspText, 'frame-src')) errors.push('csp-missing-frame-none');
   return errors;
 }
 

@@ -320,6 +320,100 @@ describe('createWidgetRegistryRouter', () => {
     expect(res.statusCode).toBe(409);
   });
 
+  it('POST revoke does not set CORS headers', async () => {
+    await router(
+      fakeRequest('POST', '/widget-registry/install', installBody()),
+      new FakeResponse() as unknown as ServerResponse,
+    );
+
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('POST', '/widget-registry/publisher/community.example.counter/1.0.0/revoke'),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.getHeader('access-control-allow-origin')).toBeUndefined();
+  });
+
+  it('POST install does not set CORS headers', async () => {
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('POST', '/widget-registry/install', installBody()),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(201);
+    expect(res.getHeader('access-control-allow-origin')).toBeUndefined();
+  });
+
+  it('GET manifest.json sets CORS headers', async () => {
+    await router(
+      fakeRequest('POST', '/widget-registry/install', installBody()),
+      new FakeResponse() as unknown as ServerResponse,
+    );
+
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('GET', '/widget-registry/publisher/community.example.counter/1.0.0/manifest.json'),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.getHeader('access-control-allow-origin')).toBe('*');
+  });
+
+  it('GET index.html sets CORS headers', async () => {
+    await router(
+      fakeRequest('POST', '/widget-registry/install', installBody()),
+      new FakeResponse() as unknown as ServerResponse,
+    );
+
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('GET', '/widget-registry/publisher/community.example.counter/1.0.0/index.html'),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.getHeader('access-control-allow-origin')).toBe('*');
+  });
+
+  it('GET catalog.json sets CORS headers', async () => {
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('GET', '/widget-registry/catalog.json'),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.getHeader('access-control-allow-origin')).toBe('*');
+  });
+
+  it('404 error responses do not set CORS headers', async () => {
+    const res = new FakeResponse();
+    await router(fakeRequest('GET', '/widget-registry/nope'), res as unknown as ServerResponse);
+
+    expect(res.statusCode).toBe(404);
+    expect(res.getHeader('access-control-allow-origin')).toBeUndefined();
+  });
+
+  it('405 error responses do not set CORS headers', async () => {
+    await router(
+      fakeRequest('POST', '/widget-registry/install', installBody()),
+      new FakeResponse() as unknown as ServerResponse,
+    );
+
+    const res = new FakeResponse();
+    await router(
+      fakeRequest('GET', '/widget-registry/publisher/community.example.counter/1.0.0/revoke'),
+      res as unknown as ServerResponse,
+    );
+
+    expect(res.statusCode).toBe(405);
+    expect(res.getHeader('access-control-allow-origin')).toBeUndefined();
+  });
+
   describe('createWidgetRegistryMiddleware', () => {
     it('passes through non-widget-registry requests', () => {
       const middleware = createWidgetRegistryMiddleware(store);

@@ -39,7 +39,10 @@ function createInstanceId(): string {
 
 export { isSandboxWidgetsEnabled } from './sandbox-limits';
 
-export let activeFrames = 0;
+let _activeFrames = 0;
+export function getActiveFrameCount(): number {
+  return _activeFrames;
+}
 
 export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Element | null {
   const {
@@ -128,9 +131,9 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
   };
 
   useEffect(() => {
-    activeFrames += 1;
+    _activeFrames += 1;
     return () => {
-      activeFrames -= 1;
+      _activeFrames -= 1;
     };
   }, []);
 
@@ -258,6 +261,17 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
           cbInteract(msg.payload as InteractionPayload);
           break;
         case 'state:save': {
+          // Gate state:save in observe-mode (preview should not write state)
+          {
+            const capabilities = callbacksRef.current.initPayload.capabilities;
+            const observeGate =
+              capabilities.includes('observe-mode') &&
+              !capabilities.includes('telemetry-interaction');
+            if (observeGate) {
+              callbacksRef.current.onDiagnostic?.('observe-mode-state-save-rejected');
+              break;
+            }
+          }
           const raw = msg.payload as {
             requestId?: string;
             schemaVersion?: string;
@@ -345,7 +359,7 @@ export function SandboxWidgetAdapter(props: SandboxWidgetAdapterProps): JSX.Elem
         loading="lazy"
         title={title}
         data-testid="sandbox-widget-frame"
-        frameBorder={0}
+        className="border-0"
         src={documentUrl}
         srcDoc={srcDoc}
       />

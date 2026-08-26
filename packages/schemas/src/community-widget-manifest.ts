@@ -12,7 +12,7 @@ export const WidgetCapabilitySchema = z.enum([
   'observe-mode',
 ]);
 
-const integritySchema = z.string().regex(/^sha256-[a-f0-9]{64}$/);
+export const IntegrityHashSchema = z.string().regex(/^sha256-[a-f0-9]{64}$/);
 
 const httpsUrlSchema = z
   .string()
@@ -44,9 +44,9 @@ export const WidgetManifestSchema = z
     apiVersion: z.literal(PROTOCOL_API_VERSION),
     artifact: z.object({
       documentUrl: httpsUrlSchema,
-      documentIntegrity: integritySchema,
+      documentIntegrity: IntegrityHashSchema,
       archiveUrl: httpsUrlSchema.optional(),
-      archiveIntegrity: integritySchema.optional(),
+      archiveIntegrity: IntegrityHashSchema.optional(),
       sizeBytes: z.number().int().positive(),
       format: z.enum(['multi-file', 'self-contained-html']),
     }),

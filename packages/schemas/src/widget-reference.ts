@@ -1,6 +1,5 @@
 import { z } from 'zod';
-
-const integrity = z.string().regex(/^sha256-[a-f0-9]{64}$/);
+import { IntegrityHashSchema } from './community-widget-manifest.js';
 
 const BuiltinRef = z.object({
   id: z.string().min(1).max(256),
@@ -15,7 +14,7 @@ const ExternalRef = z
     version: z.string().min(1).max(64),
     source: z.enum(['registry', 'url']),
     registryId: z.string().min(1).max(128).optional(),
-    integrity: integrity.optional(),
+    integrity: IntegrityHashSchema.optional(),
     fallback: z.string().min(1).max(256).optional(),
   })
   .superRefine((val, ctx) => {
@@ -24,6 +23,13 @@ const ExternalRef = z
         code: 'custom',
         message: 'registry references require integrity',
         path: ['integrity'],
+      });
+    }
+    if (val.source === 'registry' && !val.registryId) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'registry references require registryId',
+        path: ['registryId'],
       });
     }
   });

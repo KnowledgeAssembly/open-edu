@@ -119,4 +119,29 @@ describe('verifyDocumentCsp', () => {
     const html = `<meta http-equiv="Content-Security-Policy" content="connect-src 'none';">`;
     expect(verifyDocumentCsp(html)).toBe(false);
   });
+
+  it('rejects connect-src with extra sources (CSP directive injection)', () => {
+    const html = `<meta http-equiv="Content-Security-Policy" content="connect-src 'none' https://evil.example; frame-src 'none';">`;
+    expect(verifyDocumentCsp(html)).toBe(false);
+  });
+
+  it('rejects frame-src with extra sources (CSP directive injection)', () => {
+    const html = `<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; frame-src 'none' https://evil.example;">`;
+    expect(verifyDocumentCsp(html)).toBe(false);
+  });
+
+  it('accepts multiple directives where each is exactly none', () => {
+    const html = `<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; frame-src 'none';">`;
+    expect(verifyDocumentCsp(html)).toBe(true);
+  });
+
+  it('accepts connect-src none alone', () => {
+    const header = `connect-src 'none'; frame-src 'none'`;
+    expect(verifyDocumentCsp(`<script></script>`, header)).toBe(true);
+  });
+
+  it('works regardless of attribute order in meta tag', () => {
+    const html = `<meta content="connect-src 'none'; frame-src 'none';" http-equiv="Content-Security-Policy">`;
+    expect(verifyDocumentCsp(html)).toBe(true);
+  });
 });

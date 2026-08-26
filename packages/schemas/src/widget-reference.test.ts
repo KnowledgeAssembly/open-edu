@@ -34,6 +34,7 @@ describe('WidgetReferenceSchema', () => {
         id: 'community.example.counter',
         version: '1.0.0',
         source: 'registry',
+        registryId: 'reg.example',
         integrity: 'sha256-' + 'a'.repeat(64),
       }),
     ).toMatchObject({ source: 'registry', integrity: 'sha256-' + 'a'.repeat(64) });
@@ -48,5 +49,32 @@ describe('WidgetReferenceSchema', () => {
         integrity: 'not-a-sha256',
       }),
     ).toThrow();
+  });
+
+  it('requires registryId for source registry', () => {
+    expect(() =>
+      WidgetReferenceSchema.parse({
+        id: 'community.example.counter',
+        version: '1.0.0',
+        source: 'registry',
+        integrity: 'sha256-' + 'a'.repeat(64),
+      }),
+    ).toThrow();
+  });
+
+  it('accepts a registry ref with valid integrity and registryId', () => {
+    expect(
+      WidgetReferenceSchema.parse({
+        id: 'community.example.counter',
+        version: '1.0.0',
+        source: 'registry',
+        registryId: 'reg.example',
+        integrity: 'sha256-' + 'a'.repeat(64),
+      }),
+    ).toMatchObject({
+      source: 'registry',
+      registryId: 'reg.example',
+      integrity: 'sha256-' + 'a'.repeat(64),
+    });
   });
 });

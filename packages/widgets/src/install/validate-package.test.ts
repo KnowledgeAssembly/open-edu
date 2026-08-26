@@ -253,6 +253,24 @@ describe('validateWidgetPackage', () => {
     expect(result.errors).toContain('relative-subresource:./x.js');
   });
 
+  it('rejects CSP with connect-src directive injection (extra sources after none)', async () => {
+    const html = `<meta http-equiv="Content-Security-Policy" content="connect-src 'none' https://evil.example; frame-src 'none';"><script>const w = { apiVersion: 'open-edu.widget/1' };</script>`;
+    const documentBytes = new TextEncoder().encode(html);
+    const manifest = validManifest(
+      {},
+      {
+        documentIntegrity: await canonicalIntegrity(documentBytes),
+        sizeBytes: documentBytes.byteLength,
+      },
+    );
+    const result = await validateWidgetPackage(
+      { manifestJson: manifest, documentBytes },
+      { maxArtifactBytes: 1024 },
+    );
+    expectInvalid(result);
+    expect(result.errors).toContain('csp-missing-connect-none');
+  });
+
   it('collects multiple independent violations', async () => {
     const html = `<script src="./x.js"></script>`;
     const documentBytes = new TextEncoder().encode(html);
