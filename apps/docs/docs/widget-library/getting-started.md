@@ -190,5 +190,6 @@ Open your browser to the URL shown in the terminal. You should see your intro, q
 ## What's next?
 
 - Browse the full [Widget Library](./core/multiple-choice.md) to discover all 27 built-in widgets
+- Learn about [Community Widgets](../widgets/community-widgets) for building sandboxed third-party widgets
 - Learn about [Package Authoring](../package-authoring) for advanced node types like reflections and assessments
 - See more examples in the [Examples](../examples/hello-world) section

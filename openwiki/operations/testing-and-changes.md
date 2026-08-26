@@ -31,6 +31,8 @@ From the repository root:
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang` — find missing translations for a target language
 - Curriculum pipeline (`@open-edu/pipeline`) moved to the standalone `open-edu-pipeline` repo — see its `packages/pipeline/README.md` for `curriculum:generate` usage
 - `pnpm --filter @open-edu/registry test` — run the registry package tests (catalog builder, release validation, metadata validation)
+- `pnpm --filter @open-edu/widget-sdk test` — run widget-sdk tests (framework-agnostic protocol, fixtures, build helpers)
+- `pnpm test:e2e tests/e2e/community-widget.spec.ts` — run community widget E2E tests (sandbox isolation, persistence, revocation)
 
 ## Package-local commands
 
@@ -65,6 +67,7 @@ This matters because runtime and dev-server styling are intentionally coupled th
 - Preserve progress persistence and local-storage behavior when changing learner flows.
 - Be careful with bundle navigation, because module-level navigation can bypass some normal exit warnings.
 - When touching widget catalogs, update the canonical source in `packages/widgets/src/widget-catalog-source.ts` and regenerate the derived JSON rather than editing the JSON by hand.
+- Community widget protocol changes must update conformance fixtures in `packages/widget-sdk/src/fixtures/` and pass the full E2E suite in `tests/e2e/community-widget.spec.ts`.
 - When adding new user-facing strings to runtime or learner components, use `t('namespace.key')` via `useTranslation()` from `@open-edu/i18n` and add the English translation to the appropriate locale file in `packages/i18n/locales/en/`.
 
 ## Best starting points by change type

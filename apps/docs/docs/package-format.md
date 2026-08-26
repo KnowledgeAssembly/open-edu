@@ -135,6 +135,10 @@ Nodes can load widgets from remote URLs at runtime:
 }
 ```
 
+:::tip
+For new content, prefer `widgetRef` with `source: 'registry'` over `remoteWidget`. Community widgets via the registry provide stronger guarantees: sandboxed iframe isolation, mandatory integrity, version pinning, and host-controlled capabilities. See the [Community Widgets Developer Guide](./widgets/community-widgets) for details.
+:::
+
 ### Skill Assessments
 
 Exercise and custom nodes can assess skills:

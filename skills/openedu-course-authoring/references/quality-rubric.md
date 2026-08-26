@@ -41,12 +41,14 @@ Assessments must test what was taught, not introduce new concepts.
 
 ## Dimension 5: Widget Decisions
 
-| Check ID    | Rule                                                               | Severity |
-| ----------- | ------------------------------------------------------------------ | -------- |
-| `QC-WDG-01` | Widget IDs are from the discovered catalog (canonical, not legacy) | `error`  |
-| `QC-WDG-02` | Widget is not marked deprecated                                    | `error`  |
-| `QC-WDG-03` | widgetConfig includes all required fields for the widget           | `error`  |
-| `QC-WDG-04` | Widget choice is justified by learning intent                      | `info`   |
+| Check ID    | Rule                                                                                     | Severity  |
+| ----------- | ---------------------------------------------------------------------------------------- | --------- |
+| `QC-WDG-01` | Widget IDs are from the discovered catalog (canonical, not legacy)                       | `error`   |
+| `QC-WDG-02` | Widget is not marked deprecated                                                          | `error`   |
+| `QC-WDG-03` | widgetConfig includes all required fields for the widget                                 | `error`   |
+| `QC-WDG-04` | Widget choice is justified by learning intent                                            | `info`    |
+| `QC-WDG-05` | Community widget references (`widgetRef`) include mandatory integrity and valid `source` | `error`   |
+| `QC-WDG-06` | Community widget `fallback` resolves to an available native widget                       | `warning` |
 
 ## Dimension 6: Accessibility & Inclusion
 

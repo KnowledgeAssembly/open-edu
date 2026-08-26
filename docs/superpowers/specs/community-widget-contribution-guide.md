@@ -6,6 +6,7 @@
 
 **Related docs:**
 
+- [Community Widgets Developer Guide](../../../apps/docs/docs/widgets/community-widgets) — published developer guide for building, publishing, and installing community widgets
 - [Widget Registry Operator Runbook](./widget-registry-operator-runbook.md) — installing, enabling, and revoking widgets on an instance
 - [Runtime Community Widget Ecosystem — Technical Design Spec](./2026-08-14-runtime-community-widget-ecosystem-design.md) — full protocol and security model
 
