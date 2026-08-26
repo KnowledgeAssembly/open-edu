@@ -4,7 +4,7 @@
   "apiVersion": "open-edu.widget/1",
   "artifact": {
     "documentUrl": "https://cdn.example.com/widgets/community.example.counter/1.0.0/index.html",
-    "documentIntegrity": "sha256-3384f1ebb34320d572e63b91ef6009174401830c53df50c3e960e55c5b57174e",
+    "documentIntegrity": "sha256-a2a6dd0317b58f43c59a3d810a0993724e23bfc74bb089de1daafe8216a65699",
     "sizeBytes": 4400,
     "format": "self-contained-html"
   },
