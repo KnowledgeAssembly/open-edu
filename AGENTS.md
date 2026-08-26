@@ -56,6 +56,7 @@ pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js compile cours
 # The curriculum pipeline lives in the standalone open-edu-pipeline repo:
 #   cd ../open-edu-pipeline && pnpm curriculum:generate --pdf ./textbook.pdf --level B --subject math
 pnpm --filter @open-edu/registry test  # Run registry package tests
+pnpm --filter @open-edu/widget-sdk test  # Run widget-sdk tests (framework-agnostic protocol)
 pnpm --filter @open-edu/widgets generate:catalog  # Regenerate widget-catalog-data.json from canonical source
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales  # Extract translatable strings
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales  # Validate translation completeness
@@ -90,7 +91,8 @@ open-edu/
 │   ├── cli/                 # edu CLI (10+ commands)
 │   ├── course-compiler/     # Course spec compiler (course-spec.md/.json → OpenEdu package)
 │   ├── llm-config/          # LLM provider abstraction (OpenAI + OpenRouter)
-│   ├── widgets/             # Widget SDK + registry + 28 built-in widgets + metadata enrichment + validation + catalog generation + remote loader
+│   ├── widgets/             # Widget SDK + registry + 28 built-in widgets + metadata enrichment + validation + catalog generation + remote loader + WidgetResolver + artifact cache
+│   ├── widget-sdk/          # Framework-agnostic community widget protocol SDK (no React dependency)
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
 │   ├── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
 │   └── registry/             # Course registry tooling (catalog builder, release validation, open-edu-registry CLI)
@@ -182,7 +184,7 @@ All packages use the `@open-edu/` scope:
 
 - `@open-edu/schemas`, `@open-edu/core`, `@open-edu/workflow`, `@open-edu/runtime`
 - `@open-edu/accessibility`, `@open-edu/telemetry`, `@open-edu/rewards`, `@open-edu/cli`
-- `@open-edu/widgets`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
+- `@open-edu/widgets`, `@open-edu/widget-sdk`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
 - `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
 - `@open-edu/oep-distribution`

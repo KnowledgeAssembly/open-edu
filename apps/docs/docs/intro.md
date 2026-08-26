@@ -76,4 +76,5 @@ node packages/cli/dist/cli.js --help
 - [Course Compiler](./course-compiler) — Compile `course-spec.md` into validated packages with `edu compile`
 - [CLI Reference](./cli/overview) — All CLI commands, including `edu import learn-easy` and `edu compile`
 - [Widget SDK](./widgets/overview) — Building custom interactive widgets
+- [Community Widgets](./widgets/community-widgets) — Building sandboxed community widgets (iframe + protocol)
 - [Testing Guide](./testing) — Unit and E2E testing, including bundle navigation tests

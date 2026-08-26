@@ -81,7 +81,11 @@ Translates events into reward receipts, including badge delivery and card progre
 
 ### `@open-edu/widgets`
 
-Provides the widget registry and built-in widgets used by content nodes and runtime renderers. The registry supports alias resolution, domain namespacing, structured search, metadata validation, and catalog generation for LLM prompts. Recent changes moved the canonical widget metadata into `packages/widgets/src/widget-catalog-source.ts` and added the SVG explorer widget family, while `@open-edu/core` now reads the generated catalog data at runtime.
+Provides the widget registry and built-in widgets used by content nodes and runtime renderers. The registry supports alias resolution, domain namespacing, structured search, metadata validation, and catalog generation for LLM prompts. Recent changes moved the canonical widget metadata into `packages/widgets/src/widget-catalog-source.ts` and added the SVG explorer widget family, while `@open-edu/core` now reads the generated catalog data at runtime. The `WidgetResolver` handles policy-aware resolution of native, sandboxed, and trusted-remote widgets, with an IndexedDB-backed artifact cache and deterministic fallback transforms.
+
+### `@open-edu/widget-sdk`
+
+Framework-agnostic protocol SDK for community widgets. Provides message validators, a widget-side host client (`createWidgetHostClient`), theme token applicator, protocol conformance fixtures, and build helpers (CSP hash computation). No React dependency — community widgets can use any framework or vanilla JavaScript. See the [Community Widgets Developer Guide](../../apps/docs/docs/widgets/community-widgets) for building, publishing, and installing community widgets.
 
 ### `@open-edu/course-compiler`
 

@@ -199,6 +199,7 @@ const sidebars: SidebarsConfig = {
         'oep-distribution',
         'registry',
         'widgets/overview',
+        'widgets/community-widgets',
       ],
     },
     {

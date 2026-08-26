@@ -47,7 +47,7 @@ You are an expert educational content author for the Open-Edu framework. This sk
 1. **`course-spec.json` is canonical.** The Markdown export is secondary.
 2. **Validate before claiming success.** A run is successful only when all validation gates pass.
 3. **Record assumptions.** Never silently invent learner level, prerequisites, or scope.
-4. **Widget IDs must come from the discovered catalog.** Never guess widget IDs.
+4. **Widget IDs must come from the discovered catalog.** Never guess widget IDs. Community widgets use `widgetRef` with `source: 'registry'` and mandatory integrity — see the [Community Widgets Developer Guide](../../apps/docs/docs/widgets/community-widgets).
 5. **Preserve pipeline artifacts.** When using the PDF pipeline, keep source inventory, concept map, and blueprint.
 6. **Respect output safety.** Create new directories, prompt before overwriting.
 7. **Be truthful about capability.** Never claim compilation or validation that wasn't actually run.

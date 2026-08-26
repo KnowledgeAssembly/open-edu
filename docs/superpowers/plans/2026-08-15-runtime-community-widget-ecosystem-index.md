@@ -6,6 +6,8 @@
 
 **Architecture:** Native widgets stay in the host React realm. Community widgets load as cross-origin iframes (`sandbox="allow-scripts"`) and talk to the host through a versioned, schema-validated protocol. The host owns state, completion, telemetry, rewards, capabilities, and lifecycle. Exact widget version + integrity are pinned in the course package.
 
+**Published Guide:** [Community Widgets Developer Guide](../../../apps/docs/docs/widgets/community-widgets) — the canonical developer-facing reference for building, publishing, and installing community widgets.
+
 **Tech Stack:** TypeScript 5.x, Zod 3.x, Vitest 1.x, React 18.x, Playwright 1.x, IndexedDB, iframe `postMessage`
 
 **Spec:** [`docs/superpowers/specs/2026-08-14-runtime-community-widget-ecosystem-design.md`](../specs/2026-08-14-runtime-community-widget-ecosystem-design.md)

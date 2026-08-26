@@ -304,3 +304,36 @@ Reference widgets in exercise or custom nodes using the new domain-prefixed IDs:
 Legacy `open-edu.*` IDs are automatically resolved — no migration required for existing packages.
 
 For remote widgets, use the `remoteWidget` field on custom nodes.
+
+## Community Widgets (Sandboxed)
+
+Community widgets run in sandboxed iframes and communicate with the host through a versioned `postMessage` protocol. They never execute in the learner app's JavaScript realm. This is the recommended approach for third-party and instance-hosted widgets.
+
+**Key differences from native widgets:**
+
+- Framework-agnostic (React not required)
+- Sandboxed iframe with `sandbox="allow-scripts"` (no `allow-same-origin`)
+- Versioned protocol (`open-edu.widget/1`) with schema-validated messages
+- Host owns state, completion, telemetry, rewards, and capabilities
+- Mandatory integrity verification for registry references
+- Supports offline-capable self-contained HTML artifacts
+
+Use `widgetRef` on exercise/custom nodes to reference community widgets:
+
+```json
+{
+  "type": "exercise",
+  "title": "Community Counter",
+  "widgetRef": {
+    "id": "community.example.counter",
+    "version": "1.0.0",
+    "source": "registry",
+    "registryId": "main",
+    "integrity": "sha256-<64-hex>",
+    "fallback": "core.multiple-choice"
+  },
+  "config": { "prompt": "Count to 10!" }
+}
+```
+
+For the full guide on building, publishing, and installing community widgets, see the [Community Widgets Developer Guide](./community-widgets).

@@ -6,6 +6,7 @@
 
 **Related docs:**
 
+- [Community Widgets Developer Guide](../../../apps/docs/docs/widgets/community-widgets) — published developer guide for widget authors
 - [Community Widget Contribution Guide](./community-widget-contribution-guide.md) — author-side package layout, protocol, and CSP
 - [Runtime Community Widget Ecosystem — Technical Design Spec](./2026-08-14-runtime-community-widget-ecosystem-design.md) — full threat model and resolver/cache design
 

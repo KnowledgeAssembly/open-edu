@@ -53,17 +53,18 @@ course-output/
 
 ### Activity Schema
 
-| Field          | Type                                                                                                   | Required | Description                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------- |
-| `step`         | `"observe" \| "guided_practice" \| "independent_practice" \| "mastery_check" \| "positive_completion"` | yes      | Pedagogical step role                                   |
-| `order`        | number                                                                                                 | yes      | Sequential order (starting at 1)                        |
-| `type`         | `"reading" \| "exercise" \| "quiz" \| "reflection" \| "widget"`                                        | yes      | Activity type                                           |
-| `description`  | string                                                                                                 | yes      | Short description of the activity                       |
-| `instructions` | string                                                                                                 | no       | For reading/exercise types: the content or instructions |
-| `examples`     | `string[]`                                                                                             | no       | For exercise types: example problems                    |
-| `questions`    | `MCQQuestion[]`                                                                                        | no       | For quiz type: array with exactly 4-option MCQs         |
-| `widgetId`     | string                                                                                                 | no       | For widget type: canonical widget ID                    |
-| `widgetConfig` | `Record<string, unknown>`                                                                              | no       | For widget type: widget-specific config                 |
+| Field          | Type                                                                                                   | Required | Description                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `step`         | `"observe" \| "guided_practice" \| "independent_practice" \| "mastery_check" \| "positive_completion"` | yes      | Pedagogical step role                                                                                                                                           |
+| `order`        | number                                                                                                 | yes      | Sequential order (starting at 1)                                                                                                                                |
+| `type`         | `"reading" \| "exercise" \| "quiz" \| "reflection" \| "widget"`                                        | yes      | Activity type                                                                                                                                                   |
+| `description`  | string                                                                                                 | yes      | Short description of the activity                                                                                                                               |
+| `instructions` | string                                                                                                 | no       | For reading/exercise types: the content or instructions                                                                                                         |
+| `examples`     | `string[]`                                                                                             | no       | For exercise types: example problems                                                                                                                            |
+| `questions`    | `MCQQuestion[]`                                                                                        | no       | For quiz type: array with exactly 4-option MCQs                                                                                                                 |
+| `widgetId`     | string                                                                                                 | no       | For widget type: canonical widget ID                                                                                                                            |
+| `widgetConfig` | `Record<string, unknown>`                                                                              | no       | For widget type: widget-specific config                                                                                                                         |
+| `widgetRef`    | `WidgetReference`                                                                                      | no       | For community widgets: `{ id, version, source, integrity, fallback }` — see [Community Widgets Developer Guide](../../apps/docs/docs/widgets/community-widgets) |
 
 ### MCQQuestion Schema
 

@@ -168,6 +168,10 @@ The skill ships with 9 evaluation scenarios (`evals/evals.json`) — 3 portable,
 
 Widget-based exercises depend on the registry and catalog pipeline. The canonical widget metadata is defined in `packages/widgets/src/widget-catalog-source.ts`, resolved through `packages/widgets/src/domains.ts`, and consumed by `packages/core/src/widget-catalog.ts` when the CLI builds prompt/catalog output. That separation keeps author-facing widget IDs stable while allowing legacy `open-edu.*` IDs to be migrated automatically. The SVG explorer widget family also lives under `packages/widgets/src/svg-explorer/` and extends the same catalog pathway for interactive content.
 
+### Community widgets
+
+Community widgets run in sandboxed iframes and communicate with the host through the `open-edu.widget/1` protocol. Courses reference them via `widgetRef` with `source: 'registry'` and mandatory integrity. The `WidgetResolver` (`packages/widgets/src/resolver/`) handles verification, caching, and adapter selection. See the [Community Widgets Developer Guide](../../apps/docs/docs/widgets/community-widgets) for the full reference on building, publishing, and installing community widgets.
+
 ## Pipeline: content-to-course-spec generation
 
 The curriculum pipeline moved to the standalone [`open-edu-pipeline`](https://github.com/KnowledgeAssembly/open-edu-pipeline) repository. It generates course specifications from educational source files (PDF, DOCX, PPTX, Markdown, Images, ZIP) through an 8-stage AI-driven pipeline with profile-aware generation (generic/math/science/nios). See that repo's `packages/pipeline/README.md` for CLI usage, profiles, scope options, and resume behavior.

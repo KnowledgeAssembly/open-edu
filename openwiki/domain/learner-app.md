@@ -49,6 +49,7 @@ This page is the primary discovery surface for both simple courses and multi-mod
 - `RewardBroker` for badge delivery
 - `CardBroker` for Knowledge Card unlocks/level-ups
 - widget registry setup from `@open-edu/widgets`
+- sandboxed community widget execution via `SandboxWidgetAdapter` (iframe isolation, `open-edu.widget/1` protocol)
 - local progress, bundle progress, badge, and card storage
 
 This file is the best starting point when changing how a learner enters, advances through, or exits a course.

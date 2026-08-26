@@ -140,3 +140,4 @@ Every lesson should follow this progression:
 4. Provide `widgetConfig` that matches the widget's required fields
 5. Fall back to reading/exercise/quiz when no suitable widget exists
 6. Record widget choices and rationale in quality report
+7. For community widgets, use `widgetRef` with `source: 'registry'`, mandatory `integrity`, and a native `fallback` — see the [Community Widgets Developer Guide](../../apps/docs/docs/widgets/community-widgets)

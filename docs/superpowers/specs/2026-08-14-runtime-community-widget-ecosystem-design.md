@@ -4,6 +4,7 @@
 **Status:** Draft for maintainer review
 **Audience:** Open-Edu maintainers, widget SDK contributors, registry operators, and implementers
 **Scope:** Runtime deployment of third-party/community widgets without rebuilding the learner application
+**Published Guide:** [Community Widgets Developer Guide](../../../apps/docs/docs/widgets/community-widgets) — the canonical developer-facing reference for building, publishing, and installing community widgets
 
 ## 1. Summary
 
