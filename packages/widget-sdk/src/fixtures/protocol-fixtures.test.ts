@@ -71,12 +71,15 @@ describe('host-bound validation of fixtures', () => {
     expect(result).toEqual({ ok: false, reason: 'nonce' });
   });
 
-  it('rejects EXPIRED_SEQUENCE_MESSAGE', () => {
+  it('accepts EXPIRED_SEQUENCE_MESSAGE (ready bypasses sequence check for StrictMode)', () => {
     const result = validateHostBoundMessage(
       EXPIRED_SEQUENCE_MESSAGE,
       'https://app.example.com',
       SESSION,
     );
-    expect(result).toEqual({ ok: false, reason: 'sequence' });
+    expect(result).toEqual({
+      ok: true,
+      message: expect.objectContaining({ type: 'ready', sequence: 99 }),
+    });
   });
 });

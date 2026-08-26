@@ -48,11 +48,17 @@ export function validateHostBoundMessage(
   if (msg.apiVersion !== PROTOCOL_API_VERSION) return { ok: false, reason: 'api-version' };
   if (msg.instanceId !== session.instanceId) return { ok: false, reason: 'instance' };
   if (msg.nonce !== session.nonce) return { ok: false, reason: 'nonce' };
-  if (msg.sequence !== session.lastSequence + 1) return { ok: false, reason: 'sequence' };
   if (!WidgetToHostTypeSchema.safeParse(msg.type).success) return { ok: false, reason: 'type' };
   // v1 does not implement the capability request/response channel, so the host
   // deterministically drops capability:request to keep the extension point safe.
   if (msg.type === 'capability:request') return { ok: false, reason: 'type' };
+  // The 'ready' handshake is the first message a widget sends. In React
+  // StrictMode the message listener may be torn down and re-attached, causing
+  // the host to miss earlier ready messages.  Accept any sequence for the
+  // initial handshake so the widget can still establish the session.
+  if (msg.type !== 'ready' && msg.sequence !== session.lastSequence + 1) {
+    return { ok: false, reason: 'sequence' };
+  }
   return { ok: true, message: msg };
 }
 

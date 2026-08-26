@@ -48,9 +48,21 @@ describe('validateHostBoundMessage', () => {
     expect(result).toEqual({ ok: false, reason: 'instance' });
   });
 
-  it('rejects an out-of-order sequence', () => {
+  it('accepts a ready message with a non-sequential sequence (StrictMode)', () => {
     const result = validateHostBoundMessage(
       makeEnvelope({ sequence: 3 }),
+      'https://app.example.com',
+      SESSION,
+    );
+    expect(result).toEqual({
+      ok: true,
+      message: expect.objectContaining({ type: 'ready', sequence: 3 }),
+    });
+  });
+
+  it('rejects an out-of-order sequence for non-ready messages', () => {
+    const result = validateHostBoundMessage(
+      makeEnvelope({ type: 'interaction', sequence: 3 }),
       'https://app.example.com',
       SESSION,
     );
