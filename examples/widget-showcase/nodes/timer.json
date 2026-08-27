@@ -1,0 +1,22 @@
+{
+  "type": "exercise",
+  "title": "Take a Break",
+  "widget": "core.timer",
+  "config": {
+    "duration": 120,
+    "mode": "countdown",
+    "label": "Time for a stretch break",
+    "completeMessage": "Ready to continue?",
+    "visual": "ring",
+    "showDigital": true,
+    "autoStart": true,
+    "allowPause": true,
+    "allowSkip": true,
+    "warnings": [
+      { "atSeconds": 60, "message": "One minute left — finish up" },
+      { "atSeconds": 10, "message": "Almost done" }
+    ],
+    "colorZones": true,
+    "interactive": false
+  }
+}

@@ -37,6 +37,7 @@ import {
   numberLine,
   socialMap,
   processExplainer,
+  timer,
 } from './builtins';
 
 export function createWidgetRegistry(): WidgetRegistry {
@@ -171,6 +172,7 @@ const BUILTIN_WIDGETS: WidgetDefinition[] = [
   numberLine,
   socialMap,
   processExplainer,
+  timer,
 ];
 
 export function registerAllBuiltins(registry: WidgetRegistry): void {

@@ -15,5 +15,20 @@
   "process_explainer.all_steps": "All steps revealed!",
   "process_explainer.finish": "Finish",
   "process_explainer.all_steps_viewed": "All steps viewed.",
-  "process_explainer.mark_as_seen": "Mark as seen ✓"
+  "process_explainer.mark_as_seen": "Mark as seen ✓",
+  "timer.label_default": "Timer",
+  "timer.started": "Timer started",
+  "timer.paused": "Timer paused",
+  "timer.resumed": "Timer resumed",
+  "timer.restarted": "Timer restarted",
+  "timer.remaining_aria": "{{time}} remaining",
+  "timer.elapsed_aria": "{{time}} elapsed",
+  "timer.start": "Start",
+  "timer.pause": "Pause",
+  "timer.resume": "Resume",
+  "timer.restart": "Restart",
+  "timer.skip": "End break now",
+  "timer.done": "Done",
+  "timer.warning_default": "Almost done",
+  "timer.all_done": "All done"
 }
