@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, extname, resolve, dirname, relative, isAbsolute } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
@@ -17,7 +18,7 @@ const REPO_ROOT = resolve(__dirname, '../..');
 const resolveEnvPath = (value: string): string =>
   isAbsolute(value) ? value : resolve(REPO_ROOT, value);
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
-  ? resolveEnvPath(process.env.EDU_CATALOG_DIR)
+  ? resolve(process.env.EDU_CATALOG_DIR)
   : resolve(__dirname, '../../examples');
 const WIDGET_DIR = process.env.EDU_WIDGET_DIR
   ? resolveEnvPath(process.env.EDU_WIDGET_DIR)
@@ -262,6 +263,31 @@ function scanWidgetDir(dir: string) {
         try {
           const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
           if (manifest.status === 'disabled' || manifest.status === 'revoked') continue;
+
+          const docPath = join(dir, publisher.name, widget.name, version.name, 'index.html');
+          if (existsSync(docPath)) {
+            const docBytes = new Uint8Array(readFileSync(docPath));
+            const docIntegrity = `sha256-${createHash('sha256').update(docBytes).digest('hex')}`;
+            if (
+              manifest.artifact?.documentIntegrity &&
+              manifest.artifact.documentIntegrity !== docIntegrity
+            ) {
+              console.warn(
+                `[widget-registry] integrity mismatch: ${publisher.name}/${widget.name}/${version.name} — skipping`,
+              );
+              continue;
+            }
+            if (
+              manifest.artifact?.sizeBytes &&
+              manifest.artifact.sizeBytes !== docBytes.byteLength
+            ) {
+              console.warn(
+                `[widget-registry] size mismatch: ${publisher.name}/${widget.name}/${version.name} — skipping`,
+              );
+              continue;
+            }
+          }
+
           widgets.push({
             id: manifest.id ?? `${publisher.name}.${widget.name}`,
             version: manifest.version ?? version.name,

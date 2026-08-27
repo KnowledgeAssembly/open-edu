@@ -282,6 +282,66 @@ describe('WidgetResolver (policy-aware)', () => {
     expect(calls.indexOf(CDN_DOCUMENT_URL)).toBeLessThan(calls.indexOf(LOCAL_DOCUMENT_URL));
   });
 
+  it('returns unavailable when both primary and local fallback fetches fail', async () => {
+    const LOCAL_REGISTRY = 'http://localhost:4001';
+    const LOCAL_MANIFEST_URL = `${LOCAL_REGISTRY}/widget-registry/localpub/community.example.counter/1.0.0/manifest.json`;
+    const CDN_DOCUMENT_URL =
+      'https://cdn.example.com/widgets/community.example.counter/1.0.0/index.html';
+    const doc = await documentBytes(DOC_TEXT);
+    const man = await manifestBytes({
+      artifact: {
+        ...baseArtifact(doc.integrity),
+        documentUrl: CDN_DOCUMENT_URL,
+        sizeBytes: doc.bytes.byteLength,
+      },
+      distribution: { offline: false, cachePolicy: 'immutable' },
+    });
+    const { impl, calls } = makeFetchMock({
+      [LOCAL_MANIFEST_URL]: man.bytes,
+      // neither CDN nor local document URL registered → both fail
+    });
+    const catalog: ResolverCatalog = {
+      registryId: 'localdev',
+      origin: LOCAL_REGISTRY,
+      widgets: new Map([
+        [
+          `${WIDGET_ID}@${VERSION}`,
+          {
+            id: WIDGET_ID,
+            version: VERSION,
+            manifestUrl: LOCAL_MANIFEST_URL,
+            status: 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          },
+        ],
+      ]),
+    };
+    const resolver = createWidgetResolver({
+      policy: policy({ registryCatalogOrigins: [LOCAL_REGISTRY] }),
+      cache: createWidgetArtifactCache(),
+      catalogs: { localdev: catalog },
+      registry: registryWith(BUILTIN_COUNTER),
+      fetchImpl: impl,
+      isOnline: () => true,
+      now: () => Date.now(),
+    });
+
+    const result = await resolver.resolve({
+      id: WIDGET_ID,
+      version: VERSION,
+      source: 'registry',
+      registryId: 'localdev',
+      integrity: man.integrity,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.failure).toBe('unavailable');
+    }
+    expect(calls).toContain(CDN_DOCUMENT_URL);
+  });
+
   it('fails with integrity before fetching the document on mismatch', async () => {
     const doc = await documentBytes(DOC_TEXT);
     const man = await manifestBytes({
