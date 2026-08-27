@@ -337,3 +337,13 @@ Use `widgetRef` on exercise/custom nodes to reference community widgets:
 ```
 
 For the full guide on building, publishing, and installing community widgets, see the [Community Widgets Developer Guide](./community-widgets).
+
+### Local development
+
+Test community widgets in the learner app without a dev-server or DevTools globals:
+
+```bash
+EDU_WIDGET_DIR=./examples/community-widget-counter pnpm --filter @open-edu/learner dev
+```
+
+See [Community Widgets — Local Development](./community-widgets#local-development) for details.

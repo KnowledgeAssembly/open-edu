@@ -20,6 +20,9 @@ pnpm --filter @open-edu/learner dev
 # Use a custom course directory (defaults to ../../examples)
 EDU_CATALOG_DIR=/path/to/my/courses pnpm --filter @open-edu/learner dev
 
+# Serve community widgets from a local directory (no dev-server needed)
+EDU_WIDGET_DIR=./examples/community-widget-counter pnpm --filter @open-edu/learner dev
+
 # Start the Course Creator Studio for a specific package (port 4000)
 # Creator mode (default) is a teacher-friendly authoring UI — templates,
 # outline, form editors, preview, share; Developer mode keeps the file editors

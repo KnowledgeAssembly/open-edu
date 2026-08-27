@@ -33,6 +33,7 @@ From the repository root:
 - `pnpm --filter @open-edu/registry test` — run the registry package tests (catalog builder, release validation, metadata validation)
 - `pnpm --filter @open-edu/widget-sdk test` — run widget-sdk tests (framework-agnostic protocol, fixtures, build helpers)
 - `pnpm test:e2e tests/e2e/community-widget.spec.ts` — run community widget E2E tests (sandbox isolation, persistence, revocation)
+- `EDU_WIDGET_DIR=./examples/community-widget-counter pnpm --filter @open-edu/learner dev` — manually test community widgets in the learner app (auto-discovers catalog, no globals needed)
 
 ## Package-local commands
 
