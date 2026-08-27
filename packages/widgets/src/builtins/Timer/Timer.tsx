@@ -266,6 +266,7 @@ function TimerComponent(props: {
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
+      if (event.target !== event.currentTarget) return;
       if (event.key === ' ' || event.key === 'Spacebar') {
         event.preventDefault();
         if (allowPause && !completedRef.current) {
@@ -433,7 +434,7 @@ function TimerComponent(props: {
         </Button>
       )}
 
-      {!completed && interactive && mode === 'countup' && (
+      {!completed && mode === 'countup' && (
         <Button variant="default" onClick={handleDone} data-testid="timer-done">
           {t('widgets.timer.done')}
         </Button>
@@ -529,7 +530,6 @@ const TimerWidget: WidgetDefinitionV2 = {
         warnings: [{ atSeconds: 60, message: 'One minute left' }],
       },
       {
-        duration: 0,
         mode: 'countup',
         label: 'Quiet reading time',
         interactive: true,

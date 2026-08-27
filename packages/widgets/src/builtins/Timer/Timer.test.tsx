@@ -300,6 +300,14 @@ describe('Timer count-up mode', () => {
       expect.objectContaining({ phase: 'completed' }),
     );
   });
+
+  it('shows a Done control in non-interactive count-up even when skip is disabled', () => {
+    const { complete } = renderWidget({ mode: 'countup', interactive: false, allowSkip: false });
+    expect(screen.getByTestId('timer-done')).toBeInTheDocument();
+    expect(screen.queryByTestId('timer-skip')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('timer-done'));
+    expect(complete).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('Timer state restoration', () => {

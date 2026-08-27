@@ -163,7 +163,7 @@ generationHints:
 exampleConfigs:
   - { duration: 120, mode: 'countdown', label: 'Time for a stretch break', visual: 'ring' }
   - { duration: 300, mode: 'countdown', warnings: [{ atSeconds: 60, message: 'One minute left' }] }
-  - { duration: 0, mode: 'countup', label: 'Quiet reading time', interactive: true }
+  - { mode: 'countup', label: 'Quiet reading time', interactive: true }
 ```
 
 ---

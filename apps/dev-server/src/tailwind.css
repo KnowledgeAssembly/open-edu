@@ -1291,6 +1291,10 @@ video {
   height: 100vh;
 }
 
+.h-icon-sm {
+  height: var(--oe-size-icon-sm);
+}
+
 .h-sm {
   height: var(--oe-size-height-sm);
 }
