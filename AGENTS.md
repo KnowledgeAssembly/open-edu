@@ -48,6 +48,7 @@ pnpm typecheck                        # Type-check all packages
 pnpm format:check                     # Check formatting
 pnpm format                           # Auto-format all files
 pnpm --filter @open-edu/learner dev   # Start the learner app (port 4001)
+EDU_WIDGET_DIR=./examples/community-widget-counter pnpm --filter @open-edu/learner dev  # Learner with community widgets
 pnpm test:e2e                         # Run Playwright E2E tests
 pnpm test:e2e -- bundle-navigation    # Run bundle-specific E2E tests
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js import learn-easy ./source-dir ./output-dir  # Import Learn-Easy content as a bundle

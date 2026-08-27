@@ -1,7 +1,8 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, extname, resolve, dirname, relative } from 'node:path';
+import { createHash } from 'node:crypto';
+import { join, extname, resolve, dirname, relative, isAbsolute } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'url';
 import { scanAll, scanPackages, loadPackage, loadBundle, ASSET_MIME_TYPES } from '@open-edu/core';
@@ -13,9 +14,16 @@ import { oepProxyHandler } from './src/oep-proxy/index.js';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(__dirname, '../..');
+const resolveEnvPath = (value: string): string =>
+  isAbsolute(value) ? value : resolve(REPO_ROOT, value);
 const CATALOG_DIR = process.env.EDU_CATALOG_DIR
   ? resolve(process.env.EDU_CATALOG_DIR)
   : resolve(__dirname, '../../examples');
+const WIDGET_DIR = process.env.EDU_WIDGET_DIR
+  ? resolveEnvPath(process.env.EDU_WIDGET_DIR)
+  : undefined;
+const WIDGET_REGISTRY_ORIGIN = 'http://localhost:4001';
 const PKGS_DIR = resolve(__dirname, '../../packages');
 const VIRTUAL_MODULE_ID = 'virtual:edu-data';
 const RESOLVED_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
@@ -222,6 +230,145 @@ export const bundleEntries = ${bundleEntriesJson};
   };
 }
 
+function isSafeWidgetSegment(segment: string | undefined): segment is string {
+  return (
+    segment !== undefined &&
+    segment !== '' &&
+    segment !== '.' &&
+    segment !== '..' &&
+    !/[\\/\0]/.test(segment)
+  );
+}
+
+function scanWidgetDir(dir: string) {
+  const widgets: Array<{
+    id: string;
+    version: string;
+    manifestUrl: string;
+    status: string;
+    trustTier: 'sandboxed';
+    offline: boolean;
+  }> = [];
+
+  for (const publisher of readdirSync(dir, { withFileTypes: true })) {
+    if (!publisher.isDirectory() || publisher.name.startsWith('.')) continue;
+    for (const widget of readdirSync(join(dir, publisher.name), { withFileTypes: true })) {
+      if (!widget.isDirectory() || widget.name.startsWith('.')) continue;
+      for (const version of readdirSync(join(dir, publisher.name, widget.name), {
+        withFileTypes: true,
+      })) {
+        if (!version.isDirectory() || version.name.startsWith('.')) continue;
+        const manifestPath = join(dir, publisher.name, widget.name, version.name, 'manifest.json');
+        if (!existsSync(manifestPath)) continue;
+        try {
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+          if (manifest.status === 'disabled' || manifest.status === 'revoked') continue;
+
+          const docPath = join(dir, publisher.name, widget.name, version.name, 'index.html');
+          if (existsSync(docPath)) {
+            const docBytes = new Uint8Array(readFileSync(docPath));
+            const docIntegrity = `sha256-${createHash('sha256').update(docBytes).digest('hex')}`;
+            if (
+              manifest.artifact?.documentIntegrity &&
+              manifest.artifact.documentIntegrity !== docIntegrity
+            ) {
+              console.warn(
+                `[widget-registry] integrity mismatch: ${publisher.name}/${widget.name}/${version.name} — skipping`,
+              );
+              continue;
+            }
+            if (
+              manifest.artifact?.sizeBytes &&
+              manifest.artifact.sizeBytes !== docBytes.byteLength
+            ) {
+              console.warn(
+                `[widget-registry] size mismatch: ${publisher.name}/${widget.name}/${version.name} — skipping`,
+              );
+              continue;
+            }
+          }
+
+          widgets.push({
+            id: manifest.id ?? `${publisher.name}.${widget.name}`,
+            version: manifest.version ?? version.name,
+            manifestUrl: `${WIDGET_REGISTRY_ORIGIN}/widget-registry/${publisher.name}/${widget.name}/${version.name}/manifest.json`,
+            status: manifest.status ?? 'experimental',
+            trustTier: 'sandboxed',
+            offline: true,
+          });
+        } catch {
+          // skip invalid manifests
+        }
+      }
+    }
+  }
+
+  return {
+    registryId: 'local',
+    origin: WIDGET_REGISTRY_ORIGIN,
+    widgets,
+  };
+}
+
+function widgetRegistryPlugin(): Plugin | undefined {
+  if (!WIDGET_DIR) return undefined;
+
+  const catalog = scanWidgetDir(WIDGET_DIR);
+
+  return {
+    name: 'widget-registry',
+    configureServer(server) {
+      console.log(
+        `[widget-registry] Serving ${catalog.widgets.length} widget(s) from ${WIDGET_DIR} (registry: ${catalog.registryId})`,
+      );
+
+      server.middlewares.use((req, res, next) => {
+        const url = decodeURIComponent(req.url ?? '');
+
+        if (url === '/widget-registry/catalog.json' && req.method === 'GET') {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(JSON.stringify(catalog));
+          return;
+        }
+
+        const manifestMatch = url.match(
+          /^\/widget-registry\/([^/]+)\/([^/]+)\/([^/]+)\/manifest\.json$/,
+        );
+        if (manifestMatch && req.method === 'GET') {
+          const [, pub, id, ver] = manifestMatch;
+          if (isSafeWidgetSegment(pub) && isSafeWidgetSegment(id) && isSafeWidgetSegment(ver)) {
+            const filePath = join(WIDGET_DIR, pub, id, ver, 'manifest.json');
+            if (existsSync(filePath)) {
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.end(readFileSync(filePath));
+              return;
+            }
+          }
+        }
+
+        const docMatch = url.match(/^\/widget-registry\/([^/]+)\/([^/]+)\/([^/]+)\/index\.html$/);
+        if (docMatch && req.method === 'GET') {
+          const [, pub, id, ver] = docMatch;
+          if (isSafeWidgetSegment(pub) && isSafeWidgetSegment(id) && isSafeWidgetSegment(ver)) {
+            const filePath = join(WIDGET_DIR, pub, id, ver, 'index.html');
+            if (existsSync(filePath)) {
+              res.setHeader('Content-Type', 'text/html; charset=utf-8');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.setHeader('Content-Security-Policy', 'sandbox allow-scripts');
+              res.end(readFileSync(filePath));
+              return;
+            }
+          }
+        }
+
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const envDir = resolve(__dirname);
   const env = loadEnv(mode, envDir, '');
@@ -281,7 +428,8 @@ export default defineConfig(({ mode }) => {
         },
       }),
       eduDataPlugin(),
-    ],
+      widgetRegistryPlugin(),
+    ].filter((plugin): plugin is Plugin => plugin !== undefined),
     resolve: {
       alias: [
         { find: /^fs\/promises$/, replacement: resolve(__dirname, 'src/stubs/fs-promises.ts') },

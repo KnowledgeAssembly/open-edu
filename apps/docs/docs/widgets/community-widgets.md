@@ -899,6 +899,52 @@ if (process.env.NODE_ENV !== 'production') {
 | `loadStaticCatalog()`    | Load and index a registry catalog     |
 | `applyFallbackConfig()`  | Apply fallback config transform       |
 
+## Local Development
+
+The learner app can serve community widgets directly from a local directory — no dev-server or DevTools globals needed.
+
+### Quick start
+
+```bash
+EDU_WIDGET_DIR=./examples/community-widget-counter \
+  pnpm --filter @open-edu/learner dev
+```
+
+Then open `http://localhost:4001` and navigate to a course that references the widget (e.g., `community-widget-counter-course`).
+
+### How it works
+
+1. On startup, the learner's Vite dev server scans `EDU_WIDGET_DIR` for installed widgets using the `{publisher}/{widgetId}/{version}/manifest.json` layout.
+2. It serves the catalog at `/widget-registry/catalog.json` and individual widget files at `/widget-registry/{publisher}/{widgetId}/{version}/manifest.json` and `index.html`.
+3. In dev mode, `CourseRuntime` auto-discovers the catalog from the same origin — no `__OPEN_EDU_WIDGET_CATALOG_URL__` or `__OPEN_EDU_WIDGET_ORIGINS__` globals needed.
+4. Experimental widgets are automatically allowed for locally-served catalogs.
+
+### Widget directory structure
+
+```
+$EDU_WIDGET_DIR/
+  localpub/
+    community.example.counter/
+      1.0.0/
+        manifest.json
+        index.html
+```
+
+The directory layout matches the `WidgetRegistryStore` on-disk format. Multiple publishers, widgets, and versions are supported.
+
+### Integrity verification
+
+The learner verifies `documentIntegrity` and `sizeBytes` from each `manifest.json` against the actual `index.html` file at startup. Widgets with mismatched integrity are skipped with a console warning.
+
+### Combining with courses
+
+```bash
+EDU_CATALOG_DIR=./examples EDU_WIDGET_DIR=./examples/community-widget-counter \
+  pnpm --filter @open-edu/learner dev
+```
+
+This loads all example courses and makes the community counter widget available.
+
 ## Further Reading
 
 - [Widgets Overview](./overview) — Built-in widgets, registry, and catalog

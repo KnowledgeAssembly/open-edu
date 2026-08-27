@@ -84,6 +84,19 @@ export interface WidgetResolver {
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_SRCDOC_BYTES = 2 * 1024 * 1024;
 
+function localRegistryDocumentUrl(manifestUrl: string): string | undefined {
+  try {
+    const url = new URL(manifestUrl);
+    if (url.protocol !== 'http:') return undefined;
+    if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') return undefined;
+    if (!url.pathname.endsWith('/manifest.json')) return undefined;
+    const base = url.pathname.slice(0, -'/manifest.json'.length);
+    return `${url.origin}${base}/index.html`;
+  } catch {
+    return undefined;
+  }
+}
+
 export function createWidgetResolver(options: WidgetResolverOptions): WidgetResolver {
   const { policy, cache, catalogs, registry } = options;
   const fetchImpl = options.fetchImpl ?? fetch;
@@ -254,10 +267,11 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
         }
       }
 
-      let bytes: ArrayBuffer;
+      let bytes: ArrayBuffer | undefined = undefined;
       if (cachedDocumentBytes) {
         bytes = cachedDocumentBytes;
       } else {
+        let fetchErr: unknown;
         try {
           if (manifest.distribution.offline) {
             bytes =
@@ -275,7 +289,24 @@ export function createWidgetResolver(options: WidgetResolverOptions): WidgetReso
             );
           }
         } catch (err) {
-          if (isFetchTimeout(err)) {
+          fetchErr = err;
+        }
+        if (!bytes) {
+          const registryDocUrl = localRegistryDocumentUrl(entry.manifestUrl);
+          if (registryDocUrl) {
+            try {
+              bytes = await fetchBytes(
+                registryDocUrl,
+                { signal: AbortSignal.timeout(policy.readyTimeoutMs) },
+                fetchImpl,
+              );
+            } catch {
+              // keep the original error below
+            }
+          }
+        }
+        if (!bytes) {
+          if (isFetchTimeout(fetchErr)) {
             return { ok: false, failure: 'timeout', message: 'document-fetch-timeout' };
           }
           return { ok: false, failure: 'unavailable', message: 'document-fetch-failed' };

@@ -55,6 +55,31 @@ if (widgetGlobalOrigins) {
   }
 }
 
+const widgetCatalogUrl =
+  (globalThis as { __OPEN_EDU_WIDGET_CATALOG_URL__?: string }).__OPEN_EDU_WIDGET_CATALOG_URL__ ??
+  (import.meta.env.VITE_OPEN_EDU_WIDGET_CATALOG_URL as string | undefined) ??
+  (import.meta.env as Record<string, string | undefined>).OPEN_EDU_WIDGET_CATALOG_URL ??
+  // Auto-discover from the learner's own dev server
+  (import.meta.env.DEV ? '/widget-registry/catalog.json' : undefined);
+
+if (widgetCatalogUrl) {
+  try {
+    const catalogOrigin = new URL(widgetCatalogUrl, window.location.origin).origin;
+    if (!widgetOrigins.includes(catalogOrigin)) widgetOrigins.push(catalogOrigin);
+  } catch {
+    // ignore
+  }
+}
+
+const allowLocalExperimental =
+  !!widgetCatalogUrl &&
+  (widgetCatalogUrl.startsWith('/') || widgetCatalogUrl.includes('localhost'));
+
+const allowExperimentalCommunityWidgets =
+  allowLocalExperimental ||
+  (globalThis as { __OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__?: boolean })
+    .__OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__ === true;
+
 const widgetE2EClock = (): number => {
   const fake = (globalThis as { __OPEN_EDU_NOW__?: unknown }).__OPEN_EDU_NOW__;
   return typeof fake === 'number' ? fake : Date.now();
@@ -66,16 +91,18 @@ const widgetE2EOnline = (): boolean => {
   return String(flag) !== 'false';
 };
 
-const allowExperimentalCommunityWidgets =
-  (globalThis as { __OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__?: boolean })
-    .__OPEN_EDU_ALLOW_EXPERIMENTAL_WIDGETS__ === true;
-
 const WIDGET_CATALOG_STORAGE_KEY = 'open-edu-widget-registry-catalog';
 
 function buildRemoteCatalogs(catalogUrl: string, json: unknown): Record<string, ResolverCatalog> {
-  const allowLoopback = new URL(catalogUrl).protocol === 'http:';
+  const absoluteUrl = new URL(catalogUrl, window.location.origin);
+  const allowLoopback = absoluteUrl.protocol === 'http:';
   const catalog = loadStaticCatalog(json, { allowLoopback });
-  return { [catalog.registryId]: catalog };
+  const catalogs: Record<string, ResolverCatalog> = { [catalog.registryId]: catalog };
+  if (allowLoopback) {
+    catalogs['local'] = catalog;
+    catalogs['localdev'] = catalog;
+  }
+  return catalogs;
 }
 
 export interface BundleCourseContext {
@@ -156,8 +183,6 @@ export function CourseRuntime({
     [],
   );
 
-  const widgetCatalogUrl = (globalThis as { __OPEN_EDU_WIDGET_CATALOG_URL__?: string })
-    .__OPEN_EDU_WIDGET_CATALOG_URL__;
   const [remoteCatalogs, setRemoteCatalogs] = useState<Record<string, ResolverCatalog>>({});
 
   useEffect(() => {
