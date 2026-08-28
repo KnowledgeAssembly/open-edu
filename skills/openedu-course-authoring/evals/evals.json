@@ -146,6 +146,35 @@
         "cards.json unlock references the same node",
         "card id is namespaced"
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "Create an Open-Edu course about fractions for autistic learners (learnerProfile: autism). 2 lessons covering: 1) What fractions are, 2) Comparing fractions. Use literal language, one concept per activity, sensory-friendly widgets, and the standard ALX activity order.",
+      "expected_output": "Mode: portable. Generate a fractions course with learnerProfile=autism.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json metadata.audience is 'autism'\n- metadata.accessibility includes 'sensory-friendly', 'predictable-structure', 'literal-language'\n- metadata.difficulty is 'beginner' unless overridden\n- course-brief.md records the learner profile under '## Learner Profile'\n- 2 lessons, each with a full activity plan (observe, guided_practice, independent_practice, mastery_check, positive_completion)\n- instructions use literal 5-12 word sentences; no idioms or 'conquer'/'genius' framing",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "metadata.audience is 'autism'",
+        "metadata.accessibility includes 'sensory-friendly', 'predictable-structure', 'literal-language'",
+        "metadata.difficulty is 'beginner'",
+        "course-brief.md records the learner profile under '## Learner Profile'",
+        "has exactly 2 lessons",
+        "instructions use literal language without idioms or exaggerated praise"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Create an Open-Edu course about fractions for neurotypical learners (learnerProfile: neurotypical). 2 lessons covering: 1) What fractions are, 2) Comparing fractions.",
+      "expected_output": "Mode: portable. Generate a fractions course with learnerProfile=neurotypical.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json metadata.audience is 'neurotypical'\n- metadata.accessibility is empty or absent\n- course-brief.md records the learner profile under '## Learner Profile'\n- 2 lessons, each with a complete activity plan",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "metadata.audience is 'neurotypical'",
+        "metadata.accessibility is empty or absent",
+        "course-brief.md records the learner profile under '## Learner Profile'",
+        "has exactly 2 lessons",
+        "each lesson includes observe, guided_practice, independent_practice, mastery_check, positive_completion steps"
+      ]
     }
   ]
 }
