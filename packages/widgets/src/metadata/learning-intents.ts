@@ -45,6 +45,7 @@ export const WIDGET_LEARNING_INTENTS: Record<string, LearningIntent[]> = {
   'science.process-diagram': [LearningIntent.Observe, LearningIntent.Understand],
   'math.number-line': [LearningIntent.Observe, LearningIntent.Practice, LearningIntent.Compare],
   'social.map': [LearningIntent.Explore, LearningIntent.Observe],
+  'core.timer': [LearningIntent.Observe, LearningIntent.Reflect],
 };
 
 export function getLearningIntentsForWidget(widgetId: string): LearningIntent[] {

@@ -39,6 +39,7 @@ export interface WidgetCatalogEntry {
     cognitiveLoad?: string;
     recommendedAge?: [number, number];
     readingLevel?: string;
+    subjectTags?: string[];
     learningObjectives?: string[];
     commonMisconceptions?: string[];
     generationHints?: string[];
@@ -4023,6 +4024,158 @@ export const WIDGET_CATALOG_ENTRIES: WidgetCatalogEntry[] = [
       ],
       sidebarPosition: 1,
       relatedWidgets: [{ id: 'core.hotspot', name: 'Hotspot', domain: 'core', slug: 'hotspot' }],
+    },
+  },
+  {
+    id: 'core.timer',
+    name: 'Timer',
+    description: 'Visual countdown/count-up timer for breaks and transitions',
+    domain: 'core',
+    status: 'stable',
+    keywords: ['timer', 'break', 'countdown', 'transition', 'pause', 'self-regulation'],
+    learningIntents: ['Observe', 'Reflect'],
+    capabilities: [
+      'Keyboard',
+      'ScreenReader',
+      'Touch',
+      'Mouse',
+      'Analytics',
+      'Accessibility',
+      'Offline',
+      'ObserveMode',
+    ],
+    accessibility: [
+      'HighContrast',
+      'KeyboardOnly',
+      'ScreenReader',
+      'TTS',
+      'ReducedMotion',
+      'FocusManagement',
+      'AriaSupport',
+    ],
+    analytics: ['Attempts', 'CompletionTime', 'Interactions'],
+    reward: { positiveMessage: 'Break complete — great job!', achievement: 'first-timer' },
+    ai: {
+      difficulty: 'easy',
+      estimatedMinutes: 2,
+      bloomsLevel: 'remember',
+      cognitiveLoad: 'low',
+      recommendedAge: [3, 18],
+      readingLevel: 'pre-reader',
+      subjectTags: ['wellness', 'self-regulation', 'transitions'],
+      learningObjectives: [
+        'Use a visual timer to understand elapsed and remaining time',
+        'Transition calmly between activities',
+      ],
+      commonMisconceptions: [
+        'Understanding that the shrinking visual does not mean time is running out of control',
+        'Confusing remaining time with elapsed time on a count-up timer',
+      ],
+      generationHints: [
+        'Keep break length short and concrete (1-5 minutes) for young or spectrum learners',
+        'Add a warning ~30-60s before the end to support predictable transitions',
+        'Provide a clear label and a calm completeMessage',
+      ],
+    },
+    guide: {
+      oneLiner: 'A visual countdown or count-up timer for breaks and transitions.',
+      whatItDoes:
+        'The Timer widget shows time as a shrinking ring, bar, or row of blocks so elapsed and remaining time feel concrete rather than abstract. It supports clear start signals, pre-warned near-end announcements, and a calm completion state — designed with autism-spectrum learners in mind, with no startling audio or flashing.',
+      whenToUse: [
+        'Placing a timed stretch break between lessons',
+        'Predictable transitions between activities',
+        'Quiet focus or reading blocks with a count-up timer',
+        'Teaching the concept of elapsed versus remaining time',
+      ],
+      setupSteps: [
+        'Add an Exercise node to your lesson',
+        'Set the widget to "core.timer"',
+        'Choose a duration in seconds (5–3600)',
+        'Pick a visual: ring (default), bar, or blocks',
+        'Optionally add warnings with atSeconds and a message for predictable transitions',
+        'Leave interactive off for an auto-running break, or turn it on for pause/resume/restart controls',
+      ],
+      configFields: [
+        {
+          name: 'duration',
+          type: 'number',
+          required: false,
+          description: 'Length of the timer in seconds (5–3600). Defaults to 120.',
+        },
+        {
+          name: 'mode',
+          type: 'string',
+          required: false,
+          description: '"countdown" (default) or "countup".',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Short heading such as "Time for a stretch break".',
+        },
+        {
+          name: 'completeMessage',
+          type: 'string',
+          required: false,
+          description: 'Calm message shown when the timer finishes, e.g. "Ready to continue?".',
+        },
+        {
+          name: 'visual',
+          type: 'string',
+          required: false,
+          description: '"ring" (default), "bar", or "blocks" time representation.',
+        },
+        {
+          name: 'warnings',
+          type: 'array of objects',
+          required: false,
+          description:
+            'Pre-warned transitions. Each has atSeconds (number) and an optional message (string).',
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          required: false,
+          description:
+            'When true, shows pause/resume/restart controls. When false (default) the timer auto-runs and completes on its own.',
+        },
+        {
+          name: 'allowSkip',
+          type: 'boolean',
+          required: false,
+          description: 'Whether to show an "End break now" button. Defaults to true.',
+        },
+      ],
+      exampleJson: `{
+  "type": "exercise",
+  "title": "Take a Break",
+  "widget": "core.timer",
+  "config": {
+    "duration": 120,
+    "mode": "countdown",
+    "label": "Time for a stretch break",
+    "completeMessage": "Ready to continue?",
+    "visual": "ring",
+    "warnings": [
+      { "atSeconds": 60, "message": "One minute left — finish up" },
+      { "atSeconds": 10, "message": "Almost done" }
+    ],
+    "interactive": false
+  }
+}`,
+      tips: [
+        'Use short, concrete break lengths (1–5 minutes) for young or spectrum learners',
+        'Add a warning 30–60 seconds before the end to support predictable transitions',
+        'Provide a clear label and a calm completeMessage',
+        'Visual time is primary — keep the digital readout on for accessibility',
+      ],
+      sidebarPosition: 10,
+      relatedWidgets: [
+        { id: 'core.callout', name: 'Callout', domain: 'core', slug: 'callout' },
+        { id: 'core.audio-player', name: 'Audio Player', domain: 'core', slug: 'audio-player' },
+        { id: 'math.clock-time', name: 'Clock Time', domain: 'math', slug: 'clock-time' },
+      ],
     },
   },
 ];

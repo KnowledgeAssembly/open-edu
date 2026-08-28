@@ -4,7 +4,7 @@
   "title": "Widget Showcase",
   "version": "0.1.0",
   "private": true,
-  "description": "Demonstrates all 27 built-in widgets in the Open-Edu runtime",
+  "description": "Demonstrates all 28 built-in widgets in the Open-Edu runtime",
   "author": "Open-Edu",
   "entry": "nodes/intro.md",
   "devDependencies": {

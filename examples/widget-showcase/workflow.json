@@ -46,6 +46,9 @@
       "onComplete": "nodes/callout.json"
     },
     "nodes/callout.json": {
+      "onComplete": "nodes/timer.json"
+    },
+    "nodes/timer.json": {
       "onComplete": "nodes/image-compare.json"
     },
     "nodes/image-compare.json": {

@@ -26,3 +26,4 @@ export { processDiagram } from './ProcessDiagram/ProcessDiagram';
 export { numberLine } from './NumberLine/NumberLine';
 export { socialMap } from './SocialMap/SocialMap';
 export { processExplainer } from './ProcessExplainer/ProcessExplainer';
+export { timer } from './Timer/Timer';

@@ -41,6 +41,7 @@ const config: Config = {
       },
       height: {
         ...tailwindComponentHeightExtensions,
+        ...tailwindSizingExtensions,
         header: 'var(--oe-layout-header-height)',
       },
       minWidth: tailwindMinWidthExtensions,
