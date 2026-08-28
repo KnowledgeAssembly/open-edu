@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadWidgetCatalog, getCanonicalWidgetIds, isDeprecatedWidget, resolveLegacyWidgetId, getWidgetById } from './widget-catalog.mjs';
+import { resolveProfile, loadProfileConfig } from './profiles.mjs';
 
 const nonMeasurableVerbs = [
   'understand', 'know', 'learn', 'appreciate', 'be familiar', 'grasp',
@@ -9,6 +10,31 @@ const nonMeasurableVerbs = [
 ];
 
 const PEDAGOGICAL_STEPS = ['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion'];
+
+// Profile-scoped heuristic vocabularies (QC-ACC-05/06, QC-SCH-01, QC-COL-01).
+const NON_LITERAL_PHRASES = [
+  'conquer', 'on fire', 'genius', 'amazing', 'crush it', "let's battle", 'warrior',
+  'champion', 'ninja', 'superstar', 'rock star', "you're a star", 'piece of cake',
+  'break a leg', 'in the zone',
+];
+const TASK_VERBS = [
+  'count', 'add', 'subtract', 'multiply', 'divide', 'solve', 'identify', 'compare',
+  'match', 'write', 'read', 'draw', 'find', 'name', 'circle', 'select', 'choose',
+  'list', 'explain', 'describe', 'calculate', 'complete', 'fill', 'sort', 'order',
+  'group', 'label', 'measure', 'convert', 'color', 'trace',
+];
+const COMPOUND_TASK_PATTERN = new RegExp(
+  `\\b(${TASK_VERBS.join('|')})\\b[^.;]*\\b(?:and|also|then|plus)\\b[^.;]*\\b(${TASK_VERBS.join('|')})\\b`,
+  'i',
+);
+const ADULT_CONTEXT_WORDS = [
+  'mortgage', 'salary', 'tax return', 'resume', 'lease', 'alcohol', 'cigarette',
+  'voting', 'health insurance', '401k', 'payroll', 'credit score', 'investing',
+];
+const ACADEMIC_REGISTER_MARKERS = [
+  'analyze', 'critique', 'evaluate', 'synthesize', 'thesis', 'framework',
+  'methodology', 'theory', 'paradigm', 'implication',
+];
 
 /**
  * Combines validation diagnostics with a lesson blueprint to produce a quality report.
@@ -91,14 +117,27 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
   // --- Course-level metadata extraction ---
   let courseEstimatedHours = null;
   let courseDifficulty = null;
+  let courseAudience = null;
   try {
     const specPath = join(outputDir, 'course-spec.json');
     if (existsSync(specPath)) {
       const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
       courseEstimatedHours = spec.metadata?.estimatedHours;
       courseDifficulty = spec.metadata?.difficulty;
+      courseAudience = spec.metadata?.audience;
     }
   } catch { /* best-effort */ }
+
+  // --- Active learner profile (drives profile-scoped QC checks) ---
+  const activeProfile = courseAudience
+    ? resolveProfile(courseAudience)
+    : { key: 'neurotypical', source: 'defaulted' };
+  const profileKey = activeProfile.key;
+  let profileName = profileKey;
+  try {
+    const cfg = loadProfileConfig(profileKey);
+    profileName = cfg.name;
+  } catch { /* config unavailable; fall back to key */ }
 
   let totalObjectives = 0;
   let totalActivities = 0;
@@ -356,6 +395,37 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
       }
     }
 
+    // --- QC-ACC-05 (autism): literal language ---
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        const text = `${act.description || ''} ${act.instructions || ''}`.toLowerCase();
+        for (const phrase of NON_LITERAL_PHRASES) {
+          if (text.includes(phrase)) {
+            findings.push({
+              checkId: 'QC-ACC-05',
+              severity: 'warning',
+              message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" uses non-literal phrasing ("${phrase}")`,
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    // --- QC-ACC-06 (autism): one concept per activity ---
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        const text = act.instructions || '';
+        if (COMPOUND_TASK_PATTERN.test(text)) {
+          findings.push({
+            checkId: 'QC-ACC-06',
+            severity: 'warning',
+            message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" combines multiple tasks in one instruction; keep one concept per activity`,
+          });
+        }
+      }
+    }
+
     // --- QC-ACC-02: Widget choices support keyboard interaction ---
     for (const act of activities) {
       if (act.type === 'widget' && act.widgetId && catalogAvailable) {
@@ -366,6 +436,23 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
             severity: 'info',
             message: `Widget "${act.widgetId}" in lesson "${lessonId}" does not declare keyboard-only support`,
           });
+        }
+      }
+    }
+
+    // --- QC-ACC-07 (autism): widget selection avoids high-sensory-load defaults ---
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        if (act.type === 'widget' && act.widgetId && catalogAvailable) {
+          const widgetEntry = getWidgetById(catalog, act.widgetId);
+          const tags = widgetEntry?.accessibility || [];
+          if (!tags.includes('ReducedMotion')) {
+            findings.push({
+              checkId: 'QC-ACC-07',
+              severity: 'info',
+              message: `Widget "${act.widgetId}" in lesson "${lessonId}" does not declare reduced-motion support; prefer calm, predictable widgets for this profile`,
+            });
+          }
         }
       }
     }
@@ -394,6 +481,41 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
           checkId: 'QC-ACC-04',
           severity: 'warning',
           message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" instructions exceed 1000 chars; consider chunking`,
+        });
+      }
+    }
+
+    // --- QC-SCH-01 (school): objectives/examples are age-appropriate ---
+    if (profileKey === 'school') {
+      const learnerText = [
+        ...lessonObj,
+        ...(lesson.examples || []),
+        lesson.coreIdea || '',
+      ].join(' ').toLowerCase();
+      for (const word of ADULT_CONTEXT_WORDS) {
+        if (learnerText.includes(word)) {
+          findings.push({
+            checkId: 'QC-SCH-01',
+            severity: 'warning',
+            message: `Lesson "${lessonId}" references adult context ("${word}") that may not be age-appropriate`,
+          });
+        }
+      }
+    }
+
+    // --- QC-COL-01 (college): academic register present ---
+    if (profileKey === 'college') {
+      const learnerText = [
+        ...lessonObj,
+        ...(lesson.examples || []),
+        lesson.coreIdea || '',
+      ].join(' ').toLowerCase();
+      const hasAcademicMarker = ACADEMIC_REGISTER_MARKERS.some((m) => learnerText.includes(m));
+      if (!hasAcademicMarker) {
+        findings.push({
+          checkId: 'QC-COL-01',
+          severity: 'info',
+          message: `Lesson "${lessonId}" shows no academic register markers (e.g. analyze, critique, evaluate, methodology)`,
         });
       }
     }
@@ -455,6 +577,11 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
       errors: errorCount,
       warnings: warningCount,
       infos: infoCount,
+      learnerProfile: {
+        key: profileKey,
+        name: profileName,
+        source: activeProfile.source,
+      },
     },
     findings,
   };

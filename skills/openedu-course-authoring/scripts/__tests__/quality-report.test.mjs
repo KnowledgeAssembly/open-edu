@@ -197,4 +197,54 @@ describe('quality-report', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('records an explicit learnerProfile in the merged summary', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.audience = 'autism';
+      spec.metadata.accessibility = ['sensory-friendly'];
+      writeJSON(dir, 'course-spec.json', spec);
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'lesson-01', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [{ type: 'reading', step: 'observe', order: 1, description: 'Read' }],
+        estimatedMinutes: 15,
+      }]));
+      const report = createQualityReport({
+        specPath: join(dir, 'course-spec.json'),
+        outputDir: dir,
+        discovery: { mode: 'portable' },
+      });
+      ok(report.summary.learnerProfile);
+      strictEqual(report.summary.learnerProfile.key, 'autism');
+      strictEqual(report.summary.learnerProfile.name, 'Autism Spectrum');
+      strictEqual(report.summary.learnerProfile.source, 'explicit');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('defaults learnerProfile to defaulted neurotypical when audience is absent', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'lesson-01', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [{ type: 'reading', step: 'observe', order: 1, description: 'Read' }],
+        estimatedMinutes: 15,
+      }]));
+      const report = createQualityReport({
+        specPath: join(dir, 'course-spec.json'),
+        outputDir: dir,
+        discovery: { mode: 'portable' },
+      });
+      ok(report.summary.learnerProfile);
+      strictEqual(report.summary.learnerProfile.key, 'neurotypical');
+      strictEqual(report.summary.learnerProfile.source, 'defaulted');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

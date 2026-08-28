@@ -529,3 +529,195 @@ describe('summarize-quality (rubric extension)', () => {
     }
   });
 });
+
+describe('summarize-quality (profile-scoped checks)', () => {
+  function writeSpec(dir, audience) {
+    writeFileSync(join(dir, 'course-spec.json'), JSON.stringify({ metadata: { audience } }));
+  }
+
+  function makeAutismBlueprint() {
+    return [{
+      id: 'l1', title: 'L1',
+      objectives: ['Count objects'],
+      coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+      activityPlan: [
+        {
+          type: 'reading', step: 'observe', order: 1, description: 'Read intro',
+          instructions: 'Let us conquer the counting challenge.',
+        },
+        { type: 'widget', step: 'guided_practice', order: 2, widgetId: 'math.fraction-visual', description: 'Practice' },
+        {
+          type: 'exercise', step: 'independent_practice', order: 3, description: 'Practice',
+          instructions: 'Count the apples and subtract the oranges.',
+        },
+        { type: 'quiz', step: 'mastery_check', order: 4, description: 'Quiz' },
+        { type: 'reflection', step: 'positive_completion', order: 5, description: 'Reflect' },
+      ],
+      estimatedMinutes: 15,
+    }];
+  }
+
+  it('QC-ACC-05/06 fire only for the autism profile', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'autism');
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const autismResult = summarizeQuality(dir, makeValidationResult(), {
+        preloadedCatalog: makeFixtureCatalog(),
+        reportPath: false,
+      });
+      ok(autismResult.findings.some((f) => f.checkId === 'QC-ACC-05'));
+      ok(autismResult.findings.some((f) => f.checkId === 'QC-ACC-06'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+
+    const neuroDir = createTempDir();
+    try {
+      writeSpec(neuroDir, 'neurotypical');
+      writeFileSync(join(neuroDir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const neuroResult = summarizeQuality(neuroDir, makeValidationResult(), {
+        preloadedCatalog: makeFixtureCatalog(),
+        reportPath: false,
+      });
+      strictEqual(neuroResult.findings.some((f) => f.checkId === 'QC-ACC-05'), false);
+      strictEqual(neuroResult.findings.some((f) => f.checkId === 'QC-ACC-06'), false);
+    } finally {
+      rmSync(neuroDir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ACC-06 does not fire for single-task instructions', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'autism');
+      const blueprint = makeAutismBlueprint();
+      blueprint[0].activityPlan[2].instructions = 'Count the apples.';
+      blueprint[0].activityPlan[0].instructions = 'Read the introduction.';
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      strictEqual(result.findings.some((f) => f.checkId === 'QC-ACC-06'), false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ACC-07 fires info for autism when widgets lack reduced-motion support', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'autism');
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        preloadedCatalog: makeFixtureCatalog(),
+        reportPath: false,
+      });
+      ok(result.findings.some((f) => f.checkId === 'QC-ACC-07'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ACC-07 does not fire when the widget declares ReducedMotion', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'autism');
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const catalog = [
+        { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable', accessibility: ['ReducedMotion'] },
+      ];
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        preloadedCatalog: catalog,
+        reportPath: false,
+      });
+      strictEqual(result.findings.some((f) => f.checkId === 'QC-ACC-07'), false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-SCH-01 fires for the school profile with adult context', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['Compare two salary offers'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-SCH-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-COL-01 fires info for the college profile without academic markers', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'college');
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['count objects'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.findings.some((f) => f.checkId === 'QC-COL-01'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('records learnerProfile in the quality summary', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }]));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.summary.learnerProfile);
+      strictEqual(result.summary.learnerProfile.key, 'school');
+      strictEqual(result.summary.learnerProfile.name, 'School (K-12)');
+      strictEqual(result.summary.learnerProfile.source, 'explicit');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('defaults learnerProfile to defaulted neurotypical when audience is absent', () => {
+    const dir = createTempDir();
+    try {
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify([{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }]));
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      ok(result.summary.learnerProfile);
+      strictEqual(result.summary.learnerProfile.key, 'neurotypical');
+      strictEqual(result.summary.learnerProfile.source, 'defaulted');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
