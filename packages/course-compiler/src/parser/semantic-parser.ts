@@ -111,6 +111,8 @@ function parseMetadata(frontmatter: Record<string, unknown>, ctx: ParseContext):
     language: (frontmatter.language as string) || 'en',
     keywords: frontmatter.keywords as string[] | undefined,
     targetAudience: frontmatter.targetAudience as string | undefined,
+    audience: frontmatter.audience as string | undefined,
+    accessibility: frontmatter.accessibility as string[] | undefined,
     difficulty: frontmatter.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
     estimatedHours: frontmatter.estimatedHours as number | undefined,
     lastUpdated: frontmatter.lastUpdated as string | undefined,

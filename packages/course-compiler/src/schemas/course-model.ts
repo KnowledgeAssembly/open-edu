@@ -225,6 +225,8 @@ export const CourseMetadataSchema = z
     language: z.string().default('en'),
     keywords: z.array(z.string()).optional(),
     targetAudience: z.string().optional(),
+    audience: z.string().optional(),
+    accessibility: z.array(z.string()).optional(),
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
     estimatedHours: z.number().optional(),
     lastUpdated: z.string().optional(),

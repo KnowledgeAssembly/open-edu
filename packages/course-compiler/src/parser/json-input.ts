@@ -52,8 +52,13 @@ const CourseSpecJSONSchema = z.object({
     description: z.string(),
     author: z.string().optional(),
     version: z.string().optional(),
+    keywords: z.array(z.string()).optional(),
+    targetAudience: z.string().optional(),
+    audience: z.string().optional(),
+    accessibility: z.array(z.string()).optional(),
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
     estimatedHours: z.number().optional(),
+    lastUpdated: z.string().optional(),
     generated: z.boolean(),
   }),
   lessons: z.array(LessonJSONSchema),
@@ -181,8 +186,13 @@ export function parseCourseSpecJSON(jsonStr: string): {
     author: parsed.metadata.author,
     version: parsed.metadata.version,
     language: 'en',
+    keywords: parsed.metadata.keywords,
+    targetAudience: parsed.metadata.targetAudience,
+    audience: parsed.metadata.audience,
+    accessibility: parsed.metadata.accessibility,
     difficulty: parsed.metadata.difficulty,
     estimatedHours: parsed.metadata.estimatedHours,
+    lastUpdated: parsed.metadata.lastUpdated,
   };
 
   const moduleId =
