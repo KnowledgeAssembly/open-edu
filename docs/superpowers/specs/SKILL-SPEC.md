@@ -136,12 +136,11 @@ Delta semantics:
 
 Extend `course-spec.json` `metadata` with:
 
-- `audience: string` (e.g. `"autism"`, `"neurotypical"`, `"school"`, `"college"`)
-- `accessibility: string[]` (e.g. `["sensory-friendly", "plain-language", "predictable-navigation"]`)
+- `audience: string` (machine-readable profile key) — `"autism"`, `"neurotypical"`, `"school"`, `"college"`. Validated against the `profiles.config.json` keys.
+- `accessibility: string[]` (accessibility tags) — e.g. `["sensory-friendly", "predictable-structure", "literal-language"]`.
+- `targetAudience: string` is **retained** as the human-readable prose field (e.g. "8–10 year old students").
 
-Both are **optional** and additive — the compiler schema (artifact-contract.md:29-39) and existing packages are unaffected. Profile deltas fill these fields on output.
-
-> If the compiler must _not_ choke on unknown optional metadata, verify against `packages/course-compiler/src/parser/json-input.ts` and confirm unknowns are tolerated. If not tolerated, gate field emission behind a whitelist or a compiler compatibility flag in this skill iteration.
+_Resolved (PR 1):_ the compiler now forwards `audience`, `accessibility`, `targetAudience`, `keywords`, and `lastUpdated` from `course-spec.json` into the compiled `CourseModel.metadata`, so the fields survive into the `package/`. Both `audience` and `accessibility` are **optional** and additive — existing packages are unaffected.
 
 ### 6.2 Quality rubric — per-profile checks
 
@@ -201,7 +200,7 @@ _(Resolved)_
 - **Should `audience`/`accessibility` metadata be emitted unconditionally in v1?**
   - _Decision:_ Yes, emit unconditionally. This aids downstream tooling observability and ensures the format is consistent regardless of profile.
 - **Does the course-compiler tolerate unknown optional metadata fields?**
-  - _Decision:_ Verify this in PR 1. If not tolerated, gate field emission behind a compiler whitelist.
+  - _Decision (resolved in PR 1):_ confirmed — the compiler previously _stripped_ unknown metadata (dropping `audience`/`accessibility` silently). Propagation was made explicit: the JSON input schema now accepts the fields and the reconstruction forwards them into the compiled model. No gate/whitelist needed.
 - **Should the interview _require_ a profile or always default silently to `neurotypical`?**
   - _Decision:_ Require when a `learnerProfile` isn't inferable, matching Critical Rule 3. This was incorporated into §4.
 - **Which widget IDs belong in the "allowed/preferred" set per profile?**
