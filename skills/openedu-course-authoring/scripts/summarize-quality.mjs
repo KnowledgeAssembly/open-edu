@@ -441,16 +441,19 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
     }
 
     // --- QC-ACC-07 (autism): widget selection avoids high-sensory-load defaults ---
+    // Only flag widgets that animate without offering a reduced-motion fallback;
+    // static widgets are not flagged (avoids noise until a catalog allowlist lands).
     if (profileKey === 'autism') {
       for (const act of activities) {
         if (act.type === 'widget' && act.widgetId && catalogAvailable) {
           const widgetEntry = getWidgetById(catalog, act.widgetId);
+          const capabilities = widgetEntry?.capabilities || [];
           const tags = widgetEntry?.accessibility || [];
-          if (!tags.includes('ReducedMotion')) {
+          if (capabilities.includes('Animation') && !tags.includes('ReducedMotion')) {
             findings.push({
               checkId: 'QC-ACC-07',
               severity: 'info',
-              message: `Widget "${act.widgetId}" in lesson "${lessonId}" does not declare reduced-motion support; prefer calm, predictable widgets for this profile`,
+              message: `Widget "${act.widgetId}" in lesson "${lessonId}" uses animation without reduced-motion support; prefer calm, predictable widgets for this profile`,
             });
           }
         }

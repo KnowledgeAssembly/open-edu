@@ -63,13 +63,13 @@ Assessments must test what was taught, not introduce new concepts.
 
 These checks **supplement** (do not replace) the universal checks and run only when the active learner profile matches. The profile is read from `course-spec.json` `metadata.audience` (default: `neurotypical`).
 
-| Check ID    | Profile   | Rule                                                                           | Severity  |
-| ----------- | --------- | ------------------------------------------------------------------------------ | --------- |
-| `QC-ACC-05` | `autism`  | Instructions use literal, unambiguous language (no idiom/metaphor/competition) | `warning` |
-| `QC-ACC-06` | `autism`  | One concept per activity (no compound objectives in a single instruction)      | `warning` |
-| `QC-ACC-07` | `autism`  | Widget selection avoids high-sensory-load defaults (prefer `ReducedMotion`)    | `info`    |
-| `QC-SCH-01` | `school`  | Objectives and examples are age/grade-appropriate                              | `warning` |
-| `QC-COL-01` | `college` | Academic register is present; objectives are rigorous                          | `info`    |
+| Check ID    | Profile   | Rule                                                                                    | Severity  |
+| ----------- | --------- | --------------------------------------------------------------------------------------- | --------- |
+| `QC-ACC-05` | `autism`  | Instructions use literal, unambiguous language (no idiom/metaphor/competition)          | `warning` |
+| `QC-ACC-06` | `autism`  | One concept per activity (no compound objectives in a single instruction)               | `warning` |
+| `QC-ACC-07` | `autism`  | Animated widgets must offer a `ReducedMotion` fallback (static widgets are not flagged) | `info`    |
+| `QC-SCH-01` | `school`  | Objectives and examples are age/grade-appropriate                                       | `warning` |
+| `QC-COL-01` | `college` | Academic register is present; objectives are rigorous                                   | `info`    |
 
 ## Dimension 7: Completeness
 

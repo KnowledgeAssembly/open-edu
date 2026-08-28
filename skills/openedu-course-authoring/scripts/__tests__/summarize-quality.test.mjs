@@ -602,13 +602,16 @@ describe('summarize-quality (profile-scoped checks)', () => {
     }
   });
 
-  it('QC-ACC-07 fires info for autism when widgets lack reduced-motion support', () => {
+  it('QC-ACC-07 fires info for autism when an animated widget lacks reduced-motion support', () => {
     const dir = createTempDir();
     try {
       writeSpec(dir, 'autism');
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const catalog = [
+        { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable', capabilities: ['Animation'] },
+      ];
       const result = summarizeQuality(dir, makeValidationResult(), {
-        preloadedCatalog: makeFixtureCatalog(),
+        preloadedCatalog: catalog,
         reportPath: false,
       });
       ok(result.findings.some((f) => f.checkId === 'QC-ACC-07'));
@@ -617,13 +620,31 @@ describe('summarize-quality (profile-scoped checks)', () => {
     }
   });
 
-  it('QC-ACC-07 does not fire when the widget declares ReducedMotion', () => {
+  it('QC-ACC-07 does not fire when an animated widget declares ReducedMotion', () => {
     const dir = createTempDir();
     try {
       writeSpec(dir, 'autism');
       writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
       const catalog = [
-        { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable', accessibility: ['ReducedMotion'] },
+        { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable', capabilities: ['Animation'], accessibility: ['ReducedMotion'] },
+      ];
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        preloadedCatalog: catalog,
+        reportPath: false,
+      });
+      strictEqual(result.findings.some((f) => f.checkId === 'QC-ACC-07'), false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-ACC-07 does not fire for static widgets without animation', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'autism');
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(makeAutismBlueprint()));
+      const catalog = [
+        { id: 'math.fraction-visual', name: 'Fraction Visual', status: 'stable', capabilities: ['Keyboard'] },
       ];
       const result = summarizeQuality(dir, makeValidationResult(), {
         preloadedCatalog: catalog,
