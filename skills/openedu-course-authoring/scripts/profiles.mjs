@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 const PROFILE_KEYS = ['neurotypical', 'autism', 'school', 'college'];
 
+export { PROFILE_KEYS };
+
 const ALIASES = new Map([
   ['autistic', 'autism'],
   ['spectrum', 'autism'],

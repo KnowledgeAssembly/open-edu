@@ -29,6 +29,7 @@ The agent MUST obtain or explicitly assume:
 
 - **Topic/Subject** — What is being taught
 - **Learner Age/Level** — Target grade/age range
+- **Learner Profile** — `neurotypical` (default) | `autism` | `school` | `college`. Ask _after_ Learner Age/Level: age may naturally imply `school` or `college`. An `autism` profile is **never** inferred — only used when explicitly stated (SKILL.md Critical Rule 9).
 - **Learning Goals** — 3-6 specific things learners should achieve
 - **Language/Locale** — Content language (default: `en`)
 - **Expected Duration** — Total course hours or lesson count
@@ -37,7 +38,7 @@ The agent MUST obtain or explicitly assume:
 - **Accessibility Needs** — Screen reader, keyboard-only, reading level
 - **Source Materials** — Any PDFs, textbooks, or curriculum documents supplied
 
-Every unstated input becomes an explicit assumption in `course-brief.md`.
+Every unstated input becomes an explicit assumption in `course-brief.md`. Profile selection (or default) is resolved via `scripts/profiles.mjs` (`resolveProfile`) and recorded in `course-brief.md`; unknown names are mapped to the closest supported profile and logged as an assumption.
 
 ### Stage 2: Course Brief
 
@@ -61,6 +62,12 @@ Every unstated input becomes an explicit assumption in `course-brief.md`.
 
 - [Assumption 1]
 - [Assumption 2]
+
+## Learner Profile
+
+- key: neurotypical | autism | school | college
+- source: explicit | defaulted | mapped
+- (when mapped) mapped from: <original input>, recorded as an assumption
 
 ## Lesson Outline
 

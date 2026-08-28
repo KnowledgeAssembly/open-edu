@@ -23,10 +23,28 @@ You are an expert educational content author for the Open-Edu framework. This sk
 ## Quick Start
 
 1. **Discover environment:** Run `node skills/openedu-course-authoring/scripts/discover-openedu.mjs` to detect repository capabilities. All helper scripts resolve relative to the `OPENEDU_SKILL_DIR` environment variable or the skill directory.
-2. **Interview:** Ask the user for topic, learner level, goals, language, duration, prerequisites, accessibility needs, and source materials. Record unstated inputs as assumptions.
-3. **Generate:** Follow the staged workflow in `references/authoring-workflow.md`.
-4. **Output:** Produce artifacts per `references/artifact-contract.md`.
-5. **Validate:** In repository mode, run `quality-report.mjs` as the central orchestrator — it produces `quality-report.json` and coordinates compile, validate, and lint via `validate-package.mjs`.
+2. **Interview:** Ask the user for topic, learner level, goals, language, duration, prerequisites, accessibility needs, learner profile (see [Profiles](#profiles)), and source materials. Record unstated inputs as assumptions.
+3. **Select profile:** Pick the matching `references/profile-*.md` in Stage 1 and apply its **Guidance Deltas** to every authoring stage and its **Output Deltas** to every generated artifact.
+4. **Generate:** Follow the staged workflow in `references/authoring-workflow.md`.
+5. **Output:** Produce artifacts per `references/artifact-contract.md`.
+6. **Validate:** In repository mode, run `quality-report.mjs` as the central orchestrator — it produces `quality-report.json` and coordinates compile, validate, and lint via `validate-package.mjs`.
+
+## Profiles
+
+The skill supports four learner profiles that vary **both** the authoring guidance the agent follows **and** the content it produces:
+
+| Key            | Default | Reference                            |
+| -------------- | ------- | ------------------------------------ |
+| `neurotypical` | yes     | `references/profile-neurotypical.md` |
+| `autism`       | no      | `references/profile-autism.md`       |
+| `school`       | no      | `references/profile-school.md`       |
+| `college`      | no      | `references/profile-college.md`      |
+
+Select the matching `profile-<key>.md` in Stage 1 and apply its **Guidance Deltas** to every authoring stage and its **Output Deltas** to every generated artifact. `scripts/profiles.mjs` normalizes user input (`resolveProfile`) and loads the machine-checkable knobs (`profiles.config.json`) that scripts use for verification and reporting.
+
+- Ask for `learnerProfile` after Learner Age/Level in the Stage 1 interview; it may be named (`autism | school | college`) or inferred from age context, defaulting to `neurotypical`.
+- Record every selection (or default) under a `## Learner Profile` section in `course-brief.md`.
+- Unknown profile names are mapped to the closest supported profile and that mapping is recorded as an assumption.
 
 ## Modes
 
@@ -52,10 +70,12 @@ You are an expert educational content author for the Open-Edu framework. This sk
 6. **Respect output safety.** Create new directories, prompt before overwriting.
 7. **Be truthful about capability.** Never claim compilation or validation that wasn't actually run.
 8. **Each lesson must be complete.** Include measurable objectives, core explanation, examples, misconceptions, progressive activities, and aligned assessment.
+9. **Never infer `autism`.** A neurodivergence profile is never deduced from age, level, or behavior — it is only ever explicitly stated by the user or defaulted to `neurotypical`. `school`/`college` may be inferred from age/educational context; `autism` alone is never auto-labeled.
 
 ## References
 
 - **Artifact Contract:** `references/artifact-contract.md` — exact JSON schema, field requirements, ID rules
+- **Profiles:** `references/profiles.md` — index of the four learner profiles and delta semantics
 - **Authoring Workflow:** `references/authoring-workflow.md` — staged generation sequence, activity progression, widget selection rules
 - **Bundle Authoring:** `references/bundle-authoring.md` — USE when authoring a multi-module bundle: module split rules, bundle.json manifest, dependsOn ordering, bundle-level rewards/cards placement
 - **Quality Rubric:** `references/quality-rubric.md` — objective coverage, alignment, accessibility, inclusion checks
