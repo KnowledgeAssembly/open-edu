@@ -175,6 +175,36 @@
         "has exactly 2 lessons",
         "each lesson includes observe, guided_practice, independent_practice, mastery_check, positive_completion steps"
       ]
+    },
+    {
+      "id": 14,
+      "prompt": "Create an Open-Edu course about fractions for a middle-school learner (learnerProfile: school, gradeBand: middle_school). 2 lessons covering: 1) What fractions are, 2) Comparing fractions. Use age-appropriate vocabulary, concrete examples, and pacing within the middle-school band.",
+      "expected_output": "Mode: portable. Generate a fractions course with learnerProfile=school, gradeBand=middle_school.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json metadata.audience is 'school'\n- metadata.accessibility is empty or absent (school profile does not add autism tags)\n- course-brief.md records the learner profile under '## Learner Profile' and educational context (educationLevel/gradeBand) under '## Educational Context'\n- 2 lessons with grade-appropriate objectives, concrete examples, and estimatedMinutes within the middle_school band",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "metadata.audience is 'school'",
+        "metadata.accessibility is empty or absent",
+        "course-brief.md records gradeBand middle_school under '## Educational Context'",
+        "has exactly 2 lessons",
+        "examples are concrete and age-appropriate",
+        "lesson estimatedMinutes is within the middle_school grade band"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Create an Open-Edu course about fractions for college learners (learnerProfile: college). 2 lessons covering: 1) What fractions are, 2) Comparing fractions. Use academic register, higher-order objectives where appropriate, and deeper reasoning-based assessment.",
+      "expected_output": "Mode: portable. Generate a fractions course with learnerProfile=college.\nExpected artifacts: course-spec.json, course-spec.md, course-brief.md, quality-report.json.\nChecks:\n- course-spec.json metadata.audience is 'college'\n- metadata.accessibility is empty or absent\n- course-brief.md records the learner profile under '## Learner Profile'\n- 2 lessons with academic register, higher-order objectives, and assessment that tests reasoning rather than memorization",
+      "files": ["course-spec.json", "course-spec.md", "course-brief.md", "quality-report.json"],
+      "expectations": [
+        "course-spec.json is valid JSON",
+        "metadata.audience is 'college'",
+        "metadata.accessibility is empty or absent",
+        "course-brief.md records the learner profile under '## Learner Profile'",
+        "has exactly 2 lessons",
+        "objectives use higher-order verbs where appropriate",
+        "assessment tests reasoning rather than terminology memorization"
+      ]
     }
   ]
 }

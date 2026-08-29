@@ -18,9 +18,9 @@ describe('evals.json schema validation', () => {
     strictEqual(data.skill_name, 'openedu-course-authoring');
   });
 
-  it('has an evals array with 13 entries', () => {
+  it('has an evals array with 15 entries', () => {
     ok(Array.isArray(data.evals));
-    strictEqual(data.evals.length, 13);
+    strictEqual(data.evals.length, 15);
   });
 
   it('all eval IDs are unique', () => {
@@ -209,6 +209,32 @@ describe('evals.json schema validation', () => {
       const e = data.evals.find((ev) => ev.id === 12);
       ok(e.files.includes('course-brief.md'));
       ok(e.expectations.some((x) => x.toLowerCase().includes('accessibility')));
+    });
+  });
+
+  describe('profile evals (IDs 14, 15)', () => {
+    it('eval 14 declares the school profile and grade band', () => {
+      const e = data.evals.find((ev) => ev.id === 14);
+      ok(e, 'eval 14 not found');
+      ok(e.prompt.includes('school') && e.prompt.includes('middle_school'), 'prompt should declare school + gradeBand');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('school')),
+        'expectations should assert metadata.audience is school'
+      );
+      ok(
+        e.expectations.some((x) => x.includes('middle_school')),
+        'expectations should reference the middle_school grade band'
+      );
+    });
+
+    it('eval 15 declares the college profile', () => {
+      const e = data.evals.find((ev) => ev.id === 15);
+      ok(e, 'eval 15 not found');
+      ok(e.prompt.includes('college'), 'prompt should declare college');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('college')),
+        'expectations should assert metadata.audience is college'
+      );
     });
   });
 

@@ -95,3 +95,7 @@ The agent must never claim it performed an operation it did not run. When gradin
 | 9   | eval-edge-multilingual       | portable   | 3             | 4            |
 | 10  | eval-bundle-rewards-cards    | portable   | 5             | 5            |
 | 11  | eval-module-rewards-cards    | portable   | 3             | 4            |
+| 12  | eval-autism-fractions        | portable   | 4             | 7            |
+| 13  | eval-neurotypical-fractions  | portable   | 4             | 6            |
+| 14  | eval-school-fractions        | portable   | 4             | 7            |
+| 15  | eval-college-fractions       | portable   | 4             | 7            |
