@@ -247,4 +247,38 @@ describe('quality-report', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('surfaces educational context in the merged summary', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      const report = createQualityReport({
+        specPath: join(dir, 'course-spec.json'),
+        outputDir: dir,
+        discovery: { mode: 'portable' },
+        qualityOptions: { context: { educationLevel: 'school', gradeBand: 'middle_school', curriculum: 'nios' } },
+      });
+      ok(report.summary.context);
+      strictEqual(report.summary.context.educationLevel, 'school');
+      strictEqual(report.summary.context.gradeBand, 'middle_school');
+      strictEqual(report.summary.context.curriculum, 'nios');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('defaults context to null when not provided', () => {
+    const dir = createTempDir();
+    try {
+      writeJSON(dir, 'course-spec.json', makeValidSpec());
+      const report = createQualityReport({
+        specPath: join(dir, 'course-spec.json'),
+        outputDir: dir,
+        discovery: { mode: 'portable' },
+      });
+      strictEqual(report.summary.context, null);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

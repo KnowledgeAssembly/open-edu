@@ -139,6 +139,15 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
     profileName = cfg.name;
   } catch { /* config unavailable; fall back to key */ }
 
+  // --- Educational context (authoring/brief layer; optional) ---
+  const context = options.context && typeof options.context === 'object'
+    ? {
+        educationLevel: options.context.educationLevel || null,
+        gradeBand: options.context.gradeBand || null,
+        curriculum: options.context.curriculum || null,
+      }
+    : null;
+
   let totalObjectives = 0;
   let totalActivities = 0;
   let totalMinutes = 0;
@@ -585,6 +594,7 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
         name: profileName,
         source: activeProfile.source,
       },
+      context,
     },
     findings,
   };
@@ -623,6 +633,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
  * @property {string} [catalogPath]
  * @property {import('./widget-catalog.mjs').WidgetEntry[]} [preloadedCatalog]
  * @property {string|boolean} [reportPath]
+ * @property {{ educationLevel?: string, gradeBand?: string, curriculum?: string }} [context]
  */
 
 /**

@@ -45,6 +45,7 @@ Select the matching `profile-<key>.md` in Stage 1 and apply its **Guidance Delta
 - Ask for `learnerProfile` after Learner Age/Level in the Stage 1 interview; it may be named (`autism | school | college`) or inferred from age context, defaulting to `neurotypical`.
 - Record every selection (or default) under a `## Learner Profile` section in `course-brief.md`.
 - Unknown profile names are mapped to the closest supported profile and that mapping is recorded as an assumption.
+- Record **educational context** — `educationLevel` (`school`/`college`), `gradeBand` (school only), and `curriculum` — separately under `## Educational Context`. These compose with the learner profile as distinct fields, never as composite profiles (see `references/profiles.md`).
 
 ## Modes
 

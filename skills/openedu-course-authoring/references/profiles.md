@@ -24,6 +24,42 @@ The skill supports four student-profile variants. Each profile changes **both** 
 
 Every selection (or default) is recorded under a `## Learner Profile` section in `course-brief.md` and injected into `quality-report.json` `summary.learnerProfile` as `{ key, name, source }`.
 
+## Learner Profile vs. educational context
+
+Four concepts are kept distinct — do not collapse them into a single `learnerProfile` value:
+
+| Concept         | Answers                       | Example values                                | Where it lives                   |
+| --------------- | ----------------------------- | --------------------------------------------- | -------------------------------- |
+| Learner Profile | How the learner best learns   | `neurotypical`, `autism`, `school`, `college` | `learnerProfile` (course brief)  |
+| Education Level | Academic/developmental stage  | `school`, `college`                           | `educationLevel` (brief context) |
+| Grade Band      | Age/grade-specific complexity | `early_primary` … `senior_secondary`          | `gradeBand` (brief context)      |
+| Curriculum      | What must be taught           | `nios`, `<other board>`                       | `curriculum` (brief context)     |
+
+Examples:
+
+```yaml
+learnerProfile: neurotypical
+educationLevel: school
+gradeBand: middle_school
+curriculum: nios
+```
+
+```yaml
+learnerProfile: autism
+educationLevel: school
+gradeBand: middle_school
+curriculum: nios
+```
+
+```yaml
+learnerProfile: neurotypical
+educationLevel: college
+```
+
+- `autism` is a learner characteristic; `educationLevel`/`gradeBand`/`curriculum` are context. They compose by being separate fields, not by creating composite profiles (e.g. no `autism-nios`, `school-nios`).
+- `autism` is **never** inferred from age/grade/level — only ever stated explicitly or defaulted to `neurotypical`.
+- Educational context is recorded in `course-brief.md` and surfaced in `quality-report.json` `summary.context`; it does not require new `course-spec.json` metadata.
+
 ## Delta semantics
 
 Each `profile-*.md` encodes deltas over the implicit base layer (default skill behavior) using four operations:

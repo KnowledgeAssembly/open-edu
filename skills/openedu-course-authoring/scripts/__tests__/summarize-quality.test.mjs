@@ -741,4 +741,32 @@ describe('summarize-quality (profile-scoped checks)', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('surfaces educational context in the quality summary when provided', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        reportPath: false,
+        context: { educationLevel: 'school', gradeBand: 'middle_school', curriculum: 'nios' },
+      });
+      ok(result.summary.context);
+      strictEqual(result.summary.context.educationLevel, 'school');
+      strictEqual(result.summary.context.gradeBand, 'middle_school');
+      strictEqual(result.summary.context.curriculum, 'nios');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('defaults context to null when not provided', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const result = summarizeQuality(dir, makeValidationResult(), { reportPath: false });
+      strictEqual(result.summary.context, null);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

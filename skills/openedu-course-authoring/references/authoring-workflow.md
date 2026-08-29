@@ -30,6 +30,9 @@ The agent MUST obtain or explicitly assume:
 - **Topic/Subject** — What is being taught
 - **Learner Age/Level** — Target grade/age range
 - **Learner Profile** — `neurotypical` (default) | `autism` | `school` | `college`. Ask _after_ Learner Age/Level: age may naturally imply `school` or `college`. An `autism` profile is **never** inferred — only used when explicitly stated (SKILL.md Critical Rule 9).
+- **Education Level** — `school` | `college` (educational context, separate from Learner Profile). May be inferred from Learner Age/Level; default `null` when unknown.
+- **Grade Band** — for `school` only: `early_primary` | `upper_primary` | `middle_school` | `secondary` | `senior_secondary`. Optional; may be inferred from age/grade when known.
+- **Curriculum** — the curriculum/board to align against (e.g. `nios`). Optional; only set when a specific curriculum is required.
 - **Learning Goals** — 3-6 specific things learners should achieve
 - **Language/Locale** — Content language (default: `en`)
 - **Expected Duration** — Total course hours or lesson count
@@ -68,6 +71,12 @@ Every unstated input becomes an explicit assumption in `course-brief.md`. Profil
 - key: neurotypical | autism | school | college
 - source: explicit | defaulted | mapped
 - (when mapped) mapped from: <original input>, recorded as an assumption
+
+## Educational Context
+
+- educationLevel: school | college | (none)
+- gradeBand: early_primary | upper_primary | middle_school | secondary | senior_secondary | (none)
+- curriculum: <curriculum id, e.g. nios> | (none)
 
 ## Lesson Outline
 
