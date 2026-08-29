@@ -698,6 +698,82 @@ describe('summarize-quality (profile-scoped checks)', () => {
     }
   });
 
+  it('QC-SCH-02 fires error for an unknown grade band', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        reportPath: false,
+        context: { gradeBand: 'phd' },
+      });
+      ok(result.findings.some((f) => f.checkId === 'QC-SCH-02'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-SCH-02 does not fire for a known grade band', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        reportPath: false,
+        context: { gradeBand: 'middle_school' },
+      });
+      strictEqual(result.findings.some((f) => f.checkId === 'QC-SCH-02'), false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-SCH-03 fires warning when lesson pacing is outside the grade band', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 60,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        reportPath: false,
+        context: { gradeBand: 'early_primary' },
+      });
+      ok(result.findings.some((f) => f.checkId === 'QC-SCH-03'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('QC-SCH-03 does not fire when lesson pacing is within the grade band', () => {
+    const dir = createTempDir();
+    try {
+      writeSpec(dir, 'school');
+      const blueprint = [{
+        id: 'l1', title: 'L1', objectives: ['obj1'],
+        coreIdea: 'idea', examples: ['ex'], misconceptions: ['mc'],
+        activityPlan: [
+          { type: 'reading', step: 'observe', order: 1, description: 'Read' },
+          { type: 'quiz', step: 'mastery_check', order: 2, description: 'Quiz' },
+        ],
+        estimatedMinutes: 15,
+      }];
+      writeFileSync(join(dir, 'lesson-blueprints.json'), JSON.stringify(blueprint));
+      const result = summarizeQuality(dir, makeValidationResult(), {
+        reportPath: false,
+        context: { gradeBand: 'early_primary' },
+      });
+      strictEqual(result.findings.some((f) => f.checkId === 'QC-SCH-03'), false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('records learnerProfile in the quality summary', () => {
     const dir = createTempDir();
     try {

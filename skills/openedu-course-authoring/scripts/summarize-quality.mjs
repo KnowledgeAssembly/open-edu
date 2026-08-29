@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadWidgetCatalog, getCanonicalWidgetIds, isDeprecatedWidget, resolveLegacyWidgetId, getWidgetById } from './widget-catalog.mjs';
-import { resolveProfile, loadProfileConfig } from './profiles.mjs';
+import { resolveProfile, loadProfileConfig, getGradeBandConfig, GRADE_BANDS } from './profiles.mjs';
 
 const nonMeasurableVerbs = [
   'understand', 'know', 'learn', 'appreciate', 'be familiar', 'grasp',
@@ -147,6 +147,23 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
         curriculum: options.context.curriculum || null,
       }
     : null;
+
+  const isSchool = profileKey === 'school' || context?.educationLevel === 'school' || Boolean(context?.gradeBand);
+  const isCollege = profileKey === 'college' || context?.educationLevel === 'college';
+  const gradeBand = context?.gradeBand || null;
+  const gradeBandValid = gradeBand ? GRADE_BANDS.includes(gradeBand) : true;
+  const gradeBandRange = gradeBand && gradeBandValid
+    ? getGradeBandConfig('school', gradeBand)?.pacingRangeMinutes || null
+    : null;
+
+  // --- QC-SCH-02 (school): grade band must be a known value ---
+  if (gradeBand && !gradeBandValid) {
+    findings.push({
+      checkId: 'QC-SCH-02',
+      severity: 'error',
+      message: `Unknown grade band "${gradeBand}". Expected one of: ${GRADE_BANDS.join(', ')}`,
+    });
+  }
 
   let totalObjectives = 0;
   let totalActivities = 0;
@@ -498,7 +515,7 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
     }
 
     // --- QC-SCH-01 (school): objectives/examples are age-appropriate ---
-    if (profileKey === 'school') {
+    if (isSchool) {
       const learnerText = [
         ...lessonObj,
         ...(lesson.examples || []),
@@ -515,8 +532,20 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
       }
     }
 
+    // --- QC-SCH-03 (school): lesson pacing within the grade band ---
+    if (gradeBandRange && lesson.estimatedMinutes !== undefined) {
+      const [min, max] = gradeBandRange;
+      if (lesson.estimatedMinutes < min || lesson.estimatedMinutes > max) {
+        findings.push({
+          checkId: 'QC-SCH-03',
+          severity: 'warning',
+          message: `Lesson "${lessonId}" is ${lesson.estimatedMinutes} min, outside the ${gradeBand} band range [${min}, ${max}]`,
+        });
+      }
+    }
+
     // --- QC-COL-01 (college): academic register present ---
-    if (profileKey === 'college') {
+    if (isCollege) {
       const learnerText = [
         ...lessonObj,
         ...(lesson.examples || []),
