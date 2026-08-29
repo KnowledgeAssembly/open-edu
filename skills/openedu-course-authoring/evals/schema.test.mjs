@@ -18,9 +18,9 @@ describe('evals.json schema validation', () => {
     strictEqual(data.skill_name, 'openedu-course-authoring');
   });
 
-  it('has an evals array with 11 entries', () => {
+  it('has an evals array with 15 entries', () => {
     ok(Array.isArray(data.evals));
-    strictEqual(data.evals.length, 11);
+    strictEqual(data.evals.length, 15);
   });
 
   it('all eval IDs are unique', () => {
@@ -171,6 +171,105 @@ describe('evals.json schema validation', () => {
         e.expected_output.includes('confirmation') || e.expected_output.includes('permission'),
         'expected_output does not describe confirmation behavior'
       );
+    });
+  });
+
+  describe('profile evals (IDs 12, 13)', () => {
+    function mentionsProfile(text, key) {
+      const lower = text.toLowerCase();
+      return (
+        (lower.includes('learnerprofile') || lower.includes('learner profile')) &&
+        lower.includes(key)
+      );
+    }
+
+    it('eval 12 declares the autism profile in prompt and expected_output', () => {
+      const e = data.evals.find((ev) => ev.id === 12);
+      ok(e, 'eval 12 not found');
+      ok(mentionsProfile(e.prompt, 'autism'), 'prompt should declare learnerProfile autism');
+      ok(mentionsProfile(e.expected_output, 'autism'), 'expected_output should declare learnerProfile autism');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('autism')),
+        'expectations should assert metadata.audience is autism'
+      );
+    });
+
+    it('eval 13 declares the neurotypical profile in prompt and expected_output', () => {
+      const e = data.evals.find((ev) => ev.id === 13);
+      ok(e, 'eval 13 not found');
+      ok(mentionsProfile(e.prompt, 'neurotypical'), 'prompt should declare learnerProfile neurotypical');
+      ok(mentionsProfile(e.expected_output, 'neurotypical'), 'expected_output should declare learnerProfile neurotypical');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('neurotypical')),
+        'expectations should assert metadata.audience is neurotypical'
+      );
+    });
+
+    it('each new eval records its profile in files/course-brief and asserts accessibility', () => {
+      const e = data.evals.find((ev) => ev.id === 12);
+      ok(e.files.includes('course-brief.md'));
+      ok(e.expectations.some((x) => x.toLowerCase().includes('accessibility')));
+    });
+  });
+
+  describe('profile evals (IDs 14, 15)', () => {
+    it('eval 14 declares the school profile and grade band', () => {
+      const e = data.evals.find((ev) => ev.id === 14);
+      ok(e, 'eval 14 not found');
+      ok(e.prompt.includes('school') && e.prompt.includes('middle_school'), 'prompt should declare school + gradeBand');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('school')),
+        'expectations should assert metadata.audience is school'
+      );
+      ok(
+        e.expectations.some((x) => x.includes('middle_school')),
+        'expectations should reference the middle_school grade band'
+      );
+    });
+
+    it('eval 15 declares the college profile', () => {
+      const e = data.evals.find((ev) => ev.id === 15);
+      ok(e, 'eval 15 not found');
+      ok(e.prompt.includes('college'), 'prompt should declare college');
+      ok(
+        e.expectations.some((x) => x.includes('metadata.audience') && x.includes('college')),
+        'expectations should assert metadata.audience is college'
+      );
+    });
+  });
+
+  describe('contrast evals (D3): autism output differs deterministically from neurotypical', () => {
+    it('autism eval requires accessibility tags the neurotypical eval does not', () => {
+      const autism = data.evals.find((ev) => ev.id === 12);
+      const neuro = data.evals.find((ev) => ev.id === 13);
+      ok(autism, 'eval 12 not found');
+      ok(neuro, 'eval 13 not found');
+
+      ok(
+        autism.expectations.some((x) => x.includes('sensory-friendly')),
+        'autism eval should require sensory-friendly accessibility'
+      );
+      ok(
+        autism.expectations.some((x) => x.includes('literal-language')),
+        'autism eval should require literal-language accessibility'
+      );
+
+      for (const tag of ['sensory-friendly', 'literal-language']) {
+        ok(
+          !neuro.expectations.some((x) => x.includes(tag)),
+          `neurotypical eval should not require "${tag}"`
+        );
+      }
+    });
+
+    it('autism and neurotypical evals require opposing metadata.audience values', () => {
+      const autism = data.evals.find((ev) => ev.id === 12);
+      const neuro = data.evals.find((ev) => ev.id === 13);
+      const autismExpectation = autism.expectations.find((x) => x.includes('metadata.audience'));
+      const neuroExpectation = neuro.expectations.find((x) => x.includes('metadata.audience'));
+      ok(autismExpectation.includes('autism'));
+      ok(neuroExpectation.includes('neurotypical'));
+      ok(!neuroExpectation.includes('autism'));
     });
   });
 });

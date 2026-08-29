@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { runOpenEduCommand } from './openedu-adapter.mjs';
+import { PROFILE_KEYS } from './profiles.mjs';
 
 const VALID_STEPS = ['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion'];
 const VALID_ACTIVITY_TYPES = ['reading', 'exercise', 'quiz', 'reflection', 'widget'];
@@ -225,6 +226,33 @@ function checkMetadata(spec, errors, warnings) {
       message: 'metadata.estimatedHours must be a non-negative finite number',
       code: 'INVALID_ESTIMATED_HOURS',
     });
+  }
+  if (meta.audience !== undefined) {
+    if (typeof meta.audience !== 'string' || meta.audience.trim().length === 0) {
+      errors.push({
+        severity: 'error',
+        message: 'metadata.audience must be a non-empty string',
+        code: 'INVALID_AUDIENCE',
+      });
+    } else if (!PROFILE_KEYS.includes(meta.audience)) {
+      errors.push({
+        severity: 'error',
+        message: `Invalid audience: "${meta.audience}". Must be one of: ${PROFILE_KEYS.join(', ')}`,
+        code: 'INVALID_AUDIENCE',
+      });
+    }
+  }
+  if (meta.accessibility !== undefined) {
+    if (
+      !Array.isArray(meta.accessibility) ||
+      !meta.accessibility.every((a) => typeof a === 'string' && a.trim().length > 0)
+    ) {
+      errors.push({
+        severity: 'error',
+        message: 'metadata.accessibility must be an array of non-empty strings',
+        code: 'INVALID_ACCESSIBILITY',
+      });
+    }
   }
 }
 

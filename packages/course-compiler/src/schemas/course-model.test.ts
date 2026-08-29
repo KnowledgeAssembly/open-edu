@@ -132,6 +132,37 @@ describe('CourseMetadataSchema', () => {
     const result = CourseMetadataSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
+
+  it('accepts audience and accessibility', () => {
+    const meta = {
+      ...validMetadata(),
+      audience: 'autism',
+      accessibility: ['sensory-friendly', 'predictable-structure', 'literal-language'],
+    };
+    const result = CourseMetadataSchema.safeParse(meta);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.audience).toBe('autism');
+      expect(result.data.accessibility).toEqual([
+        'sensory-friendly',
+        'predictable-structure',
+        'literal-language',
+      ]);
+    }
+  });
+
+  it('rejects non-array accessibility', () => {
+    const result = CourseMetadataSchema.safeParse({
+      ...validMetadata(),
+      accessibility: 'sensory-friendly',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-string audience', () => {
+    const result = CourseMetadataSchema.safeParse({ ...validMetadata(), audience: ['autism'] });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('QuestionSchema', () => {

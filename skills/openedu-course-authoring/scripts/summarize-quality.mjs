@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadWidgetCatalog, getCanonicalWidgetIds, isDeprecatedWidget, resolveLegacyWidgetId, getWidgetById } from './widget-catalog.mjs';
+import { resolveProfile, loadProfileConfig, getGradeBandConfig, GRADE_BANDS } from './profiles.mjs';
 
 const nonMeasurableVerbs = [
   'understand', 'know', 'learn', 'appreciate', 'be familiar', 'grasp',
@@ -9,6 +10,31 @@ const nonMeasurableVerbs = [
 ];
 
 const PEDAGOGICAL_STEPS = ['observe', 'guided_practice', 'independent_practice', 'mastery_check', 'positive_completion'];
+
+// Profile-scoped heuristic vocabularies (QC-ACC-05/06, QC-SCH-01, QC-COL-01).
+const NON_LITERAL_PHRASES = [
+  'conquer', 'on fire', 'genius', 'amazing', 'crush it', "let's battle", 'warrior',
+  'champion', 'ninja', 'superstar', 'rock star', "you're a star", 'piece of cake',
+  'break a leg', 'in the zone',
+];
+const TASK_VERBS = [
+  'count', 'add', 'subtract', 'multiply', 'divide', 'solve', 'identify', 'compare',
+  'match', 'write', 'read', 'draw', 'find', 'name', 'circle', 'select', 'choose',
+  'list', 'explain', 'describe', 'calculate', 'complete', 'fill', 'sort', 'order',
+  'group', 'label', 'measure', 'convert', 'color', 'trace',
+];
+const COMPOUND_TASK_PATTERN = new RegExp(
+  `\\b(${TASK_VERBS.join('|')})\\b[^.;]*\\b(?:and|also|then|plus)\\b[^.;]*\\b(${TASK_VERBS.join('|')})\\b`,
+  'i',
+);
+const ADULT_CONTEXT_WORDS = [
+  'mortgage', 'salary', 'tax return', 'resume', 'lease', 'alcohol', 'cigarette',
+  'voting', 'health insurance', '401k', 'payroll', 'credit score', 'investing',
+];
+const ACADEMIC_REGISTER_MARKERS = [
+  'analyze', 'critique', 'evaluate', 'synthesize', 'thesis', 'framework',
+  'methodology', 'theory', 'paradigm', 'implication',
+];
 
 /**
  * Combines validation diagnostics with a lesson blueprint to produce a quality report.
@@ -91,14 +117,53 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
   // --- Course-level metadata extraction ---
   let courseEstimatedHours = null;
   let courseDifficulty = null;
+  let courseAudience = null;
   try {
     const specPath = join(outputDir, 'course-spec.json');
     if (existsSync(specPath)) {
       const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
       courseEstimatedHours = spec.metadata?.estimatedHours;
       courseDifficulty = spec.metadata?.difficulty;
+      courseAudience = spec.metadata?.audience;
     }
   } catch { /* best-effort */ }
+
+  // --- Active learner profile (drives profile-scoped QC checks) ---
+  const activeProfile = courseAudience
+    ? resolveProfile(courseAudience)
+    : { key: 'neurotypical', source: 'defaulted' };
+  const profileKey = activeProfile.key;
+  let profileName = profileKey;
+  try {
+    const cfg = loadProfileConfig(profileKey);
+    profileName = cfg.name;
+  } catch { /* config unavailable; fall back to key */ }
+
+  // --- Educational context (authoring/brief layer; optional) ---
+  const context = options.context && typeof options.context === 'object'
+    ? {
+        educationLevel: options.context.educationLevel || null,
+        gradeBand: options.context.gradeBand || null,
+        curriculum: options.context.curriculum || null,
+      }
+    : null;
+
+  const isSchool = profileKey === 'school' || context?.educationLevel === 'school' || Boolean(context?.gradeBand);
+  const isCollege = profileKey === 'college' || context?.educationLevel === 'college';
+  const gradeBand = context?.gradeBand || null;
+  const gradeBandValid = gradeBand ? GRADE_BANDS.includes(gradeBand) : true;
+  const gradeBandRange = gradeBand && gradeBandValid
+    ? getGradeBandConfig('school', gradeBand)?.pacingRangeMinutes || null
+    : null;
+
+  // --- QC-SCH-02 (school): grade band must be a known value ---
+  if (gradeBand && !gradeBandValid) {
+    findings.push({
+      checkId: 'QC-SCH-02',
+      severity: 'error',
+      message: `Unknown grade band "${gradeBand}". Expected one of: ${GRADE_BANDS.join(', ')}`,
+    });
+  }
 
   let totalObjectives = 0;
   let totalActivities = 0;
@@ -356,6 +421,37 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
       }
     }
 
+    // --- QC-ACC-05 (autism): literal language ---
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        const text = `${act.description || ''} ${act.instructions || ''}`.toLowerCase();
+        for (const phrase of NON_LITERAL_PHRASES) {
+          if (text.includes(phrase)) {
+            findings.push({
+              checkId: 'QC-ACC-05',
+              severity: 'warning',
+              message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" uses non-literal phrasing ("${phrase}")`,
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    // --- QC-ACC-06 (autism): one concept per activity ---
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        const text = act.instructions || '';
+        if (COMPOUND_TASK_PATTERN.test(text)) {
+          findings.push({
+            checkId: 'QC-ACC-06',
+            severity: 'warning',
+            message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" combines multiple tasks in one instruction; keep one concept per activity`,
+          });
+        }
+      }
+    }
+
     // --- QC-ACC-02: Widget choices support keyboard interaction ---
     for (const act of activities) {
       if (act.type === 'widget' && act.widgetId && catalogAvailable) {
@@ -366,6 +462,26 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
             severity: 'info',
             message: `Widget "${act.widgetId}" in lesson "${lessonId}" does not declare keyboard-only support`,
           });
+        }
+      }
+    }
+
+    // --- QC-ACC-07 (autism): widget selection avoids high-sensory-load defaults ---
+    // Only flag widgets that animate without offering a reduced-motion fallback;
+    // static widgets are not flagged (avoids noise until a catalog allowlist lands).
+    if (profileKey === 'autism') {
+      for (const act of activities) {
+        if (act.type === 'widget' && act.widgetId && catalogAvailable) {
+          const widgetEntry = getWidgetById(catalog, act.widgetId);
+          const capabilities = widgetEntry?.capabilities || [];
+          const tags = widgetEntry?.accessibility || [];
+          if (capabilities.includes('Animation') && !tags.includes('ReducedMotion')) {
+            findings.push({
+              checkId: 'QC-ACC-07',
+              severity: 'info',
+              message: `Widget "${act.widgetId}" in lesson "${lessonId}" uses animation without reduced-motion support; prefer calm, predictable widgets for this profile`,
+            });
+          }
         }
       }
     }
@@ -394,6 +510,53 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
           checkId: 'QC-ACC-04',
           severity: 'warning',
           message: `Activity "${act.description || 'unnamed'}" in lesson "${lessonId}" instructions exceed 1000 chars; consider chunking`,
+        });
+      }
+    }
+
+    // --- QC-SCH-01 (school): objectives/examples are age-appropriate ---
+    if (isSchool) {
+      const learnerText = [
+        ...lessonObj,
+        ...(lesson.examples || []),
+        lesson.coreIdea || '',
+      ].join(' ').toLowerCase();
+      for (const word of ADULT_CONTEXT_WORDS) {
+        if (learnerText.includes(word)) {
+          findings.push({
+            checkId: 'QC-SCH-01',
+            severity: 'warning',
+            message: `Lesson "${lessonId}" references adult context ("${word}") that may not be age-appropriate`,
+          });
+        }
+      }
+    }
+
+    // --- QC-SCH-03 (school): lesson pacing within the grade band ---
+    if (gradeBandRange && lesson.estimatedMinutes !== undefined) {
+      const [min, max] = gradeBandRange;
+      if (lesson.estimatedMinutes < min || lesson.estimatedMinutes > max) {
+        findings.push({
+          checkId: 'QC-SCH-03',
+          severity: 'warning',
+          message: `Lesson "${lessonId}" is ${lesson.estimatedMinutes} min, outside the ${gradeBand} band range [${min}, ${max}]`,
+        });
+      }
+    }
+
+    // --- QC-COL-01 (college): academic register present ---
+    if (isCollege) {
+      const learnerText = [
+        ...lessonObj,
+        ...(lesson.examples || []),
+        lesson.coreIdea || '',
+      ].join(' ').toLowerCase();
+      const hasAcademicMarker = ACADEMIC_REGISTER_MARKERS.some((m) => learnerText.includes(m));
+      if (!hasAcademicMarker) {
+        findings.push({
+          checkId: 'QC-COL-01',
+          severity: 'info',
+          message: `Lesson "${lessonId}" shows no academic register markers (e.g. analyze, critique, evaluate, methodology)`,
         });
       }
     }
@@ -455,6 +618,12 @@ export function summarizeQuality(outputDir, validationResult, options = {}) {
       errors: errorCount,
       warnings: warningCount,
       infos: infoCount,
+      learnerProfile: {
+        key: profileKey,
+        name: profileName,
+        source: activeProfile.source,
+      },
+      context,
     },
     findings,
   };
@@ -493,6 +662,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
  * @property {string} [catalogPath]
  * @property {import('./widget-catalog.mjs').WidgetEntry[]} [preloadedCatalog]
  * @property {string|boolean} [reportPath]
+ * @property {{ educationLevel?: string, gradeBand?: string, curriculum?: string }} [context]
  */
 
 /**

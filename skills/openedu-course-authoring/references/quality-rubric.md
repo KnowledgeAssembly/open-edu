@@ -59,6 +59,20 @@ Assessments must test what was taught, not introduce new concepts.
 | `QC-ACC-03` | Color is not the sole differentiator (non-color-only distinctions)  | `warning` |
 | `QC-ACC-04` | Content is chunked into readable segments (not single large blocks) | `warning` |
 
+## Dimension 6b: Profile-Scoped Checks
+
+These checks **supplement** (do not replace) the universal checks and run only when the active learner profile matches. The profile is read from `course-spec.json` `metadata.audience` (default: `neurotypical`). School/college checks also activate when `educationLevel`/`gradeBand` context is supplied via `options.context`.
+
+| Check ID    | Profile   | Rule                                                                                    | Severity  |
+| ----------- | --------- | --------------------------------------------------------------------------------------- | --------- |
+| `QC-ACC-05` | `autism`  | Instructions use literal, unambiguous language (no idiom/metaphor/competition)          | `warning` |
+| `QC-ACC-06` | `autism`  | One concept per activity (no compound objectives in a single instruction)               | `warning` |
+| `QC-ACC-07` | `autism`  | Animated widgets must offer a `ReducedMotion` fallback (static widgets are not flagged) | `info`    |
+| `QC-SCH-01` | `school`  | Objectives and examples are age/grade-appropriate                                       | `warning` |
+| `QC-SCH-02` | `school`  | `gradeBand` context is a known band (`early_primary` … `senior_secondary`)              | `error`   |
+| `QC-SCH-03` | `school`  | Lesson `estimatedMinutes` falls within the grade band's pacing range                    | `warning` |
+| `QC-COL-01` | `college` | Academic register is present; objectives are rigorous                                   | `info`    |
+
 ## Dimension 7: Completeness
 
 | Check ID    | Rule                                                     | Severity  |
@@ -100,7 +114,8 @@ Findings use these severity levels:
     "totalEstimatedMinutes": 60,
     "errors": 0,
     "warnings": 2,
-    "infos": 3
+    "infos": 3,
+    "learnerProfile": { "key": "autism", "name": "Autism Spectrum", "source": "explicit" }
   },
   "findings": [
     {

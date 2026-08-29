@@ -347,6 +347,93 @@ describe('validate-course-spec (structural-only)', () => {
   });
 });
 
+describe('validate-course-spec (profile metadata)', () => {
+  it('accepts valid audience and accessibility metadata', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.audience = 'autism';
+      spec.metadata.accessibility = ['sensory-friendly', 'predictable-structure', 'literal-language'];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, true);
+      strictEqual(result.errors.length, 0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts empty accessibility array (neurotypical default)', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.audience = 'neurotypical';
+      spec.metadata.accessibility = [];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects an unknown audience key', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.audience = 'alien';
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_AUDIENCE'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects non-string audience', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.audience = ['autism'];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_AUDIENCE'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects non-array accessibility', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.accessibility = 'sensory-friendly';
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_ACCESSIBILITY'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects accessibility arrays with non-string entries', () => {
+    const dir = createTempDir();
+    try {
+      const spec = makeValidSpec();
+      spec.metadata.accessibility = ['sensory-friendly', 42];
+      writeJSON(dir, 'course-spec.json', spec);
+      const result = validateCourseSpec(join(dir, 'course-spec.json'), dir);
+      strictEqual(result.success, false);
+      ok(result.errors.some((e) => e.code === 'INVALID_ACCESSIBILITY'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('validate-course-spec (compiler integration)', () => {
   it('sets compilerAvailable=true and validationMode=compiler with fake command', () => {
     const dir = createTempDir();

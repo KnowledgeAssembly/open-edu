@@ -154,6 +154,8 @@ export function createQualityReport({
       totalErrors: errors.length,
       totalWarnings: warnings.length,
       totalInfos: infos.length,
+      learnerProfile: qualityResult.summary?.learnerProfile || null,
+      context: qualityResult.summary?.context || null,
     },
     timestamp: new Date().toISOString(),
   };

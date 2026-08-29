@@ -33,6 +33,47 @@ describe('parseCourseSpecJSON', () => {
     expect(model!.modules[0]!.lessons).toHaveLength(1);
   });
 
+  it('forwards profile metadata into the compiled model', () => {
+    const json = JSON.stringify({
+      format: 'openedu-course-spec',
+      version: 1,
+      generatedAt: '2026-08-28T00:00:00.000Z',
+      metadata: {
+        title: 'Fractions',
+        description: 'Intro to fractions',
+        generated: true,
+        audience: 'autism',
+        accessibility: ['sensory-friendly', 'predictable-structure', 'literal-language'],
+        targetAudience: '8-10 year old students',
+        keywords: ['fractions', 'math'],
+        lastUpdated: '2026-08-28',
+      },
+      lessons: [
+        {
+          id: 'lesson-101',
+          title: 'Parts of a Whole',
+          objectives: ['Identify numerators and denominators'],
+          coreIdea: 'A fraction represents a part of a whole',
+          examples: ['1/2 of a pizza'],
+          misconceptions: ['Larger denominator means larger fraction'],
+          activities: [],
+        },
+      ],
+    });
+    const { model, diagnostics } = parseCourseSpecJSON(json);
+    expect(model).not.toBeNull();
+    expect(diagnostics).toHaveLength(0);
+    expect(model!.metadata.audience).toBe('autism');
+    expect(model!.metadata.accessibility).toEqual([
+      'sensory-friendly',
+      'predictable-structure',
+      'literal-language',
+    ]);
+    expect(model!.metadata.targetAudience).toBe('8-10 year old students');
+    expect(model!.metadata.keywords).toEqual(['fractions', 'math']);
+    expect(model!.metadata.lastUpdated).toBe('2026-08-28');
+  });
+
   it('maps widget activity correctly', () => {
     const json = JSON.stringify({
       format: 'openedu-course-spec',
