@@ -25,3 +25,5 @@ RUN mkdir -p /opt/examples /data/courses \
   && chown -R node:node /opt/examples /data/courses /app
 USER node
 WORKDIR /app
+
+CMD ["sh", "-c", "pnpm --filter @open-edu/learner exec vite --host 0.0.0.0 --port 4001 --strictPort"]
