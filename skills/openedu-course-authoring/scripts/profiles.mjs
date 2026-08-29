@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 const PROFILE_KEYS = ['neurotypical', 'autism', 'school', 'college'];
 
-export { PROFILE_KEYS };
+const GRADE_BANDS = ['early_primary', 'upper_primary', 'middle_school', 'secondary', 'senior_secondary'];
+
+export { PROFILE_KEYS, GRADE_BANDS };
 
 const ALIASES = new Map([
   ['autistic', 'autism'],
@@ -127,6 +129,23 @@ export function listProfiles(configPath) {
   return Object.keys(config.profiles || {});
 }
 
+/**
+ * Returns the machine-checkable config for a school grade band, or null when
+ * the profile/band has no such config.
+ *
+ * @param {string} key - profile key or alias (resolved via resolveProfile)
+ * @param {string} gradeBand - one of GRADE_BANDS
+ * @param {object} [options]
+ * @param {string} [options.configPath] - override path to profiles.config.json (tests)
+ * @returns {{ pacingRangeMinutes: number[] } | null}
+ */
+export function getGradeBandConfig(key, gradeBand, options = {}) {
+  const config = loadProfileConfig(key, options);
+  const bands = config.gradeBands;
+  if (!bands || typeof bands !== 'object') return null;
+  return bands[gradeBand] || null;
+}
+
 function loadRawConfig(configPath) {
   const path = configPath || getProfilesConfigPath();
   let raw;
@@ -171,4 +190,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
  * @property {string[]} accessibility
  * @property {string|null} difficultyBias
  * @property {number[]} pacingRangeMinutes
+ * @property {Record<string, { pacingRangeMinutes: number[] }>} [gradeBands]
  */

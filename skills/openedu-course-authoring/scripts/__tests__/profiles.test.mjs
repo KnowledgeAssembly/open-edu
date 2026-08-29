@@ -3,7 +3,7 @@ import { ok, strictEqual } from 'node:assert';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { resolveProfile, loadProfileConfig, listProfiles } from '../profiles.mjs';
+import { resolveProfile, loadProfileConfig, listProfiles, getGradeBandConfig, GRADE_BANDS } from '../profiles.mjs';
 
 function createTempDir() {
   const base = join(tmpdir(), `profiles-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -118,5 +118,36 @@ describe('listProfiles', () => {
     for (const key of ['neurotypical', 'autism', 'school', 'college']) {
       ok(keys.includes(key), `expected "${key}" in ${JSON.stringify(keys)}`);
     }
+  });
+});
+
+describe('grade bands', () => {
+  it('exposes the five school grade bands in order', () => {
+    strictEqual(GRADE_BANDS.length, 5);
+    strictEqual(GRADE_BANDS[0], 'early_primary');
+    strictEqual(GRADE_BANDS[GRADE_BANDS.length - 1], 'senior_secondary');
+  });
+
+  it('loads per-band pacing from the school profile config', () => {
+    const config = loadProfileConfig('school');
+    ok(config.gradeBands, 'school config should include gradeBands');
+    strictEqual(config.gradeBands.early_primary.pacingRangeMinutes[0], 10);
+    strictEqual(config.gradeBands.middle_school.pacingRangeMinutes[1], 35);
+    strictEqual(config.gradeBands.senior_secondary.pacingRangeMinutes[0], 30);
+  });
+
+  it('returns grade-band config via getGradeBandConfig', () => {
+    const early = getGradeBandConfig('school', 'early_primary');
+    strictEqual(early.pacingRangeMinutes[0], 10);
+    strictEqual(early.pacingRangeMinutes[1], 20);
+
+    const senior = getGradeBandConfig('school', 'senior_secondary');
+    strictEqual(senior.pacingRangeMinutes[1], 45);
+  });
+
+  it('returns null for unknown or non-school grade bands', () => {
+    strictEqual(getGradeBandConfig('school', 'phd'), null);
+    strictEqual(getGradeBandConfig('college', 'early_primary'), null);
+    strictEqual(getGradeBandConfig('neurotypical', 'early_primary'), null);
   });
 });

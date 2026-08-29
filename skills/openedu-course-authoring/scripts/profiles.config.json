@@ -21,7 +21,14 @@
       "audience": "school",
       "accessibility": [],
       "difficultyBias": null,
-      "pacingRangeMinutes": [15, 45]
+      "pacingRangeMinutes": [15, 45],
+      "gradeBands": {
+        "early_primary": { "pacingRangeMinutes": [10, 20] },
+        "upper_primary": { "pacingRangeMinutes": [15, 25] },
+        "middle_school": { "pacingRangeMinutes": [20, 35] },
+        "secondary": { "pacingRangeMinutes": [25, 40] },
+        "senior_secondary": { "pacingRangeMinutes": [30, 45] }
+      }
     },
     "college": {
       "name": "College / Adult",
