@@ -26,4 +26,12 @@ RUN mkdir -p /opt/examples /data/courses \
 USER node
 WORKDIR /app
 
-CMD ["sh", "-c", "pnpm --filter @open-edu/learner exec vite --host 0.0.0.0 --port 4001 --strictPort"]
+# Run both the Course Creator Studio (dev-server, port 4000) and the learner
+# app (port 4001) in the same container. The studio opens the hello-world
+# package from /opt/examples by default (BROWSER=none disables vite's
+# auto-open in the headless container).
+CMD ["sh", "-c", "\
+  BROWSER=none OPEN_EDU_PACKAGE_DIR=/opt/examples/hello-world \
+    pnpm --filter @open-edu/dev-server exec vite --host 0.0.0.0 --port 4000 --strictPort & \
+  pnpm --filter @open-edu/learner exec vite --host 0.0.0.0 --port 4001 --strictPort & \
+  wait"]
