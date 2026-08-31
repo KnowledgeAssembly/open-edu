@@ -2,6 +2,15 @@ import type { LoadedPackage } from '@open-edu/core';
 import { loadPackageFromFiles } from '@open-edu/core/browser';
 import type { DistributionManifest } from '@open-edu/schemas';
 import { OepReader, OepWriter } from '@open-edu/oep-distribution';
+import {
+  OpfsQuotaError,
+  OpfsUnsupportedError,
+  WorkspaceNotFoundError,
+  WorkspaceUnavailableError,
+  getOpfsRoot,
+  type CourseWorkspace,
+  walkWorkspace,
+} from '@open-edu/storage';
 import type {
   StudioApi,
   StudioApiError,
@@ -24,6 +33,8 @@ import { getTemplateById } from './templates/catalog.js';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './outlineModel.js';
 import type { LibraryEntry } from './library/types.js';
 import { BrowserAiClient, type BrowserAiClientOptions } from './browserAiClient.js';
+import { applyChangeSet } from './ai/applyChangeSet.js';
+import { createChangeSet, type WorkspaceChange } from '@open-edu/storage';
 import type {
   CourseDraftResult,
   AiItemAddResult,
@@ -153,15 +164,23 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     return course;
   }
 
+  async function requireActiveWorkspace(): Promise<CourseWorkspace> {
+    if (!session.activeCourseId) {
+      throw new BrowserStudioApiError('no-active-course', 'No course is open');
+    }
+    const ws = await store.workspaceOf?.(session.activeCourseId);
+    if (!ws) {
+      throw new BrowserStudioApiError(
+        'course-not-found',
+        `Course ${session.activeCourseId} not found`,
+      );
+    }
+    return ws;
+  }
+
   async function loadCurrentPackage(): Promise<LoadedPackage> {
     const course = await requireActiveCourse();
     return loadPackageFromFiles(makeSourceFromFiles(course.files), `browser://${course.id}`);
-  }
-
-  async function replaceFiles(files: StudioFile[]): Promise<void> {
-    const course = await requireActiveCourse();
-    await store.replace(course.id, { ...course, files });
-    onPackageChanged();
   }
 
   async function validate(): Promise<ValidationResult> {
@@ -188,85 +207,73 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   }
 
   async function getOutline(): Promise<OutlineResult> {
-    const course = await requireActiveCourse();
-    const index = buildFileIndex(course.files);
+    const ws = await requireActiveWorkspace();
 
-    const manifestRaw = index.get('package.json');
     let title = '';
-    if (manifestRaw) {
-      try {
-        title = (JSON.parse(TEXT_DECODER.decode(manifestRaw)) as { title?: string }).title ?? '';
-      } catch {
-        title = '';
-      }
+    let entry: string | undefined;
+    try {
+      const manifestRaw = await ws.readText('package.json');
+      const manifest = JSON.parse(manifestRaw) as { title?: string; entry?: string };
+      title = manifest.title ?? '';
+      entry = typeof manifest.entry === 'string' ? manifest.entry : undefined;
+    } catch {
+      // no readable manifest; fall back to empty decoration
     }
 
     let orderedPaths: string[] = [];
-    const files = new Map<string, string>();
-    const workflowRaw = index.get('workflow.json');
-    if (workflowRaw) {
-      try {
-        const workflow = JSON.parse(TEXT_DECODER.decode(workflowRaw)) as {
-          routing?: Record<string, unknown>;
-        };
-        orderedPaths = Object.keys(workflow.routing ?? {});
-      } catch {
-        orderedPaths = [];
-      }
+    try {
+      const workflowRaw = await ws.readText('workflow.json');
+      const workflow = JSON.parse(workflowRaw) as { routing?: Record<string, unknown> };
+      orderedPaths = Object.keys(workflow.routing ?? {});
+    } catch {
+      orderedPaths = [];
     }
+
     if (orderedPaths.length === 0) {
-      orderedPaths = Array.from(index.keys())
-        .filter((p) => p.startsWith('nodes/') && /\.(md|json)$/.test(p))
-        .sort();
-      const entry = (() => {
-        try {
-          return (
-            JSON.parse(TEXT_DECODER.decode(manifestRaw ?? new Uint8Array())) as { entry?: string }
-          ).entry;
-        } catch {
-          return undefined;
-        }
-      })();
+      let nodeFiles: string[] = [];
+      try {
+        const entries = await ws.list('nodes');
+        nodeFiles = entries
+          .filter((e) => e.kind === 'file' && /\.(md|json)$/.test(e.name))
+          .map((e) => e.path)
+          .sort();
+      } catch {
+        nodeFiles = [];
+      }
+      orderedPaths = nodeFiles;
       if (entry && orderedPaths.includes(entry)) {
         orderedPaths = [entry, ...orderedPaths.filter((p) => p !== entry)];
       }
     }
+
+    const files = new Map<string, string>();
     for (const path of orderedPaths) {
-      const raw = index.get(path);
-      if (raw) files.set(path, TEXT_DECODER.decode(raw));
+      try {
+        files.set(path, await ws.readText(path));
+      } catch {
+        // skip unreadable members
+      }
     }
 
     return { title, activities: activitiesFromEntryOrder(orderedPaths, files) };
   }
 
   async function saveOutlineOrder(paths: string[]): Promise<{ success: boolean }> {
-    const course = await requireActiveCourse();
-    const index = buildFileIndex(course.files);
-    const manifestRaw = index.get('package.json');
+    const ws = await requireActiveWorkspace();
     let manifest: Record<string, unknown> = {};
-    if (manifestRaw) {
-      try {
-        manifest = JSON.parse(TEXT_DECODER.decode(manifestRaw)) as Record<string, unknown>;
-      } catch {
-        manifest = {};
-      }
+    try {
+      manifest = JSON.parse(await ws.readText('package.json')) as Record<string, unknown>;
+    } catch {
+      manifest = {};
     }
-
     const entry = paths[0] ?? (typeof manifest.entry === 'string' ? manifest.entry : '');
     const linear = buildLinearWorkflow(paths, entry);
-    const nextFiles = course.files
-      .filter((f) => f.path !== 'workflow.json' && f.path !== 'package.json')
-      .concat([
-        {
-          path: 'workflow.json',
-          data: TEXT_ENCODER.encode(JSON.stringify({ routing: linear.routing }, null, 2)),
-        },
-        {
-          path: 'package.json',
-          data: TEXT_ENCODER.encode(JSON.stringify({ ...manifest, entry: linear.entry }, null, 2)),
-        },
-      ]);
-    await replaceFiles(nextFiles);
+    await ws.writeText('workflow.json', JSON.stringify({ routing: linear.routing }, null, 2));
+    await ws.writeText(
+      'package.json',
+      JSON.stringify({ ...manifest, entry: linear.entry }, null, 2),
+    );
+    onPackageChanged();
     return { success: true };
   }
 
@@ -406,28 +413,32 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   }
 
   async function exportOep(): Promise<ExportResult> {
-    const course = await requireActiveCourse();
-    const manifest = await loadCurrentPackage().then((p) => p.manifest);
+    const ws = await requireActiveWorkspace();
+    const files = await walkWorkspace(ws);
+    const courseFiles = new Map<string, Uint8Array>();
+    for (const file of sortCourseFiles(files.map((f) => ({ path: f.path, data: f.data })))) {
+      courseFiles.set(file.path, new Uint8Array(file.data));
+    }
+    const pkg = await loadPackageFromFiles(
+      makeSourceFromFiles(files.map((f) => ({ path: f.path, data: f.data }))),
+      `browser://${session.activeCourseId}`,
+    );
     const distManifest: DistributionManifest = {
       format: 'openedu-package',
       formatVersion: 1,
       type: 'course',
-      id: manifest.id,
-      version: manifest.version,
-      title: manifest.title,
+      id: pkg.manifest.id,
+      version: pkg.manifest.version,
+      title: pkg.manifest.title,
       checksum: { algorithm: 'sha256', value: '' },
       contentRoot: 'course/',
       signature: { status: 'unsigned' },
     };
-    const courseFiles = new Map<string, Uint8Array>();
-    for (const file of sortCourseFiles(course.files)) {
-      courseFiles.set(file.path, new Uint8Array(file.data));
-    }
     const result = await OepWriter.build({ manifest: distManifest, courseFiles });
     const blob = new Blob([result.bytes as unknown as ArrayBuffer], {
       type: 'application/octet-stream',
     });
-    return { blob, fileName: `${manifest.id}-${manifest.version}.oep` };
+    return { blob, fileName: `${pkg.manifest.id}-${pkg.manifest.version}.oep` };
   }
 
   async function importOep(bytes: Uint8Array): Promise<CourseSummary> {
@@ -480,43 +491,43 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   }
 
   async function readFile(path: string): Promise<{ path: string; content: string }> {
-    const course = await requireActiveCourse();
-    const index = buildFileIndex(course.files);
-    const data = index.get(path);
-    if (data === undefined) {
-      throw new BrowserStudioApiError('file-not-found', `File not found: ${path}`);
-    }
-    const content = TEXT_DECODER.decode(data);
-    if (content.includes('\uFFFD')) {
+    const ws = await requireActiveWorkspace();
+    try {
+      const content = await ws.readText(path);
+      return { path, content };
+    } catch (err) {
+      if (err instanceof WorkspaceNotFoundError) {
+        throw new BrowserStudioApiError('file-not-found', `File not found: ${path}`);
+      }
+      if (err instanceof WorkspaceUnavailableError) {
+        throw new BrowserStudioApiError(
+          err instanceof OpfsQuotaError ? 'quota-exceeded' : 'storage-unavailable',
+          err.message,
+        );
+      }
       throw new BrowserStudioApiError(
         'binary-file',
         `File is binary and cannot be opened as text: ${path}`,
       );
     }
-    return { path, content };
   }
 
   async function writeFile(path: string, content: string): Promise<{ success: boolean }> {
     const safePath = assertSafeCoursePath(path);
-    const course = await requireActiveCourse();
-    const next = course.files
-      .filter((f) => f.path !== safePath)
-      .concat({
-        path: safePath,
-        data: TEXT_ENCODER.encode(content),
-      });
-    await replaceFiles(next);
+    const ws = await requireActiveWorkspace();
+    await ws.writeText(safePath, content);
+    onPackageChanged();
     return { success: true };
   }
 
   async function deleteFile(path: string): Promise<{ success: boolean; path: string }> {
     const safePath = assertSafeCoursePath(path);
-    const course = await requireActiveCourse();
-    const next = course.files.filter((f) => f.path !== safePath);
-    if (next.length === course.files.length) {
+    const ws = await requireActiveWorkspace();
+    if (!(await ws.exists(safePath))) {
       throw new BrowserStudioApiError('file-not-found', `File not found: ${path}`);
     }
-    await replaceFiles(next);
+    await ws.delete(safePath);
+    onPackageChanged();
     return { success: true, path: safePath };
   }
 
@@ -531,14 +542,16 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
 
   async function getStorageStatus(): Promise<StorageStatus> {
     try {
-      await store.list();
+      await getOpfsRoot();
       return { available: true };
     } catch (err) {
-      const code = (err as { code?: string }).code;
-      return {
-        available: false,
-        reason: code === 'quota-exceeded' ? 'quota-exceeded' : 'storage-unavailable',
-      };
+      if (err instanceof OpfsUnsupportedError) {
+        return { available: false, reason: 'unsupported' };
+      }
+      if (err instanceof OpfsQuotaError) {
+        return { available: false, reason: 'quota-exceeded' };
+      }
+      return { available: false, reason: 'storage-unavailable' };
     }
   }
 
@@ -603,15 +616,17 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     if (!draft) {
       return { success: false, error: 'Draft not found' };
     }
-    const course = await store.get(session.activeCourseId);
-    if (!course) {
-      return { success: false, error: `Course ${session.activeCourseId} not found` };
-    }
-    const files: StudioFile[] = draft.files.map((f) => ({
+    const ws = await requireActiveWorkspace();
+    const changes: WorkspaceChange[] = draft.files.map((f) => ({
       path: f.path,
-      data: new Uint8Array(f.data),
+      operation: 'create',
+      newContent: new Uint8Array(f.data),
     }));
-    await store.replace(course.id, { ...course, title: draft.title, files, updatedAt: Date.now() });
+    const changeSet = createChangeSet('ai', `Apply AI draft "${draft.title}"`, changes);
+    const result = await applyChangeSet(changeSet, ws);
+    if (!result.success) {
+      return { success: false, error: result.error ?? 'Could not apply draft.' };
+    }
     await aiClient.discardDraft(draftId);
     onPackageChanged();
     return { success: true, title: draft.title };

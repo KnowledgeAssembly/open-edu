@@ -33,6 +33,8 @@ import type { EditorMode } from './editor/types';
 import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
 import type { StudioMode } from './studio/types.js';
 import { StudioApp } from './studio/StudioApp.js';
+import './studio/browserPreview.js';
+import { OPFSWorkspace } from '@open-edu/storage';
 import { BrowserStudioProvider, useBrowserStudio } from './studio/browserPreview.js';
 import { DeveloperToolbar } from './components/DeveloperToolbar.js';
 import { useTranslation } from '@open-edu/i18n';
@@ -521,6 +523,15 @@ export function DevApp(): JSX.Element {
     setStudioMode(mode);
     setStudioModeState(mode);
   }, []);
+
+  // Expose the workspace adapter on the browser build so Playwright can drive a
+  // real OPFSWorkspace round-trip (tests/e2e/opfs-workspace.spec.ts). Harmless
+  // outside tests; production behavior is unaffected.
+  useEffect(() => {
+    if (isBrowserMode) {
+      (window as unknown as Record<string, unknown>).__openeduWorkspace = { OPFSWorkspace };
+    }
+  }, [isBrowserMode]);
 
   if (isBrowserMode) {
     return (

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import {
@@ -6,9 +6,14 @@ import {
   buildFileIndex,
   type BrowserCourse,
   type BrowserCourseStoreError,
+  type BrowserCourseStore,
 } from './browserCourseStore.js';
 
 const enc = (s: string) => new TextEncoder().encode(s);
+
+function makeStore(): BrowserCourseStore {
+  return createBrowserCourseStore({ nonPersistent: true });
+}
 
 function makeCourse(id: string): BrowserCourse {
   return {
@@ -16,7 +21,7 @@ function makeCourse(id: string): BrowserCourse {
     version: '1.0.0',
     title: `Course ${id}`,
     files: [
-      { path: 'package.json', data: enc('{"id":"' + id + '"}') },
+      { path: 'package.json', data: enc('{"id":"' + id + '","title":"Course ' + id + '"}') },
       { path: 'nodes/lesson.md', data: enc('# Lesson') },
     ],
     updatedAt: Date.now(),
@@ -24,18 +29,16 @@ function makeCourse(id: string): BrowserCourse {
 }
 
 describe('BrowserCourseStore', () => {
-  let store: ReturnType<typeof createBrowserCourseStore>;
-
   beforeEach(async () => {
     resetDatabase();
     const db = await openDatabase();
     await db.clear('studio-courses');
     db.close();
     resetDatabase();
-    store = createBrowserCourseStore();
   });
 
   it('creates, lists, and reads courses', async () => {
+    const store = makeStore();
     await store.create(makeCourse('c1'));
     await store.create(makeCourse('c2'));
     const list = await store.list();
@@ -45,19 +48,34 @@ describe('BrowserCourseStore', () => {
     expect(loaded!.files.map((f) => f.path)).toEqual(['nodes/lesson.md', 'package.json']);
   });
 
-  it('can be constructed when IndexedDB is unavailable so callers can report the status', async () => {
+  it('stores content in the workspace, not as an IndexedDB course record', async () => {
+    const store = makeStore();
+    await store.create(makeCourse('ws'));
+    const db = await openDatabase();
+    const records = await db.getAll('studio-courses');
+    expect(records).toEqual([]);
+
+    const loaded = await store.get('ws');
+    expect(loaded!.files.map((f) => f.path)).toEqual(['nodes/lesson.md', 'package.json']);
+    const ws = await store.workspaceOf?.('ws');
+    expect(ws).not.toBeNull();
+    expect(await ws!.readText('nodes/lesson.md')).toBe('# Lesson');
+  });
+
+  it('can be safely reconstructed when IndexedDB is unavailable (non-persistent fallback)', async () => {
     vi.stubGlobal('indexedDB', undefined);
     try {
-      const unavailableStore = createBrowserCourseStore();
-      await expect(unavailableStore.list()).rejects.toMatchObject({
-        code: 'storage-unavailable',
-      });
+      const store = createBrowserCourseStore();
+      await store.create(makeCourse('mem'));
+      const loaded = await store.get('mem');
+      expect(loaded!.title).toBe('Course mem');
     } finally {
       vi.unstubAllGlobals();
     }
   });
 
   it('stores nested, unknown-text, and binary files without loss', async () => {
+    const store = makeStore();
     const png = new Uint8Array([137, 80, 78, 71, 1, 2, 3]);
     const course: BrowserCourse = {
       id: 'rich',
@@ -80,6 +98,7 @@ describe('BrowserCourseStore', () => {
   });
 
   it('deep-copies file bytes so callers cannot mutate stored data', async () => {
+    const store = makeStore();
     const course = makeCourse('copy');
     await store.create(course);
     course.files[0]!.data[0] = 90;
@@ -90,6 +109,7 @@ describe('BrowserCourseStore', () => {
   });
 
   it('normalizes backslash paths before persistence', async () => {
+    const store = makeStore();
     const course = makeCourse('win');
     course.files = [{ path: 'nodes\\lesson.md', data: enc('# L') }];
     await store.create(course);
@@ -98,6 +118,7 @@ describe('BrowserCourseStore', () => {
   });
 
   it('rejects traversal paths with an invalid-path code', async () => {
+    const store = makeStore();
     const course = makeCourse('bad');
     course.files = [{ path: '../escape.png', data: enc('x') }];
     await expect(store.create(course)).rejects.toMatchObject({
@@ -106,12 +127,13 @@ describe('BrowserCourseStore', () => {
   });
 
   it('replaces an existing course', async () => {
+    const store = makeStore();
     await store.create(makeCourse('r'));
     const updated: BrowserCourse = {
       ...makeCourse('r'),
       title: 'Updated',
       files: [
-        { path: 'package.json', data: enc('{}') },
+        { path: 'package.json', data: enc('{"title":"Updated"}') },
         { path: 'nodes/lesson.md', data: enc('# Updated') },
         { path: 'nodes/quiz.json', data: enc('{"type":"quiz"}') },
       ],
@@ -124,12 +146,14 @@ describe('BrowserCourseStore', () => {
   });
 
   it('maps a missing replacement to course-not-found', async () => {
+    const store = makeStore();
     await expect(store.replace('missing', makeCourse('missing'))).rejects.toMatchObject({
       code: 'course-not-found',
     } as Partial<BrowserCourseStoreError>);
   });
 
   it('preserves last-known-good data after a failed replacement', async () => {
+    const store = makeStore();
     const original = makeCourse('lkg');
     await store.create(original);
     const failing: BrowserCourse = {
@@ -147,9 +171,10 @@ describe('BrowserCourseStore', () => {
   });
 
   it('duplicates a course with deep-copied bytes and a new id', async () => {
+    const store = makeStore();
     const course = makeCourse('src');
     course.files = [
-      { path: 'package.json', data: enc('{"id":"src"}') },
+      { path: 'package.json', data: enc('{"id":"src","title":"Source"}') },
       { path: 'assets/pic.png', data: new Uint8Array([1, 2, 3]) },
     ];
     await store.create(course);
@@ -165,8 +190,22 @@ describe('BrowserCourseStore', () => {
   });
 
   it('deletes a course', async () => {
+    const store = makeStore();
     await store.create(makeCourse('gone'));
     await store.delete('gone');
     expect(await store.get('gone')).toBeNull();
+  });
+
+  it('exposes the live workspace via workspaceOf', async () => {
+    const store = makeStore();
+    await store.create(makeCourse('live'));
+    const ws = await store.workspaceOf?.('live');
+    expect(ws).not.toBeNull();
+    await ws!.writeText('notes.md', 'from workspace');
+    const loaded = await store.get('live');
+    expect(new TextDecoder().decode(buildFileIndex(loaded!.files).get('notes.md'))).toBe(
+      'from workspace',
+    );
+    expect(await store.workspaceOf?.('missing')).toBeNull();
   });
 });

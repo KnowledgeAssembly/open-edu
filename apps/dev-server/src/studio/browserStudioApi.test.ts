@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import { createBrowserStudioApi, createBrowserStudioSession } from './browserStudioApi.js';
@@ -8,6 +8,7 @@ import {
   buildFileIndex,
   type BrowserCourse,
 } from './browserCourseStore.js';
+import type { CourseWorkspace } from '@open-edu/storage';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
@@ -61,10 +62,19 @@ async function fixtureOepBytes(): Promise<Uint8Array> {
 }
 
 function createBrowserApi() {
-  const store = createBrowserCourseStore();
+  const store = createBrowserCourseStore({ nonPersistent: true });
   const session = createBrowserStudioSession();
   const api = createBrowserStudioApi({ store, session });
   return { store, session, api };
+}
+
+async function activeWorkspace(
+  store: ReturnType<typeof createBrowserCourseStore>,
+  id: string,
+): Promise<CourseWorkspace> {
+  const ws = await store.workspaceOf?.(id);
+  if (!ws) throw new Error('workspace missing');
+  return ws;
 }
 
 describe('BrowserStudioApi', () => {
@@ -115,7 +125,7 @@ describe('BrowserStudioApi', () => {
     expect(await api.getPackageDir()).toBe('browser://no-course');
   });
 
-  it('reads, writes, and deletes files', async () => {
+  it('reads, writes, and deletes files through the workspace', async () => {
     const { store, session, api } = createBrowserApi();
     await api.applyTemplate('reading-lesson');
     await api.openLibraryCourse('reading-lesson');
@@ -123,7 +133,13 @@ describe('BrowserStudioApi', () => {
     const original = await api.readFile('nodes/lesson.md');
     expect(original.content).toContain('# Reading Lesson');
 
+    const ws = await activeWorkspace(store, 'reading-lesson');
+    const writeSpy = vi.spyOn(ws, 'writeText');
+    const readSpy = vi.spyOn(ws, 'readText');
+
     await api.writeFile('nodes/lesson.md', '# Updated Lesson\n\nNew content.');
+    expect(writeSpy).toHaveBeenCalledTimes(1);
+    expect(writeSpy).toHaveBeenCalledWith('nodes/lesson.md', '# Updated Lesson\n\nNew content.');
     const updated = await api.readFile('nodes/lesson.md');
     expect(updated.content).toContain('# Updated Lesson');
 
@@ -131,6 +147,7 @@ describe('BrowserStudioApi', () => {
     const afterWrite = buildFileIndex((await store.get('reading-lesson'))!.files);
     expect(new TextDecoder().decode(afterWrite.get('notes.txt'))).toBe('A new unknown file');
 
+    readSpy.mockClear();
     const del = await api.deleteFile('notes.txt');
     expect(del.success).toBe(true);
     const afterDelete = buildFileIndex((await store.get('reading-lesson'))!.files);
@@ -138,17 +155,53 @@ describe('BrowserStudioApi', () => {
     expect(session.activeCourseId).toBe('reading-lesson');
   });
 
+  it('delegates single-file writes without touching unrelated files', async () => {
+    const { store, api } = createBrowserApi();
+    await api.applyTemplate('reading-lesson');
+    await api.openLibraryCourse('reading-lesson');
+    const ws = await activeWorkspace(store, 'reading-lesson');
+    const readSpy = vi.spyOn(ws, 'read');
+    await api.writeFile('nodes/quiz.json', '{"type":"quiz"}');
+    expect(readSpy).not.toHaveBeenCalled();
+    expect(
+      new TextDecoder().decode(
+        buildFileIndex((await store.get('reading-lesson'))!.files).get('nodes/quiz.json'),
+      ),
+    ).toBe('{"type":"quiz"}');
+  });
+
+  it('derives the outline reading only manifest, workflow, and outline members', async () => {
+    const { store, api } = createBrowserApi();
+    await api.applyTemplate('lesson-quiz');
+    await api.openLibraryCourse('lesson-quiz');
+    const ws = await activeWorkspace(store, 'lesson-quiz');
+    const readSpy = vi.spyOn(ws, 'readText');
+
+    const outline = await api.getOutline();
+    expect(outline.title).toBe('Lesson and Quiz');
+    expect(outline.activities.map((a) => a.path)).toEqual(['nodes/lesson.md', 'nodes/quiz.json']);
+    expect(outline.activities[1]!.kind).toBe('quiz');
+
+    const readPaths = readSpy.mock.calls.map((c) => c[0]);
+    expect(readPaths).toContain('package.json');
+    expect(readPaths).toContain('workflow.json');
+    expect(readPaths.every((p) => !p.startsWith('assets/'))).toBe(true);
+    expect(readPaths.every((p) => !p.startsWith('.openu'))).toBe(true);
+  });
+
   it('rejects reading binary files as text', async () => {
     const { store, session, api } = createBrowserApi();
     await api.applyTemplate('reading-lesson');
     await api.openLibraryCourse('reading-lesson');
-    const course = (await store.get('reading-lesson'))!;
     await api.writeFile('assets/pic.png', 'placeholder');
-    // Replace the stored bytes with real binary data.
+    // Fetch the post-write file set, then replace the bytes with real binary.
+    const afterWrite = (await store.get('reading-lesson'))!;
     const png = new Uint8Array([137, 80, 78, 71, 0, 1, 2]);
     await store.replace('reading-lesson', {
-      ...course,
-      files: [...course.files, { path: 'assets/pic.png', data: png }],
+      ...afterWrite,
+      files: afterWrite.files.map((f) =>
+        f.path === 'assets/pic.png' ? { path: f.path, data: png } : f,
+      ),
     });
     session.setActiveCourse('reading-lesson');
     await expect(api.readFile('assets/pic.png')).rejects.toMatchObject({ code: 'binary-file' });
@@ -194,12 +247,16 @@ describe('BrowserStudioApi', () => {
     expect(outline.activities[1]!.kind).toBe('quiz');
   });
 
-  it('persists outline reorder into manifest and workflow', async () => {
+  it('persists outline reorder into manifest and workflow only', async () => {
     const { store, session, api } = createBrowserApi();
     await api.applyTemplate('lesson-quiz');
     await api.openLibraryCourse('lesson-quiz');
+    const ws = await activeWorkspace(store, 'lesson-quiz');
+    const writeSpy = vi.spyOn(ws, 'writeText');
 
     await api.saveOutlineOrder(['nodes/quiz.json', 'nodes/lesson.md']);
+    expect(writeSpy).toHaveBeenCalledTimes(2);
+    expect(writeSpy.mock.calls.map((c) => c[0]).sort()).toEqual(['package.json', 'workflow.json']);
     const course = (await store.get('lesson-quiz'))!;
     const index = buildFileIndex(course.files);
     const workflow = JSON.parse(new TextDecoder().decode(index.get('workflow.json')!)) as {
@@ -223,9 +280,6 @@ describe('BrowserStudioApi', () => {
 
     const renamed = await api.renameCourse('reading-copy', 'Reading Copy v2');
     expect(renamed.entry.title).toBe('Reading Copy v2');
-    const renamedCourse = await (await import('./browserCourseStore.js')).createBrowserCourseStore()
-      .get;
-    void renamedCourse;
   });
 
   it('archives (hard-deletes) without a fabricated archivedPath', async () => {
@@ -289,6 +343,26 @@ describe('BrowserStudioApi', () => {
     expect(api.session.activeCourseId).toBe('browser-studio');
   });
 
+  it('export excludes derived .openu data (SPEC §43)', async () => {
+    const api1 = createBrowserApi();
+    await api1.api.applyTemplate('reading-lesson');
+    const ws = await api1.store.workspaceOf?.('reading-lesson');
+    await ws!.writeText('.openu/history.json', '{"derived":true}');
+    await ws!.writeText('nodes/lesson.md', '# Changed');
+
+    const { blob } = await api1.api.exportOep();
+    const bytes = new Uint8Array(await blobToBytes(blob));
+    await api1.store.delete('reading-lesson');
+
+    const api2 = createBrowserApi();
+    const summary = await api2.api.importOep(bytes);
+    const imported = await api2.store.get(summary.id);
+    const keys = buildFileIndex(imported!.files);
+    expect(Array.from(keys.keys()).some((p) => p.startsWith('.openu'))).toBe(false);
+    expect(keys.has('nodes/lesson.md')).toBe(true);
+    expect(new TextDecoder().decode(keys.get('nodes/lesson.md'))).toBe('# Changed');
+  });
+
   it('assigns a new id when importing an archive whose id already exists', async () => {
     const bytes = await fixtureOepBytes();
     const api = createBrowserApi();
@@ -314,7 +388,7 @@ describe('BrowserStudioApi', () => {
   });
 
   it('includes active course activity titles when drafting an item', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     const session = createBrowserStudioSession();
     const generateItem = vi.fn().mockResolvedValue({
       item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
@@ -335,8 +409,69 @@ describe('BrowserStudioApi', () => {
     );
   });
 
+  it('committing an AI draft touches only draft files and never replaces the course', async () => {
+    const store = createBrowserCourseStore({ nonPersistent: true });
+    const session = createBrowserStudioSession();
+    const draft = {
+      id: 'draft-1',
+      courseId: 'reading-lesson',
+      version: '1.0.0',
+      title: 'AI Draft',
+      files: [{ path: 'nodes/ai-lesson.md', data: enc('ai content').buffer }],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+    const discardDraft = vi.fn().mockResolvedValue(undefined);
+    const aiClient = {
+      getDraft: vi.fn().mockResolvedValue(draft),
+      discardDraft,
+    } as unknown as BrowserAiClient;
+    const api = createBrowserStudioApi({ store, session, aiClient });
+    await api.applyTemplate('reading-lesson');
+    await api.openLibraryCourse('reading-lesson');
+
+    const before = buildFileIndex((await store.get('reading-lesson'))!.files);
+    expect(before.has('nodes/ai-lesson.md')).toBe(false);
+
+    const result = await api.commitCourseDraft('draft-1');
+    expect(result.success).toBe(true);
+    const after = buildFileIndex((await store.get('reading-lesson'))!.files);
+    expect(after.has('nodes/ai-lesson.md')).toBe(true);
+    expect(new TextDecoder().decode(after.get('nodes/ai-lesson.md'))).toBe('ai content');
+    // Unrelated files are untouched.
+    expect(after.get('nodes/lesson.md')).toEqual(before.get('nodes/lesson.md'));
+    expect(discardDraft).toHaveBeenCalledWith('draft-1');
+  });
+
+  it('rejecting an AI draft leaves the course untouched (approval is required)', async () => {
+    const store = createBrowserCourseStore({ nonPersistent: true });
+    const session = createBrowserStudioSession();
+    const draft = {
+      id: 'draft-rejected',
+      courseId: 'reading-lesson',
+      version: '1.0.0',
+      title: 'AI Draft',
+      files: [{ path: 'nodes/ai-lesson.md', data: enc('ai content').buffer }],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+    const getDraft = vi.fn().mockResolvedValue(draft);
+    const discardDraft = vi.fn().mockResolvedValue(undefined);
+    const aiClient = { getDraft, discardDraft } as unknown as BrowserAiClient;
+    const api = createBrowserStudioApi({ store, session, aiClient });
+    await api.applyTemplate('reading-lesson');
+    await api.openLibraryCourse('reading-lesson');
+
+    // Reject step: discard without committing.
+    const rejected = await api.discardCourseDraft('draft-rejected');
+    expect(rejected.success).toBe(true);
+    expect(discardDraft).toHaveBeenCalledWith('draft-rejected');
+    const after = buildFileIndex((await store.get('reading-lesson'))!.files);
+    expect(after.has('nodes/ai-lesson.md')).toBe(false);
+  });
+
   it('omits activity titles when no course is open', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     const session = createBrowserStudioSession();
     const generateItem = vi.fn().mockResolvedValue({
       item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
@@ -359,10 +494,12 @@ describe('BrowserStudioApi', () => {
     expect(status.available).toBe(false);
   });
 
-  it('reports storage status', async () => {
+  it('reports storage support via the OPFS availability probe', async () => {
     const { api } = createBrowserApi();
+    // jsdom has no navigator.storage so OPFS is reported unsupported.
     const status = await api.getStorageStatus();
-    expect(status.available).toBe(true);
+    expect(status.available).toBe(false);
+    expect(status.reason).toBe('unsupported');
   });
 
   it('returns a preview package for the active course', async () => {

@@ -32,10 +32,14 @@ const BrowserStudioContext = createContext<BrowserStudioContextValue | null>(nul
 
 interface BrowserStudioProviderProps {
   children: ReactNode;
+  store?: BrowserCourseStore;
 }
 
-export function BrowserStudioProvider({ children }: BrowserStudioProviderProps) {
-  const [store] = useState(() => createBrowserCourseStore());
+export function BrowserStudioProvider({
+  children,
+  store: injectedStore,
+}: BrowserStudioProviderProps) {
+  const [store] = useState<BrowserCourseStore>(() => injectedStore ?? createBrowserCourseStore());
   const [session] = useState(() => createBrowserStudioSession());
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [loadedPackage, setLoadedPackage] = useState<LoadedPackage | null>(null);
@@ -104,12 +108,15 @@ export function BrowserStudioProvider({ children }: BrowserStudioProviderProps) 
     let cancelled = false;
     void (async () => {
       try {
+        const status = await api.getStorageStatus();
         const list = await store.list();
+        if (cancelled) return;
+        setStorageStatus(status);
         const latest = list[0];
-        if (latest && !cancelled) {
+        if (latest) {
           session.setActiveCourse(latest.id);
           await reloadPreview();
-        } else if (!cancelled) {
+        } else {
           setIsLoading(false);
         }
       } catch (err) {
@@ -127,7 +134,7 @@ export function BrowserStudioProvider({ children }: BrowserStudioProviderProps) 
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api, store, session, reloadPreview]);
 
   const value = useMemo<BrowserStudioContextValue>(
     () => ({
