@@ -911,34 +911,468 @@ Extend `apps/dev-server/src/studio/ai/applyDraft.test.ts` to assert:
 
 ---
 
-## Phase 6 — Add a controlled agent loop (later)
+## Phase 6 — Add controlled agent loop
 
-Introduce multi-step execution over the tool catalog from Phase 2. Implement `AgentLoop` with these **hard** bounds: `maxSteps`, `timeoutMs`, cancellation, permission checks, output validation, approval, and observable events. See spec §9. The loop is a new module (e.g. `apps/dev-server/src/studio/ai/agentLoop.ts`) that:
+**Goal:** introduce multi-step execution over the tool catalog from Phase 2, driven by the `AgentRuntime` contract from Phase 4. The loop is the single place that assembles context, resolves skills (empty until Phase 7), resolves permissions, determines intent, selects tools, runs the model, executes tools, validates output, and emits `CompanionEvent`s (spec §9).
 
-1. assembles context,
-2. resolves skills (empty set initially),
-3. resolves permissions,
-4. determines intent,
-5. selects tools from `companionToolCatalog`,
-6. runs the model via `AgentRuntime`,
-7. on tool call, executes the tool, validates output, loops (bounded),
-8. emits `CompanionEvent`s throughout.
+**DoD:** a request can run more than one internal step while presenting a single coherent unit to the user; the loop enforces six hard bounds — `maxSteps`, `timeoutMs`, cancellation, permission checks, output validation, and approval gating — and emits observable `CompanionEvent`s; the existing deterministic tool behavior (course gen / item draft / item edit) is unchanged.
 
-This phase is gated on Phases 1–5 and is deliberately **not** part of the first PR. Do not build it until the contracts and ChangeSet path are stable.
+### 6.1 Extend the `AgentRuntime` contract for tool calling
 
-## Phase 7 — Add skills (later)
+Today `AgentRuntimeRequest` only carries plain `messages`. The loop needs the runtime to (a) know which tools are available and (b) report model-requested tool calls back with a correlatable id. Extend **`packages/companion/src/runtime.ts`**:
 
-Introduce data-driven `SkillRegistry`/`SkillResolver` (spec §11) resolving skills per-request instead of injecting the whole library. First dynamic skill: `learner-adaptation` (spec §12). Skills initially affect system instructions, tool availability, and permissions only — no plugin system.
+```ts
+import type { z } from 'zod';
 
-## Phase 8 — Add persistent tasks (later)
+export interface AgentRuntimeToolSpec {
+  name: string;
+  description: string;
+  inputSchema: z.ZodType;
+}
 
-Add `Task`/`TaskStore` with states `started/running/waiting-for-approval/completed/failed/cancelled` (spec §20, §33 Phase 8). Only after Phase 6's loop is stable. Tasks are separate from both conversation history and workspace state.
+export type AgentRuntimeMessage =
+  | { role: 'user' | 'assistant' | 'system'; content: string }
+  | {
+      role: 'assistant';
+      content: string;
+      toolCalls: Array<{ toolCallId: string; tool: string; input: unknown }>;
+    }
+  | { role: 'tool'; toolCallId: string; content: string };
+
+export interface AgentRuntimeRequest {
+  messages: AgentRuntimeMessage[];
+  systemPrompt?: string;
+  signal?: AbortSignal;
+  maxSteps?: number;
+  timeoutMs?: number;
+  tools?: AgentRuntimeToolSpec[];
+}
+```
+
+`AgentRuntimeEvent` is unchanged — it already declares `tool.call` (Phase 1).
+
+### 6.2 Teach `AiSdkAgentRuntime` to pass tools and surface tool calls
+
+Update **`apps/dev-server/src/studio/ai/runtime/AiSdkAgentRuntime.ts`** to:
+
+- map `request.tools` into `streamText({ tools })` (each `AgentRuntimeToolSpec` → `{ name, description, parameters }` derived from its Zod `inputSchema`);
+- convert `AgentRuntimeMessage[]` into AI SDK messages: a `toolCalls` assistant message becomes an assistant message with `tool-call` parts; a `tool` message becomes a `tool-result` part keyed by `toolCallId`;
+- when a `tool-call` part arrives in the stream, yield `{ type: 'tool.call', toolCallId, tool, input }` before the final `text.complete`.
+
+The runtime stays a thin AI SDK wrapper — the loop owns iteration, tool execution, and message assembly.
+
+### 6.3 Implement `InMemoryToolRegistry`
+
+Create **`apps/dev-server/src/studio/ai/toolRegistry.ts`**:
+
+```ts
+import type { CompanionTool, ToolRegistry } from '@open-edu/companion';
+import { companionToolCatalog } from './chat/toolCatalog.js';
+
+export class InMemoryToolRegistry implements ToolRegistry {
+  private readonly tools = new Map<string, CompanionTool>();
+
+  constructor(tools: CompanionTool[] = companionToolCatalog) {
+    for (const tool of tools) this.tools.set(tool.id, tool);
+  }
+
+  register(tool: CompanionTool): void {
+    this.tools.set(tool.id, tool);
+  }
+
+  get(id: string): CompanionTool | undefined {
+    return this.tools.get(id);
+  }
+
+  list(): CompanionTool[] {
+    return [...this.tools.values()];
+  }
+}
+```
+
+Add **`toolRegistry.test.ts`**: `register`/`get`/`list` round-trip; registering a duplicate id overwrites; `get` of an unknown id returns `undefined`.
+
+### 6.4 Implement `PermissionPolicy`
+
+Create **`apps/dev-server/src/studio/ai/permissionPolicy.ts`**:
+
+```ts
+import type { CompanionPermissions, Permission, PermissionPolicy } from '@open-edu/companion';
+
+export const defaultPermissionPolicy: PermissionPolicy = {
+  check(tool, permissions) {
+    return permissions.allowed.some((p) => p.id === tool.permission.id);
+  },
+  requiresApproval(permission, permissions) {
+    return permissions.requireApprovalFor.includes(permission.kind);
+  },
+};
+```
+
+Add **`permissionPolicy.test.ts`**: an unlisted permission id is denied; `commit`/`destructive` require approval; `propose`/`read` do not.
+
+### 6.5 Implement `AgentLoop`
+
+Create **`apps/dev-server/src/studio/ai/agentLoop.ts`** — an async generator of `CompanionEvent`:
+
+```ts
+import type {
+  AgentRuntime,
+  AgentRuntimeMessage,
+  CompanionEvent,
+  CompanionRequest,
+  PermissionPolicy,
+  ToolRegistry,
+} from '@open-edu/companion';
+import type { SkillResolver } from '@open-edu/companion';
+import { parseIntentFromMessage } from './chat/intent.js';
+import { routeIntent } from './chat/route.js';
+
+export interface AgentLoopOptions {
+  runtime: AgentRuntime;
+  tools: ToolRegistry;
+  policy: PermissionPolicy;
+  skills?: SkillResolver; // Phase 7
+  systemPrompt?: string;
+  maxSteps?: number; // default 6
+  timeoutMs?: number; // default 120_000
+  now?: () => number; // test seam
+  signal?: AbortSignal;
+}
+
+export async function* runAgentLoop(
+  request: CompanionRequest,
+  options: AgentLoopOptions,
+): AsyncGenerator<CompanionEvent> {
+  const maxSteps = options.maxSteps ?? 6;
+  const deadline = (options.now?.() ?? Date.now()) + (options.timeoutMs ?? 120_000);
+  const signal = options.signal;
+
+  // 1–2. Assemble context + resolve skills. `request.context` is already a
+  // validated StudioContextSnapshot (INV-007). Context is expanded via tools
+  // in later phases — never by reading the whole course into the prompt.
+  const skills = options.skills?.resolve(request.context) ?? [];
+
+  // 3–4. Resolve permissions + determine intent.
+  const route = routeIntent(parseIntentFromMessage(request.message), request.context);
+
+  // Deterministic single-step path (preserves Phase 2 behavior exactly).
+  if (route.tool !== 'explain') {
+    yield* runDeterministicTool(route, request, options);
+    return;
+  }
+
+  // Model-driven, bounded loop.
+  const messages: AgentRuntimeMessage[] = [{ role: 'system', content: options.systemPrompt ?? '' }];
+  const toolSpecs = options.tools
+    .list()
+    .filter((t) => options.policy.check(t, request.permissions))
+    .filter((t) => skills.length === 0 || skills.some((s) => !s.tools || s.tools!.includes(t.id)))
+    .map((t) => ({ name: t.id, description: t.description, inputSchema: t.inputSchema }));
+
+  for (let step = 0; step < maxSteps; step++) {
+    if (signal?.aborted) {
+      yield { type: 'error', error: { code: 'cancelled', message: 'Cancelled' } };
+      return;
+    }
+    if ((options.now?.() ?? Date.now()) > deadline) {
+      yield { type: 'error', error: { code: 'runtime-error', message: 'Timed out' } };
+      return;
+    }
+
+    let calledTool = false;
+    for await (const event of options.runtime.run({ messages, tools: toolSpecs, signal })) {
+      if (event.type === 'tool.call') {
+        calledTool = true;
+        yield { type: 'tool.started', toolCallId: event.toolCallId, tool: event.tool };
+        const tool = options.tools.get(event.tool);
+        if (!tool || !options.policy.check(tool, request.permissions)) {
+          yield {
+            type: 'error',
+            error: { code: 'permission-denied', message: `Tool ${event.tool} is not permitted` },
+          };
+          return;
+        }
+        const parsed = tool.inputSchema.safeParse(event.input);
+        if (!parsed.success) {
+          yield {
+            type: 'error',
+            error: { code: 'validation-failed', message: 'Invalid tool input' },
+          };
+          return;
+        }
+        if (options.policy.requiresApproval(tool.permission, request.permissions)) {
+          yield {
+            type: 'approval.required',
+            approval: {
+              id: event.toolCallId,
+              changeSetId: '',
+              kind: tool.permission.kind,
+              summary: tool.id,
+              requestedAt: Date.now(),
+            },
+          };
+          return; // no commit executes without approval (INV-003, INV-010)
+        }
+        const result = await tool.execute(parsed.data, { signal: signal ?? undefined });
+        yield { type: 'tool.completed', toolCallId: event.toolCallId, result };
+        messages.push({
+          role: 'assistant',
+          content: '',
+          toolCalls: [{ toolCallId: event.toolCallId, tool: event.tool, input: parsed.data }],
+        });
+        messages.push({
+          role: 'tool',
+          toolCallId: event.toolCallId,
+          content: result.ok ? JSON.stringify(result.value) : result.error,
+        });
+      } else if (event.type === 'text.delta') {
+        yield { type: 'message.delta', text: event.text };
+      } else if (event.type === 'error') {
+        yield { type: 'error', error: { code: 'runtime-error', message: event.error } };
+        return;
+      }
+    }
+    if (!calledTool) break;
+  }
+  yield { type: 'message.complete' };
+}
+```
+
+The deterministic branch `runDeterministicTool` reuses `routeIntent` + the existing `draftActivity`/`generateCourseDraftTool` from `tools.ts` (the same code `handler.ts` calls today) so the observed output is identical. It must also re-apply the `needPackageDraft`/`needPackageEdit`/`needOpenActivity` guards — those are execution-path concerns, not routing concerns (Phase 2 note).
+
+Hard rules for this file (enforce in review):
+
+- **No** direct `streamText`/AI SDK import — all model access is via `options.runtime` (INV-005, INV-006).
+- The loop never mutates course files itself; tool results are drafts/ChangeSets that the UI approves (INV-001, INV-002).
+- Every bound (`maxSteps`, `timeoutMs`, `signal`, permission, validation, approval) short-circuits with an explicit `error`/`approval.required` event — never a silent hang or silent skip.
+
+### 6.6 Wire the loop into the local chat handler
+
+Update **`apps/dev-server/src/studio/ai/chat/handler.ts`** to construct one `runAgentLoop` (with `AiSdkAgentRuntime`, `InMemoryToolRegistry`, `defaultPermissionPolicy`, and `systemPrompt: buildSystemPrompt(context)`) and map its `CompanionEvent` stream to the UI stream via `companionEventsToUIMessageChunks`. Keep the `StudioChatRequestSchema`/rate-limit/`MAX_MESSAGES` guards and the request-abort signal exactly as they are. The deterministic tool branches must continue to produce the same `messageMetadata` (`draft`/`course_draft`/`explain`) so `StudioChatProvider.onFinish` still drives draft cards and course-quality chips.
+
+> Land in two reviewable steps: (a) move the deterministic branch into the loop's single-step path and confirm `handler.test.ts` passes **unchanged**; (b) swap `streamExplain`'s direct `AiSdkAgentRuntime().run(...)` for the loop's model sub-loop.
+
+### 6.7 Add loop unit tests
+
+Create **`apps/dev-server/src/studio/ai/agentLoop.test.ts`** using a fake `AgentRuntime` (a generator that yields scripted `AgentRuntimeEvent`s) and a stub `ToolRegistry`:
+
+- a single-step deterministic tool call emits `tool.started` → `tool.completed` in order;
+- a model turn that requests a tool twice runs exactly two steps (multi-step) and emits both `tool.completed` events;
+- `maxSteps` bound halts the loop and emits `error` (`runtime-error`) instead of running forever;
+- `timeoutMs` expiry (via injected `now`) halts mid-loop;
+- an aborted `signal` halts the loop with `error` (`cancelled`);
+- a denied tool emits `error` (`permission-denied`) and is never executed;
+- an invalid tool input emits `error` (`validation-failed`) and is never executed;
+- a `commit`-kind tool emits `approval.required` and stops before executing.
+
+### 6.8 Verification
+
+```bash
+pnpm --filter @open-edu/companion build   # contract changed (runtime.ts)
+pnpm --filter @open-edu/dev-server test
+pnpm --filter @open-edu/dev-server typecheck
+pnpm --filter @open-edu/dev-server lint
+```
+
+---
+
+## Phase 7 — Add skills
+
+**Goal:** introduce dynamic, per-request skill resolution (spec §11) and ship `learner-adaptation` as the first data-driven skill (spec §12). Skills affect system instructions, tool availability, and permissions only — no plugin system.
+
+**DoD:** skills resolve per-request (not all injected into every model call); a matched skill's `instructions`/`tools`/`permissions` take effect; `learner-adaptation` activates only when the request context carries a learner profile; the core loop (Phase 6) contains no learner-specific logic.
+
+### 7.1 Add the learner profile to the context contract
+
+The `StudioContextSnapshot` has no learner signal today. Extend **`packages/companion/src/context.ts`** with an optional `learner` object (`.optional()` keeps existing snapshots valid):
+
+```ts
+const learnerProfileSchema = z.object({
+  id: z.string(),
+  label: z.string(), // e.g. "Level B", "Adult learners", "Autism-friendly"
+  kind: z.enum(['school', 'college', 'adult', 'family', 'neurotypical', 'autism']),
+});
+
+// inside studioContextSnapshotSchema:
+learner: learnerProfileSchema.optional(),
+```
+
+Thread a `learner` prop through **`apps/dev-server/src/studio/ai/StudioContextBridge.tsx`** into the snapshot (default `undefined`, so existing callers are unaffected).
+
+### 7.2 Implement `InMemorySkillRegistry`
+
+The `CompanionSkill`/`SkillRegistry`/`SkillResolver` interfaces already exist in `packages/companion/src/skill.ts` (Phase 1) — no contract change needed.
+
+Create **`apps/dev-server/src/studio/ai/skillRegistry.ts`**:
+
+```ts
+import type { CompanionSkill, SkillRegistry } from '@open-edu/companion';
+import { learnerAdaptationSkill } from './skills/learner-adaptation.js';
+
+export class InMemorySkillRegistry implements SkillRegistry {
+  private readonly skills = new Map<string, CompanionSkill>();
+
+  constructor(skills: CompanionSkill[] = [learnerAdaptationSkill]) {
+    for (const skill of skills) this.skills.set(skill.id, skill);
+  }
+
+  register(skill: CompanionSkill): void {
+    this.skills.set(skill.id, skill);
+  }
+
+  list(): CompanionSkill[] {
+    return [...this.skills.values()];
+  }
+}
+```
+
+### 7.3 Define the `learner-adaptation` skill
+
+Create **`apps/dev-server/src/studio/ai/skills/learner-adaptation.ts`**:
+
+```ts
+import type { CompanionSkill } from '@open-edu/companion';
+
+export const learnerAdaptationSkill: CompanionSkill = {
+  id: 'learner-adaptation',
+  description: 'Adapt content, pacing, and activity design to a learner profile.',
+  instructions:
+    'Adapt explanations, examples, pacing, and assessment format to the active learner profile. Distinguish learner context from author context.',
+  tools: ['generate_item', 'edit_item'], // only the authoring tools the skill influences
+  permissions: ['item.generate', 'item.edit'],
+};
+```
+
+### 7.4 Implement the `SkillResolver`
+
+Create **`apps/dev-server/src/studio/ai/skills/resolveSkills.ts`**:
+
+```ts
+import type { CompanionSkill, SkillResolver } from '@open-edu/companion';
+import type { StudioContextSnapshot } from '@open-edu/companion/context';
+import { learnerAdaptationSkill } from './learner-adaptation.js';
+
+export function createSkillResolver(registry: { list(): CompanionSkill[] }): SkillResolver {
+  return {
+    resolve(context: unknown): CompanionSkill[] {
+      const ctx = context as StudioContextSnapshot;
+      if (ctx?.learner) {
+        return registry.list().filter((s) => s.id === 'learner-adaptation');
+      }
+      return [];
+    },
+  };
+}
+```
+
+> The resolver is deliberately trivial now (one rule: learner profile present → `learner-adaptation`). Its `resolve(context)` contract keeps future skills additive: add a rule + a skill definition, no loop changes.
+
+### 7.5 Wire skills into the loop and system prompt
+
+In **`agentLoop.ts`** (Phase 6.5), make `skills` a real input:
+
+- pass the resolver in and call `resolve(request.context)` during context assembly (the `skills` variable in the loop already exists);
+- restrict the tool spec list passed to the runtime to the tools named by the matched skills' `tools` (intersected with `policy.check`), so a skill can gate tool availability;
+- append matched skills' `instructions` to `options.systemPrompt` before the model call — never to the user-visible message.
+
+Add **`skills.test.ts`**: `learner-adaptation` resolves only when `context.learner` is set; no skills resolve for a plain snapshot; the loop receives only `learner-adaptation` tools when matched.
+
+### 7.6 Verification
+
+```bash
+pnpm --filter @open-edu/companion build   # context.ts gained the learner field
+pnpm --filter @open-edu/dev-server test
+pnpm --filter @open-edu/dev-server typecheck
+pnpm --filter @open-edu/dev-server lint
+```
+
+`context.test.ts` must still pass — the new `learner` field is optional.
+
+---
+
+## Phase 8 — Add persistent tasks
+
+**Goal:** introduce `Task`/`TaskStore` with the states from spec §20 / §33 Phase 8, distinct from conversation history and workspace state. Persist task records so a long-running agent operation can be observed and resumed. Build this only after Phase 6's loop is stable.
+
+**DoD:** the loop creates a `Task` with a lifecycle (`started → running → waiting-for-approval → completed | failed | cancelled`); tasks persist across navigation; `task.started`/`task.progress`/`task.completed` events carry real task ids; task state is never conflated with conversation or workspace state.
+
+### 8.1 Add the task contract
+
+Create **`packages/companion/src/task.ts`**:
+
+```ts
+import { z } from 'zod';
+
+export const taskStateSchema = z.enum([
+  'started',
+  'running',
+  'waiting-for-approval',
+  'completed',
+  'failed',
+  'cancelled',
+]);
+export type TaskState = z.infer<typeof taskStateSchema>;
+
+export interface Task {
+  id: string;
+  conversationId: string;
+  state: TaskState;
+  kind: 'generate_course' | 'generate_item' | 'edit_item' | 'multi-step' | 'explain';
+  changeSetId?: string;
+  error?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface TaskStore {
+  create(task: Task): Promise<void>;
+  update(id: string, patch: Partial<Task>): Promise<void>;
+  get(id: string): Promise<Task | undefined>;
+  listByConversation(conversationId: string): Promise<Task[]>;
+}
+```
+
+Re-export from **`packages/companion/src/index.ts`**: `export * from './task.js';`
+
+### 8.2 Implement `IndexedDbTaskStore`
+
+Create **`apps/dev-server/src/studio/ai/TaskStore.ts`** exporting `class IndexedDbTaskStore implements TaskStore`, mirroring the `ConversationStore` IndexedDB + sessionStorage fallback pattern (same `openDb`/`transaction`/write-generation guards; store name `open-edu-studio-tasks`; `keyPath` `id`; an index on `conversationId`). Provide `create`/`update`/`get`/`listByConversation`.
+
+### 8.3 Emit task events from the loop
+
+In **`agentLoop.ts`**, add a `taskStore?: TaskStore` option (default: a no-op store so existing tests don't need IndexedDB) and:
+
+- at start, `create({ id, conversationId: request.conversationId, state: 'started', kind, createdAt: now })` and yield `task.started { taskId }`;
+- before each step, `update(id, { state: 'running' })` and yield `task.progress { taskId, message }`;
+- when a `commit`/`destructive` tool awaits approval, `update(id, { state: 'waiting-for-approval' })`;
+- on success, `update(id, { state: 'completed' })` and yield `task.completed`;
+- on error/cancel, `update(id, { state: 'failed' | 'cancelled', error })`.
+
+### 8.4 Surface task state in the UI (minimal)
+
+In **`StudioChatProvider.tsx`**, handle the `task.completed`/`approval.required` events (already flowing through the adapter) to attach a `taskId` to the assistant message metadata; the existing draft/approval cards can later link to that id. No new full-screen task UI is required in this phase — the persisted `Task` record is the deliverable.
+
+### 8.5 Add tests
+
+**`TaskStore.test.ts`** — `create`/`update`/`get`/`listByConversation` round-trip; state transitions persist; fallback path when IndexedDB is unavailable. **`agentLoop.test.ts`** additions — the loop emits `task.started`/`task.completed` with a real id and persists the terminal state.
+
+### 8.6 Verification
+
+```bash
+pnpm --filter @open-edu/companion build   # new task.ts + index export
+pnpm --filter @open-edu/dev-server test
+pnpm --filter @open-edu/dev-server typecheck
+pnpm --filter @open-edu/dev-server lint
+```
 
 ---
 
 ## Cross-phase risks and notes
 
 - **Build ordering:** after any edit under `packages/companion/src`, run `pnpm --filter @open-edu/companion build` before dev-server typecheck/tests.
-- **Do not** add `.js` extensions project-wide to "fix" ESM imports — use subpath `exports` (already added for `./context` and `./types`) per AGENTS.md.
+- **Do not** add `.js` extensions project-wide to "fix" ESM imports — use subpath `exports` (already added for `./context` and `./types`) per AGENTS.md. Phases 6–8 add only re-exported contract files (`task.ts`, extended `context.ts`/`runtime.ts`), so no new subpath exports are required; import them from `@open-edu/companion`.
 - **i18n:** every new user-facing string in Phases 2–8 must go through `studioChatMessage`/`t()`, never hardcoded English (enforced by `pnpm lint`).
-- **No new framework:** Mastra / OpenAI Agents SDK / LangGraph are out of scope for all of these phases (spec §34).
+- **No new framework:** Mastra / OpenAI Agents SDK / LangGraph are out of scope for all of these phases (spec §34). The Phase 6 loop uses the existing `ai` SDK (`streamText` with `tools`) through `AgentRuntime` — no new agent framework.
+- **Deterministic-path invariants (Phase 6):** `runDeterministicTool` must reproduce `handler.ts`'s current `routeIntent` + `draftActivity`/`generateCourseDraftTool` behavior exactly, including the `needPackageDraft`/`needPackageEdit`/`needOpenActivity` guards, so `handler.test.ts` and `StudioChatProvider.test.tsx` keep passing unchanged.
+- **Loop purity:** `agentLoop.ts` never imports the AI SDK, never touches `@open-edu/storage` directly (it emits drafts/ChangeSets for the UI to approve), and resolves all six bounds to an explicit `error`/`approval.required` event rather than hanging or silently skipping.
