@@ -8,8 +8,12 @@ import {
   type ReactNode,
 } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, type ChatTransport, type UIMessage, type UIMessageChunk } from 'ai';
+import { type ChatTransport, type UIMessage, type UIMessageChunk } from 'ai';
 import { useTranslation } from '@open-edu/i18n';
+import { CompanionChatTransport } from './CompanionChatTransport';
+import { DEFAULT_PERMISSIONS } from './CompanionClient';
+import { HostedCompanionClient } from './HostedCompanionClient';
+import { LocalCompanionClient } from './LocalCompanionClient';
 import { getConversationId, setConversationId } from './assistantStorage';
 import { useStudioAssistant } from './StudioAssistantProvider';
 import { ConversationStore, type StoredChatMessage } from './ConversationStore';
@@ -26,6 +30,7 @@ import type { StudioApi } from '../studioApi';
 import type { ActivityKind, StudioContextSnapshot } from './context';
 import { parseIntentFromMessage } from './chat/intent';
 import { extractSuggestedNextSteps } from './chat/policy';
+import { routeIntent } from './chat/route';
 
 interface ChatMessageMetadata {
   mode?: 'explain' | 'draft' | 'course_draft';
@@ -180,8 +185,18 @@ export function createHostedChatTransport(
       const lastUserContent = lastUser ? extractText(lastUser) : '';
       const hasToolCallbacks = Boolean(generateDraft || generateItemAdd || generateItemEdit);
       const intent = hasToolCallbacks ? parseIntentFromMessage(lastUserContent) : null;
+      const contextSnapshot: StudioContextSnapshot = {
+        view: 'home',
+        locale: 'en',
+        aiAvailable: true,
+        activity: getCurrentActivity?.(),
+      };
+      const route = routeIntent(intent, contextSnapshot);
 
-      if (intent?.type === 'generate_course' && generateDraft) {
+      if (route.tool === 'generate_course') {
+        if (!generateDraft) {
+          return fallbackToChat();
+        }
         try {
           const result = await generateDraft(lastUserContent);
           return buildToolResponse(courseDraftReadyMessage ?? '', {
@@ -203,12 +218,12 @@ export function createHostedChatTransport(
         }
       }
 
-      if (intent?.type === 'draft_new' && intent.kind && generateItemAdd) {
+      if (route.tool === 'generate_item') {
+        if (!generateItemAdd) {
+          return fallbackToChat();
+        }
         try {
-          const result = await generateItemAdd(
-            intent.kind,
-            intent.description ?? `Create a ${intent.kind}`,
-          );
+          const result = await generateItemAdd(route.kind, route.description);
           if (!result.ok) {
             return buildToolResponse(messagesOptions.draftFailed ?? FALLBACK_DRAFT_FAILED, {
               mode: 'explain',
@@ -217,7 +232,7 @@ export function createHostedChatTransport(
           }
           const ready =
             typeof draftReadyMessage === 'function'
-              ? draftReadyMessage(intent.kind)
+              ? draftReadyMessage(route.kind)
               : (draftReadyMessage ?? '');
           return buildToolResponse(ready, {
             mode: 'draft',
@@ -238,7 +253,10 @@ export function createHostedChatTransport(
         }
       }
 
-      if (intent?.type === 'edit_existing' && generateItemEdit) {
+      if (route.tool === 'edit_item') {
+        if (!generateItemEdit) {
+          return fallbackToChat();
+        }
         const activity = getCurrentActivity?.();
         if (!activity) {
           return buildToolResponse(
@@ -250,9 +268,9 @@ export function createHostedChatTransport(
         try {
           const result = await generateItemEdit(
             kind,
-            intent.intent || 'rewrite',
+            route.intent,
             activity.contentExcerpt ?? '',
-            intent.params,
+            route.params,
           );
           if (!result.ok) {
             return buildToolResponse(messagesOptions.editFailed ?? FALLBACK_EDIT_FAILED, {
@@ -279,23 +297,40 @@ export function createHostedChatTransport(
         }
       }
 
-      const response = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(buildBody(messages, chatId)),
-        signal: abortSignal,
-      });
-      const data = (await response.json().catch(() => null)) as HostedChatResponse | null;
-      if (!response.ok) {
-        throw new Error(data?.error ?? 'The AI gateway request failed.');
-      }
-      if (!data || data.terminal !== 'finished') {
-        const msg = data?.error ?? 'The AI gateway could not complete the request.';
-        throw new Error(data?.suggestion ? `${msg}\n\n${data.suggestion}` : msg);
+      // The "need an activity" guard is an execution-path concern, not routing:
+      // an edit request without an open activity must not silently fall through
+      // to the generic chat endpoint.
+      if (intent?.type === 'edit_existing' && generateItemEdit) {
+        const activity = getCurrentActivity?.();
+        if (!activity) {
+          return buildToolResponse(
+            messagesOptions.needOpenActivity ?? FALLBACK_NEED_OPEN_ACTIVITY,
+            { mode: 'explain', suggestedNextSteps: suggestedNextSteps('explain') },
+          );
+        }
       }
 
-      return buildToolResponse(data.content ?? '');
+      return fallbackToChat();
+
+      async function fallbackToChat(): Promise<ReadableStream<UIMessageChunk>> {
+        const response = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(buildBody(messages, chatId)),
+          signal: abortSignal,
+        });
+        const data = (await response.json().catch(() => null)) as HostedChatResponse | null;
+        if (!response.ok) {
+          throw new Error(data?.error ?? 'The AI gateway request failed.');
+        }
+        if (!data || data.terminal !== 'finished') {
+          const msg = data?.error ?? 'The AI gateway could not complete the request.';
+          throw new Error(data?.suggestion ? `${msg}\n\n${data.suggestion}` : msg);
+        }
+
+        return buildToolResponse(data.content ?? '');
+      }
     },
     async reconnectToStream() {
       return null;
@@ -432,61 +467,74 @@ function ChatRuntime({
   const hydrationPendingRef = useRef(hydrationPending);
   hydrationPendingRef.current = hydrationPending;
 
+  const buildChatBody = (messages: UIMessage[], chatId: string) => ({
+    conversationId: chatId,
+    messages: messages.map((m) => ({ role: m.role, content: extractText(m) })),
+    context: {
+      ...(contextRef.current ?? {}),
+      ...(lastCourseQualityRef.current?.length
+        ? { lastCourseDraftQuality: lastCourseQualityRef.current }
+        : {}),
+    },
+  });
+
+  const client = chatApiUrl
+    ? new HostedCompanionClient({
+        createTransport: () =>
+          createHostedChatTransport({
+            api: chatApiUrl,
+            buildBody: buildChatBody,
+            generateDraft: api ? (notes) => api.generateCourseDraft(notes) : undefined,
+            courseDraftReadyMessage: t('studio.assistant.chat.courseDraftReady'),
+            generateItemAdd: api
+              ? (kind, description) => api.generateItemAdd(kind, description)
+              : undefined,
+            draftReadyMessage: (kind) => t('studio.assistant.chat.draftReady', { kind }),
+            generateItemEdit: api
+              ? (kind, intent, currentContent, params) =>
+                  api.generateItemEdit(kind, intent, currentContent, params)
+              : undefined,
+            editReadyMessage: t('studio.assistant.chat.editReady'),
+            getCurrentActivity: () => contextRef.current?.activity ?? undefined,
+            getSuggestedNextSteps: (mode, hasCourseDraft) =>
+              extractSuggestedNextSteps({
+                mode,
+                view: contextRef.current?.view ?? 'outline',
+                hasCourseDraft: Boolean(hasCourseDraft),
+                locale: contextRef.current?.locale || 'en',
+              }),
+            messages: {
+              needOpenCourse: t('studio.assistant.chat.needOpenCourse'),
+              needOpenActivity: t('studio.assistant.chat.needOpenActivity'),
+              draftFailed: t('studio.assistant.chat.draftError'),
+              editFailed: t('studio.assistant.chat.editError'),
+            },
+          }),
+      })
+    : new LocalCompanionClient({
+        api: '/api/studio/ai/chat',
+        buildBody: buildChatBody,
+      });
+
   const transport = useRef<ChatTransport<UIMessage>>(
-    chatApiUrl
-      ? createHostedChatTransport({
-          api: chatApiUrl,
-          buildBody: (messages, id) => ({
-            conversationId: id,
-            messages: messages.map((m) => ({ role: m.role, content: extractText(m) })),
-            context: {
-              ...(contextRef.current ?? {}),
-              ...(lastCourseQualityRef.current?.length
-                ? { lastCourseDraftQuality: lastCourseQualityRef.current }
-                : {}),
-            },
-          }),
-          generateDraft: api ? (notes) => api.generateCourseDraft(notes) : undefined,
-          courseDraftReadyMessage: t('studio.assistant.chat.courseDraftReady'),
-          generateItemAdd: api
-            ? (kind, description) => api.generateItemAdd(kind, description)
-            : undefined,
-          draftReadyMessage: (kind) => t('studio.assistant.chat.draftReady', { kind }),
-          generateItemEdit: api
-            ? (kind, intent, currentContent, params) =>
-                api.generateItemEdit(kind, intent, currentContent, params)
-            : undefined,
-          editReadyMessage: t('studio.assistant.chat.editReady'),
-          getCurrentActivity: () => contextRef.current?.activity ?? undefined,
-          getSuggestedNextSteps: (mode, hasCourseDraft) =>
-            extractSuggestedNextSteps({
-              mode,
-              view: contextRef.current?.view ?? 'outline',
-              hasCourseDraft: Boolean(hasCourseDraft),
-              locale: contextRef.current?.locale || 'en',
-            }),
-          messages: {
-            needOpenCourse: t('studio.assistant.chat.needOpenCourse'),
-            needOpenActivity: t('studio.assistant.chat.needOpenActivity'),
-            draftFailed: t('studio.assistant.chat.draftError'),
-            editFailed: t('studio.assistant.chat.editError'),
-          },
-        })
-      : new DefaultChatTransport({
-          api: '/api/studio/ai/chat',
-          prepareSendMessagesRequest: ({ id, messages }) => ({
-            body: {
-              conversationId: id,
-              messages: messages.map((m) => ({ role: m.role, content: extractText(m) })),
-              context: {
-                ...(contextRef.current ?? {}),
-                ...(lastCourseQualityRef.current?.length
-                  ? { lastCourseDraftQuality: lastCourseQualityRef.current }
-                  : {}),
-              },
-            },
-          }),
-        }),
+    new CompanionChatTransport<UIMessage>({
+      client,
+      buildRequest: ({ messages }) => {
+        const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+        const base: StudioContextSnapshot = contextRef.current ?? {
+          view: 'home',
+          locale: 'en',
+          aiAvailable: true,
+        };
+        return {
+          message: lastUser ? extractText(lastUser) : '',
+          context: lastCourseQualityRef.current?.length
+            ? { ...base, lastCourseDraftQuality: lastCourseQualityRef.current }
+            : base,
+          permissions: DEFAULT_PERMISSIONS,
+        };
+      },
+    }),
   ).current;
 
   const {

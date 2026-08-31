@@ -1,13 +1,8 @@
-import {
-  createUIMessageStream,
-  pipeUIMessageStreamToResponse,
-  streamText,
-  toUIMessageStream,
-  type UIMessageChunk,
-} from 'ai';
-import { createModelFactoryFromEnv } from '@open-edu/llm-config';
+import { createUIMessageStream, pipeUIMessageStreamToResponse, type UIMessageChunk } from 'ai';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { completeWithLlm } from '../studioLlm';
+import { AiSdkAgentRuntime } from '../runtime/AiSdkAgentRuntime';
+import { agentRuntimeEventsToUIMessageStream } from '../runtime/runtimeToUIMessage';
 import {
   StudioChatRequestSchema,
   MAX_MESSAGES,
@@ -21,6 +16,7 @@ import { studioChatMessage } from './messages';
 import { checkRateLimit } from './rateLimit';
 import type { StudioContextSnapshot } from '../context';
 import { parseIntentFromMessage, type ParsedIntent } from './intent.js';
+import { routeIntent } from './route.js';
 
 function writeJson(res: ServerResponse, status: number, body: unknown): void {
   if (res.headersSent) return;
@@ -170,7 +166,8 @@ async function runToolIntent(
 ): Promise<ToolEmission | null> {
   const { context, packageDir, msg } = opts;
 
-  if (!intent || intent.type === 'explain' || !context.course) {
+  const route = routeIntent(intent, context);
+  if (route.tool === 'explain' || !context.course) {
     return null;
   }
 
@@ -182,7 +179,7 @@ async function runToolIntent(
       locale: context.locale || 'en',
     });
 
-  if (intent.type === 'generate_course') {
+  if (route.tool === 'generate_course') {
     if (!packageDir) {
       return {
         content: msg('assistant.chat.needPackageDraft'),
@@ -191,7 +188,7 @@ async function runToolIntent(
     }
 
     const result = await generateCourseDraftTool({
-      notes: intent.description,
+      notes: route.description,
       packageDir,
       completeText: completeWithLlm,
     });
@@ -218,7 +215,7 @@ async function runToolIntent(
     };
   }
 
-  if (intent.type === 'draft_new' && intent.kind) {
+  if (route.tool === 'generate_item') {
     if (!packageDir) {
       return {
         content: msg('assistant.chat.needPackageDraft'),
@@ -228,19 +225,19 @@ async function runToolIntent(
 
     const result = await draftActivity({
       type: 'draft_new',
-      kind: intent.kind,
-      description: intent.description || `Create a ${intent.kind}`,
+      kind: route.kind,
+      description: route.description,
       packageDir,
     });
 
     console.log('[studio-assistant] item draft tool', {
       ok: result.ok,
-      kind: intent.kind,
+      kind: route.kind,
     });
 
     if (result.ok) {
       return {
-        content: msg('assistant.chat.draftReady', { kind: intent.kind }),
+        content: msg('assistant.chat.draftReady', { kind: route.kind }),
         metadata: createChatMetadata('draft', {
           drafts: result.items,
           suggestedNextSteps: nextSteps('draft'),
@@ -254,7 +251,7 @@ async function runToolIntent(
     };
   }
 
-  if (intent.type === 'edit_existing' && context.activity) {
+  if (route.tool === 'edit_item') {
     if (!packageDir) {
       return {
         content: msg('assistant.chat.needPackageEdit'),
@@ -262,25 +259,19 @@ async function runToolIntent(
       };
     }
 
-    const contentExcerpt = context.activity.contentExcerpt || '';
-    const kind =
-      context.activity.kind === 'other'
-        ? 'lesson'
-        : (context.activity.kind as 'lesson' | 'quiz' | 'practice');
-
     const result = await draftActivity({
       type: 'edit_existing',
-      kind,
-      currentContent: contentExcerpt,
-      intent: intent.intent || 'rewrite',
-      params: intent.params,
+      kind: route.kind,
+      currentContent: route.currentContent,
+      intent: route.intent,
+      params: route.params,
       packageDir,
     });
 
     console.log('[studio-assistant] item edit tool', {
       ok: result.ok,
-      kind,
-      intent: intent.intent,
+      kind: route.kind,
+      intent: route.intent,
     });
 
     if (result.ok) {
@@ -324,7 +315,7 @@ async function pipeStaticMessage(res: ServerResponse, emission: ToolEmission): P
   await pipeUIMessageStreamToResponse({ response: res, status: 200, stream });
 }
 
-/** Real token streaming for the explain path. */
+/** Real token streaming for the explain path, run through `AgentRuntime`. */
 async function streamExplain(
   res: ServerResponse,
   opts: {
@@ -335,36 +326,28 @@ async function streamExplain(
   },
 ): Promise<void> {
   const { context, systemPrompt, messages, abortSignal } = opts;
-  const factory = createModelFactoryFromEnv();
-  const model = factory.getModel('fast');
 
-  const result = streamText({
-    model,
-    system: systemPrompt,
-    messages: messages as never,
-    abortSignal,
-    onFinish: () => {
+  const events = new AiSdkAgentRuntime().run({
+    messages,
+    systemPrompt,
+    signal: abortSignal,
+  });
+
+  const uiStream: ReadableStream<UIMessageChunk> = agentRuntimeEventsToUIMessageStream(events, {
+    messageMetadata: () =>
+      createChatMetadata('explain', {
+        suggestedNextSteps: extractSuggestedNextSteps({
+          mode: 'explain',
+          view: context.view,
+          hasCourseDraft: false,
+          locale: context.locale || 'en',
+        }),
+      }),
+    onComplete: () => {
       console.log('[studio-assistant] chat response finished', {
         view: context.view,
         locale: context.locale,
       });
-    },
-  });
-
-  const uiStream = toUIMessageStream({
-    stream: result.stream,
-    messageMetadata: ({ part }) => {
-      if (part.type === 'finish') {
-        return createChatMetadata('explain', {
-          suggestedNextSteps: extractSuggestedNextSteps({
-            mode: 'explain',
-            view: context.view,
-            hasCourseDraft: false,
-            locale: context.locale || 'en',
-          }),
-        });
-      }
-      return undefined;
     },
     onError: () => studioChatMessage('assistant.chat.serverError', context.locale || 'en'),
   });

@@ -41,6 +41,9 @@ export async function gatewayChat(
   deps: ChatDeps = {},
   signal?: AbortSignal,
 ): Promise<GatewayChatResult> {
+  // The hosted gateway is a transport/security boundary (spec §26): it keeps
+  // using `completeWithLlm` for the plain-chat completion. Full AgentRuntime
+  // parity for the gateway is a Phase 6+ concern.
   const completeText = deps.completeText ?? completeWithLlm;
   const lastUser = [...request.messages].reverse().find((m) => m.role === 'user');
 
