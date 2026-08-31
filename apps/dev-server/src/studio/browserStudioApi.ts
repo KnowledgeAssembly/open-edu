@@ -648,6 +648,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
 
   return {
     getPackageDir: async () => `browser://${session.activeCourseId ?? 'no-course'}`,
+    getWorkspace: () => requireActiveWorkspace(),
     validate,
     getOutline,
     saveOutlineOrder,
