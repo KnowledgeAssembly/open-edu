@@ -2,7 +2,11 @@ import { createUIMessageStream, pipeUIMessageStreamToResponse, type UIMessageChu
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { completeWithLlm } from '../studioLlm';
 import { AiSdkAgentRuntime } from '../runtime/AiSdkAgentRuntime';
-import { agentRuntimeEventsToUIMessageStream } from '../runtime/runtimeToUIMessage';
+import { runAgentLoop } from '../agentLoop';
+import { InMemoryToolRegistry } from '../toolRegistry';
+import { defaultPermissionPolicy } from '../permissionPolicy';
+import { DEFAULT_PERMISSIONS } from '../CompanionClient';
+import { companionEventsToUIMessageChunks } from '../companionToUIMessage';
 import {
   StudioChatRequestSchema,
   MAX_MESSAGES,
@@ -10,13 +14,16 @@ import {
   MAX_REQUEST_SIZE_BYTES,
 } from './config';
 import { buildSystemPrompt, extractSuggestedNextSteps } from './policy';
-import { draftActivity, generateCourseDraftTool } from './tools';
 import { createChatMetadata, type StudioChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
 import { checkRateLimit } from './rateLimit';
 import type { StudioContextSnapshot } from '../context';
-import { parseIntentFromMessage, type ParsedIntent } from './intent.js';
+import type { CourseDraftResult, DraftItem, CompanionEvent } from '@open-edu/companion';
+import { parseIntentFromMessage } from './intent.js';
 import { routeIntent } from './route.js';
+
+const AGENT_LOOP_MAX_STEPS = 6;
+const AGENT_LOOP_TIMEOUT_MS = 120_000;
 
 function writeJson(res: ServerResponse, status: number, body: unknown): void {
   if (res.headersSent) return;
@@ -68,11 +75,87 @@ interface ToolEmission {
   metadata: StudioChatMetadata;
 }
 
+/** Reconstruct the `StudioChatMetadata` shape from a `draft.created` payload. */
+function messageMetadataFor(
+  info: { draft?: CourseDraftResult | DraftItem[] },
+  ctx: {
+    view: StudioContextSnapshot['view'];
+    locale: string;
+  },
+): StudioChatMetadata {
+  const draft = info.draft;
+  if (draft && 'draftId' in (draft as CourseDraftResult)) {
+    return createChatMetadata('course_draft', {
+      courseDraft: draft as CourseDraftResult,
+      suggestedNextSteps: extractSuggestedNextSteps({
+        mode: 'course_draft',
+        view: ctx.view,
+        hasCourseDraft: true,
+        locale: ctx.locale,
+      }),
+    });
+  }
+  if (Array.isArray(draft)) {
+    return createChatMetadata('draft', {
+      drafts: draft as DraftItem[],
+      suggestedNextSteps: extractSuggestedNextSteps({
+        mode: 'draft',
+        view: ctx.view,
+        hasCourseDraft: false,
+        locale: ctx.locale,
+      }),
+    });
+  }
+  return createChatMetadata('explain', {
+    suggestedNextSteps: extractSuggestedNextSteps({
+      mode: 'explain',
+      view: ctx.view,
+      hasCourseDraft: false,
+      locale: ctx.locale,
+    }),
+  });
+}
+
+/** Build a static tool emission (content + metadata) from collected loop events. */
+function buildStaticEmission(
+  events: CompanionEvent[],
+  ctx: { view: StudioContextSnapshot['view']; locale: string },
+): ToolEmission {
+  const content = events
+    .filter((event) => event.type === 'message.delta')
+    .map((event) => (event as { text: string }).text)
+    .join('');
+  const draftEvent = [...events].reverse().find((event) => event.type === 'draft.created');
+  const metadata = messageMetadataFor(
+    { draft: (draftEvent as { draft?: CourseDraftResult | DraftItem[] } | undefined)?.draft },
+    ctx,
+  );
+  return { content, metadata };
+}
+
+/** Prime the loop through `task.started` + the first step's `task.progress`
+ *  (which is when the model is invoked). A synchronous provider failure surfaces
+ *  on the second pull, before any SSE header is written; the model stream itself
+ *  is left for the UI mapper to iterate. */
+async function primeLoop(
+  events: AsyncGenerator<CompanionEvent>,
+): Promise<{ iterator: AsyncIterator<CompanionEvent>; buffered: CompanionEvent[] }> {
+  const iterator = events[Symbol.asyncIterator]();
+  const buffered: CompanionEvent[] = [];
+  for (let i = 0; i < 2; i++) {
+    const result = await iterator.next();
+    if (result.done) break;
+    buffered.push(result.value);
+  }
+  return { iterator, buffered };
+}
+
 /**
- * Vite-middleware-compatible chat endpoint. Writes an SSE UI message stream
- * to `res` (mirrors `createPipiliHandler`): the explain path streams tokens
- * from the LLM; tool paths emit a single static message whose drafts /
- * courseDraft / next steps are attached as message metadata on finish.
+ * Vite-middleware-compatible chat endpoint. Writes an SSE UI message stream to
+ * `res` (mirrors `createPipiliHandler`). Every request runs through the
+ * `AgentLoop`: deterministic intents execute the generation tools single-step
+ * (same messageMetadata as before); everything else is a bounded, model-driven
+ * loop streamed via `companionEventsToUIMessageChunks`.
  */
 export async function createStudioAssistantHandler(
   req: IncomingMessage,
@@ -126,171 +209,83 @@ export async function createStudioAssistantHandler(
   }
 
   const context = body.context;
-  const lastUserMessage = [...body.messages].reverse().find((m) => m.role === 'user');
-  const intent = lastUserMessage ? parseIntentFromMessage(lastUserMessage.content) : null;
+  const lastUser = [...body.messages].reverse().find((m) => m.role === 'user');
+  if (!lastUser) {
+    writeJson(res, 400, { error: msg('assistant.chat.invalidBody') });
+    return;
+  }
+
+  const route = routeIntent(parseIntentFromMessage(lastUser.content), context);
+
+  const loopGenerator = runAgentLoop(
+    {
+      message: lastUser.content,
+      context,
+      conversationId: body.conversationId ?? '',
+      permissions: DEFAULT_PERMISSIONS,
+    },
+    {
+      runtime: new AiSdkAgentRuntime(),
+      tools: new InMemoryToolRegistry(),
+      policy: defaultPermissionPolicy,
+      systemPrompt,
+      maxSteps: AGENT_LOOP_MAX_STEPS,
+      timeoutMs: AGENT_LOOP_TIMEOUT_MS,
+      signal: createRequestAbortSignal(res),
+      packageDir,
+      completeText: completeWithLlm,
+    },
+  );
 
   try {
-    const toolEmission = await runToolIntent(intent, {
-      body,
-      context,
-      packageDir,
-      msg,
-    });
-
-    if (toolEmission) {
-      await pipeStaticMessage(res, toolEmission);
+    // Deterministic single-step path: run the loop to completion, then pipe one
+    // static message whose messageMetadata drives the draft / quality cards.
+    if (route.tool !== 'explain') {
+      const events: CompanionEvent[] = [];
+      for await (const event of loopGenerator) {
+        events.push(event);
+      }
+      const emission = buildStaticEmission(events, { view: context.view, locale });
+      const toolEvent = [...events].reverse().find((event) => event.type === 'tool.completed');
+      if (toolEvent) {
+        console.log('[studio-assistant] loop tool finished', {
+          ok: (toolEvent as { result: { ok?: boolean } }).result?.ok,
+        });
+      }
+      await pipeStaticMessage(res, emission);
       return;
     }
 
-    await streamExplain(res, {
-      context,
-      systemPrompt,
-      messages: body.messages,
-      abortSignal: createRequestAbortSignal(res),
+    // Model-driven loop: prime the first model call so a synchronous provider
+    // failure surfaces as a 500, then stream the remaining events.
+    const { iterator, buffered } = await primeLoop(loopGenerator);
+    const rest = async function* rest(): AsyncGenerator<CompanionEvent> {
+      for (const event of buffered) {
+        yield event;
+      }
+      let result: IteratorResult<CompanionEvent>;
+      while (true) {
+        result = await iterator.next();
+        if (result.done) break;
+        yield result.value;
+      }
+    };
+
+    const uiStream: ReadableStream<UIMessageChunk> = companionEventsToUIMessageChunks(rest(), {
+      messageMetadata: ({ draft }) => messageMetadataFor({ draft }, { view: context.view, locale }),
+      onComplete: () => {
+        console.log('[studio-assistant] chat response finished', {
+          view: context.view,
+          locale: context.locale,
+        });
+      },
+      errorFallback: () => msg('assistant.chat.serverError'),
     });
+    await pipeUIMessageStreamToResponse({ response: res, status: 200, stream: uiStream });
   } catch (err) {
     console.error('[studio-assistant] chat handler error:', err);
     writeJson(res, 500, { error: msg('assistant.chat.serverError') });
   }
-}
-
-/** Runs the deterministic tool path (draft / course gen). Null → explain. */
-async function runToolIntent(
-  intent: ParsedIntent | null,
-  opts: {
-    body: { context: StudioContextSnapshot };
-    context: StudioContextSnapshot;
-    packageDir: string;
-    msg: (key: string, params?: Record<string, string>) => string;
-  },
-): Promise<ToolEmission | null> {
-  const { context, packageDir, msg } = opts;
-
-  const route = routeIntent(intent, context);
-  if (route.tool === 'explain' || !context.course) {
-    return null;
-  }
-
-  const nextSteps = (mode: 'explain' | 'draft' | 'course_draft', hasCourseDraft = false) =>
-    extractSuggestedNextSteps({
-      mode,
-      view: context.view,
-      hasCourseDraft,
-      locale: context.locale || 'en',
-    });
-
-  if (route.tool === 'generate_course') {
-    if (!packageDir) {
-      return {
-        content: msg('assistant.chat.needPackageDraft'),
-        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-      };
-    }
-
-    const result = await generateCourseDraftTool({
-      notes: route.description,
-      packageDir,
-      completeText: completeWithLlm,
-    });
-
-    console.log('[studio-assistant] course draft tool', {
-      ok: result.ok,
-      draftId: result.ok ? result.courseDraft.draftId : undefined,
-      error: result.ok ? undefined : result.error,
-    });
-
-    if (result.ok) {
-      return {
-        content: msg('assistant.chat.courseDraftReady'),
-        metadata: createChatMetadata('course_draft', {
-          courseDraft: result.courseDraft,
-          suggestedNextSteps: nextSteps('course_draft', true),
-        }),
-      };
-    }
-
-    return {
-      content: msg('assistant.chat.courseDraftFailed', { error: result.error }),
-      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-    };
-  }
-
-  if (route.tool === 'generate_item') {
-    if (!packageDir) {
-      return {
-        content: msg('assistant.chat.needPackageDraft'),
-        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-      };
-    }
-
-    const result = await draftActivity({
-      type: 'draft_new',
-      kind: route.kind,
-      description: route.description,
-      packageDir,
-    });
-
-    console.log('[studio-assistant] item draft tool', {
-      ok: result.ok,
-      kind: route.kind,
-    });
-
-    if (result.ok) {
-      return {
-        content: msg('assistant.chat.draftReady', { kind: route.kind }),
-        metadata: createChatMetadata('draft', {
-          drafts: result.items,
-          suggestedNextSteps: nextSteps('draft'),
-        }),
-      };
-    }
-
-    return {
-      content: msg('assistant.chat.draftFailed', { error: result.error }),
-      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-    };
-  }
-
-  if (route.tool === 'edit_item') {
-    if (!packageDir) {
-      return {
-        content: msg('assistant.chat.needPackageEdit'),
-        metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-      };
-    }
-
-    const result = await draftActivity({
-      type: 'edit_existing',
-      kind: route.kind,
-      currentContent: route.currentContent,
-      intent: route.intent,
-      params: route.params,
-      packageDir,
-    });
-
-    console.log('[studio-assistant] item edit tool', {
-      ok: result.ok,
-      kind: route.kind,
-      intent: route.intent,
-    });
-
-    if (result.ok) {
-      return {
-        content: msg('assistant.chat.editReady'),
-        metadata: createChatMetadata('draft', {
-          drafts: result.items,
-          suggestedNextSteps: nextSteps('draft'),
-        }),
-      };
-    }
-
-    return {
-      content: msg('assistant.chat.editFailed', { error: result.error }),
-      metadata: createChatMetadata('explain', { suggestedNextSteps: nextSteps('explain') }),
-    };
-  }
-
-  return null;
 }
 
 /** Emit a single static assistant message (tool path) as a UI message stream. */
@@ -313,44 +308,4 @@ async function pipeStaticMessage(res: ServerResponse, emission: ToolEmission): P
   });
 
   await pipeUIMessageStreamToResponse({ response: res, status: 200, stream });
-}
-
-/** Real token streaming for the explain path, run through `AgentRuntime`. */
-async function streamExplain(
-  res: ServerResponse,
-  opts: {
-    context: StudioContextSnapshot;
-    systemPrompt: string;
-    messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-    abortSignal?: AbortSignal;
-  },
-): Promise<void> {
-  const { context, systemPrompt, messages, abortSignal } = opts;
-
-  const events = new AiSdkAgentRuntime().run({
-    messages,
-    systemPrompt,
-    signal: abortSignal,
-  });
-
-  const uiStream: ReadableStream<UIMessageChunk> = agentRuntimeEventsToUIMessageStream(events, {
-    messageMetadata: () =>
-      createChatMetadata('explain', {
-        suggestedNextSteps: extractSuggestedNextSteps({
-          mode: 'explain',
-          view: context.view,
-          hasCourseDraft: false,
-          locale: context.locale || 'en',
-        }),
-      }),
-    onComplete: () => {
-      console.log('[studio-assistant] chat response finished', {
-        view: context.view,
-        locale: context.locale,
-      });
-    },
-    onError: () => studioChatMessage('assistant.chat.serverError', context.locale || 'en'),
-  });
-
-  await pipeUIMessageStreamToResponse({ response: res, status: 200, stream: uiStream });
 }
