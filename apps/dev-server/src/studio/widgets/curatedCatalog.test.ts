@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { execFile } from 'node:child_process';
+import { resolve } from 'node:path';
+import { promisify } from 'node:util';
 import {
   listCuratedWidgets,
   getCuratedWidget,
@@ -162,5 +165,30 @@ describe('curatedCatalog', () => {
     expect(ids.filter((id) => id === 'community-registry')).toHaveLength(1);
     expect(ids).not.toContain('core.matching');
     (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = original;
+  });
+
+  it('loads the catalog in plain Node where import.meta.env is undefined (SSR regression)', async () => {
+    // The module is executed by the Vite middleware in plain Node ESM, where
+    // Vite's `import.meta.env` injection is absent. Regression: this used to
+    // crash with "Cannot read properties of undefined (reading 'SSR')".
+    // The dev-server workspace root. The vitest runner's cwd is the package dir.
+    const devServerRoot = process.cwd();
+    const source = `
+      import { listCuratedWidgets } from './src/studio/widgets/curatedCatalog.ts';
+      const widgets = listCuratedWidgets();
+      console.log('WIDGET_COUNT=' + widgets.length);
+    `;
+    const entry = resolve(devServerRoot, 'repro-ssr.ts');
+    const { writeFile, rm } = await import('node:fs/promises');
+    await writeFile(entry, source, 'utf-8');
+    try {
+      const { stdout } = await promisify(execFile)(process.execPath, [
+        '--experimental-strip-types',
+        entry,
+      ]);
+      expect(stdout).toMatch(/WIDGET_COUNT=[2-9]\d+/);
+    } finally {
+      await rm(entry, { force: true });
+    }
   });
 });

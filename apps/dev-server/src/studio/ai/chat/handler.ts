@@ -199,6 +199,7 @@ async function runToolIntent(
     console.log('[studio-assistant] course draft tool', {
       ok: result.ok,
       draftId: result.ok ? result.courseDraft.draftId : undefined,
+      error: result.ok ? undefined : result.error,
     });
 
     if (result.ok) {

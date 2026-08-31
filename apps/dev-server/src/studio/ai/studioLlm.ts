@@ -23,6 +23,7 @@ export async function completeWithLlm(prompt: string, signal?: AbortSignal): Pro
     return result.text;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    console.error('[studio-llm] completeWithLlm failed:', message);
     throw new Error(`AI generation failed: ${message}`);
   }
 }

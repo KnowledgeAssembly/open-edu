@@ -1,8 +1,33 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { cp, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { loadPackage } from '@open-edu/core';
 import { getDraftEntry, deleteDraft } from './generateCourse.js';
+
+/**
+ * Resolve a brand-new course directory inside `workspaceRoot` derived from a
+ * human-readable title. Slugifies the title into a kebab-case directory name
+ * (falling back to `course` when nothing usable remains) and de-duplicates
+ * against existing entries by appending `-2`, `-3`, ... This is a pure
+ * function: it never touches the filesystem and returns a path that the caller
+ * is responsible for creating.
+ */
+export function resolveNewCourseDir(workspaceRoot: string, title?: string): string {
+  const slug = (title ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const base = slug || 'course';
+
+  const root = resolve(workspaceRoot);
+  let candidate = base;
+  let counter = 2;
+  while (existsSync(join(root, candidate))) {
+    candidate = `${base}-${counter}`;
+    counter += 1;
+  }
+  return join(root, candidate);
+}
 
 export interface CommitCourseDraftOptions {
   draftId: string;

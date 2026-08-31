@@ -29,4 +29,33 @@ describe('loadConfig', () => {
     expect(config.baseURL).toBe('http://localhost:11434/v1');
     delete process.env.LLM_BASE_URL;
   });
+
+  it('falls back to OPEN_EDU_STUDIO_LLM_API_KEY when no LLM_*/provider key is set', () => {
+    process.env.OPEN_EDU_STUDIO_LLM_API_KEY = 'studio-key';
+    const config = loadConfig();
+    expect(config.apiKey).toBe('studio-key');
+    delete process.env.OPEN_EDU_STUDIO_LLM_API_KEY;
+  });
+
+  it('prefers LLM_* over the Studio-prefixed fallback', () => {
+    process.env.LLM_API_KEY = 'llm-key';
+    process.env.OPEN_EDU_STUDIO_LLM_API_KEY = 'studio-key';
+    const config = loadConfig();
+    expect(config.apiKey).toBe('llm-key');
+    delete process.env.LLM_API_KEY;
+    delete process.env.OPEN_EDU_STUDIO_LLM_API_KEY;
+  });
+
+  it('reads OPEN_EDU_STUDIO_LLM_PROVIDER / MODEL / BASE_URL fallbacks', () => {
+    process.env.OPEN_EDU_STUDIO_LLM_PROVIDER = 'openrouter';
+    process.env.OPEN_EDU_STUDIO_LLM_MODEL = 'studio-model';
+    process.env.OPEN_EDU_STUDIO_LLM_BASE_URL = 'http://localhost:11434/v1';
+    const config = loadConfig();
+    expect(config.provider).toBe('openrouter');
+    expect(config.model).toBe('studio-model');
+    expect(config.baseURL).toBe('http://localhost:11434/v1');
+    delete process.env.OPEN_EDU_STUDIO_LLM_PROVIDER;
+    delete process.env.OPEN_EDU_STUDIO_LLM_MODEL;
+    delete process.env.OPEN_EDU_STUDIO_LLM_BASE_URL;
+  });
 });

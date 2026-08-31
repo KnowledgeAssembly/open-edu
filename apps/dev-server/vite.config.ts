@@ -26,8 +26,8 @@ import {
 import { OepWriter } from '@open-edu/oep-distribution';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './src/studio/outlineModel.js';
 import { getTemplateById } from './src/studio/templates/catalog.js';
-import { generateCourseDraft, deleteDraft } from './src/studio/ai/generateCourse.js';
-import { commitCourseDraft } from './src/studio/ai/commitCourseDraft.js';
+import { generateCourseDraft, deleteDraft, getDraftEntry } from './src/studio/ai/generateCourse.js';
+import { commitCourseDraft, resolveNewCourseDir } from './src/studio/ai/commitCourseDraft.js';
 import {
   generateItemAdd,
   generateItemEdit,
@@ -478,11 +478,6 @@ function eduPackageLoader(): Plugin {
           // or an uploaded course-spec.json / course-spec.md compiled without the LLM.
           // Draft-only: does NOT copy to packageDir. Use /api/studio/ai/commit to write.
           if (pathname === '/api/studio/ai/generate' && method === 'POST') {
-            if (!packageDir) {
-              res.statusCode = 400;
-              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
-              return;
-            }
             const body = (await parseJsonBody(req)) as {
               notes?: string;
               spec?: string;
@@ -521,11 +516,6 @@ function eduPackageLoader(): Plugin {
 
           // POST /api/studio/ai/generate-draft — draft-only course generation
           if (pathname === '/api/studio/ai/generate-draft' && method === 'POST') {
-            if (!packageDir) {
-              res.statusCode = 400;
-              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
-              return;
-            }
             const body = (await parseJsonBody(req)) as {
               notes?: string;
               spec?: string;
@@ -548,18 +538,17 @@ function eduPackageLoader(): Plugin {
               res.end(JSON.stringify({ code: 'missing-spec', error: 'Missing spec or notes' }));
               return;
             }
-            const draftResult = await generateCourseDraft({ source, packageDir });
+            const draftResult = await generateCourseDraft({
+              source,
+              packageDir,
+            });
             res.end(JSON.stringify(draftResult));
             return;
           }
 
-          // POST /api/studio/ai/commit — commit a draft to packageDir
+          // POST /api/studio/ai/commit — commit a draft to the active package, or
+          // to a brand-new course directory when none is open.
           if (pathname === '/api/studio/ai/commit' && method === 'POST') {
-            if (!packageDir) {
-              res.statusCode = 400;
-              res.end(JSON.stringify({ code: 'no-active-package', error: 'No active package' }));
-              return;
-            }
             const body = (await parseJsonBody(req)) as {
               draftId?: string;
               force?: boolean;
@@ -569,12 +558,23 @@ function eduPackageLoader(): Plugin {
               res.end(JSON.stringify({ code: 'invalid-request', error: 'Missing draftId' }));
               return;
             }
+            // Without an active package, commit into a fresh course directory so
+            // the AI can create a brand-new course from scratch.
+            const isNewCourse = !packageDir;
+            let targetDir = packageDir;
+            if (isNewCourse) {
+              const workspaceRoot =
+                process.env.OPEN_EDU_STUDIO_WORKSPACE || join(process.cwd(), 'courses');
+              const draftTitle = getDraftEntry(body.draftId)?.title;
+              targetDir = resolveNewCourseDir(workspaceRoot, draftTitle);
+              await mkdir(targetDir, { recursive: true });
+            }
             aiGenerating = true;
             let commitResult: import('./src/studio/ai/commitCourseDraft.js').CommitCourseDraftResult;
             try {
               commitResult = await commitCourseDraft({
                 draftId: body.draftId,
-                packageDir,
+                packageDir: targetDir,
                 force: body.force === true,
               });
             } finally {
@@ -582,6 +582,10 @@ function eduPackageLoader(): Plugin {
             }
 
             if (commitResult.success) {
+              if (isNewCourse) {
+                packageDir = targetDir;
+                srv.watcher.add(targetDir);
+              }
               try {
                 packageData = await loadPackage(packageDir);
                 const mod = srv.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
@@ -1626,7 +1630,12 @@ export default defineConfig(({ mode }) => {
   const envDir = resolve(__dirname);
   const env = loadEnv(mode, envDir, '');
   for (const [key, value] of Object.entries(env)) {
-    if ((key.startsWith('LLM_') || SERVER_ENV_KEYS.has(key)) && !process.env[key]) {
+    if (
+      (key.startsWith('LLM_') ||
+        key.startsWith('OPEN_EDU_STUDIO_LLM_') ||
+        SERVER_ENV_KEYS.has(key)) &&
+      !process.env[key]
+    ) {
       process.env[key] = value;
     }
   }

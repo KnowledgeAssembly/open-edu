@@ -132,7 +132,12 @@ export function loadCatalogWidgets(
 function getConfiguredCatalogFiles(): unknown[] {
   const globalCatalogs = (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__;
   if (Array.isArray(globalCatalogs)) return globalCatalogs;
-  if (!import.meta.env.SSR) return [];
+  // In a browser bundle (import.meta.env present and not SSR) there is no
+  // server filesystem; catalog files arrive via the global above. Outside Vite
+  // entirely (plain Node ESM) import.meta.env is undefined and we are on the
+  // server, so proceed to read OPEN_EDU_STUDIO_CATALOGS.
+  const env = (import.meta as { env?: { SSR?: unknown } }).env;
+  if (env && env.SSR !== true) return [];
   const envPaths = process.env.OPEN_EDU_STUDIO_CATALOGS;
   if (!envPaths) return [];
   return envPaths
