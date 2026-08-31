@@ -129,15 +129,26 @@ export function loadCatalogWidgets(
   return widgets;
 }
 
+/**
+ * Decide whether to read `OPEN_EDU_STUDIO_CATALOGS` files from the server
+ * filesystem. Vite injects `import.meta.env` into browser-bundled code and
+ * into SSR-transformed server code, but the Vite middleware executes modules in
+ * plain Node ESM where `import.meta.env` is `undefined` — which is still the
+ * server, so catalog files should be read there.
+ *
+ * @param env The value of `import.meta.env`, or `undefined` when it is absent.
+ * @returns `true` when running on the server (SSR or plain Node).
+ */
+export function shouldReadConfiguredCatalogFiles(env?: { SSR?: unknown }): boolean {
+  if (env === undefined) return true;
+  return env.SSR === true;
+}
+
 function getConfiguredCatalogFiles(): unknown[] {
   const globalCatalogs = (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__;
   if (Array.isArray(globalCatalogs)) return globalCatalogs;
-  // In a browser bundle (import.meta.env present and not SSR) there is no
-  // server filesystem; catalog files arrive via the global above. Outside Vite
-  // entirely (plain Node ESM) import.meta.env is undefined and we are on the
-  // server, so proceed to read OPEN_EDU_STUDIO_CATALOGS.
   const env = (import.meta as { env?: { SSR?: unknown } }).env;
-  if (env && env.SSR !== true) return [];
+  if (!shouldReadConfiguredCatalogFiles(env)) return [];
   const envPaths = process.env.OPEN_EDU_STUDIO_CATALOGS;
   if (!envPaths) return [];
   return envPaths

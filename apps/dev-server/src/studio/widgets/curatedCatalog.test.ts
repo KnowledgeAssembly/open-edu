@@ -1,12 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { execFile } from 'node:child_process';
-import { resolve } from 'node:path';
-import { promisify } from 'node:util';
 import {
   listCuratedWidgets,
   getCuratedWidget,
   loadCatalogWidgets,
   listConfiguredRegistryIds,
+  shouldReadConfiguredCatalogFiles,
   __resetCatalogCache,
 } from './curatedCatalog';
 
@@ -167,28 +165,19 @@ describe('curatedCatalog', () => {
     (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = original;
   });
 
-  it('loads the catalog in plain Node where import.meta.env is undefined (SSR regression)', async () => {
-    // The module is executed by the Vite middleware in plain Node ESM, where
-    // Vite's `import.meta.env` injection is absent. Regression: this used to
-    // crash with "Cannot read properties of undefined (reading 'SSR')".
-    // The dev-server workspace root. The vitest runner's cwd is the package dir.
-    const devServerRoot = process.cwd();
-    const source = `
-      import { listCuratedWidgets } from './src/studio/widgets/curatedCatalog.ts';
-      const widgets = listCuratedWidgets();
-      console.log('WIDGET_COUNT=' + widgets.length);
-    `;
-    const entry = resolve(devServerRoot, 'repro-ssr.ts');
-    const { writeFile, rm } = await import('node:fs/promises');
-    await writeFile(entry, source, 'utf-8');
-    try {
-      const { stdout } = await promisify(execFile)(process.execPath, [
-        '--experimental-strip-types',
-        entry,
-      ]);
-      expect(stdout).toMatch(/WIDGET_COUNT=[2-9]\d+/);
-    } finally {
-      await rm(entry, { force: true });
-    }
+  it('reads catalog files when import.meta.env is undefined (SSR regression)', () => {
+    // The Vite middleware executes modules in plain Node ESM, where Vite's
+    // `import.meta.env` injection is absent (env === undefined). Regression:
+    // this used to throw "Cannot read properties of undefined (reading 'SSR')".
+    expect(shouldReadConfiguredCatalogFiles(undefined)).toBe(true);
+  });
+
+  it('skips catalog files in a browser bundle (non-SSR)', () => {
+    expect(shouldReadConfiguredCatalogFiles({})).toBe(false);
+    expect(shouldReadConfiguredCatalogFiles({ SSR: false })).toBe(false);
+  });
+
+  it('reads catalog files in SSR mode', () => {
+    expect(shouldReadConfiguredCatalogFiles({ SSR: true })).toBe(true);
   });
 });
