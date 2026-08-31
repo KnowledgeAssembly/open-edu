@@ -1,9 +1,27 @@
+import type { z } from 'zod';
+
+export interface AgentRuntimeToolSpec {
+  name: string;
+  description: string;
+  inputSchema: z.ZodType;
+}
+
+export type AgentRuntimeMessage =
+  | { role: 'user' | 'assistant' | 'system'; content: string }
+  | {
+      role: 'assistant';
+      content: string;
+      toolCalls: Array<{ toolCallId: string; tool: string; input: unknown }>;
+    }
+  | { role: 'tool'; toolCallId: string; content: string };
+
 export interface AgentRuntimeRequest {
-  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  messages: AgentRuntimeMessage[];
   systemPrompt?: string;
   signal?: AbortSignal;
   maxSteps?: number;
   timeoutMs?: number;
+  tools?: AgentRuntimeToolSpec[];
 }
 
 export type AgentRuntimeEvent =
