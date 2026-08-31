@@ -378,6 +378,31 @@ describe('runAgentLoop — model-driven loop (Phase 6.5)', () => {
     expect(calls).toHaveLength(0);
     expect(events.some((event) => event.type === 'approval.required')).toBe(true);
   });
+
+  it('preserves the provided conversation history as the model seed', async () => {
+    const { tool } = recordingTool('generate_item', 'item.generate');
+    const runtime = new FakeRuntime([
+      [{ type: 'text.delta', text: 'hi' }, { type: 'text.complete' }],
+    ]);
+    const history = [
+      { role: 'user' as const, content: 'earlier turn that mentions fractions' },
+      { role: 'assistant' as const, content: 'earlier assistant reply' },
+      { role: 'user' as const, content: 'explain syllabus design' },
+    ];
+
+    const events = await collect(
+      runAgentLoop(requestFor('explain syllabus design'), {
+        runtime,
+        tools: new InMemoryToolRegistry([tool]),
+        policy: defaultPermissionPolicy,
+        messages: history,
+        packageDir: '/pkg',
+      }),
+    );
+
+    expect(runtime.requests[0]!.messages).toEqual(history);
+    expect(events.some((event) => event.type === 'message.delta')).toBe(true);
+  });
 });
 
 describe('runAgentLoop — skills (Phase 7)', () => {

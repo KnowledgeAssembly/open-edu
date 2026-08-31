@@ -25,6 +25,8 @@ export interface AgentLoopOptions {
   /** Phase 7: per-request skill resolution. */
   skills?: SkillResolver;
   systemPrompt?: string;
+  /** Prior conversation history (null/empty → a single turn with `request.message`). */
+  messages?: AgentRuntimeMessage[];
   maxSteps?: number; // default 6
   timeoutMs?: number; // default 120_000
   now?: () => number; // test seam
@@ -125,8 +127,13 @@ export async function* runAgentLoop(
     return;
   }
 
-  // Model-driven, bounded loop (spec §9 diagram).
-  const messages: AgentRuntimeMessage[] = [{ role: 'user', content: request.message }];
+  // Model-driven, bounded loop (spec §9 diagram). Seed with the full
+  // conversation history when provided so the model retains multi-turn context;
+  // otherwise fall back to a single user turn.
+  const messages: AgentRuntimeMessage[] =
+    options.messages && options.messages.length > 0
+      ? [...options.messages]
+      : [{ role: 'user', content: request.message }];
   const toolSpecs: AgentRuntimeToolSpec[] = options.tools
     .list()
     .filter((tool) => options.policy.check(tool, request.permissions))

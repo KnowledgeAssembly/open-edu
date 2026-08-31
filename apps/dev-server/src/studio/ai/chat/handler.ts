@@ -18,7 +18,12 @@ import { createChatMetadata, type StudioChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
 import { checkRateLimit } from './rateLimit';
 import type { StudioContextSnapshot } from '../context';
-import type { CourseDraftResult, DraftItem, CompanionEvent } from '@open-edu/companion';
+import type {
+  CourseDraftResult,
+  DraftItem,
+  CompanionEvent,
+  AgentRuntimeMessage,
+} from '@open-edu/companion';
 import { parseIntentFromMessage } from './intent.js';
 import { routeIntent } from './route.js';
 
@@ -229,6 +234,9 @@ export async function createStudioAssistantHandler(
       tools: new InMemoryToolRegistry(),
       policy: defaultPermissionPolicy,
       systemPrompt,
+      // Preserve the full conversation history so the model retains multi-turn
+      // context on subsequent turns (the explain path streams from the loop).
+      messages: body.messages as AgentRuntimeMessage[],
       maxSteps: AGENT_LOOP_MAX_STEPS,
       timeoutMs: AGENT_LOOP_TIMEOUT_MS,
       signal: createRequestAbortSignal(res),
