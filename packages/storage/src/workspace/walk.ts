@@ -8,6 +8,8 @@ export interface WorkspaceFile {
 export interface WalkWorkspaceOptions {
   /** Prefixes (e.g. `.openu/`) whose files should be excluded from the result. */
   excludePrefixes?: string[];
+  /** Start directory to walk from (default `''`, the workspace root). */
+  root?: string;
 }
 
 /**
@@ -20,6 +22,7 @@ export async function walkWorkspace(
   options: WalkWorkspaceOptions = {},
 ): Promise<WorkspaceFile[]> {
   const exclude = options.excludePrefixes ?? ['.openu/'];
+  const root = options.root ?? '';
   const out: WorkspaceFile[] = [];
 
   async function visit(dir: string): Promise<void> {
@@ -35,6 +38,6 @@ export async function walkWorkspace(
     }
   }
 
-  await visit('');
+  await visit(root);
   return out.sort((a, b) => a.path.localeCompare(b.path));
 }

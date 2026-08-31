@@ -69,9 +69,8 @@ async function snapshotPaths(ws: CourseWorkspace, logicalPaths: string[]): Promi
     if (await ws.exists(path)) {
       const stat = await ws.stat(path).catch(() => undefined);
       if (stat && stat.kind === 'directory') {
-        const files = await walkWorkspace(ws, { excludePrefixes: [] });
+        const files = await walkWorkspace(ws, { root: path, excludePrefixes: [] });
         for (const file of files) {
-          if (file.path !== path && !file.path.startsWith(`${path}/`)) continue;
           if (seen.has(file.path)) continue;
           seen.add(file.path);
           snapshots.push({ path: file.path, existed: true, data: file.data });
