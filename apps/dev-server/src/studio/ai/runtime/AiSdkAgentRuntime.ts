@@ -26,16 +26,18 @@ function toAiSdkMessages(messages: AgentRuntimeMessage[]): Array<Record<string, 
 
   return messages.map((message) => {
     if (message.role === 'assistant' && 'toolCalls' in message) {
-      const content: Array<Record<string, unknown>> = [];
-      if (message.content) {
-        content.push({ type: 'text', text: message.content });
-      }
+      // Keep a non-empty text part so OpenAI-compatible providers don't
+      // serialize this turn's `content` as null (some reject null content).
+      const text = message.content?.trim()
+        ? message.content
+        : `Tool call: ${message.toolCalls.map((call) => call.tool).join(', ')}`;
+      const content: Array<Record<string, unknown>> = [{ type: 'text', text }];
       for (const call of message.toolCalls) {
         content.push({
           type: 'tool-call',
           toolCallId: call.toolCallId,
           toolName: call.tool,
-          args: call.input,
+          input: call.input,
         });
       }
       return { role: 'assistant', content };
@@ -48,12 +50,12 @@ function toAiSdkMessages(messages: AgentRuntimeMessage[]): Array<Record<string, 
             type: 'tool-result',
             toolCallId: message.toolCallId,
             toolName: toolNames.get(message.toolCallId) ?? 'tool',
-            result: message.content,
+            output: { type: 'text', value: message.content },
           },
         ],
       };
     }
-    return { role: message.role, content: message.content };
+    return { role: message.role, content: message.content ?? '' };
   });
 }
 

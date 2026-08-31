@@ -224,7 +224,9 @@ export async function* runAgentLoop(
         }
         messages.push({
           role: 'assistant',
-          content: '',
+          // Non-empty content keeps the provider from serializing this turn's
+          // `content` as null (some OpenAI-compatible providers reject null).
+          content: `Called tool ${event.tool}`,
           toolCalls: [{ toolCallId: event.toolCallId, tool: event.tool, input: parsed.data }],
         });
         messages.push({

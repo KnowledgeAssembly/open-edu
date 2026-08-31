@@ -149,7 +149,7 @@ describe('AiSdkAgentRuntime', () => {
     );
   });
 
-  it('maps tool-role messages into AI SDK tool-result content', async () => {
+  it('maps tool-role messages into AI SDK tool-call / tool-result content', async () => {
     streamTextMock.mockReturnValue(streamOf([]));
 
     await collect(
@@ -158,7 +158,7 @@ describe('AiSdkAgentRuntime', () => {
           { role: 'user', content: 'create a quiz' },
           {
             role: 'assistant',
-            content: '',
+            content: 'Called tool generate_item',
             toolCalls: [{ toolCallId: 'call-1', tool: 'generate_item', input: { kind: 'quiz' } }],
           },
           { role: 'tool', toolCallId: 'call-1', content: '{}' },
@@ -172,17 +172,50 @@ describe('AiSdkAgentRuntime', () => {
     expect(callArgs.messages[1]).toMatchObject({
       role: 'assistant',
       content: [
+        { type: 'text', text: 'Called tool generate_item' },
         {
           type: 'tool-call',
           toolCallId: 'call-1',
           toolName: 'generate_item',
-          args: { kind: 'quiz' },
+          input: { kind: 'quiz' },
         },
       ],
     });
     expect(callArgs.messages[2]).toMatchObject({
       role: 'tool',
-      content: [{ type: 'tool-result', toolCallId: 'call-1', toolName: 'generate_item' }],
+      content: [
+        {
+          type: 'tool-result',
+          toolCallId: 'call-1',
+          toolName: 'generate_item',
+          output: { type: 'text', value: '{}' },
+        },
+      ],
     });
+  });
+
+  it('keeps assistant tool-call content non-null even when empty', async () => {
+    streamTextMock.mockReturnValue(streamOf([]));
+
+    await collect(
+      new AiSdkAgentRuntime().run({
+        messages: [
+          { role: 'user', content: 'create a quiz' },
+          {
+            role: 'assistant',
+            content: '',
+            toolCalls: [{ toolCallId: 'call-1', tool: 'generate_item', input: { kind: 'quiz' } }],
+          },
+        ],
+      }),
+    );
+
+    const callArgs = streamTextMock.mock.calls[0]![0] as {
+      messages: Array<Record<string, unknown>>;
+    };
+    const content = callArgs.messages[1]!.content as Array<{ type: string; text?: string }>;
+    const textPart = content.find((part) => part.type === 'text');
+    expect(textPart?.text).toBeTruthy();
+    expect(textPart?.text).toContain('generate_item');
   });
 });
