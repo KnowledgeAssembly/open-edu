@@ -10,16 +10,11 @@ import {
   type QualityRubricFile,
 } from './types.js';
 
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readDataFile } from './dataPath.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const artifactContractJson = JSON.parse(readFileSync(join(__dirname, 'data/artifact-contract.json'), 'utf-8'));
-const profilesJson = JSON.parse(readFileSync(join(__dirname, 'data/profiles.json'), 'utf-8'));
-const qualityRubricJson = JSON.parse(readFileSync(join(__dirname, 'data/quality-rubric.json'), 'utf-8'));
+const artifactContractJson = JSON.parse(readDataFile('artifact-contract.json'));
+const profilesJson = JSON.parse(readDataFile('profiles.json'));
+const qualityRubricJson = JSON.parse(readDataFile('quality-rubric.json'));
 import { buildAuthoredPromptView } from './generate.js';
 
 export * from './types.js';

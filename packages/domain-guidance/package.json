@@ -16,8 +16,8 @@
     "./data/artifact-contract": "./src/data/artifact-contract.json"
   },
   "scripts": {
-    "build": "tsc",
-    "generate": "tsc && node dist/generate.js",
+    "build": "tsc && node scripts/copy-data.mjs",
+    "generate": "tsc && node scripts/copy-data.mjs && node dist/generate.js",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit",
