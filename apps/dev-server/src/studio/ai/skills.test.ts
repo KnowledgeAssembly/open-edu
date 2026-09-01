@@ -39,10 +39,12 @@ describe('createSkillResolver', () => {
     expect(resolver.resolve(baseCtx)).toHaveLength(0);
     const withLearner: StudioContextSnapshot = {
       ...baseCtx,
-      learner: { id: 'level-b', label: 'Level B', kind: 'school' },
+      learner: { id: 'autism-1', label: 'Autism', kind: 'autism' },
     };
     const skills = resolver.resolve(withLearner);
     expect(skills.map((skill) => skill.id)).toEqual(['learner-adaptation']);
+    expect(skills[0]?.instructions).toContain('Autism Spectrum');
+    expect(skills[0]?.instructions).toContain('literal language');
   });
 
   it('is additive: a plain snapshot resolves no skills (whole library not injected)', () => {

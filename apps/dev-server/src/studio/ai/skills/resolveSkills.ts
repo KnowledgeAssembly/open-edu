@@ -1,6 +1,8 @@
 import type { CompanionSkill, SkillResolver } from '@open-edu/companion';
 import type { StudioContextSnapshot } from '@open-edu/companion/context';
 
+import { getProfile } from '@open-edu/domain-guidance';
+
 /**
  * Resolve skills per-request (spec §13) so the whole skill library is never
  * injected into every model call. The resolver is deliberately trivial now: one
@@ -13,7 +15,18 @@ export function createSkillResolver(registry: { list(): CompanionSkill[] }): Ski
     resolve(context: unknown): CompanionSkill[] {
       const ctx = context as StudioContextSnapshot;
       if (ctx?.learner) {
-        return registry.list().filter((skill) => skill.id === 'learner-adaptation');
+        const profileDef = getProfile(ctx.learner.kind);
+        const customInstructions = profileDef?.promptInstructions
+          ? `Adapt explanations, examples, pacing, and assessment format to the target learner profile (${profileDef.name}): ${profileDef.promptInstructions}`
+          : undefined;
+
+        return registry
+          .list()
+          .filter((skill) => skill.id === 'learner-adaptation')
+          .map((skill) => ({
+            ...skill,
+            instructions: customInstructions || skill.instructions,
+          }));
       }
       return [];
     },

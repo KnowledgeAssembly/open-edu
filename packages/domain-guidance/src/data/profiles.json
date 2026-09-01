@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "defaultProfile": "neurotypical",
+  "profiles": {
+    "neurotypical": {
+      "id": "neurotypical",
+      "kind": "neurotypical",
+      "name": "Neurotypical",
+      "audience": "neurotypical",
+      "description": "Default profile. Standard default skill behavior; base authoring layer.",
+      "accessibility": [],
+      "difficultyBias": null,
+      "pacingRangeMinutes": [15, 45],
+      "guidanceDeltas": ["Base authoring layer describes standard neurotypical behavior."],
+      "outputDeltas": [
+        "metadata.audience set to 'neurotypical'",
+        "metadata.accessibility set to []",
+        "lesson.estimatedMinutes use pacing range [15, 45]"
+      ],
+      "promptInstructions": "Adapt content for a general neurotypical learner: standard clear explanations, balanced pacing (15-45 min), and standard difficulty progression."
+    },
+    "autism": {
+      "id": "autism",
+      "kind": "autism",
+      "name": "Autism Spectrum",
+      "audience": "autism",
+      "description": "Autistic learners. Prioritizes predictability, visual support, literal language, and errorless learning.",
+      "accessibility": ["sensory-friendly", "predictable-structure", "literal-language"],
+      "difficultyBias": "beginner",
+      "pacingRangeMinutes": [10, 30],
+      "guidanceDeltas": [
+        "Vocabulary: Use literal language. 5-12 word sentences. No idioms or sarcasm.",
+        "One concept per activity: split multi-concept lessons.",
+        "Predictability: keep lesson flow fixed across the course.",
+        "Errorless learning & gradual prompt hierarchy.",
+        "Visual first: images carry primary meaning, text is secondary."
+      ],
+      "outputDeltas": [
+        "metadata.audience set to 'autism'",
+        "metadata.accessibility add ['sensory-friendly', 'predictable-structure', 'literal-language']",
+        "metadata.difficulty prefer 'beginner'",
+        "lesson.estimatedMinutes use pacing range [10, 30]",
+        "activityPlan progression: observe -> guided_practice -> independent_practice -> mastery_check -> positive_completion"
+      ],
+      "promptInstructions": "Adapt content for an autistic learner: use strict literal language (5-12 words per sentence, no idioms/metaphors), direct step-by-step instructions, one concept per activity, predictable structure, visual emphasis, and calm non-exaggerated feedback."
+    },
+    "school": {
+      "id": "school",
+      "kind": "school",
+      "name": "School (K-12)",
+      "audience": "school",
+      "description": "School-age learners (K-12). Age-graded register, curriculum-aligned objectives, grade-band-appropriate pacing.",
+      "accessibility": [],
+      "difficultyBias": null,
+      "pacingRangeMinutes": [15, 45],
+      "gradeBands": {
+        "early_primary": { "pacingRangeMinutes": [10, 20] },
+        "upper_primary": { "pacingRangeMinutes": [15, 25] },
+        "middle_school": { "pacingRangeMinutes": [20, 35] },
+        "secondary": { "pacingRangeMinutes": [25, 40] },
+        "senior_secondary": { "pacingRangeMinutes": [30, 45] }
+      },
+      "guidanceDeltas": [
+        "Vocabulary: match the grade band (concrete to academic).",
+        "Objectives: align to stated curriculum and grade band.",
+        "Examples: concrete -> familiar -> visual -> abstract.",
+        "Activity instructions: direct, concrete, sequential instructions."
+      ],
+      "outputDeltas": [
+        "metadata.audience set to 'school'",
+        "metadata.accessibility set to []",
+        "lesson.estimatedMinutes use grade-band appropriate pacing range [15, 45]"
+      ],
+      "promptInstructions": "Adapt content for K-12 school learners: age-appropriate vocabulary and grade-band pacing, concrete visual examples, curriculum-aligned objectives, and direct step-by-step activity instructions."
+    },
+    "college": {
+      "id": "college",
+      "kind": "college",
+      "name": "College / Adult",
+      "audience": "college",
+      "description": "Higher-education / adult learners. Academic rigor, independence, disciplinary terminology, and deeper conceptual treatment.",
+      "accessibility": [],
+      "difficultyBias": null,
+      "pacingRangeMinutes": [20, 60],
+      "guidanceDeltas": [
+        "Register: formal, precise, discipline-appropriate language.",
+        "Objectives: prefer higher-order objectives (apply, analyze, evaluate).",
+        "Examples: realistic disciplinary examples and authentic problems.",
+        "Pacing: deeper, longer learning blocks (20-60 min)."
+      ],
+      "outputDeltas": [
+        "metadata.audience set to 'college'",
+        "metadata.accessibility set to []",
+        "lesson.estimatedMinutes use pacing range [20, 60]"
+      ],
+      "promptInstructions": "Adapt content for college/adult learners: formal disciplinary register, higher-order objectives (apply, analyze, evaluate), realistic case-based examples, deeper independent learning blocks (20-60 min)."
+    }
+  }
+}

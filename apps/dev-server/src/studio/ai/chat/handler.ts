@@ -4,6 +4,8 @@ import { completeWithLlm } from '../studioLlm';
 import { AiSdkAgentRuntime } from '../runtime/AiSdkAgentRuntime';
 import { runAgentLoop } from '../agentLoop';
 import { InMemoryToolRegistry } from '../toolRegistry';
+import { InMemorySkillRegistry } from '../skillRegistry';
+import { createSkillResolver } from '../skills/resolveSkills';
 import { defaultPermissionPolicy } from '../permissionPolicy';
 import { DEFAULT_PERMISSIONS } from '../CompanionClient';
 import { companionEventsToUIMessageChunks } from '../companionToUIMessage';
@@ -233,6 +235,7 @@ export async function createStudioAssistantHandler(
       runtime: new AiSdkAgentRuntime(),
       tools: new InMemoryToolRegistry(),
       policy: defaultPermissionPolicy,
+      skills: createSkillResolver(new InMemorySkillRegistry()),
       systemPrompt,
       // Preserve the full conversation history so the model retains multi-turn
       // context on subsequent turns (the explain path streams from the loop).

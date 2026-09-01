@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -36,12 +36,19 @@ export function getSkillDir() {
   return process.env.OPENEDU_SKILL_DIR || join(__dirname, '..');
 }
 
+import { discoverRepository } from './openedu-adapter.mjs';
+
 /**
- * Returns the machine-checkable profile config path (profiles.config.json).
+ * Returns the machine-checkable profile config path (profiles.json or profiles.config.json).
  *
  * @returns {string}
  */
 export function getProfilesConfigPath() {
+  const env = discoverRepository();
+  if (env.mode === 'repository' && env.paths.guidanceData) {
+    const repoProfiles = join(env.paths.guidanceData, 'profiles.json');
+    if (existsSync(repoProfiles)) return repoProfiles;
+  }
   return join(__dirname, 'profiles.config.json');
 }
 

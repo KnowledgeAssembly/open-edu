@@ -69,6 +69,12 @@ export function discoverRepository(startDir = process.cwd()) {
     result.paths.catalogData = catalogDataPath;
   }
 
+  const domainGuidanceDataPath = join(repoRoot, 'packages', 'domain-guidance', 'src', 'data');
+  if (existsSync(domainGuidanceDataPath)) {
+    result.capabilities.domainGuidance = true;
+    result.paths.guidanceData = domainGuidanceDataPath;
+  }
+
   const pipelinePath = join(repoRoot, 'packages', 'pipeline');
   if (existsSync(join(pipelinePath, 'package.json'))) {
     result.capabilities.pipeline.packagePresent = true;

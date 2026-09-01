@@ -8,13 +8,13 @@ import type {
   CompilerDiagnostic,
 } from '../schemas/index.js';
 
-const MCQQuestionSchema = z.object({
+export const MCQQuestionSchema = z.object({
   question: z.string(),
   options: z.array(z.string()).length(4),
   correctIndex: z.number().min(0).max(3),
 });
 
-const ActivityJSONSchema = z.object({
+export const ActivityJSONSchema = z.object({
   step: z.enum([
     'observe',
     'guided_practice',
@@ -32,7 +32,7 @@ const ActivityJSONSchema = z.object({
   widgetConfig: z.record(z.unknown()).optional(),
 });
 
-const LessonJSONSchema = z.object({
+export const LessonJSONSchema = z.object({
   id: z.string(),
   title: z.string(),
   objectives: z.array(z.string()),
@@ -43,7 +43,7 @@ const LessonJSONSchema = z.object({
   activities: z.array(ActivityJSONSchema),
 });
 
-const CourseSpecJSONSchema = z.object({
+export const CourseSpecJSONSchema = z.object({
   format: z.literal('openedu-course-spec'),
   version: z.literal(1),
   generatedAt: z.string(),
@@ -64,7 +64,7 @@ const CourseSpecJSONSchema = z.object({
   lessons: z.array(LessonJSONSchema),
 });
 
-type CourseSpecJSON = z.infer<typeof CourseSpecJSONSchema>;
+export type CourseSpecJSON = z.infer<typeof CourseSpecJSONSchema>;
 
 function slugify(text: string): string {
   return (

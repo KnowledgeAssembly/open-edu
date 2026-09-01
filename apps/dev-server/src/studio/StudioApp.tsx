@@ -33,6 +33,9 @@ import { EditorBridgeProvider } from './ai/EditorBridgeContext';
 import { isAssistantEnabled } from './ai/assistantFlags';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
 
+import { getProfile } from '@open-edu/domain-guidance';
+import type { LearnerProfile } from './ai/context.js';
+
 export function StudioApp({
   mode,
   onModeChange,
@@ -64,6 +67,24 @@ export function StudioApp({
   const [aiAvailable, setAiAvailable] = useState(false);
   const [assistantEnabled] = useState(() => _assistantEnabled ?? isAssistantEnabled());
   const [outlineRevision, setOutlineRevision] = useState(0);
+  const [targetLearnerKind, setTargetLearnerKind] = useState<string>(() => {
+    return localStorage.getItem('openedu.studio.targetLearnerKind') || 'neurotypical';
+  });
+
+  const handleTargetLearnerKindChange = useCallback((kind: string) => {
+    setTargetLearnerKind(kind);
+    localStorage.setItem('openedu.studio.targetLearnerKind', kind);
+  }, []);
+
+  const learner: LearnerProfile = useMemo(() => {
+    const profileDef = getProfile(targetLearnerKind) || getProfile('neurotypical')!;
+    return {
+      id: profileDef.id,
+      label: profileDef.name,
+      kind: profileDef.kind as any,
+    };
+  }, [targetLearnerKind]);
+
   const api = useMemo(() => apiProp ?? createLocalStudioApi(), [apiProp]);
 
   useEffect(() => {
@@ -237,6 +258,7 @@ export function StudioApp({
             loadedPackage={loadedPackage}
             aiAvailable={aiAvailable}
             locale="en"
+            learner={learner}
             api={api}
           />
           <StudioAppInner
@@ -249,6 +271,8 @@ export function StudioApp({
             assistantEnabled={assistantEnabled}
             themeId={themeId}
             onThemeChange={onThemeChange}
+            targetLearnerKind={targetLearnerKind}
+            onTargetLearnerKindChange={handleTargetLearnerKindChange}
           >
             <div key={view} className="studio-view-enter min-h-0 flex-1">
               {storageNotice ? (
@@ -283,6 +307,8 @@ function StudioAppInner({
   assistantEnabled,
   themeId,
   onThemeChange,
+  targetLearnerKind,
+  onTargetLearnerKindChange,
   children,
 }: {
   mode: StudioMode;
@@ -294,6 +320,8 @@ function StudioAppInner({
   assistantEnabled?: boolean;
   themeId?: ThemeId;
   onThemeChange?: (id: ThemeId) => void;
+  targetLearnerKind?: string;
+  onTargetLearnerKindChange?: (kind: string) => void;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
@@ -320,6 +348,8 @@ function StudioAppInner({
         setPanelOpen={assistantEnabled ? setPanelOpen : undefined}
         themeId={themeId}
         onThemeChange={onThemeChange}
+        targetLearnerKind={targetLearnerKind}
+        onTargetLearnerKindChange={onTargetLearnerKindChange}
       />
       <StudioLayout
         className="bg-surface min-h-0 flex-1 overflow-hidden"
