@@ -32,11 +32,11 @@ export interface StudioAiMiddlewareOptions {
 
 async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    const chunks: string[] = [];
+    req.on('data', (chunk: Buffer | string) => chunks.push(chunk.toString()));
     req.on('end', () => {
       try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString('utf-8')));
+        resolve(JSON.parse(chunks.join('')));
       } catch {
         reject(new Error('Invalid JSON body'));
       }
