@@ -55,6 +55,15 @@ function toAiSdkMessages(messages: AgentRuntimeMessage[]): Array<Record<string, 
         ],
       };
     }
+    // Plain messages. Assistant turns that only carried tool calls (e.g. a prior
+    // tool-call turn in the conversation history) arrive with empty text; a
+    // provider serializes assistant `content` as `text || null`, so an empty
+    // string becomes `null` which OpenAI-compatible endpoints reject. Keep the
+    // content non-empty to stay valid across providers.
+    if (message.role === 'assistant') {
+      const text = message.content?.trim() ? message.content : ' ';
+      return { role: 'assistant', content: text };
+    }
     return { role: message.role, content: message.content ?? '' };
   });
 }

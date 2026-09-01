@@ -218,4 +218,30 @@ describe('AiSdkAgentRuntime', () => {
     expect(textPart?.text).toBeTruthy();
     expect(textPart?.text).toContain('generate_item');
   });
+
+  it('keeps plain assistant history content non-null when empty', async () => {
+    streamTextMock.mockReturnValue(streamOf([]));
+
+    // A prior tool-call turn in the conversation history is stored as a plain
+    // assistant message with empty text. Providers serialize assistant `content`
+    // as `text || null`, so an empty string would become `null` and be rejected.
+    await collect(
+      new AiSdkAgentRuntime().run({
+        messages: [
+          { role: 'user', content: 'create a quiz' },
+          { role: 'assistant', content: '' },
+          { role: 'tool', toolCallId: 'call-1', content: '{}' },
+        ],
+      }),
+    );
+
+    const callArgs = streamTextMock.mock.calls[0]![0] as {
+      messages: Array<Record<string, unknown>>;
+    };
+    expect(callArgs.messages[1]).toMatchObject({
+      role: 'assistant',
+      content: expect.any(String) as unknown,
+    });
+    expect((callArgs.messages[1] as { content: string }).content.length).toBeGreaterThan(0);
+  });
 });
