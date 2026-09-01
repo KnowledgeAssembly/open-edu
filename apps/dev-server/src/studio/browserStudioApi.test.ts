@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import { createBrowserStudioApi, createBrowserStudioSession } from './browserStudioApi.js';
-import type { BrowserAiClient } from './browserAiClient.js';
+import type { BrowserAiGateway } from './browserAiGateway.js';
 import {
   createBrowserCourseStore,
   buildFileIndex,
@@ -393,7 +393,7 @@ describe('BrowserStudioApi', () => {
     const generateItem = vi.fn().mockResolvedValue({
       item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
     });
-    const aiClient = { generateItem } as unknown as BrowserAiClient;
+    const aiClient = { generateItem } as unknown as BrowserAiGateway;
     const api = createBrowserStudioApi({ store, session, aiClient });
     await api.applyTemplate('lesson-quiz');
     await api.openLibraryCourse('lesson-quiz');
@@ -425,7 +425,7 @@ describe('BrowserStudioApi', () => {
     const aiClient = {
       getDraft: vi.fn().mockResolvedValue(draft),
       discardDraft,
-    } as unknown as BrowserAiClient;
+    } as unknown as BrowserAiGateway;
     const api = createBrowserStudioApi({ store, session, aiClient });
     await api.applyTemplate('reading-lesson');
     await api.openLibraryCourse('reading-lesson');
@@ -457,7 +457,7 @@ describe('BrowserStudioApi', () => {
     };
     const getDraft = vi.fn().mockResolvedValue(draft);
     const discardDraft = vi.fn().mockResolvedValue(undefined);
-    const aiClient = { getDraft, discardDraft } as unknown as BrowserAiClient;
+    const aiClient = { getDraft, discardDraft } as unknown as BrowserAiGateway;
     const api = createBrowserStudioApi({ store, session, aiClient });
     await api.applyTemplate('reading-lesson');
     await api.openLibraryCourse('reading-lesson');
@@ -476,7 +476,7 @@ describe('BrowserStudioApi', () => {
     const generateItem = vi.fn().mockResolvedValue({
       item: { kind: 'lesson', title: 'Fractions', content: '# Fractions\n\nBody' },
     });
-    const aiClient = { generateItem } as unknown as BrowserAiClient;
+    const aiClient = { generateItem } as unknown as BrowserAiGateway;
     const api = createBrowserStudioApi({ store, session, aiClient });
     await session.setActiveCourse('nonexistent');
 

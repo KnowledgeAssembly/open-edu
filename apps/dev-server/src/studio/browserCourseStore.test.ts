@@ -208,4 +208,34 @@ describe('BrowserCourseStore', () => {
     );
     expect(await store.workspaceOf?.('missing')).toBeNull();
   });
+
+  it('isolates per-session hooks: separate stores never share courses (multi-user model)', async () => {
+    // Each user session owns its own store/repository (OPFS is per-browser but
+    // the store seam scopes it). Editing in one session must not leak into the
+    // other even when the same course ids exist.
+    const sessionA = makeStore();
+    const sessionB = makeStore();
+
+    await sessionA.create(makeCourse('shared-id'));
+    await sessionB.create(makeCourse('shared-id'));
+
+    const wsA = await sessionA.workspaceOf?.('shared-id');
+    const wsB = await sessionB.workspaceOf?.('shared-id');
+    await wsA!.writeText('nodes/lesson.md', '# Session A edit');
+    await wsB!.writeText('nodes/lesson.md', '# Session B edit');
+
+    const loadedA = await sessionA.get('shared-id');
+    const loadedB = await sessionB.get('shared-id');
+    expect(new TextDecoder().decode(buildFileIndex(loadedA!.files).get('nodes/lesson.md'))).toBe(
+      '# Session A edit',
+    );
+    expect(new TextDecoder().decode(buildFileIndex(loadedB!.files).get('nodes/lesson.md'))).toBe(
+      '# Session B edit',
+    );
+
+    // Unrelated to the AI path, but a useful seam guard: one session deleting
+    // its copy leaves the other intact.
+    await sessionA.delete('shared-id');
+    expect(await sessionB.get('shared-id')).not.toBeNull();
+  });
 });
