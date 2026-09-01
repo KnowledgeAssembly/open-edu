@@ -1,7 +1,6 @@
-import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CourseSpecJSONSchema } from '@open-edu/course-compiler';
 import {
   ProfilesFileSchema,
   QualityRubricFileSchema,
@@ -9,48 +8,21 @@ import {
   type QualityDimension,
   type LearnerProfileDefinition,
 } from './types.js';
+import { buildDerivedSchemaFacts } from './schema-facts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const profilesJson = JSON.parse(readFileSync(join(__dirname, 'data/profiles.json'), 'utf-8'));
-const qualityRubricJson = JSON.parse(readFileSync(join(__dirname, 'data/quality-rubric.json'), 'utf-8'));
-
-export function buildDerivedSchemaFacts() {
-  const schemaShape = CourseSpecJSONSchema.shape;
-  const topKeys = Object.keys(schemaShape);
-  return {
-    format: 'openedu-course-spec',
-    version: 1,
-    requiredTopLevelKeys: topKeys,
-    metadataFields: {
-      title: 'string (required)',
-      description: 'string (required)',
-      author: 'string (optional)',
-      version: 'string (optional)',
-      difficulty: 'beginner | intermediate | advanced (optional)',
-      estimatedHours: 'number (optional)',
-      generated: 'boolean (required)',
-    },
-    lessonFields: {
-      id: 'string (kebab-case, required)',
-      title: 'string (required)',
-      objectives: 'array of strings (required)',
-      coreIdea: 'string (required)',
-      examples: 'array of strings (optional)',
-      misconceptions: 'array of strings (optional)',
-      estimatedMinutes: 'number 5-45 (optional)',
-      activities: 'array of activity objects (required)',
-    },
-    activitySteps: [
-      'observe',
-      'guided_practice',
-      'independent_practice',
-      'mastery_check',
-      'positive_completion',
-    ],
-    activityTypes: ['reading', 'exercise', 'quiz', 'reflection', 'widget'],
-  };
+/** Walk up from the package src/dist to the workspace root (`pnpm-workspace.yaml`). */
+export function resolveRepoRoot(): string {
+  let dir = join(__dirname, '..', '..', '..');
+  for (let i = 0; i < 20; i++) {
+    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('Cannot locate the Open-Edu workspace root (pnpm-workspace.yaml not found).');
 }
 
 export const AUTHORED_PROMPT_RULES = [
@@ -61,9 +33,31 @@ export const AUTHORED_PROMPT_RULES = [
   'All required fields above must be present and non-empty.',
 ];
 
+function renderField(field: { name: string; type: string; required: boolean }): string {
+  return `${field.name}: ${field.type} (${field.required ? 'required' : 'optional'})`;
+}
+
+/**
+ * Authored prompt view: curated, model-facing phrasing layered over schema
+ * facts derived at runtime from `CourseSpecJSONSchema`. The prose (JSON shape
+ * example + RULES) is reviewed like golden copy; the schema section must never
+ * be hand-edited here — it is introspected.
+ */
 export function buildAuthoredPromptView(): string {
+  const facts = buildDerivedSchemaFacts();
   return `
-Output ONLY a single JSON object that conforms EXACTLY to this JSON schema (no markdown, no comments, no extra text):
+Output ONLY a single JSON object that conforms EXACTLY to the derived course-spec schema below (no markdown, no comments, no extra text).
+
+## Schema (derived from ${facts.provenance.package} ${facts.provenance.schema})
+
+Top-level keys: ${facts.requiredTopLevelKeys.map((k) => `"${k}"`).join(', ')}
+
+metadata: { ${facts.metadataFields.map(renderField).join(', ')} }
+lesson: { ${facts.lessonFields.map(renderField).join(', ')} }
+activity: { ${facts.activityFields.map(renderField).join(', ')} }
+question: { ${facts.questionFields.map(renderField).join(', ')} }
+
+Here is the exact JSON shape to produce:
 
 {
   "format": "openedu-course-spec",
@@ -122,98 +116,152 @@ export function generateArtifactContractData() {
   });
 }
 
-export function generateAll(): void {
-  const rootDir = join(__dirname, '../..');
-  const packageDataDir = join(__dirname, 'data');
-  const skillRefDir = join(rootDir, 'skills/openedu-course-authoring/references');
+function generatedHeader(title: string, sourceFile: string): string {
+  return `# ${title}
 
-  mkdirSync(packageDataDir, { recursive: true });
+> GENERATED reference — do not hand-edit. Regenerate with \`pnpm --filter @open-edu/domain-guidance generate\`.
+> Source of truth: \`${sourceFile}\`.
+`;
+}
+
+function renderProfile(profile: LearnerProfileDefinition, isDefault: boolean): string {
+  const lines = [
+    `- key: ${profile.id}`,
+    `- default: ${isDefault}`,
+    `- name: ${profile.name}`,
+    `- description: ${profile.description}`,
+    `- accessibility: ${profile.accessibility.length > 0 ? profile.accessibility.join(', ') : 'none'}`,
+    `- difficultyBias: ${profile.difficultyBias ?? 'none'}`,
+    `- pacingRangeMinutes: ${profile.pacingRangeMinutes[0]}–${profile.pacingRangeMinutes[1]}`,
+  ];
+  if (profile.gradeBands) {
+    lines.push('\n## Grade Bands');
+    for (const [band, bandInfo] of Object.entries(profile.gradeBands)) {
+      lines.push(
+        `- \`${band}\` ${bandInfo.pacingRangeMinutes[0]}–${bandInfo.pacingRangeMinutes[1]} minutes`,
+      );
+    }
+  }
+  lines.push('\n## Guidance Deltas');
+  lines.push(...(profile.guidanceDeltas ?? []).map((g: string) => `- ${g}`));
+  lines.push('\n## Output Deltas');
+  lines.push(...(profile.outputDeltas ?? []).map((o: string) => `- ${o}`));
+  if (profile.promptInstructions) {
+    lines.push('\n## Prompt Instructions');
+    lines.push(profile.promptInstructions);
+  }
+  return lines.join('\n');
+}
+
+export function generateAll(): void {
+  const repoRoot = resolveRepoRoot();
+  const packageSrcDataDir = join(repoRoot, 'packages', 'domain-guidance', 'src', 'data');
+  const skillRefDir = join(repoRoot, 'skills', 'openedu-course-authoring', 'references');
+
+  mkdirSync(packageSrcDataDir, { recursive: true });
   mkdirSync(skillRefDir, { recursive: true });
 
-  // 1. Artifact contract JSON
+  // 1. Artifact contract JSON (canonical, committed at src/data)
   const artifactContract = generateArtifactContractData();
   writeFileSync(
-    join(packageDataDir, 'artifact-contract.json'),
+    join(packageSrcDataDir, 'artifact-contract.json'),
     JSON.stringify(artifactContract, null, 2) + '\n',
   );
 
-  const parsedRubric = QualityRubricFileSchema.parse(qualityRubricJson);
-  const parsedProfiles = ProfilesFileSchema.parse(profilesJson);
+  const parsedRubric = QualityRubricFileSchema.parse(
+    JSON.parse(readFileSync(join(packageSrcDataDir, 'quality-rubric.json'), 'utf-8')),
+  );
+  const parsedProfiles = ProfilesFileSchema.parse(
+    JSON.parse(readFileSync(join(packageSrcDataDir, 'profiles.json'), 'utf-8')),
+  );
 
-  // 3. Generate Markdown views for skill references
-  const contractMd = `# OpenEdu Course Spec Artifact Contract
+  // 2. Skill reference views (generated, committed, CI-freshness-checked)
+  const facts = buildDerivedSchemaFacts();
+  const view = buildAuthoredPromptView();
 
-Version: ${artifactContract.version}
-Format: \`${artifactContract.format}\`
+  const contractMd = [
+    generatedHeader(
+      'OpenEdu Course Spec Artifact Contract',
+      'packages/domain-guidance/src/data/artifact-contract.json',
+    ),
+    `Schema: ${facts.provenance.package} \`${facts.provenance.schema}\` (derived by runtime Zod introspection)`,
+    `Version: ${artifactContract.version}; Format: \`${artifactContract.format}\``,
+    '',
+    '## Top-Level Required Keys',
+    ...facts.requiredTopLevelKeys.map((k: string) => `- \`${k}\``),
+    '',
+    '## Derived Schema Structure',
+    '```json',
+    JSON.stringify(facts, null, 2),
+    '```',
+    '',
+    '## Authored Model Prompt Rules',
+    ...artifactContract.authoredPromptRules.map((r: string) => `- ${r}`),
+    '',
+    '## Authored Prompt View',
+    '```',
+    view,
+    '```',
+    '',
+  ].join('\n');
+  writeFileSync(join(skillRefDir, 'artifact-contract.md'), contractMd + '\n');
 
-## Top-Level Required Keys
-${artifactContract.requiredTopLevelKeys.map((k: string) => `- \`${k}\``).join('\n')}
+  const rubricMd = [
+    generatedHeader(
+      'OpenEdu Quality Rubric Reference',
+      'packages/domain-guidance/src/data/quality-rubric.json',
+    ),
+    `Schema Version: ${parsedRubric.schemaVersion}`,
+    '',
+    '## Dimensions',
+    '',
+    ...parsedRubric.dimensions.map((d: QualityDimension) =>
+      [
+        `### ${d.title} (\`${d.id}\`)`,
+        `- **Description**: ${d.description}`,
+        `- **Failing Message**: ${d.failingMessage}`,
+        `- **Prompt Guidance**: ${d.promptGuidance}`,
+        d.thresholds ? `- **Thresholds**: \`${JSON.stringify(d.thresholds)}\`` : '',
+        '',
+      ].join('\n'),
+    ),
+    '',
+  ].join('\n');
+  writeFileSync(join(skillRefDir, 'quality-rubric.md'), rubricMd + '\n');
 
-## Authored Model Prompt Rules
-${artifactContract.authoredPromptRules.map((r: string) => `- ${r}`).join('\n')}
-
-## Derived Schema Structure
-\`\`\`json
-${JSON.stringify(artifactContract.derivedSchemaFacts, null, 2)}
-\`\`\`
-`;
-  writeFileSync(join(skillRefDir, 'artifact-contract.md'), contractMd);
-
-  const rubricMd = `# OpenEdu Quality Rubric Reference
-
-Schema Version: ${parsedRubric.schemaVersion}
-
-## Dimensions
-
-${parsedRubric.dimensions
-  .map(
-    (d: QualityDimension) => `### ${d.title} (\`${d.id}\`)
-- **Description**: ${d.description}
-- **Failing Message**: ${d.failingMessage}
-- **Prompt Guidance**: ${d.promptGuidance}
-`,
-  )
-  .join('\n')}
-`;
-  writeFileSync(join(skillRefDir, 'quality-rubric.md'), rubricMd);
-
-  const profilesMd = `# OpenEdu Learner Profiles Reference
-
-Schema Version: ${parsedProfiles.schemaVersion}
-Default Profile: \`${parsedProfiles.defaultProfile}\`
-
-## Profiles List
-${Object.values(parsedProfiles.profiles)
-  .map(
-    (p: LearnerProfileDefinition) => `### ${p.name} (\`${p.id}\`)
-- **Audience**: ${p.audience}
-- **Description**: ${p.description}
-- **Accessibility Tags**: ${p.accessibility.length > 0 ? p.accessibility.join(', ') : 'none'}
-- **Pacing**: ${p.pacingRangeMinutes[0]}–${p.pacingRangeMinutes[1]} minutes
-- **Prompt Instructions**: ${p.promptInstructions || 'none'}
-`,
-  )
-  .join('\n')}
-`;
-  writeFileSync(join(skillRefDir, 'profiles.md'), profilesMd);
+  const profilesMd = [
+    generatedHeader(
+      'OpenEdu Learner Profiles Reference',
+      'packages/domain-guidance/src/data/profiles.json',
+    ),
+    `Schema Version: ${parsedProfiles.schemaVersion}`,
+    `Default Profile: \`${parsedProfiles.defaultProfile}\``,
+    '',
+    ...Object.values(parsedProfiles.profiles).map((p: LearnerProfileDefinition) =>
+      [
+        `### ${p.name} (\`${p.id}\`)`,
+        renderProfile(p, p.id === parsedProfiles.defaultProfile),
+        '',
+      ].join('\n'),
+    ),
+    '',
+  ].join('\n');
+  writeFileSync(join(skillRefDir, 'profiles.md'), profilesMd + '\n');
 
   for (const [id, profile] of Object.entries(parsedProfiles.profiles)) {
-    const singleProfileMd = `# Profile: ${profile.name}
-
-- key: ${profile.id}
-- default: ${id === parsedProfiles.defaultProfile}
-- description: ${profile.description}
-
-## Guidance Deltas
-
-${(profile.guidanceDeltas || []).map((g: string) => `- ${g}`).join('\n')}
-
-## Output Deltas
-
-${(profile.outputDeltas || []).map((o: string) => `- ${o}`).join('\n')}
-`;
-    writeFileSync(join(skillRefDir, `profile-${id}.md`), singleProfileMd);
+    const singleProfileMd = [
+      generatedHeader(
+        `Profile: ${profile.name}`,
+        'packages/domain-guidance/src/data/profiles.json',
+      ),
+      renderProfile(profile, id === parsedProfiles.defaultProfile),
+      '',
+    ].join('\n');
+    writeFileSync(join(skillRefDir, `profile-${id}.md`), singleProfileMd + '\n');
   }
+
+  console.log(`Generated domain guidance artifacts -> ${packageSrcDataDir}`);
+  console.log(`Generated skill reference views -> ${skillRefDir}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

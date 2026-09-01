@@ -10,6 +10,12 @@ export function parseCourseSpec(markdown: string): {
   return parseSemantic({ ast, frontmatter });
 }
 
-export { parseCourseSpecJSON, CourseSpecJSONSchema } from './json-input.js';
+export {
+  parseCourseSpecJSON,
+  CourseSpecJSONSchema,
+  LessonJSONSchema,
+  ActivityJSONSchema,
+  MCQQuestionSchema,
+} from './json-input.js';
 export * from './markdown-ast.js';
 export * from './semantic-parser.js';
