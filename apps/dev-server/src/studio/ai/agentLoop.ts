@@ -217,7 +217,14 @@ export async function* runAgentLoop(
           };
           return; // no commit executes without approval (INV-003, INV-010)
         }
-        const result = await tool.execute(parsed.data, { signal: signal ?? undefined });
+        const result = await tool.execute(parsed.data, {
+          signal: signal ?? undefined,
+          // Server-side execution inputs: the model only supplies the
+          // activity/course description, never the filesystem path or the
+          // provider callback (the input schemas intentionally omit them).
+          packageDir: options.packageDir ?? '',
+          completeText: options.completeText,
+        });
         yield { type: 'tool.completed', toolCallId: event.toolCallId, result };
         if (result.ok) {
           yield { type: 'draft.created', draft: result.value as DraftItem[] | CourseDraftResult };

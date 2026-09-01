@@ -287,7 +287,10 @@ export async function createStudioAssistantHandler(
           locale: context.locale,
         });
       },
-      errorFallback: () => msg('assistant.chat.serverError'),
+      errorFallback: (message) => {
+        console.error('[studio-assistant] chat stream error:', message);
+        return msg('assistant.chat.serverError');
+      },
     });
     await pipeUIMessageStreamToResponse({ response: res, status: 200, stream: uiStream });
   } catch (err) {

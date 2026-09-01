@@ -9,11 +9,15 @@ function messageFromError(error: unknown): string {
 
 function toAiSdkTools(
   tools: NonNullable<AgentRuntimeRequest['tools']>,
-): Record<string, { description: string; parameters: unknown }> {
+): Record<string, { description: string; inputSchema: unknown }> {
   return Object.fromEntries(
     tools.map((tool) => [
       tool.name,
-      { description: tool.description, parameters: tool.inputSchema },
+      // AI SDK v7 expects `inputSchema` (a Zod / JSON schema) on the tool; the
+      // legacy v4 `parameters` key is ignored, which silently dropped the input
+      // schema and made the model emit schema-less tool calls that failed
+      // validation (surfacing as the opaque "An error occurred").
+      { description: tool.description, inputSchema: tool.inputSchema },
     ]),
   );
 }
