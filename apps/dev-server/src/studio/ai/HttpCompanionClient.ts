@@ -7,19 +7,20 @@ import type {
 } from './CompanionClient.js';
 import { uiStreamToCompanionEvents } from './uiStreamToCompanionEvents.js';
 
-export interface LocalCompanionClientOptions {
+export interface HttpCompanionClientOptions {
   api: string;
   buildBody: (messages: UIMessage[], chatId: string) => object;
 }
 
 /**
- * Local-mode client: runs the request through the Vite `/api/studio/ai/chat`
- * handler via the AI SDK `DefaultChatTransport`, then re-expresses the resulting
- * UI stream as CompanionEvents. Server tool dispatch (draft / course gen) keeps
- * running exactly as before; only the client-side seam moves.
+ * The single Studio assistant client. Runs the request through the Vite
+ * `/api/studio/ai/chat` handler via the AI SDK `DefaultChatTransport`, then
+ * re-expresses the resulting UI stream as CompanionEvents. Routing and tool
+ * dispatch live server-side in the agent loop; this client never re-parses
+ * intents. Used in both local file-system and browser (OPFS) Studio modes.
  */
-export class LocalCompanionClient implements CompanionClient {
-  constructor(private readonly options: LocalCompanionClientOptions) {}
+export class HttpCompanionClient implements CompanionClient {
+  constructor(private readonly options: HttpCompanionClientOptions) {}
 
   async *run(
     _request: CompanionRequest,
@@ -27,7 +28,7 @@ export class LocalCompanionClient implements CompanionClient {
   ): AsyncIterable<CompanionTransportEvent> {
     const messages = transport?.messages;
     if (!messages) {
-      throw new Error('LocalCompanionClient requires the transport message list');
+      throw new Error('HttpCompanionClient requires the transport message list');
     }
     const chatId = transport?.chatId ?? _request.conversationId;
     const inner = new DefaultChatTransport<UIMessage>({

@@ -16,10 +16,19 @@ export const ActivityKindSchema = z.enum(['lesson', 'quiz', 'practice', 'reflect
 
 export type ActivityKind = z.infer<typeof ActivityKindSchema>;
 
+export const learnerProfileSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  kind: z.enum(['school', 'college', 'adult', 'family', 'neurotypical', 'autism']),
+});
+
+export type LearnerProfile = z.infer<typeof learnerProfileSchema>;
+
 export const studioContextSnapshotSchema = z.object({
   view: StudioViewSchema,
   locale: z.string(),
   aiAvailable: z.boolean(),
+  learner: learnerProfileSchema.optional(),
   course: z
     .object({
       id: z.string(),

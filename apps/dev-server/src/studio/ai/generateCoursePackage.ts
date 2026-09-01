@@ -12,14 +12,19 @@ import type { AiQualityItem } from './types.js';
 export const MIN_NOTES_LENGTH = 40;
 
 export type CourseSpecSource =
-  | { kind: 'notes'; notes: string; completeText: (prompt: string, signal?: AbortSignal) => Promise<string>; signal?: AbortSignal }
+  | {
+      kind: 'notes';
+      notes: string;
+      completeText: (prompt: string, signal?: AbortSignal) => Promise<string>;
+      signal?: AbortSignal;
+    }
   | { kind: 'spec'; spec: string; extension: '.json' | '.md' };
 
 /**
  * Resolve a course spec source into raw spec text. For notes, calls the LLM
  * and extracts JSON. For spec sources, returns the raw text. This is the
- * shared, transport-independent spec resolution used by both the local
- * middleware and the hosted gateway.
+ * shared, transport-independent spec resolution used by the Studio AI
+ * middleware (local and browser modes).
  */
 export async function resolveCourseSpec(source: CourseSpecSource): Promise<string> {
   if (source.kind === 'spec') {

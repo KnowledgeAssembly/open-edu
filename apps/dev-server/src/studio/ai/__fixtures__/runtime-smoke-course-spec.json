@@ -4,7 +4,7 @@
   "generatedAt": "2026-08-18T00:00:00.000Z",
   "metadata": {
     "title": "Runtime Smoke Course",
-    "description": "A minimal fixture for the Phase 2 gateway runtime smoke test.",
+    "description": "A minimal fixture for the Studio AI runtime smoke test.",
     "author": "OpenEdu",
     "version": "1.0.0",
     "difficulty": "beginner",
@@ -15,7 +15,7 @@
     {
       "id": "lesson-smoke",
       "title": "Smoke Lesson",
-      "objectives": ["Verify the gateway can compile a course"],
+      "objectives": ["Verify the middleware can compile a course"],
       "coreIdea": "Compilation validates the Node runtime.",
       "estimatedMinutes": 10,
       "activities": [
