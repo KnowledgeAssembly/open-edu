@@ -51,6 +51,22 @@ The repo treats tests as a primary change guard. The agent instructions and root
 - schema-driven changes should be validated at the package level
 - learner flows rely on Vitest and Playwright coverage
 
+## Studio AI test paths
+
+The Course Creator Studio assistant runs on a single Node backend mounted in both
+Creator (file-system) and Browser (OPFS) modes — no Vercel static-function gateway.
+Unit coverage for the surface lives in `apps/dev-server/src/studio/ai/`:
+
+- `middleware.test.ts` — `createStudioAiMiddleware` routing + the storage-independent
+  item/course-draft endpoints (`existingTitles` instead of a package dir)
+- `handler.test.ts` / `agentLoop.test.ts` — the `/api/studio/ai/chat` loop
+- `StudioChatProvider.transport.test.tsx` — the single client targets
+  `/api/studio/ai/chat` in both modes and never routes intents
+- `browserAiGateway.test.ts` — browser-mode status/draft/item calls against
+  `/api/studio/ai/*` (no `/api/ai/*` anywhere)
+- The chat wire schema + `toAiSdkMessages` / `fromUIMessage` converters live in
+  `@open-edu/companion/chat` (see `packages/companion/src/chat.test.ts`).
+
 ## Tailwind and styling maintenance
 
 The repo has an explicit workflow for CSS freshness:
