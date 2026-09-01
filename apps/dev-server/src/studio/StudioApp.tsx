@@ -224,7 +224,6 @@ export function StudioApp({
         <StudioChatProvider
           courseId={loadedPackage?.manifest.id}
           api={api}
-          chatApiUrl={browserMode ? '/api/ai/chat' : undefined}
           onOpenPath={handleEdit}
           onError={handleError}
           onOutlineChanged={() => {
