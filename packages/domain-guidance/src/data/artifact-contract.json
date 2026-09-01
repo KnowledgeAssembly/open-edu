@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "format": "openedu-course-spec",
+  "version": 1,
+  "requiredTopLevelKeys": ["format", "version", "generatedAt", "metadata", "lessons"],
+  "derivedSchemaFacts": {
+    "provenance": {
+      "package": "@open-edu/course-compiler",
+      "module": "parser/json-input.ts",
+      "schema": "CourseSpecJSONSchema",
+      "derived": "runtime-zod-introspection"
+    },
+    "format": "openedu-course-spec",
+    "version": 1,
+    "requiredTopLevelKeys": ["format", "version", "generatedAt", "metadata", "lessons"],
+    "metadataFields": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "author",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "keywords",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "targetAudience",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "audience",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "accessibility",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "difficulty",
+        "type": "enum(beginner | intermediate | advanced)",
+        "required": false
+      },
+      {
+        "name": "estimatedHours",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "lastUpdated",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "generated",
+        "type": "boolean",
+        "required": true
+      }
+    ],
+    "lessonFields": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "objectives",
+        "type": "string[]",
+        "required": true
+      },
+      {
+        "name": "coreIdea",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "examples",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "misconceptions",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "estimatedMinutes",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "activities",
+        "type": "object[]",
+        "required": true
+      }
+    ],
+    "activityFields": [
+      {
+        "name": "step",
+        "type": "enum(observe | guided_practice | independent_practice | mastery_check | positive_completion)",
+        "required": true
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "type",
+        "type": "enum(reading | exercise | quiz | reflection | widget)",
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "instructions",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "examples",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "questions",
+        "type": "object[]",
+        "required": false
+      },
+      {
+        "name": "widgetId",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "widgetConfig",
+        "type": "record",
+        "required": false
+      }
+    ],
+    "questionFields": [
+      {
+        "name": "question",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "options",
+        "type": "string[]",
+        "required": true
+      },
+      {
+        "name": "correctIndex",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "activitySteps": [
+      "observe",
+      "guided_practice",
+      "independent_practice",
+      "mastery_check",
+      "positive_completion"
+    ],
+    "activityTypes": ["reading", "exercise", "quiz", "reflection", "widget"]
+  },
+  "authoredPromptRules": [
+    "1 to 6 lessons only (teachers build short courses).",
+    "Exactly one activity per lesson with \"type\": \"quiz\"; its questions are multiple-choice with exactly 4 options each.",
+    "Use measurable objectives, never \"understand\", \"know\", or \"learn\".",
+    "Widget ids must be chosen from the AVAILABLE WIDGETS table in this prompt (canonical catalog ids); never \"open-edu.*\".",
+    "All required fields above must be present and non-empty."
+  ]
+}

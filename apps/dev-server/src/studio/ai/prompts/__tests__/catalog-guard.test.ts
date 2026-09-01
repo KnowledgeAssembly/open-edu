@@ -12,6 +12,7 @@ import {
   isCatalogWidgetId,
   assertCatalogWidgetId,
   assertNoLegacyRemoteUrlPrompt,
+  COURSE_SPEC_CONTRACT,
 } from '../index.js';
 
 vi.mock('../../../widgets/curatedCatalog.js', () => ({
@@ -143,9 +144,8 @@ describe('contract guard', () => {
   });
 
   it('the contract names the required top-level keys', () => {
-    const source = readPromptSource('coursePrompt.ts');
     for (const key of ['format', 'version', 'generatedAt', 'metadata', 'lessons']) {
-      expect(source).toContain(`"${key}"`);
+      expect(COURSE_SPEC_CONTRACT).toContain(`"${key}"`);
     }
   });
 });

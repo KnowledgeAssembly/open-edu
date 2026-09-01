@@ -292,6 +292,17 @@ Implementation plan: `docs/superpowers/plans/2026-07-04-three-theme-cutover.md`
 
 ---
 
+### ADR-0009
+
+Course-authoring domain knowledge (widget selection, `course-spec.json` artifact contract, learner profiles, quality rubric) is consolidated behind a single rendering source, `@open-edu/domain-guidance`, which both the external `openedu-course-authoring` skill and the in-app companion render against — while keeping the two skill mechanisms separate. Schema-owning packages (`@open-edu/course-compiler`, the widget catalog pipeline) remain authoritative; `domain-guidance` derives and renders, never re-declares.
+
+Status: **Proposed** — not yet Accepted; do not treat as guiding until accepted.
+
+Decision record: `ADR-0009-unified-course-authoring-guidance.md`
+Implementation plan: `docs/superpowers/plans/2026-09-01-domain-guidance-consolidation.md`
+
+---
+
 # Success Criteria
 
 An ADR is successful when a contributor can understand:

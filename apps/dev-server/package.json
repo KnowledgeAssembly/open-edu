@@ -32,6 +32,7 @@
     "@open-edu/core": "workspace:*",
     "@open-edu/course-compiler": "workspace:^",
     "@open-edu/design-system": "workspace:*",
+    "@open-edu/domain-guidance": "workspace:*",
     "@open-edu/i18n": "workspace:*",
     "@open-edu/llm-config": "workspace:^",
     "@open-edu/logger": "workspace:*",

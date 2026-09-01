@@ -35,6 +35,8 @@ export function StudioChrome({
   setPanelOpen: setPanelOpenProp,
   themeId,
   onThemeChange,
+  targetLearnerKind,
+  onTargetLearnerKindChange,
 }: {
   mode: StudioMode;
   onModeChange: (m: StudioMode) => void;
@@ -47,6 +49,8 @@ export function StudioChrome({
   setPanelOpen?: (open: boolean) => void;
   themeId?: ThemeId;
   onThemeChange?: (id: ThemeId) => void;
+  targetLearnerKind?: string;
+  onTargetLearnerKindChange?: (kind: string) => void;
 }) {
   const { t } = useTranslation();
   const panelOpen = panelOpenProp ?? false;
@@ -203,6 +207,19 @@ export function StudioChrome({
       ) : null}
 
       <div className="flex items-center gap-2">
+        {onTargetLearnerKindChange && targetLearnerKind && (
+          <select
+            aria-label={t('studio.nav.targetLearner')}
+            className="border-outline-variant bg-surface-container text-on-surface rounded border px-2 py-1 text-xs"
+            value={targetLearnerKind}
+            onChange={(e) => onTargetLearnerKindChange(e.target.value)}
+          >
+            <option value="neurotypical">{t('studio.nav.targetNeurotypical')}</option>
+            <option value="autism">{t('studio.nav.targetAutism')}</option>
+            <option value="school">{t('studio.nav.targetSchool')}</option>
+            <option value="college">{t('studio.nav.targetCollege')}</option>
+          </select>
+        )}
         {mode === 'creator' && setPanelOpenProp && (
           <AssistantHeaderButton active={panelOpen} onClick={() => setPanelOpen(!panelOpen)} />
         )}

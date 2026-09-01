@@ -141,6 +141,36 @@ describe('createStudioAssistantHandler', () => {
     expect(args.messages.some((m) => m.role === 'system')).toBe(false);
   });
 
+  it('resolves learner-adaptation into the model prompt when the context carries a target learner profile', async () => {
+    mockStreamText.mockReturnValue({ stream: new ReadableStream() });
+    const res = makeRes();
+    await createStudioAssistantHandler(
+      makeReq({
+        ...validRequest,
+        messages: [{ role: 'user', content: 'How should I teach fraction addition?' }],
+        context: { ...mockContext, learner: { id: 'autism-1', label: 'Autism', kind: 'autism' } },
+      }),
+      res,
+      {},
+    );
+
+    const args = mockStreamText.mock.calls[0]![0] as {
+      system?: string;
+      tools: Record<string, { description: string }>;
+    };
+    expect(args.system).toContain('Adapt content for an autistic learner');
+    expect(Object.keys(args.tools)).toContain('generate_item');
+  });
+
+  it('injects no learner-adaptation guidance when the default context has no learner', async () => {
+    mockStreamText.mockReturnValue({ stream: new ReadableStream() });
+    const res = makeRes();
+    await createStudioAssistantHandler(makeReq(validRequest), res, {});
+
+    const args = mockStreamText.mock.calls[0]![0] as { system?: string };
+    expect(args.system).not.toContain('Adapt content for an autistic learner');
+  });
+
   it('aborts the explain stream only when the response closes before completion', async () => {
     mockStreamText.mockReturnValue({ stream: new ReadableStream() });
     const res = makeRes();
