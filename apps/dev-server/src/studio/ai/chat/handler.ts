@@ -12,7 +12,7 @@ import {
   MAX_MESSAGES,
   MAX_CONTEXT_CHARS,
   MAX_REQUEST_SIZE_BYTES,
-} from './config';
+} from '@open-edu/companion/chat';
 import { buildSystemPrompt, extractSuggestedNextSteps } from './policy';
 import { createChatMetadata, type StudioChatMetadata } from './metadata';
 import { studioChatMessage } from './messages';
