@@ -209,15 +209,15 @@ export function StudioChrome({
       <div className="flex items-center gap-2">
         {onTargetLearnerKindChange && targetLearnerKind && (
           <select
-            aria-label={t('nav.targetLearner')}
+            aria-label={t('studio.nav.targetLearner')}
             className="border-outline-variant bg-surface-container text-on-surface rounded border px-2 py-1 text-xs"
             value={targetLearnerKind}
             onChange={(e) => onTargetLearnerKindChange(e.target.value)}
           >
-            <option value="neurotypical">{t('nav.targetNeurotypical')}</option>
-            <option value="autism">{t('nav.targetAutism')}</option>
-            <option value="school">{t('nav.targetSchool')}</option>
-            <option value="college">{t('nav.targetCollege')}</option>
+            <option value="neurotypical">{t('studio.nav.targetNeurotypical')}</option>
+            <option value="autism">{t('studio.nav.targetAutism')}</option>
+            <option value="school">{t('studio.nav.targetSchool')}</option>
+            <option value="college">{t('studio.nav.targetCollege')}</option>
           </select>
         )}
         {mode === 'creator' && setPanelOpenProp && (
