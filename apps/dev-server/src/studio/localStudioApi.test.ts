@@ -401,4 +401,68 @@ describe('localStudioApi client', () => {
     const api = createLocalStudioApi();
     await expect(api.exportUnitOep('units/missing')).rejects.toThrow('bundle.json not found');
   });
+
+  it('listFiles fetches the package tree', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          files: [{ path: 'package.json', label: 'package.json', category: 'manifest', extension: '.json' }],
+        }),
+        { status: 200 },
+      ),
+    );
+    const api = createLocalStudioApi();
+    const result = await api.listFiles();
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/package/tree');
+    expect(init?.method ?? 'GET').toBe('GET');
+    expect(result[0]?.path).toBe('package.json');
+  });
+
+  it('createFile posts path + content to /api/package/file', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true, path: 'nodes/new.md' }), { status: 200 }),
+    );
+    const api = createLocalStudioApi();
+    const result = await api.createFile('nodes/new.md', '# Hello');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/package/file');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({
+      path: 'nodes/new.md',
+      content: '# Hello',
+      validate: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('renameFile posts oldPath + newPath to /api/package/rename', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true, oldPath: 'a.md', newPath: 'b.md' }), {
+        status: 200,
+      }),
+    );
+    const api = createLocalStudioApi();
+    const result = await api.renameFile('nodes/a.md', 'nodes/b.md');
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/package/rename');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({ oldPath: 'nodes/a.md', newPath: 'nodes/b.md' });
+    expect(result.newPath).toBe('b.md');
+  });
+
+  it('uploadAsset sends multipart form data without json content type', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true, path: 'assets/x.png' }), { status: 200 }),
+    );
+    const api = createLocalStudioApi();
+    const file = new File(['bytes'], 'x.png', { type: 'image/png' });
+    const result = await api.uploadAsset(file);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/package/assets/upload');
+    expect(init?.method).toBe('POST');
+    expect(init?.headers).toBeUndefined();
+    expect(init?.body).toBeInstanceOf(FormData);
+    expect(result.path).toBe('assets/x.png');
+  });
 });

@@ -1,5 +1,3 @@
-export type StudioMode = 'creator' | 'developer';
-
 export type StudioView =
   | 'home'
   | 'outline'

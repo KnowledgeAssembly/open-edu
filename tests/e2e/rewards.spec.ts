@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, type TestServer } from './helpers';
+import {
+  startServer,
+  openStudioPreview,
+  openPreviewDevtools,
+  type TestServer,
+} from './helpers';
 
 const LIVING_VS_NONLIVING = resolve('examples/living-vs-nonliving');
 
@@ -17,6 +22,7 @@ test.describe('living-vs-nonliving (with rewards)', () => {
 
   test('loads and displays content without blank page', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await expect(page.getByRole('heading', { level: 1 }).first()).toHaveText(
       'Living vs Non-Living Things',
     );
@@ -26,6 +32,7 @@ test.describe('living-vs-nonliving (with rewards)', () => {
 
   test('shows DevTools with pending rewards', async ({ page }) => {
     await page.goto(server.url);
+    await openPreviewDevtools(page);
     await page.getByRole('tab', { name: 'Rewards' }).click();
     await expect(page.getByText('Pending (3)')).toBeVisible();
     await expect(page.getByText(/badge.award: living-nonliving-mastery/)).toBeVisible();
@@ -33,7 +40,9 @@ test.describe('living-vs-nonliving (with rewards)', () => {
 
   test('reward broker fires on workflow completion', async ({ page }) => {
     await page.goto(server.url);
+    await openPreviewDevtools(page);
     await page.getByRole('tab', { name: 'Rewards' }).click();
+    await expect(page.getByText('Pending (3)').first()).toBeVisible();
 
     const initial = await page.locator('text=Delivered').count();
 

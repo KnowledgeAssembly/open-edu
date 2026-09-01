@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, tabTo, type TestServer } from './helpers';
+import { startServer, tabTo, openStudioPreview, type TestServer } from './helpers';
 
 const HELLO_WORLD = resolve('examples/hello-world');
 const FRACTIONS = resolve('examples/fractions');
@@ -18,6 +18,7 @@ test.describe('keyboard navigation - hello-world', () => {
 
   test('can navigate to Next button and activate with Enter', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });
@@ -30,6 +31,7 @@ test.describe('keyboard navigation - hello-world', () => {
 
   test('completion heading is visible after keyboard navigation', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });
@@ -43,6 +45,7 @@ test.describe('keyboard navigation - hello-world', () => {
 
   test('Escape does not trap user', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.keyboard.press('Escape');
@@ -63,6 +66,7 @@ test.describe('keyboard navigation - fractions (conditional branching)', () => {
 
   test('can navigate quiz options and submit with keyboard', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });
@@ -81,6 +85,7 @@ test.describe('keyboard navigation - fractions (conditional branching)', () => {
 
   test('Escape does not trap user on quiz', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });

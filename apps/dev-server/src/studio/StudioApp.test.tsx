@@ -49,6 +49,10 @@ vi.mock('./localStudioApi.js', () => ({
     readFile: readFileMock,
     writeFile: writeFileMock,
     deleteFile: vi.fn(),
+    listFiles: vi.fn().mockResolvedValue([]),
+    createFile: vi.fn().mockResolvedValue({ success: true, path: 'nodes/new.md' }),
+    renameFile: vi.fn().mockResolvedValue({ success: true, oldPath: 'a', newPath: 'b' }),
+    uploadAsset: vi.fn().mockResolvedValue({ success: true, path: 'assets/x.png' }),
     getPreviewPackage: vi.fn().mockResolvedValue(null),
     getStorageStatus: vi.fn().mockResolvedValue({ available: true }),
     getAiStatus: getAiStatusMock,
@@ -140,10 +144,10 @@ describe('StudioApp', () => {
     await userEvent.click(screen.getByRole('button', { name: /replace and continue/i }));
   }
 
-  it('renders studio chrome with mode toggle', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+  it('renders studio chrome', async () => {
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: /studio mode/i })).toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: /studio mode/i })).not.toBeInTheDocument();
   });
 
   it('renders the theme switcher in the top bar and changes the theme', async () => {
@@ -151,8 +155,6 @@ describe('StudioApp', () => {
     render(
       wrap(
         <StudioApp
-          mode="creator"
-          onModeChange={() => {}}
           loadedPackage={mockPkg}
           themeId="lumina-scholastica"
           onThemeChange={onThemeChange}
@@ -166,7 +168,7 @@ describe('StudioApp', () => {
 
   it('fills the viewport height so full-height views like the preview can stretch', async () => {
     const { container } = render(
-      wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />),
+      wrap(<StudioApp loadedPackage={mockPkg} />),
     );
     const main = container.querySelector('main');
     expect(main).not.toBeNull();
@@ -179,18 +181,18 @@ describe('StudioApp', () => {
   });
 
   it('starts on Home with template gallery', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     expect(await screen.findByText('Reading lesson')).toBeInTheDocument();
   });
 
   it('navigates to outline after opening a template', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 
   it('navigates to share via top bar nav', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     await userEvent.click(
       within(screen.getByRole('banner')).getByRole('button', { name: /share/i }),
@@ -199,7 +201,7 @@ describe('StudioApp', () => {
   });
 
   it('navigates to Share from the outline health strip', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     await screen.findByText('Intro');
     const aside = await screen.findByRole('complementary');
@@ -208,7 +210,7 @@ describe('StudioApp', () => {
   });
 
   it('opens the activity editor from the outline', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     await screen.findByText('Intro');
     await userEvent.click(screen.getByRole('button', { name: 'Intro' }));
@@ -216,7 +218,7 @@ describe('StudioApp', () => {
   });
 
   it('records a recent course when opening a template', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await useTemplateAndConfirm();
     await screen.findByText('Intro');
     const recent = localStorage.getItem('openedu.studio.recent');
@@ -226,19 +228,19 @@ describe('StudioApp', () => {
   });
 
   it('reaches outline directly from Home via the top bar (no dead end)', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 
   it('restores the last view after a full reload (session persistence)', async () => {
     sessionStorage.setItem('openedu.studio.view', 'outline');
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
 
   it('navigates Home to the loaded package via Open this course', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /open this course/i }));
     expect(await screen.findByText('Intro')).toBeInTheDocument();
   });
@@ -246,16 +248,16 @@ describe('StudioApp', () => {
   it('shows an unsupported shell for bundles without package mutations', () => {
     render(
       wrap(
-        <StudioApp mode="creator" onModeChange={() => {}} loadedPackage={null} bundleUnsupported />,
+        <StudioApp loadedPackage={null} bundleUnsupported />,
       ),
     );
-    expect(screen.getByText('Bundles need Developer mode')).toBeInTheDocument();
+    expect(screen.getByText('Bundles are not supported yet')).toBeInTheDocument();
     expect(screen.queryByText('Reading lesson')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /outline/i })).not.toBeInTheDocument();
   });
 
   it('exposes the Learning path and Rewards & cards panels from the outline', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     await screen.findByText('Intro');
     expect(screen.getByRole('button', { name: /learning path/i })).toBeInTheDocument();
@@ -263,7 +265,7 @@ describe('StudioApp', () => {
   });
 
   it('renders flow and rewards panel content when expanded', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     await userEvent.click(screen.getByRole('button', { name: /outline/i }));
     await screen.findByText('Intro');
     await userEvent.click(screen.getByRole('button', { name: /learning path/i }));
@@ -275,14 +277,14 @@ describe('StudioApp', () => {
   });
 
   it('navigates to the library via the My courses top-bar button', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
     await userEvent.click(myCourses[0]!);
     expect(await screen.findByText('Fractions')).toBeInTheDocument();
   });
 
   it('opens a library course into the outline view', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
     await userEvent.click(myCourses[0]!);
     await userEvent.click(await screen.findByRole('button', { name: /^open$/i }));
@@ -290,7 +292,7 @@ describe('StudioApp', () => {
   });
 
   it('reaches the unit-builder placeholder from the library', async () => {
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     const myCourses = await screen.findAllByRole('button', { name: /my courses/i });
     await userEvent.click(myCourses[0]!);
     await userEvent.click(await screen.findByRole('button', { name: /create unit/i }));
@@ -305,7 +307,7 @@ describe('StudioApp', () => {
       outlinePreview: [{ title: 'Intro', kind: 'lesson' }],
       title: 'AI Course',
     });
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     const elements = await screen.findAllByText('Or start with AI');
     expect(elements.length).toBeGreaterThanOrEqual(1);
   });
@@ -314,9 +316,17 @@ describe('StudioApp', () => {
     writeFileMock.mockClear();
     saveOutlineOrderMock.mockClear();
 
-    render(wrap(<StudioApp mode="creator" onModeChange={() => {}} loadedPackage={mockPkg} />));
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
     const outlineBtn = await screen.findByRole('button', { name: /outline/i });
     await userEvent.click(outlineBtn);
     expect(await screen.findByText('Intro')).toBeInTheDocument();
+  });
+
+  it('switches to the Files tab from outline without crashing', async () => {
+    render(wrap(<StudioApp loadedPackage={mockPkg} />));
+    await userEvent.click(await screen.findByRole('button', { name: /outline/i }));
+    await screen.findByText('Intro');
+    await userEvent.click(screen.getByRole('tab', { name: 'Files' }));
+    expect(screen.getByRole('tab', { name: 'Files' })).toHaveAttribute('data-state', 'active');
   });
 });

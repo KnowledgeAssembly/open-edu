@@ -31,6 +31,20 @@ export interface EditorFile {
 export type EditorMode = 'preview' | 'edit';
 export type ViewMode = 'form' | 'raw';
 
+export interface PackageFileApi {
+  listFiles(): Promise<FileEntry[]>;
+  getPackageDir(): Promise<string>;
+  readFile(path: string): Promise<{ path: string; content: string }>;
+  writeFile(path: string, content: string, validate?: boolean): Promise<{ success: boolean }>;
+  deleteFile(path: string): Promise<{ success: boolean }>;
+  renameFile(
+    oldPath: string,
+    newPath: string,
+  ): Promise<{ success: boolean; oldPath: string; newPath: string }>;
+  createFile(path: string, content?: string): Promise<{ success: boolean; path: string }>;
+  uploadAsset(file: File, path?: string): Promise<{ success: boolean; path: string }>;
+}
+
 export interface ValidationResult {
   valid: boolean;
   error: string | null;

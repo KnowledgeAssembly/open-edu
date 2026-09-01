@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { resolve, join } from 'path';
 import { mkdtempSync, writeFileSync, readFileSync, cpSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
-import { startServer, type TestServer } from './helpers';
+import { startServer, openStudioPreview, type TestServer } from './helpers';
 
 test.describe('hot reload preserves state', () => {
   let server: TestServer;
@@ -22,6 +22,7 @@ test.describe('hot reload preserves state', () => {
 
   test('preserves node state after markdown edit', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -40,6 +41,7 @@ test.describe('hot reload preserves state', () => {
 
   test('preserves node state after JSON edit', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();

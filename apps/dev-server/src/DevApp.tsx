@@ -1,42 +1,11 @@
-import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
-import {
-  RuntimeProvider,
-  LayoutShell,
-  RuntimeThemeProvider,
-  BundleOverview,
-  RewardEventBridge,
-  useThemePreference,
-} from '@open-edu/runtime';
+import { useEffect } from 'react';
+import { RuntimeThemeProvider, useThemePreference } from '@open-edu/runtime';
 import type { ThemeId } from '@open-edu/runtime';
-import { createRewardReceiptBridge } from './createRewardReceiptBridge.js';
-import { WorkflowEngine } from '@open-edu/workflow';
-import type { WorkflowEvent } from '@open-edu/workflow';
-import { TelemetrySession } from '@open-edu/telemetry';
-import type { TelemetryEvent, ProgressSnapshot } from '@open-edu/schemas';
-import { AccessibilityProvider } from '@open-edu/accessibility';
 import type { LoadedPackage, LoadedBundle } from '@open-edu/core';
-import { createDefaultRegistry } from '@open-edu/widgets';
-import { RewardBroker } from '@open-edu/rewards';
-import type { RewardReceipt } from '@open-edu/rewards';
-import { Badge } from './components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './components/ui/select';
-import { InspectorPanel } from './inspectors/InspectorPanel';
-import { loadProgress, saveProgress, clearProgress } from './progressStorage';
-import { EditorShell } from './editor/EditorShell';
-import type { EditorMode } from './editor/types';
-import { getStudioMode, setStudioMode } from './studio/modeStorage.js';
-import type { StudioMode } from './studio/types.js';
 import { StudioApp } from './studio/StudioApp.js';
 import './studio/browserPreview.js';
 import { OPFSWorkspace } from '@open-edu/storage';
 import { BrowserStudioProvider, useBrowserStudio } from './studio/browserPreview.js';
-import { DeveloperToolbar } from './components/DeveloperToolbar.js';
 import { useTranslation } from '@open-edu/i18n';
 
 import {
@@ -52,433 +21,10 @@ const loadedBundle = rawBundleData
     } as LoadedBundle)
   : null;
 
-function DevAppFallback({ title, message }: { title: string; message: string }): JSX.Element {
-  return (
-    <div className="text-error max-w-[40rem] p-8 font-sans">
-      <h1 className="mb-2 text-2xl">{title}</h1>
-      <p className="text-on-surface-variant">{message}</p>
-    </div>
-  );
-}
-
-function BundleDevApp({
-  bundle,
-  mode,
-  onModeChange,
-  themeId,
-}: {
-  bundle: LoadedBundle;
-  mode: StudioMode;
-  onModeChange: (mode: StudioMode) => void;
-  themeId: ThemeId;
-}): JSX.Element {
-  const { t } = useTranslation();
-  const [selectedModuleId, setSelectedModuleId] = useState<string>(
-    bundle.modules[0]?.manifest.id ?? '',
-  );
-  const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
-  const [rewardReceipts] = useState<RewardReceipt[]>([]);
-  const [showOverview, setShowOverview] = useState(false);
-  const [progressKey, setProgressKey] = useState(0);
-  const [editorMode, setEditorMode] = useState<EditorMode>('preview');
-  const [editorOpen, setEditorOpen] = useState(false);
-
-  const moduleSessionRef = useRef<TelemetrySession | null>(null);
-
-  const currentPkg = useMemo(() => {
-    return selectedModuleId ? (bundle.moduleMap.get(selectedModuleId) ?? null) : null;
-  }, [selectedModuleId, bundle]);
-
-  const initialProgress = useMemo(() => {
-    if (!currentPkg) return undefined;
-    return loadProgress(currentPkg.manifest.id, currentPkg.manifest.version) ?? undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressKey, currentPkg?.manifest.id]);
-
-  const engine = useMemo(() => {
-    if (!currentPkg?.workflow) return null;
-    const saved = initialProgress?.currentNodeId;
-    const entry = saved && saved in currentPkg.workflow.routing ? saved : currentPkg.manifest.entry;
-    return new WorkflowEngine(currentPkg.workflow, { entry });
-  }, [currentPkg, initialProgress, progressKey]);
-
-  useEffect(() => {
-    const session = new TelemetrySession();
-    session.start();
-    moduleSessionRef.current = session;
-
-    const eventSub = session.events$.subscribe({
-      next: (event) => {
-        setTelemetryEvents((prev) => [...prev, event]);
-      },
-    });
-
-    let engineUnsub: (() => void) | undefined;
-    if (engine) {
-      engineUnsub = engine.subscribe((event: WorkflowEvent) => {
-        if (event.type === 'node.entered' && event.nodeId) {
-          session.emit({
-            event: 'node_open',
-            nodeId: event.nodeId,
-            bundleId: bundle.manifest.id,
-            moduleId: selectedModuleId,
-          } as never);
-        } else if (event.type === 'node.completed' && event.nodeId) {
-          session.emit({
-            event: 'node_complete',
-            nodeId: event.nodeId,
-            score: event.score,
-            bundleId: bundle.manifest.id,
-            moduleId: selectedModuleId,
-          } as never);
-        } else if (event.type === 'workflow.completed') {
-          session.emit({
-            event: 'workflow_complete',
-            bundleId: bundle.manifest.id,
-            moduleId: selectedModuleId,
-          } as never);
-        }
-      });
-    }
-
-    return () => {
-      engineUnsub?.();
-      eventSub.unsubscribe();
-      session.stop();
-      moduleSessionRef.current = null;
-    };
-  }, [engine, selectedModuleId, bundle.manifest.id]);
-
-  const handleProgressChange = useCallback(
-    (snapshot: ProgressSnapshot) => {
-      if (currentPkg) {
-        saveProgress(currentPkg.manifest.id, currentPkg.manifest.version, snapshot);
-      }
-    },
-    [currentPkg],
-  );
-
-  const widgetRegistry = useMemo(() => createDefaultRegistry(), []);
-
-  const handleReset = useCallback(() => {
-    if (currentPkg) {
-      clearProgress(currentPkg.manifest.id, currentPkg.manifest.version);
-      setProgressKey((k) => k + 1);
-    }
-  }, [currentPkg]);
-
-  const handleEditorToggle = useCallback(() => {
-    setEditorOpen((prev) => !prev);
-    setEditorMode((prev) => (prev === 'preview' ? 'edit' : 'preview'));
-  }, []);
-
-  if (editorMode === 'edit') {
-    return (
-      <RuntimeThemeProvider themeId={themeId}>
-        <EditorShell
-          isOpen={editorOpen}
-          onToggle={handleEditorToggle}
-          mode={editorMode}
-          onModeChange={(mode) => {
-            setEditorMode(mode);
-            setEditorOpen(mode === 'edit');
-          }}
-        />
-      </RuntimeThemeProvider>
-    );
-  }
-
-  if (showOverview) {
-    return (
-      <RuntimeThemeProvider themeId={themeId}>
-        <AccessibilityProvider>
-          <BundleOverview
-            bundleTitle={bundle.manifest.title}
-            bundleId={bundle.manifest.id}
-            description={bundle.manifest.description}
-            modules={bundle.manifest.modules.map((m) => ({
-              id: m.id,
-              title: m.title,
-              chapterCode: m.chapterCode,
-              status: 'unlocked' as const,
-              nodeCount: bundle.moduleMap.get(m.id)?.nodes.length ?? 0,
-              completedNodeCount: 0,
-              estimatedDuration: m.estimatedDuration,
-            }))}
-            onStartModule={(moduleId) => {
-              setSelectedModuleId(moduleId);
-              setShowOverview(false);
-            }}
-            onBackToCatalog={() => setShowOverview(false)}
-          />
-        </AccessibilityProvider>
-      </RuntimeThemeProvider>
-    );
-  }
-
-  if (!currentPkg) {
-    return (
-      <DevAppFallback title="No module selected" message="Select a module from the dropdown." />
-    );
-  }
-
-  if (!engine) {
-    return <DevAppFallback title="No workflow" message="Selected module has no workflow." />;
-  }
-
-  return (
-    <RuntimeThemeProvider themeId={themeId}>
-      <AccessibilityProvider>
-        <RuntimeProvider
-          key={progressKey}
-          loadedPackage={currentPkg}
-          engine={engine}
-          initialProgress={initialProgress}
-          onProgressChange={handleProgressChange}
-          widgetRegistry={widgetRegistry}
-          onTelemetryEvent={(e) => moduleSessionRef.current?.emit(e)}
-        >
-          <div className="flex h-screen">
-            <div className="min-w-0 flex-1 overflow-auto">
-              <DeveloperToolbar
-                mode={mode}
-                onModeChange={onModeChange}
-                onEdit={handleEditorToggle}
-                onReset={handleReset}
-                onOverview={() => setShowOverview(true)}
-              />
-              <div className="border-outline-variant bg-surface-container-low flex flex-wrap items-center gap-3 border-b px-4 py-2">
-                <Badge>Bundle Mode</Badge>
-                <Select value={selectedModuleId} onValueChange={setSelectedModuleId}>
-                  <SelectTrigger
-                    className="border-outline-variant bg-surface text-on-surface w-auto min-w-[200px] px-2 py-1 text-sm"
-                    aria-label={t('studio.developer.selectModule')}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bundle.manifest.modules.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <LayoutShell />
-            </div>
-            <InspectorPanel
-              telemetryEvents={telemetryEvents}
-              rewardReceipts={rewardReceipts}
-              bundleData={bundle}
-            />
-          </div>
-        </RuntimeProvider>
-      </AccessibilityProvider>
-    </RuntimeThemeProvider>
-  );
-}
-
-function SinglePackageDeveloperApp({
-  mode,
-  onModeChange,
-  themeId,
-}: {
-  mode: StudioMode;
-  onModeChange: (mode: StudioMode) => void;
-  themeId: ThemeId;
-}): JSX.Element {
-  const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
-  const telemetrySessionRef = useRef<TelemetrySession | null>(null);
-  const brokerRef = useRef<RewardBroker | null>(null);
-  const [rewardReceipts, setRewardReceipts] = useState<RewardReceipt[]>([]);
-  const [progressKey, setProgressKey] = useState(0);
-  const [editorMode, setEditorMode] = useState<EditorMode>('preview');
-  const [editorOpen, setEditorOpen] = useState(false);
-
-  const rewardBridge = useMemo(() => createRewardReceiptBridge(), []);
-
-  const initialProgress = useMemo(() => {
-    if (!loadedPkg) return undefined;
-    return loadProgress(loadedPkg.manifest.id, loadedPkg.manifest.version) ?? undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressKey]);
-
-  const engine = useMemo(() => {
-    if (!loadedPkg?.workflow) return null;
-    const saved = initialProgress?.currentNodeId;
-    const entry = saved && saved in loadedPkg.workflow.routing ? saved : loadedPkg.manifest.entry;
-    return new WorkflowEngine(loadedPkg.workflow, { entry });
-  }, [loadedPkg, initialProgress, progressKey]);
-
-  useEffect(() => {
-    const session = new TelemetrySession();
-    session.start();
-    telemetrySessionRef.current = session;
-
-    const eventSub = session.events$.subscribe({
-      next: (event) => {
-        setTelemetryEvents((prev) => [...prev, event]);
-      },
-    });
-
-    const broker = loadedPkg?.rewards
-      ? new RewardBroker({
-          rewards: loadedPkg.rewards,
-          source: session.events$,
-          onReceipt: (receipt) => {
-            rewardBridge.onReceipt(receipt);
-            setRewardReceipts((prev) => [...prev, receipt]);
-          },
-        })
-      : null;
-    broker?.start();
-    brokerRef.current = broker;
-
-    let engineUnsub: (() => void) | undefined;
-    if (engine) {
-      engineUnsub = engine.subscribe((event: WorkflowEvent) => {
-        if (event.type === 'node.entered' && event.nodeId) {
-          session.emit({ event: 'node_open', nodeId: event.nodeId } as never);
-        } else if (event.type === 'node.completed' && event.nodeId) {
-          session.emit({
-            event: 'node_complete',
-            nodeId: event.nodeId,
-            score: event.score,
-          } as never);
-          broker?.updateContext({
-            scores: event.score != null ? { [event.nodeId]: event.score } : undefined,
-            completedNodes: [event.nodeId],
-          });
-        } else if (event.type === 'workflow.completed') {
-          session.emit({ event: 'workflow_complete' } as never);
-          broker?.updateContext({
-            completedNodes: ['__workflow__'],
-          });
-        }
-      });
-    }
-
-    return () => {
-      engineUnsub?.();
-      broker?.stop();
-      eventSub.unsubscribe();
-      session.stop();
-      telemetrySessionRef.current = null;
-      brokerRef.current = null;
-    };
-  }, [engine, rewardBridge]);
-
-  const handleProgressChange = useCallback((snapshot: ProgressSnapshot) => {
-    if (loadedPkg) {
-      saveProgress(loadedPkg.manifest.id, loadedPkg.manifest.version, snapshot);
-    }
-  }, []);
-
-  const widgetRegistry = useMemo(() => {
-    return createDefaultRegistry();
-  }, []);
-
-  const handleReset = useCallback(() => {
-    if (loadedPkg) {
-      clearProgress(loadedPkg.manifest.id, loadedPkg.manifest.version);
-      setProgressKey((k) => k + 1);
-    }
-  }, []);
-
-  const handleEditorToggle = useCallback(() => {
-    setEditorOpen((prev) => !prev);
-    setEditorMode((prev) => (prev === 'preview' ? 'edit' : 'preview'));
-  }, []);
-
-  // Show editor when in edit mode
-  if (editorMode === 'edit') {
-    return (
-      <RuntimeThemeProvider themeId={themeId}>
-        <EditorShell
-          isOpen={editorOpen}
-          onToggle={handleEditorToggle}
-          mode={editorMode}
-          onModeChange={(mode) => {
-            setEditorMode(mode);
-            setEditorOpen(mode === 'edit');
-          }}
-        />
-      </RuntimeThemeProvider>
-    );
-  }
-
-  if (!loadedPkg) {
-    return (
-      <DevAppFallback
-        title="No package loaded"
-        message="Ensure OPEN_EDU_PACKAGE_DIR or OPEN_EDU_BUNDLE_DIR is set and points to a valid Open-Edu package or bundle directory."
-      />
-    );
-  }
-
-  if (!engine) {
-    return (
-      <DevAppFallback
-        title="No workflow defined"
-        message={`The package at ${loadedPkg.rootDir} has no workflow.json. Add a workflow to enable navigation.`}
-      />
-    );
-  }
-
-  return (
-    <RuntimeThemeProvider themeId={themeId}>
-      <AccessibilityProvider>
-        <RuntimeProvider
-          key={progressKey}
-          loadedPackage={loadedPkg}
-          engine={engine}
-          initialProgress={initialProgress}
-          onProgressChange={handleProgressChange}
-          widgetRegistry={widgetRegistry}
-          onTelemetryEvent={(e) => telemetrySessionRef.current?.emit(e)}
-        >
-          <RewardEventBridge receipts$={rewardBridge.receipts$} />
-          <div className="flex h-screen">
-            <div className="min-w-0 flex-1 overflow-auto">
-              <DeveloperToolbar
-                mode={mode}
-                onModeChange={onModeChange}
-                onEdit={handleEditorToggle}
-                onReset={handleReset}
-              />
-              <LayoutShell />
-            </div>
-            <InspectorPanel
-              telemetryEvents={telemetryEvents}
-              rewardReceipts={rewardReceipts}
-              definedRewards={
-                loadedPkg?.rewards
-                  ? loadedPkg.rewards.triggers.flatMap((t) =>
-                      t.rewards.map((r) => ({
-                        action: r.action,
-                        badge: (r as any).badge,
-                        condition: (r as any).condition,
-                      })),
-                    )
-                  : undefined
-              }
-            />
-          </div>
-        </RuntimeProvider>
-      </AccessibilityProvider>
-    </RuntimeThemeProvider>
-  );
-}
-
 function BrowserStudioApp({
-  mode,
-  onModeChange,
   themeId,
   onThemeChange,
 }: {
-  mode: StudioMode;
-  onModeChange: (mode: StudioMode) => void;
   themeId: ThemeId;
   onThemeChange: (id: ThemeId) => void;
 }): JSX.Element {
@@ -501,8 +47,6 @@ function BrowserStudioApp({
 
   return (
     <StudioApp
-      mode={mode}
-      onModeChange={onModeChange}
       loadedPackage={loadedPackage}
       api={api}
       storageNotice={storageNotice}
@@ -514,15 +58,9 @@ function BrowserStudioApp({
 }
 
 export function DevApp(): JSX.Element {
-  const [studioMode, setStudioModeState] = useState<StudioMode>(() => getStudioMode());
   const [themeId, setThemeId] = useThemePreference();
 
   const isBrowserMode = import.meta.env.VITE_OPEN_EDU_BROWSER === '1';
-
-  const setStudioModeAndPersist = useCallback((mode: StudioMode) => {
-    setStudioMode(mode);
-    setStudioModeState(mode);
-  }, []);
 
   // Expose the workspace adapter on the browser build so Playwright can drive a
   // real OPFSWorkspace round-trip (tests/e2e/opfs-workspace.spec.ts). Harmless
@@ -537,48 +75,20 @@ export function DevApp(): JSX.Element {
     return (
       <RuntimeThemeProvider themeId={themeId}>
         <BrowserStudioProvider>
-          <BrowserStudioApp
-            mode={studioMode}
-            onModeChange={setStudioModeAndPersist}
-            themeId={themeId}
-            onThemeChange={setThemeId}
-          />
+          <BrowserStudioApp themeId={themeId} onThemeChange={setThemeId} />
         </BrowserStudioProvider>
       </RuntimeThemeProvider>
     );
   }
 
-  if (studioMode === 'creator') {
-    return (
-      <RuntimeThemeProvider themeId={themeId}>
-        <StudioApp
-          mode={studioMode}
-          onModeChange={setStudioModeAndPersist}
-          loadedPackage={loadedPkg}
-          bundleUnsupported={Boolean(loadedBundle)}
-          themeId={themeId}
-          onThemeChange={setThemeId}
-        />
-      </RuntimeThemeProvider>
-    );
-  }
-
-  if (loadedBundle) {
-    return (
-      <BundleDevApp
-        bundle={loadedBundle}
-        mode={studioMode}
-        onModeChange={setStudioModeAndPersist}
-        themeId={themeId}
-      />
-    );
-  }
-
   return (
-    <SinglePackageDeveloperApp
-      mode={studioMode}
-      onModeChange={setStudioModeAndPersist}
-      themeId={themeId}
-    />
+    <RuntimeThemeProvider themeId={themeId}>
+      <StudioApp
+        loadedPackage={loadedPkg}
+        bundleUnsupported={Boolean(loadedBundle)}
+        themeId={themeId}
+        onThemeChange={setThemeId}
+      />
+    </RuntimeThemeProvider>
   );
 }

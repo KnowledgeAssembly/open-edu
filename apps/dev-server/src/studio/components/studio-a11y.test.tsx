@@ -11,8 +11,11 @@ import { ShareView } from './ShareView';
 import { StudioChrome } from './StudioChrome';
 import { HomeView } from './HomeView';
 import { OutlineView } from './OutlineView';
+import { OutlineWorkspace } from './OutlineWorkspace';
+import { CreatorPreview } from '../CreatorPreview';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
+import type { LoadedPackage } from '@open-edu/core';
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
@@ -71,6 +74,36 @@ const validQuiz = JSON.stringify({
   ],
 });
 
+vi.mock('@dotlottie/react-player', () => ({
+  DotLottiePlayer: () => <div data-testid="mocked-dotlottie" />,
+  PlayerEvents: {},
+}));
+
+const previewPkg: LoadedPackage = {
+  rootDir: '/test',
+  manifest: {
+    id: 'test',
+    title: 'Test',
+    version: '1.0.0',
+    author: 'Test',
+    entry: 'nodes/lesson.md',
+  },
+  workflow: {
+    routing: { 'nodes/lesson.md': { onComplete: 'COMPLETED' } },
+  },
+  rewards: null,
+  cards: null,
+  nodes: [
+    {
+      path: '/test/nodes/lesson.md',
+      relativePath: 'nodes/lesson.md',
+      content: '# Hello\nWorld',
+      node: { type: 'lesson' },
+    },
+  ],
+  assetPaths: [],
+};
+
 function wrap(ui: React.ReactElement) {
   return (
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
@@ -114,6 +147,10 @@ function makeApi(overrides: Partial<StudioApi> = {}): StudioApi {
     importCourseFolder: vi.fn(),
     createUnit: vi.fn(),
     exportUnitOep: vi.fn(),
+    listFiles: vi.fn().mockResolvedValue([]),
+    createFile: vi.fn(),
+    renameFile: vi.fn(),
+    uploadAsset: vi.fn(),
     ...overrides,
   } as unknown as StudioApi;
 }
@@ -190,8 +227,6 @@ describe('axe-core accessibility audits for studio components', () => {
     const { container } = render(
       wrap(
         <StudioChrome
-          mode="creator"
-          onModeChange={() => {}}
           onNavigate={() => {}}
           courseTitle="Test Course"
           view="outline"
@@ -227,6 +262,33 @@ describe('axe-core accessibility audits for studio components', () => {
     );
     await screen.findByRole('list');
     const violations = await runAxe(container, { 'heading-order': { enabled: false } });
+    expect(violations).toEqual([]);
+  });
+
+  it('OutlineWorkspace is accessible with the Files tab selected', async () => {
+    const { container } = render(
+      wrap(
+        <OutlineWorkspace
+          api={makeApi({ listFiles: vi.fn().mockResolvedValue([]) })}
+          onEdit={() => {}}
+          onError={() => {}}
+        />,
+      ),
+    );
+    await screen.findAllByText('Lesson');
+    await userEvent.click(screen.getByRole('tab', { name: 'Files' }));
+    expect(screen.getByRole('tab', { name: 'Files' })).toHaveAttribute('data-state', 'active');
+    const violations = await runAxe(container);
+    expect(violations).toEqual([]);
+  });
+
+  it('CreatorPreview is accessible with the DevTools drawer open', async () => {
+    const { container } = render(
+      wrap(<CreatorPreview pkg={previewPkg} />),
+    );
+    await userEvent.click(await screen.findByRole('button', { name: 'Open DevTools' }));
+    await screen.findByRole('complementary', { name: 'Preview DevTools' });
+    const violations = await runAxe(container);
     expect(violations).toEqual([]);
   });
 });

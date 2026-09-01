@@ -511,4 +511,42 @@ describe('BrowserStudioApi', () => {
     expect(pkg!.manifest.id).toBe('lesson-quiz');
     expect(pkg!.assetPaths).toEqual([]);
   });
+
+  it('lists package files with category and extension', async () => {
+    const { api } = createBrowserApi();
+    await api.applyTemplate('lesson-quiz');
+    await api.openLibraryCourse('lesson-quiz');
+
+    const files = await api.listFiles();
+    const manifest = files.find((f) => f.path === 'package.json');
+    expect(manifest).toBeDefined();
+    expect(manifest!.category).toBe('manifest');
+    expect(manifest!.extension).toBe('.json');
+    const node = files.find((f) => f.path === 'nodes/lesson.md');
+    expect(node).toBeDefined();
+    expect(node!.category).toBe('nodes');
+    expect(node!.extension).toBe('.md');
+  });
+
+  it('creates, renames, and uploads files', async () => {
+    const { api } = createBrowserApi();
+    await api.applyTemplate('lesson-quiz');
+    await api.openLibraryCourse('lesson-quiz');
+
+    const created = await api.createFile('notes.txt', 'hi');
+    expect(created.success).toBe(true);
+    const read = await api.readFile('notes.txt');
+    expect(read.content).toBe('hi');
+
+    const renamed = await api.renameFile('notes.txt', 'notes-renamed.txt');
+    expect(renamed.success).toBe(true);
+    expect(renamed.newPath).toBe('notes-renamed.txt');
+    await expect(api.readFile('notes.txt')).rejects.toMatchObject({ code: 'file-not-found' });
+
+    const file = new File(['x'], 'pic.png', { type: 'image/png' });
+    file.arrayBuffer = async () => new TextEncoder().encode('x').buffer;
+    const uploaded = await api.uploadAsset(file);
+    expect(uploaded.success).toBe(true);
+    expect(uploaded.path).toBe('assets/pic.png');
+  });
 });

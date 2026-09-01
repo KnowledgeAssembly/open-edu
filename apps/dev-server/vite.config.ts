@@ -1450,9 +1450,6 @@ export default defineConfig(({ mode }) => {
       OPEN_EDU_PACKAGE_DIR: process.env.OPEN_EDU_PACKAGE_DIR
         ? JSON.stringify(process.env.OPEN_EDU_PACKAGE_DIR)
         : '""',
-      OPEN_EDU_STUDIO_MODE: process.env.OPEN_EDU_STUDIO_MODE
-        ? JSON.stringify(process.env.OPEN_EDU_STUDIO_MODE)
-        : '""',
       OPEN_EDU_STUDIO_ASSISTANT: process.env.OPEN_EDU_STUDIO_ASSISTANT
         ? JSON.stringify(process.env.OPEN_EDU_STUDIO_ASSISTANT)
         : '""',

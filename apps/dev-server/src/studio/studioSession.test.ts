@@ -4,6 +4,10 @@ import {
   writeStudioView,
   readSelectedPath,
   writeSelectedPath,
+  readOutlineTab,
+  writeOutlineTab,
+  readFilesPath,
+  writeFilesPath,
 } from './studioSession';
 
 describe('studioSession', () => {
@@ -36,5 +40,27 @@ describe('studioSession', () => {
     expect(readSelectedPath()).toBeNull();
     writeSelectedPath('nodes/lesson.md');
     expect(readSelectedPath()).toBe('nodes/lesson.md');
+  });
+
+  it('defaults to the outline tab', () => {
+    expect(readOutlineTab()).toBe('outline');
+  });
+
+  it('persists and restores the outline tab', () => {
+    writeOutlineTab('files');
+    expect(readOutlineTab()).toBe('files');
+  });
+
+  it('ignores invalid stored outline tabs', () => {
+    sessionStorage.setItem('openedu.studio.outlineTab', 'nope');
+    expect(readOutlineTab()).toBe('outline');
+  });
+
+  it('persists and restores the files path', () => {
+    expect(readFilesPath()).toBeNull();
+    writeFilesPath('nodes/lesson.md');
+    expect(readFilesPath()).toBe('nodes/lesson.md');
+    writeFilesPath(null);
+    expect(readFilesPath()).toBeNull();
   });
 });

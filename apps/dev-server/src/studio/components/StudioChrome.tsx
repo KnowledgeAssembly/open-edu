@@ -8,15 +8,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from '@open-edu/design-system';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from '@open-edu/i18n';
 import type { ThemeId } from '@open-edu/runtime';
-import { ModeToggle } from './ModeToggle.js';
 import { AssistantHeaderButton } from './AssistantHeaderButton.js';
 import { ThemeSwitcher } from './ThemeSwitcher.js';
-import type { StudioMode, StudioView } from '../types.js';
+import type { StudioView } from '../types.js';
 
 interface BreadcrumbItem {
   label: string;
@@ -24,8 +22,6 @@ interface BreadcrumbItem {
 }
 
 export function StudioChrome({
-  mode,
-  onModeChange,
   onNavigate,
   courseTitle,
   view,
@@ -38,8 +34,6 @@ export function StudioChrome({
   targetLearnerKind,
   onTargetLearnerKindChange,
 }: {
-  mode: StudioMode;
-  onModeChange: (m: StudioMode) => void;
   onNavigate: (view: StudioView) => void;
   courseTitle?: string;
   view: StudioView;
@@ -195,10 +189,6 @@ export function StudioChrome({
                     {t(navItem.labelKey)}
                   </DropdownMenuItem>
                 ))}
-                <DropdownMenuSeparator />
-                <div className="p-2 md:hidden">
-                  <ModeToggle mode={mode} onChange={onModeChange} />
-                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -220,15 +210,12 @@ export function StudioChrome({
             <option value="college">{t('studio.nav.targetCollege')}</option>
           </select>
         )}
-        {mode === 'creator' && setPanelOpenProp && (
+        {setPanelOpenProp && (
           <AssistantHeaderButton active={panelOpen} onClick={() => setPanelOpen(!panelOpen)} />
         )}
         {themeId && onThemeChange && (
           <ThemeSwitcher currentThemeId={themeId} onChange={onThemeChange} />
         )}
-        <div className="hidden md:flex">
-          <ModeToggle mode={mode} onChange={onModeChange} />
-        </div>
       </div>
     </header>
   );

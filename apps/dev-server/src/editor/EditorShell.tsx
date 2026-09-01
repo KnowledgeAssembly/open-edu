@@ -1,7 +1,15 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import * as api from './api';
-import { renameFile as apiRenameFile, CONFIG_TEMPLATES } from './api';
-import type { FileEntry, EditorFile, EditorMode, ViewMode, ContextMenuTarget } from './types';
+import { CONFIG_TEMPLATES } from './api';
+import { useTranslation } from '@open-edu/i18n';
+import type {
+  FileEntry,
+  EditorFile,
+  EditorMode,
+  ViewMode,
+  ContextMenuTarget,
+  PackageFileApi,
+} from './types';
 import type { ValidationError } from './WidgetValidator';
 import { FileTree } from './FileTree';
 import { ManifestEditor } from './ManifestEditor';
@@ -56,9 +64,48 @@ interface EditorShellProps {
   onToggle: () => void;
   mode: EditorMode;
   onModeChange: (mode: EditorMode) => void;
+  fileApi?: PackageFileApi;
+  variant?: 'standalone' | 'embedded';
+  initialPath?: string | null;
+  onOpenActivity?: (path: string) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onTreeChanged?: () => void;
+  onSelectPath?: (path: string) => void;
 }
 
-export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShellProps) {
+export interface EditorShellHandle {
+  save: () => Promise<void>;
+  dirtyCount: number;
+}
+
+const defaultFileApi: PackageFileApi = {
+  listFiles: api.listFiles,
+  getPackageDir: api.getPackageDir,
+  readFile: api.readFile,
+  writeFile: (path, content, validate) => api.writeFile(path, content, validate ?? true),
+  deleteFile: api.deleteFile,
+  renameFile: api.renameFile,
+  createFile: api.createFile,
+  uploadAsset: api.uploadAsset,
+};
+
+export const EditorShell = forwardRef<EditorShellHandle, EditorShellProps>(function EditorShell(
+  {
+    mode,
+    onModeChange: rawOnModeChange,
+    fileApi,
+    variant = 'standalone',
+    initialPath,
+    onOpenActivity,
+    onDirtyChange,
+    onTreeChanged,
+    onSelectPath,
+  }: EditorShellProps,
+  ref,
+) {
+  const { t } = useTranslation();
+  const client = fileApi ?? defaultFileApi;
+  const isEmbedded = variant === 'embedded';
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [openFiles, setOpenFiles] = useState<Map<string, EditorFile>>(new Map());
@@ -76,6 +123,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   const [deleteTargetFromMenu, setDeleteTargetFromMenu] = useState<FileEntry | null>(null);
 
   const currentFile = selectedPath ? (openFiles.get(selectedPath) ?? null) : null;
+  const effectiveShowPreview = isEmbedded ? false : showPreview;
 
   const { widgetType, widgetConfig, isWidgetNode } = useWidgetConfig(currentFile?.content ?? '');
 
@@ -93,11 +141,20 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   }, [openFiles]);
 
   const refreshFiles = useCallback(() => {
-    api
+    client
       .listFiles()
       .then(setFiles)
       .catch(() => {});
-  }, []);
+  }, [client]);
+
+  useImperativeHandle(ref, () => ({
+    save: () => handleSave(),
+    dirtyCount,
+  }));
+
+  useEffect(() => {
+    onDirtyChange?.(dirtyCount > 0);
+  }, [dirtyCount, onDirtyChange]);
 
   const onModeChange = useCallback(
     (newMode: EditorMode) => {
@@ -114,21 +171,24 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   useEffect(() => {
     async function load() {
       try {
-        const [fileList, dir] = await Promise.all([api.listFiles(), api.getPackageDir()]);
+        const [fileList, dir] = await Promise.all([client.listFiles(), client.getPackageDir()]);
         setFiles(fileList);
         setPackageDir(dir);
 
         if (fileList.length > 0) {
-          const first = fileList[0];
-          if (first) {
-            setSelectedPath(first.path);
+          const initial = fileList.find((f) => f.path === initialPath) ?? fileList[0];
+          if (initial) {
+            setSelectedPath(initial.path);
           }
+        } else if (initialPath) {
+          setSelectedPath(initialPath);
         }
       } catch (err) {
         toast.error('Failed to load files: ' + (err as Error).message);
       }
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load file content when selected
@@ -138,7 +198,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
 
     async function loadContent() {
       try {
-        const fileContent = await api.readFile(selectedPath!);
+        const fileContent = await client.readFile(selectedPath!);
         setOpenFiles((prev) => {
           const next = new Map(prev);
           next.set(selectedPath!, {
@@ -155,18 +215,24 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       }
     }
     loadContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPath, openFiles]);
 
-  const handleFileSelect = useCallback((path: string) => {
-    setSelectedPath(path);
-    setViewMode('form');
-  }, []);
+  const handleFileSelect = useCallback(
+    (path: string) => {
+      setSelectedPath(path);
+      setViewMode('form');
+      onSelectPath?.(path);
+    },
+    [onSelectPath],
+  );
 
   const handleFileDelete = useCallback(
     async (path: string) => {
       try {
-        await api.deleteFile(path);
+        await client.deleteFile(path);
         refreshFiles();
+        onTreeChanged?.();
         setOpenFiles((prev) => {
           const next = new Map(prev);
           next.delete(path);
@@ -180,7 +246,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         toast.error('Failed to delete: ' + (err as Error).message);
       }
     },
-    [selectedPath, refreshFiles],
+    [selectedPath, refreshFiles, client, onTreeChanged],
   );
 
   const handleContentChange = useCallback(
@@ -211,7 +277,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
 
     setSaving(true);
     try {
-      await api.writeFile(selectedPath, currentFile.content, true);
+      await client.writeFile(selectedPath, currentFile.content, true);
       setOpenFiles((prev) => {
         const next = new Map(prev);
         const existing = next.get(selectedPath);
@@ -226,6 +292,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         return next;
       });
       toast.success('Saved successfully! Preview will reload.');
+      onTreeChanged?.();
     } catch (err) {
       const message = (err as Error).message;
       toast.error(`Save failed: ${message}`);
@@ -245,7 +312,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     } finally {
       setSaving(false);
     }
-  }, [selectedPath, currentFile]);
+  }, [selectedPath, currentFile, client, onTreeChanged]);
 
   const handleSaveAll = useCallback(async () => {
     const dirtyFiles = Array.from(openFiles.values()).filter((f) => f.isDirty);
@@ -258,7 +325,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     let errorCount = 0;
     for (const file of dirtyFiles) {
       try {
-        await api.writeFile(file.path, file.content, true);
+        await client.writeFile(file.path, file.content, true);
         setOpenFiles((prev) => {
           const next = new Map(prev);
           const existing = next.get(file.path);
@@ -294,9 +361,10 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     }
     if (errorCount === 0) {
       toast.success(`Saved ${dirtyFiles.length} file(s)! Preview will reload.`);
+      onTreeChanged?.();
     }
     setSavingAll(false);
-  }, [openFiles]);
+  }, [openFiles, client, onTreeChanged]);
 
   const handleUndo = useCallback(() => {
     if (!selectedPath || !currentFile) return;
@@ -322,22 +390,24 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       const template = CONFIG_TEMPLATES[fileName];
       if (!template) return;
       try {
-        await api.createFile(fileName, template, true);
+        await client.createFile(fileName, template);
         refreshFiles();
+        onTreeChanged?.();
         setSelectedPath(fileName);
         toast.success(`Created ${fileName}`);
       } catch (err) {
         toast.error('Failed to create config file: ' + (err as Error).message);
       }
     },
-    [refreshFiles],
+    [refreshFiles, client, onTreeChanged],
   );
 
   const handleRenameFile = useCallback(
     async (oldPath: string, newPath: string) => {
       try {
-        await apiRenameFile(oldPath, newPath);
+        await client.renameFile(oldPath, newPath);
         refreshFiles();
+        onTreeChanged?.();
         if (selectedPath === oldPath) {
           setSelectedPath(newPath);
         }
@@ -355,7 +425,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         toast.error('Rename failed: ' + (err as Error).message);
       }
     },
-    [selectedPath, refreshFiles],
+    [selectedPath, refreshFiles, client, onTreeChanged],
   );
 
   const handleCreateNode = useCallback(async () => {
@@ -377,8 +447,9 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
               2,
             );
 
-      await api.createFile(filePath, content, false);
+      await client.createFile(filePath, content);
       refreshFiles();
+      onTreeChanged?.();
       setShowNewNode(false);
       setNewNodeName('');
       setNewNodeType('lesson');
@@ -387,7 +458,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
     } catch (err) {
       toast.error('Failed to create node: ' + (err as Error).message);
     }
-  }, [newNodeName, newNodeType, refreshFiles]);
+  }, [newNodeName, newNodeType, refreshFiles, client, onTreeChanged]);
 
   const handleStructuredDataChange = useCallback(
     (data: Record<string, unknown>) => {
@@ -657,21 +728,41 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
   return (
     <div className="bg-surface flex h-full flex-col" role="region" aria-label="Package editor">
       <div className="border-outline-variant bg-surface-container-low flex items-center justify-between border-b px-3 py-2">
-        <div className="flex items-center gap-2">
-          <span className="bg-primary-container text-on-primary-container rounded px-1.5 py-0.5 text-[10px] font-semibold">
-            EDITOR
-          </span>
-          {mode === 'edit' && (
-            <>
-              <span className="text-on-surface-variant text-xs">Edit Mode</span>
-              {dirtyCount > 0 && (
-                <span className="bg-secondary-container text-secondary rounded px-1.5 py-0.5 text-[10px] font-medium">
-                  {dirtyCount} unsaved
-                </span>
-              )}
-            </>
-          )}
-        </div>
+        {isEmbedded ? (
+          <div className="flex items-center gap-2">
+            {dirtyCount > 0 && (
+              <span className="bg-secondary-container text-secondary rounded px-1.5 py-0.5 text-[10px] font-medium">
+                {dirtyCount} unsaved
+              </span>
+            )}
+            {onOpenActivity && selectedPath?.startsWith('nodes/') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => onOpenActivity(selectedPath)}
+              >
+                {t('studio.files.openAsActivity')}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="bg-primary-container text-on-primary-container rounded px-1.5 py-0.5 text-[10px] font-semibold">
+              EDITOR
+            </span>
+            {mode === 'edit' && (
+              <>
+                <span className="text-on-surface-variant text-xs">Edit Mode</span>
+                {dirtyCount > 0 && (
+                  <span className="bg-secondary-container text-secondary rounded px-1.5 py-0.5 text-[10px] font-medium">
+                    {dirtyCount} unsaved
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           {mode === 'edit' && isJsonFile && (
             <Button
@@ -683,18 +774,20 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
               {viewMode === 'raw' ? 'Form View' : 'Raw JSON'}
             </Button>
           )}
-          <Button
-            variant={mode === 'edit' ? 'default' : 'outline'}
-            size="sm"
-            className={mode === 'edit' ? 'bg-success hover:bg-success/90' : ''}
-            onClick={() => onModeChange(mode === 'preview' ? 'edit' : 'preview')}
-          >
-            {mode === 'edit' ? 'Done Editing' : 'Edit Package'}
-          </Button>
+          {!isEmbedded && (
+            <Button
+              variant={mode === 'edit' ? 'default' : 'outline'}
+              size="sm"
+              className={mode === 'edit' ? 'bg-success hover:bg-success/90' : ''}
+              onClick={() => onModeChange(mode === 'preview' ? 'edit' : 'preview')}
+            >
+              {mode === 'edit' ? 'Done Editing' : 'Edit Package'}
+            </Button>
+          )}
         </div>
       </div>
 
-      {mode === 'edit' ? (
+      {mode === 'edit' || isEmbedded ? (
         <div className="flex flex-1 overflow-hidden">
           <div className="border-outline-variant flex w-56 shrink-0 flex-col overflow-hidden border-r">
             <FileTree
@@ -735,20 +828,20 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                 >
                   Undo
                 </Button>
-                {isWidgetNode && (
+                {!isEmbedded && isWidgetNode && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-on-surface-variant text-xs font-medium"
                     onClick={() => setShowPreview((p) => !p)}
-                    title={showPreview ? 'Hide preview' : 'Show preview'}
+                    title={effectiveShowPreview ? 'Hide preview' : 'Show preview'}
                   >
-                    {showPreview ? (
+                    {effectiveShowPreview ? (
                       <EyeOff className="size-3.5" />
                     ) : (
                       <Eye className="size-3.5" />
                     )}
-                    <span className="ml-1">{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
+                    <span className="ml-1">{effectiveShowPreview ? 'Hide Preview' : 'Show Preview'}</span>
                   </Button>
                 )}
                 <div className="flex-1" />
@@ -797,7 +890,7 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
                       onCollapse={() => setShowPreview(false)}
                     />
                   }
-                  showPreview={showPreview && isWidgetNode}
+                  showPreview={effectiveShowPreview && isWidgetNode}
                   onTogglePreview={() => setShowPreview((p) => !p)}
                 />
               ) : (
@@ -1017,12 +1110,14 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
         id="asset-upload-input"
         type="file"
         className="hidden"
+        aria-label="Upload asset"
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
           try {
-            await api.uploadAsset(file);
+            await client.uploadAsset(file);
             refreshFiles();
+            onTreeChanged?.();
             toast.success(`Uploaded ${file.name}`);
           } catch (err) {
             toast.error('Upload failed: ' + (err as Error).message);
@@ -1034,4 +1129,4 @@ export function EditorShell({ mode, onModeChange: rawOnModeChange }: EditorShell
       <Toaster position="bottom-right" />
     </div>
   );
-}
+});

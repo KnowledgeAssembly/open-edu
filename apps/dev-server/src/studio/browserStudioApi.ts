@@ -18,9 +18,11 @@ import type {
   ExportResult,
   LibraryResult,
   OutlineResult,
+  PackageFileEntry,
   StorageStatus,
   ValidationResult,
 } from './studioApi.js';
+import { getFileCategory } from './packageFileCategory.js';
 import {
   createBrowserCourseStore,
   buildFileIndex,
@@ -530,6 +532,58 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     return { success: true, path: safePath };
   }
 
+  async function listFiles(): Promise<PackageFileEntry[]> {
+    const ws = await requireActiveWorkspace();
+    const files = await walkWorkspace(ws);
+    return files.map((file) => {
+      const label = file.path.split('/').pop() ?? file.path;
+      const dot = file.path.lastIndexOf('.');
+      const extension = dot > 0 ? file.path.slice(dot) : '';
+      return {
+        path: file.path,
+        label,
+        category: getFileCategory(file.path),
+        extension,
+      };
+    });
+  }
+
+  async function createFile(
+    path: string,
+    content?: string,
+  ): Promise<{ success: boolean; path: string }> {
+    const safePath = assertSafeCoursePath(path);
+    const ws = await requireActiveWorkspace();
+    await ws.writeText(safePath, content ?? '');
+    onPackageChanged();
+    return { success: true, path: safePath };
+  }
+
+  async function renameFile(
+    oldPath: string,
+    newPath: string,
+  ): Promise<{ success: boolean; oldPath: string; newPath: string }> {
+    const from = assertSafeCoursePath(oldPath);
+    const to = assertSafeCoursePath(newPath);
+    const ws = await requireActiveWorkspace();
+    await ws.move(from, to);
+    onPackageChanged();
+    return { success: true, oldPath: from, newPath: to };
+  }
+
+  async function uploadAsset(file: File, path?: string): Promise<{ success: boolean; path: string }> {
+    const data = file.arrayBuffer
+      ? await file.arrayBuffer()
+      : await new Blob([file]).arrayBuffer();
+    const buf = new Uint8Array(data);
+    const dest = path ?? `assets/${file.name}`;
+    const safeDest = assertSafeCoursePath(dest);
+    const ws = await requireActiveWorkspace();
+    await ws.write(safeDest, buf);
+    onPackageChanged();
+    return { success: true, path: safeDest };
+  }
+
   async function getPreviewPackage(): Promise<LoadedPackage | null> {
     if (!session.activeCourseId) return null;
     try {
@@ -662,6 +716,10 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
     readFile,
     writeFile,
     deleteFile,
+    listFiles,
+    createFile,
+    renameFile,
+    uploadAsset,
     getPreviewPackage,
     getStorageStatus,
     getAiStatus: () => aiClient.getStatus(),

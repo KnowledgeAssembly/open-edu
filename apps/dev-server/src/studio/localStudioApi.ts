@@ -15,6 +15,7 @@ import type {
   ExportResult,
   LibraryResult,
   OutlineResult,
+  PackageFileEntry,
   StorageStatus,
   ValidationResult,
 } from './studioApi.js';
@@ -110,6 +111,19 @@ export function createLocalStudioApi(): StudioApi {
       apiRequest<{ success: boolean; path: string }>(`/file?path=${encodeURIComponent(path)}`, {
         method: 'DELETE',
       }),
+    listFiles: () =>
+      apiRequest<{ files: PackageFileEntry[] }>('/tree').then((d) => d.files),
+    createFile: (path: string, content?: string) =>
+      apiRequest<{ success: boolean; path: string }>('/file', {
+        method: 'POST',
+        body: JSON.stringify({ path, content, validate: true }),
+      }),
+    renameFile: (oldPath: string, newPath: string) =>
+      apiRequest<{ success: boolean; oldPath: string; newPath: string }>('/rename', {
+        method: 'POST',
+        body: JSON.stringify({ oldPath, newPath }),
+      }),
+    uploadAsset: (file: File, path?: string) => uploadAssetRequest(file, path),
     getPreviewPackage: async () => null as LoadedPackage | null,
     getStorageStatus: async (): Promise<StorageStatus> => ({ available: true }),
     getAiStatus: () =>
@@ -217,4 +231,24 @@ async function downloadBlob(
   const disposition = res.headers.get('Content-Disposition') || '';
   const match = disposition.match(/filename="?([^"]+)"?/);
   return { blob, fileName: match?.[1] || fallbackName };
+}
+
+async function uploadAssetRequest(
+  file: File,
+  path?: string,
+): Promise<{ success: boolean; path: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (path) {
+    formData.append('path', path);
+  }
+  const res = await fetch(`${API_BASE}/assets/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Upload failed');
+  }
+  return data as { success: boolean; path: string };
 }

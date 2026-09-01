@@ -6,7 +6,7 @@ import { I18nProvider } from '@open-edu/i18n';
 import studioEn from '@open-edu/i18n/locales/en/studio.json';
 import type { ThemeId } from '@open-edu/runtime';
 import { StudioChrome } from './StudioChrome';
-import type { StudioMode, StudioView } from '../types.js';
+import type { StudioView } from '../types.js';
 
 (globalThis as { axe?: typeof axe }).axe = axe;
 
@@ -19,8 +19,6 @@ function wrap(ui: React.ReactElement) {
 }
 
 function renderChrome(props: {
-  mode?: StudioMode;
-  onModeChange?: (m: StudioMode) => void;
   view?: StudioView;
   courseTitle?: string;
   minimal?: boolean;
@@ -30,16 +28,12 @@ function renderChrome(props: {
   themeId?: ThemeId;
   onThemeChange?: (id: ThemeId) => void;
 }) {
-  const onModeChange = props.onModeChange ?? vi.fn();
   const onNavigate = vi.fn();
   return {
-    onModeChange,
     onNavigate,
     ...render(
       wrap(
         <StudioChrome
-          mode={props.mode ?? 'creator'}
-          onModeChange={onModeChange}
           onNavigate={onNavigate}
           courseTitle={props.courseTitle}
           view={props.view ?? 'home'}
@@ -143,12 +137,9 @@ describe('StudioChrome', () => {
     expect(onNavigate).toHaveBeenCalledWith('share');
   });
 
-  it('calls onModeChange on mode toggle', async () => {
-    const { onModeChange } = renderChrome({});
-    const header = screen.getByRole('banner');
-    const toggle = within(header).getByRole('switch', { name: /studio mode/i });
-    await userEvent.click(toggle);
-    expect(onModeChange).toHaveBeenCalledWith('developer');
+  it('does not render a studio mode switch', () => {
+    renderChrome({});
+    expect(screen.queryByRole('switch', { name: /studio mode/i })).not.toBeInTheDocument();
   });
 
   it('hides nav when minimal', () => {
@@ -172,18 +163,10 @@ describe('StudioChrome', () => {
     expect(results.violations).toEqual([]);
   });
 
-  it('offers the mode toggle inside the mobile overflow menu', async () => {
-    const user = userEvent.setup();
-    const onModeChange = vi.fn();
-    renderChrome({ mode: 'creator', onModeChange });
-    await user.click(screen.getByRole('button', { name: /more/i }));
-    const menu = await screen.findByRole('menu');
-    const toggle = within(menu).getByRole('switch');
-    expect(toggle).toBeInTheDocument();
-    expect(toggle).not.toBeChecked();
-    expect(within(menu).getByText('Creator')).toBeInTheDocument();
-    expect(within(menu).getByText('Developer')).toBeInTheDocument();
-    await user.click(toggle);
-    expect(onModeChange).toHaveBeenCalledWith('developer');
+  it('shows the author assistant header button when setPanelOpen is provided', () => {
+    renderChrome({ view: 'home', panelOpen: false, setPanelOpen: vi.fn() });
+    expect(
+      screen.getByRole('button', { name: /open author assistant/i }),
+    ).toBeInTheDocument();
   });
 });
