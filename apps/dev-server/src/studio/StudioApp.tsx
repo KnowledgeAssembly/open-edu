@@ -33,7 +33,7 @@ import { EditorBridgeProvider } from './ai/EditorBridgeContext';
 import { isAssistantEnabled } from './ai/assistantFlags';
 import { StudioRightSidebar } from './components/StudioRightSidebar.js';
 
-import { getProfile } from '@open-edu/domain-guidance';
+import { getProfile } from '@open-edu/domain-guidance/profiles';
 import type { LearnerProfile } from './ai/context.js';
 
 export function StudioApp({
