@@ -21,10 +21,10 @@ function toAiSdkTools(
 type ToolCallStreamPart = { toolCallId: string; toolName: string; input: unknown };
 
 /** Initial `AgentRuntime`: wraps the AI SDK `streamText` call. Model execution is
- *  only ever reached through this contract; the local chat handler and hosted
- *  gateway share it. The model call is performed eagerly so that synchronous
- *  configuration/provider failures surface immediately (surfacing as a 500)
- *  rather than bubbling out of the stream iteration. */
+ *  only ever reached through this contract; the Studio AI middleware (local
+ *  and browser modes) share it. The model call is performed eagerly so that
+ *  synchronous configuration/provider failures surface immediately (surfacing
+ *  as a 500) rather than bubbling out of the stream iteration. */
 export class AiSdkAgentRuntime implements AgentRuntime {
   run(request: AgentRuntimeRequest): AsyncIterable<AgentRuntimeEvent> {
     const factory = createModelFactoryFromEnv();

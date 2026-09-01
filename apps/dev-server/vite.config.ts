@@ -447,8 +447,10 @@ function eduPackageLoader(): Plugin {
             packageDir = dir;
             srv.watcher.add(dir);
           },
-          onCommitSuccess: (dir: string) => {
+          onCommitStart: () => {
             aiGenerating = true;
+          },
+          onCommitSuccess: (dir: string) => {
             void (async () => {
               try {
                 packageData = await loadPackage(dir);

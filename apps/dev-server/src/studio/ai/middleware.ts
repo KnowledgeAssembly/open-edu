@@ -26,6 +26,8 @@ export interface StudioAiMiddlewareOptions {
   getPackageDir: () => string;
   /** Adopt a newly committed course directory (normal mode only). */
   setPackageDir?: (dir: string) => void;
+  /** Called before a commit begins so the host can suppress file-watcher reloads. */
+  onCommitStart?: () => void;
   /** Invoked after a successful commit so the host can reload the package. */
   onCommitSuccess?: (packageDir: string) => void;
 }
@@ -55,7 +57,7 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
 export function createStudioAiMiddleware(
   options: StudioAiMiddlewareOptions,
 ): (req: IncomingMessage, res: ServerResponse, next: () => void) => Promise<void> {
-  const { getPackageDir, setPackageDir, onCommitSuccess } = options;
+  const { getPackageDir, setPackageDir, onCommitStart, onCommitSuccess } = options;
 
   return async (req, res, next) => {
     const url = req.url ?? '';
@@ -170,6 +172,7 @@ export function createStudioAiMiddleware(
           targetDir = resolveNewCourseDir(workspaceRoot, draftTitle);
           await mkdir(targetDir, { recursive: true });
         }
+        onCommitStart?.();
         const commitResult = await commitCourseDraft({
           draftId: body.draftId,
           packageDir: targetDir,

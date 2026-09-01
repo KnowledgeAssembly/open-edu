@@ -17,8 +17,8 @@ export type RoutedTool =
 /**
  * Map a parsed intent + current Studio context to a single tool invocation.
  * Returns the `explain` fallback when no tool applies. Pure and deterministic:
- * shared by the local Vite handler and the hosted browser transport so the two
- * never disagree about which tool an intent triggers.
+ * consumed by the Studio AI middleware which handles both local and browser
+ * mode so the two never disagree about which tool an intent triggers.
  */
 export function routeIntent(
   intent: ParsedIntent | null,
