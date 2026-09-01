@@ -1,17 +1,22 @@
 import { z } from 'zod';
-import type { CompanionTool } from '@open-edu/companion';
+import type { CompanionTool, ToolContext } from '@open-edu/companion';
 import { draftActivity, generateCourseDraftTool } from './tools.js';
 import type { ToolCallRequest, GenerateCourseRequest } from './tools.js';
 
+/**
+ * The tool input schemas describe only the fields the model should supply.
+ * Server-side execution inputs (`packageDir`, `completeText`) are deliberately
+ * NOT part of the schema — the agent loop injects them via the `ToolContext`
+ * second argument so the model never has to (and never can) hallucinate a
+ * filesystem path or provider callback.
+ */
 export const generateCourseInput = z.object({
   notes: z.string(),
-  packageDir: z.string(),
 });
 
 export const generateItemInput = z.object({
   kind: z.enum(['lesson', 'quiz', 'practice']),
   description: z.string(),
-  packageDir: z.string(),
 });
 
 export const editItemInput = z.object({
@@ -19,8 +24,16 @@ export const editItemInput = z.object({
   intent: z.string(),
   currentContent: z.string(),
   params: z.unknown().optional(),
-  packageDir: z.string(),
 });
+
+interface GenerationToolContext extends ToolContext {
+  packageDir?: string;
+  completeText?: (prompt: string) => Promise<string>;
+}
+
+function packageDirFrom(ctx: GenerationToolContext): string {
+  return typeof ctx.packageDir === 'string' ? ctx.packageDir : '';
+}
 
 export const companionToolCatalog: CompanionTool[] = [
   {
@@ -28,17 +41,16 @@ export const companionToolCatalog: CompanionTool[] = [
     description: 'Generate a full course draft from author notes.',
     inputSchema: generateCourseInput,
     permission: { id: 'course.generate', kind: 'propose' },
-    async execute(input, ctx) {
-      const req = input as { notes: string; packageDir: string };
+    async execute(input, ctx: GenerationToolContext) {
+      const req = input as { notes: string };
+      if (!ctx.completeText) {
+        return { ok: false as const, error: 'Course generation is not configured' };
+      }
       const result = await generateCourseDraftTool({
         notes: req.notes,
-        packageDir: req.packageDir,
-        completeText: async (prompt) => {
-          void prompt;
-          void ctx;
-          throw new Error('completeText must be injected by the caller');
-        },
-      } as GenerateCourseRequest);
+        packageDir: packageDirFrom(ctx),
+        completeText: ctx.completeText,
+      } satisfies GenerateCourseRequest);
       return result.ok
         ? { ok: true as const, value: result.courseDraft }
         : { ok: false as const, error: result.error };
@@ -49,17 +61,16 @@ export const companionToolCatalog: CompanionTool[] = [
     description: 'Draft a new lesson, quiz, or practice item.',
     inputSchema: generateItemInput,
     permission: { id: 'item.generate', kind: 'propose' },
-    async execute(input) {
+    async execute(input, ctx: GenerationToolContext) {
       const req = input as {
         kind: 'lesson' | 'quiz' | 'practice';
         description: string;
-        packageDir: string;
       };
       const result = await draftActivity({
         type: 'draft_new',
         kind: req.kind,
         description: req.description,
-        packageDir: req.packageDir,
+        packageDir: packageDirFrom(ctx),
       } satisfies ToolCallRequest);
       return result.ok
         ? { ok: true as const, value: result.items }
@@ -71,13 +82,12 @@ export const companionToolCatalog: CompanionTool[] = [
     description: 'Edit an existing activity (rewrite, translate, adjust difficulty, …).',
     inputSchema: editItemInput,
     permission: { id: 'item.edit', kind: 'propose' },
-    async execute(input) {
+    async execute(input, ctx: GenerationToolContext) {
       const req = input as {
         kind: 'lesson' | 'quiz' | 'practice';
         intent: ToolCallRequest['intent'];
         currentContent: string;
         params?: ToolCallRequest['params'];
-        packageDir: string;
       };
       const result = await draftActivity({
         type: 'edit_existing',
@@ -85,7 +95,7 @@ export const companionToolCatalog: CompanionTool[] = [
         intent: req.intent ?? 'rewrite',
         currentContent: req.currentContent,
         params: req.params,
-        packageDir: req.packageDir,
+        packageDir: packageDirFrom(ctx),
       } satisfies ToolCallRequest);
       return result.ok
         ? { ok: true as const, value: result.items }

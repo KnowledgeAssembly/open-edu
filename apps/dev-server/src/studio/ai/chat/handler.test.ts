@@ -212,6 +212,71 @@ describe('createStudioAssistantHandler', () => {
     expect(text).toContain('draft');
   });
 
+  it('creates a draft when the model calls generate_item on a follow-up turn', async () => {
+    mockDraftActivity.mockResolvedValue({
+      ok: true,
+      items: [{ kind: 'practice', title: 'Hotspot', content: '{}' }],
+    });
+
+    const partsStream = (parts: Array<Record<string, unknown>>) =>
+      new ReadableStream<Record<string, unknown>>({
+        start(controller) {
+          for (const part of parts) controller.enqueue(part);
+          controller.close();
+        },
+      });
+
+    mockStreamText
+      .mockReturnValueOnce({
+        stream: partsStream([
+          {
+            type: 'tool-call',
+            toolCallId: 'c1',
+            toolName: 'generate_item',
+            input: { kind: 'practice', description: 'Create a hotspot activity' },
+          },
+        ]),
+      })
+      .mockReturnValueOnce({ stream: partsStream([{ type: 'text-delta', text: 'Draft ready' }]) });
+
+    const chunks: Array<Record<string, unknown>> = [];
+    mockPipe.mockImplementation(
+      async ({ stream }: { stream: ReadableStream<Record<string, unknown>> }) => {
+        for await (const chunk of stream as unknown as AsyncIterable<Record<string, unknown>>) {
+          chunks.push(chunk);
+        }
+      },
+    );
+
+    const res = makeRes();
+    await createStudioAssistantHandler(
+      makeReq({
+        conversationId: 'conv-1',
+        messages: [
+          { role: 'user', content: 'I want to add a hotspot activity' },
+          { role: 'assistant', content: 'Here is a hotspot plan. Would you like to proceed?' },
+          { role: 'user', content: 'go ahead & create' },
+        ],
+        context: mockContext,
+      }),
+      res,
+      { packageDir: '/pkg' },
+    );
+
+    const finish = chunks.find((c) => c.type === 'finish') as {
+      messageMetadata: { mode: string; drafts: unknown[] };
+    };
+    expect(finish).toBeDefined();
+    expect(finish.messageMetadata.mode).toBe('draft');
+    expect(finish.messageMetadata.drafts).toHaveLength(1);
+    expect(mockDraftActivity).toHaveBeenCalledWith({
+      type: 'draft_new',
+      kind: 'practice',
+      description: 'Create a hotspot activity',
+      packageDir: '/pkg',
+    });
+  });
+
   it('emits a course draft message with courseDraft metadata', async () => {
     mockGenerateCourseDraftTool.mockResolvedValue({
       ok: true,

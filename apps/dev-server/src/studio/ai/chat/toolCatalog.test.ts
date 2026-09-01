@@ -1,12 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   companionToolCatalog,
   editItemInput,
   generateCourseInput,
   generateItemInput,
 } from './toolCatalog.js';
+import { draftActivity, generateCourseDraftTool } from './tools.js';
+
+vi.mock('./tools.js', () => ({
+  draftActivity: vi.fn(),
+  generateCourseDraftTool: vi.fn(),
+}));
 
 describe('companionToolCatalog', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   it('registers the three generation tools with contract metadata', () => {
     expect(companionToolCatalog.map((t) => t.id)).toEqual([
       'generate_course',
@@ -20,16 +29,18 @@ describe('companionToolCatalog', () => {
     }
   });
 
-  it('validates generate_course input', () => {
-    const parsed = generateCourseInput.parse({ notes: 'math', packageDir: '/pkg' });
+  it('validates generate_course input without a packageDir field', () => {
+    const parsed = generateCourseInput.parse({ notes: 'math' });
     expect(parsed.notes).toBe('math');
-    expect(generateCourseInput.safeParse({ notes: 'x' }).success).toBe(false);
+    expect(generateCourseInput.safeParse({ notes: 'x' }).success).toBe(true);
   });
 
   it('validates generate_item input and rejects unknown kinds', () => {
-    const parsed = generateItemInput.parse({ kind: 'quiz', description: 'a quiz', packageDir: '/pkg' });
+    const parsed = generateItemInput.parse({ kind: 'quiz', description: 'a quiz' });
     expect(parsed.kind).toBe('quiz');
-    expect(generateItemInput.safeParse({ kind: 'reflection', description: 'x', packageDir: '/pkg' }).success).toBe(false);
+    expect(generateItemInput.safeParse({ kind: 'reflection', description: 'x' }).success).toBe(
+      false,
+    );
   });
 
   it('validates edit_item input with optional params', () => {
@@ -37,7 +48,6 @@ describe('companionToolCatalog', () => {
       kind: 'lesson',
       intent: 'rewrite',
       currentContent: '# Original',
-      packageDir: '/pkg',
     });
     expect(parsed.intent).toBe('rewrite');
     expect(parsed.params).toBeUndefined();
@@ -47,8 +57,64 @@ describe('companionToolCatalog', () => {
       intent: 'difficulty',
       currentContent: '# Original',
       params: { direction: 'easier' },
-      packageDir: '/pkg',
     });
     expect(withParams.params).toEqual({ direction: 'easier' });
+  });
+
+  it('executes generate_item using the packageDir from the tool context', async () => {
+    vi.mocked(draftActivity).mockResolvedValueOnce({
+      ok: true,
+      items: [{ kind: 'lesson', title: 'L', content: '# L' }],
+    });
+    const tool = companionToolCatalog.find((t) => t.id === 'generate_item')!;
+
+    const result = await tool.execute(
+      { kind: 'lesson', description: 'Explain fractions' },
+      { packageDir: '/pkg' },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(draftActivity).toHaveBeenCalledWith({
+      type: 'draft_new',
+      kind: 'lesson',
+      description: 'Explain fractions',
+      packageDir: '/pkg',
+    });
+  });
+
+  it('executes generate_course without throwing when completeText is injected', async () => {
+    vi.mocked(generateCourseDraftTool).mockResolvedValueOnce({
+      ok: true,
+      courseDraft: {
+        success: true,
+        title: 'Course',
+        outlinePreview: [],
+        quality: [],
+        draftId: 'd1',
+      },
+    });
+    const tool = companionToolCatalog.find((t) => t.id === 'generate_course')!;
+    const completeText = vi.fn();
+
+    const result = await tool.execute(
+      { notes: 'Build a course' },
+      { packageDir: '/pkg', completeText },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(generateCourseDraftTool).toHaveBeenCalledWith({
+      notes: 'Build a course',
+      packageDir: '/pkg',
+      completeText,
+    });
+  });
+
+  it('returns an error from generate_course when completeText is missing', async () => {
+    const tool = companionToolCatalog.find((t) => t.id === 'generate_course')!;
+
+    const result = await tool.execute({ notes: 'Build a course' }, { packageDir: '/pkg' });
+
+    expect(result.ok).toBe(false);
+    expect(generateCourseDraftTool).not.toHaveBeenCalled();
   });
 });

@@ -142,7 +142,7 @@ describe('AiSdkAgentRuntime', () => {
         tools: {
           generate_item: {
             description: 'Draft an item',
-            parameters: expect.anything(),
+            inputSchema: expect.anything(),
           },
         },
       }),

@@ -379,6 +379,48 @@ describe('runAgentLoop — model-driven loop (Phase 6.5)', () => {
     expect(events.some((event) => event.type === 'approval.required')).toBe(true);
   });
 
+  it('injects packageDir and completeText into the tool execution context', async () => {
+    const captured: Array<{ input: unknown; ctx: Record<string, unknown> }> = [];
+    const tool: CompanionTool = {
+      id: 'generate_item',
+      description: 'Draft a new lesson, quiz, or practice item.',
+      inputSchema: z.object({ kind: z.string(), description: z.string() }),
+      permission: { id: 'item.generate', kind: 'propose' },
+      async execute(input, ctx) {
+        captured.push({ input, ctx });
+        return { ok: true, value: [{ kind: 'quiz', title: 'Quiz', content: '{}' }] };
+      },
+    };
+    const completeText = vi.fn();
+    const runtime = new FakeRuntime([
+      [
+        {
+          type: 'tool.call',
+          toolCallId: 'c1',
+          tool: 'generate_item',
+          input: { kind: 'quiz', description: 'A quiz about fractions' },
+        },
+        { type: 'text.complete' },
+      ],
+      [{ type: 'text.delta', text: 'ready' }, { type: 'text.complete' }],
+    ]);
+
+    await collect(
+      runAgentLoop(requestFor('explain syllabus design'), {
+        runtime,
+        tools: new InMemoryToolRegistry([tool]),
+        policy: defaultPermissionPolicy,
+        packageDir: '/pkg',
+        completeText,
+      }),
+    );
+
+    expect(captured).toHaveLength(1);
+    expect(captured[0]!.input).toEqual({ kind: 'quiz', description: 'A quiz about fractions' });
+    expect(captured[0]!.ctx.packageDir).toBe('/pkg');
+    expect(captured[0]!.ctx.completeText).toBe(completeText);
+  });
+
   it('preserves the provided conversation history as the model seed', async () => {
     const { tool } = recordingTool('generate_item', 'item.generate');
     const runtime = new FakeRuntime([
