@@ -11,6 +11,11 @@ import {
 import { generateArtifactContractData } from '../generate.js';
 import { buildDerivedSchemaFacts } from '../schema-facts.js';
 import {
+  getProfile as getProfileBrowser,
+  getProfilesData as getProfilesDataBrowser,
+  listProfiles,
+} from '../profiles.js';
+import {
   CourseSpecJSONSchema,
   LessonJSONSchema,
   ActivityJSONSchema,
@@ -118,5 +123,21 @@ describe('domain-guidance package', () => {
     expect(objectives).toBeDefined();
     expect(objectives?.title).toBe('Learning Objectives');
     expect(objectives?.promptGuidance).toContain('measurable objectives');
+  });
+
+  it('browser-safe ./profiles subpath stays in parity with the Node entry', () => {
+    const nodeProfiles = getProfilesData();
+    const browserProfiles = getProfilesDataBrowser();
+
+    expect(browserProfiles).toEqual(nodeProfiles);
+    expect(
+      listProfiles()
+        .map((p) => p.id)
+        .sort(),
+    ).toEqual(Object.keys(nodeProfiles.profiles).sort());
+
+    for (const [id, profile] of Object.entries(nodeProfiles.profiles)) {
+      expect(getProfileBrowser(id)).toEqual(profile);
+    }
   });
 });

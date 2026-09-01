@@ -11,6 +11,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./profiles": {
+      "types": "./dist/profiles.d.ts",
+      "import": "./dist/profiles.js"
+    },
     "./data/profiles": "./src/data/profiles.json",
     "./data/quality-rubric": "./src/data/quality-rubric.json",
     "./data/artifact-contract": "./src/data/artifact-contract.json"
