@@ -1,103 +1,145 @@
-# Learner Profiles
+# OpenEdu Learner Profiles Reference
 
-The skill supports four student-profile variants. Each profile changes **both** how the agent authors and what the artifacts encode, while conforming to the same canonical `course-spec.json` contract and compiler pipeline.
+> GENERATED reference — do not hand-edit. Regenerate with `pnpm --filter @open-edu/domain-guidance generate`.
+> Source of truth: `packages/domain-guidance/src/data/profiles.json`.
 
-## Profiles at a glance
+Schema Version: 1
+Default Profile: `neurotypical`
 
-| Key            | Default | One-line description                                            | Reference                 |
-| -------------- | ------- | --------------------------------------------------------------- | ------------------------- |
-| `neurotypical` | yes     | Default behavior; the base authoring layer.                     | `profile-neurotypical.md` |
-| `autism`       | no      | Predictability, literal language, errorless learning (ALX 2.0). | `profile-autism.md`       |
-| `school`       | no      | K-12 register, curriculum-aligned, age-graded.                  | `profile-school.md`       |
-| `college`      | no      | Academic register, rigorous objectives.                         | `profile-college.md`      |
+### Neurotypical (`neurotypical`)
 
-## Selection
+- key: neurotypical
+- default: true
+- name: Neurotypical
+- description: Default profile. Standard default skill behavior; base authoring layer.
+- accessibility: none
+- difficultyBias: none
+- pacingRangeMinutes: 15–45
 
-`scripts/profiles.mjs` (`resolveProfile`) normalizes the user's `learnerProfile`:
+## Guidance Deltas
 
-- explicit valid key → `source: "explicit"`
-- no input → `neurotypical`, `source: "defaulted"`
-- known alias (`autistic`→`autism`, `k12`→`school`, `university`→`college`) → `source: "mapped"`
-- anything else → `neurotypical`, `source: "mapped"`
+- Base authoring layer describes standard neurotypical behavior.
 
-**Accessibility rule:** `autism` is never inferred from age or level — only ever explicitly stated or defaulted to `neurotypical` (SKILL.md Critical Rule 9). `school`/`college` may be inferred from age/educational context.
+## Output Deltas
 
-Every selection (or default) is recorded under a `## Learner Profile` section in `course-brief.md` and injected into `quality-report.json` `summary.learnerProfile` as `{ key, name, source }`.
+- metadata.audience `set` to `"neurotypical"`
+- metadata.accessibility `set` to `[]`
+- metadata.difficulty no bias — any value the authoring flow supports
+- lesson.estimatedMinutes use pacing range [15, 45]
 
-## Learner Profile vs. educational context
+## Prompt Instructions
 
-Four concepts are kept distinct — do not collapse them into a single `learnerProfile` value:
+Adapt content for a general neurotypical learner: standard clear explanations, balanced pacing (15-45 min), and standard difficulty progression.
 
-| Concept         | Answers                       | Example values                                | Where it lives                   |
-| --------------- | ----------------------------- | --------------------------------------------- | -------------------------------- |
-| Learner Profile | How the learner best learns   | `neurotypical`, `autism`, `school`, `college` | `learnerProfile` (course brief)  |
-| Education Level | Academic/developmental stage  | `school`, `college`                           | `educationLevel` (brief context) |
-| Grade Band      | Age/grade-specific complexity | `early_primary` … `senior_secondary`          | `gradeBand` (brief context)      |
-| Curriculum      | What must be taught           | `nios`, `<other board>`                       | `curriculum` (brief context)     |
+### Autism Spectrum (`autism`)
 
-Examples:
+- key: autism
+- default: false
+- name: Autism Spectrum
+- description: Autistic learners. Prioritizes predictability, visual support, literal language, and errorless learning.
+- accessibility: sensory-friendly, predictable-structure, literal-language
+- difficultyBias: beginner
+- pacingRangeMinutes: 10–30
 
-```yaml
-learnerProfile: neurotypical
-educationLevel: school
-gradeBand: middle_school
-curriculum: nios
-```
+## Guidance Deltas
 
-```yaml
-learnerProfile: autism
-educationLevel: school
-gradeBand: middle_school
-curriculum: nios
-```
+- Vocabulary / Reading Level (ALX 18): use literal language; target sentence length of 5-12 words; no idioms, sarcasm, or abstract metaphors (avoid 'conquer', 'on fire', 'genius').
+- One Concept per Activity (ALX-3): never introduce multiple concepts simultaneously; each activity must have exactly one learning objective, one task, and one decision; split multi-concept lessons.
+- Predictability (ALX-1): keep lesson flow fixed across the whole course; never vary the structure between lessons.
+- Structured Work Systems (ALX-9): every activity must answer four questions — what am I doing, how much work is there, how do I know I am finished, and what happens next.
+- Shaping (ALX-14): break complex skills into smaller, achievable sub-steps (task decomposition); sequence sub-steps into a graduated path.
+- Errorless Learning (ALX-13): build confidence before introducing challenge; new concepts start with high early success.
+- Prompt Hierarchy (ALX-12): support fades as mastery improves — full demonstration, visual hint, partial hint, verbal cue, independent; never remove support abruptly.
+- Visual First (ALX-2): images carry primary meaning, text is secondary; every concept must begin with a visual example before explanation.
+- Executive Function & Transitions (ALX-10, ALX-11): support task initiation and sequencing; never jump abruptly between activities; end each activity with an explicit 'next:' orientation and expected duration.
+- Feedback & Praise (ALX-5, 19): use specific, calm, literal praise; never exaggerate; never use failure framing; prefer 'Let's try again'.
+- AI Tutor Sequence (19): follow show, explain, practice; establish what the learner is doing and what comes next before explaining.
+- Reinforcement (ALX-8, ALX-15, ALX-16): mastery-based and independence-based; no leaderboards, rankings, or excessive gamification; reward prompt-free completion and growth over raw accuracy.
+- Calm Zone & Breaks (ALX-17, ALX-18): every lesson includes a calm break/reflection opportunity; keep zones single-purpose.
 
-```yaml
-learnerProfile: neurotypical
-educationLevel: college
-```
+## Output Deltas
 
-- `autism` is a learner characteristic; `educationLevel`/`gradeBand`/`curriculum` are context. They compose by being separate fields, not by creating composite profiles (e.g. no `autism-nios`, `school-nios`).
-- `autism` is **never** inferred from age/grade/level — only ever stated explicitly or defaulted to `neurotypical`.
-- Educational context is recorded in `course-brief.md` and surfaced in `quality-report.json` `summary.context`; it does not require new `course-spec.json` metadata.
+- metadata.audience `set` to `"autism"`
+- metadata.accessibility `add` `["sensory-friendly", "predictable-structure", "literal-language"]`
+- metadata.difficulty prefer 'beginner' unless explicitly overridden
+- lesson.estimatedMinutes use pacing range [10, 30]
+- activityPlan.progression `set` to `[observe, guided_practice, independent_practice, mastery_check, positive_completion]`
+- activity.instructions style restrict to short, direct instructions (e.g. 'Count the apples')
+- widget selection restrict away from high-sensory-load, autoplay-media, or flashing widgets; prefer calm, predictable visual layouts with large touch targets
+- quiz question style set literal one-step questions with one correct, unambiguous answer; no penalties, unlimited retries, no trick wording or implied-meaning distractors
+- rewards/cards framing restrict use of competitive rewards; prefer progress-visible, mastery-based recognition and independence
 
-## Delta semantics
+## Prompt Instructions
 
-Each `profile-*.md` encodes deltas over the implicit base layer (default skill behavior) using four operations:
+Adapt content for an autistic learner: use strict literal language (5-12 words per sentence, no idioms/metaphors), direct step-by-step instructions, one concept per activity, predictable structure, visual emphasis, and calm non-exaggerated feedback.
 
-- `set` — override a field with a concrete value
-- `add` — append to a list (e.g. accessibility tags)
-- `restrict` — constrain options (e.g. widget selection, instruction style)
-- `prefer` — ordering preference (e.g. pacing ranges, difficulty bias)
+### School (K-12) (`school`)
 
-`neurotypical` is the base-aligned profile and lists only its output encoding (`audience: "neurotypical"`, `accessibility: []`). The other profiles list their deviations.
+- key: school
+- default: false
+- name: School (K-12)
+- description: School-age learners (K-12). Age-graded register, curriculum-aligned objectives, grade-band-appropriate pacing.
+- accessibility: none
+- difficultyBias: none
+- pacingRangeMinutes: 15–45
 
-## Machine-checkable knobs
+## Grade Bands
 
-`scripts/profiles.config.json` carries the machine-checkable settings used by the validation and reporting scripts (pacing ranges, accessibility tags, difficulty bias). Prose guidance deltas in the `profile-*.md` files are applied by the LLM only; scripts never parse them.
+- `early_primary` 10–20 minutes
+- `upper_primary` 15–25 minutes
+- `middle_school` 20–35 minutes
+- `secondary` 25–40 minutes
+- `senior_secondary` 30–45 minutes
 
-## Output encoding
+## Guidance Deltas
 
-All profiles emit `metadata.audience` and `metadata.accessibility` on the produced `course-spec.json`:
+- Vocabulary / Reading Level: match the grade band — very short concrete sentences (early_primary) to academically precise vocabulary with explicit definitions for new technical terms (senior_secondary); prefer developmental appropriateness over mechanical word-count rules.
+- Objectives: align objectives to the stated curriculum where it exists; keep them grade-band appropriate and observable; connect each objective directly to an activity and an assessment signal; do not force higher-order objectives onto every lesson.
+- Examples: prefer concrete to familiar to visual to abstract, especially for younger learners; age-appropriate, culturally/contextually appropriate, subject-related, and understandable without unnecessary background knowledge.
+- Activity Instructions: direct, concrete, age-appropriate, sequential instructions that are easy to scan (e.g. 'Look at the picture. Count the apples. Choose the number.'); include a worked example when introducing a new procedure.
+- Assessment: each item should primarily measure one learning objective, with complexity appropriate to the grade band; keep question text readable at the intended grade level.
+- Pacing: use shorter learning blocks than college; grade-band pacing ranges live in gradeBands.
 
-| Profile        | `metadata.audience` | `metadata.accessibility`                                            |
-| -------------- | ------------------- | ------------------------------------------------------------------- |
-| `neurotypical` | `neurotypical`      | `[]`                                                                |
-| `autism`       | `autism`            | `["sensory-friendly", "predictable-structure", "literal-language"]` |
-| `school`       | `school`            | `[]`                                                                |
-| `college`      | `college`           | `[]`                                                                |
+## Output Deltas
 
-The compiler propagates these (plus `targetAudience`, `keywords`, `lastUpdated`) into the compiled package metadata (course-compiler PR 1).
+- metadata.audience set to 'school'
+- metadata.accessibility set to [] — do not add autism accessibility tags
+- lesson.estimatedMinutes use grade-band appropriate pacing range [15, 45]
+- activity.instructions style restrict to direct, concrete, sequential instructions; include a worked example for new procedures
+- quiz question style set each item primarily measures one objective; readability and complexity match the grade band
 
-## Profile-scoped quality checks
+## Prompt Instructions
 
-`summarize-quality.mjs` gates these checks on the active profile (from `metadata.audience`):
+Adapt content for K-12 school learners: age-appropriate vocabulary and grade-band pacing, concrete visual examples, curriculum-aligned objectives, and direct step-by-step activity instructions.
 
-- `QC-ACC-05/06/07` — autism: literal language, one concept per activity, sensory-friendly widgets
-- `QC-SCH-01` — school: age-appropriate objectives/examples
-- `QC-COL-01` — college: academic register
+### College / Adult (`college`)
 
-See `quality-rubric.md` Dimension 6b for the full table.
+- key: college
+- default: false
+- name: College / Adult
+- description: Higher-education / adult learners. Academic rigor, independence, disciplinary terminology, and deeper conceptual treatment.
+- accessibility: none
+- difficultyBias: none
+- pacingRangeMinutes: 20–60
 
-## Composition (future)
+## Guidance Deltas
 
-Profile composition (e.g. `autism` + `college`) is future work. The delta format (`set`/`add`/`restrict`/`prefer`) leaves room to merge, but v1 supports single-profile selection only.
+- Register: formal, precise, discipline-appropriate language with fewer conversational simplifications; introduce technical terminology when relevant; clarity remains more important than artificial academic verbosity.
+- Objectives: prefer higher-order objectives when appropriate (apply, analyze, evaluate, create), but do not force every objective into analyze/evaluate/create — the objective must reflect the actual learning goal.
+- Prior Knowledge: assume prerequisite knowledge only when explicitly stated in the course brief; expose important prerequisites explicitly.
+- Examples: use realistic disciplinary examples, case studies, authentic problems, research examples, and professional/academic contexts; move from simple explanation to disciplinary application.
+- Evidence: where the discipline requires, structure explanation as claim, explanation, evidence/example, implication; cite authoritative sources when the subject demands evidence.
+- Pacing: deeper, longer learning blocks; prefer fewer, deeper, more independent activities over many tiny activities.
+
+## Output Deltas
+
+- metadata.audience set to 'college'
+- metadata.accessibility set to [] — do not add autism accessibility tags
+- metadata.difficulty no automatic 'advanced' bias — difficulty is determined by the course brief and subject
+- lesson.estimatedMinutes use pacing range [20, 60]
+- activity.instructions style restrict to formal, self-contained, precise instructions sufficiently detailed for independent completion; avoid excessive hand-holding, but do not remove scaffolding from genuinely difficult tasks
+- quiz question style set questions that test reasoning rather than terminology memorization; may include multi-step problems, inference, application, analysis, evaluation, synthesis, and case-based questions
+
+## Prompt Instructions
+
+Adapt content for college/adult learners: formal disciplinary register, higher-order objectives (apply, analyze, evaluate), realistic case-based examples, deeper independent learning blocks (20-60 min).

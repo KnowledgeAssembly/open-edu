@@ -1,128 +1,36 @@
-# Quality Rubric
+# OpenEdu Quality Rubric Reference
 
-The quality report evaluates a course spec against pedagogical dimensions. Each check has a severity (`pass`, `warning`, or `error`) and evidence.
+> GENERATED reference — do not hand-edit. Regenerate with `pnpm --filter @open-edu/domain-guidance generate`.
+> Source of truth: `packages/domain-guidance/src/data/quality-rubric.json`.
 
-## Dimension 1: Objective Coverage
+Schema Version: 1
 
-Every learning objective must map to at least one learning activity and one assessment signal.
+## Dimensions
 
-| Check ID    | Rule                                                                                            | Severity  |
-| ----------- | ----------------------------------------------------------------------------------------------- | --------- |
-| `QC-OBJ-01` | Every objective is covered by at least one activity                                             | `error`   |
-| `QC-OBJ-02` | Every objective has an assessment signal (quiz, exercise with feedback, or mastery_check)       | `warning` |
-| `QC-OBJ-03` | No lesson has more than 6 objectives                                                            | `warning` |
-| `QC-OBJ-04` | Objectives use measurable action verbs (identify, explain, calculate, compare, construct, etc.) | `warning` |
+### Learning Objectives (`objectives`)
 
-## Dimension 2: Assessment Alignment
+- **Description**: Lessons must contain measurable learning objectives with action verbs.
+- **Failing Message**: One or more lessons are missing learning objectives.
+- **Prompt Guidance**: Use measurable objectives that start with an action verb (e.g. explain, calculate, compare, construct). NEVER use 'understand', 'know', or 'learn'.
+- **Thresholds**: `{"minObjectivesPerLesson":1,"prohibitedVerbs":["understand","know","learn","appreciate","grasp"]}`
 
-Assessments must test what was taught, not introduce new concepts.
+### Assessment & Practice (`assessment`)
 
-| Check ID    | Rule                                                              | Severity  |
-| ----------- | ----------------------------------------------------------------- | --------- |
-| `QC-ASM-01` | Quiz questions reference only concepts introduced in the lesson   | `error`   |
-| `QC-ASM-02` | Every lesson with > 0 activities has a mastery_check or quiz step | `warning` |
-| `QC-ASM-03` | Assessment difficulty matches the stated course difficulty level  | `warning` |
+- **Description**: Course lessons must include check-for-understanding quizzes or practice activities.
+- **Failing Message**: Add a quiz or practice activity so learners can check understanding.
+- **Prompt Guidance**: Include exactly one quiz activity per lesson with multiple-choice questions (4 options each, exactly 1 correct option).
+- **Thresholds**: `{"quizOptionsCount":4,"quizRequiredPerLesson":true}`
 
-## Dimension 3: Duration Consistency
+### Course Duration & Scope (`duration`)
 
-| Check ID    | Rule                                                              | Severity  |
-| ----------- | ----------------------------------------------------------------- | --------- |
-| `QC-DUR-01` | Sum of lesson.estimatedMinutes within 20% of total estimatedHours | `warning` |
-| `QC-DUR-02` | No single lesson exceeds 45 minutes                               | `warning` |
-| `QC-DUR-03` | No single lesson is under 5 minutes                               | `warning` |
+- **Description**: Courses should maintain a focused scope with 1 to 6 lessons.
+- **Failing Message**: Outline should have between 1 and 6 lessons/activities for a focused course.
+- **Prompt Guidance**: 1 to 6 lessons only (teachers build short, focused courses).
+- **Thresholds**: `{"minLessons":1,"maxLessons":6}`
 
-## Dimension 4: Activity Progression
+### Course Completeness (`completeness`)
 
-| Check ID     | Rule                                                             | Severity  |
-| ------------ | ---------------------------------------------------------------- | --------- |
-| `QC-PROG-01` | Lesson contains at least one activity from each step type        | `warning` |
-| `QC-PROG-02` | Activity `order` values are sequential (1,2,3...) and start at 1 | `warning` |
-| `QC-PROG-03` | First activity is observe (introduce concept)                    | `info`    |
-
-## Dimension 5: Widget Decisions
-
-| Check ID    | Rule                                                                                     | Severity  |
-| ----------- | ---------------------------------------------------------------------------------------- | --------- |
-| `QC-WDG-01` | Widget IDs are from the discovered catalog (canonical, not legacy)                       | `error`   |
-| `QC-WDG-02` | Widget is not marked deprecated                                                          | `error`   |
-| `QC-WDG-03` | widgetConfig includes all required fields for the widget                                 | `error`   |
-| `QC-WDG-04` | Widget choice is justified by learning intent                                            | `info`    |
-| `QC-WDG-05` | Community widget references (`widgetRef`) include mandatory integrity and valid `source` | `error`   |
-| `QC-WDG-06` | Community widget `fallback` resolves to an available native widget                       | `warning` |
-
-## Dimension 6: Accessibility & Inclusion
-
-| Check ID    | Rule                                                                | Severity  |
-| ----------- | ------------------------------------------------------------------- | --------- |
-| `QC-ACC-01` | Instructions use plain language (reading level appropriate)         | `warning` |
-| `QC-ACC-02` | Widget choices support keyboard-only interaction where possible     | `info`    |
-| `QC-ACC-03` | Color is not the sole differentiator (non-color-only distinctions)  | `warning` |
-| `QC-ACC-04` | Content is chunked into readable segments (not single large blocks) | `warning` |
-
-## Dimension 6b: Profile-Scoped Checks
-
-These checks **supplement** (do not replace) the universal checks and run only when the active learner profile matches. The profile is read from `course-spec.json` `metadata.audience` (default: `neurotypical`). School/college checks also activate when `educationLevel`/`gradeBand` context is supplied via `options.context`.
-
-| Check ID    | Profile   | Rule                                                                                    | Severity  |
-| ----------- | --------- | --------------------------------------------------------------------------------------- | --------- |
-| `QC-ACC-05` | `autism`  | Instructions use literal, unambiguous language (no idiom/metaphor/competition)          | `warning` |
-| `QC-ACC-06` | `autism`  | One concept per activity (no compound objectives in a single instruction)               | `warning` |
-| `QC-ACC-07` | `autism`  | Animated widgets must offer a `ReducedMotion` fallback (static widgets are not flagged) | `info`    |
-| `QC-SCH-01` | `school`  | Objectives and examples are age/grade-appropriate                                       | `warning` |
-| `QC-SCH-02` | `school`  | `gradeBand` context is a known band (`early_primary` … `senior_secondary`)              | `error`   |
-| `QC-SCH-03` | `school`  | Lesson `estimatedMinutes` falls within the grade band's pacing range                    | `warning` |
-| `QC-COL-01` | `college` | Academic register is present; objectives are rigorous                                   | `info`    |
-
-## Dimension 7: Completeness
-
-| Check ID    | Rule                                                     | Severity  |
-| ----------- | -------------------------------------------------------- | --------- |
-| `QC-COM-01` | Every required field in the artifact contract is present | `error`   |
-| `QC-COM-02` | No unresolved assumptions in course-brief.md             | `warning` |
-| `QC-COM-03` | Every lesson has coreIdea, examples, and misconceptions  | `warning` |
-
-## Dimension 8: Rewards & Cards
-
-| Check ID    | Rule                                                          | Severity  |
-| ----------- | ------------------------------------------------------------- | --------- |
-| `QC-REW-01` | Reward `condition` is attached to the reward, not the trigger | `error`   |
-| `QC-REW-02` | Condition scope matches file placement (module vs bundle)     | `error`   |
-| `QC-REW-03` | Card IDs are unique across the whole bundle                   | `error`   |
-| `QC-REW-04` | Card definitions include summary, category, and levels        | `warning` |
-| `QC-REW-05` | No condition uses a signal the scope cannot evaluate          | `error`   |
-
-## Finding Severity Codes
-
-Findings use these severity levels:
-
-- `error` — fails the run (must be fixed)
-- `warning` — degrades quality but does not fail
-- `info` — advisory only
-- `pass` — check satisfied
-
-## Quality Report Format
-
-```json
-{
-  "success": true,
-  "timestamp": "2026-07-25T...",
-  "summary": {
-    "lessons": 3,
-    "objectives": 9,
-    "activities": 12,
-    "widgetsUsed": 2,
-    "totalEstimatedMinutes": 60,
-    "errors": 0,
-    "warnings": 2,
-    "infos": 3,
-    "learnerProfile": { "key": "autism", "name": "Autism Spectrum", "source": "explicit" }
-  },
-  "findings": [
-    {
-      "checkId": "QC-OBJ-04",
-      "severity": "warning",
-      "message": "Objective \"understand photosynthesis\" uses a non-measurable verb"
-    }
-  ]
-}
-```
+- **Description**: Course spec must be complete with no compilation errors and required metadata.
+- **Failing Message**: Outline is empty or compilation reported errors.
+- **Prompt Guidance**: All required fields in the course spec contract must be present and non-empty.
+- **Thresholds**: `{"requireNonEmpty":true}`
