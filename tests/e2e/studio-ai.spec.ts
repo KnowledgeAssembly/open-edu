@@ -375,7 +375,7 @@ test.describe('Browser Studio AI (Phase 2)', () => {
 
     // Open the assistant and send a course-generation prompt.
     const chatInput = await openAssistant(page);
-    await chatInput.fill(COURSE_NOTES);
+    await chatInput.fill('Create a course about water and aquatic life');
     await chatInput.press('Enter');
 
     // The course-draft card renders from the loop's finish metadata.
