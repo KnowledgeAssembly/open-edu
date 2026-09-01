@@ -5,6 +5,7 @@ import {
   studioContextSnapshotSchema,
   truncateExcerpt,
   type ActivityKind,
+  type LearnerProfile,
   type StudioContextSnapshot,
 } from './context';
 import { useStudioAssistant } from './StudioAssistantProvider';
@@ -19,6 +20,8 @@ interface StudioContextBridgeProps {
   } | null;
   aiAvailable: boolean;
   locale: string;
+  /** Author-facing learner profile (spec §12). Default undefined → no styling. */
+  learner?: LearnerProfile;
   api?: {
     getOutline: () => Promise<{
       activities: Array<{ path: string; title: string; kind: string }>;
@@ -39,6 +42,7 @@ export function StudioContextBridge({
   loadedPackage,
   aiAvailable,
   locale,
+  learner,
   api,
 }: StudioContextBridgeProps) {
   const { setContext } = useStudioAssistant();
@@ -55,6 +59,10 @@ export function StudioContextBridge({
         locale,
         aiAvailable,
       };
+
+      if (learner) {
+        snapshot.learner = learner;
+      }
 
       if (loadedPackage) {
         snapshot.course = {
@@ -146,6 +154,7 @@ export function StudioContextBridge({
         view,
         locale,
         aiAvailable,
+        ...(learner ? { learner } : {}),
       }),
     );
     void syncContext();
@@ -153,7 +162,7 @@ export function StudioContextBridge({
     return () => {
       cancelled = true;
     };
-  }, [view, selectedPath, loadedPackage, aiAvailable, locale, setContext, api]);
+  }, [view, selectedPath, loadedPackage, aiAvailable, locale, learner, setContext, api]);
 
   // Patch live editor fields (selection, dirty, buffer excerpt) without re-fetching.
   // Debounced at ~300ms to avoid request spam while typing.

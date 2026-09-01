@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -49,6 +49,44 @@ export function deleteDraft(draftId: string): void {
     activeDrafts.delete(draftId);
     rm(entry.tempDir, { recursive: true, force: true }).catch(() => {});
   }
+}
+
+/** Base64 file list for a still-live server draft (browser OPFS consumers).
+ *  Returns null when the draft no longer exists or its output cannot be read. */
+export function readDraftFiles(
+  draftId: string,
+): Array<{ path: string; content: string; encoding: 'base64' }> | null {
+  const entry = getDraftEntry(draftId);
+  if (!entry) return null;
+
+  const files: Array<{ path: string; content: string; encoding: 'base64' }> = [];
+  const walk = (dir: string, prefix = ''): void => {
+    let entries: string[] = [];
+    try {
+      entries = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const name of entries) {
+      const abs = join(dir, name);
+      try {
+        const stat = statSync(abs);
+        if (stat.isDirectory()) {
+          walk(abs, `${prefix}${name}/`);
+        } else if (stat.isFile()) {
+          files.push({
+            path: `${prefix}${name}`,
+            content: readFileSync(abs).toString('base64'),
+            encoding: 'base64',
+          });
+        }
+      } catch {
+        // skip unreadable entries
+      }
+    }
+  };
+  walk(entry.outputDir);
+  return files;
 }
 
 function errorResult(code: AiGenerateErrorCode, error: string): CourseDraftResult {

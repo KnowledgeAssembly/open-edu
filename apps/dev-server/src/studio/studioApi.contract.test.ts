@@ -28,6 +28,7 @@ describe('StudioApi contract', () => {
   it('both factories expose every StudioApi method', () => {
     const methodNames: Array<keyof StudioApi> = [
       'getPackageDir',
+      'getWorkspace',
       'validate',
       'getOutline',
       'saveOutlineOrder',

@@ -119,7 +119,9 @@ describe('createStudioAssistantHandler', () => {
     await createStudioAssistantHandler(makeReq(validRequest), res, {});
 
     expect(mockStreamText).toHaveBeenCalledOnce();
-    expect(mockToUIMessageStream).toHaveBeenCalledOnce();
+    // Model execution goes through AgentRuntime now; the plain `toUIMessageStream`
+    // adapter is no longer called directly by the handler.
+    expect(mockToUIMessageStream).not.toHaveBeenCalled();
     expect(mockPipe).toHaveBeenCalledOnce();
     const pipeArgs = mockPipe.mock.calls[0]![0] as { status: number; response: ServerResponse };
     expect(pipeArgs.status).toBe(200);

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { generateCoursePackage, type CourseSpecSource } from './generateCoursePackage.js';
 
-const FIXTURE_DIR = resolve(import.meta.dirname, '../../gateway/__tests__/fixtures');
+const FIXTURE_DIR = resolve(import.meta.dirname, '__fixtures__');
 
 async function specFixture(): Promise<string> {
   return readFile(join(FIXTURE_DIR, 'runtime-smoke-course-spec.json'), 'utf-8');

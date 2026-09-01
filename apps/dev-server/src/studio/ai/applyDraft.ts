@@ -1,5 +1,8 @@
 import type { StudioApi } from '../studioApi';
 import type { DraftItem } from './types';
+import { applyChangeSet } from './applyChangeSet';
+import { buildItemChangeSet } from './buildItemChangeSet';
+import { diffChangeSet, type FileDiff } from './changeSet';
 
 export type ApplyMode = 'file' | 'buffer';
 
@@ -10,80 +13,84 @@ export interface ApplyDraftOptions {
   openInEditor?: boolean;
 }
 
+export interface ApplyDraftResult {
+  path?: string;
+  paths: string[];
+  preview: FileDiff[];
+  changeSetId: string;
+}
+
 export async function applyDraft(
   api: StudioApi,
   draft: DraftItem,
   options: ApplyDraftOptions,
-): Promise<{ path?: string }> {
+): Promise<ApplyDraftResult> {
   if (options.mode === 'file') {
     return applyDraftToFile(api, draft, options);
   }
   return applyDraftToBuffer(draft, options);
 }
 
+/**
+ * Apply a batch of generated items as a single atomic workspace commit (SPEC
+ * §14, §17): build one ChangeSet, preview it with `diffChangeSet`, then commit
+ * through the workspace transaction. There is no per-file partial-failure path.
+ */
 export async function applyDraftBatch(
   api: StudioApi,
   drafts: DraftItem[],
-): Promise<string[]> {
-  const stamp = Date.now();
-  const written: string[] = [];
-
-  for (let i = 0; i < drafts.length; i++) {
-    const item = drafts[i]!;
-    const ext = item.kind === 'lesson' ? '.md' : '.json';
-    const path = `nodes/${item.kind}-${stamp + i}${ext}`;
-    try {
-      await api.writeFile(path, item.content);
-      written.push(path);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`${message} (${written.length} of ${drafts.length} saved)`);
-    }
+): Promise<ApplyDraftResult> {
+  const workspace = await api.getWorkspace();
+  const changeSet = buildItemChangeSet(drafts, []);
+  const preview = await diffChangeSet(changeSet, workspace);
+  const result = await applyChangeSet(changeSet, workspace);
+  if (!result.success) {
+    throw new Error(result.error ?? 'Could not apply the draft');
   }
-
-  try {
-    const outline = await api.getOutline();
-    await api.saveOutlineOrder([
-      ...outline.activities.map((a) => a.path),
-      ...written,
-    ]);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new Error(`Saved files but failed to update outline: ${message}`);
-  }
-
-  return written;
+  const paths = changeSet.changes.map((c) => c.path);
+  await appendToOutline(api, paths);
+  return { paths, preview, changeSetId: changeSet.id };
 }
 
 async function applyDraftToFile(
   api: StudioApi,
   draft: DraftItem,
   options: ApplyDraftOptions,
-): Promise<{ path?: string }> {
-  const stamp = Date.now();
-  const ext = draft.kind === 'lesson' ? '.md' : '.json';
-  const path = options.path || `nodes/${draft.kind}-${stamp}${ext}`;
-
-  await api.writeFile(path, draft.content);
-
-  const outline = await api.getOutline();
-  const exists = outline.activities.some((a) => a.path === path);
-  if (!exists) {
-    await api.saveOutlineOrder([
-      ...outline.activities.map((a) => a.path),
-      path,
-    ]);
+): Promise<ApplyDraftResult> {
+  const workspace = await api.getWorkspace();
+  const explicitPaths = options.path ? [options.path] : undefined;
+  const changeSet = buildItemChangeSet([draft], [], explicitPaths);
+  const preview = await diffChangeSet(changeSet, workspace);
+  const result = await applyChangeSet(changeSet, workspace);
+  if (!result.success) {
+    throw new Error(result.error ?? 'Could not apply the draft');
   }
-
-  return { path };
+  const path = changeSet.changes[0]?.path ?? options.path;
+  await appendToOutline(api, path ? [path] : []);
+  return { path, paths: path ? [path] : [], preview, changeSetId: changeSet.id };
 }
 
 async function applyDraftToBuffer(
   draft: DraftItem,
   options: ApplyDraftOptions,
-): Promise<{ path?: string }> {
+): Promise<ApplyDraftResult> {
   if (options.applyToEditor) {
     options.applyToEditor(draft);
   }
-  return {};
+  return { paths: [], preview: [], changeSetId: '' };
+}
+
+/** Append newly created node files to the outline (package.json + workflow.json). */
+async function appendToOutline(api: StudioApi, newPaths: string[]): Promise<void> {
+  try {
+    const outline = await api.getOutline();
+    const existing = outline.activities.map((a) => a.path);
+    const toAdd = newPaths.filter((p) => !existing.includes(p));
+    if (toAdd.length > 0) {
+      await api.saveOutlineOrder([...existing, ...toAdd]);
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Applied files but failed to update outline: ${message}`);
+  }
 }

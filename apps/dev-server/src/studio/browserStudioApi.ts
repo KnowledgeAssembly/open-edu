@@ -32,7 +32,7 @@ import { assertSafeCoursePath, sortCourseFiles, type StudioFile } from './course
 import { getTemplateById } from './templates/catalog.js';
 import { activitiesFromEntryOrder, buildLinearWorkflow } from './outlineModel.js';
 import type { LibraryEntry } from './library/types.js';
-import { BrowserAiClient, type BrowserAiClientOptions } from './browserAiClient.js';
+import { createBrowserAiGateway, type BrowserAiGateway } from './browserAiGateway.js';
 import { applyChangeSet } from './ai/applyChangeSet.js';
 import { createChangeSet, type WorkspaceChange } from '@open-edu/storage';
 import type {
@@ -64,8 +64,7 @@ export interface BrowserStudioApiOptions {
   store?: BrowserCourseStore;
   session?: BrowserStudioSession;
   onPackageChanged?: () => void;
-  aiClient?: BrowserAiClient;
-  aiClientOptions?: BrowserAiClientOptions;
+  aiClient?: BrowserAiGateway;
 }
 
 export function createBrowserStudioSession(): BrowserStudioSession {
@@ -148,7 +147,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   const store = options.store ?? createBrowserCourseStore();
   const session = options.session ?? createBrowserStudioSession();
   const onPackageChanged = options.onPackageChanged ?? (() => {});
-  const aiClient = options.aiClient ?? new BrowserAiClient(options.aiClientOptions ?? {});
+  const aiClient = options.aiClient ?? createBrowserAiGateway();
 
   async function requireActiveCourse(): Promise<BrowserCourse> {
     if (!session.activeCourseId) {
@@ -558,7 +557,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
   function toCourseDraftResult(
     id: string,
     hasFiles: boolean,
-    title: string,
+    title: string | undefined,
     outlinePreview: Array<{ title: string; kind: string }>,
     quality: Array<{ id: string; labelKey: string; passed: boolean; detail?: string }>,
   ): CourseDraftResult {
@@ -648,6 +647,7 @@ export function createBrowserStudioApi(options: BrowserStudioApiOptions = {}): S
 
   return {
     getPackageDir: async () => `browser://${session.activeCourseId ?? 'no-course'}`,
+    getWorkspace: () => requireActiveWorkspace(),
     validate,
     getOutline,
     saveOutlineOrder,
