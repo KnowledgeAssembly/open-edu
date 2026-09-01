@@ -1,8 +1,4 @@
-import {
-  generateItemAdd,
-  generateItemEdit,
-  ItemRequestError,
-} from '../itemGenerate';
+import { generateItemAdd, generateItemEdit, ItemRequestError } from '../itemGenerate';
 import { generateCourseDraft } from '../generateCourse';
 import type { DraftItem, ItemIntent, ItemIntentParams, CourseDraftResult } from '../types';
 
@@ -24,9 +20,7 @@ export interface GenerateCourseRequest {
   completeText: (prompt: string) => Promise<string>;
 }
 
-export type ToolCallResult =
-  | { ok: true; items: DraftItem[] }
-  | { ok: false; error: string };
+export type ToolCallResult = { ok: true; items: DraftItem[] } | { ok: false; error: string };
 
 export type GenerateCourseToolResult =
   | { ok: true; courseDraft: CourseDraftResult }
@@ -87,7 +81,7 @@ export async function generateCourseDraftTool(
       : {
           kind: 'spec' as const,
           spec: request.spec || '',
-          extension: request.specExt || '.json' as '.json' | '.md',
+          extension: request.specExt || ('.json' as '.json' | '.md'),
         };
 
     const result = await generateCourseDraft({
@@ -100,7 +94,7 @@ export async function generateCourseDraftTool(
         result.code === 'notes-too-short'
           ? 'Your notes are too short. Add more detail about what the course should cover.'
           : result.code === 'llm'
-            ? 'AI generation failed. Please try again.'
+            ? `AI generation failed: ${result.error || 'Please check your LLM configuration and try again.'}`
             : result.code === 'parse'
               ? 'Could not understand the generated spec. Try rephrasing your notes.'
               : result.code === 'compile'

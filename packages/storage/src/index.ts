@@ -71,3 +71,78 @@ export {
   deleteNotesByLesson,
   deleteNotesByCourse,
 } from './note-store.js';
+export type {
+  CourseWorkspace,
+  FileStat,
+  WorkspaceEntry,
+  WorkspaceKind,
+} from './workspace/types.js';
+export {
+  WorkspaceError,
+  WorkspaceNotFoundError,
+  WorkspacePathError,
+  WorkspacePermissionError,
+  WorkspaceConflictError,
+  WorkspaceTransactionError,
+  WorkspaceUnavailableError,
+} from './workspace/errors.js';
+export { normalizeCoursePath, assertSafeCoursePath, isTextCourseFile } from './workspace/paths.js';
+export { MemoryWorkspace } from './workspace/memory-workspace.js';
+export { walkWorkspace, type WorkspaceFile } from './workspace/walk.js';
+export {
+  OpfsCourseRepository,
+  type CourseRepository,
+  type CourseInfo,
+  COURSE_MANIFEST_DIR,
+  COURSE_MANIFEST_PATH,
+} from './workspace/course-repository.js';
+export { MemoryCourseRepository } from './workspace/memory-course-repository.js';
+export {
+  getOpfsRoot,
+  OpfsUnsupportedError,
+  OpfsQuotaError,
+} from './workspace/opfs-availability.js';
+export { OPFSWorkspace } from './workspace/opfs-workspace.js';
+export type { WorkspaceChange, WorkspaceChangeSet } from './workspace/change.js';
+export { createChangeSet } from './workspace/change.js';
+export {
+  createTransaction,
+  WorkspaceTransactionImpl,
+  type WorkspaceTransaction,
+  type CommitResult,
+  type ValidationResult as WorkspaceValidationResult,
+} from './workspace/transaction.js';
+export { hashBytes, sha256Hex } from './workspace/hash.js';
+export { buildFileIndexFromWorkspace, rebuildFileIndex } from './workspace/index-builder.js';
+export {
+  putFileIndexRecord,
+  getFileIndexRecord,
+  listFileIndexRecords,
+  listAllFileIndexRecords,
+  deleteFileIndexRecord,
+  clearFileIndex,
+} from './file-index-store.js';
+export {
+  saveHistoryEntry,
+  getHistoryEntry,
+  listHistory,
+  listAllHistory,
+  deleteHistoryEntry,
+  clearHistory,
+  type HistoryEntry,
+} from './history-store.js';
+export {
+  saveWorkspaceSearchIndex,
+  getWorkspaceSearchIndex,
+  listWorkspaceSearchIndexes,
+  deleteWorkspaceSearchIndex,
+  clearWorkspaceSearchIndexes,
+} from './search-index-store.js';
+export { undo, redo, type UndoRedoResult } from './workspace/undo.js';
+export type {
+  IndexedFile,
+  WorkspaceRecord,
+  HistoryEntryRecord,
+  AiSessionRecord,
+  WorkspaceSearchIndexRecord,
+} from './db.js';

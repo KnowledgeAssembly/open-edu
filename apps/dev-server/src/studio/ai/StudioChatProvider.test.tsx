@@ -12,9 +12,15 @@ import { EditorBridgeProvider } from './EditorBridgeContext';
 import { ConversationStore } from './ConversationStore';
 import { setConversationId } from './assistantStorage';
 import type { StudioContextSnapshot } from './context';
-import type { CourseDraftResult, DraftItem } from './types';
 import type { StudioApi } from '../studioApi';
-import { BrowserStudioApiError } from '../browserStudioApi';
+
+function sseResponse(chunks: Array<Record<string, unknown>>): Response {
+  const body = chunks.map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`).join('');
+  return new Response(body, {
+    status: 200,
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+}
 
 interface ChatApi {
   messages: unknown[];
@@ -162,16 +168,6 @@ describe('StudioChatProvider new conversation', () => {
 const COURSE_NOTES =
   'Help me create a course from my notes. Course for School students. Exploring different states of India. Capital cities & key historical places. It needs to be interactive & should be engaging.';
 
-const editSnapshot: StudioContextSnapshot = {
-  ...snapshot,
-  activity: {
-    path: 'nodes/lesson.md',
-    kind: 'lesson',
-    title: 'Lesson',
-    contentExcerpt: '# Original\n\nBody',
-  },
-};
-
 function makeUserMessage(content: string): UIMessage {
   return {
     id: `user-${content.slice(0, 10)}`,
@@ -195,11 +191,6 @@ async function readChunks(stream: ReadableStream<UIMessageChunk>): Promise<UIMes
   return chunks;
 }
 
-function finishMetadata(chunks: UIMessageChunk[]): Record<string, unknown> | undefined {
-  const finish = chunks.find((c) => c.type === 'finish');
-  return (finish as { messageMetadata?: Record<string, unknown> } | undefined)?.messageMetadata;
-}
-
 function chunkText(chunks: UIMessageChunk[]): string {
   return chunks
     .filter((c): c is Extract<UIMessageChunk, { type: 'text-delta' }> => c.type === 'text-delta')
@@ -207,17 +198,31 @@ function chunkText(chunks: UIMessageChunk[]): string {
     .join('');
 }
 
-describe('StudioChatProvider browser-mode intent routing', () => {
+describe('StudioChatProvider single-endpoint transport', () => {
+  const fetchMock = vi.fn();
+
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
     capturedUseChatOptions.current = undefined;
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue(
+      sseResponse([
+        { type: 'start', messageId: 'm1', role: 'assistant' },
+        { type: 'text-start', id: 't1' },
+        { type: 'text-delta', id: 't1', delta: 'Here is a draft' },
+        { type: 'text-end', id: 't1' },
+        { type: 'finish', finishReason: 'stop' },
+      ]),
+    );
+    vi.stubGlobal('fetch', fetchMock);
   });
 
-  async function renderBrowserChat(
-    api: Partial<StudioApi>,
-    context: StudioContextSnapshot = snapshot,
-  ) {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  async function renderBrowserChat(api: Partial<StudioApi>) {
     render(
       <I18nProvider
         locale="en"
@@ -225,12 +230,8 @@ describe('StudioChatProvider browser-mode intent routing', () => {
       >
         <StudioAssistantProvider>
           <EditorBridgeProvider>
-            <StudioChatProvider
-              courseId="course-x"
-              api={api as StudioApi}
-              chatApiUrl="/api/ai/chat"
-            >
-              <ContextSeeder snapshot={context}>
+            <StudioChatProvider courseId="course-x" api={api as StudioApi}>
+              <ContextSeeder snapshot={snapshot}>
                 <div />
               </ContextSeeder>
             </StudioChatProvider>
@@ -255,100 +256,57 @@ describe('StudioChatProvider browser-mode intent routing', () => {
     return readChunks(stream);
   }
 
-  it('routes a course-generation message to generateCourseDraft and emits a course_draft', async () => {
-    const courseDraft: CourseDraftResult = {
-      success: true,
-      draftId: 'draft-1',
-      title: 'States of India',
-      outlinePreview: [{ title: 'Introduction', kind: 'lesson' }],
-      quality: [{ id: 'q1', labelKey: 'quality.ok', passed: true }],
-    };
-    const generateCourseDraft = vi.fn().mockResolvedValue(courseDraft);
+  it('sends a course-generation message to the single /api/studio/ai/chat endpoint', async () => {
+    const generateCourseDraft = vi.fn();
     await renderBrowserChat({ generateCourseDraft });
 
     const chunks = await sendViaTransport(COURSE_NOTES);
-    const meta = finishMetadata(chunks) as Record<string, unknown> & {
-      courseDraft?: CourseDraftResult;
-      drafts?: DraftItem[];
-      suggestedNextSteps?: string[];
+
+    expect(generateCourseDraft).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/chat');
+    const body = JSON.parse((init as RequestInit).body as string) as {
+      messages: Array<{ role: string; content: string }>;
+      context: StudioContextSnapshot;
     };
-
-    expect(generateCourseDraft).toHaveBeenCalledWith(COURSE_NOTES);
-    expect(meta?.mode).toBe('course_draft');
-    expect(meta?.courseDraft).toEqual(courseDraft);
-    expect(Array.isArray(meta?.suggestedNextSteps)).toBe(true);
+    expect(body.messages[0]).toMatchObject({ role: 'user', content: COURSE_NOTES });
+    expect(body.context.view).toBe('outline');
+    expect(chunkText(chunks)).toBe('Here is a draft');
   });
 
-  it('routes a create-quiz message to generateItemAdd and emits a draft card', async () => {
-    const generateItemAdd = vi.fn().mockResolvedValue({
-      ok: true,
-      item: { kind: 'quiz', title: 'Photosynthesis Quiz', content: '{}' },
-    });
-    await renderBrowserChat({ generateItemAdd });
-
-    const chunks = await sendViaTransport('create a quiz about photosynthesis');
-    const meta = finishMetadata(chunks) as Record<string, unknown> & { drafts?: DraftItem[] };
-
-    expect(generateItemAdd).toHaveBeenCalledWith('quiz', 'create a quiz about photosynthesis');
-    expect(meta?.mode).toBe('draft');
-    expect(meta?.drafts).toHaveLength(1);
-    expect((meta?.drafts as DraftItem[])[0]).toMatchObject({ kind: 'quiz' });
-  });
-
-  it('routes an edit message to generateItemEdit with the active activity context', async () => {
-    const generateItemEdit = vi.fn().mockResolvedValue({
-      ok: true,
-      items: [{ kind: 'lesson', title: 'Simpler', content: '# Simpler' }],
-    });
-    await renderBrowserChat({ generateItemEdit }, editSnapshot);
-
-    const chunks = await sendViaTransport('Make this simpler');
-    const meta = finishMetadata(chunks) as Record<string, unknown> & { drafts?: DraftItem[] };
-
-    expect(generateItemEdit).toHaveBeenCalledWith('lesson', 'difficulty', '# Original\n\nBody', {
-      direction: 'easier',
-    });
-    expect(meta?.mode).toBe('draft');
-    expect(meta?.drafts).toHaveLength(1);
-  });
-
-  it('prompts to open an activity when an edit is requested without an open activity', async () => {
+  it('sends a tool-intent "Add this quiz to course" message to the same endpoint', async () => {
+    const generateItemAdd = vi.fn();
     const generateItemEdit = vi.fn();
-    await renderBrowserChat({ generateItemEdit });
+    await renderBrowserChat({ generateItemAdd, generateItemEdit });
 
-    const chunks = await sendViaTransport('Rewrite this to be simpler');
-    const meta = finishMetadata(chunks) as Record<string, unknown>;
+    const chunks = await sendViaTransport('Add this quiz to course');
 
+    expect(generateItemAdd).not.toHaveBeenCalled();
     expect(generateItemEdit).not.toHaveBeenCalled();
-    expect(meta?.mode).toBe('explain');
-    expect(chunkText(chunks)).toContain('Open an activity first');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('/api/studio/ai/chat');
+    const body = JSON.parse((init as RequestInit).body as string) as {
+      messages: Array<{ role: string; content: string }>;
+    };
+    expect(body.messages[0]).toMatchObject({ role: 'user', content: 'Add this quiz to course' });
+    expect(chunkText(chunks)).toBe('Here is a draft');
   });
 
-  it('shows a localized course prompt when course generation fails with no-active-course', async () => {
-    const generateCourseDraft = vi
-      .fn()
-      .mockRejectedValue(new BrowserStudioApiError('no-active-course', 'No course is open'));
-    await renderBrowserChat({ generateCourseDraft });
+  it('always targets the loop endpoint regardless of intent', async () => {
+    await renderBrowserChat({});
 
-    const chunks = await sendViaTransport(COURSE_NOTES);
-    const meta = finishMetadata(chunks) as Record<string, unknown>;
-
-    expect(meta?.mode).toBe('explain');
-    expect(chunkText(chunks)).toContain('Open a course first');
-  });
-
-  it('emits a friendly failure when a draft-new request fails', async () => {
-    const generateItemAdd = vi.fn().mockResolvedValue({
-      ok: false,
-      code: 'item-retry-failed',
-      error: 'provider down',
-    });
-    await renderBrowserChat({ generateItemAdd });
-
-    const chunks = await sendViaTransport('create a lesson about fractions');
-    const meta = finishMetadata(chunks) as Record<string, unknown>;
-
-    expect(meta?.mode).toBe('explain');
-    expect(chunkText(chunks)).toContain("couldn't create");
+    for (const content of [
+      COURSE_NOTES,
+      'Make this simpler',
+      'create a quiz about photosynthesis',
+      'What is a quote?',
+    ]) {
+      fetchMock.mockClear();
+      await sendViaTransport(content);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock.mock.calls[0]![0]).toBe('/api/studio/ai/chat');
+    }
   });
 });

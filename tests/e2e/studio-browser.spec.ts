@@ -53,30 +53,38 @@ test.describe('Browser Studio (Phase 1)', () => {
 
     // Add files the editor does not expose so the browser persistence and
     // archive flow can prove that unknown text and binary assets survive.
+    // Canonical content now lives in OPFS (not the IndexedDB studio-courses
+    // record), so the fixture is written directly into the workspace.
     await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('open-edu');
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-      await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction('studio-courses', 'readwrite');
-        const store = transaction.objectStore('studio-courses');
-        const getRequest = store.get('lesson-quiz');
-        getRequest.onsuccess = () => {
-          const course = getRequest.result as {
-            files: Array<{ path: string; data: ArrayBuffer }>;
-          };
-          course.files.push(
-            { path: 'assets/notes.txt', data: new TextEncoder().encode('unknown text').buffer },
-            { path: 'assets/diagram.png', data: new Uint8Array([137, 80, 78, 71, 1, 2, 3]).buffer },
-          );
-          store.put(course);
-        };
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-      });
-      db.close();
+      const writeRecursive = async (
+        dir: FileSystemDirectoryHandle,
+        segments: string[],
+        bytes: Uint8Array,
+      ): Promise<void> => {
+        if (segments.length === 1) {
+          const file = await dir.getFileHandle(segments[0]!, { create: true });
+          const writable = await file.createWritable();
+          await writable.write(bytes);
+          await writable.close();
+          return;
+        }
+        const next = await dir.getDirectoryHandle(segments[0]!, { create: true });
+        await writeRecursive(next, segments.slice(1), bytes);
+      };
+      const root = await navigator.storage.getDirectory();
+      const openedu = await root.getDirectoryHandle('openedu', { create: true });
+      const courses = await openedu.getDirectoryHandle('courses', { create: true });
+      const course = await courses.getDirectoryHandle('lesson-quiz', { create: true });
+      await writeRecursive(
+        course,
+        ['assets', 'notes.txt'],
+        new TextEncoder().encode('unknown text'),
+      );
+      await writeRecursive(
+        course,
+        ['assets', 'diagram.png'],
+        new Uint8Array([137, 80, 78, 71, 1, 2, 3]),
+      );
     });
 
     // 4. Reload and confirm persistence.
@@ -113,26 +121,28 @@ test.describe('Browser Studio (Phase 1)', () => {
     await expect(page.getByText('lesson-quiz-imported')).toBeVisible();
 
     const importedFiles = await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('open-edu');
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-      const course = await new Promise<{
-        files: Array<{ path: string; data: ArrayBuffer }>;
-      }>((resolve, reject) => {
-        const request = db
-          .transaction('studio-courses')
-          .objectStore('studio-courses')
-          .get('lesson-quiz-imported');
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-      db.close();
-      return course.files.map((file) => ({
-        path: file.path,
-        bytes: Array.from(new Uint8Array(file.data)),
-      }));
+      const readRecursive = async (
+        dir: FileSystemDirectoryHandle,
+        prefix: string,
+        out: Array<{ path: string; bytes: number[] }>,
+      ): Promise<void> => {
+        for await (const [name, handle] of dir.entries()) {
+          const path = prefix ? `${prefix}/${name}` : name;
+          if (handle.kind === 'directory') {
+            await readRecursive(handle as FileSystemDirectoryHandle, path, out);
+            continue;
+          }
+          const file = await (handle as FileSystemFileHandle).getFile();
+          out.push({ path, bytes: Array.from(new Uint8Array(await file.arrayBuffer())) });
+        }
+      };
+      const root = await navigator.storage.getDirectory();
+      const openedu = await root.getDirectoryHandle('openedu');
+      const courses = await openedu.getDirectoryHandle('courses');
+      const course = await courses.getDirectoryHandle('lesson-quiz-imported');
+      const out: Array<{ path: string; bytes: number[] }> = [];
+      await readRecursive(course, '', out);
+      return out;
     });
     expect(importedFiles.find((file) => file.path === 'assets/notes.txt')?.bytes).toEqual(
       Array.from(new TextEncoder().encode('unknown text')),

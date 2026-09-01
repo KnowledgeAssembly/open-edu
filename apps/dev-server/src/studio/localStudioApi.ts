@@ -18,6 +18,7 @@ import type {
   StorageStatus,
   ValidationResult,
 } from './studioApi.js';
+import { createStudioApiWorkspace } from './studioApiWorkspace.js';
 
 const API_BASE = '/api/package';
 const AI_BASE = '/api/studio/ai';
@@ -76,8 +77,9 @@ async function libraryRequest<T>(url: string, options?: RequestInit): Promise<T>
 }
 
 export function createLocalStudioApi(): StudioApi {
-  return {
+  const api: StudioApi = {
     getPackageDir: () => apiRequest<{ packageDir: string }>('/dir').then((d) => d.packageDir),
+    getWorkspace: () => Promise.resolve(createStudioApiWorkspace(api)),
     validate: () =>
       apiRequest<ValidationResult>('/validate', {
         method: 'POST',
@@ -194,6 +196,7 @@ export function createLocalStudioApi(): StudioApi {
     exportUnitOep: (relativePath: string) =>
       downloadBlob(`${LIBRARY_BASE}/export-unit-oep`, 'unit.oep', { relativePath }),
   };
+  return api;
 }
 
 async function downloadBlob(

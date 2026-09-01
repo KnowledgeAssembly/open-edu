@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'open-edu';
-export const DB_VERSION = 7;
+export const DB_VERSION = 8;
 
 export interface DistributionMeta {
   sourceKind: string;
@@ -101,6 +101,9 @@ export interface StoredStudioFile {
   data: ArrayBuffer;
 }
 
+/** Whole-course legacy records. Retained ONLY for the one-time legacy
+ *  migration utility (`migrateLegacyCourses`) — canonical content now lives in
+ *  CourseWorkspace/OPFS and the Studio no longer reads these for normal use. */
 export interface StoredStudioCourse {
   id: string;
   version: string;
@@ -143,6 +146,66 @@ export interface OpenEduDB {
   'studio-courses': StoredStudioCourse;
   'studio-drafts': StoredStudioDraft;
   'pending-drafts': StoredPendingDraft;
+  workspaces: WorkspaceRecord;
+  files: IndexedFile;
+  history: HistoryEntryRecord;
+  aiSessions: AiSessionRecord;
+  searchIndex: WorkspaceSearchIndexRecord;
+}
+
+/** @see SPEC §24 — IndexedDB metadata layer for the workspace architecture. */
+export interface WorkspaceRecord {
+  id: string;
+  courseId: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Metadata about a canonical file. The record MUST NOT contain file content
+ * (SPEC §25); content lives only in CourseWorkspace/OPFS.
+ */
+export interface IndexedFile {
+  id: string;
+  workspaceId: string;
+  path: string;
+  size: number;
+  hash?: string;
+  mimeType?: string;
+  modifiedAt: number;
+}
+
+/** File-level change history (SPEC §37). Canonical files stay in OPFS. */
+export interface HistoryEntryRecord {
+  id: string;
+  workspaceId: string;
+  timestamp: number;
+  source: 'user' | 'ai';
+  description: string;
+  changes: Array<{
+    path: string;
+    operation: 'create' | 'update' | 'delete' | 'move';
+    previousContent?: ArrayBuffer | Uint8Array;
+    newContent?: ArrayBuffer | Uint8Array;
+    from?: string;
+    to?: string;
+  }>;
+}
+
+export interface AiSessionRecord {
+  id: string;
+  workspaceId: string;
+  updatedAt: number;
+  data?: Record<string, unknown>;
+}
+
+/** Rebuildable derived search index; deleting it never invalidates the course. */
+export interface WorkspaceSearchIndexRecord {
+  id: string;
+  workspaceId: string;
+  updatedAt: number;
+  /** Serialized matches keyed by query generation; content-derived. */
+  data?: Record<string, unknown>;
 }
 
 let dbPromise: Promise<IDBPDatabase<OpenEduDB>> | null = null;
@@ -184,6 +247,7 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
           db.createObjectStore('bundles', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('studio-courses')) {
+          // Retained for the legacy migration utility; not a canonical store.
           db.createObjectStore('studio-courses', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('studio-drafts')) {
@@ -191,6 +255,25 @@ export function openDatabase(): Promise<IDBPDatabase<OpenEduDB>> {
         }
         if (!db.objectStoreNames.contains('pending-drafts')) {
           db.createObjectStore('pending-drafts', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('workspaces')) {
+          db.createObjectStore('workspaces', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('files')) {
+          const files = db.createObjectStore('files', { keyPath: 'id' });
+          files.createIndex('byWorkspace', 'workspaceId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('history')) {
+          const history = db.createObjectStore('history', { keyPath: 'id' });
+          history.createIndex('byWorkspace', 'workspaceId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('aiSessions')) {
+          const aiSessions = db.createObjectStore('aiSessions', { keyPath: 'id' });
+          aiSessions.createIndex('byWorkspace', 'workspaceId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('searchIndex')) {
+          const searchIndex = db.createObjectStore('searchIndex', { keyPath: 'id' });
+          searchIndex.createIndex('byWorkspace', 'workspaceId', { unique: false });
         }
       },
     }).catch((err) => {

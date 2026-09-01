@@ -4,6 +4,7 @@ import {
   getCuratedWidget,
   loadCatalogWidgets,
   listConfiguredRegistryIds,
+  shouldReadConfiguredCatalogFiles,
   __resetCatalogCache,
 } from './curatedCatalog';
 
@@ -162,5 +163,21 @@ describe('curatedCatalog', () => {
     expect(ids.filter((id) => id === 'community-registry')).toHaveLength(1);
     expect(ids).not.toContain('core.matching');
     (globalThis as Record<string, unknown>).__OPEN_EDU_STUDIO_CATALOGS__ = original;
+  });
+
+  it('reads catalog files when import.meta.env is undefined (SSR regression)', () => {
+    // The Vite middleware executes modules in plain Node ESM, where Vite's
+    // `import.meta.env` injection is absent (env === undefined). Regression:
+    // this used to throw "Cannot read properties of undefined (reading 'SSR')".
+    expect(shouldReadConfiguredCatalogFiles(undefined)).toBe(true);
+  });
+
+  it('skips catalog files in a browser bundle (non-SSR)', () => {
+    expect(shouldReadConfiguredCatalogFiles({})).toBe(false);
+    expect(shouldReadConfiguredCatalogFiles({ SSR: false })).toBe(false);
+  });
+
+  it('reads catalog files in SSR mode', () => {
+    expect(shouldReadConfiguredCatalogFiles({ SSR: true })).toBe(true);
   });
 });

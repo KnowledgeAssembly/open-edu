@@ -1,3 +1,4 @@
+import type { CourseWorkspace } from '@open-edu/storage';
 import type {
   AiEndpointErrorCode,
   AiItemAddResult,
@@ -50,6 +51,7 @@ export interface ExportResult {
 
 export interface StudioApi {
   getPackageDir(): Promise<string>;
+  getWorkspace(): Promise<CourseWorkspace>;
   validate(): Promise<ValidationResult>;
   getOutline(): Promise<OutlineResult>;
   saveOutlineOrder(paths: string[]): Promise<{ success: boolean }>;

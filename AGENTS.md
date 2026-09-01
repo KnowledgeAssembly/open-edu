@@ -78,7 +78,7 @@ pnpm --filter @open-edu/dev-server test
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # OpenEdu Course Creator Studio (Creator + Developer modes, StudioAPI)
+│   ├── dev-server/          # OpenEdu Course Creator Studio (Creator + Developer modes, StudioAPI, single Node AI backend)
 │   ├── docs/                # Docusaurus documentation site
 │   └── learner/             # Standalone learner app with 8-page router + theme switching + Pipili chat + course install
 ├── packages/
@@ -308,6 +308,7 @@ The learner app is the primary development surface. After `install` completes, t
 - **E2E tests.** Run `pnpm test:e2e:install` once per environment for Playwright Chromium, then `pnpm test:e2e tests/e2e/learner-experience.spec.ts` for the canonical learner smoke test.
 - **Optional services.** The Course Creator Studio (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above. The Studio defaults to Creator mode for teachers; Developer mode (file editors + inspectors) is toggled in-app and persisted in `localStorage`. The course library uses `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
 - **Author Assistant.** Enabled by default in Creator. Toggle with `Cmd/Ctrl+Shift+A`. Disable via `OPEN_EDU_STUDIO_ASSISTANT=0` or `localStorage` key `openedu.studio.assistant.enabled=false`. Chat streams through `/api/studio/ai/chat`; conversation history is stored per course in IndexedDB (sessionStorage fallback).
+- **Studio AI is a single Node backend.** There is no Vercel static-function gateway (`/api/ai/*` was deleted). Both Creator (local FS) and Browser (hosted OPFS) modes mount the same `/api/studio/ai/*` middleware (`apps/dev-server/src/studio/ai/middleware.ts`): `/api/studio/ai/status`, `/api/studio/ai/generate-draft`, `/api/studio/ai/commit`, `/api/studio/ai/item/add`, `/api/studio/ai/item/edit`, and the agent loop at `/api/studio/ai/chat`. The chat message schema + `toAiSdkMessages` / `fromUIMessage` converters live in `@open-edu/companion/chat`. Routing is server-owned: the client ships raw messages to `/api/studio/ai/chat` and never re-parses intents.
 - **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion. Studio AI drafting is server-side and uses `OPEN_EDU_STUDIO_LLM_*` (or existing llm-config env vars); it degrades to templates when unavailable.
 
 <!-- OPENWIKI:START -->

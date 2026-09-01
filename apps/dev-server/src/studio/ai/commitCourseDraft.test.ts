@@ -1,12 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { commitCourseDraft } from './commitCourseDraft';
+import { join, basename } from 'node:path';
+import { commitCourseDraft, resolveNewCourseDir } from './commitCourseDraft';
 import { generateCourseDraft } from './generateCourse';
 
-const NOTES =
-  'Teach fourth graders how to add and subtract fractions with like denominators.';
+const NOTES = 'Teach fourth graders how to add and subtract fractions with like denominators.';
 
 async function makePackageDir(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'openedu-studio-commit-test-'));
@@ -30,8 +29,9 @@ describe('commitCourseDraft', () => {
   it('refuses to commit when package has content and force is not set', async () => {
     const packageDir = await makePackageDir();
     try {
-      const compile = vi.fn().mockImplementation(
-        async (_specPath: string, options: { output: string }) => {
+      const compile = vi
+        .fn()
+        .mockImplementation(async (_specPath: string, options: { output: string }) => {
           await mkdir(join(options.output, 'nodes'), { recursive: true });
           await writeFile(
             join(options.output, 'package.json'),
@@ -39,12 +39,19 @@ describe('commitCourseDraft', () => {
             'utf-8',
           );
           return { success: true, diagnostics: [], outputPath: options.output };
-        },
-      );
+        });
 
       // Generate draft on empty package
       const draft = await generateCourseDraft({
-        source: { kind: 'notes', notes: NOTES, completeText: vi.fn().mockResolvedValue('{"format":"openedu-course-spec","version":1,"metadata":{"title":"T","description":"D","author":"A"},"lessons":[]}') },
+        source: {
+          kind: 'notes',
+          notes: NOTES,
+          completeText: vi
+            .fn()
+            .mockResolvedValue(
+              '{"format":"openedu-course-spec","version":1,"metadata":{"title":"T","description":"D","author":"A"},"lessons":[]}',
+            ),
+        },
         packageDir,
         compile,
       });
@@ -70,8 +77,9 @@ describe('commitCourseDraft', () => {
   it('commits a draft to an empty package successfully', async () => {
     const packageDir = await makePackageDir();
     try {
-      const compile = vi.fn().mockImplementation(
-        async (_specPath: string, options: { output: string }) => {
+      const compile = vi
+        .fn()
+        .mockImplementation(async (_specPath: string, options: { output: string }) => {
           await mkdir(join(options.output, 'nodes'), { recursive: true });
           await writeFile(
             join(options.output, 'package.json'),
@@ -89,17 +97,20 @@ describe('commitCourseDraft', () => {
             JSON.stringify({ routing: { 'nodes/intro.md': { onComplete: 'COMPLETED' } } }),
             'utf-8',
           );
-          await writeFile(
-            join(options.output, 'nodes/intro.md'),
-            '# Test\n\nContent',
-            'utf-8',
-          );
+          await writeFile(join(options.output, 'nodes/intro.md'), '# Test\n\nContent', 'utf-8');
           return { success: true, diagnostics: [], outputPath: options.output };
-        },
-      );
+        });
 
       const draft = await generateCourseDraft({
-        source: { kind: 'notes', notes: NOTES, completeText: vi.fn().mockResolvedValue('{"format":"openedu-course-spec","version":1,"metadata":{"title":"Test","description":"D","author":"A"},"lessons":[]}') },
+        source: {
+          kind: 'notes',
+          notes: NOTES,
+          completeText: vi
+            .fn()
+            .mockResolvedValue(
+              '{"format":"openedu-course-spec","version":1,"metadata":{"title":"Test","description":"D","author":"A"},"lessons":[]}',
+            ),
+        },
         packageDir,
         compile,
       });
@@ -128,8 +139,9 @@ describe('commitCourseDraft', () => {
   it('commits even when package has content if force is true', async () => {
     const packageDir = await makePackageDir();
     try {
-      const compile = vi.fn().mockImplementation(
-        async (_specPath: string, options: { output: string }) => {
+      const compile = vi
+        .fn()
+        .mockImplementation(async (_specPath: string, options: { output: string }) => {
           await mkdir(join(options.output, 'nodes'), { recursive: true });
           await writeFile(
             join(options.output, 'package.json'),
@@ -142,18 +154,21 @@ describe('commitCourseDraft', () => {
             }),
             'utf-8',
           );
-          await writeFile(
-            join(options.output, 'nodes/lesson.md'),
-            '# New\n\nContent',
-            'utf-8',
-          );
+          await writeFile(join(options.output, 'nodes/lesson.md'), '# New\n\nContent', 'utf-8');
           return { success: true, diagnostics: [], outputPath: options.output };
-        },
-      );
+        });
 
       // Generate draft on empty package
       const draft = await generateCourseDraft({
-        source: { kind: 'notes', notes: NOTES, completeText: vi.fn().mockResolvedValue('{"format":"openedu-course-spec","version":1,"metadata":{"title":"New","description":"D","author":"A"},"lessons":[]}') },
+        source: {
+          kind: 'notes',
+          notes: NOTES,
+          completeText: vi
+            .fn()
+            .mockResolvedValue(
+              '{"format":"openedu-course-spec","version":1,"metadata":{"title":"New","description":"D","author":"A"},"lessons":[]}',
+            ),
+        },
         packageDir,
         compile,
       });
@@ -175,6 +190,53 @@ describe('commitCourseDraft', () => {
       expect(result.title).toBe('New');
     } finally {
       await rm(packageDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('resolveNewCourseDir', () => {
+  it('slugifies the title into a directory name', async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'openedu-ws-slug-'));
+    try {
+      const dir = resolveNewCourseDir(workspace, 'Fractions for Fourth Graders!');
+      expect(dir).toBe(join(workspace, 'fractions-for-fourth-graders'));
+      expect(basename(dir)).toBe('fractions-for-fourth-graders');
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
+    }
+  });
+
+  it('falls back to course when the title is empty or only punctuation', async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'openedu-ws-fallback-'));
+    try {
+      expect(basename(resolveNewCourseDir(workspace, ''))).toBe('course');
+      expect(basename(resolveNewCourseDir(workspace, '!!!'))).toBe('course');
+      expect(basename(resolveNewCourseDir(workspace))).toBe('course');
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
+    }
+  });
+
+  it('de-duplicates against existing directories in the workspace', async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'openedu-ws-dedupe-'));
+    try {
+      await mkdir(join(workspace, 'fractions'), { recursive: true });
+      await mkdir(join(workspace, 'fractions-2'), { recursive: true });
+      const dir = resolveNewCourseDir(workspace, 'Fractions');
+      expect(dir).toBe(join(workspace, 'fractions-3'));
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
+    }
+  });
+
+  it('does not create anything on the filesystem', async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'openedu-ws-pure-'));
+    try {
+      const dir = resolveNewCourseDir(workspace, 'Pure Function');
+      const { existsSync } = await import('node:fs');
+      expect(existsSync(dir)).toBe(false);
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
     }
   });
 });

@@ -126,8 +126,8 @@ describe('Note Store', () => {
     expect(all).toEqual(['alpha', 'beta', 'zeta']);
   });
 
-  it('DB version is 7 and stores exist', async () => {
-    expect(DB_VERSION).toBe(7);
+  it('DB version is 8 and stores exist', async () => {
+    expect(DB_VERSION).toBe(8);
     const db = await openDatabase();
     const storeNames = Array.from(db.objectStoreNames);
     expect(storeNames).toContain('notes');

@@ -1,10 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
 import { renderHook, waitFor } from '@testing-library/react';
 import { openDatabase, resetDatabase } from '@open-edu/storage';
 import { BrowserStudioProvider, useBrowserStudio } from './browserPreview.js';
-import type { BrowserCourse } from './browserCourseStore.js';
-import { createBrowserCourseStore } from './browserCourseStore.js';
+import {
+  createBrowserCourseStore,
+  type BrowserCourse,
+  type BrowserCourseStore,
+} from './browserCourseStore.js';
 
 const enc = (s: string) => new TextEncoder().encode(s);
 
@@ -37,9 +40,11 @@ function makeCourse(id: string): BrowserCourse {
   };
 }
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <BrowserStudioProvider>{children}</BrowserStudioProvider>
-);
+const wrapper =
+  (store: BrowserCourseStore) =>
+  ({ children }: { children: React.ReactNode }) => (
+    <BrowserStudioProvider store={store}>{children}</BrowserStudioProvider>
+  );
 
 describe('BrowserStudioProvider', () => {
   beforeEach(async () => {
@@ -51,29 +56,31 @@ describe('BrowserStudioProvider', () => {
   });
 
   it('exposes api, store, and session', async () => {
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(createBrowserCourseStore({ nonPersistent: true })),
+    });
     expect(result.current.api).toBeDefined();
     expect(result.current.store).toBeDefined();
     expect(result.current.session).toBeDefined();
   });
 
-  it('exposes a storage-unavailable state when IndexedDB is absent', async () => {
-    vi.stubGlobal('indexedDB', undefined);
-    try {
-      const { result } = renderHook(() => useBrowserStudio(), { wrapper });
-      await waitFor(() => expect(result.current.storageStatus.available).toBe(false));
-      expect(result.current.storageStatus.reason).toBe('storage-unavailable');
-    } finally {
-      vi.unstubAllGlobals();
-    }
+  it('exposes a storage-unavailable state when OPFS is absent', async () => {
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(createBrowserCourseStore({ nonPersistent: true })),
+    });
+    await waitFor(() => expect(result.current.storageStatus.available).toBe(false));
+    expect(result.current.storageStatus.reason).toBe('unsupported');
   });
 
   it('boots the most recently updated course into the preview', async () => {
-    const store = createBrowserCourseStore();
-    await store.create(makeCourse('latest'));
+    const store = createBrowserCourseStore({ nonPersistent: true });
     await store.create(makeCourse('older'));
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await store.create(makeCourse('latest'));
 
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(store),
+    });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.activeCourseId).toBe('latest');
     expect(result.current.loadedPackage).not.toBeNull();
@@ -83,11 +90,13 @@ describe('BrowserStudioProvider', () => {
   });
 
   it('openCourse switches the active course and reloads the preview', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     await store.create(makeCourse('a'));
     await store.create(makeCourse('b'));
 
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(store),
+    });
     await waitFor(() => expect(result.current.loadedPackage).not.toBeNull());
 
     await result.current.openCourse('b');
@@ -100,9 +109,11 @@ describe('BrowserStudioProvider', () => {
   });
 
   it('reloadPreview repopulates the package after files change', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     await store.create(makeCourse('editable'));
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(store),
+    });
     await waitFor(() => expect(result.current.loadedPackage).not.toBeNull());
 
     const course = await store.get('editable');
@@ -134,9 +145,11 @@ describe('BrowserStudioProvider', () => {
   });
 
   it('clears the preview when reloading with no active course', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     await store.create(makeCourse('temp'));
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(store),
+    });
     await waitFor(() => expect(result.current.loadedPackage).not.toBeNull());
 
     result.current.session.setActiveCourse(null);
@@ -145,11 +158,13 @@ describe('BrowserStudioProvider', () => {
   });
 
   it('reports an error and clears the preview when the active course is invalid', async () => {
-    const store = createBrowserCourseStore();
+    const store = createBrowserCourseStore({ nonPersistent: true });
     const bad = { ...makeCourse('bad'), files: [{ path: 'package.json', data: enc('not json') }] };
     await store.create(bad);
 
-    const { result } = renderHook(() => useBrowserStudio(), { wrapper });
+    const { result } = renderHook(() => useBrowserStudio(), {
+      wrapper: wrapper(store),
+    });
     await waitFor(() => expect(result.current.loadedPackage).toBeNull());
     await waitFor(() => expect(result.current.error).not.toBeNull());
     expect(result.current.loadedPackage).toBeNull();

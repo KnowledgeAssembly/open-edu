@@ -1,3 +1,10 @@
+import {
+  WorkspacePathError,
+  assertSafeCoursePath as storageAssertSafeCoursePath,
+  isTextCourseFile as storageIsTextCourseFile,
+  normalizeCoursePath as storageNormalizeCoursePath,
+} from '@open-edu/storage';
+
 export interface StudioFile {
   path: string;
   data: Uint8Array;
@@ -12,44 +19,25 @@ export class UnsafeCoursePathError extends Error {
   }
 }
 
-export function normalizeCoursePath(path: string): string {
-  const normalized = path.replace(/\\/g, '/');
-  const cleaned = normalized.replace(/\/+/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
-  return cleaned;
-}
+/**
+ * Path helpers moved to `@open-edu/storage` (shared with workspace backends)
+ * to avoid a cross-package import cycle. This module re-exports them as a thin
+ * wrapper so existing app code keeps working unchanged.
+ */
+export const normalizeCoursePath = storageNormalizeCoursePath;
 
 export function assertSafeCoursePath(path: string): string {
-  const normalized = normalizeCoursePath(path);
-
-  if (!normalized || normalized.length === 0) {
-    throw new UnsafeCoursePathError('Path must not be empty');
+  try {
+    return storageAssertSafeCoursePath(path);
+  } catch (err) {
+    if (err instanceof WorkspacePathError) {
+      throw new UnsafeCoursePathError(err.message);
+    }
+    throw err;
   }
-  if (normalized.startsWith('/')) {
-    throw new UnsafeCoursePathError(`Absolute paths are not allowed: ${path}`);
-  }
-  if (/^[A-Za-z]:/.test(normalized)) {
-    throw new UnsafeCoursePathError(`Drive-letter paths are not allowed: ${path}`);
-  }
-  if (normalized.includes('\0')) {
-    throw new UnsafeCoursePathError(`Path must not contain null bytes: ${path}`);
-  }
-
-  const segments = normalized.split('/');
-  if (
-    segments.some((segment) => segment === '..' || segment === '.') ||
-    normalized.includes('..')
-  ) {
-    throw new UnsafeCoursePathError(`Traversal segments are not allowed: ${path}`);
-  }
-
-  return normalized;
 }
 
-export function isTextCourseFile(path: string): boolean {
-  const lastDot = path.lastIndexOf('.');
-  if (lastDot === -1) return false;
-  return TEXT_EXTS.has(path.slice(lastDot).toLowerCase());
-}
+export const isTextCourseFile = storageIsTextCourseFile;
 
 export function cloneCourseFiles(files: StudioFile[]): StudioFile[] {
   return files.map((file) => ({
@@ -84,3 +72,5 @@ export function recordToCourseFiles(record: Record<string, Uint8Array>): StudioF
   });
   return sortCourseFiles(files);
 }
+
+export { TEXT_EXTS };

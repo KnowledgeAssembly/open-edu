@@ -50,39 +50,6 @@ const MOCK_LESSON_ITEM = {
   content: '# Simpler Version\n\nAn easier way to read this lesson.',
 };
 
-/** Mocks the stateless item endpoint for both add (no intent) and edit (intent) calls. */
-async function mockItemGateway(page: Page): Promise<void> {
-  await page.route('**/api/ai/item', (route) => {
-    const body = route.request().postDataJSON() as {
-      intent?: string;
-      kind?: string;
-    };
-    if (body.intent) {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          requestId: 'gw-item-edit',
-          ok: true,
-          items: [{ ...MOCK_LESSON_ITEM, kind: body.kind ?? 'lesson' }],
-        }),
-      });
-    } else {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          requestId: 'gw-item-add',
-          item: MOCK_QUIZ_ITEM,
-        }),
-      });
-    }
-  });
-}
-
-const COURSE_NOTES =
-  'Help me create a course from my notes. A course about water for young students. Explore the states of water and the water cycle with hands-on activities. It should be interactive and engaging for class use.';
-
 async function openAssistant(page: Page): Promise<void> {
   const assistantButton = page.getByRole('button', { name: 'Open Author Assistant' }).first();
   await assistantButton.click();
@@ -91,18 +58,40 @@ async function openAssistant(page: Page): Promise<void> {
   return chatInput;
 }
 
+function sseBody(chunks: Array<Record<string, unknown>>): string {
+  return chunks.map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`).join('');
+}
+
+/** Mocks the chat loop endpoint (`/api/studio/ai/chat`) with an ordered list of
+ *  SSE UI-message streams (one per submitted turn). Each entry can carry a
+ *  `finish` chunk with `messageMetadata` so draft cards render. */
+async function mockChatLoop(
+  page: Page,
+  streams: Array<Array<Record<string, unknown>>>,
+): Promise<void> {
+  let call = 0;
+  await page.route('**/api/studio/ai/chat', (route) => {
+    const chunks = streams[Math.min(call, streams.length - 1)] ?? [];
+    call += 1;
+    void route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      body: sseBody(chunks),
+    });
+  });
+}
+
 function mockGateway(
   page: Page,
   options: { available?: boolean; generateDraft?: boolean; chatResponse?: string } = {},
 ) {
   const { available = true, generateDraft = true, chatResponse } = options;
 
-  void page.route('**/api/ai/status', (route) => {
+  void page.route('**/api/studio/ai/status', (route) => {
     void route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        requestId: 'gw-status',
         available,
         reason: available ? undefined : 'missing-key',
       }),
@@ -110,12 +99,11 @@ function mockGateway(
   });
 
   if (generateDraft && available) {
-    void page.route('**/api/ai/generate-draft', (route) => {
+    void page.route('**/api/studio/ai/generate-draft', (route) => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          requestId: 'gw-draft',
           success: true,
           title: 'AI Water Course',
           files: MOCK_DRAFT_FILES,
@@ -127,15 +115,17 @@ function mockGateway(
   }
 
   if (chatResponse && available) {
-    void page.route('**/api/ai/chat', (route) => {
+    void page.route('**/api/studio/ai/chat', (route) => {
       void route.fulfill({
         status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          requestId: 'gw-chat',
-          terminal: 'finished',
-          content: chatResponse,
-        }),
+        contentType: 'text/event-stream',
+        body: sseBody([
+          { type: 'start', messageId: 'm1', role: 'assistant' },
+          { type: 'text-start', id: 't1' },
+          { type: 'text-delta', id: 't1', delta: chatResponse },
+          { type: 'text-end', id: 't1' },
+          { type: 'finish', finishReason: 'stop' },
+        ]),
       });
     });
   }
@@ -247,7 +237,7 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await createTemplateCourse(page, 'Lesson + quiz');
 
     // Override the generate-draft route to fail.
-    await page.route('**/api/ai/generate-draft', (route) => {
+    await page.route('**/api/studio/ai/generate-draft', (route) => {
       void route.fulfill({
         status: 502,
         contentType: 'application/json',
@@ -346,17 +336,52 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await openStudio(page);
     mockGateway(page, { available: true, generateDraft: true });
     await createTemplateCourse(page, 'Lesson + quiz');
-    await mockItemGateway(page);
+    await mockChatLoop(page, [
+      // First turn: course draft card.
+      [
+        { type: 'start', messageId: 'm1', role: 'assistant' },
+        { type: 'text-start', id: 't1' },
+        { type: 'text-delta', id: 't1', delta: 'Course draft ready.' },
+        { type: 'text-end', id: 't1' },
+        {
+          type: 'finish',
+          finishReason: 'stop',
+          messageMetadata: {
+            mode: 'course_draft',
+            courseDraft: {
+              success: true,
+              draftId: 'draft-1',
+              title: 'AI Water Course',
+              outlinePreview: [{ title: 'Water Basics', kind: 'lesson' }],
+              quality: [],
+            },
+            suggestedNextSteps: [],
+          },
+        },
+      ],
+      // Second turn: item draft card.
+      [
+        { type: 'start', messageId: 'm2', role: 'assistant' },
+        { type: 'text-start', id: 't2' },
+        { type: 'text-delta', id: 't2', delta: 'Here is a draft quiz.' },
+        { type: 'text-end', id: 't2' },
+        {
+          type: 'finish',
+          finishReason: 'stop',
+          messageMetadata: { mode: 'draft', drafts: [MOCK_QUIZ_ITEM], suggestedNextSteps: [] },
+        },
+      ],
+    ]);
 
     // Open the assistant and send a course-generation prompt.
     const chatInput = await openAssistant(page);
-    await chatInput.fill(COURSE_NOTES);
+    await chatInput.fill('Create a course about water and aquatic life');
     await chatInput.press('Enter');
 
-    // The course-draft card renders with the mocked gateway output.
+    // The course-draft card renders from the loop's finish metadata.
     await expect(page.getByText('Course draft: AI Water Course')).toBeVisible({ timeout: 15000 });
 
-    // Ask for a new quiz; the item endpoint mock returns a quiz draft.
+    // Ask for a new quiz; the loop stream returns a quiz draft.
     await chatInput.fill('create a quiz about photosynthesis');
     await chatInput.press('Enter');
 
@@ -368,7 +393,23 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await openStudio(page);
     mockGateway(page, { available: true });
     await createTemplateCourse(page, 'Lesson + quiz');
-    await mockItemGateway(page);
+    await mockChatLoop(page, [
+      [
+        { type: 'start', messageId: 'm1', role: 'assistant' },
+        { type: 'text-start', id: 't1' },
+        { type: 'text-delta', id: 't1', delta: 'Here is the updated version.' },
+        { type: 'text-end', id: 't1' },
+        {
+          type: 'finish',
+          finishReason: 'stop',
+          messageMetadata: {
+            mode: 'draft',
+            drafts: [MOCK_LESSON_ITEM],
+            suggestedNextSteps: [],
+          },
+        },
+      ],
+    ]);
 
     // Open the lesson activity so the context has an active activity, and keep
     // the editor open while chatting so the assistant can read its context.
@@ -390,7 +431,19 @@ test.describe('Browser Studio AI (Phase 2)', () => {
     await openStudio(page);
     mockGateway(page, { available: true });
     await createTemplateCourse(page, 'Lesson + quiz');
-    await mockItemGateway(page);
+    await mockChatLoop(page, [
+      [
+        { type: 'start', messageId: 'm1', role: 'assistant' },
+        { type: 'text-start', id: 't1' },
+        {
+          type: 'text-delta',
+          id: 't1',
+          delta: 'Open an activity first, then I can rewrite or improve it for you.',
+        },
+        { type: 'text-end', id: 't1' },
+        { type: 'finish', finishReason: 'stop' },
+      ],
+    ]);
 
     // Stay on the outline view (no activity open) and ask for an edit.
     const chatInput = await openAssistant(page);
