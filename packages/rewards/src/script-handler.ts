@@ -1,8 +1,10 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import * as childProcess from 'child_process';
+import * as nodeUtil from 'util';
 import type { ScriptAction } from '@open-edu/schemas';
 import type { RewardResult } from './types';
 
+const exec = childProcess.exec;
+const promisify = nodeUtil.promisify;
 const execAsync = promisify(exec);
 
 export async function handleScriptAction(action: ScriptAction): Promise<RewardResult> {

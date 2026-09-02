@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import studioDict from '@open-edu/i18n/locales/en/studio.json';
@@ -58,6 +57,19 @@ vi.mock('@dotlottie/react-player', () => ({
   PlayerEvents: {},
 }));
 
+vi.mock('@ai-sdk/react', () => ({
+  useChat: () => ({
+    messages: [],
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
+    status: 'ready' as const,
+    stop: vi.fn(),
+    clearError: vi.fn(),
+    setMessages: vi.fn(),
+    error: undefined,
+  }),
+}));
+
 const { DevApp } = await import('./DevApp');
 
 function renderWithI18n() {
@@ -74,23 +86,14 @@ describe('DevApp bundle mode', () => {
     sessionStorage.clear();
   });
 
-  it('defaults to Creator chrome for bundles and hides DevTools', async () => {
+  it('shows the Studio bundle unsupported empty state without a mode switch', async () => {
     renderWithI18n();
     expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
-    expect(await screen.findByText('Bundles need Developer mode')).toBeInTheDocument();
+    expect(await screen.findByText('Bundles are not supported yet')).toBeInTheDocument();
     expect(screen.queryByText('Reading lesson')).not.toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: /studio mode/i })).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+      screen.queryByRole('complementary', { name: 'Preview DevTools' }),
     ).not.toBeInTheDocument();
-  });
-
-  it('switches a bundle to developer mode and back', async () => {
-    renderWithI18n();
-    await screen.findByText('Bundles need Developer mode');
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Bundle Mode')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Bundles need Developer mode')).toBeInTheDocument();
   });
 });

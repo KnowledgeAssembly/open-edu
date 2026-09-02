@@ -12,7 +12,6 @@ export async function startServer(packageDir: string, port = 0): Promise<TestSer
   const devServerRoot = resolve('apps/dev-server');
 
   process.env.OPEN_EDU_PACKAGE_DIR = resolvedPackageDir;
-  process.env.OPEN_EDU_STUDIO_MODE = 'developer';
 
   const server = await createServer({
     root: devServerRoot,
@@ -38,4 +37,16 @@ export async function tabTo(page: Page, target: Locator) {
     await page.keyboard.press('Tab');
     await expect(target).toBeFocused({ timeout: 500 });
   }).toPass({ timeout: 15000 });
+}
+
+export async function openStudioPreview(page: Page): Promise<void> {
+  const previewNav = page.getByRole('button', { name: /^preview$/i });
+  await previewNav.click();
+  await expect(page.getByRole('button', { name: /exit preview/i })).toBeVisible({ timeout: 15000 });
+}
+
+export async function openPreviewDevtools(page: Page): Promise<void> {
+  await openStudioPreview(page);
+  await page.getByRole('button', { name: /open devtools/i }).click();
+  await expect(page.getByRole('complementary', { name: /preview devtools/i })).toBeVisible();
 }

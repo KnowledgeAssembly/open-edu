@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./broker": {
+      "types": "./dist/broker.d.ts",
+      "import": "./dist/broker.js"
     }
   },
   "files": [

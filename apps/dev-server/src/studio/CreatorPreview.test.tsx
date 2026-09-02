@@ -57,13 +57,24 @@ describe('CreatorPreview', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the runtime without DevTools inspectors', async () => {
+  it('renders the runtime without DevTools open by default', async () => {
     render(wrap(<CreatorPreview pkg={mockPkg} />));
     expect(await screen.findByText('Hello')).toBeInTheDocument();
     expect(
-      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+      screen.queryByRole('complementary', { name: 'Preview DevTools' }),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText('Telemetry')).not.toBeInTheDocument();
+  });
+
+  it('opens the DevTools drawer with a Telemetry tab from the toolbar', async () => {
+    const user = userEvent.setup();
+    render(wrap(<CreatorPreview pkg={mockPkg} />));
+    const toggle = await screen.findByRole('button', { name: 'Open DevTools' });
+    await user.click(toggle);
+    expect(
+      await screen.findByRole('complementary', { name: 'Preview DevTools' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /telemetry/i })).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('shows a reset progress button', async () => {

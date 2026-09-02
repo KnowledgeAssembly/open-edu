@@ -2,6 +2,10 @@ import type { StudioView } from './types.js';
 
 const VIEW_KEY = 'openedu.studio.view';
 const PATH_KEY = 'openedu.studio.selectedPath';
+const OUTLINE_TAB_KEY = 'openedu.studio.outlineTab';
+const FILES_PATH_KEY = 'openedu.studio.filesPath';
+
+export type OutlineTab = 'outline' | 'files';
 
 const VALID_VIEWS: StudioView[] = [
   'home',
@@ -45,6 +49,47 @@ export function writeSelectedPath(path: string | null): void {
       return;
     }
     sessionStorage.setItem(PATH_KEY, path);
+  } catch {
+    // storage unavailable
+  }
+}
+
+const VALID_OUTLINE_TABS: OutlineTab[] = ['outline', 'files'];
+
+export function readOutlineTab(): OutlineTab {
+  try {
+    const value = sessionStorage.getItem(OUTLINE_TAB_KEY);
+    return value && (VALID_OUTLINE_TABS as string[]).includes(value)
+      ? (value as OutlineTab)
+      : 'outline';
+  } catch {
+    return 'outline';
+  }
+}
+
+export function writeOutlineTab(tab: OutlineTab): void {
+  try {
+    sessionStorage.setItem(OUTLINE_TAB_KEY, tab);
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function readFilesPath(): string | null {
+  try {
+    return sessionStorage.getItem(FILES_PATH_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function writeFilesPath(path: string | null): void {
+  try {
+    if (path === null) {
+      sessionStorage.removeItem(FILES_PATH_KEY);
+      return;
+    }
+    sessionStorage.setItem(FILES_PATH_KEY, path);
   } catch {
     // storage unavailable
   }

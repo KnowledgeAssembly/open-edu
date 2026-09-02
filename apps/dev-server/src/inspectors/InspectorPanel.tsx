@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from '@open-edu/i18n';
 import type { TelemetryEvent } from '@open-edu/schemas';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { TelemetryInspector } from './TelemetryInspector';
@@ -7,9 +8,9 @@ import { RewardsInspector } from './RewardsInspector';
 import { LogsInspector } from './LogsInspector';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
-import { PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { X } from 'lucide-react';
 
-type Tab = 'telemetry' | 'logs' | 'accessibility' | 'rewards' | 'bundle';
+export type InspectorTab = 'telemetry' | 'logs' | 'accessibility' | 'rewards' | 'bundle';
 
 interface InspectorPanelProps {
   telemetryEvents: TelemetryEvent[];
@@ -21,6 +22,11 @@ interface InspectorPanelProps {
   }>;
   onResendReward?: (receipt: RewardReceipt) => void;
   bundleData?: any;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  activeTab?: InspectorTab;
+  onActiveTabChange?: (tab: InspectorTab) => void;
+  auditRootSelector?: string;
 }
 
 export function InspectorPanel({
@@ -29,34 +35,49 @@ export function InspectorPanel({
   definedRewards,
   onResendReward,
   bundleData,
+  open,
+  onOpenChange,
+  activeTab: activeTabProp,
+  onActiveTabChange,
+  auditRootSelector,
 }: InspectorPanelProps): JSX.Element | null {
-  const [activeTab, setActiveTab] = useState<Tab>('telemetry');
-  const [isOpen, setIsOpen] = useState(true);
+  const { t } = useTranslation();
+  const [internalTab, setInternalTab] = useState<InspectorTab>('telemetry');
+  const activeTab = activeTabProp ?? internalTab;
 
-  if (!isOpen) {
-    return (
-      <Button
-        variant="default"
-        size="sm"
-        className="shadow-elevation-modal fixed bottom-4 right-4 z-[9999]"
-        onClick={() => setIsOpen(true)}
-        aria-label="Open inspector panel"
-      >
-        <PanelRightOpen className="mr-1 size-4" />
-        DevTools
-      </Button>
-    );
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, onOpenChange]);
+
+  if (!open) {
+    return null;
   }
+
+  const handleTabChange = (tab: InspectorTab) => {
+    if (onActiveTabChange) {
+      onActiveTabChange(tab);
+      return;
+    }
+    setInternalTab(tab);
+  };
 
   return (
     <div
-      className="bg-surface-container-low border-outline-variant flex w-[360px] flex-col border-l font-mono text-xs"
+      className="border-outline-variant bg-surface-container-low flex h-[min(40vh,280px)] w-full shrink-0 flex-col border-t font-mono text-xs"
       role="complementary"
-      aria-label="Developer inspector panel"
+      aria-label={t('studio.preview.devtoolsPanel')}
+      data-audit-root={auditRootSelector ?? ''}
     >
       <Tabs
         value={activeTab}
-        onValueChange={(v) => setActiveTab(v as Tab)}
+        onValueChange={(v) => handleTabChange(v as InspectorTab)}
         className="flex flex-1 flex-col overflow-hidden"
       >
         <div className="bg-surface-container border-outline-variant flex shrink-0 border-b">
@@ -65,32 +86,32 @@ export function InspectorPanel({
               value="telemetry"
               className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
-              Telemetry
+              {t('studio.devtools.telemetry')}
             </TabsTrigger>
             <TabsTrigger
               value="logs"
               className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
-              Logs
+              {t('studio.devtools.logs')}
             </TabsTrigger>
             <TabsTrigger
               value="rewards"
               className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
-              Rewards
+              {t('studio.devtools.rewards')}
             </TabsTrigger>
             <TabsTrigger
               value="accessibility"
               className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
             >
-              A11y
+              {t('studio.devtools.a11y')}
             </TabsTrigger>
             {bundleData && (
               <TabsTrigger
                 value="bundle"
                 className="data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-surface flex-1 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-xs font-semibold uppercase tracking-wider"
               >
-                Bundle
+                {t('studio.devtools.bundle')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -98,10 +119,10 @@ export function InspectorPanel({
             variant="ghost"
             size="icon"
             className="text-on-surface-variant size-auto rounded-none px-3"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close inspector panel"
+            onClick={() => onOpenChange(false)}
+            aria-label={t('studio.preview.devtoolsClose')}
           >
-            <PanelRightClose className="size-4" />
+            <X className="size-4" />
           </Button>
         </div>
 
@@ -124,7 +145,7 @@ export function InspectorPanel({
         {bundleData && (
           <TabsContent value="bundle" className="mt-0 flex-1 overflow-auto border-0 p-2">
             <div className="p-2">
-              <h3 className="mb-2 font-semibold">Bundle Modules</h3>
+              <h3 className="mb-2 font-semibold">{t('studio.bundle.modulesTitle')}</h3>
               {bundleData?.manifest?.modules?.map((mod: any) => (
                 <div
                   key={mod.id}
@@ -132,12 +153,15 @@ export function InspectorPanel({
                 >
                   <div className="font-medium">{mod.title}</div>
                   <div className="text-on-surface-variant text-xs">
-                    ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
+                    {t('studio.bundle.moduleId', {
+                      id: mod.id,
+                      deps: mod.dependsOn?.join(', ') || 'none',
+                    })}
                   </div>
                 </div>
               ))}
               {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
-                <p className="text-on-surface-variant text-xs">No modules loaded.</p>
+                <p className="text-on-surface-variant text-xs">{t('studio.bundle.noModules')}</p>
               )}
             </div>
           </TabsContent>

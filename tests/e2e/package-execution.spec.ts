@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, type TestServer } from './helpers';
+import { startServer, openStudioPreview, type TestServer } from './helpers';
 
 const HELLO_WORLD = resolve('examples/hello-world');
 const INTRO_JS = resolve('examples/intro-javascript');
@@ -18,12 +18,14 @@ test.describe('hello-world (single lesson node)', () => {
 
   test('loads and displays the package title', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('Hello World');
   });
 
   test('renders markdown content from the lesson node', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await expect(page.getByText('Welcome to your first Open-Edu learning package!')).toBeVisible();
     await expect(
       page.getByText('Educational Packages are portable learning experiences'),
@@ -32,18 +34,21 @@ test.describe('hello-world (single lesson node)', () => {
 
   test('shows progress bar on initial load', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const progressbar = page.getByRole('progressbar').first();
     await expect(progressbar).toBeVisible();
   });
 
   test('clicks Next to complete the learning experience', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.getByRole('button', { name: 'Next' }).click();
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
   });
 
   test('completion hides the Next button', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.getByRole('button', { name: 'Next' }).click();
     await expect(page.getByRole('button', { name: 'Next' })).toBeHidden();
   });
@@ -62,6 +67,7 @@ test.describe('intro-javascript (multi-node linear)', () => {
 
   test('renders the first lesson node on load', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('Introduction to JavaScript');
     await expect(page.getByText('JavaScript is a programming language')).toBeVisible();
@@ -69,6 +75,7 @@ test.describe('intro-javascript (multi-node linear)', () => {
 
   test('navigates through all 4 nodes to completion', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -96,6 +103,7 @@ test.describe('intro-javascript (multi-node linear)', () => {
 
   test('progress bar shows correct total', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(1000);
     const footer = page.locator('footer');
     await expect(footer.getByText('/ 4')).toBeVisible();
@@ -115,6 +123,7 @@ test.describe('fractions (conditional branching)', () => {
 
   test('passes quiz with correct answer and reaches advanced node', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('Understanding Fractions');
     await page.waitForTimeout(500);
@@ -135,6 +144,7 @@ test.describe('fractions (conditional branching)', () => {
 
   test('fails quiz with wrong answer and reaches remediation node', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -164,6 +174,7 @@ test.describe('widget-practice (widget exercise)', () => {
 
   test('renders intro and navigates to widget', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await expect(page.getByRole('heading', { name: 'Widget Practice' }).first()).toBeVisible();
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
@@ -172,6 +183,7 @@ test.describe('widget-practice (widget exercise)', () => {
 
   test('selects correct answer and completes', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
@@ -188,6 +200,7 @@ test.describe('widget-practice (widget exercise)', () => {
 
   test('selects wrong answer and completes', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
@@ -211,6 +224,7 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
 
   test('loads with correct title and intro content', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('Adaptive Study');
     await expect(
@@ -220,6 +234,7 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
 
   test('passes checkpoint and reaches reflection', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -239,6 +254,7 @@ test.describe('adaptive-study (adaptive learning with remediation loop)', () => 
 
   test('fails checkpoint and reaches remediation', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -267,6 +283,7 @@ test.describe('skill-graph (mastery-based routing)', () => {
 
   test('passes basics quiz to unlock advanced quiz', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('Algebra Skill Graph');
     await page.waitForTimeout(500);
@@ -298,6 +315,7 @@ test.describe('skill-graph (mastery-based routing)', () => {
 
   test('fails basics quiz and reaches remediation', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();
@@ -324,6 +342,7 @@ test.describe('autism-reading (lesson → quiz → reflection)', () => {
 
   test('loads with correct title and lesson content', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     const title = page.getByRole('heading', { level: 1 }).first();
     await expect(title).toHaveText('A Day at the Park');
     await expect(page.getByText('Sam and Max went to the park')).toBeVisible();
@@ -331,6 +350,7 @@ test.describe('autism-reading (lesson → quiz → reflection)', () => {
 
   test('navigates full journey: lesson → quiz → reflection → completion', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
     await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: 'Next' }).click();

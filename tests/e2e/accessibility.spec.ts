@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'path';
-import { startServer, tabTo, type TestServer } from './helpers';
+import {
+  startServer,
+  tabTo,
+  openStudioPreview,
+  openPreviewDevtools,
+  type TestServer,
+} from './helpers';
 
 const AUTISM = resolve('examples/autism-reading');
 const HELLO_WORLD = resolve('examples/hello-world');
@@ -18,7 +24,8 @@ test.describe('keyboard navigation', () => {
 
   test('Next button receives focus via Tab', async ({ page }) => {
     await page.goto(server.url);
-    await page.waitForTimeout(1000);
+    await openStudioPreview(page);
+    await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });
     await tabTo(page, nextButton);
@@ -27,7 +34,8 @@ test.describe('keyboard navigation', () => {
 
   test('activates Next button with keyboard Enter', async ({ page }) => {
     await page.goto(server.url);
-    await page.waitForTimeout(1000);
+    await openStudioPreview(page);
+    await page.waitForTimeout(500);
 
     const nextButton = page.getByRole('button', { name: 'Next' });
     await tabTo(page, nextButton);
@@ -49,6 +57,7 @@ test.describe('accessibility validation', () => {
 
   test('page has proper landmark regions', async ({ page }) => {
     await page.goto(server.url);
+    await openStudioPreview(page);
 
     const shell = page.getByTestId('layout-shell');
     await expect(shell).toBeVisible();
@@ -57,15 +66,17 @@ test.describe('accessibility validation', () => {
     await expect(main).toBeVisible();
   });
 
-  test('inspector panel has complementary role', async ({ page }) => {
+  test('inspector devtools drawer has complementary role', async ({ page }) => {
     await page.goto(server.url);
+    await openPreviewDevtools(page);
 
-    const inspector = page.getByRole('complementary', { name: 'Developer inspector panel' });
+    const inspector = page.getByRole('complementary', { name: /preview devtools/i });
     await expect(inspector).toBeVisible();
   });
 
   test('A11y inspector shows no violations after auto-audit', async ({ page }) => {
     await page.goto(server.url);
+    await openPreviewDevtools(page);
 
     await page.getByRole('tab', { name: 'A11y' }).click();
 
@@ -76,6 +87,7 @@ test.describe('accessibility validation', () => {
 
   test('Run Audit button is present and clickable', async ({ page }) => {
     await page.goto(server.url);
+    await openPreviewDevtools(page);
 
     await page.getByRole('tab', { name: 'A11y' }).click();
 

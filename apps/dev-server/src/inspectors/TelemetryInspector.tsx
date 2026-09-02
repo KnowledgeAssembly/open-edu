@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import type { TelemetryEvent } from '@open-edu/schemas';
-import { createSummary } from '@open-edu/telemetry';
+import { createSummary } from '@open-edu/telemetry/summary';
 
 interface TelemetryInspectorProps {
   events: TelemetryEvent[];

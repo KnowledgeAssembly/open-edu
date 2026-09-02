@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import fs from 'fs';
 import path from 'path';
 import type { LoadedPackage } from '@open-edu/core';
-import type { RewardReceipt } from '@open-edu/rewards';
 import { I18nProvider } from '@open-edu/i18n';
 import runtimeDict from '@open-edu/i18n/locales/en/runtime.json';
 import studioDict from '@open-edu/i18n/locales/en/studio.json';
@@ -57,25 +55,6 @@ vi.mock('virtual:open-edu-package', () => ({
   bundleData: null,
 }));
 
-let capturedOnReceipt: ((receipt: RewardReceipt) => void) | undefined;
-
-import type * as RewardsModule from '@open-edu/rewards';
-
-vi.mock('@open-edu/rewards', async (importOriginal) => {
-  const actual = await importOriginal<typeof RewardsModule>();
-  return {
-    ...actual,
-    RewardBroker: class {
-      constructor(opts: { onReceipt?: (receipt: RewardReceipt) => void }) {
-        capturedOnReceipt = opts.onReceipt;
-      }
-      start() {}
-      stop() {}
-      updateContext() {}
-    },
-  };
-});
-
 vi.mock('@dotlottie/react-player', () => ({
   DotLottiePlayer: () => <div data-testid="mocked-dotlottie" />,
   PlayerEvents: {},
@@ -102,105 +81,29 @@ describe('DevApp', () => {
     localStorage.clear();
   });
 
-  it('hides developer inspector by default in creator mode', async () => {
+  it('renders the Studio chrome and no DevTools on first paint', async () => {
     renderWithI18n();
-    expect(
-      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText('Telemetry')).not.toBeInTheDocument();
-    expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
-  });
-
-  it('switches to developer mode to show the inspector', async () => {
-    renderWithI18n();
-    expect(
-      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
-    ).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-
-    expect(
-      await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Telemetry')).toBeInTheDocument();
-  });
-
-  it('switches back to creator mode from the developer shell', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(
-      await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
-    ).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-
     expect(await screen.findByText('OpenEdu Studio')).toBeInTheDocument();
     expect(
-      screen.queryByRole('complementary', { name: 'Developer inspector panel' }),
+      screen.queryByRole('complementary', { name: 'Preview DevTools' }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: /studio mode/i })).not.toBeInTheDocument();
   });
 
-  it('should render the package title from the manifest in developer mode', async () => {
+  it('does not render a studio mode toggle', async () => {
     renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Test Package')).toBeInTheDocument();
-  });
-
-  it('should render the inspector panel in developer mode', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(
-      await screen.findByRole('complementary', { name: 'Developer inspector panel' }),
-    ).toBeInTheDocument();
-  });
-
-  it('should render telemetry tab button in developer mode', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Telemetry')).toBeInTheDocument();
-  });
-
-  it('should render accessibility tab button in developer mode', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('A11y')).toBeInTheDocument();
-  });
-
-  it('should render the reset progress button in developer mode', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Reset Progress')).toBeInTheDocument();
+    await screen.findByText('OpenEdu Studio');
+    expect(screen.queryByRole('switch', { name: /studio mode/i })).not.toBeInTheDocument();
   });
 });
 
 describe('DevApp reward overlay wiring', () => {
   beforeEach(() => {
-    capturedOnReceipt = undefined;
     localStorage.clear();
   });
 
-  it('shows the reward overlay when the broker delivers a badge receipt', async () => {
-    renderWithI18n();
-    await userEvent.click(screen.getByRole('switch', { name: /studio mode/i }));
-    expect(await screen.findByText('Test Package')).toBeInTheDocument();
-    expect(capturedOnReceipt).toBeTypeOf('function');
-
-    act(() => {
-      capturedOnReceipt!({
-        actionId: 'reward-test',
-        actionType: 'badge.award',
-        actionKey: 'First Steps',
-        dispatchedAt: Date.now(),
-        status: 'delivered',
-      });
-    });
-
-    expect(await screen.findByTestId('reward-animation')).toBeInTheDocument();
-    expect(screen.getByLabelText('Badge unlocked: First Steps')).toBeInTheDocument();
-  });
-
-  it('composes createRewardReceiptBridge and RewardEventBridge', () => {
-    const src = fs.readFileSync(path.resolve(__dirname, './DevApp.tsx'), 'utf8');
+  it('composes createRewardReceiptBridge and RewardEventBridge in the preview', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, './studio/CreatorPreview.tsx'), 'utf8');
     expect(src).toContain('createRewardReceiptBridge');
     expect(src).toContain('RewardEventBridge');
     expect(createRewardReceiptBridge).toBeTypeOf('function');

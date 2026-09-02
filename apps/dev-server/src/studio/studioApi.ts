@@ -49,6 +49,13 @@ export interface ExportResult {
   fileName: string;
 }
 
+export interface PackageFileEntry {
+  path: string;
+  label: string;
+  category: string;
+  extension: string;
+}
+
 export interface StudioApi {
   getPackageDir(): Promise<string>;
   getWorkspace(): Promise<CourseWorkspace>;
@@ -73,6 +80,13 @@ export interface StudioApi {
   readFile(path: string): Promise<{ path: string; content: string }>;
   writeFile(path: string, content: string): Promise<{ success: boolean }>;
   deleteFile(path: string): Promise<{ success: boolean; path: string }>;
+  listFiles(): Promise<PackageFileEntry[]>;
+  createFile(path: string, content?: string): Promise<{ success: boolean; path: string }>;
+  renameFile(
+    oldPath: string,
+    newPath: string,
+  ): Promise<{ success: boolean; oldPath: string; newPath: string }>;
+  uploadAsset(file: File, path?: string): Promise<{ success: boolean; path: string }>;
   getPreviewPackage(): Promise<LoadedPackage | null>;
   getStorageStatus(): Promise<StorageStatus>;
   getAiStatus(): Promise<AiStatus>;
