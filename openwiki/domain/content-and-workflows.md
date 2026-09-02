@@ -116,8 +116,10 @@ The `openedu-course-authoring` skill (`skills/openedu-course-authoring/`) provid
 
 | File                               | Role                                                                                                                                       |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/discover-openedu.mjs`     | Detects repo, capabilities, executable status, commands, paths; distinguishes `packagePresent` from `executable`                           |
 | `scripts/openedu-adapter.mjs`      | Shared adapter: repo discovery, command resolution (structured argv, never shell), command execution                                       |
 | `scripts/widget-catalog.mjs`       | Loads live `widget-catalog-data.json`; resolves canonical/deprecated/legacy widget IDs                                                     |
+| `scripts/profiles.mjs`             | Normalizes learner-profile input (`resolveProfile`) and loads machine-checkable knobs from `profiles.config.json`                          |
 | `scripts/validate-course-spec.mjs` | Structural preflight checks + optional compiler invocation via `cmdArgv`                                                                   |
 | `scripts/validate-package.mjs`     | Orchestrates compile → validate → lint phases with `runOpenEduCommand`                                                                     |
 | `scripts/quality-report.mjs`       | Central report merger — sole writer of `quality-report.json` during orchestration                                                          |
@@ -135,6 +137,12 @@ The skill evaluates generated specs against pedagogical dimensions with specific
 - **Accessibility** (`QC-ACC-01` through `-04`) — plain language; keyboard support; non-color-only distinctions; chunked content
 - **Completeness** (`QC-COM-01` through `-03`) — all required schema fields present; no unresolved assumptions; coreIdea/examples/misconceptions
 
+### Learner profiles, bundles, and generated references
+
+- The skill adapts output to four learner profiles (`neurotypical`, `autism`, `school`, `college`) via `references/profiles.md` and `references/profile-{neurotypical,autism,school,college}.md`; educational context (`educationLevel`, `gradeBand`, `curriculum`) is recorded separately. The `autism` profile is only ever explicitly stated, never inferred.
+- Bundle authoring (`references/bundle-authoring.md`) and rewards & cards authoring (`references/rewards-cards-authoring.md`) extend the portable workflow to multi-module and reward-driven content.
+- The reference files in `skills/openedu-course-authoring/references/` are **generated** from `@open-edu/domain-guidance` (profiles, quality rubric, artifact contract) — regenerate with `pnpm --filter @open-edu/domain-guidance generate`; see ADR-0009 (`openedu-way/ADR-0009-unified-course-authoring-guidance.md`).
+
 ### Command execution
 
 All commands are executed as structured `argv` arrays via `spawnSync` — never shell-interpolated strings. The adapter distinguishes `packagePresent` (directory exists) from `executable` (entrypoint exists). When the CLI is not built, compile/validate/lint phases are skipped with an explicit `cli-unavailable` reason in the report.
@@ -145,14 +153,17 @@ When users supply PDF textbooks, the skill routes through the standalone `open-e
 
 ### Evaluation framework
 
-The skill ships with 9 evaluation scenarios (`evals/evals.json`) — 3 portable, 2 repository, 4 edge cases — validated against the standard skill-creator schema (`evals/schema.test.mjs`, 23 tests).
+The skill ships with 15 evaluation scenarios (`evals/evals.json`) covering portable, repository, source-material (PDF), bundle, rewards/cards, learner-profile, and edge cases — validated against the standard skill-creator schema (`evals/schema.test.mjs`).
 
 ### Where to start
 
 - Skill workflow: `skills/openedu-course-authoring/SKILL.md`
-- Artifact schema: `skills/openedu-course-authoring/references/artifact-contract.md`
+- Learner profiles: `skills/openedu-course-authoring/references/profiles.md` + `profile-{neurotypical,autism,school,college}.md`
+- Artifact schema: `skills/openedu-course-authoring/references/artifact-contract.md` (generated from `@open-edu/domain-guidance`)
 - Authoring stages: `skills/openedu-course-authoring/references/authoring-workflow.md`
-- Quality rubric spec: `skills/openedu-course-authoring/references/quality-rubric.md`
+- Bundle authoring: `skills/openedu-course-authoring/references/bundle-authoring.md`
+- Rewards & cards authoring: `skills/openedu-course-authoring/references/rewards-cards-authoring.md`
+- Quality rubric spec: `skills/openedu-course-authoring/references/quality-rubric.md` (generated from `@open-edu/domain-guidance`)
 - Repository adapter: `skills/openedu-course-authoring/references/repository-adapter.md`
 - Source materials: `skills/openedu-course-authoring/references/source-materials.md`
 

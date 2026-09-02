@@ -15,8 +15,14 @@ The `openedu-course-authoring` skill is a portable agent skill located at `skill
 - Generate `course-spec.json` and `course-spec.md` from natural language prompts
 - Validate specs against the Open-Edu compiler schema
 - Select widgets from the live widget catalog (not hardcoded lists)
+- Adapt content to one of four learner profiles (neurotypical, autism, school, college) plus educational context (`educationLevel`, `gradeBand`, `curriculum`)
+- Author multi-module bundles and module/bundle rewards & cards
 - Produce a detailed quality report with pedagogical diagnostics
 - Compile, validate, and lint packages (in repository mode)
+
+The skill's reference files (`references/*.md`) are **generated** from `@open-edu/domain-guidance` — do not hand-edit them; regenerate with `pnpm --filter @open-edu/domain-guidance generate` (see `openedu-way/ADR-0009-unified-course-authoring-guidance.md`).
+
+> **Two skill mechanisms:** this guide covers the full `openedu-course-authoring` skill. The CLI also ships a thin reference skill (`packages/cli/skills/course-spec-generator.skill.md`) that `edu generate --prompt` prints for single-shot spec generation without validation or quality checks. Use the full skill for real authoring.
 
 ## Modes
 
@@ -139,6 +145,24 @@ When the catalog is unavailable:
 - **Portable mode**: `QC-WDG-00` warning — "widget IDs not validated against catalog"
 - **Repository mode**: `QC-WDG-00` error — "widget ID validation cannot run"
 
+## Learner Profiles
+
+The skill adapts authoring guidance _and_ generated output to one of four learner profiles:
+
+| Key            | Default | Reference                            |
+| -------------- | ------- | ------------------------------------ |
+| `neurotypical` | yes     | `references/profile-neurotypical.md` |
+| `autism`       | no      | `references/profile-autism.md`       |
+| `school`       | no      | `references/profile-school.md`       |
+| `college`      | no      | `references/profile-college.md`      |
+
+In the Stage 1 interview, ask for `learnerProfile` (after age/level) and record it under a `## Learner Profile` section in `course-brief.md`. Record educational context separately — `educationLevel` (`school`/`college`), `gradeBand` (school only), `curriculum` — under `## Educational Context`; these compose with the profile as distinct fields, never as composite profiles (`references/profiles.md`). **Never infer the `autism` profile** from age, level, or behavior — only an explicit user statement (otherwise default to `neurotypical`).
+
+## Bundle & Rewards/Cards Authoring
+
+- **Bundles:** use `references/bundle-authoring.md` when authoring a multi-module bundle — module split rules, the `bundle.json` manifest, `dependsOn` ordering, and bundle-level rewards/cards placement.
+- **Rewards & cards:** use `references/rewards-cards-authoring.md` when authoring `rewards.json` / `cards.json` — triggers, conditions, scope rules (module vs bundle), and global card-ID uniqueness.
+
 ## Source Materials (PDF Pipeline)
 
 When you supply a PDF textbook, the skill integrates with the standalone `open-edu-pipeline` project:
@@ -201,30 +225,40 @@ In repository mode, the output would also include `package/` with the compiled O
 
 ## Evaluation Framework
 
-The skill includes 9 evaluation scenarios that verify correctness:
+The skill includes 15 evaluation scenarios that verify correctness:
 
-| Eval                           | Mode       | Description                              |
-| ------------------------------ | ---------- | ---------------------------------------- |
-| `eval-portable-fractions`      | Portable   | Fractions course for 8-10 year olds      |
-| `eval-portable-javascript`     | Portable   | Intro JavaScript for adult beginners     |
-| `eval-portable-non-stem`       | Portable   | French greetings language course         |
-| `eval-repo-package`            | Repository | Complete package compilation             |
-| `eval-repo-pdf`                | Repository | PDF pipeline with math profile           |
-| `eval-edge-missing-level`      | Edge       | Asks for clarification on missing inputs |
-| `eval-edge-unsupported-widget` | Edge       | Graceful fallback for unknown widgets    |
-| `eval-edge-existing-output`    | Edge       | Detects and asks before overwriting      |
-| `eval-edge-multilingual`       | Edge       | Spanish (es-MX) locale support           |
+| Eval                           | Mode       | Description                                      |
+| ------------------------------ | ---------- | ------------------------------------------------ |
+| `eval-portable-fractions`      | Portable   | Fractions course for 8-10 year olds              |
+| `eval-portable-javascript`     | Portable   | Intro JavaScript for adult beginners             |
+| `eval-portable-non-stem`       | Portable   | French greetings language course                 |
+| `eval-repo-package`            | Repository | Complete package compilation                     |
+| `eval-repo-pdf`                | Repository | PDF pipeline with math profile                   |
+| `eval-edge-missing-level`      | Any        | Asks for clarification on missing inputs         |
+| `eval-edge-unsupported-widget` | Repository | Graceful fallback for unknown widgets            |
+| `eval-edge-existing-output`    | Any        | Detects and asks before overwriting              |
+| `eval-edge-multilingual`       | Portable   | Spanish (es-MX) locale support                   |
+| `eval-bundle-rewards-cards`    | Portable   | Bundle authoring with rewards & cards            |
+| `eval-module-rewards-cards`    | Portable   | Module-level rewards & cards                     |
+| `eval-autism-fractions`        | Portable   | Fractions course adapted for the autism profile  |
+| `eval-neurotypical-fractions`  | Portable   | Fractions course for the default profile         |
+| `eval-school-fractions`        | Portable   | Fractions course adapted for the school profile  |
+| `eval-college-fractions`       | Portable   | Fractions course adapted for the college profile |
 
-See `skills/openedu-course-authoring/evals/README.md` for running instructions.
+See `skills/openedu-course-authoring/evals/README.md` for running instructions. The manifest (`evals/evals.json`) is validated by `node --test skills/openedu-course-authoring/evals/schema.test.mjs`.
 
 ## Reference Documents
 
-- [Skill definition](./skills/openedu-course-authoring/SKILL.md)
-- [Artifact contract](./skills/openedu-course-authoring/references/artifact-contract.md)
-- [Authoring workflow](./skills/openedu-course-authoring/references/authoring-workflow.md)
-- [Quality rubric](./skills/openedu-course-authoring/references/quality-rubric.md)
-- [Repository adapter](./skills/openedu-course-authoring/references/repository-adapter.md)
-- [Source materials](./skills/openedu-course-authoring/references/source-materials.md)
-- [Package Authoring Guide](./package-authoring.md)
-- [Course Compiler](./course-compiler.md)
-- [Pipeline](./pipeline.md)
+The skill and its references live in the repository at `skills/openedu-course-authoring/` (outside the docs tree, so the paths below are shown as code, not links):
+
+- `SKILL.md` — skill definition and critical rules
+- `references/profiles.md` + `references/profile-{neurotypical,autism,school,college}.md` — learner profiles
+- `references/artifact-contract.md` — exact JSON schema (generated from `@open-edu/domain-guidance`)
+- `references/authoring-workflow.md` — staged generation sequence, activity progression, widget selection rules
+- `references/bundle-authoring.md` — multi-module bundle authoring (module split, `bundle.json`, `dependsOn`, bundle rewards/cards)
+- `references/rewards-cards-authoring.md` — `rewards.json` / `cards.json` triggers, conditions, scope rules
+- `references/quality-rubric.md` — quality rubric dimensions and check IDs (generated from `@open-edu/domain-guidance`)
+- `references/repository-adapter.md` — discovery, commands, catalog loading, pipeline integration
+- `references/source-materials.md` — PDF and curriculum document handling via the pipeline
+
+Related published guides: [Package Authoring Guide](./package-authoring.md), [Course Compiler](./course-compiler.md), [Pipeline](./pipeline.md).

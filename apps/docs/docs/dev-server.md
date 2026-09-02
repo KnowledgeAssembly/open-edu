@@ -4,7 +4,7 @@ sidebar_position: 12
 
 # Dev Server (`@open-edu/dev-server`)
 
-The `@open-edu/dev-server` package powers the [**OpenEdu Course Creator Studio**](./course-creator-studio). It is a Vite-based development environment with hot reload, runtime mounting, and inspector panels for debugging accessibility, telemetry, and rewards. In the Studio these tools live in **Developer mode**; Creator mode (default) hides them behind the teacher-facing authoring UI.
+The `@open-edu/dev-server` package powers the [**OpenEdu Course Creator Studio**](./course-creator-studio). It is a Vite-based development environment with hot reload, runtime mounting, and a single unified Studio shell. There is no mode toggle — the file editors and inspector panels live inside the Studio (Files tab and Preview DevTools drawer).
 
 ## Quick Start
 
@@ -22,47 +22,45 @@ edu dev ./my-package
 ## Features
 
 - **Hot reload** — Markdown and JSON changes reflect instantly without full page reload
-- **Runtime mounting** — Automatically loads and renders any educational package or bundle
-- **Inspector panels** — Debug accessibility, telemetry, rewards, and bundles in real time
-- **Creator/Developer modes** — Creator mode (default) is the teacher authoring UI; Developer mode restores the file editors and inspectors below
+- **Runtime mounting** — Automatically loads and renders any educational package
+- **Unified Studio shell** — Home · Library · Outline | Files · Preview · Share (see [Course Creator Studio](./course-creator-studio))
+- **Preview DevTools drawer** — Telemetry / Logs / Rewards / A11y / Bundle inspectors in a collapsed bottom drawer on the Preview page
 
-## Multi-Module Bundle Mode
+## Bundle Support
 
-The dev-server automatically detects bundle projects by checking for `bundle.json` (when no `package.json` is found). In bundle mode:
-
-- A **"Bundle Mode"** badge is shown
-- A **module selector dropdown** lets you switch between modules
-- A **"Bundle Overview"** button renders the `BundleOverview` component
-- Telemetry events are tagged with `bundleId` and `moduleId` for correlation
-- Hot reload works across all module files
-
-You can also set the `OPEN_EDU_BUNDLE_DIR` environment variable for explicit bundle detection.
+Bundle authoring and preview are **not supported** in the Studio today: opening a bundle shows an unsupported empty state. The **Bundle** inspector tab renders only when bundle data is actually present. Multi-module bundles remain a learner-app and CLI concern.
 
 ## Inspector Panels
 
+The inspectors live in the Preview **DevTools drawer** (bottom, collapsed by default) rather than a fixed right rail:
+
 ### Accessibility Inspector
 
-Displays axe-core violation reports for the current page, including impact level, description, and element selector. Helps identify and fix accessibility issues during development.
+Displays axe-core violation reports for the current page, including impact level, description, and element selector.
 
 ### Telemetry Inspector
 
-Shows a live stream of telemetry events as they fire — node opens, completions, quiz answers, widget interactions, and bundle module events. Each event shows its type, timestamp, and payload.
+Shows a live stream of telemetry events — node opens, completions, quiz answers, widget interactions, and bundle module events — for the current Preview visit. Each event shows its type, timestamp, and payload.
+
+### Logs Inspector
+
+Shows the process-wide log sink output in real time.
 
 ### Rewards Inspector
 
-Displays reward configuration for the loaded package and tracks reward receipt status as events trigger. Shows which conditions were evaluated and whether rewards were delivered, skipped, or failed.
+Displays reward configuration for the loaded package and tracks reward receipt status as events trigger.
 
 ### Bundle Inspector
 
-When running in bundle mode, a **Bundle** tab lists all modules with their IDs, dependency chains, and current status (`locked` / `unlocked` / `in_progress` / `completed`). Helps debug prerequisite logic and module transitions.
+When bundle data is present, a **Bundle** tab lists modules with their IDs, dependency chains, and current status (`locked` / `unlocked` / `in_progress` / `completed`).
 
 ## How It Works
 
-The dev server wraps the `@open-edu/runtime` embed adapter in a Vite application with the inspector panels overlaid. When a package directory is provided, it loads the package via `loadPackage()`, sets up a `WorkflowEngine` and `RewardBroker`, and renders the runtime inside a `LayoutShell` with the sidebar.
+The dev server wraps the `@open-edu/runtime` embed adapter in a Vite application. When a package directory is provided, it loads the package via `loadPackage()`, sets up a `WorkflowEngine` and `RewardBroker`, and renders the runtime inside the Studio shell.
 
-The inspector panels read from the same contexts — `AxesValidator` for a11y, `TelemetrySession.events$` for telemetry, and `RewardBroker` status for rewards.
+The inspector panels read from the same contexts — `AxesValidator` for a11y, `TelemetrySession.events$` for telemetry, the memory log sink for logs, and `RewardBroker` status for rewards.
 
-The Studio adds a `StudioAPI` façade (`apps/dev-server/src/studio/studioApi.ts`) over Vite middleware (`/api/package/*` for files, outline, validate, assets, and `.oep` export; `/api/studio/*` for AI generation, the course library, and units). See [Course Creator Studio](./course-creator-studio) for the product view.
+The Studio adds a `StudioAPI` façade (`apps/dev-server/src/studio/studioApi.ts`) over Vite middleware (`/api/package/*` for files, tree, outline, validate, assets, and `.oep` export; `/api/studio/*` for AI generation, the course library, and units). A browser variant (`BrowserStudioApi`) maps the same surface onto the OPFS workspace. See [Course Creator Studio](./course-creator-studio) for the product view.
 
 ### Tailwind CSS
 

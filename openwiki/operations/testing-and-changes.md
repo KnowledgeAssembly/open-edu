@@ -24,8 +24,10 @@ From the repository root:
 - `pnpm --filter @open-edu/learner dev` — start the learner app
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js ...` — use the CLI after building it
 - `pnpm --filter @open-edu/widgets generate:catalog` — regenerate the widget catalog JSON from the canonical source in `packages/widgets/src/widget-catalog-source.ts`
-- `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js dev ./examples/hello-world` — start the OpenEdu Course Creator Studio (Creator mode default, Developer toggle in-app)
+- `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js dev ./examples/hello-world` — start the OpenEdu Course Creator Studio (single unified authoring shell)
 - `pnpm --filter @open-edu/dev-server test` — run the Course Creator Studio package tests (Studio UI, library, AI, flow logic)
+- `pnpm --filter @open-edu/domain-guidance generate` — regenerate the authoring-skill reference files from canonical data; must produce no diff in CI
+- `node --test skills/openedu-course-authoring/evals/schema.test.mjs` — validate the authoring-skill eval scenarios against the skill-creator schema
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:extract ./my-lesson ./locales` — extract translatable strings from a package
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:validate ./my-lesson ./locales` — validate translation completeness
 - `pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js i18n:missing ./locales ./target-lang` — find missing translations for a target language

@@ -97,7 +97,7 @@ edu generate --prompt
 edu generate --from-description "Create a JavaScript variables lesson"
 ```
 
-`--prompt` outputs a structured template for AI agents. `--from-description` scaffolds a package with basic content generation.
+`--prompt` outputs the content of the thin reference skill (`packages/cli/skills/course-spec-generator.skill.md`) as agent context. For full interactive authoring with discovery, validation, and quality checks, use the portable `openedu-course-authoring` skill instead (see [Agentic Course Authoring](../agentic-authoring)). `--from-description` scaffolds a package with basic content generation.
 
 ### Widget Create
 

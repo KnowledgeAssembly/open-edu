@@ -93,12 +93,16 @@ Compiles course-spec Markdown or JSON into validated package structures.
 
 ### `@open-edu/dev-server` — OpenEdu Course Creator Studio
 
-The `apps/dev-server` app (package `@open-edu/dev-server`) evolved from the original local Vite preview + inspector + file editor into **OpenEdu Course Creator Studio**, a single authoring product with two modes over the same on-disk packages:
+The `apps/dev-server` app (package `@open-edu/dev-server`) evolved from the original local Vite preview + inspector + file editor into **OpenEdu Course Creator Studio**, one unified authoring shell over the same on-disk packages (there is **no mode toggle**):
 
-- **Creator mode** (default, for teachers/tutors) — starts from a template, AI draft, recent course, or the course library. The **Outline** is the course spine (add lessons/quizzes/practice, reorder → linear workflow). Form editors author lessons (Markdown), quizzes (MCQ with correct-answer coaching), and practice widgets (curated picker + live preview + schema forms). Guided **flow** (score-based branching), **rewards & cards** forms, preview without DevTools, and a **Share** flow (Ready check → `.oep` export → learner-install instructions / classroom note). Units bundle 2–5 courses via a canonical `bundle.json`.
-- **Developer mode** — preserves the original dev-server power tools: file tree, Markdown/JSON editors, manifest/workflow/rewards/cards editors, and the Telemetry / Logs / Rewards / A11y / Bundle inspector panels.
+- **Home / Library** — start from a template, AI draft, or recent course; manage a local course library (open, duplicate, rename, archive, import folder); compose **units** (2–5 courses → canonical `bundle.json`).
+- **Outline** (default tab) — the course spine: add lessons/quizzes/practice, reorder → linear workflow. **Files** tab — the package file tree with Markdown/JSON editors, manifest/workflow/rewards/cards editors, and asset upload. The Author Assistant stays pinned in the right rail across both tabs.
+- **Preview** — the full learner runtime with a collapsed-by-default **DevTools drawer** (Telemetry / Logs / Rewards / A11y; Bundle only when bundle data is present).
+- **Share** — Ready check → `.oep` export → learner-install instructions / classroom note.
 
-Architecturally, the Studio UI is a façade over the package model. It talks to a thin `StudioAPI` (`apps/dev-server/src/studio/studioApi.ts`) implemented by a local adapter — Vite middleware for `/api/package/*` (file read/write, outline, validate, assets, export `.oep`) and `/api/studio/*` (AI generate/status, library scan/open/duplicate/rename/archive/import, unit creation/export) — so a hosted cloud Studio can later reuse the same UX. AI drafting runs server-side (LLM → `course-spec.json` → `@open-edu/course-compiler`) with keys kept out of the client. The workspace root for the course library comes from `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
+Bundles are **not** authorable in the Studio (unsupported empty state).
+
+Architecturally, the Studio UI is a façade over the package model. It talks to a thin `StudioAPI` (`apps/dev-server/src/studio/studioApi.ts`) implemented by a **local adapter** — Vite middleware for `/api/package/*` (file read/write, tree, outline, validate, assets, export `.oep`) and `/api/studio/*` (AI generate/status, library scan/open/duplicate/rename/archive/import, unit creation/export) — and a **browser adapter** (`BrowserStudioApi`) over the OPFS workspace. AI drafting runs server-side (LLM → `course-spec.json` → `@open-edu/course-compiler`) with keys kept out of the client. The workspace root for the course library comes from `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package). The unified-view design spec is `docs/superpowers/specs/2026-09-01-studio-unified-view-design.md`.
 
 The Studio Assistant runs on a **single Node backend** with one AI pipeline (`createStudioAiMiddleware` in `apps/dev-server/src/studio/ai/middleware.ts`). Both Creator (local file-system) and Browser (hosted OPFS) modes mount the same `/api/studio/ai/*` surface — status, course-draft generate/commit, item add/edit, and the agent loop at `/api/studio/ai/chat`. There is no Vercel static-function gateway / `/api/ai/*` any longer; the chat message schema + `toAiSdkMessages` / `fromUIMessage` converters live in `@open-edu/companion/chat`. Routing belongs to the server-side loop; the client ships raw messages and never re-parses intents.
 
@@ -121,6 +125,18 @@ Provides search, dictionary, conversation, and provider interfaces for the AI co
 - **Pipili metadata and V2 extension seams** for future capability expansion
 
 The learner app implements the server-side Pipili endpoint using AI SDK v4's `streamText` with `pipeDataStreamToResponse`, including Zod request validation, assessment policy, accessibility profiles, and a 7-tool registry.
+
+### `@open-edu/companion`
+
+AI companion contracts extracted from the dev-server Studio assistant: the chat message schema and `toAiSdkMessages` / `fromUIMessage` converters in `@open-edu/companion/chat`, plus tool, skill, task, event, permission, runtime, request, and changeset contracts. Consumers: `apps/dev-server` (Studio AI agent loop) and the learner app. Requires a build after source changes (`pnpm --filter @open-edu/companion build`).
+
+### `@open-edu/domain-guidance`
+
+Canonical home for course-authoring domain knowledge — the four learner profiles (`profiles.json`) and the quality rubric (`quality-rubric.json`) — plus a **generated** `artifact-contract.json` derived from the `@open-edu/course-compiler` Zod schemas. `src/generate.ts` renders the `openedu-course-authoring` skill reference files; CI requires `pnpm --filter @open-edu/domain-guidance generate` to be diff-free. Exposes `@open-edu/domain-guidance/profiles` for browser-safe profile resolution (used by the Studio). See ADR-0009.
+
+### `@open-edu/logger`
+
+Structured isomorphic logging engine: `createLogger` / `configureLogger`, child loggers, `ConsoleSink` / `MemorySink` / `JsonlSink` / `TelemetryBridgeSink`, and a React `LoggerProvider` / `useLogger`. Used by dev-server and other packages.
 
 ### `@open-edu/oep-distribution`
 
@@ -201,5 +217,5 @@ The repo is organized to keep learning content portable and the runtime platform
 - course distribution (`.oep` build, install, catalog, updates): `packages/oep-distribution`
 - course registry (catalog build, release validation, schema generation): `packages/registry` + the `openedu-library` repo
 - Pipili AI companion (chat, hints, context mapping): `packages/ai-companion/src/pipili/` and `apps/learner/src/pipili/`
-- Course Creator Studio authoring (Creator/Developer modes, StudioAPI, AI drafts, library/units, share/export): `apps/dev-server/src/studio/` and `apps/dev-server/vite.config.ts`
+- Course Creator Studio authoring (unified shell, Outline | Files tabs, StudioAPI, AI drafts + Author Assistant, library/units, share/export): `apps/dev-server/src/studio/` and `apps/dev-server/vite.config.ts`
 - end-user navigation and app composition: `apps/learner`
