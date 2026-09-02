@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  RuntimeProvider,
-  LayoutShell,
-  RewardEventBridge,
-} from '@open-edu/runtime';
+import { RuntimeProvider, LayoutShell, RewardEventBridge } from '@open-edu/runtime';
 import { WorkflowEngine } from '@open-edu/workflow';
 import type { WorkflowEvent } from '@open-edu/workflow';
 import { AccessibilityProvider } from '@open-edu/accessibility';
 import { createDefaultRegistry } from '@open-edu/widgets';
-import { TelemetrySession } from '@open-edu/telemetry';
-import { RewardBroker } from '@open-edu/rewards';
+import { TelemetrySession } from '@open-edu/telemetry/session';
+import { RewardBroker } from '@open-edu/rewards/broker';
 import type { RewardReceipt } from '@open-edu/rewards';
 import { Button } from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
@@ -172,19 +168,17 @@ export function CreatorPreview({
               {t('studio.preview.exit')}
             </Button>
             <div className="flex items-center gap-2">
-              {engine ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleToggleDevtools}
-                  aria-pressed={devtools.open}
-                  aria-label={t(
-                    devtools.open ? 'studio.preview.devtoolsClose' : 'studio.preview.devtoolsOpen',
-                  )}
-                >
-                  {t('studio.preview.devtools')}
-                </Button>
-              ) : null}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleDevtools}
+                aria-pressed={devtools.open}
+                aria-label={t(
+                  devtools.open ? 'studio.preview.devtoolsClose' : 'studio.preview.devtoolsOpen',
+                )}
+              >
+                {t('studio.preview.devtools')}
+              </Button>
               <Button variant="outline" size="sm" onClick={handleReset}>
                 {t('studio.preview.resetProgress')}
               </Button>

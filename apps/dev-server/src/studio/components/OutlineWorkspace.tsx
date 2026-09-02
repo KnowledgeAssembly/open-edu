@@ -1,19 +1,18 @@
-import { useCallback, useRef, useState } from 'react';
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@open-edu/design-system';
+import { useCallback, useState, type RefObject } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { OutlineView } from './OutlineView.js';
-import {
-  PackageSourcePane,
-  type PackageSourcePaneHandle,
-} from './PackageSourcePane.js';
-import {
-  readOutlineTab,
-  writeOutlineTab,
-  readFilesPath,
-  writeFilesPath,
-  type OutlineTab,
-} from '../studioSession.js';
+import { PackageSourcePane, type PackageSourcePaneHandle } from './PackageSourcePane.js';
+import { readFilesPath, writeFilesPath, type OutlineTab } from '../studioSession.js';
 import type { StudioApi } from '../studioApi.js';
 
 export function OutlineWorkspace({
@@ -23,6 +22,11 @@ export function OutlineWorkspace({
   onTitleChange,
   onShare,
   onOutlineMutated,
+  filesDirty,
+  onDirtyChange,
+  tab,
+  onTabChange,
+  paneRef,
 }: {
   api: StudioApi;
   onEdit: (path: string) => void;
@@ -30,17 +34,14 @@ export function OutlineWorkspace({
   onTitleChange?: (title: string) => void;
   onShare?: () => void;
   onOutlineMutated?: () => void;
+  filesDirty: boolean;
+  onDirtyChange: (dirty: boolean) => void;
+  tab: OutlineTab;
+  onTabChange: (tab: OutlineTab) => void;
+  paneRef: RefObject<PackageSourcePaneHandle>;
 }) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<OutlineTab>(() => readOutlineTab());
-  const [filesDirty, setFilesDirty] = useState(false);
   const [pendingTab, setPendingTab] = useState<OutlineTab | null>(null);
-  const paneRef = useRef<PackageSourcePaneHandle>(null);
-
-  const applyTab = useCallback((next: OutlineTab) => {
-    setTab(next);
-    writeOutlineTab(next);
-  }, []);
 
   const selectTab = useCallback(
     (next: OutlineTab) => {
@@ -48,29 +49,29 @@ export function OutlineWorkspace({
         setPendingTab('outline');
         return;
       }
-      applyTab(next);
+      onTabChange(next);
     },
-    [filesDirty, applyTab],
+    [filesDirty, onTabChange],
   );
 
   const handleSaveThenSwitch = useCallback(async () => {
     if (!pendingTab) return;
     try {
       await paneRef.current?.save();
-      applyTab(pendingTab);
+      onTabChange(pendingTab);
     } catch {
       // Save failed; stay on Files.
     } finally {
       setPendingTab(null);
     }
-  }, [pendingTab, applyTab]);
+  }, [pendingTab, onTabChange, paneRef]);
 
   const handleDiscardThenSwitch = useCallback(() => {
     if (!pendingTab) return;
-    setFilesDirty(false);
-    applyTab(pendingTab);
+    onDirtyChange(false);
+    onTabChange(pendingTab);
     setPendingTab(null);
-  }, [pendingTab, applyTab]);
+  }, [pendingTab, onTabChange, onDirtyChange]);
 
   const handleCancelSwitch = useCallback(() => {
     setPendingTab(null);
@@ -98,7 +99,7 @@ export function OutlineWorkspace({
             api={api}
             initialPath={readFilesPath()}
             onOpenActivity={onEdit}
-            onDirtyChange={setFilesDirty}
+            onDirtyChange={onDirtyChange}
             onTreeChanged={onOutlineMutated}
             onSelectPath={writeFilesPath}
           />

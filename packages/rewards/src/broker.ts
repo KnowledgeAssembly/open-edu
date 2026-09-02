@@ -143,7 +143,7 @@ export class RewardBroker {
           });
           break;
         }
-        const { handleScriptAction } = await import('./script-handler');
+        const { handleScriptAction } = await import(/* @vite-ignore */ './script-handler');
         handleScriptAction(action as ScriptAction).then((r) =>
           this.addReceipt(this.toReceipt(r, action.action)),
         );

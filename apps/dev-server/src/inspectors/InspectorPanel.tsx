@@ -145,7 +145,7 @@ export function InspectorPanel({
         {bundleData && (
           <TabsContent value="bundle" className="mt-0 flex-1 overflow-auto border-0 p-2">
             <div className="p-2">
-              <h3 className="mb-2 font-semibold">Bundle Modules</h3>
+              <h3 className="mb-2 font-semibold">{t('studio.bundle.modulesTitle')}</h3>
               {bundleData?.manifest?.modules?.map((mod: any) => (
                 <div
                   key={mod.id}
@@ -153,12 +153,15 @@ export function InspectorPanel({
                 >
                   <div className="font-medium">{mod.title}</div>
                   <div className="text-on-surface-variant text-xs">
-                    ID: {mod.id} | Deps: {mod.dependsOn?.join(', ') || 'none'}
+                    {t('studio.bundle.moduleId', {
+                      id: mod.id,
+                      deps: mod.dependsOn?.join(', ') || 'none',
+                    })}
                   </div>
                 </div>
               ))}
               {(!bundleData?.manifest?.modules || bundleData.manifest.modules.length === 0) && (
-                <p className="text-on-surface-variant text-xs">No modules loaded.</p>
+                <p className="text-on-surface-variant text-xs">{t('studio.bundle.noModules')}</p>
               )}
             </div>
           </TabsContent>

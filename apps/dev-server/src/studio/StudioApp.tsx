@@ -1,10 +1,20 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { EmptyState } from '@open-edu/design-system';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogContent,
+  DialogDescription,
+  EmptyState,
+} from '@open-edu/design-system';
 import { useTranslation } from '@open-edu/i18n';
 import type { ThemeId } from '@open-edu/runtime';
 import { HomeView } from './components/HomeView.js';
 import { LibraryView } from './components/LibraryView.js';
 import { OutlineWorkspace } from './components/OutlineWorkspace.js';
+import type { PackageSourcePaneHandle } from './components/PackageSourcePane.js';
 import { ShareView } from './components/ShareView.js';
 import { UnitBuilderView } from './components/UnitBuilderView.js';
 import { ActivityEditorRouter } from './components/ActivityEditorRouter.js';
@@ -19,8 +29,10 @@ import {
   writeStudioView,
   readSelectedPath,
   writeSelectedPath,
+  readOutlineTab,
   writeOutlineTab,
   writeFilesPath,
+  type OutlineTab,
 } from './studioSession.js';
 import type { LoadedPackage } from '@open-edu/core';
 import type { StudioView } from './types.js';
@@ -68,6 +80,10 @@ export function StudioApp({
   const [targetLearnerKind, setTargetLearnerKind] = useState<string>(() => {
     return localStorage.getItem('openedu.studio.targetLearnerKind') || 'neurotypical';
   });
+  const [filesDirty, setFilesDirty] = useState(false);
+  const [pendingNavigate, setPendingNavigate] = useState<StudioView | null>(null);
+  const [outlineTab, setOutlineTab] = useState<OutlineTab>(() => readOutlineTab());
+  const filesPaneRef = useRef<PackageSourcePaneHandle>(null);
 
   const handleTargetLearnerKindChange = useCallback((kind: string) => {
     setTargetLearnerKind(kind);
@@ -100,7 +116,7 @@ export function StudioApp({
     };
   }, [api]);
 
-  const handleNavigate = useCallback((next: StudioView) => {
+  const applyNavigate = useCallback((next: StudioView) => {
     setView(next);
     writeStudioView(next);
     if (next === 'outline' || next === 'home') {
@@ -108,6 +124,41 @@ export function StudioApp({
       writeSelectedPath(null);
     }
   }, []);
+
+  const handleNavigate = useCallback(
+    (next: StudioView) => {
+      if (filesDirty && view === 'outline' && outlineTab === 'files' && next !== 'outline') {
+        setPendingNavigate(next);
+        return;
+      }
+      applyNavigate(next);
+    },
+    [filesDirty, view, outlineTab, applyNavigate],
+  );
+
+  const handleCancelNavigate = useCallback(() => {
+    setPendingNavigate(null);
+  }, []);
+
+  const handleSaveThenNavigate = useCallback(async () => {
+    if (!pendingNavigate) return;
+    try {
+      await filesPaneRef.current?.save();
+      applyNavigate(pendingNavigate);
+    } catch {
+      // Save failed; stay on Outline.
+    } finally {
+      setPendingNavigate(null);
+    }
+  }, [pendingNavigate, applyNavigate]);
+
+  const handleDiscardThenNavigate = useCallback(() => {
+    if (!pendingNavigate) return;
+    setFilesDirty(false);
+    applyNavigate(pendingNavigate);
+    setPendingNavigate(null);
+    setOutlineTab('files');
+  }, [pendingNavigate, applyNavigate]);
 
   const handleOpened = useCallback(() => {
     if (loadedPackage) {
@@ -138,6 +189,7 @@ export function StudioApp({
         handleEdit(path);
         return;
       }
+      setOutlineTab('files');
       writeOutlineTab('files');
       writeFilesPath(path);
       handleNavigate('outline');
@@ -194,6 +246,14 @@ export function StudioApp({
           onTitleChange={setCourseTitle}
           onShare={() => handleNavigate('share')}
           onOutlineMutated={() => setOutlineRevision((n) => n + 1)}
+          filesDirty={filesDirty}
+          onDirtyChange={setFilesDirty}
+          tab={outlineTab}
+          onTabChange={(next) => {
+            setOutlineTab(next);
+            writeOutlineTab(next);
+          }}
+          paneRef={filesPaneRef}
         />
       );
       break;
@@ -301,6 +361,28 @@ export function StudioApp({
           </StudioAppInner>
         </StudioChatProvider>
       </EditorBridgeProvider>
+      <Dialog
+        open={pendingNavigate !== null}
+        onOpenChange={(open) => !open && handleCancelNavigate()}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('studio.files.unsavedTitle')}</DialogTitle>
+            <DialogDescription>{t('studio.files.unsavedLede')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={handleCancelNavigate}>
+              {t('studio.files.unsavedCancel')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => void handleSaveThenNavigate()}>
+              {t('studio.files.unsavedSave')}
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDiscardThenNavigate}>
+              {t('studio.files.unsavedDiscard')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </StudioAssistantProvider>
   );
 }

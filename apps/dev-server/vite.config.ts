@@ -1439,8 +1439,6 @@ export default defineConfig(({ mode }) => {
     resolve: isBrowserMode
       ? {
           alias: {
-            '@open-edu/telemetry': resolve(__dirname, 'src/stubs/telemetry.ts'),
-            '@open-edu/rewards': resolve(__dirname, 'src/stubs/rewards.ts'),
             '@open-edu/ai-companion': resolve(__dirname, 'src/stubs/ai-companion.ts'),
           },
         }

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
@@ -12,6 +13,7 @@ import { StudioChrome } from './StudioChrome';
 import { HomeView } from './HomeView';
 import { OutlineView } from './OutlineView';
 import { OutlineWorkspace } from './OutlineWorkspace';
+import type { PackageSourcePaneHandle } from './PackageSourcePane';
 import { CreatorPreview } from '../CreatorPreview';
 import type { StudioApi } from '../studioApi.js';
 import type { LibraryEntry } from '../library/types.js';
@@ -109,6 +111,22 @@ function wrap(ui: React.ReactElement) {
     <I18nProvider locale="en" dictionaries={{ en: { studio: studioEn as Record<string, string> } }}>
       {ui}
     </I18nProvider>
+  );
+}
+
+function ControlledWorkspace({ api }: { api: StudioApi }) {
+  const [tab, setTab] = useState<'outline' | 'files'>('outline');
+  return (
+    <OutlineWorkspace
+      api={api}
+      onEdit={() => {}}
+      onError={() => {}}
+      filesDirty={false}
+      onDirtyChange={() => {}}
+      tab={tab}
+      onTabChange={setTab as (t: 'outline' | 'files') => void}
+      paneRef={{ current: null } as React.RefObject<PackageSourcePaneHandle>}
+    />
   );
 }
 
@@ -225,13 +243,7 @@ describe('axe-core accessibility audits for studio components', () => {
 
   it('StudioChrome is accessible on outline view', async () => {
     const { container } = render(
-      wrap(
-        <StudioChrome
-          onNavigate={() => {}}
-          courseTitle="Test Course"
-          view="outline"
-        />,
-      ),
+      wrap(<StudioChrome onNavigate={() => {}} courseTitle="Test Course" view="outline" />),
     );
     await screen.findByText('OpenEdu Studio');
     const violations = await runAxe(container);
@@ -267,13 +279,7 @@ describe('axe-core accessibility audits for studio components', () => {
 
   it('OutlineWorkspace is accessible with the Files tab selected', async () => {
     const { container } = render(
-      wrap(
-        <OutlineWorkspace
-          api={makeApi({ listFiles: vi.fn().mockResolvedValue([]) })}
-          onEdit={() => {}}
-          onError={() => {}}
-        />,
-      ),
+      wrap(<ControlledWorkspace api={makeApi({ listFiles: vi.fn().mockResolvedValue([]) })} />),
     );
     await screen.findAllByText('Lesson');
     await userEvent.click(screen.getByRole('tab', { name: 'Files' }));
@@ -283,9 +289,7 @@ describe('axe-core accessibility audits for studio components', () => {
   });
 
   it('CreatorPreview is accessible with the DevTools drawer open', async () => {
-    const { container } = render(
-      wrap(<CreatorPreview pkg={previewPkg} />),
-    );
+    const { container } = render(wrap(<CreatorPreview pkg={previewPkg} />));
     await userEvent.click(await screen.findByRole('button', { name: 'Open DevTools' }));
     await screen.findByRole('complementary', { name: 'Preview DevTools' });
     const violations = await runAxe(container);
