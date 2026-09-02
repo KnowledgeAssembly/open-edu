@@ -77,4 +77,4 @@ The Studio UI is a façade over the package model. It talks to a thin `StudioAPI
 
 AI drafting runs **server-side** on a single Node backend: LLM → `course-spec.json` → `@open-edu/course-compiler`. API keys stay in the server process (`OPEN_EDU_STUDIO_LLM_*` or existing llm-config env vars) and templates remain the offline fallback. The chat message schema + `toAiSdkMessages` / `fromUIMessage` converters live in `@open-edu/companion/chat`; learner profiles and the quality rubric render from `@open-edu/domain-guidance`. There is no Vercel static-function gateway (`/api/ai/*` was removed).
 
-The current design spec is [`2026-09-01-studio-unified-view-design.md`](../../superpowers/specs/2026-09-01-studio-unified-view-design.md). It supersedes the Creator/Developer split (§3.4–3.5) of the earlier `docs/superpowers/specs/2026-08-05-course-creator-studio-design.md`.
+The current design spec is `docs/superpowers/specs/2026-09-01-studio-unified-view-design.md` (outside the docs tree, so shown as a code path). It supersedes the Creator/Developer split (§3.4–3.5) of the earlier `docs/superpowers/specs/2026-08-05-course-creator-studio-design.md`.
