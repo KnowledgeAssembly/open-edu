@@ -4,7 +4,7 @@ Instructions for AI coding agents working on the Open-Edu Framework.
 
 ## Project Overview
 
-Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, course distribution (`.oep` format), an AI companion (Pipili), and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling. It also ships **OpenEdu Course Creator Studio** (in `apps/dev-server`) — a teacher-facing authoring product with Creator/Developer modes that produces the same OpenEdu packages.
+Open-Edu is an open runtime for educational experiences — a monorepo framework that separates educational content from delivery platforms. Learning packages (Markdown + JSON) are loaded, validated, and rendered through a configurable runtime with built-in accessibility, telemetry, internationalization, rewards, course distribution (`.oep` format), an AI companion (Pipili), and a **3-theme system (Light, Dark, Zen)** with Tailwind CSS styling. It also ships **OpenEdu Course Creator Studio** (in `apps/dev-server`) — a teacher-facing authoring product with a single unified authoring shell (Outline | Files, Preview + DevTools, AI Author Assistant) that produces the same OpenEdu packages.
 
 ## OpenWiki
 
@@ -67,10 +67,16 @@ node packages/i18n/src/i18n-keys.test.ts          # Run i18n key validation test
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js oep:build ./my-course -o ./dist  # Build .oep distribution artifact
 # Regenerate dev-server Tailwind CSS after runtime style changes
 pnpm --filter @open-edu/dev-server exec tailwindcss -c tailwind.config.js -i src/index.css -o src/tailwind.css
-# Start the Course Creator Studio (Creator mode default; Developer toggle in-app)
+# Start the Course Creator Studio (single unified authoring shell)
 pnpm --filter @open-edu/cli build && node packages/cli/dist/cli.js dev ./examples/hello-world
 # Run the dev-server package tests (Studio UI + library/ai/flow logic)
 pnpm --filter @open-edu/dev-server test
+# Regenerate the authoring-skill reference files from @open-edu/domain-guidance
+pnpm --filter @open-edu/domain-guidance generate
+# Run the course-authoring skill eval-schema tests
+node --test skills/openedu-course-authoring/evals/schema.test.mjs
+# Install the portable course-authoring skill for an agent
+cp -r skills/openedu-course-authoring ~/.agents/skills/openedu-course-authoring
 ```
 
 ## Monorepo Structure
@@ -78,7 +84,7 @@ pnpm --filter @open-edu/dev-server test
 ```
 open-edu/
 ├── apps/
-│   ├── dev-server/          # OpenEdu Course Creator Studio (Creator + Developer modes, StudioAPI, single Node AI backend)
+│   ├── dev-server/          # OpenEdu Course Creator Studio (unified shell: Outline | Files + Preview DevTools, StudioAPI, single Node AI backend)
 │   ├── docs/                # Docusaurus documentation site
 │   └── learner/             # Standalone learner app with 8-page router + theme switching + Pipili chat + course install
 ├── packages/
@@ -96,6 +102,9 @@ open-edu/
 │   ├── widget-sdk/          # Framework-agnostic community widget protocol SDK (no React dependency)
 │   ├── i18n/                # Internationalization — locale types, translation engine, React I18nProvider, namespaces, formatters, LanguageSwitcher
 │   ├── oep-distribution/    # .oep archive writer/reader, install coordinator, catalog loader, ZIP security, version compare
+│   ├── companion/           # AI companion contracts — chat schema + converters, tools, skills, tasks, permissions
+│   ├── domain-guidance/     # Authoring domain knowledge — learner profiles + quality rubric; generates skill references
+│   ├── logger/              # Structured isomorphic logging engine
 │   └── registry/             # Course registry tooling (catalog builder, release validation, open-edu-registry CLI)
 ├── examples/                # Example educational packages
 │   ├── adaptive-study/
@@ -188,6 +197,8 @@ All packages use the `@open-edu/` scope:
 - `@open-edu/widgets`, `@open-edu/widget-sdk`, `@open-edu/dev-server`, `@open-edu/docs`, `@open-edu/course-compiler`
 - `@open-edu/llm-config`, `@open-edu/i18n`
 - `@open-edu/design-system`, `@open-edu/ai-companion`
+- `@open-edu/companion`, `@open-edu/domain-guidance`
+- `@open-edu/logger`, `@open-edu/storage`, `@open-edu/pwa-core`
 - `@open-edu/oep-distribution`
 - `@open-edu/registry`
 
@@ -237,6 +248,7 @@ Epic 301 (Pipili AI Companion)
 
 Epic 5 (Runtime Renderer) consumes @open-edu/design-system for UI primitives, tokens, and patterns.
 Epic 13 (Learner App) consumes @open-edu/ai-companion for AI companion services.
+@open-edu/companion and @open-edu/domain-guidance underpin the Course Creator Studio assistant (chat contracts) and authoring (profiles/rubric generation).
 ```
 
 ## OpenWiki
@@ -306,7 +318,7 @@ The learner app is the primary development surface. After `install` completes, t
 - **Workspace packages require a build.** Monorepo packages resolve to `dist/` outputs; `pnpm build` runs during environment install. If you change package source and imports fail at runtime, rerun `pnpm build`.
 - **Dev-server CSS staleness.** After editing Tailwind classes in `packages/runtime/src/`, regenerate dev-server CSS (see Tailwind CSS & Dev-Server section above).
 - **E2E tests.** Run `pnpm test:e2e:install` once per environment for Playwright Chromium, then `pnpm test:e2e tests/e2e/learner-experience.spec.ts` for the canonical learner smoke test.
-- **Optional services.** The Course Creator Studio (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above. The Studio defaults to Creator mode for teachers; Developer mode (file editors + inspectors) is toggled in-app and persisted in `localStorage`. The course library uses `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
+- **Optional services.** The Course Creator Studio (`edu dev`, port 4000), docs (port 3000), and Storybook (port 6006) are not started automatically; see Essential Commands above. The Studio is a single unified shell (no mode toggle): Outline | Files tabs, Preview with a DevTools drawer, and a pinned Author Assistant. The course library uses `OPEN_EDU_STUDIO_WORKSPACE` (defaults to the parent of the opened package).
 - **Author Assistant.** Enabled by default in Creator. Toggle with `Cmd/Ctrl+Shift+A`. Disable via `OPEN_EDU_STUDIO_ASSISTANT=0` or `localStorage` key `openedu.studio.assistant.enabled=false`. Chat streams through `/api/studio/ai/chat`; conversation history is stored per course in IndexedDB (sessionStorage fallback).
 - **Studio AI is a single Node backend.** There is no Vercel static-function gateway (`/api/ai/*` was deleted). Both Creator (local FS) and Browser (hosted OPFS) modes mount the same `/api/studio/ai/*` middleware (`apps/dev-server/src/studio/ai/middleware.ts`): `/api/studio/ai/status`, `/api/studio/ai/generate-draft`, `/api/studio/ai/commit`, `/api/studio/ai/item/add`, `/api/studio/ai/item/edit`, and the agent loop at `/api/studio/ai/chat`. The chat message schema + `toAiSdkMessages` / `fromUIMessage` converters live in `@open-edu/companion/chat`. Routing is server-owned: the client ships raw messages to `/api/studio/ai/chat` and never re-parses intents.
 - **LLM / Pipili.** Cloud API keys are optional for basic course browsing and completion; set `LLM_API_KEY` only when testing the AI companion. Studio AI drafting is server-side and uses `OPEN_EDU_STUDIO_LLM_*` (or existing llm-config env vars); it degrades to templates when unavailable.

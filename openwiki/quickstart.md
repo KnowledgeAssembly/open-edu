@@ -23,7 +23,7 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 ### Apps
 
 - `apps/learner` — standalone learner experience. It is the main user-facing app and stitches together catalog, course runtime, progress, settings, bundle overview, collection binder, course install UI (`.oep` files, URL, catalog), and Pipili AI companion chat.
-- `apps/dev-server` — **OpenEdu Course Creator Studio** (local hybrid authoring + preview). Creator mode (default) is a teacher-facing authoring UI: template gallery, AI drafting, outline, form-based activity editors, guided flow/rewards, course library, and `.oep` share/export. Developer mode preserves the original dev-server surface: file tree + Markdown/JSON editors and Telemetry / Logs / Rewards / A11y / Bundle inspectors.
+- `apps/dev-server` — **OpenEdu Course Creator Studio** (local hybrid authoring + preview). One unified shell: template gallery, AI drafting, Outline | Files tabs (form-based activity editors + Markdown/JSON file editors), guided flow/rewards, course library/units, Preview with a DevTools drawer (Telemetry / Logs / Rewards / A11y / Bundle), and `.oep` share/export. Bundles are not authorable in the Studio.
 - `apps/docs` — docs site that mirrors some of the framework guidance.
 
 ### Core packages
@@ -34,6 +34,9 @@ Open-Edu is a pnpm TypeScript monorepo for educational experiences. It separates
 - `packages/runtime` — React runtime renderers, layout shells, theme system, progress helpers, and knowledge-card components.
 - `packages/design-system` — primitives, patterns, learning UI, tokens, themes, and visual-dna components.
 - `packages/ai-companion` — AI Learning Companion: search, dictionary, conversation, and provider services for the AI companion feature; includes the **Pipili subsystem** (context normalization, hint progression, bounded context, V2 extension seams).
+- `packages/companion` — AI companion wire contracts: chat message schema + `toAiSdkMessages` / `fromUIMessage` converters (`@open-edu/companion/chat`), plus tool, skill, task, event, permission, runtime, and changeset contracts shared by the dev-server Studio assistant and the learner app.
+- `packages/domain-guidance` — canonical home for course-authoring domain knowledge (learner profiles + quality rubric). Generates the `openedu-course-authoring` skill reference files (`pnpm --filter @open-edu/domain-guidance generate`) and exposes a browser-safe `@open-edu/domain-guidance/profiles` subpath. See ADR-0009.
+- `packages/logger` — structured isomorphic logging engine with console, memory, JSONL, and telemetry-bridge sinks plus a React `LoggerProvider`.
 - `packages/accessibility` — accessibility helpers and validation.
 - `packages/telemetry` — event collection and JSONL persistence.
 - `packages/rewards` — reward broker and card unlock logic.
@@ -98,7 +101,7 @@ The UI is intentionally split between low-level primitives and opinionated visua
 - Change widget IDs, catalog entries, or metadata validation: start in `packages/widgets/src/domains.ts`, `packages/widgets/src/widget-catalog-source.ts`, and `packages/core/src/widget-catalog.ts`.
 - Change community widget protocol, sandbox adapter, or resolver: start in `packages/widget-sdk/src/`, `packages/runtime/src/widgets/SandboxWidgetAdapter.tsx`, and `packages/widgets/src/resolver/`. See the [Community Widgets Developer Guide](../apps/docs/docs/widgets/community-widgets) for the full reference.
 - Change CLI behavior: start in `packages/cli`.
-- Change the Course Creator Studio (Creator/Developer modes, outline, activity editors, AI drafting, library/units, share/export): start in `apps/dev-server/src/studio/` (UI + `StudioAPI` client), `apps/dev-server/vite.config.ts` (local `/api/package/*` + `/api/studio/*` adapters), and `packages/i18n/locales/en/studio.json` (Creator copy). The product spec lives in `docs/superpowers/specs/2026-08-05-course-creator-studio-design.md`.
+- Change the Course Creator Studio (unified shell, Outline | Files tabs, Preview DevTools drawer, activity editors, AI drafting, library/units, share/export): start in `apps/dev-server/src/studio/` (UI + `StudioAPI` client), `apps/dev-server/vite.config.ts` (local `/api/package/*` + `/api/studio/*` adapters and browser/OPFS mode), and `packages/i18n/locales/en/studio.json`. The product spec lives in `docs/superpowers/specs/2026-09-01-studio-unified-view-design.md` (supersedes the mode split in `2026-08-05-course-creator-studio-design.md`).
 - Change course-authoring skill behavior: start in `skills/openedu-course-authoring/` — see [agentic course authoring](domain/content-and-workflows.md#agentic-course-authoring).
 - Change course distribution (`.oep` build, install, catalog, updates): start in `packages/oep-distribution` and `apps/learner/src/courseDownload.ts`.
 - Change course registry tooling (catalog generation, release validation): start in `packages/registry` and the `openedu-library` repo.

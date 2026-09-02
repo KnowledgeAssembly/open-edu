@@ -1,6 +1,6 @@
 # Open-Edu Course Authoring Skill Evaluations
 
-These evaluations test the skill across 11 scenarios: portable mode, repository mode, source material (PDF), bundles, rewards/cards, and edge cases (missing input, unsupported widgets, existing output, multilingual).
+These evaluations test the skill across 15 scenarios: portable mode, repository mode, source material (PDF), bundles, rewards/cards, learner profiles, and edge cases (missing input, unsupported widgets, existing output, multilingual).
 
 ## Running Evaluations
 
