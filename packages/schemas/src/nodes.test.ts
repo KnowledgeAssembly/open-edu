@@ -6,6 +6,8 @@ import {
   ExerciseNodeSchema,
   WidgetNodeSchema,
   ContentNodeSchema,
+  InteractiveNodeSchema,
+  validateInteractiveNode,
   NodeTypeSchema,
 } from './nodes';
 
@@ -299,9 +301,170 @@ describe('NodeTypeSchema', () => {
     expect(NodeTypeSchema.parse('reflection')).toBe('reflection');
     expect(NodeTypeSchema.parse('exercise')).toBe('exercise');
     expect(NodeTypeSchema.parse('custom')).toBe('custom');
+    expect(NodeTypeSchema.parse('interactive')).toBe('interactive');
   });
 
   it('should reject invalid node types', () => {
     expect(() => NodeTypeSchema.parse('video')).toThrow();
+  });
+});
+
+describe('InteractiveNodeSchema', () => {
+  const singleEngine = {
+    type: 'interactive' as const,
+    engine: 'timeline',
+    spec: {
+      type: 'timeline',
+      version: '1.0.0',
+      id: 'timeline-independence',
+      metadata: { title: 'Indian independence — key events' },
+      purpose: { learningObjective: 'Explore major events', reasoningMode: 'sequence' },
+      content: {
+        kind: 'events',
+        events: [{ id: 'event-1947', label: 'Independence', date: '1947-08-15' }],
+      },
+      interaction: { mode: 'explore', actions: ['select', 'focus', 'reset'] },
+      accessibility: { label: 'Timeline of independence' },
+    },
+  };
+
+  const composedLesson = {
+    type: 'interactive' as const,
+    id: 'independence-narrative-demo',
+    title: 'Timeline drives visual focus',
+    engines: [
+      {
+        instanceId: 'timeline-independence',
+        engine: 'timeline',
+        spec: {
+          type: 'timeline',
+          version: '1.0.0',
+          id: 'timeline-independence',
+          metadata: { title: 'Timeline' },
+          purpose: { learningObjective: 'Explore events', reasoningMode: 'sequence' },
+          content: {
+            kind: 'events',
+            events: [{ id: 'event-1947', label: 'Independence', date: '1947-08-15' }],
+          },
+          interaction: { mode: 'explore', actions: ['select'] },
+          accessibility: { label: 'Timeline' },
+        },
+      },
+      {
+        instanceId: 'visual-independence',
+        engine: 'visual',
+        spec: {
+          type: 'visual',
+          version: '1.0.0',
+          id: 'visual-independence',
+          content: {
+            kind: 'illustration',
+            entities: [{ id: 'figure-independence', label: 'Independence' }],
+          },
+          interaction: { mode: 'explore', actions: ['focus', 'reset'] },
+          accessibility: { label: 'Illustration' },
+        },
+      },
+    ],
+    bindings: [
+      {
+        on: 'timeline.event-selected',
+        from: 'timeline-independence',
+        dispatch: { to: 'visual-independence', action: 'focus', targetIdFrom: 'links.visualEntityId' },
+      },
+    ],
+  };
+
+  it('should accept a valid single-engine interactive node', () => {
+    expect(validateInteractiveNode(singleEngine).valid).toBe(true);
+    const parsed = InteractiveNodeSchema.parse(singleEngine);
+    expect(parsed.type).toBe('interactive');
+    expect(parsed.engine).toBe('timeline');
+  });
+
+  it('should be accepted by ContentNodeSchema via the discriminated union', () => {
+    expect(ContentNodeSchema.parse(singleEngine).type).toBe('interactive');
+  });
+
+  it('should accept a valid composed lesson node', () => {
+    expect(validateInteractiveNode(composedLesson).valid).toBe(true);
+    const parsed = InteractiveNodeSchema.parse(composedLesson);
+    expect(parsed.type).toBe('interactive');
+    expect(parsed.engines).toHaveLength(2);
+    expect(parsed.bindings).toHaveLength(1);
+  });
+
+  it('should reject a node mixing single-engine and composed fields', () => {
+    const bad = {
+      ...singleEngine,
+      engines: composedLesson.engines,
+      bindings: composedLesson.bindings,
+    };
+    const result = validateInteractiveNode(bad);
+    expect(result.valid).toBe(false);
+  });
+
+  it('should reject a node with neither single nor composed fields', () => {
+    const bad = { type: 'interactive' };
+    const result = validateInteractiveNode(bad);
+    expect(result.valid).toBe(false);
+  });
+
+  it('should reject single-engine form missing spec', () => {
+    const bad = { type: 'interactive', engine: 'visual' };
+    const result = validateInteractiveNode(bad);
+    expect(result.valid).toBe(false);
+  });
+
+  it('should reject an unknown engine type', () => {
+    const bad = { ...singleEngine, engine: 'physics' };
+    expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('should reject a binding dispatch without targetIdFrom or targetId', () => {
+    const bad = {
+      ...composedLesson,
+      bindings: [
+        {
+          on: 'timeline.event-selected',
+          from: 'timeline-independence',
+          dispatch: { to: 'visual-independence', action: 'focus' },
+        },
+      ],
+    };
+    expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('should reject a binding dispatch with both targetIdFrom and targetId', () => {
+    const bad = {
+      ...composedLesson,
+      bindings: [
+        {
+          on: 'timeline.event-selected',
+          from: 'timeline-independence',
+          dispatch: {
+            to: 'visual-independence',
+            action: 'focus',
+            targetIdFrom: 'links.visualEntityId',
+            targetId: 'figure-independence',
+          },
+        },
+      ],
+    };
+    expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('should reject an invalid instanceId pattern in engines', () => {
+    const spec = composedLesson.engines[0]?.spec ?? {};
+    const bad = {
+      ...composedLesson,
+      engines: [{ instanceId: '1invalid', engine: 'timeline', spec }],
+    };
+    expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('should reject extra properties (additionalProperties=false strictness)', () => {
+    const bad = { ...singleEngine, extra: 'nope' };
+    expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
   });
 });
