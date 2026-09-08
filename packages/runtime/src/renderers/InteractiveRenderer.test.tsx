@@ -190,6 +190,72 @@ describe('InteractiveRenderer', () => {
     expect(violations).toEqual([]);
   });
 
+  it('mounts a composed interactive lesson', async () => {
+    const composedNode: InteractiveNode = {
+      type: 'interactive',
+      id: 'independence-narrative-demo',
+      title: 'Timeline drives visual focus',
+      engines: [
+        {
+          instanceId: 'timeline-independence',
+          engine: 'timeline',
+          spec: {
+            type: 'timeline',
+            version: '1.0.0',
+            id: 'timeline-independence',
+            metadata: { title: 'Timeline' },
+            purpose: { learningObjective: 'Explore events', reasoningMode: 'sequence' },
+            content: {
+              kind: 'events',
+              events: [{ id: 'event-1947', label: 'Independence', date: '1947-08-15' }],
+            },
+            interaction: { mode: 'explore', actions: ['select'] },
+            accessibility: { label: 'Timeline' },
+          },
+        },
+        {
+          instanceId: 'visual-independence',
+          engine: 'visual',
+          spec: {
+            type: 'visual',
+            version: '1.0.0',
+            id: 'visual-independence',
+            content: {
+              kind: 'illustration',
+              entities: [{ id: 'figure-independence', label: 'Independence' }],
+            },
+            interaction: { mode: 'explore', actions: ['focus', 'reset'] },
+            accessibility: { label: 'Illustration' },
+          },
+        },
+      ],
+      bindings: [
+        {
+          on: 'timeline.event-selected',
+          from: 'timeline-independence',
+          dispatch: {
+            to: 'visual-independence',
+            action: 'focus',
+            targetIdFrom: 'links.visualEntityId',
+          },
+        },
+      ],
+    };
+    const pkg = makePackage([{ relativePath: 'nodes/composed.json', node: composedNode }]);
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <I18nProvider locale="en" dictionaries={{ en: { runtime: runtimeDict } }}>
+        <RuntimeProvider loadedPackage={pkg} engine={makeEngine('nodes/composed.json')}>
+          {children}
+        </RuntimeProvider>
+      </I18nProvider>
+    );
+    const { getByTestId } = render(
+      <InteractiveRenderer node={composedNode} nodeId="nodes/composed.json" />,
+      { wrapper },
+    );
+    expect(getByTestId('interactive-renderer')).toBeInTheDocument();
+  });
+
   afterEach(() => {
     cleanup();
   });

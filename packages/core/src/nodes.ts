@@ -33,7 +33,7 @@ export function parseNodeContent(relativePath: string, content: string): Content
         file: relativePath,
         path: 'type',
         suggestion:
-          'Add "type": "lesson" | "quiz" | "reflection" | "exercise" | "custom" to the node file',
+          'Add "type": "lesson" | "quiz" | "reflection" | "exercise" | "custom" | "interactive" to the node file',
       });
     }
 

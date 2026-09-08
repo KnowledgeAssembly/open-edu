@@ -1,4 +1,4 @@
-export { buildOpenEduBridge, readCssTokens } from './bridge.js';
+export { buildOpenEduBridge, buildSemanticTokens, readCssTokens } from './bridge.js';
 export type { OpenEduBridgeInputs, OpenEduBridge } from './bridge.js';
 export { InteractiveNodeView, InteractiveLessonView } from './views.js';
 export type {

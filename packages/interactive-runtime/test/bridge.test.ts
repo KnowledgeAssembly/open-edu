@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildOpenEduBridge, readCssTokens } from '../src/bridge';
+import { buildOpenEduBridge, buildSemanticTokens, readCssTokens } from '../src/bridge';
 
 describe('buildOpenEduBridge', () => {
   const announce = vi.fn();
@@ -52,5 +52,17 @@ describe('readCssTokens', () => {
     const tokens = readCssTokens(document);
     expect(tokens['--oe-color-primary']).toContain('#123456');
     expect(tokens['some-other-var']).toBeUndefined();
+  });
+});
+
+describe('buildSemanticTokens', () => {
+  it('maps semantic aliases from --oe-* theme variables', () => {
+    const el = document.documentElement;
+    el.style.setProperty('--oe-color-primary', '#112233');
+    el.style.setProperty('--oe-color-error', '#cc0000');
+    const tokens = buildSemanticTokens(document);
+    expect(tokens.emphasis).toContain('#112233');
+    expect(tokens.danger).toContain('#cc0000');
+    expect(tokens['--oe-color-primary']).toContain('#112233');
   });
 });

@@ -1,0 +1,13 @@
+{
+  "routing": {
+    "nodes/intro.md": {
+      "onComplete": "nodes/number-line.json"
+    },
+    "nodes/number-line.json": {
+      "onComplete": "nodes/composed-lesson.json"
+    },
+    "nodes/composed-lesson.json": {
+      "onComplete": "COMPLETED"
+    }
+  }
+}

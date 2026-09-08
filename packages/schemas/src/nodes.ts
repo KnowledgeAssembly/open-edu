@@ -113,59 +113,59 @@ const interactiveConfigShape = {
   bindings: z.array(InteractiveBindingSchema).optional(),
 } as const;
 
+type InteractiveConfigValue = {
+  engine?: z.infer<typeof InteractiveEngineTypeSchema>;
+  spec?: Record<string, unknown>;
+  id?: string;
+  title?: string;
+  engines?: Array<z.infer<typeof InteractiveEngineEntrySchema>>;
+  bindings?: Array<z.infer<typeof InteractiveBindingSchema>>;
+};
+
+function refineInteractiveNodeConfig(value: InteractiveConfigValue, ctx: z.RefinementCtx): void {
+  const isSingle = value.engine !== undefined || value.spec !== undefined;
+  const isComposed =
+    value.id !== undefined || value.engines !== undefined || value.bindings !== undefined;
+
+  if (isSingle && isComposed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        'cannot mix single-engine (engine/spec) with composed (id/engines/bindings) form',
+    });
+    return;
+  }
+  if (!isSingle && !isComposed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'must provide either engine/spec (single) or engines/bindings (composed)',
+    });
+    return;
+  }
+  if (isSingle) {
+    if (value.engine === undefined || value.spec === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'single-engine form requires both engine and spec',
+      });
+    }
+  }
+  if (isComposed) {
+    if (value.engines === undefined || value.bindings === undefined || value.id === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'composed form requires id, engines, and bindings',
+      });
+    }
+  }
+}
+
 export const InteractiveNodeConfigSchema = z
   .object(interactiveConfigShape)
-  .superRefine((value, ctx) => {
-    const isSingle = value.engine !== undefined || value.spec !== undefined;
-    const isComposed =
-      value.id !== undefined ||
-      value.engines !== undefined ||
-      value.bindings !== undefined;
-
-    if (isSingle && isComposed) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'cannot mix single-engine (engine/spec) with composed (id/engines/bindings) form',
-      });
-      return;
-    }
-    if (!isSingle && !isComposed) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'must provide either engine/spec (single) or engines/bindings (composed)',
-      });
-      return;
-    }
-    if (isSingle) {
-      if (value.engine === undefined || value.spec === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'single-engine form requires both engine and spec',
-        });
-      }
-    }
-    if (isComposed) {
-      if (value.engines === undefined || value.bindings === undefined || value.id === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'composed form requires id, engines, and bindings',
-        });
-      }
-    }
-  });
+  .strict()
+  .superRefine(refineInteractiveNodeConfig);
 
 export type InteractiveNodeConfig = z.infer<typeof InteractiveNodeConfigSchema>;
-
-export function validateInteractiveNode(
-  value: unknown,
-): { valid: true; data: InteractiveNode } | { valid: false; issues: string[] } {
-  const result = InteractiveNodeConfigSchema.safeParse(value);
-  if (!result.success) {
-    return { valid: false, issues: result.error.issues.map((i) => i.message) };
-  }
-  return { valid: true, data: value as InteractiveNode };
-}
 
 const NodeFields = {
   title: z.string().max(256).optional(),
@@ -211,14 +211,23 @@ export const InteractiveNodeSchema = z
   })
   .strict();
 
-export const ContentNodeSchema = z.discriminatedUnion('type', [
-  LessonNodeSchema,
-  QuizNodeSchema,
-  ReflectionNodeSchema,
-  ExerciseNodeSchema,
-  WidgetNodeSchema,
-  InteractiveNodeSchema,
-]);
+const InteractiveNodeValidatedSchema =
+  InteractiveNodeSchema.superRefine(refineInteractiveNodeConfig);
+
+export const ContentNodeSchema = z
+  .discriminatedUnion('type', [
+    LessonNodeSchema,
+    QuizNodeSchema,
+    ReflectionNodeSchema,
+    ExerciseNodeSchema,
+    WidgetNodeSchema,
+    InteractiveNodeSchema,
+  ])
+  .superRefine((data, ctx) => {
+    if (data.type === 'interactive') {
+      refineInteractiveNodeConfig(data, ctx);
+    }
+  });
 
 export type ContentNode = z.infer<typeof ContentNodeSchema>;
 export type LessonNode = z.infer<typeof LessonNodeSchema>;
@@ -229,6 +238,17 @@ export type WidgetNode = z.infer<typeof WidgetNodeSchema>;
 export type InteractiveNode = z.infer<typeof InteractiveNodeSchema>;
 export type InteractiveEngineType = z.infer<typeof InteractiveEngineTypeSchema>;
 export type InteractiveActionType = z.infer<typeof InteractiveActionTypeSchema>;
+
+export function validateInteractiveNode(
+  value: unknown,
+): { valid: true; data: InteractiveNode } | { valid: false; issues: string[] } {
+  const result = InteractiveNodeValidatedSchema.safeParse(value);
+  if (!result.success) {
+    return { valid: false, issues: result.error.issues.map((i) => i.message) };
+  }
+  return { valid: true, data: result.data };
+}
+
 export type NodeType = ContentNode['type'];
 
 export const NodeTypeSchema = z.enum([

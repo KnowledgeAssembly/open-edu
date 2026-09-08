@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import {
   InteractiveNode,
   InteractiveLesson,
@@ -25,21 +25,12 @@ export interface InteractiveNodeViewProps {
  * host can `dispatch` semantic actions and read snapshots/events.
  */
 export const InteractiveNodeView = forwardRef<InteractiveNodeHandle, InteractiveNodeViewProps>(
-  function InteractiveNodeView({ spec, engineType, bridge, id, onEvent, onReady }, ref) {
+  function InteractiveNodeView({ spec, engineType, bridge, id, onReady }, ref) {
     const innerRef = useRef<InteractiveNodeHandle | null>(null);
-    const readyRef = useRef<InteractiveNodeHandle | null>(null);
-
-    const host: OpenEduBridge = useMemo<OpenEduBridge>(
-      () => (onEvent && onEvent !== bridge.onEvent ? { ...bridge, onEvent } : bridge),
-      [bridge, onEvent],
-    );
 
     const handleRef = useCallback((node: InteractiveNodeHandle | null) => {
       innerRef.current = node;
-      if (node) {
-        readyRef.current = node;
-        onReady?.(node);
-      }
+      if (node) onReady?.(node);
     }, [onReady]);
 
     useImperativeHandle(ref, () => ({
@@ -53,7 +44,7 @@ export const InteractiveNodeView = forwardRef<InteractiveNodeHandle, Interactive
         ref={handleRef}
         spec={spec}
         engineType={engineType}
-        host={host}
+        host={bridge}
         id={id}
       />
     );
@@ -77,13 +68,8 @@ export interface InteractiveLessonViewProps {
 export const InteractiveLessonView = forwardRef<
   InteractiveLessonHandle,
   InteractiveLessonViewProps
->(function InteractiveLessonView({ lesson, bridge, onEvent, onReady }, ref) {
+>(function InteractiveLessonView({ lesson, bridge, onReady }, ref) {
   const innerRef = useRef<InteractiveLessonHandle | null>(null);
-
-  const host: OpenEduBridge = useMemo<OpenEduBridge>(
-    () => (onEvent && onEvent !== bridge.onEvent ? { ...bridge, onEvent } : bridge),
-    [bridge, onEvent],
-  );
 
   const handleRef = useCallback((node: InteractiveLessonHandle | null) => {
     innerRef.current = node;
@@ -97,7 +83,7 @@ export const InteractiveLessonView = forwardRef<
     instances: () => innerRef.current?.instances() ?? [],
   }));
 
-  return <InteractiveLesson ref={handleRef} lesson={lesson} host={host} />;
+  return <InteractiveLesson ref={handleRef} lesson={lesson} host={bridge} />;
 });
 
 export type { InteractiveNodeHandle, InteractiveLessonHandle } from '@knowledgeassemble/interactive-react';

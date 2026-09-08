@@ -368,3 +368,45 @@ test.describe('autism-reading (lesson → quiz → reflection)', () => {
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
   });
 });
+
+test.describe('interactive-demo (interactive engine nodes)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/interactive-demo'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('renders a single-engine interactive node', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await expect(page.getByRole('heading', { name: 'Interactive Engine Demo' }).first()).toBeVisible();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible();
+    await expect(page.getByText('0 interactions')).toBeVisible();
+  });
+
+  test('completes the full interactive journey', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible();
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
+  });
+});

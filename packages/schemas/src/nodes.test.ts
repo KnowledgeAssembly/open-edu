@@ -408,12 +408,25 @@ describe('InteractiveNodeSchema', () => {
     const bad = { type: 'interactive' };
     const result = validateInteractiveNode(bad);
     expect(result.valid).toBe(false);
+    expect(() => ContentNodeSchema.parse(bad)).toThrow();
   });
 
   it('should reject single-engine form missing spec', () => {
     const bad = { type: 'interactive', engine: 'visual' };
     const result = validateInteractiveNode(bad);
     expect(result.valid).toBe(false);
+    expect(() => ContentNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('should reject a node mixing single-engine and composed fields via ContentNodeSchema', () => {
+    const bad = {
+      type: 'interactive',
+      engine: 'visual',
+      spec: singleEngine.spec,
+      engines: composedLesson.engines,
+      bindings: composedLesson.bindings,
+    };
+    expect(() => ContentNodeSchema.parse(bad)).toThrow();
   });
 
   it('should reject an unknown engine type', () => {

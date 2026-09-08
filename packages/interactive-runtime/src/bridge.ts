@@ -59,3 +59,32 @@ export function readCssTokens(root: Document = document): Record<string, string>
   }
   return result;
 }
+
+const SEMANTIC_TOKEN_ALIASES: Record<string, string> = {
+  emphasis: '--oe-color-primary',
+  danger: '--oe-color-error',
+  focus: '--oe-color-primary',
+  success: '--oe-color-success',
+  surface: '--oe-color-surface',
+  'on-surface': '--oe-color-on-surface',
+  background: '--oe-color-background',
+  'on-background': '--oe-color-on-background',
+  outline: '--oe-color-outline',
+};
+
+/**
+ * Build the token map engines consume: raw `--oe-*` vars plus semantic aliases
+ * (`emphasis`, `danger`, …) resolved from the active theme.
+ */
+export function buildSemanticTokens(root: Document = document): Record<string, string> {
+  const cssTokens = readCssTokens(root);
+  const styles = getComputedStyle(root.documentElement);
+  const tokens: Record<string, string> = { ...cssTokens };
+
+  for (const [semantic, cssVar] of Object.entries(SEMANTIC_TOKEN_ALIASES)) {
+    const value = styles.getPropertyValue(cssVar).trim() || cssTokens[cssVar];
+    if (value) tokens[semantic] = value;
+  }
+
+  return tokens;
+}

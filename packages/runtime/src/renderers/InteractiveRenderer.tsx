@@ -1,15 +1,17 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { InteractiveNode } from '@open-edu/schemas';
 import {
   InteractiveNodeView,
   InteractiveLessonView,
   buildOpenEduBridge,
-  readCssTokens,
+  buildSemanticTokens,
 } from '@open-edu/interactive-runtime';
 import type { OpenEduBridge } from '@open-edu/interactive-runtime';
+import { Button } from '@open-edu/design-system';
 import { useRuntimeOptional } from '../context/RuntimeContext';
 import { useTranslation } from '@open-edu/i18n';
 import { useLiveRegion } from '@open-edu/accessibility';
+import { WidgetErrorBoundary } from '../widgets/NativeWidgetAdapter';
 
 export interface InteractiveRendererProps {
   node: InteractiveNode;
@@ -17,8 +19,24 @@ export interface InteractiveRendererProps {
   onComplete?: (score?: number) => void;
 }
 
+type EngineEvent = {
+  seq: number;
+  name: string;
+  instanceId: string;
+  action?: unknown;
+};
+
 function isComposedLesson(node: InteractiveNode): boolean {
   return Array.isArray(node.engines);
+}
+
+function resolveEngineLabel(node: InteractiveNode, event: EngineEvent): string {
+  if (node.engine) return node.engine;
+  const entry = node.engines?.find((engine) => engine.instanceId === event.instanceId);
+  if (entry) return entry.engine;
+  const prefix = event.name.split('.')[0];
+  if (prefix && !prefix.includes('-')) return prefix;
+  return 'interactive';
 }
 
 /**
@@ -36,17 +54,38 @@ export function InteractiveRenderer({
   const { t, locale } = useTranslation();
   const { announce } = useLiveRegion();
   const [interactions, setInteractions] = useState(0);
+  const [isReady, setIsReady] = useState(false);
 
   const tRef = useRef(t);
   tRef.current = t;
   const announceRef = useRef(announce);
   announceRef.current = announce;
+  const nodeRef = useRef(node);
+  nodeRef.current = node;
+
+  const handleEngineEvent = useCallback(
+    (event: EngineEvent) => {
+      const isUserInteraction = event.action != null;
+      if (isUserInteraction) setInteractions((n) => n + 1);
+      const rawAction = event.action as { type?: string } | undefined;
+      runtime?.emitTelemetry?.({
+        event: 'interactive_interaction',
+        nodeId,
+        instanceId: event.instanceId,
+        engine: resolveEngineLabel(nodeRef.current, event),
+        action: rawAction?.type,
+        seq: event.seq,
+        data: { event: event.name },
+      });
+    },
+    [nodeId, runtime],
+  );
 
   const bridge: OpenEduBridge = useMemo(
     () =>
       buildOpenEduBridge({
         locale,
-        tokens: readCssTokens(),
+        tokens: buildSemanticTokens(),
         reducedMotion:
           typeof window !== 'undefined' && typeof window.matchMedia === 'function'
             ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -57,24 +96,15 @@ export function InteractiveRenderer({
           return tRef.current(key, safe);
         },
         announce: (message) => announceRef.current(message),
-        onEvent: (event) => {
-          const isUserInteraction = event.action != null;
-          if (isUserInteraction) setInteractions((n) => n + 1);
-          const rawAction = event.action as { type?: string } | undefined;
-          runtime?.emitTelemetry?.({
-            event: 'interactive_interaction',
-            nodeId,
-            instanceId: event.instanceId,
-            engine: String(event.name.split('.')[0] ?? ''),
-            action: rawAction?.type,
-            seq: event.seq,
-            data: { event: event.name },
-          });
-        },
+        onEvent: handleEngineEvent,
         resolveAsset: (id) => runtime?.resolveAsset(id) ?? `/assets/${id}`,
       }),
-    [locale, runtime, nodeId],
+    [locale, runtime, handleEngineEvent],
   );
+
+  const handleReady = useCallback(() => {
+    setIsReady(true);
+  }, []);
 
   const handleComplete = (): void => {
     runtime?.saveAnswer(nodeId, {
@@ -92,45 +122,49 @@ export function InteractiveRenderer({
     else runtime?.completeNode(undefined);
   };
 
-  const engine = node.engine ?? 'lesson';
+  const engineLabel = node.engine ?? node.id ?? 'lesson';
+  const interactiveId = node.id ?? node.engine ?? nodeId;
 
   return (
     <div
       className="open-edu-interactive"
       data-testid="interactive-renderer"
       role="region"
-      aria-label={t('runtime.interactive.iframe_title', { engine })}
+      aria-label={t('runtime.interactive.iframe_title', { engine: engineLabel })}
     >
-      {isComposedLesson(node) ? (
-        <InteractiveLessonView
-          lesson={{
-            id: node.id ?? 'interactive-lesson',
-            title: node.title,
-            engines: node.engines ?? [],
-            bindings: node.bindings ?? [],
-          }}
-          bridge={bridge}
-          onEvent={bridge.onEvent}
-        />
-      ) : (
-        <InteractiveNodeView
-          spec={node.spec}
-          engineType={node.engine ?? 'visual'}
-          bridge={bridge}
-          onEvent={bridge.onEvent}
-        />
+      {!isReady && (
+        <p className="text-body-ui text-muted-foreground" role="status">
+          {t('runtime.interactive.loading')}
+        </p>
       )}
+      <WidgetErrorBoundary widgetId={interactiveId} message={t('runtime.interactive.load_error')}>
+        {isComposedLesson(node) ? (
+          <InteractiveLessonView
+            lesson={{
+              id: node.id ?? 'interactive-lesson',
+              title: node.title,
+              engines: node.engines ?? [],
+              bindings: node.bindings ?? [],
+            }}
+            bridge={bridge}
+            onReady={handleReady}
+          />
+        ) : (
+          <InteractiveNodeView
+            spec={node.spec}
+            engineType={node.engine ?? 'visual'}
+            bridge={bridge}
+            onReady={handleReady}
+          />
+        )}
+      </WidgetErrorBoundary>
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-muted-foreground text-sm">
+        <span className="text-caption text-muted-foreground">
           {t('runtime.interactive.interactions', { count: String(interactions) })}
         </span>
-        <button
-          type="button"
-          className="bg-primary text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          onClick={handleComplete}
-        >
+        <Button type="button" onClick={handleComplete}>
           {t('runtime.interactive.mark_complete')}
-        </button>
+        </Button>
       </div>
     </div>
   );
