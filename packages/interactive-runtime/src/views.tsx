@@ -46,7 +46,6 @@ export const InteractiveNodeView = forwardRef<InteractiveNodeHandle, Interactive
         engineType={engineType}
         host={bridge}
         id={id}
-        controlsMode="learner"
       />
     );
   },
@@ -84,9 +83,7 @@ export const InteractiveLessonView = forwardRef<
     instances: () => innerRef.current?.instances() ?? [],
   }));
 
-  return (
-    <InteractiveLesson ref={handleRef} lesson={lesson} host={bridge} controlsMode="learner" />
-  );
+  return <InteractiveLesson ref={handleRef} lesson={lesson} host={bridge} />;
 });
 
 export type { InteractiveNodeHandle, InteractiveLessonHandle } from '@knowledgeassemble/interactive-react';
