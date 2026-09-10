@@ -62,13 +62,15 @@ export function InteractiveRenderer({
   announceRef.current = announce;
   const nodeRef = useRef(node);
   nodeRef.current = node;
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
 
   const handleEngineEvent = useCallback(
     (event: EngineEvent) => {
       const isUserInteraction = event.action != null;
       if (isUserInteraction) setInteractions((n) => n + 1);
       const rawAction = event.action as { type?: string } | undefined;
-      runtime?.emitTelemetry?.({
+      runtimeRef.current?.emitTelemetry?.({
         event: 'interactive_interaction',
         nodeId,
         instanceId: event.instanceId,
@@ -78,7 +80,7 @@ export function InteractiveRenderer({
         data: { event: event.name },
       });
     },
-    [nodeId, runtime],
+    [nodeId],
   );
 
   const bridge: OpenEduBridge = useMemo(
@@ -97,9 +99,9 @@ export function InteractiveRenderer({
         },
         announce: (message) => announceRef.current(message),
         onEvent: handleEngineEvent,
-        resolveAsset: (id) => runtime?.resolveAsset(id) ?? `/assets/${id}`,
+        resolveAsset: (id) => runtimeRef.current?.resolveAsset(id) ?? `/assets/${id}`,
       }),
-    [locale, runtime, handleEngineEvent],
+    [locale, handleEngineEvent],
   );
 
   const handleReady = useCallback(() => {
