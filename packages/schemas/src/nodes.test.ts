@@ -370,7 +370,11 @@ describe('InteractiveNodeSchema', () => {
       {
         on: 'timeline.event-selected',
         from: 'timeline-independence',
-        dispatch: { to: 'visual-independence', action: 'focus', targetIdFrom: 'links.visualEntityId' },
+        dispatch: {
+          to: 'visual-independence',
+          action: 'focus',
+          targetIdFrom: 'links.visualEntityId',
+        },
       },
     ],
   };
@@ -479,5 +483,22 @@ describe('InteractiveNodeSchema', () => {
   it('should reject extra properties (additionalProperties=false strictness)', () => {
     const bad = { ...singleEngine, extra: 'nope' };
     expect(() => InteractiveNodeSchema.parse(bad)).toThrow();
+  });
+
+  it('accepts optional prompt on single-engine interactive node', () => {
+    const node = {
+      type: 'interactive' as const,
+      engine: 'visual' as const,
+      title: 'Number line practice',
+      prompt: 'Tap the emphasized number on the line.',
+      spec: {
+        type: 'visual',
+        version: '1.0.0',
+        id: 'x',
+        content: { kind: 'number-line', components: [] },
+        accessibility: { label: 'l' },
+      },
+    };
+    expect(validateInteractiveNode(node).valid).toBe(true);
   });
 });

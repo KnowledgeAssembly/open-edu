@@ -62,13 +62,15 @@ export function InteractiveRenderer({
   announceRef.current = announce;
   const nodeRef = useRef(node);
   nodeRef.current = node;
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
 
   const handleEngineEvent = useCallback(
     (event: EngineEvent) => {
       const isUserInteraction = event.action != null;
       if (isUserInteraction) setInteractions((n) => n + 1);
       const rawAction = event.action as { type?: string } | undefined;
-      runtime?.emitTelemetry?.({
+      runtimeRef.current?.emitTelemetry?.({
         event: 'interactive_interaction',
         nodeId,
         instanceId: event.instanceId,
@@ -78,7 +80,7 @@ export function InteractiveRenderer({
         data: { event: event.name },
       });
     },
-    [nodeId, runtime],
+    [nodeId],
   );
 
   const bridge: OpenEduBridge = useMemo(
@@ -97,9 +99,9 @@ export function InteractiveRenderer({
         },
         announce: (message) => announceRef.current(message),
         onEvent: handleEngineEvent,
-        resolveAsset: (id) => runtime?.resolveAsset(id) ?? `/assets/${id}`,
+        resolveAsset: (id) => runtimeRef.current?.resolveAsset(id) ?? `/assets/${id}`,
       }),
-    [locale, runtime, handleEngineEvent],
+    [locale, handleEngineEvent],
   );
 
   const handleReady = useCallback(() => {
@@ -137,6 +139,12 @@ export function InteractiveRenderer({
           {t('runtime.interactive.loading')}
         </p>
       )}
+      {(node.title ?? node.prompt) && (
+        <div className="mb-4">
+          {node.title && <h2 className="text-heading-sm text-foreground">{node.title}</h2>}
+          {node.prompt && <p className="text-body-ui text-muted-foreground mt-1">{node.prompt}</p>}
+        </div>
+      )}
       <WidgetErrorBoundary widgetId={interactiveId} message={t('runtime.interactive.load_error')}>
         {isComposedLesson(node) ? (
           <InteractiveLessonView
@@ -158,11 +166,8 @@ export function InteractiveRenderer({
           />
         )}
       </WidgetErrorBoundary>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-caption text-muted-foreground">
-          {t('runtime.interactive.interactions', { count: String(interactions) })}
-        </span>
-        <Button type="button" onClick={handleComplete}>
+      <div className="mt-4 flex justify-end">
+        <Button type="button" onClick={handleComplete} disabled={!isReady}>
           {t('runtime.interactive.mark_complete')}
         </Button>
       </div>
