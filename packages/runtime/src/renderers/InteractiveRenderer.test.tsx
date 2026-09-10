@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import axe from 'axe-core';
 import type { InteractiveNode } from '@open-edu/schemas';
@@ -164,16 +164,17 @@ describe('InteractiveRenderer', () => {
   });
 
   it('increments internal interaction count on SVG click and passes it on Mark complete', async () => {
-    const { container, findByRole, getByRole } = renderWithProvider(
+    const { container, findByRole, getByRole, engine } = renderWithProvider(
       <InteractiveRenderer node={interactiveNode()} nodeId="nodes/nl-01.md" />,
       'nodes/nl-01.md',
     );
     await findByRole('heading', { name: 'Number line' });
+    await waitFor(() => expect(getByRole('button', { name: 'Mark complete' })).not.toBeDisabled());
     const target = container.querySelector('#nl-label-7');
     expect(target).toBeTruthy();
     fireEvent.click(target!);
     fireEvent.click(getByRole('button', { name: 'Mark complete' }));
-    expect(getByRole('button', { name: 'Mark complete' })).toBeInTheDocument();
+    expect(engine.completeNode).toHaveBeenCalledWith(undefined);
   });
 
   it('calls onComplete when reaching the mark complete button', async () => {
