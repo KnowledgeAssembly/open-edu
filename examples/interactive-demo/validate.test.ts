@@ -7,9 +7,10 @@ describe('interactive-demo example', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('interactive-demo');
     expect(pkg.manifest.title).toBe('Interactive Engine Demo');
-    expect(pkg.nodes).toHaveLength(3);
+    expect(pkg.nodes).toHaveLength(4);
     expect(pkg.workflow).not.toBeNull();
     expect(pkg.workflow!.routing).toHaveProperty('nodes/number-line.json');
+    expect(pkg.workflow!.routing).toHaveProperty('nodes/number-line-practice.json');
     expect(pkg.workflow!.routing).toHaveProperty('nodes/composed-lesson.json');
 
     const numberLine = pkg.nodes.find((n) => n.relativePath === 'nodes/number-line.json');
@@ -17,6 +18,19 @@ describe('interactive-demo example', () => {
     if (numberLine?.node.type === 'interactive') {
       expect(numberLine.node.engine).toBe('visual');
       expect(numberLine.node.spec).toBeDefined();
+    }
+
+    const numberLinePractice = pkg.nodes.find(
+      (n) => n.relativePath === 'nodes/number-line-practice.json',
+    );
+    expect(numberLinePractice?.node.type).toBe('interactive');
+    if (numberLinePractice?.node.type === 'interactive') {
+      expect(numberLinePractice.node.engine).toBe('visual');
+      expect(numberLinePractice.node.prompt).toBe('Tap the emphasized number on the line.');
+      const spec = numberLinePractice.node.spec as {
+        content?: { components?: Array<{ props?: { interactive?: boolean } }> };
+      };
+      expect(spec.content?.components?.[0]?.props?.interactive).toBe(true);
     }
 
     const composed = pkg.nodes.find((n) => n.relativePath === 'nodes/composed-lesson.json');

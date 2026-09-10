@@ -137,6 +137,12 @@ export function InteractiveRenderer({
           {t('runtime.interactive.loading')}
         </p>
       )}
+      {(node.title ?? node.prompt) && (
+        <div className="mb-4">
+          {node.title && <h2 className="text-heading-sm text-foreground">{node.title}</h2>}
+          {node.prompt && <p className="text-body-ui text-muted-foreground mt-1">{node.prompt}</p>}
+        </div>
+      )}
       <WidgetErrorBoundary widgetId={interactiveId} message={t('runtime.interactive.load_error')}>
         {isComposedLesson(node) ? (
           <InteractiveLessonView
@@ -158,11 +164,8 @@ export function InteractiveRenderer({
           />
         )}
       </WidgetErrorBoundary>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-caption text-muted-foreground">
-          {t('runtime.interactive.interactions', { count: String(interactions) })}
-        </span>
-        <Button type="button" onClick={handleComplete}>
+      <div className="mt-4 flex justify-end">
+        <Button type="button" onClick={handleComplete} disabled={!isReady}>
           {t('runtime.interactive.mark_complete')}
         </Button>
       </div>

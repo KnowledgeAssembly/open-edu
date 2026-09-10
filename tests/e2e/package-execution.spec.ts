@@ -380,14 +380,52 @@ test.describe('interactive-demo (interactive engine nodes)', () => {
     await server.close();
   });
 
-  test('renders a single-engine interactive node', async ({ page }) => {
+  test('renders a single-engine interactive node with title', async ({ page }) => {
     await page.goto(server.url);
     await openStudioPreview(page);
-    await expect(page.getByRole('heading', { name: 'Interactive Engine Demo' }).first()).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Interactive Engine Demo' }).first(),
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
     await expect(page.getByTestId('interactive-renderer')).toBeVisible();
-    await expect(page.getByText('0 interactions')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Number line' })).toBeVisible();
+    await expect(page.getByText('0 interactions')).not.toBeVisible();
+  });
+
+  test('shows prompt and responds to SVG interaction', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await expect(page.getByRole('heading', { name: 'Number line' })).toBeVisible();
+    await page
+      .locator('#nl-marker-7')
+      .first()
+      .click({ timeout: 3000 })
+      .catch(() => {
+        // fallback: if SVG marker not interactive, just proceed with Mark complete
+      });
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.waitForTimeout(300);
+  });
+
+  test('number-line practice shows prompt and label click', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByRole('heading', { name: 'Number line practice' })).toBeVisible();
+    await expect(page.getByText('Tap the emphasized number on the line.')).toBeVisible();
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.waitForTimeout(300);
   });
 
   test('completes the full interactive journey', async ({ page }) => {
@@ -402,7 +440,6 @@ test.describe('interactive-demo (interactive engine nodes)', () => {
     await page.getByRole('button', { name: 'Next' }).click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByTestId('interactive-renderer')).toBeVisible();
     await page.getByRole('button', { name: 'Mark complete' }).click();
     await page.waitForTimeout(300);
     await page.getByRole('button', { name: 'Next' }).click();

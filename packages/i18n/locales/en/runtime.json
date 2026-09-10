@@ -61,5 +61,6 @@
   "interactive.mark_complete": "Mark complete",
   "interactive.completed": "Interactive activity completed",
   "interactive.interactions": "{{count}} interactions",
-  "interactive.iframe_title": "Interactive activity: {{engine}}"
+  "interactive.iframe_title": "Interactive activity: {{engine}}",
+  "interactive.instructions_default": "Interact with the activity below, then mark complete when you are done."
 }

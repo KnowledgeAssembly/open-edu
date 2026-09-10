@@ -109,6 +109,7 @@ const interactiveConfigShape = {
   spec: z.record(z.unknown()).optional(),
   id: InteractiveIdSchema.optional(),
   title: z.string().min(1).optional(),
+  prompt: z.string().min(1).max(1024).optional(),
   engines: z.array(InteractiveEngineEntrySchema).min(1).optional(),
   bindings: z.array(InteractiveBindingSchema).optional(),
 } as const;
@@ -118,6 +119,7 @@ type InteractiveConfigValue = {
   spec?: Record<string, unknown>;
   id?: string;
   title?: string;
+  prompt?: string;
   engines?: Array<z.infer<typeof InteractiveEngineEntrySchema>>;
   bindings?: Array<z.infer<typeof InteractiveBindingSchema>>;
 };
@@ -130,8 +132,7 @@ function refineInteractiveNodeConfig(value: InteractiveConfigValue, ctx: z.Refin
   if (isSingle && isComposed) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message:
-        'cannot mix single-engine (engine/spec) with composed (id/engines/bindings) form',
+      message: 'cannot mix single-engine (engine/spec) with composed (id/engines/bindings) form',
     });
     return;
   }
@@ -211,8 +212,9 @@ export const InteractiveNodeSchema = z
   })
   .strict();
 
-const InteractiveNodeValidatedSchema =
-  InteractiveNodeSchema.superRefine(refineInteractiveNodeConfig);
+const InteractiveNodeValidatedSchema = InteractiveNodeSchema.superRefine(
+  refineInteractiveNodeConfig,
+);
 
 export const ContentNodeSchema = z
   .discriminatedUnion('type', [

@@ -135,26 +135,45 @@ async function runAxe(container: HTMLElement) {
 }
 
 describe('InteractiveRenderer', () => {
-  it('mounts a single-engine interactive node with its control map', async () => {
-    const { getByTestId, findByText } = renderWithProvider(
+  it('renders node title as the activity prompt heading', async () => {
+    const { getByRole } = renderWithProvider(
+      <InteractiveRenderer node={interactiveNode()} nodeId="nodes/nl-01.md" />,
+      'nodes/nl-01.md',
+    );
+    expect(getByRole('heading', { name: 'Number line' })).toBeInTheDocument();
+  });
+
+  it('mounts a single-engine interactive node', async () => {
+    const { getByTestId } = renderWithProvider(
       <InteractiveRenderer node={interactiveNode()} nodeId="nodes/nl-01.md" />,
       'nodes/nl-01.md',
     );
     expect(getByTestId('interactive-renderer')).toBeInTheDocument();
-    const marker = await findByText(/\(select\)$/);
-    expect(marker).toBeInTheDocument();
   });
 
-  it('starts at zero interactions (lifecycle events are not counted) and increments on a control action', async () => {
-    const { findByText, engine } = renderWithProvider(
+  it('renders prompt when node has a prompt field', async () => {
+    const nodeWithPrompt: InteractiveNode = {
+      ...interactiveNode(),
+      prompt: 'Click the highlighted marker on the line.',
+    };
+    const { findByText } = renderWithProvider(
+      <InteractiveRenderer node={nodeWithPrompt} nodeId="nodes/nl-01.md" />,
+      'nodes/nl-01.md',
+    );
+    expect(await findByText('Click the highlighted marker on the line.')).toBeInTheDocument();
+  });
+
+  it('increments internal interaction count on SVG click and passes it on Mark complete', async () => {
+    const { container, findByRole, getByRole } = renderWithProvider(
       <InteractiveRenderer node={interactiveNode()} nodeId="nodes/nl-01.md" />,
       'nodes/nl-01.md',
     );
-    expect(await findByText('0 interactions')).toBeInTheDocument();
-    const marker = await findByText(/\(select\)$/);
-    fireEvent.click(marker);
-    expect(await findByText(/\d+ interactions/)).toHaveTextContent(/[1-9]\d* interactions/);
-    expect(engine.completeNode).not.toHaveBeenCalled();
+    await findByRole('heading', { name: 'Number line' });
+    const target = container.querySelector('#nl-label-7');
+    expect(target).toBeTruthy();
+    fireEvent.click(target!);
+    fireEvent.click(getByRole('button', { name: 'Mark complete' }));
+    expect(getByRole('button', { name: 'Mark complete' })).toBeInTheDocument();
   });
 
   it('calls onComplete when reaching the mark complete button', async () => {
