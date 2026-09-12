@@ -1,4 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, afterAll, vi } from 'vitest';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
   parseGeoUri,
@@ -13,6 +15,7 @@ import {
 import { loadPackage } from './loader.js';
 import { loadNodes } from './nodes-fs.js';
 import { NodeLoadError } from './errors.js';
+import { coreLoaderLogger } from './logger.js';
 import type { LoadedNode } from './types.js';
 
 const fixturesDir = resolve(__dirname, '__fixtures__');
@@ -320,5 +323,176 @@ describe('loadNodes direct loader', () => {
       .geography.sources as [{ data?: { features?: unknown[] }; uri?: string }];
     expect(states.data?.features).toHaveLength(2);
     expect(states.uri).toBeUndefined();
+  });
+});
+
+describe('catalog path confinement', () => {
+  let tempDir: string;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'openedu-geo-confine-'));
+  });
+
+  async function withCatalog(base: string, assets: unknown[]): Promise<void> {
+    await writeFile(join(base, 'catalog.json'), JSON.stringify({ assets }), 'utf8');
+  }
+
+  it('rejects a manifest path that escapes the base dir', async () => {
+    await withCatalog(tempDir, [
+      { id: 'demo/states', version: '1.0.0', manifest: '../../outside.json' },
+    ]);
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(/escapes/);
+  });
+
+  it('rejects an absolute manifest path', async () => {
+    await withCatalog(tempDir, [{ id: 'demo/states', version: '1.0.0', manifest: '/etc/passwd' }]);
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(/escapes/);
+  });
+
+  it('rejects a files.data path that escapes the manifest directory', async () => {
+    const assetDir = join(tempDir, 'assets', 'demo-states');
+    await mkdir(assetDir, { recursive: true });
+    await writeFile(
+      join(assetDir, 'manifest.json'),
+      JSON.stringify({
+        version: '1.0.0',
+        format: 'geojson',
+        files: { data: '../../../../../etc/passwd' },
+      }),
+      'utf8',
+    );
+    await withCatalog(tempDir, [
+      { id: 'demo/states', version: '1.0.0', manifest: 'assets/demo-states/manifest.json' },
+    ]);
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(/escapes/);
+  });
+});
+
+describe('geo-asset file error messages', () => {
+  it('distinguishes invalid catalog JSON from a missing catalog', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'openedu-geo-json-'));
+    await writeFile(join(tempDir, 'catalog.json'), '{ not json', 'utf8');
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(
+      /is not valid JSON/,
+    );
+
+    await expect(loadGeoAssetFeatures('demo/states', join(tempDir, 'nope'))).rejects.toThrowError(
+      /catalog not found/,
+    );
+  });
+
+  it('distinguishes a missing manifest from invalid manifest JSON', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'openedu-geo-json-'));
+    await writeFile(
+      join(tempDir, 'catalog.json'),
+      JSON.stringify({
+        assets: [
+          { id: 'demo/states', version: '1.0.0', manifest: 'assets/demo-states/manifest.json' },
+        ],
+      }),
+      'utf8',
+    );
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(
+      /manifest not found/,
+    );
+
+    const assetDir = join(tempDir, 'assets', 'demo-states');
+    await mkdir(assetDir, { recursive: true });
+    await writeFile(join(assetDir, 'manifest.json'), '{ broken', 'utf8');
+    await expect(loadGeoAssetFeatures('demo/states', tempDir)).rejects.toThrowError(
+      /manifest.*not valid JSON/,
+    );
+  });
+});
+
+describe('topojson multi-object assets', () => {
+  it('merges every TopoJSON object into one FeatureCollection', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'openedu-geo-topo-'));
+    const assetDir = join(tempDir, 'assets', 'demo-regions');
+    await mkdir(join(assetDir, '1.0.0'), { recursive: true });
+    await writeFile(
+      join(tempDir, 'catalog.json'),
+      JSON.stringify({
+        assets: [
+          {
+            id: 'demo/regions',
+            version: '1.0.0',
+            format: 'topojson',
+            manifest: 'assets/demo-regions/manifest.json',
+          },
+        ],
+      }),
+      'utf8',
+    );
+    await writeFile(
+      join(assetDir, 'manifest.json'),
+      JSON.stringify({
+        version: '1.0.0',
+        format: 'topojson',
+        files: { data: '1.0.0/data.topojson' },
+      }),
+      'utf8',
+    );
+    await writeFile(
+      join(assetDir, '1.0.0', 'data.topojson'),
+      JSON.stringify({
+        type: 'Topology',
+        objects: {
+          north: { type: 'Polygon', id: 'N', arcs: [[0]] },
+          south: { type: 'Polygon', id: 'S', arcs: [[1]] },
+        },
+        arcs: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 0],
+          ],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 0],
+          ],
+        ],
+        transform: { scale: [1, 1], translate: [0, 0] },
+      }),
+      'utf8',
+    );
+
+    const data = await loadGeoAssetFeatures('demo/regions', tempDir);
+    const features = (data as { features: Array<{ id?: string }> }).features;
+    expect(features).toHaveLength(2);
+    expect(features.map((f) => f.id).sort()).toEqual(['N', 'S']);
+  });
+});
+
+describe('default discovery without a catalog', () => {
+  const originalCwd = process.cwd();
+  let noCatalogDir: string;
+
+  beforeEach(async () => {
+    noCatalogDir = await mkdtemp(join(tmpdir(), 'openedu-geo-empty-'));
+    vi.stubEnv('OPEN_EDU_GEO_ASSETS_DIR', noCatalogDir);
+    process.chdir(noCatalogDir);
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    vi.unstubAllEnvs();
+  });
+
+  it('leaves geo URIs intact and logs a warning when no catalog is found', async () => {
+    const warnSpy = vi.spyOn(coreLoaderLogger, 'warn');
+    const spec = makeGeomapSpec([
+      { id: 'a', type: 'geojson', class: 'reference', uri: 'openedu://geo/india/states' },
+    ]);
+
+    await resolveGeoUrisInSpec(spec);
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('no geo-assets catalog found'));
+    const [source] = (spec.content as { geography: { sources: [{ uri?: string }] } }).geography
+      .sources;
+    expect(source.uri).toBe('openedu://geo/india/states');
   });
 });

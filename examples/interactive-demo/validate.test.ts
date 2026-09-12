@@ -4,7 +4,9 @@ import { resolve } from 'path';
 
 describe('interactive-demo example', () => {
   it('should load without errors', async () => {
-    const pkg = await loadPackage(resolve(__dirname));
+    const pkg = await loadPackage(resolve(__dirname), {
+      geoAssetsDir: resolve(__dirname, 'geo-assets'),
+    });
     expect(pkg.manifest.id).toBe('interactive-demo');
     expect(pkg.manifest.title).toBe('Interactive Engine Demo');
     expect(pkg.nodes).toHaveLength(5);
@@ -64,16 +66,13 @@ describe('interactive-demo example', () => {
         };
       };
       const source = spec.content?.geography?.sources?.[0];
-      if (source?.data) {
-        // openedu://geo resolution inlined the geo-assets FeatureCollection.
-        expect(source.uri).toBeUndefined();
-        expect(source.type).toBe('geojson');
-        expect(source.data.features?.length).toBeGreaterThan(0);
-        expect(source.data.features?.some((f) => f.id === 'IN-OD')).toBe(true);
-      } else {
-        // Geo-assets not checked out (e.g. CI): the authored URI is preserved.
-        expect(source?.uri).toBe('openedu://geo/india/states');
-      }
+      expect(source).toBeDefined();
+      if (!source) return;
+      // openedu://geo resolution must inline the vendored example catalog.
+      expect(source.uri).toBeUndefined();
+      expect(source.type).toBe('geojson');
+      expect(source.data?.features?.length).toBeGreaterThan(0);
+      expect(source.data?.features?.some((f) => f.id === 'IN-OD')).toBe(true);
 
       const odishaItem = spec.content?.layers?.[0]?.items?.find((i) => i.entity === 'odisha');
       expect(odishaItem?.interactive).toBe(true);

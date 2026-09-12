@@ -19,6 +19,30 @@ This package is a **thin bridge layer** between OpenEdu and [`@knowledgeassemble
 - **SVG interaction / rendering** lives in `@knowledgeassemble/interactive-react`
 - **Scoring / answer keys** — not implemented (planned for Phase OC-4)
 
+## Geo assets (`openedu://geo/`)
+
+Interactive `geomap` nodes reference shared geography via `openedu://geo/{asset-id}`
+URIs (engine-native `uri` field or `asset: { uri, version }` convention) instead
+of embedding raw TopoJSON/GeoJSON. `@open-edu/core` resolves these at load time
+so shipped packages are self-contained and offline-first.
+
+**Resolution happens at Node-load-time only** — `loadPackage` (Node) and
+`loadNodes`. The browser bundle never resolves geo URIs, and neither does
+`loadPackageFromFiles` or `oep:build`, which keep authored URIs as-is.
+
+The geo-assets dist directory (containing `catalog.json`) is located in this
+order:
+
+1. An explicit `geoAssetsDir` option passed to `loadPackage`
+2. The `OPEN_EDU_GEO_ASSETS_DIR` environment variable
+3. An installed `@knowledgeassemble/geo-assets` npm package
+4. A `<ancestor>/openedu-geo-assets/dist` sibling checkout (walking up from cwd)
+
+When a catalog is found, unknown asset ids or version mismatches fail fast with
+an `@open-edu/core` `NodeLoadError`. When **no** catalog is found at all, the
+URIs are left in place (best-effort, CI-safe), and a warning is logged. An
+explicit `geoAssetsDir` that lacks a catalog is always an immediate error.
+
 ## Usage
 
 ```tsx

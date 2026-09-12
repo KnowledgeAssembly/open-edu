@@ -1,5 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, join, relative, resolve } from 'node:path';
 import { feature as topojsonFeature } from 'topojson-client';
 import { NodeLoadError } from './errors.js';
 import { coreLoaderLogger } from './logger.js';
@@ -10,10 +11,19 @@ import type { LoadedNode } from './types.js';
  *
  * Authored node files reference shared geography as `openedu://geo/{asset-id}`
  * URIs instead of embedding raw TopoJSON/GeoJSON. This module resolves those
- * URIs against a `@knowledgeassemble/geo-assets` dist directory (its
- * `catalog.json` + versioned data files) and inlines a GeoJSON
- * `FeatureCollection` into the node's `geography.sources[].data` field — the
- * shape the geomap engine consumes synchronously at instantiate time.
+ * URIs against a geo-assets dist directory (its `catalog.json` + versioned
+ * data files) and inlines a GeoJSON `FeatureCollection` into the node's
+ * `geography.sources[].data` field — the shape the geomap engine consumes
+ * synchronously at instantiate time.
+ *
+ * The dist directory is located via (in order): an explicit `geoAssetsDir`
+ * option, `OPEN_EDU_GEO_ASSETS_DIR`, an installed `@knowledgeassemble/geo-assets`
+ * npm package, or a `<ancestor>/openedu-geo-assets/dist` sibling checkout
+ * walking up from the working directory.
+ *
+ * Resolution is Node-load-time only — `loadPackage` (Node) and `loadNodes`.
+ * The browser bundle never imports this module, and `loadPackageFromFiles` /
+ * `oep:build` keep authored URIs as-is.
  *
  * The pure helpers (`collectGeoSourceRefs`, `inlineGeoSources`) are framework
  * agnostic; the `*Node`/`*Nodes` helpers are the Node-side entry points wired
@@ -115,11 +125,11 @@ export async function inlineGeoSources(
 
     if (data === undefined) {
       throw new NodeLoadError(
-        `Cannot resolve geo source "${ref.uri}" — no geo-assets catalog found`,
+        `Cannot resolve geo source "${ref.uri}" — the data loader returned no data`,
         {
           suggestion:
-            `Set OPEN_EDU_GEO_ASSETS_DIR to the geo-assets dist directory ` +
-            `(containing catalog.json), or pass { geoAssetsDir } to the loader`,
+            `Check the geo-assets catalog for "${ref.uri.slice(GEO_URI_PREFIX.length)}" ` +
+            `(Set OPEN_EDU_GEO_ASSETS_DIR to the catalog's dist directory if it was not located)`,
         },
       );
     }
@@ -137,9 +147,9 @@ export async function inlineGeoSources(
  * Locate a usable geo-assets dist directory (one containing `catalog.json`).
  * When an explicit dir is given it is authoritative (no discovery fallback):
  * the directory either has a catalog or resolution fails. Otherwise the
- * candidates are `OPEN_EDU_GEO_ASSETS_DIR`, then
- * `<ancestor>/openedu-geo-assets/dist` walking up from the current working
- * directory (covers monorepo sibling checkouts).
+ * candidates are `OPEN_EDU_GEO_ASSETS_DIR`, an installed
+ * `@knowledgeassemble/geo-assets` npm package, then
+ * `<ancestor>/openedu-geo-assets/dist` walking up from the working directory.
  */
 export async function findGeoAssetsDir(extra?: string): Promise<string | undefined> {
   if (extra) {
@@ -149,6 +159,14 @@ export async function findGeoAssetsDir(extra?: string): Promise<string | undefin
   const candidates: string[] = [];
   const envDir = process.env.OPEN_EDU_GEO_ASSETS_DIR;
   if (envDir) candidates.push(envDir);
+
+  const require = createRequire(import.meta.url);
+  try {
+    const npmCatalog = require.resolve('@knowledgeassemble/geo-assets/dist/catalog.json');
+    candidates.push(dirname(npmCatalog));
+  } catch {
+    // geo-assets npm package not installed — fall through to sibling checkouts.
+  }
 
   let ancestor: string | undefined = resolve(process.cwd());
   for (let depth = 0; depth < 12 && ancestor; depth++) {
@@ -165,10 +183,53 @@ export async function findGeoAssetsDir(extra?: string): Promise<string | undefin
 }
 
 async function hasCatalog(dir: string): Promise<boolean> {
-  return access(join(dir, 'catalog.json')).then(
-    () => true,
-    () => false,
-  );
+  try {
+    await access(join(dir, 'catalog.json'));
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return false;
+    throw new NodeLoadError(
+      `Geo-assets directory is not accessible: ${dir} (${(error as Error).message})`,
+      {
+        file: dir,
+      },
+    );
+  }
+}
+
+/**
+ * Ensure a resolved path stays inside an expected root so paths taken from
+ * catalog/manifest JSON cannot escape the geo-assets directory (mirrors
+ * `resolveAssetPath` in `assets.ts`).
+ */
+function assertWithinRoot(root: string, target: string, what: string): void {
+  const rel = relative(resolve(root), resolve(target));
+  if (rel.startsWith('..') || /^[A-Za-z]:[\\/]/.test(rel) || rel === '') {
+    throw new NodeLoadError(`${what} escapes the geo-assets directory: ${target}`, {
+      path: target,
+      suggestion: 'Keep catalog manifest and files.data paths inside the geo-assets directory',
+    });
+  }
+}
+
+async function readGeoJsonFile(what: string, file: string): Promise<string> {
+  let raw: string;
+  try {
+    raw = await readFile(file, 'utf8');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') {
+      throw new NodeLoadError(`${what} not found: ${file}`, { file });
+    }
+    throw new NodeLoadError(
+      `${what} exists but could not be read: ${file} (${(error as Error).message})`,
+      {
+        file,
+      },
+    );
+  }
+  return raw;
 }
 
 /**
@@ -181,17 +242,33 @@ export async function loadGeoAssetFeatures(
   baseDir: string,
   version?: string,
 ): Promise<Record<string, unknown>> {
-  const catalogPath = join(baseDir, 'catalog.json');
+  const base = resolve(baseDir);
+  const catalogPath = join(base, 'catalog.json');
+
+  let rawCatalog: string;
+  try {
+    rawCatalog = await readFile(catalogPath, 'utf8');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') {
+      throw new NodeLoadError(`Geo-asset catalog not found: ${catalogPath}`, {
+        file: catalogPath,
+        suggestion:
+          'Set OPEN_EDU_GEO_ASSETS_DIR to the geo-assets dist directory (containing catalog.json)',
+      });
+    }
+    throw new NodeLoadError(
+      `Geo-asset catalog exists but could not be read: ${catalogPath} (${(error as Error).message})`,
+      { file: catalogPath },
+    );
+  }
+
   let catalog: { assets?: CatalogEntry[] };
   try {
-    catalog = JSON.parse(await readFile(catalogPath, 'utf8')) as {
-      assets?: CatalogEntry[];
-    };
+    catalog = JSON.parse(rawCatalog) as { assets?: CatalogEntry[] };
   } catch {
-    throw new NodeLoadError(`Geo-asset catalog not found: ${catalogPath}`, {
+    throw new NodeLoadError(`Geo-asset catalog is not valid JSON: ${catalogPath}`, {
       file: catalogPath,
-      suggestion:
-        'Set OPEN_EDU_GEO_ASSETS_DIR to the geo-assets dist directory (containing catalog.json)',
     });
   }
 
@@ -212,16 +289,19 @@ export async function loadGeoAssetFeatures(
     );
   }
 
-  const manifestPath = join(baseDir, entry.manifest);
+  const manifestPath = resolve(base, entry.manifest);
+  assertWithinRoot(base, manifestPath, 'Geo-asset manifest path');
+
   let manifest: { version?: string; format?: string; files?: { data?: string } };
   try {
-    manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as {
+    manifest = JSON.parse(await readGeoJsonFile('Geo-asset manifest', manifestPath)) as {
       version?: string;
       format?: string;
       files?: { data?: string };
     };
-  } catch {
-    throw new NodeLoadError(`Geo-asset manifest not found: ${manifestPath}`, {
+  } catch (error) {
+    if (error instanceof NodeLoadError) throw error;
+    throw new NodeLoadError(`Geo-asset manifest "${assetId}" is not valid JSON: ${manifestPath}`, {
       file: manifestPath,
     });
   }
@@ -234,35 +314,44 @@ export async function loadGeoAssetFeatures(
   }
 
   // files.data is relative to the manifest directory (the geo-assets layout).
-  const dataPath = join(baseDir, dirname(entry.manifest), dataRel);
+  const dataRoot = resolve(base, dirname(entry.manifest));
+  const dataPath = resolve(dataRoot, dataRel);
+  assertWithinRoot(dataRoot, dataPath, 'Geo-asset files.data path');
+
   let parsed: { type?: string; objects?: Record<string, unknown> };
   try {
-    parsed = JSON.parse(await readFile(dataPath, 'utf8')) as {
+    parsed = JSON.parse(await readGeoJsonFile('Geo-asset data', dataPath)) as {
       type?: string;
       objects?: Record<string, unknown>;
     };
-  } catch {
-    throw new NodeLoadError(`Geo-asset data not found: ${dataPath}`, {
-      file: dataPath,
-    });
+  } catch (error) {
+    if (error instanceof NodeLoadError) throw error;
+    throw new NodeLoadError(`Geo-asset data is not valid JSON: ${dataPath}`, { file: dataPath });
   }
 
   const format = entry.format ?? manifest.format ?? 'geojson';
   if (format === 'topojson') {
-    const objectNames = Object.keys(parsed.objects ?? {});
-    const objectName = objectNames[0];
-    if (!objectName) {
+    const objects = (parsed.objects ?? {}) as Record<string, unknown>;
+    const objectNames = Object.keys(objects);
+    if (objectNames.length === 0) {
       throw new NodeLoadError(`TopoJSON asset "${assetId}" has no objects`, {
         file: dataPath,
       });
     }
-    const collection = topojsonFeature(
-      parsed as Parameters<typeof topojsonFeature>[0],
-      (parsed.objects as Record<string, unknown>)[objectName] as Parameters<
-        typeof topojsonFeature
-      >[1],
-    );
-    return collection as unknown as Record<string, unknown>;
+    const topology = parsed as unknown as Parameters<typeof topojsonFeature>[0];
+    const features: unknown[] = [];
+    for (const name of objectNames) {
+      const result = topojsonFeature(
+        topology,
+        objects[name] as unknown as Parameters<typeof topojsonFeature>[1],
+      );
+      if (result && Array.isArray((result as { features?: unknown }).features)) {
+        features.push(...(result as unknown as { features: unknown[] }).features);
+      } else {
+        features.push(result);
+      }
+    }
+    return { type: 'FeatureCollection', features } as unknown as Record<string, unknown>;
   }
 
   return parsed as unknown as Record<string, unknown>;
