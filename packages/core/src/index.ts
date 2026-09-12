@@ -33,6 +33,7 @@ export { loadCards, parseCards } from './cards.js';
 export { loadNodes } from './nodes-fs.js';
 export { loadNodesFromSource, parseNodeContent } from './nodes.js';
 export {
+  forEachInteractiveSpec,
   parseGeoUri,
   collectGeoSourceRefs,
   inlineGeoSources,
@@ -78,3 +79,4 @@ export {
 } from './errors.js';
 export { importLearnEasy } from './learn-easy-importer.js';
 export type { ImportOptions, ImportResult } from './learn-easy-importer.js';
+export { serializeResolvedNodes, hasUnresolvedGeoSources } from './node-serialize.js';

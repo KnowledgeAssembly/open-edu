@@ -28,9 +28,11 @@ load time** (`loadPackage` / `loadNodes`) so packages loaded that way carry a
 GeoJSON `FeatureCollection` inlined into `geography.sources[].data`.
 
 **Resolution is Node-load-time only.** The browser bundle never resolves geo
-URIs, and neither does `loadPackageFromFiles` or `oep:build`, which keep
-authored URIs as-is — so `.oep` distribution artifacts are currently **not**
-inlined (baking data into `oep:build` is a follow-up).
+URIs, and neither does `loadPackageFromFiles`, which keep authored URIs as-is.
+`oep:build` / `oep:build-bundle` inline geo data into the archive at build
+time using the same catalog discovery (vendored `geo-assets/`, `--geo-assets-dir`,
+or `OPEN_EDU_GEO_ASSETS_DIR`); browser paths and `loadPackageFromFiles` keep
+authored URIs as-is.
 
 The geo-assets dist directory (containing `catalog.json`) is located in this
 order:

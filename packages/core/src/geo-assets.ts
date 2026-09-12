@@ -396,6 +396,21 @@ export async function resolveGeoUrisInSpec(
   );
 }
 
+/** Walk a node's spec (and each engine's spec) and call visit for each. Mirrors resolveGeoUrisInNode traversal. */
+export function forEachInteractiveSpec(
+  node: { spec?: unknown; engines?: Array<{ spec?: unknown }> | undefined },
+  visit: (spec: Record<string, unknown>) => void,
+): void {
+  if (node.spec) {
+    visit(node.spec as Record<string, unknown>);
+  }
+  for (const engine of node.engines ?? []) {
+    if (engine.spec) {
+      visit(engine.spec as Record<string, unknown>);
+    }
+  }
+}
+
 /** Resolve geo sources on a single interactive node (spec + composed engines). */
 export async function resolveGeoUrisInNode(
   node: LoadedNode,
