@@ -7,11 +7,12 @@ describe('interactive-demo example', () => {
     const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('interactive-demo');
     expect(pkg.manifest.title).toBe('Interactive Engine Demo');
-    expect(pkg.nodes).toHaveLength(4);
+    expect(pkg.nodes).toHaveLength(5);
     expect(pkg.workflow).not.toBeNull();
     expect(pkg.workflow!.routing).toHaveProperty('nodes/number-line.json');
     expect(pkg.workflow!.routing).toHaveProperty('nodes/number-line-practice.json');
     expect(pkg.workflow!.routing).toHaveProperty('nodes/composed-lesson.json');
+    expect(pkg.workflow!.routing).toHaveProperty('nodes/geomap-identify-odisha.json');
 
     const numberLine = pkg.nodes.find((n) => n.relativePath === 'nodes/number-line.json');
     expect(numberLine?.node.type).toBe('interactive');
@@ -38,6 +39,46 @@ describe('interactive-demo example', () => {
     if (composed?.node.type === 'interactive') {
       expect(composed.node.engines).toHaveLength(2);
       expect(composed.node.bindings).toHaveLength(1);
+    }
+
+    const geomapGuided = pkg.nodes.find(
+      (n) => n.relativePath === 'nodes/geomap-identify-odisha.json',
+    );
+    expect(geomapGuided?.node.type).toBe('interactive');
+    if (geomapGuided?.node.type === 'interactive') {
+      expect(geomapGuided.node.engine).toBe('geomap');
+      expect(geomapGuided.node.prompt).toBe('Select Odisha on the map.');
+      const spec = geomapGuided.node.spec as {
+        content?: {
+          geography?: {
+            sources?: Array<{
+              uri?: string;
+              type?: string;
+              data?: { features?: Array<{ id?: string }> };
+            }>;
+          };
+          layers?: Array<{
+            id?: string;
+            items?: Array<{ entity?: string; interactive?: boolean }>;
+          }>;
+        };
+      };
+      const source = spec.content?.geography?.sources?.[0];
+      if (source?.data) {
+        // openedu://geo resolution inlined the geo-assets FeatureCollection.
+        expect(source.uri).toBeUndefined();
+        expect(source.type).toBe('geojson');
+        expect(source.data.features?.length).toBeGreaterThan(0);
+        expect(source.data.features?.some((f) => f.id === 'IN-OD')).toBe(true);
+      } else {
+        // Geo-assets not checked out (e.g. CI): the authored URI is preserved.
+        expect(source?.uri).toBe('openedu://geo/india/states');
+      }
+
+      const odishaItem = spec.content?.layers?.[0]?.items?.find((i) => i.entity === 'odisha');
+      expect(odishaItem?.interactive).toBe(true);
+      const allInteractive = spec.content?.layers?.[0]?.items?.filter((i) => i.interactive);
+      expect(allInteractive).toHaveLength(1);
     }
   });
 });
