@@ -1,5 +1,4 @@
 import { access, readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { feature as topojsonFeature } from 'topojson-client';
 import { NodeLoadError } from './errors.js';
@@ -17,9 +16,10 @@ import type { LoadedNode } from './types.js';
  * synchronously at instantiate time.
  *
  * The dist directory is located via (in order): an explicit `geoAssetsDir`
- * option, `OPEN_EDU_GEO_ASSETS_DIR`, an installed `@knowledgeassemble/geo-assets`
- * npm package, or a `<ancestor>/openedu-geo-assets/dist` sibling checkout
- * walking up from the working directory.
+ * option, a `geo-assets/` directory vendored inside the course package
+ * (`packageDir/geo-assets`), `OPEN_EDU_GEO_ASSETS_DIR`, or a
+ * `<ancestor>/openedu-geo-assets/dist` sibling checkout walking up from the
+ * working directory.
  *
  * Resolution is Node-load-time only — `loadPackage` (Node) and `loadNodes`.
  * The browser bundle never imports this module, and `loadPackageFromFiles` /
@@ -46,6 +46,13 @@ export interface GeoSourceRef {
   source: Record<string, unknown>;
   uri: string;
   version?: string;
+}
+
+export interface GeoResolveOptions {
+  /** Geo-assets dist directory containing `catalog.json`; authoritative (no discovery fallback). */
+  geoAssetsDir?: string;
+  /** Course package directory whose optional `geo-assets/` subdir can vendor its own catalog. */
+  packageDir?: string;
 }
 
 export interface GeoSourceDataLoader {
@@ -147,26 +154,23 @@ export async function inlineGeoSources(
  * Locate a usable geo-assets dist directory (one containing `catalog.json`).
  * When an explicit dir is given it is authoritative (no discovery fallback):
  * the directory either has a catalog or resolution fails. Otherwise the
- * candidates are `OPEN_EDU_GEO_ASSETS_DIR`, an installed
- * `@knowledgeassemble/geo-assets` npm package, then
- * `<ancestor>/openedu-geo-assets/dist` walking up from the working directory.
+ * candidates are the course package's own `geo-assets/` directory,
+ * `OPEN_EDU_GEO_ASSETS_DIR`, then `<ancestor>/openedu-geo-assets/dist` walking
+ * up from the working directory.
  */
-export async function findGeoAssetsDir(extra?: string): Promise<string | undefined> {
+export async function findGeoAssetsDir(
+  extra?: string,
+  packageDir?: string,
+): Promise<string | undefined> {
   if (extra) {
     return (await hasCatalog(extra)) ? extra : undefined;
   }
 
   const candidates: string[] = [];
+  if (packageDir) candidates.push(join(resolve(packageDir), 'geo-assets'));
+
   const envDir = process.env.OPEN_EDU_GEO_ASSETS_DIR;
   if (envDir) candidates.push(envDir);
-
-  const require = createRequire(import.meta.url);
-  try {
-    const npmCatalog = require.resolve('@knowledgeassemble/geo-assets/dist/catalog.json');
-    candidates.push(dirname(npmCatalog));
-  } catch {
-    // geo-assets npm package not installed — fall through to sibling checkouts.
-  }
 
   let ancestor: string | undefined = resolve(process.cwd());
   for (let depth = 0; depth < 12 && ancestor; depth++) {
@@ -365,10 +369,10 @@ export async function loadGeoAssetFeatures(
  */
 export async function resolveGeoUrisInSpec(
   spec: Record<string, unknown>,
-  options?: { geoAssetsDir?: string },
+  options?: GeoResolveOptions,
 ): Promise<void> {
   if (collectGeoSourceRefs(spec).length === 0) return;
-  const baseDir = await findGeoAssetsDir(options?.geoAssetsDir);
+  const baseDir = await findGeoAssetsDir(options?.geoAssetsDir, options?.packageDir);
   if (!baseDir) {
     if (options?.geoAssetsDir) {
       throw new NodeLoadError(
@@ -382,7 +386,8 @@ export async function resolveGeoUrisInSpec(
     }
     coreLoaderLogger.warn(
       'openedu://geo/* sources left unresolved — no geo-assets catalog found. ' +
-        'Set OPEN_EDU_GEO_ASSETS_DIR to the geo-assets dist directory (or pass { geoAssetsDir }).',
+        'Vendor a geo-assets/ catalog in the course package, set OPEN_EDU_GEO_ASSETS_DIR ' +
+        'to the geo-assets dist directory, or pass { geoAssetsDir }.',
     );
     return;
   }
@@ -394,7 +399,7 @@ export async function resolveGeoUrisInSpec(
 /** Resolve geo sources on a single interactive node (spec + composed engines). */
 export async function resolveGeoUrisInNode(
   node: LoadedNode,
-  options?: { geoAssetsDir?: string },
+  options?: GeoResolveOptions,
 ): Promise<void> {
   if (node.node.type !== 'interactive') return;
   if (node.node.spec) {
@@ -410,7 +415,7 @@ export async function resolveGeoUrisInNode(
 /** Resolve geo sources across many loaded nodes (no-op when none reference geo URIs). */
 export async function resolveGeoUrisInNodes(
   nodes: LoadedNode[],
-  options?: { geoAssetsDir?: string },
+  options?: GeoResolveOptions,
 ): Promise<void> {
   for (const node of nodes) {
     await resolveGeoUrisInNode(node, options);

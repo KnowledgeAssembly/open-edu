@@ -53,7 +53,10 @@ export async function loadNodes(
   }
 
   if (options?.resolveGeoAssets !== false) {
-    await resolveGeoUrisInNodes(nodes, { geoAssetsDir: options?.geoAssetsDir });
+    await resolveGeoUrisInNodes(nodes, {
+      geoAssetsDir: options?.geoAssetsDir,
+      packageDir,
+    });
   }
 
   return nodes;

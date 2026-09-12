@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, afterEach, afterAll, vi } from 'vitest';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -194,6 +194,31 @@ describe('findGeoAssetsDir', () => {
   it('returns undefined for an explicit dir without a catalog', async () => {
     expect(await findGeoAssetsDir(join(fixturesDir, 'valid-package'))).toBeUndefined();
     expect(await findGeoAssetsDir(join(fixturesDir, 'geo-assets', 'nope'))).toBeUndefined();
+  });
+
+  it('prefers a catalog vendored under the package dir before other candidates', async () => {
+    const packageDir = await mkdtemp(join(tmpdir(), 'openedu-geo-pkg-dir-'));
+    await cp(geoAssetsFixtureDir, join(packageDir, 'geo-assets'), { recursive: true });
+    await expect(findGeoAssetsDir(undefined, packageDir)).resolves.toBe(
+      join(packageDir, 'geo-assets'),
+    );
+  });
+});
+
+describe('package-local geo-assets discovery', () => {
+  it('default loadPackage resolves a catalog vendored under packageDir/geo-assets', async () => {
+    const tempPkg = await mkdtemp(join(tmpdir(), 'openedu-geo-pkg-'));
+    await cp(geoPackageDir, tempPkg, { recursive: true });
+    await cp(geoAssetsFixtureDir, join(tempPkg, 'geo-assets'), { recursive: true });
+
+    const pkg = await loadPackage(tempPkg);
+    const node = pkg.nodes.find((n) => n.relativePath === 'nodes/geomap.json');
+    expect(node?.node.type).toBe('interactive');
+    if (node?.node.type !== 'interactive') return;
+    const [states] = (node.node.spec as { content: { geography: { sources: unknown[] } } }).content
+      .geography.sources as [{ uri?: string; data?: { features?: unknown[] } }];
+    expect(states.uri).toBeUndefined();
+    expect(states.data?.features).toHaveLength(2);
   });
 });
 

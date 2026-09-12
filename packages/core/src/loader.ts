@@ -7,7 +7,7 @@ import type { LoadedPackage, PackageFileSource } from './types.js';
 export interface LoadOptions {
   /** Disable `openedu://geo/*` → inline data resolution (defaults to enabled). */
   resolveGeoAssets?: boolean;
-  /** Geo-assets dist directory containing `catalog.json`. Defaults to `OPEN_EDU_GEO_ASSETS_DIR` or sibling checkouts. */
+  /** Geo-assets dist directory containing `catalog.json`. Defaults to the package's own `geo-assets/`, `OPEN_EDU_GEO_ASSETS_DIR`, or sibling checkouts. */
   geoAssetsDir?: string;
 }
 
@@ -50,7 +50,10 @@ export async function loadPackage(
   const source = await createFileSystemSource(packageDir);
   const pkg = await loadPackageFromFiles(source, packageDir);
   if (options?.resolveGeoAssets !== false) {
-    await resolveGeoUrisInNodes(pkg.nodes, { geoAssetsDir: options?.geoAssetsDir });
+    await resolveGeoUrisInNodes(pkg.nodes, {
+      geoAssetsDir: options?.geoAssetsDir,
+      packageDir,
+    });
   }
   return pkg;
 }

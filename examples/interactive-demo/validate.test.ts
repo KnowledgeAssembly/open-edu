@@ -4,9 +4,9 @@ import { resolve } from 'path';
 
 describe('interactive-demo example', () => {
   it('should load without errors', async () => {
-    const pkg = await loadPackage(resolve(__dirname), {
-      geoAssetsDir: resolve(__dirname, 'geo-assets'),
-    });
+    // No geoAssetsDir passed: default discovery must find the vendored
+    // geo-assets/ catalog inside this example package itself.
+    const pkg = await loadPackage(resolve(__dirname));
     expect(pkg.manifest.id).toBe('interactive-demo');
     expect(pkg.manifest.title).toBe('Interactive Engine Demo');
     expect(pkg.nodes).toHaveLength(5);
