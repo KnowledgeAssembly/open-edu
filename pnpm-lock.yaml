@@ -537,6 +537,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
 
+  examples/interactive-demo:
+    devDependencies:
+      '@open-edu/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
   examples/intro-javascript:
     devDependencies:
       '@open-edu/core':
@@ -716,9 +722,16 @@ importers:
       '@open-edu/schemas':
         specifier: workspace:*
         version: link:../schemas
+      topojson-client:
+        specifier: ^3.1.0
+        version: 3.1.0
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+    devDependencies:
+      '@types/topojson-client':
+        specifier: ^3.1.5
+        version: 3.1.5
 
   packages/course-compiler:
     dependencies:
@@ -949,6 +962,43 @@ importers:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.43)(jsdom@24.1.3)(terser@5.48.0)
 
+  packages/interactive-runtime:
+    dependencies:
+      '@knowledgeassemble/interactive-react':
+        specifier: ^0.1.1
+        version: 0.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@open-edu/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.0.0
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^14.0.0
+        version: 14.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react':
+        specifier: ^18.0.0
+        version: 18.3.31
+      '@types/react-dom':
+        specifier: ^18.0.0
+        version: 18.3.7(@types/react@18.3.31)
+      axe-core:
+        specifier: ^4.12.1
+        version: 4.12.1
+      jsdom:
+        specifier: ^26.0.0
+        version: 26.1.0
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.3.1(react@18.3.1)
+      tailwindcss:
+        specifier: ^3.4.0
+        version: 3.4.19(tsx@4.22.5)(yaml@2.9.0)
+
   packages/llm-config:
     dependencies:
       '@ai-sdk/google':
@@ -1059,6 +1109,9 @@ importers:
       '@open-edu/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@open-edu/interactive-runtime':
+        specifier: workspace:^
+        version: link:../interactive-runtime
       '@open-edu/rewards':
         specifier: workspace:^
         version: link:../rewards
@@ -3291,6 +3344,37 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
+  '@knowledgeassemble/chart-engine@0.1.1':
+    resolution: {integrity: sha512-I7Y1tWY1rpkmTRvbrxVSmjj7mrrIjPmxjTs4M3/aciweiPH1ZWgjdPsKvs+glBYjL3z0rinj7mhY13u/PrY9uA==}
+    engines: {node: '>=18.0.0'}
+
+  '@knowledgeassemble/diagram-engine@0.1.1':
+    resolution: {integrity: sha512-569Q+Vm59wsS1Ts3NArMKjp4R3uib9bmfC6ezuFWmJeTFIZES/1Ov0/QKUjudVn4BLymY0ARLktHP+5hdV6f2Q==}
+    engines: {node: '>=18.0.0'}
+
+  '@knowledgeassemble/geomap-engine@0.1.1':
+    resolution: {integrity: sha512-Mw4cyKHqW/dcjGvrpQkUNU1+kbEwogdP9429vTaFr+CiiSgnFQQiHlzC0tDPN5JYaB8I1XsKsqZ5fcn0R8orSg==}
+    engines: {node: '>=18.0.0'}
+
+  '@knowledgeassemble/interactive-engine@0.1.1':
+    resolution: {integrity: sha512-V7Zujbcxdm8oWWm/XS6Utq9JpupPPu4ZujdzYX2Blds5HYKotDYIkOm+CBQDrs6ynG4Tb4rs7VnqMGN/VCnBTQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@knowledgeassemble/interactive-react@0.1.1':
+    resolution: {integrity: sha512-leVZhipu3yUPPVVVHaSdfhXoskSaEQ+rSXkespNc3Z08Fb1KlF5/i5u76zJWGLssSwYQnZmKQfRGuTuwCTxXQA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
+  '@knowledgeassemble/timeline-engine@0.1.1':
+    resolution: {integrity: sha512-XPVUw0rtWTCZz6eDm6/Huwoqgm7Rvs81XMX41n3XgXwhDSDlVaRb/z8HfR3RGnkhYiIvbAh+HQ/s6Ldo97qrQQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@knowledgeassemble/visual-engine@0.1.1':
+    resolution: {integrity: sha512-YWgNbmv/W5QhRpl0IDr4u656ls2TNUR9MrDyrp9CD11QeqbWC6W4CxeLCxszhx30m4MSyncyEOdcFx4meUe/9w==}
+    engines: {node: '>=18.0.0'}
+
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
@@ -4406,6 +4490,9 @@ packages:
   '@types/express@4.17.25':
     resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
 
+  '@types/geojson@7946.0.16':
+    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
+
   '@types/gtag.js@0.0.20':
     resolution: {integrity: sha512-wwAbk3SA2QeU67unN7zPxjEHmPmlXwZXZvQEpbEUQuMCRGgKyE1m6XDuTUA9b6pCGb/GqJmdfMOY5LuDjJSbbg==}
 
@@ -4525,6 +4612,12 @@ packages:
   '@types/tar@7.0.87':
     resolution: {integrity: sha512-3IxNBV8LeY5oi2ZFpvAhOtW1+mHswkzM7BuisVrwJgPv67GBO2rkLPQlEKtzfHuLdhDDczhkCZeT+RuizMay4A==}
     deprecated: This is a stub types definition. tar provides its own type definitions, so you do not need this installed.
+
+  '@types/topojson-client@3.1.5':
+    resolution: {integrity: sha512-C79rySTyPxnQNNguTZNI1Ct4D7IXgvyAs3p9HPecnl6mNrJ5+UhvGNYcZfpROYV2lMHI48kJPxwR+F9C6c7nmw==}
+
+  '@types/topojson-specification@1.0.5':
+    resolution: {integrity: sha512-C7KvcQh+C2nr6Y2Ub4YfgvWvWCgP2nOQMtfhlnwsRL4pYmmwzBS7HclGiS87eQfDOU/DLQpX6GEscviaz4yLIQ==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -7035,6 +7128,15 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       canvas: ^2.11.2
+    peerDependenciesMeta:
+      canvas:
+        optional: true
+
+  jsdom@26.1.0:
+    resolution: {integrity: sha512-Cvc9WUhxSMEo4McES3P7oK3QaXldCfNWp7pl2NNeiIFlCoLr3kfq9kb1fxftiwk1FLV7CvpvDfonxtzUDeSOPg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      canvas: ^3.0.0
     peerDependenciesMeta:
       canvas:
         optional: true
@@ -9566,6 +9668,13 @@ packages:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
     engines: {node: '>=14.0.0'}
 
+  tldts-core@6.1.86:
+    resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
+
+  tldts@6.1.86:
+    resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
+    hasBin: true
+
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
@@ -9574,6 +9683,10 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
+  topojson-client@3.1.0:
+    resolution: {integrity: sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw==}
+    hasBin: true
+
   totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
@@ -9581,6 +9694,10 @@ packages:
   tough-cookie@4.1.4:
     resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
     engines: {node: '>=6'}
+
+  tough-cookie@5.1.2:
+    resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
+    engines: {node: '>=16'}
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
@@ -13407,6 +13524,46 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
+  '@knowledgeassemble/chart-engine@0.1.1':
+    dependencies:
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      zod: 3.25.76
+
+  '@knowledgeassemble/diagram-engine@0.1.1':
+    dependencies:
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      zod: 3.25.76
+
+  '@knowledgeassemble/geomap-engine@0.1.1':
+    dependencies:
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      zod: 3.25.76
+
+  '@knowledgeassemble/interactive-engine@0.1.1':
+    dependencies:
+      zod: 3.25.76
+
+  '@knowledgeassemble/interactive-react@0.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@knowledgeassemble/chart-engine': 0.1.1
+      '@knowledgeassemble/diagram-engine': 0.1.1
+      '@knowledgeassemble/geomap-engine': 0.1.1
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      '@knowledgeassemble/timeline-engine': 0.1.1
+      '@knowledgeassemble/visual-engine': 0.1.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@knowledgeassemble/timeline-engine@0.1.1':
+    dependencies:
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      zod: 3.25.76
+
+  '@knowledgeassemble/visual-engine@0.1.1':
+    dependencies:
+      '@knowledgeassemble/interactive-engine': 0.1.1
+      zod: 3.25.76
+
   '@leichtgewicht/ip-codec@2.0.5': {}
 
   '@lezer/common@1.5.2': {}
@@ -14699,6 +14856,8 @@ snapshots:
       '@types/qs': 6.15.1
       '@types/serve-static': 1.15.10
 
+  '@types/geojson@7946.0.16': {}
+
   '@types/gtag.js@0.0.20': {}
 
   '@types/hast@3.0.4':
@@ -14826,6 +14985,15 @@ snapshots:
   '@types/tar@7.0.87':
     dependencies:
       tar: 7.5.16
+
+  '@types/topojson-client@3.1.5':
+    dependencies:
+      '@types/geojson': 7946.0.16
+      '@types/topojson-specification': 1.0.5
+
+  '@types/topojson-specification@1.0.5':
+    dependencies:
+      '@types/geojson': 7946.0.16
 
   '@types/trusted-types@2.0.7': {}
 
@@ -17783,6 +17951,33 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 4.1.4
+      w3c-xmlserializer: 5.0.0
+      webidl-conversions: 7.0.0
+      whatwg-encoding: 3.1.1
+      whatwg-mimetype: 4.0.0
+      whatwg-url: 14.2.0
+      ws: 8.21.0
+      xml-name-validator: 5.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  jsdom@26.1.0:
+    dependencies:
+      cssstyle: 4.6.0
+      data-urls: 5.0.0
+      decimal.js: 10.6.0
+      html-encoding-sniffer: 4.0.0
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
+      is-potential-custom-element-name: 1.0.1
+      nwsapi: 2.2.24
+      parse5: 7.3.0
+      rrweb-cssom: 0.8.0
+      saxes: 6.0.0
+      symbol-tree: 3.2.4
+      tough-cookie: 5.1.2
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 7.0.0
       whatwg-encoding: 3.1.1
@@ -20816,11 +21011,21 @@ snapshots:
 
   tinyspy@3.0.2: {}
 
+  tldts-core@6.1.86: {}
+
+  tldts@6.1.86:
+    dependencies:
+      tldts-core: 6.1.86
+
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
 
   toidentifier@1.0.1: {}
+
+  topojson-client@3.1.0:
+    dependencies:
+      commander: 2.20.3
 
   totalist@3.0.1: {}
 
@@ -20830,6 +21035,10 @@ snapshots:
       punycode: 2.3.1
       universalify: 0.2.0
       url-parse: 1.5.10
+
+  tough-cookie@5.1.2:
+    dependencies:
+      tldts: 6.1.86
 
   tr46@0.0.3: {}
 
