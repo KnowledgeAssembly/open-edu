@@ -22,12 +22,7 @@ export interface OpenEduBridgeInputs {
   /** a11y live-region announce. */
   announce: (message: string) => void;
   /** Telemetry sink; receives the raw semantic engine event stream. */
-  onEvent: (event: {
-    seq: number;
-    name: string;
-    instanceId: string;
-    action?: unknown;
-  }) => void;
+  onEvent: (event: { seq: number; name: string; instanceId: string; action?: unknown }) => void;
   /** Resolve an asset id to a URL string or raw bytes. */
   resolveAsset: (id: string) => string | Uint8Array;
 }

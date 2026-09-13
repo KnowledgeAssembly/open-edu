@@ -1,8 +1,5 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
-import {
-  InteractiveNode,
-  InteractiveLesson,
-} from '@knowledgeassemble/interactive-react';
+import { InteractiveNode, InteractiveLesson } from '@knowledgeassemble/interactive-react';
 import type {
   InteractiveNodeHandle,
   InteractiveLessonHandle,
@@ -28,10 +25,13 @@ export const InteractiveNodeView = forwardRef<InteractiveNodeHandle, Interactive
   function InteractiveNodeView({ spec, engineType, bridge, id, onReady }, ref) {
     const innerRef = useRef<InteractiveNodeHandle | null>(null);
 
-    const handleRef = useCallback((node: InteractiveNodeHandle | null) => {
-      innerRef.current = node;
-      if (node) onReady?.(node);
-    }, [onReady]);
+    const handleRef = useCallback(
+      (node: InteractiveNodeHandle | null) => {
+        innerRef.current = node;
+        if (node) onReady?.(node);
+      },
+      [onReady],
+    );
 
     useImperativeHandle(ref, () => ({
       dispatch: (action) => innerRef.current?.dispatch(action),
@@ -40,13 +40,7 @@ export const InteractiveNodeView = forwardRef<InteractiveNodeHandle, Interactive
     }));
 
     return (
-      <InteractiveNode
-        ref={handleRef}
-        spec={spec}
-        engineType={engineType}
-        host={bridge}
-        id={id}
-      />
+      <InteractiveNode ref={handleRef} spec={spec} engineType={engineType} host={bridge} id={id} />
     );
   },
 );
@@ -71,10 +65,13 @@ export const InteractiveLessonView = forwardRef<
 >(function InteractiveLessonView({ lesson, bridge, onReady }, ref) {
   const innerRef = useRef<InteractiveLessonHandle | null>(null);
 
-  const handleRef = useCallback((node: InteractiveLessonHandle | null) => {
-    innerRef.current = node;
-    if (node) onReady?.(node);
-  }, [onReady]);
+  const handleRef = useCallback(
+    (node: InteractiveLessonHandle | null) => {
+      innerRef.current = node;
+      if (node) onReady?.(node);
+    },
+    [onReady],
+  );
 
   useImperativeHandle(ref, () => ({
     dispatch: (instanceId, action) => innerRef.current?.dispatch(instanceId, action),
@@ -86,4 +83,7 @@ export const InteractiveLessonView = forwardRef<
   return <InteractiveLesson ref={handleRef} lesson={lesson} host={bridge} />;
 });
 
-export type { InteractiveNodeHandle, InteractiveLessonHandle } from '@knowledgeassemble/interactive-react';
+export type {
+  InteractiveNodeHandle,
+  InteractiveLessonHandle,
+} from '@knowledgeassemble/interactive-react';

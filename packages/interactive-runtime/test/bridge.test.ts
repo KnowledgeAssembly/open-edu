@@ -34,7 +34,12 @@ describe('buildOpenEduBridge', () => {
 
   it('wraps the input onEvent without dropping fields', () => {
     const bridge = buildOpenEduBridge({ ...inputs, reducedMotion: false });
-    bridge.onEvent({ seq: 2, name: 'timeline.event-selected', instanceId: 'tl', action: { type: 'focus' } });
+    bridge.onEvent({
+      seq: 2,
+      name: 'timeline.event-selected',
+      instanceId: 'tl',
+      action: { type: 'focus' },
+    });
     expect(onEvent).toHaveBeenLastCalledWith({
       seq: 2,
       name: 'timeline.event-selected',
