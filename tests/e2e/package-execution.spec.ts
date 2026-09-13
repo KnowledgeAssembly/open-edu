@@ -368,3 +368,76 @@ test.describe('autism-reading (lesson → quiz → reflection)', () => {
     await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
   });
 });
+
+test.describe('interactive-demo (interactive engine nodes)', () => {
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    server = await startServer(resolve('examples/interactive-demo'));
+  });
+
+  test.afterAll(async () => {
+    await server.close();
+  });
+
+  test('renders a single-engine interactive node with title', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await expect(
+      page.getByRole('heading', { name: 'Interactive Engine Demo' }).first(),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Number line' })).toBeVisible();
+    await expect(page.getByText('0 interactions')).not.toBeVisible();
+  });
+
+  test('shows prompt and responds to SVG interaction', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Number line' })).toBeVisible();
+    await page.locator('#nl-marker-7').click({ timeout: 5000 });
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+  });
+
+  test('number-line practice shows prompt and label click', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Number line practice' })).toBeVisible();
+    await expect(page.getByText('Tap the emphasized number on the line.')).toBeVisible();
+    await page.locator('#nl-label-7').click({ timeout: 5000 });
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+  });
+
+  test('completes the full interactive journey', async ({ page }) => {
+    await page.goto(server.url);
+    await openStudioPreview(page);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: 'Mark complete' })).toBeEnabled({
+      timeout: 5000,
+    });
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled({ timeout: 5000 });
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByTestId('interactive-renderer')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: 'Mark complete' })).toBeEnabled({
+      timeout: 5000,
+    });
+    await page.getByRole('button', { name: 'Mark complete' }).click();
+    await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled({ timeout: 5000 });
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('You have completed this learning experience.')).toBeVisible();
+  });
+});
