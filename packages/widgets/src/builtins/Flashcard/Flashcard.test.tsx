@@ -18,6 +18,11 @@ function renderWidget(config: Record<string, unknown> = {}) {
   return { emitInteraction, complete, ...result };
 }
 
+const imageCardConfig = {
+  cards: [{ front: 'Hola', back: 'Hello', image: 'assets/posters/dilwale.jpg' }],
+  interactive: true,
+};
+
 const baseConfig = {
   cards: [
     { front: 'Hola', back: 'Hello' },
@@ -181,6 +186,32 @@ describe('Flashcard retry', () => {
     fireEvent.click(screen.getByTestId('btn-correct'));
     fireEvent.click(screen.getByTestId('btn-retry'));
     expect(screen.getByText('Hola')).toBeInTheDocument();
+  });
+});
+
+describe('Flashcard image asset resolution', () => {
+  it('resolves card images through resolveAsset', () => {
+    const resolveAsset = vi.fn((path: string) => `blob:${path}`);
+    const { container } = render(
+      <WidgetComponent
+        nodeId="test-node"
+        config={imageCardConfig}
+        emitInteraction={vi.fn()}
+        complete={vi.fn()}
+        resolveAsset={resolveAsset}
+      />,
+    );
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute('src', 'blob:assets/posters/dilwale.jpg');
+    expect(resolveAsset).toHaveBeenCalledWith('assets/posters/dilwale.jpg');
+  });
+
+  it('falls back to /assets/ path when resolveAsset is unavailable', () => {
+    const { container } = renderWidget(imageCardConfig);
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute('src', '/assets/posters/dilwale.jpg');
   });
 });
 

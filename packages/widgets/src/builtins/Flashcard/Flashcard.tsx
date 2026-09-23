@@ -48,8 +48,9 @@ function FlashcardComponent(props: {
   emitInteraction: (data: Record<string, unknown>) => void;
   complete: (score?: number, state?: unknown) => void;
   storedState?: unknown;
+  resolveAsset?: (path: string) => string;
 }) {
-  const { config: rawConfig, emitInteraction, complete, storedState } = props;
+  const { config: rawConfig, emitInteraction, complete, storedState, resolveAsset } = props;
   const parsed = flashcardSchema.safeParse(rawConfig);
   const parsedState = useMemo(() => {
     const result = FlashcardStateSchema.safeParse(storedState);
@@ -185,7 +186,10 @@ function FlashcardComponent(props: {
       >
         {currentCard.image && (
           <img
-            src={currentCard.image}
+            src={
+              resolveAsset?.(currentCard.image) ??
+              `/assets/${currentCard.image.replace(/^assets\//, '')}`
+            }
             alt=""
             className="mb-sm max-h-32 rounded"
             aria-hidden="true"
